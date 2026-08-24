@@ -125,7 +125,7 @@ export default function ReleaseSelector({
               padding: 2,
             }}
           >
-            <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
+            <ReleaseAssetsAccordion model={model} release={release} />
             <ReleaseAssetsResponses model={model} release={release} includeResponses={false} />
           </Stack>
         </Stack>

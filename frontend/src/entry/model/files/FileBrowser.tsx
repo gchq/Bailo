@@ -1,57 +1,18 @@
-import AccountTree from '@mui/icons-material/AccountTree'
 import CreateNewFolder from '@mui/icons-material/CreateNewFolder'
 import Delete from '@mui/icons-material/Delete'
 import Folder from '@mui/icons-material/Folder'
-import Home from '@mui/icons-material/Home'
 import MoreVert from '@mui/icons-material/MoreVert'
-import ViewList from '@mui/icons-material/ViewList'
-import {
-  Box,
-  Breadcrumbs,
-  IconButton,
-  Link,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Box, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
 import { deleteEntryFiles, useGetModelFiles } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import Paginate from 'src/common/Paginate'
+import FolderNavigableList from 'src/common/FolderNavigableList'
 import FileDisplay, { MutateFiles, MutateReleases } from 'src/entry/model/files/FileDisplay'
 import useNotification from 'src/hooks/useNotification'
 import { EntryKind, FileInterface, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import {
-  buildFileTree,
-  collectAllFileNames,
-  collectAllFiles,
-  countMatchingFiles,
-  type FileTreeNode,
-  getBreadcrumbParts,
-  getNodeAtPath,
-  hasAnyNestedFiles,
-  isFolderMarker,
-} from 'utils/fileTreeUtils'
-
-type ViewMode = 'flat' | 'folder'
-
-/** Union type for rendering both folders and files in the same Paginate list */
-type BrowseListItem = {
-  key: string
-  name: string
-  searchableText: string
-  size: number
-  createdAt: Date
-  updatedAt: Date
-} & ({ kind: 'folder'; node: FileTreeNode } | { kind: 'file'; file: FileInterface })
+import { collectAllFiles, countMatchingFiles, type FileTreeNode, isFolderMarker } from 'utils/fileTreeUtils'
 
 interface FileBrowserProps {
   files: FileInterface[]
@@ -74,233 +35,61 @@ export default function FileBrowser({
   onCreatePath,
   onPathChange,
 }: FileBrowserProps) {
-  const hasNested = useMemo(() => hasAnyNestedFiles(files), [files])
-  const [viewMode, setViewMode] = useState<ViewMode>(hasNested ? 'folder' : 'flat')
-  const [currentPath, _setCurrentPath] = useState('')
-  const setCurrentPath = useCallback(
-    (path: string) => {
-      _setCurrentPath(path)
-      onPathChange?.(path)
-    },
-    [onPathChange],
-  )
-  const [folderSearchQuery, setFolderSearchQuery] = useState('')
-
-  const tree = useMemo(() => buildFileTree(files), [files])
-  const currentNode = useMemo(() => getNodeAtPath(tree, currentPath), [tree, currentPath])
-  const breadcrumbs = useMemo(() => getBreadcrumbParts(currentPath), [currentPath])
-
-  // Build a unified list of folder and file items at the current level for Paginate.
-  // Folder searchableText includes the folder name plus all nested file names so
-  // Paginate's text filter matches folders containing matching files deeper in the tree.
-  const browseItems: BrowseListItem[] = useMemo(() => {
-    if (!currentNode) {
-      return []
-    }
-    const items: BrowseListItem[] = []
-    for (const child of currentNode.children) {
-      if (child.isDirectory) {
-        const nestedNames = collectAllFileNames(child)
-        items.push({
-          key: `folder-${child.fullPath}`,
-          kind: 'folder',
-          node: child,
-          name: child.name,
-          searchableText: [child.name, ...nestedNames].join(' '),
-          size: child.totalFileCount,
-          createdAt: new Date(0),
-          updatedAt: new Date(0),
-        })
-      } else if (child.file) {
-        items.push({
-          key: child.file._id,
-          kind: 'file',
-          file: child.file,
-          name: child.file.name,
-          searchableText: child.file.name,
-          size: child.file.size,
-          createdAt: child.file.createdAt,
-          updatedAt: child.file.updatedAt,
-        })
-      }
-    }
-    return items
-  }, [currentNode])
-
-  const handleViewModeChange = (_: unknown, newMode: ViewMode | null) => {
-    if (newMode) {
-      setViewMode(newMode)
-      if (newMode === 'flat') {
-        setCurrentPath('')
-      }
-    }
-  }
-
-  const FlatFileListItem = ({ data }: { data: FileInterface & { key: string } }) => (
-    <Box key={data._id} sx={{ width: '100%' }}>
-      <Stack spacing={1} sx={{ p: 2 }}>
-        <FileDisplay
-          showMenuItems={{
-            associatedReleases: !readOnly,
-            deleteFile: !readOnly && modelKind === EntryKind.MODEL,
-            rescanFile: !readOnly,
-          }}
-          file={data}
-          modelId={modelId}
-          mutator={mutator}
-          releases={releases}
-        />
-      </Stack>
-    </Box>
-  )
-
-  const BrowseListRow = ({ data }: { data: BrowseListItem }) => {
-    if (data.kind === 'folder') {
-      return (
-        <Box sx={{ width: '100%' }}>
-          <Stack spacing={1} sx={{ p: 2 }}>
-            <FolderRow
-              node={data.node}
-              modelId={modelId}
-              modelKind={modelKind}
-              releases={releases}
-              readOnly={readOnly}
-              onNavigate={setCurrentPath}
-              searchQuery={folderSearchQuery}
-            />
-          </Stack>
-        </Box>
-      )
-    }
-    return (
-      <Box key={data.file._id} sx={{ width: '100%' }}>
-        <Stack spacing={1} sx={{ p: 2 }}>
-          <FileDisplay
-            showMenuItems={{
-              associatedReleases: !readOnly,
-              deleteFile: !readOnly && modelKind === EntryKind.MODEL,
-              rescanFile: !readOnly,
-            }}
-            file={data.file}
-            modelId={modelId}
-            mutator={mutator}
-            releases={releases}
-            displayName={data.file.name.includes('/') ? data.file.name.split('/').pop() : undefined}
-          />
-        </Stack>
-      </Box>
-    )
-  }
-
-  const viewToggle = hasNested ? (
-    <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size='small'>
-      <ToggleButton value='folder' data-test='folderViewToggle'>
-        <Tooltip title='Folder view'>
-          <AccountTree fontSize='small' />
-        </Tooltip>
-      </ToggleButton>
-      <ToggleButton value='flat' data-test='flatViewToggle'>
-        <Tooltip title='Flat list view'>
-          <ViewList fontSize='small' />
-        </Tooltip>
-      </ToggleButton>
-    </ToggleButtonGroup>
-  ) : null
-
   return (
-    <Stack spacing={0} sx={{ width: '100%' }}>
-      {viewMode === 'flat' ? (
-        <>
-          {viewToggle && (
-            <Stack direction='row' sx={{ justifyContent: 'flex-end', px: 2, pt: 1 }}>
-              {viewToggle}
+    <FolderNavigableList
+      files={files}
+      onPathChange={onPathChange}
+      toolbarActions={({ currentPath }) =>
+        onCreatePath && !readOnly ? (
+          <Tooltip title='Create folder path'>
+            <IconButton size='small' onClick={() => onCreatePath(currentPath)} data-test='createPathButton'>
+              <CreateNewFolder fontSize='small' />
+            </IconButton>
+          </Tooltip>
+        ) : null
+      }
+    >
+      {({ data, onNavigate, searchQuery }) => {
+        if (data.kind === 'folder') {
+          return (
+            <Box sx={{ width: '100%' }}>
+              <Stack spacing={1} sx={{ p: 2 }}>
+                <FolderRow
+                  node={data.node}
+                  modelId={modelId}
+                  modelKind={modelKind}
+                  releases={releases}
+                  readOnly={readOnly}
+                  onNavigate={onNavigate}
+                  searchQuery={searchQuery}
+                />
+              </Stack>
+            </Box>
+          )
+        }
+        return (
+          <Box sx={{ width: '100%' }}>
+            <Stack spacing={1} sx={{ p: 2 }}>
+              <FileDisplay
+                showMenuItems={{
+                  associatedReleases: !readOnly,
+                  deleteFile: !readOnly && modelKind === EntryKind.MODEL,
+                  rescanFile: !readOnly,
+                }}
+                file={data.file}
+                modelId={modelId}
+                mutator={mutator}
+                releases={releases}
+                displayName={data.file.name.includes('/') ? data.file.name.split('/').pop() : undefined}
+              />
             </Stack>
-          )}
-          <Paginate
-            list={files.filter((f) => !isFolderMarker(f)).map((f) => ({ key: f._id, ...f }))}
-            emptyListText='No files found'
-            searchFilterProperty='name'
-            sortingProperties={[
-              { value: 'name', title: 'Name', iconKind: 'text' },
-              { value: 'size', title: 'Size', iconKind: 'size' },
-              { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-              { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-            ]}
-            searchPlaceholderText='Search by file name'
-            defaultSortProperty='createdAt'
-          >
-            {FlatFileListItem}
-          </Paginate>
-        </>
-      ) : (
-        <>
-          <Stack
-            direction='row'
-            spacing={1}
-            sx={{ alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1 }}
-          >
-            <Breadcrumbs sx={{ flex: 1 }}>
-              <Link
-                component='button'
-                underline='hover'
-                onClick={() => setCurrentPath('')}
-                sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-              >
-                <Home fontSize='small' />
-                Root
-              </Link>
-              {breadcrumbs.map((crumb, i) => {
-                const isLast = i === breadcrumbs.length - 1
-                return isLast ? (
-                  <Typography key={crumb.fullPath} fontWeight='bold'>
-                    {crumb.name}
-                  </Typography>
-                ) : (
-                  <Link
-                    key={crumb.fullPath}
-                    component='button'
-                    underline='hover'
-                    onClick={() => setCurrentPath(crumb.fullPath)}
-                  >
-                    {crumb.name}
-                  </Link>
-                )
-              })}
-            </Breadcrumbs>
-            <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
-              {onCreatePath && !readOnly && (
-                <Tooltip title='Create folder path'>
-                  <IconButton size='small' onClick={() => onCreatePath(currentPath)} data-test='createPathButton'>
-                    <CreateNewFolder fontSize='small' />
-                  </IconButton>
-                </Tooltip>
-              )}
-              {viewToggle}
-            </Stack>
-          </Stack>
-          <Paginate
-            list={browseItems}
-            emptyListText='No files in this folder'
-            searchFilterProperty='searchableText'
-            onSearchChange={setFolderSearchQuery}
-            sortingProperties={[
-              { value: 'name', title: 'Name', iconKind: 'text' },
-              { value: 'size', title: 'Size', iconKind: 'size' },
-              { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-              { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-            ]}
-            searchPlaceholderText='Search files and folders'
-            defaultSortProperty='name'
-          >
-            {BrowseListRow}
-          </Paginate>
-        </>
-      )}
-    </Stack>
+          </Box>
+        )
+      }}
+    </FolderNavigableList>
   )
 }
 
-/** Renders a folder row with the same visual weight as FileDisplay, including a delete action menu. */
 function FolderRow({
   node,
   modelId,
@@ -328,7 +117,6 @@ function FolderRow({
 
   const allFilesInFolder = useMemo(() => collectAllFiles(node), [node])
 
-  // Find folder marker files (.folder) under this path
   const folderMarkers = useMemo(
     () =>
       modelFiles.filter(
@@ -337,7 +125,6 @@ function FolderRow({
     [modelFiles, node.fullPath],
   )
 
-  // Find releases that reference any file in this folder
   const associatedReleases = useMemo(
     () => releases.filter((release) => allFilesInFolder.some((file) => release.fileIds.includes(file._id))),
     [releases, allFilesInFolder],

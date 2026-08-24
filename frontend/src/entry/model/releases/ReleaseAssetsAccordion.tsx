@@ -10,14 +10,12 @@ import { plural } from 'utils/stringUtils'
 export interface ReleaseAssetsAccordionProps {
   model: EntryInterface
   release: ReleaseInterface
-  mode: 'readonly' | 'interactive'
   hideFileDownloads?: boolean
 }
 
 export default function ReleaseAssetsAccordion({
   model,
   release,
-  mode,
   hideFileDownloads = false,
 }: ReleaseAssetsAccordionProps) {
   const [expanded, setExpanded] = useState<'files' | 'images' | false>(false)
@@ -52,7 +50,7 @@ export default function ReleaseAssetsAccordion({
                 modelId={model.id}
                 modelKind={model.kind}
                 releases={[release]}
-                readOnly={mode === 'readonly'}
+                readOnly
               />
             )}
           </AccordionDetails>

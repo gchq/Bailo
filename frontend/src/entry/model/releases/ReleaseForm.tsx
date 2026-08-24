@@ -18,6 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useGetFilesForModel } from 'actions/file'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
@@ -102,6 +103,7 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
+  const { files: modelFiles } = useGetFilesForModel(model.id)
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
@@ -352,6 +354,7 @@ export default function ReleaseForm({
                     divider={<Divider flexItem orientation='vertical' />}
                   >
                     <ExistingFileSelector
+                      files={modelFiles}
                       model={model}
                       onChange={onFilesChange}
                       existingReleaseFiles={formData.files}
