@@ -77,6 +77,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             type: 'string',
             minLength: 1,
             widget: 'entitySelector',
+            hideDefaultUser: true,
           },
           justification: {
             title: 'Justify why the risk owner has been assigned',
