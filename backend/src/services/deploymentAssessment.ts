@@ -71,7 +71,7 @@ async function notifyDeploymentStakeholders(
   try {
     const models = await ModelModel.find({
       id: { $in: modelIds },
-    })
+    }).lean()
 
     const creator = await authentication.getUserInformation(toEntity('user', deploymentAssessment.createdBy))
     const creatorName = creator.name || deploymentAssessment.createdBy
