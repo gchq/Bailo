@@ -245,7 +245,7 @@ describe('services > deploymentAssessment', () => {
         deploymentAssessments,
         'deployment_assessment:view',
       )
-      expect(result).toBe(deploymentAssessments)
+      expect(result).toStrictEqual(deploymentAssessments)
     })
 
     test('combines model, risk owner, creator, creation window, and name filters', async () => {
