@@ -344,19 +344,19 @@ export class BasicAuthorisationConnector {
           case DeploymentAssessmentAction.View: {
             // Only allow GET requests if the DA is not a draft, otherwise restrict to creator or risk owner
             if (deploymentAssessment.draft && !isNamedUser) {
-              errorInfo = 'You do not have permission to view this Deployment Assessment'
+              errorInfo = 'You are not the creator or the risk owner of this draft Deployment Assessment, so you do not have permission to view it.'
             }
             break
           }
           case DeploymentAssessmentAction.Delete: {
             if (!isNamedUser) {
-              errorInfo = 'You do not have permission to delete this Deployment Assessment'
+              errorInfo = 'You do not have permission to delete this Deployment Assessment.'
             }
             break
           }
           case DeploymentAssessmentAction.Update: {
             if (!isNamedUser) {
-              errorInfo = 'You do not have permission to update this Deployment Assessment'
+              errorInfo = 'You do not have permission to update this Deployment Assessment.'
             }
             break
           }
