@@ -92,16 +92,6 @@ export const deploymentAssessmentMetadataSchema = z
   })
   .passthrough()
 
-export const deploymentAssessmentInterfaceSchema = z.object({
-  id: deploymentAssessmentIdSchema,
-  schemaId: deploymentAssessmentSchemaIdSchema,
-  metadata: deploymentAssessmentMetadataSchema,
-  draft: deploymentAssessmentDraftSchema,
-  createdBy: z.string().openapi({ example: 'tony' }),
-  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
-  updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
-})
-
 export const deploymentAssessmentSummarySchema = z.object({
   id: deploymentAssessmentIdSchema,
   schemaId: deploymentAssessmentSchemaIdSchema,
