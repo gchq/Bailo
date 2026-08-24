@@ -234,19 +234,24 @@ describe('services > deploymentAssessment', () => {
       const deploymentAssessments = [{ id: 'assessment-one' }]
       const sort = vi.fn().mockResolvedValue(deploymentAssessments)
       DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+      vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: 'assessment-one' }])
 
       const result = await searchDeploymentAssessments({ dn: 'creator' }, {})
 
-      expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-        $and: [{ $or: [{ draft: false }, { draft: true, createdBy: 'creator' }] }],
-      })
+      expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({})
       expect(sort).toHaveBeenCalledWith({ draft: -1, updatedAt: -1 })
+      expect(authorisation.deploymentAssessments).toHaveBeenCalledWith(
+        { dn: 'creator' },
+        deploymentAssessments,
+        'deployment_assessment:view',
+      )
       expect(result).toBe(deploymentAssessments)
     })
 
     test('combines model, risk owner, creator, creation window, and name filters', async () => {
       const sort = vi.fn().mockResolvedValue([])
       DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+      vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([])
 
       await searchDeploymentAssessments(
         { dn: 'creator' },
@@ -263,7 +268,6 @@ describe('services > deploymentAssessment', () => {
       )
 
       expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-        $and: [{ $or: [{ draft: false }, { draft: true, createdBy: 'creator' }] }],
         schemaId: 'deployment-assessment-schema',
         'metadata.overview.modelIds': { $all: ['model-one', 'model-two'] },
         'metadata.overview.riskOwner': 'user:risk-owner',
@@ -273,7 +277,14 @@ describe('services > deploymentAssessment', () => {
           $lt: new Date('2026-02-01T00:00:00.000Z'),
         },
         draft: true,
-        'metadata.overview.name': { $regex: 'Assessment\\.\\*', $options: 'i' },
+        $and: [
+          {
+            $or: [
+              { 'metadata.overview.name': { $regex: 'Assessment\\.\\*', $options: 'i' } },
+              { 'metadata.overview.justification': { $regex: 'Assessment\\.\\*', $options: 'i' } },
+            ],
+          },
+        ],
       })
       expect(sort).toHaveBeenCalledWith({ draft: -1, updatedAt: -1 })
     })
@@ -284,11 +295,11 @@ describe('services > deploymentAssessment', () => {
     ])('supports a creation window with only a %s boundary', async (_boundary, params, expectedCreatedAt) => {
       const sort = vi.fn().mockResolvedValue([])
       DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+      vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([])
 
       await searchDeploymentAssessments({ dn: 'creator' }, params)
 
       expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-        $and: [{ $or: [{ draft: false }, { draft: true, createdBy: 'creator' }] }],
         createdAt: expectedCreatedAt,
       })
     })

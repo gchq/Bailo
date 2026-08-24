@@ -1,4 +1,5 @@
 import { escapeRegExp } from 'lodash-es'
+import { QueryFilter } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
@@ -145,9 +146,7 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
 }
 
 export async function searchDeploymentAssessments(user: UserInterface, params: SearchDeploymentAssessmentsParams) {
-  const query: Record<string, unknown> = {
-    $and: [{ $or: [{ draft: false }, { draft: true, createdBy: user.dn }] }],
-  }
+  const query: QueryFilter<DeploymentAssessmentInterface> = {}
 
   if (params.schemaId) {
     query.schemaId = params.schemaId
@@ -174,8 +173,12 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     query.draft = params.draft
   }
   if (params.search) {
-    query['metadata.overview.name'] = { $regex: escapeRegExp(params.search), $options: 'i' }
+    const search = { $regex: escapeRegExp(params.search), $options: 'i' }
+    query.$and = [{ $or: [{ 'metadata.overview.name': search }, { 'metadata.overview.justification': search }] }]
   }
 
-  return DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
+  const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
+  const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
+
+  return deploymentAssessments.filter((_, i) => auths[i].success)
 }
