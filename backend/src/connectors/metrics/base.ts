@@ -817,48 +817,11 @@ export class BaseMetricsConnector {
       }),
     )
 
-    const schemaCounts = new Map<string, SchemaInfo>()
-    const stateCounts = new Map<string, StateInfo>()
-
-    let entries = 0
-    let withReleases = 0
-    let withAccessRequest = 0
-
-    // Tally up the metrics for each org to get global metrics
-    for (const org of byOrganisation) {
-      entries += org.entries
-      withReleases += org.withReleases
-      withAccessRequest += org.withAccessRequest
-
-      for (const schema of org.schemaBreakdown ?? []) {
-        const key = String(schema.schemaId)
-        const existing = schemaCounts.get(key)
-
-        if (existing) {
-          existing.count += schema.count
-        } else {
-          schemaCounts.set(key, { ...schema, schemaId: key })
-        }
-      }
-
-      for (const state of org.entryState ?? []) {
-        const existing = stateCounts.get(state.state)
-
-        if (existing) {
-          existing.count += state.count
-        } else {
-          stateCounts.set(state.state, { ...state })
-        }
-      }
-    }
+    const globalMetrics = await calculateUsageMetrics(user, {})
 
     const global: BaseMetrics = {
+      ...globalMetrics,
       users: await calculateTotalUsers(),
-      entries,
-      withReleases,
-      withAccessRequest,
-      schemaBreakdown: Array.from(schemaCounts.values()),
-      entryState: Array.from(stateCounts.values()).sort((a, b) => b.count - a.count),
     }
 
     const result = { global, byOrganisation }

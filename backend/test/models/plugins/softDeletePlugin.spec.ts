@@ -94,6 +94,36 @@ describe('models > plugins > softDeletePlugin', () => {
       })
     })
 
+    describe('deleteOne', () => {
+      test('sets deleted to true and deletedAt', async () => {
+        const context: Record<string, any> = {
+          deleted: false,
+          deletedAt: undefined,
+          deletedBy: undefined,
+          save: vi.fn().mockResolvedValue(undefined),
+        }
+
+        await schema.methods.deleteOne.call(context)
+
+        expect(context.deleted).toBe(true)
+        expect(context.deletedAt).toBeDefined()
+        expect(context.save).toHaveBeenCalled()
+      })
+
+      test('sets deletedBy when user is provided', async () => {
+        const context: Record<string, any> = {
+          deleted: false,
+          deletedAt: undefined,
+          deletedBy: undefined,
+          save: vi.fn().mockResolvedValue(undefined),
+        }
+
+        await schema.methods.deleteOne.call(context, undefined, 'user-1')
+
+        expect(context.deletedBy).toBe('user-1')
+      })
+    })
+
     describe('restore', () => {
       test('sets deleted to false', async () => {
         const context: Record<string, any> = {

@@ -1,7 +1,8 @@
 import { Callback, ClientSession, Document, PipelineStage, Schema, Types } from 'mongoose'
 
-export interface SoftDeleteDocument extends Omit<Document, 'delete' | 'restore'>, SoftDeleteInterface {
+export interface SoftDeleteDocument extends Omit<Document, 'delete' | 'deleteOne' | 'restore'>, SoftDeleteInterface {
   delete(session?: ClientSession, fn?: Callback<this>): Promise<this>
+  deleteOne(session?: ClientSession, fn?: Callback<this>): Promise<this>
   restore(session?: ClientSession, fn?: Callback<this>): Promise<this>
 }
 
@@ -135,6 +136,15 @@ export function softDeletionPlugin(schema: Schema) {
     }
 
     return this.findOneAndUpdate(filter, update, options)
+  }
+
+  schema.methods.deleteOne = async function (session?: ClientSession, user?: string) {
+    this.deleted = true
+    this.deletedAt = new Date().toISOString()
+    if (user) {
+      this.deletedBy = user
+    }
+    return await this.save({ session })
   }
 
   schema.methods.restore = async function (session: ClientSession | undefined) {

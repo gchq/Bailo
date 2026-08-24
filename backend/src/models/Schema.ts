@@ -1,7 +1,8 @@
 import { Schema as JsonSchema } from 'jsonschema'
-import { Document, HydratedDocument, model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -13,6 +14,7 @@ export interface SchemaInterface {
 
   active: boolean
   hidden: boolean
+  deleted: boolean
 
   kind: SchemaKindKeys
   jsonSchema: JsonSchema
@@ -26,7 +28,7 @@ export interface SchemaInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type SchemaDoc = HydratedDocument<SchemaInterface> & Document<any, any, SchemaInterface>
+export type SchemaDoc = HydratedDocument<SchemaInterface> & SoftDeleteDocument
 
 const SchemaSchema = new Schema<SchemaInterface>(
   {
@@ -56,6 +58,8 @@ function getSchema(schema: string) {
 function setSchema(schema: unknown) {
   return JSON.stringify(schema)
 }
+
+SchemaSchema.plugin(softDeletionPlugin)
 
 const SchemaModel = model<SchemaInterface>('v2_Schema', SchemaSchema)
 
