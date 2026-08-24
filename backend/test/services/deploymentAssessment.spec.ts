@@ -304,15 +304,16 @@ describe('services > deploymentAssessment', () => {
         createdAt: expectedCreatedAt,
       })
     })
-  test('rejects a non-draft assessment without a risk owner', async () => {
-    const metadata = {
-      overview: {
-        name: 'Submitted assessment',
-      },
-    }
+    test('rejects a non-draft assessment without a risk owner', async () => {
+      const metadata = {
+        overview: {
+          name: 'Submitted assessment',
+        },
+      }
 
-    await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: false, metadata })).rejects.toThrow(
-      'Deployment risk owner is required',
-    )
+      await expect(
+        createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: false, metadata }),
+      ).rejects.toThrow('Deployment risk owner is required')
+    })
   })
 })
