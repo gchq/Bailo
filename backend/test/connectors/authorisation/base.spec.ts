@@ -1083,7 +1083,7 @@ describe('connectors > authorisation > base', () => {
       expect(result).toStrictEqual({
         id: 'da-1',
         success: false,
-        info: 'You do not have permission to view this Deployment Assessment',
+        info: 'You are not the creator or the risk owner of this draft Deployment Assessment, so you do not have permission to view it.',
       })
     })
 
@@ -1107,7 +1107,7 @@ describe('connectors > authorisation > base', () => {
       expect(result).toStrictEqual({
         id: 'da-1',
         success: false,
-        info: 'You do not have permission to delete this Deployment Assessment',
+        info: 'You do not have permission to delete this Deployment Assessment.',
       })
     })
 
@@ -1131,7 +1131,7 @@ describe('connectors > authorisation > base', () => {
       expect(result).toStrictEqual({
         id: 'da-1',
         success: false,
-        info: 'You do not have permission to update this Deployment Assessment',
+        info: 'You do not have permission to update this Deployment Assessment.',
       })
     })
 
