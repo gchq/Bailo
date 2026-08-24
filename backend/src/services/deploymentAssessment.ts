@@ -47,17 +47,15 @@ async function validateModels(modelIds: string[]) {
     throw BadReq('Deployment assessments can only use public models.', { modelIds: privateModelIds })
   }
 
+  const deployableModelState = config.ui.deploymentAssessments.deployableModelState
   const nonDeployableStateModelIds = models
-    .filter((model) => model.state !== config.deploymentAssessments.deployableModelState)
+    .filter((model) => model.state !== deployableModelState)
     .map((model) => model.id)
   if (nonDeployableStateModelIds.length > 0) {
-    throw BadReq(
-      `Deployment assessments can only use models with a ${config.deploymentAssessments.deployableModelState.toLowerCase()} state.`,
-      {
-        modelIds: nonDeployableStateModelIds,
-        deployableModelState: config.deploymentAssessments.deployableModelState,
-      },
-    )
+    throw BadReq(`Deployment assessments can only use models with a ${deployableModelState} state.`, {
+      modelIds: nonDeployableStateModelIds,
+      deployableModelState,
+    })
   }
 }
 

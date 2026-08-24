@@ -184,6 +184,10 @@ export interface UiConfig {
   llmImport: {
     enabled: boolean
   }
+
+  deploymentAssessments: {
+    deployableModelState: string
+  }
 }
 
 export interface EntrySearchResult {
