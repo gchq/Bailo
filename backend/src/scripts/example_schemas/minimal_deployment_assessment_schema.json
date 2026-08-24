@@ -9,7 +9,8 @@
         "deploymentSummary": {
           "title": "What is the name of the deployment assessment?",
           "description": "This will be used to distinguish your deployment assessment.",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "deploymentDate": {
           "title": "When is this deployment due to start?",

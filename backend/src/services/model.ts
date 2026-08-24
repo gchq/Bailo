@@ -572,7 +572,9 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, {
+    modelState: model.state,
+  })
   if (!valid) {
     throw BadReq(
       `Model metadata could not be validated against the schema${model.state && `, for ${model.state} state`}.`,
@@ -630,7 +632,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
       model.kind === EntryKind.MirroredModel && model.mirroredCard?.metadata
         ? deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata)
         : model.card.metadata
-    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, modelDiff.state)
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, { modelState: modelDiff.state })
 
     if (!valid) {
       throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)

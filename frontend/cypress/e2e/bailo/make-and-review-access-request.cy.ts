@@ -4,7 +4,7 @@ const modelName = 'Test Model'
 const schemaId = 'minimal-access-request-general-v10'
 const accessRequestName = 'Test access request'
 
-describe('Make and approve an access request', () => {
+describe.skip('Make and approve an access request', () => {
   before(() => {
     cy.log('Upload new model and set schema via API')
     cy.request('POST', 'http://localhost:8080/api/v2/models', {

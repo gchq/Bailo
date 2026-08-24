@@ -4,6 +4,7 @@ import os from 'os'
 import { ParsedQs } from 'qs'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
@@ -494,6 +495,10 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   async onCreateReview(req: Request, modelId: string): Promise<void> {
     this.auditGenericEvent(req, `Review created for ${modelId}`)
+  }
+
+  async onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
   }
 
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {

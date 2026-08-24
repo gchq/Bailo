@@ -85,12 +85,17 @@ describe('services > schema', () => {
     expect(result[0].jsonSchema.properties).toEqual({
       overview: expect.objectContaining({
         title: 'Details',
-        required: ['name', 'riskOwner', 'entryList'],
+        required: ['name', 'riskOwner', 'justification', 'modelIds'],
+        properties: expect.objectContaining({
+          name: expect.objectContaining({ minLength: 1, requiredForDraft: true }),
+          modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
+        }),
       }),
       assessment: {
         type: 'object',
       },
     })
+    expect(result[0].jsonSchema.required).toEqual(['overview'])
   })
 
   test('that non-deployment assessment schemas are unchanged when searched', async () => {
@@ -286,6 +291,87 @@ describe('services > schema', () => {
       valid: true,
     })
     expect(validatorMock.validate).toHaveBeenCalled()
+  })
+
+  test('validateContentAgainstSchema > allows fields to be incomplete but preserves draft requirements', async () => {
+    const jsonSchema = {
+      type: 'object',
+      required: ['overview', 'assessment'],
+      properties: {
+        overview: {
+          type: 'object',
+          required: ['name', 'modelIds'],
+          properties: {
+            name: { type: 'string', minLength: 1, requiredForDraft: true },
+            modelIds: { type: 'array', minItems: 1, uniqueItems: true },
+          },
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'draft-schema',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'draft-schema', jsonSchema }),
+    })
+
+    await validateContentAgainstSchema('draft-schema', { overview: { name: 'Draft', modelIds: [] } }, { draft: true })
+
+    expect(validatorMock.validate).toHaveBeenCalledWith(
+      { overview: { name: 'Draft', modelIds: [] } },
+      {
+        type: 'object',
+        properties: {
+          overview: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', minLength: 1, requiredForDraft: true },
+              modelIds: { type: 'array', uniqueItems: true },
+            },
+            required: ['name'],
+          },
+        },
+        required: ['overview'],
+      },
+      { required: true },
+    )
+  })
+
+  test('validateContentAgainstSchema > returns draft validation errors from the transformed schema', async () => {
+    const jsonSchema = {
+      type: 'object',
+      required: ['overview'],
+      properties: {
+        overview: {
+          type: 'object',
+          required: ['name', 'modelIds'],
+          properties: {
+            name: { type: 'string', minLength: 1, requiredForDraft: true },
+            modelIds: { type: 'array', minItems: 1, uniqueItems: true },
+          },
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'draft-schema',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'draft-schema', jsonSchema }),
+    })
+    validatorMock.validate.mockReturnValueOnce({ valid: false, errors: [] })
+
+    await expect(validateContentAgainstSchema('draft-schema', { overview: {} }, { draft: true })).resolves.toEqual({
+      valid: false,
+      errors: [],
+    })
+    expect(validatorMock.validate).toHaveBeenCalledWith(
+      { overview: {} },
+      expect.objectContaining({
+        properties: expect.objectContaining({
+          overview: expect.objectContaining({ required: ['name'] }),
+        }),
+        required: ['overview'],
+      }),
+      { required: true },
+    )
   })
 
   test('validateContentAgainstSchema > should throw NotFound when schema does not exist', async () => {
