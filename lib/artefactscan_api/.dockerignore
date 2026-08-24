@@ -22,7 +22,6 @@ tests/
 README.md
 .pre-commit-config.yaml
 requirements-dev.txt
-pytest.ini
 
 # Environment files
 .env*

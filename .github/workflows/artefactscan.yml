@@ -51,7 +51,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           cd lib/artefactscan_api
-          python -m pip install -r requirements-dev.txt
+          python -m pip install -e ".[dev]"
 
       - name: Run basic tests
         run: |
