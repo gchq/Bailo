@@ -13,6 +13,7 @@ import { ReviewKind } from '../../types/enums.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
+import { entryKindForRedirect } from '../../utils/routerUtils.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
@@ -115,7 +116,7 @@ export async function notifyDeploymentRiskOwner(
     ],
     [
       { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
-      { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
+      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployments` },
     ],
     true,
   )
@@ -134,10 +135,10 @@ export async function notifyDeploymentModelOwners(
     return
   }
 
-  const modelUrl = `${appBaseUrl}/${encodeURIComponent(model.kind)}` + `/${encodeURIComponent(model.id)}`
+  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
 
   const emailContent = buildEmail(
-    `A model you manage has been included in the deployment assessment ${deployment.metadata.overview.name}`,
+    `A deployment assessment has been created for a model you own`,
     [
       { title: 'Deployment Assessment ID', data: deployment.id },
       { title: 'Model Name', data: model.name },
@@ -148,8 +149,8 @@ export async function notifyDeploymentModelOwners(
       },
     ],
     [
-      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
-      { name: 'See Deployment Assessments', url: `${appBaseUrl}/deployments` },
+      { name: 'View Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
+      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployments?tab=all-assessments?models=${model.id}` },
       { name: 'Open Model', url: modelUrl },
     ],
     false,
