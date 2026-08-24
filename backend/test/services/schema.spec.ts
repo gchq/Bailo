@@ -89,7 +89,8 @@ describe('services > schema', () => {
   })
 
   test('a schema can be overwritten', async () => {
-    SchemaModelModelMock.replaceOne.mockResolvedValueOnce(testModelSchema)
+    SchemaModelModelMock.replaceOne.mockResolvedValueOnce({})
+    SchemaModelModelMock.findOne.mockResolvedValueOnce(testModelSchema)
     const result = await createSchema(testUser, testModelSchema, true)
     expect(SchemaModelModelMock.replaceOne).toHaveBeenCalledTimes(1)
     expect(SchemaModelModelMock.replaceOne).toHaveBeenCalledWith(
@@ -98,7 +99,7 @@ describe('services > schema', () => {
       { upsert: true },
     )
     expect(SchemaModelModelMock.save).not.toHaveBeenCalled()
-    expect(result).toBeDefined()
+    expect(result).toBe(testModelSchema)
   })
 
   test('an error is thrown on create collision', async () => {

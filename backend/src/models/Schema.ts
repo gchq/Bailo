@@ -30,7 +30,7 @@ export interface SchemaInterface {
 // object from Mongoose it should use this interface
 export type SchemaDoc = HydratedDocument<SchemaInterface> & SoftDeleteDocument
 
-const SchemaSchema = new Schema<SchemaInterface>(
+const SchemaSchema = new Schema<SchemaDoc>(
   {
     id: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
@@ -61,6 +61,6 @@ function setSchema(schema: unknown) {
 
 SchemaSchema.plugin(softDeletionPlugin)
 
-const SchemaModel = model<SchemaInterface>('v2_Schema', SchemaSchema)
+const SchemaModel = model<SchemaDoc>('v2_Schema', SchemaSchema)
 
 export default SchemaModel

@@ -158,7 +158,11 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
 
   if (overwrite) {
     await SchemaModel.replaceOne({ id: schema.id }, { ...schema, deleted: false }, { upsert: true })
-    return schemaDoc
+    const replaced = await SchemaModel.findOne({ id: schema.id })
+    if (!replaced) {
+      throw NotFound('The schema could not be found after upsert.', { schemaId: schema.id })
+    }
+    return replaced
   }
 
   try {

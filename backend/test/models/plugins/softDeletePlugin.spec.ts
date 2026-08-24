@@ -157,7 +157,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockUpdateOne = vi.fn().mockResolvedValue({ modifiedCount: 1 })
         const context = { updateOne: mockUpdateOne }
 
-        await schema.statics.deleteOne.call(context, { id: '123' })
+        await Reflect.apply(schema.statics.deleteOne, context, [{ id: '123' }])
 
         expect(mockUpdateOne).toHaveBeenCalledWith(
           { id: '123' },
@@ -170,7 +170,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockUpdateOne = vi.fn().mockResolvedValue({ modifiedCount: 1 })
         const context = { updateOne: mockUpdateOne }
 
-        await schema.statics.deleteOne.call(context, { id: '123' }, undefined, 'user-1')
+        await Reflect.apply(schema.statics.deleteOne, context, [{ id: '123' }, undefined, 'user-1'])
 
         expect(mockUpdateOne).toHaveBeenCalledWith(
           { id: '123' },
@@ -185,7 +185,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockUpdateMany = vi.fn().mockResolvedValue({ modifiedCount: 3 })
         const context = { updateMany: mockUpdateMany }
 
-        await schema.statics.deleteMany.call(context, { organisation: 'test' })
+        await Reflect.apply(schema.statics.deleteMany, context, [{ organisation: 'test' }])
 
         expect(mockUpdateMany).toHaveBeenCalledWith(
           { organisation: 'test' },
@@ -198,7 +198,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockUpdateMany = vi.fn().mockResolvedValue({ modifiedCount: 3 })
         const context = { updateMany: mockUpdateMany }
 
-        await schema.statics.deleteMany.call(context, {}, undefined, 'user-2')
+        await Reflect.apply(schema.statics.deleteMany, context, [{}, undefined, 'user-2'])
 
         expect(mockUpdateMany).toHaveBeenCalledWith(
           {},
@@ -213,7 +213,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockFindByIdAndUpdate = vi.fn().mockResolvedValue({})
         const context = { findByIdAndUpdate: mockFindByIdAndUpdate }
 
-        await schema.statics.findByIdAndDelete.call(context, 'abc-123')
+        await Reflect.apply(schema.statics.findByIdAndDelete, context, ['abc-123'])
 
         expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
           'abc-123',
@@ -227,7 +227,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockFindByIdAndUpdate = vi.fn().mockResolvedValue({})
         const context = { findByIdAndUpdate: mockFindByIdAndUpdate }
 
-        await schema.statics.findByIdAndDelete.call(context, 'abc-123', mockSession)
+        await Reflect.apply(schema.statics.findByIdAndDelete, context, ['abc-123', mockSession])
 
         expect(mockFindByIdAndUpdate).toHaveBeenCalledWith('abc-123', expect.objectContaining({ deleted: true }), {
           new: true,
@@ -239,7 +239,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockFindByIdAndUpdate = vi.fn().mockResolvedValue({})
         const context = { findByIdAndUpdate: mockFindByIdAndUpdate }
 
-        await schema.statics.findByIdAndDelete.call(context, 'abc-123', undefined, 'user-3')
+        await Reflect.apply(schema.statics.findByIdAndDelete, context, ['abc-123', undefined, 'user-3'])
 
         expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
           'abc-123',
@@ -254,7 +254,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockFindOneAndUpdate = vi.fn().mockResolvedValue({})
         const context = { findOneAndUpdate: mockFindOneAndUpdate }
 
-        await schema.statics.findOneAndDelete.call(context, { name: 'test' })
+        await Reflect.apply(schema.statics.findOneAndDelete, context, [{ name: 'test' }])
 
         expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
           { name: 'test' },
@@ -268,7 +268,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockFindOneAndUpdate = vi.fn().mockResolvedValue({})
         const context = { findOneAndUpdate: mockFindOneAndUpdate }
 
-        await schema.statics.findOneAndDelete.call(context, { name: 'test' }, mockSession)
+        await Reflect.apply(schema.statics.findOneAndDelete, context, [{ name: 'test' }, mockSession])
 
         expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
           { name: 'test' },
@@ -281,7 +281,7 @@ describe('models > plugins > softDeletePlugin', () => {
         const mockFindOneAndUpdate = vi.fn().mockResolvedValue({})
         const context = { findOneAndUpdate: mockFindOneAndUpdate }
 
-        await schema.statics.findOneAndDelete.call(context, { name: 'test' }, undefined, 'user-4')
+        await Reflect.apply(schema.statics.findOneAndDelete, context, [{ name: 'test' }, undefined, 'user-4'])
 
         expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
           { name: 'test' },

@@ -215,8 +215,7 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
  * Calculates the full set of usage metrics either globally
  * or scoped to a specific organisation.
  */
-async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): Promise<BaseMetrics> {
-  await checkUserIsAuthorised(user)
+async function calculateUsageMetrics(filter: ModelFilter): Promise<BaseMetrics> {
   const [totalEntries, stateMetrics, schemaMetrics, totalEntriesWithReleases, totalEntriesWithAccessRequests] =
     await Promise.all([
       calculateTotalEntries(filter),
@@ -803,25 +802,26 @@ export class BaseMetricsConnector {
       }
     }
 
+    await checkUserIsAuthorised(user)
+
     const organisationIds = await this.getOrganisationIds()
 
-    const byOrganisation = await Promise.all(
-      organisationIds.map(async (orgRaw) => {
-        const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
-
-        const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
-
-        const metrics = await calculateUsageMetrics(user, filter)
-
-        return { organisation, ...metrics }
-      }),
-    )
-
-    const globalMetrics = await calculateUsageMetrics(user, {})
+    const [byOrganisation, globalMetrics, users] = await Promise.all([
+      Promise.all(
+        organisationIds.map(async (orgRaw) => {
+          const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
+          const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
+          const metrics = await calculateUsageMetrics(filter)
+          return { organisation, ...metrics }
+        }),
+      ),
+      calculateUsageMetrics({}),
+      calculateTotalUsers(),
+    ])
 
     const global: BaseMetrics = {
       ...globalMetrics,
-      users: await calculateTotalUsers(),
+      users,
     }
 
     const result = { global, byOrganisation }

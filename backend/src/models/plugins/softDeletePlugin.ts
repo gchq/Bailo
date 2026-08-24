@@ -63,7 +63,7 @@ export function softDeletionPlugin(schema: Schema) {
   schema.add({ deletedBy: { type: String, default: '' } })
   schema.add({ deletedAt: { type: String, default: '' } })
 
-  schema.methods.delete = async function (session?: ClientSession, user?: string) {
+  async function softDeleteInstance(this: any, session?: ClientSession, user?: string) {
     this.deleted = true
     this.deletedAt = new Date().toISOString()
     if (user) {
@@ -71,6 +71,9 @@ export function softDeletionPlugin(schema: Schema) {
     }
     return await this.save({ session })
   }
+
+  schema.methods.delete = softDeleteInstance
+  schema.methods.deleteOne = softDeleteInstance
 
   schema.statics.deleteOne = async function (filter: Record<string, any>, session?: ClientSession, user?: string) {
     const update: Record<string, any> = {
@@ -136,15 +139,6 @@ export function softDeletionPlugin(schema: Schema) {
     }
 
     return this.findOneAndUpdate(filter, update, options)
-  }
-
-  schema.methods.deleteOne = async function (session?: ClientSession, user?: string) {
-    this.deleted = true
-    this.deletedAt = new Date().toISOString()
-    if (user) {
-      this.deletedBy = user
-    }
-    return await this.save({ session })
   }
 
   schema.methods.restore = async function (session: ClientSession | undefined) {
