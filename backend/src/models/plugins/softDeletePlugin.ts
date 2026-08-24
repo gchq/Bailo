@@ -1,4 +1,4 @@
-import { Callback, ClientSession, Document, Schema, Types } from 'mongoose'
+import { Callback, ClientSession, Document, PipelineStage, Schema, Types } from 'mongoose'
 
 export interface SoftDeleteDocument extends Omit<Document, 'delete' | 'restore'>, SoftDeleteInterface {
   delete(session?: ClientSession, fn?: Callback<this>): Promise<this>
@@ -9,6 +9,52 @@ export interface SoftDeleteInterface {
   deleted?: boolean | undefined
   deletedAt?: Date | undefined
   deletedBy?: Types.ObjectId | string | undefined
+}
+
+/**
+ * Converts a simple-form $lookup into pipeline form so a soft-delete
+ * filter can be injected into the joined collection's query.
+ *
+ * Simple-form $lookup operates at the MongoDB driver level and bypasses
+ * Mongoose middleware, so deleted documents in the target collection
+ * would be returned without this rewrite.
+ */
+function rewriteLookupWithSoftDelete(lookup: Record<string, any>): PipelineStage {
+  const { from, localField, foreignField, as: alias } = lookup
+  return {
+    $lookup: {
+      from,
+      let: { joinValue: `$${localField}` },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: [`$${foreignField}`, '$$joinValue'] },
+            deleted: { $ne: true },
+          },
+        },
+      ],
+      as: alias,
+    },
+  }
+}
+
+/**
+ * Scans an aggregation pipeline for $lookup stages and ensures each
+ * one excludes soft-deleted documents from the joined collection.
+ */
+function addSoftDeleteFilterToLookups(pipeline: PipelineStage[]): void {
+  for (let i = 0; i < pipeline.length; i++) {
+    const stage = pipeline[i] as Record<string, any>
+    if (!stage.$lookup) {
+      continue
+    }
+
+    if (stage.$lookup.pipeline) {
+      stage.$lookup.pipeline.unshift({ $match: { deleted: { $ne: true } } })
+    } else if (stage.$lookup.localField && stage.$lookup.foreignField) {
+      pipeline[i] = rewriteLookupWithSoftDelete(stage.$lookup)
+    }
+  }
 }
 
 export function softDeletionPlugin(schema: Schema) {
@@ -113,7 +159,9 @@ export function softDeletionPlugin(schema: Schema) {
   })
 
   schema.pre('aggregate', function () {
-    this.pipeline().unshift({ $match: { deleted: { $ne: true } } })
+    const pipeline = this.pipeline()
+    pipeline.unshift({ $match: { deleted: { $ne: true } } })
+    addSoftDeleteFilterToLookups(pipeline)
   })
 
   schema.pre('countDocuments', function () {

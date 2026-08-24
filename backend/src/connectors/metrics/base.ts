@@ -124,7 +124,10 @@ async function calculateTotalEntries(filter: ModelFilter): Promise<number> {
 async function countDistinctEntriesWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
   if (filter.organisation === undefined) {
     const ids = await collection.distinct('modelId')
-    return ids.length
+    if (ids.length === 0) {
+      return 0
+    }
+    return ModelModel.countDocuments({ id: { $in: ids } })
   }
 
   const pipeline: PipelineStage[] = [

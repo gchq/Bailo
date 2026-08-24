@@ -161,9 +161,9 @@ const mockFindWithIdFilter = (allModels: any[]) =>
     return mockFindQuery(filtered)
   })
 
-await describe('connectors > metrics > simple > getUsageMetrics', async () => {
+describe('connectors > metrics > simple > getUsageMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -272,6 +272,7 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
       { schemaId: 'none', schemaName: 'None', count: 0 },
     ])
   })
+
   test('global model count equals sum of organisation + unset counts', async () => {
     modelMocks.countDocuments
       .mockResolvedValueOnce(3) // b corp
@@ -296,6 +297,7 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
     expect(result.global.entries).toBe(6)
     expect(sumOfOrgs).toBe(result.global.entries)
   })
+
   test('global model count equals sum of organisations when no unset exists', async () => {
     modelMocks.countDocuments
       .mockResolvedValueOnce(3) // b corp
@@ -320,6 +322,7 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
     expect(result.global.entries).toBe(4)
     expect(sumOfOrgs).toBe(result.global.entries)
   })
+
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
@@ -329,9 +332,9 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
   })
 })
 
-await describe('connectors > metrics > simple > getRoleComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getRoleComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -489,9 +492,9 @@ await describe('connectors > metrics > simple > getRoleComplianceMetrics', async
   })
 })
 
-await describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -525,9 +528,9 @@ await describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', 
   })
 })
 
-await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getUnapprovedComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -718,9 +721,9 @@ await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics',
   })
 })
 
-await describe('connectors > metrics > simple > calculateEntryVolume', async () => {
+describe('connectors > metrics > simple > calculateEntryVolume', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.clearAllMocks()
     const { BaseMetricsConnector } = await loadConnector()
     connector = new BaseMetricsConnector(['b corp'])
@@ -896,6 +899,7 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
       },
     })
   })
+
   test('calculateEntryVolume > month interval includes models created on last day', async () => {
     const start = new Date('2026-05-01T00:00:00.000Z')
 
@@ -937,10 +941,10 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
   })
 })
 
-await describe('connectors > metrics > simple > calculateModelBreakdown', async () => {
+describe('connectors > metrics > simple > calculateModelBreakdown', async () => {
   let connector
 
-  await beforeEach(async () => {
+  beforeEach(async () => {
     const { BaseMetricsConnector } = await loadConnector()
     connector = new BaseMetricsConnector(['b corp'])
   })
@@ -1201,9 +1205,9 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
   })
 })
 
-await describe('connectors > metrics > simple > getLifecycleComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getLifecycleComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
