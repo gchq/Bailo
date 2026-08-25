@@ -1,8 +1,10 @@
+import { TextField } from '@mui/material'
 import { postDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import LabelledInput from 'src/common/LabelledInput'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaFormPage from 'src/schemas/SchemaFormPage'
@@ -18,6 +20,7 @@ export default function NewDeploymentAssessment() {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [name, setName] = useState('')
   const [errorText, setErrorText] = useState('')
   const [draftSuccessText, setDraftSuccessText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
@@ -55,7 +58,7 @@ export default function NewDeploymentAssessment() {
     }
 
     const data = getStepsData(splitSchema, true)
-    const res = await postDeploymentAssessment(schemaId, data, true)
+    const res = await postDeploymentAssessment(name, schemaId, data, true)
 
     if (!res.ok) {
       setErrorText(await getErrorMessage(res))
@@ -95,7 +98,7 @@ export default function NewDeploymentAssessment() {
     }
 
     const data = getStepsData(splitSchema, true)
-    const res = await postDeploymentAssessment(schemaId, data, false)
+    const res = await postDeploymentAssessment(name, schemaId, data, false)
 
     if (!res.ok) {
       setErrorText(await getErrorMessage(res))
@@ -143,6 +146,18 @@ export default function NewDeploymentAssessment() {
       onSaveDraft={onSaveDraft}
       draftButtonLoading={draftButtonLoading}
       draftSuccessText={draftSuccessText}
-    />
+      disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
+    >
+      <LabelledInput fullWidth required label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
+        <TextField
+          required
+          fullWidth
+          size='small'
+          id='deployment-assessment-name'
+          value={name}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+        />
+      </LabelledInput>
+    </SchemaFormPage>
   )
 }

@@ -24,10 +24,10 @@ const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentMod
 const ModelModelMock = getTypedModelMock('ModelModel')
 
 const params = {
+  name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      name: 'Assessment',
       riskOwner: 'user:risk-owner',
       justification: 'Owns the deployment risk.',
       modelIds: ['model-one'],
@@ -61,6 +61,7 @@ describe('services > deploymentAssessment', () => {
     })
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith({
       id: 'assessment-abc123',
+      name: params.name,
       schemaId: params.schemaId,
       metadata: params.metadata,
       draft: params.draft,
@@ -73,9 +74,9 @@ describe('services > deploymentAssessment', () => {
   })
 
   test('creates an incomplete draft without requiring optional fields', async () => {
-    const metadata = { overview: { name: 'Draft assessment' } }
+    const metadata = { overview: {} }
 
-    await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
+    await createDeploymentAssessment({ dn: 'creator' }, { ...params, name: 'Draft assessment', draft: true, metadata })
 
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ draft: true }))
     expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, { draft: true })

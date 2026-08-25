@@ -8,12 +8,13 @@ import { createDeploymentAssessment } from '../../../services/deploymentAssessme
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
+const name = z
+  .string()
+  .min(1, 'You must provide a deployment assessment name')
+  .openapi({ example: 'Just A Rather Very Intelligent System' })
+
 const overview = z
   .object({
-    name: z
-      .string()
-      .min(1, 'You must provide a deployment assessment name')
-      .openapi({ example: 'Just A Rather Very Intelligent System' }),
     riskOwner: z.string().min(1, 'You must provide a risk owner').openapi({ example: 'user:tony' }).optional(),
     justification: z
       .string()
@@ -37,6 +38,7 @@ const draft = z.boolean().openapi({ example: true })
 
 export const deploymentAssessmentInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
+  name,
   schemaId,
   metadata,
   draft,
@@ -48,6 +50,7 @@ export const deploymentAssessmentInterfaceSchema = z.object({
 export const postDeploymentAssessmentSchema = z.object({
   body: z
     .object({
+      name,
       schemaId,
       metadata,
       draft: draft.optional().default(true),

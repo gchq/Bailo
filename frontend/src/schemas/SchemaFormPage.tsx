@@ -1,5 +1,5 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Button, Container, Paper, Stack } from '@mui/material'
+import { Button, Container, Paper, Stack, Tooltip } from '@mui/material'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -24,6 +24,8 @@ type SchemaFormPageProps = {
   draftSuccessText?: string
   /** When true the form and action buttons are hidden; only children are shown inside the Paper. */
   hideForm?: boolean
+  /** Tooltip shown on both disabled action buttons. Omit to leave buttons enabled. */
+  disableActions?: string
   /** Optional content rendered inside the Paper before the form (e.g. a warning when no model card exists). */
   children?: ReactNode
 }
@@ -43,8 +45,11 @@ export default function SchemaFormPage({
   draftButtonLoading = false,
   draftSuccessText = '',
   hideForm = false,
+  disableActions,
   children,
 }: SchemaFormPageProps) {
+  const actionsDisabled = Boolean(disableActions)
+
   return (
     <>
       <Title text={title} />
@@ -69,25 +74,33 @@ export default function SchemaFormPage({
                 <Stack spacing={1} sx={{ alignItems: 'flex-end' }}>
                   <Stack direction='row' spacing={2} sx={{ justifyContent: 'flex-end' }}>
                     {onSaveDraft && (
-                      <Button
-                        sx={{ width: 'fit-content' }}
-                        variant='outlined'
-                        onClick={onSaveDraft}
-                        loading={draftButtonLoading}
-                        disabled={submitButtonLoading}
-                      >
-                        Save draft
-                      </Button>
+                      <Tooltip title={disableActions ?? ''}>
+                        <span>
+                          <Button
+                            sx={{ width: 'fit-content' }}
+                            variant='outlined'
+                            onClick={onSaveDraft}
+                            loading={draftButtonLoading}
+                            disabled={submitButtonLoading || actionsDisabled}
+                          >
+                            Save draft
+                          </Button>
+                        </span>
+                      </Tooltip>
                     )}
-                    <Button
-                      sx={{ width: 'fit-content' }}
-                      variant='contained'
-                      onClick={onSubmit}
-                      loading={submitButtonLoading}
-                      disabled={draftButtonLoading}
-                    >
-                      Submit
-                    </Button>
+                    <Tooltip title={disableActions ?? ''}>
+                      <span>
+                        <Button
+                          sx={{ width: 'fit-content' }}
+                          variant='contained'
+                          onClick={onSubmit}
+                          loading={submitButtonLoading}
+                          disabled={draftButtonLoading || actionsDisabled}
+                        >
+                          Submit
+                        </Button>
+                      </span>
+                    </Tooltip>
                   </Stack>
                   <MessageAlert message={errorText} severity='error' />
                   {onSaveDraft && <MessageAlert message={draftSuccessText} severity='success' />}

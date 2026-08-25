@@ -13,7 +13,7 @@ import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 
-export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
+export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'name' | 'schemaId' | 'draft'> & {
   metadata: unknown
 }
 
@@ -76,7 +76,7 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   }
 
   const metadata = params.metadata as DeploymentAssessmentMetadata
-  const { name, riskOwner, modelIds } = metadata.overview
+  const { riskOwner, modelIds } = metadata.overview
 
   if (riskOwner) {
     await validateRiskOwner(riskOwner)
@@ -86,7 +86,8 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   }
 
   const deploymentAssessment = new DeploymentAssessmentModel({
-    id: convertStringToId(name),
+    id: convertStringToId(params.name),
+    name: params.name,
     schemaId: params.schemaId,
     metadata,
     draft: params.draft,

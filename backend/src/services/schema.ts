@@ -65,13 +65,6 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         title: 'Details',
         type: 'object',
         properties: {
-          name: {
-            title: 'What is the name of the deployment assessment?',
-            description: 'This will be used to distinguish your deployment assessment.',
-            type: 'string',
-            minLength: 1,
-            requiredForDraft: true,
-          },
           riskOwner: {
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'string',
