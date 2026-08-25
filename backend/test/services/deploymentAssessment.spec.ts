@@ -318,7 +318,7 @@ describe('services > deploymentAssessment', () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
 
       await expect(updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: true })).rejects.toThrow(
-        'Cannot convert a released submitted assessment back to a draft.',
+        'Cannot convert a submitted deployment assessment back to a draft.',
       )
       expect(deploymentAssessment.save).not.toHaveBeenCalled()
     })
