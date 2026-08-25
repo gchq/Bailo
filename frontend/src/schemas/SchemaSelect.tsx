@@ -37,12 +37,9 @@ import { entryKindForRedirect } from 'utils/routerUtils'
 type SchemaSelectProps = {
   schemaKind: SchemaKindKeys
   entry?: EntryInterface
-  onSchemaSelect?: (schema: SchemaInterface) => void
-  backHref?: string
-  backLabel?: string
 }
 
-export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHref, backLabel }: SchemaSelectProps) {
+export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const router = useRouter()
   const [loadingSchemaId, setLoadingSchemaId] = useState<string | null>(null)
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
@@ -64,6 +61,14 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
       router.push(`/model/${entry!.id}/access-request/new?schemaId=${newSchema.id}`)
     },
     [entry, router],
+  )
+
+  const deploymentAssessmentCallback = useCallback(
+    async (newSchema: SchemaInterface) => {
+      setLoadingSchemaId(newSchema.id)
+      router.push(`/deployment-assessments/new?schemaId=${newSchema.id}`)
+    },
+    [router],
   )
 
   const entryCallback = useCallback(
@@ -92,14 +97,14 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
   } as const
 
   const selectionCallback = useMemo(() => {
-    if (onSchemaSelect) {
-      return (newSchema: SchemaInterface) => {
-        setLoadingSchemaId(newSchema.id)
-        onSchemaSelect(newSchema)
-      }
+    if (schemaKind === SchemaKind.ACCESS_REQUEST) {
+      return accessRequestCallback
     }
-    return schemaKind === SchemaKind.ACCESS_REQUEST ? accessRequestCallback : entryCallback
-  }, [onSchemaSelect, schemaKind, accessRequestCallback, entryCallback])
+    if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
+      return deploymentAssessmentCallback
+    }
+    return entryCallback
+  }, [schemaKind, accessRequestCallback, deploymentAssessmentCallback, entryCallback])
 
   const activeSchemaButtons = useMemo(
     () =>
@@ -135,13 +140,22 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
     [inactiveSchemas, selectionCallback, loadingSchemaId],
   )
 
-  const link =
-    backHref ??
-    (schemaKind === SchemaKind.ACCESS_REQUEST
-      ? `/model/${entry!.id}`
-      : `/${entryKindForRedirect(entry!.kind)}/${entry!.id}`)
+  const link = useMemo(() => {
+    if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
+      return '/deployment-assessments'
+    }
+    if (schemaKind === SchemaKind.ACCESS_REQUEST) {
+      return `/model/${entry!.id}`
+    }
+    return `/${entryKindForRedirect(entry!.kind)}/${entry!.id}`
+  }, [schemaKind, entry])
 
-  const resolvedBackLabel = backLabel ?? `Back to ${EntryKindLabel[entry!.kind]}`
+  const backLabel = useMemo(() => {
+    if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
+      return 'Back to Deployment Assessments'
+    }
+    return `Back to ${EntryKindLabel[entry!.kind]}`
+  }, [schemaKind, entry])
 
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isSchemasError,
@@ -159,7 +173,7 @@ export default function SchemaSelect({ schemaKind, entry, onSchemaSelect, backHr
           <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
             <Link href={link}>
               <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                {resolvedBackLabel}
+                {backLabel}
               </Button>
             </Link>
             <Stack

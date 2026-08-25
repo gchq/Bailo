@@ -9,7 +9,7 @@ import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaFormPage from 'src/schemas/SchemaFormPage'
 import SchemaSelect from 'src/schemas/SchemaSelect'
-import { SchemaInterface, SchemaKind, SplitSchemaNoRender } from 'types/types'
+import { SchemaKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
 
@@ -41,10 +41,6 @@ export default function NewDeploymentAssessment() {
 
     setSplitSchema({ reference: schema.id, steps })
   }, [schema, currentUser])
-
-  function handleSchemaSelect(selected: SchemaInterface) {
-    router.push(`/deployment-assessments/new?schemaId=${selected.id}`)
-  }
 
   async function onSaveDraft() {
     setErrorText('')
@@ -121,12 +117,7 @@ export default function NewDeploymentAssessment() {
     return (
       <>
         <Title text='Select a schema' />
-        <SchemaSelect
-          schemaKind={SchemaKind.DEPLOYMENT_ASSESSMENT}
-          onSchemaSelect={handleSchemaSelect}
-          backHref='/deployment-assessments'
-          backLabel='Back to Deployment Assessments'
-        />
+        <SchemaSelect schemaKind={SchemaKind.DEPLOYMENT_ASSESSMENT} />
       </>
     )
   }
@@ -148,9 +139,8 @@ export default function NewDeploymentAssessment() {
       draftSuccessText={draftSuccessText}
       disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
     >
-      <LabelledInput fullWidth required label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
+      <LabelledInput fullWidth label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
         <TextField
-          required
           fullWidth
           size='small'
           id='deployment-assessment-name'
