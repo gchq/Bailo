@@ -4,10 +4,11 @@ import { QueryFilter } from 'mongoose'
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { z } from '../lib/zod.js'
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
-import { test } from '../routes/v3/deploymentAssessment/postDeploymentAssessment.js'
+import { deploymentAssessmentSchema } from '../routes/v3/deploymentAssessment/postDeploymentAssessment.js'
 import { SchemaKind } from '../types/enums.js'
 import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
@@ -154,7 +155,10 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
   return deploymentAssessment
 }
 
-export async function createDeploymentAssessment(user: UserInterface, params: test) {
+export async function createDeploymentAssessment(
+  user: UserInterface,
+  params: z.infer<typeof deploymentAssessmentSchema>,
+) {
   const schema = await getSchemaById(params.schemaId)
   if (schema.hidden) {
     throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId: params.schemaId })

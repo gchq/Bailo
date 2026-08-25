@@ -19,7 +19,7 @@ const name = z
   .min(1, 'You must provide a deployment assessment name')
   .openapi({ example: 'Just A Rather Very Intelligent System' })
 
-const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
+export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
   z
     .object({
       name,
@@ -38,7 +38,6 @@ const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
     .strict(),
 ])
 const postDeploymentAssessmentSchema = z.object({ body: deploymentAssessmentSchema })
-export type test = z.infer<typeof deploymentAssessmentSchema>
 
 registerPath(
   {

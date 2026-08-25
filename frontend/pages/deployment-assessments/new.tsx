@@ -6,13 +6,12 @@ import { useRouter } from 'next/router'
 import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Title from 'src/common/Title'
-import { removeEmptyValues } from 'src/entry/overview/FormEditPage'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaFormPage from 'src/schemas/SchemaFormPage'
 import SchemaSelect from 'src/schemas/SchemaSelect'
 import { SchemaKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
+import { getStepsData, getStepsFromSchema, removeEmptyValues, setStepValidate, validateForm } from 'utils/formUtils'
 
 export default function NewDeploymentAssessment() {
   const router = useRouter()
