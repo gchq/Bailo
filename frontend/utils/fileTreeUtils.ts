@@ -17,6 +17,9 @@ export interface FileTreeNode {
   isDirectory: boolean
   children: FileTreeNode[]
   file?: FileInterface
+  // The ".folder" marker file for this directory, if one was uploaded (e.g. for empty folders).
+  // Preserved so that getFolderDates can fall back to the marker's timestamps when the folder has no real files.
+  markerFile?: FileInterface
   totalFileCount: number
 }
 
@@ -48,7 +51,9 @@ export function buildFileTree(files: FileInterface[]): FileTreeNode {
     let current = root
 
     if (isFolderMarker(file)) {
-      // Folder marker (e.g. "path/to/dir/.folder"): create directory nodes, skip the .folder leaf
+      // Folder marker (e.g. "path/to/dir/.folder"): create directory nodes but skip the .folder leaf.
+      // The marker's metadata is stored on the deepest directory node so getFolderDates can use its
+      // timestamps as a fallback when the folder contains no real files.
       const dirSegments = segments.slice(0, -1)
       for (let i = 0; i < dirSegments.length; i++) {
         const segment = dirSegments[i]
@@ -66,6 +71,7 @@ export function buildFileTree(files: FileInterface[]): FileTreeNode {
         }
         current = dir
       }
+      current.markerFile = file
     } else {
       for (let i = 0; i < segments.length; i++) {
         const segment = segments[i]
@@ -169,6 +175,28 @@ export function collectAllFileNames(node: FileTreeNode): string[] {
 /** Builds a searchable text string for a folder node by joining its name with all nested file names. */
 export function buildFolderSearchableText(node: FileTreeNode): string {
   return [node.name, ...collectAllFileNames(node)].join('\n')
+}
+
+/**
+ * Derives meaningful dates for a folder from its contents:
+ *   - createdAt: earliest createdAt among all nested files (when the folder effectively came into being)
+ *   - updatedAt: latest updatedAt among all nested files (when the folder's contents last changed)
+ *
+ * Falls back to the ".folder" marker file's timestamps for empty folders (created via "Create folder").
+ * Returns epoch (1970-01-01) only if neither real files nor a marker exist.
+ */
+export function getFolderDates(node: FileTreeNode): { createdAt: Date; updatedAt: Date } {
+  const files = collectAllFiles(node)
+  if (files.length === 0) {
+    if (node.markerFile) {
+      return { createdAt: new Date(node.markerFile.createdAt), updatedAt: new Date(node.markerFile.updatedAt) }
+    }
+    return { createdAt: new Date(0), updatedAt: new Date(0) }
+  }
+  return {
+    createdAt: new Date(Math.min(...files.map((f) => new Date(f.createdAt).getTime()))),
+    updatedAt: new Date(Math.max(...files.map((f) => new Date(f.updatedAt).getTime()))),
+  }
 }
 
 /** Collects all FileInterface objects recursively under a tree node. */

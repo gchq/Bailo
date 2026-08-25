@@ -8,6 +8,7 @@ import {
   buildFolderSearchableText,
   type FileTreeNode,
   getBreadcrumbParts,
+  getFolderDates,
   getNodeAtPath,
 } from 'utils/fileTreeUtils'
 
@@ -15,6 +16,7 @@ export type BrowseListItem = {
   key: string
   name: string
   searchableText: string
+  sortOrder: number
   size: number
   createdAt: Date
   updatedAt: Date
@@ -76,15 +78,17 @@ export default function FolderNavigableList({
     const items: BrowseListItem[] = []
     for (const child of currentNode.children) {
       if (child.isDirectory) {
+        const folderDates = getFolderDates(child)
         items.push({
           key: `folder-${child.fullPath}`,
           kind: 'folder',
           node: child,
           name: child.name,
           searchableText: buildFolderSearchableText(child),
+          sortOrder: 0,
           size: child.totalFileCount,
-          createdAt: new Date(0),
-          updatedAt: new Date(0),
+          createdAt: folderDates.createdAt,
+          updatedAt: folderDates.updatedAt,
         })
       } else if (child.file) {
         items.push({
@@ -93,6 +97,7 @@ export default function FolderNavigableList({
           file: child.file,
           name: child.file.name,
           searchableText: child.file.name,
+          sortOrder: 1,
           size: child.file.size,
           createdAt: child.file.createdAt,
           updatedAt: child.file.updatedAt,
@@ -143,6 +148,7 @@ export default function FolderNavigableList({
         list={browseItems}
         emptyListText={emptyListText}
         searchFilterProperty='searchableText'
+        groupByProperty='sortOrder'
         onSearchChange={setSearchQuery}
         sortingProperties={sortingProperties}
         defaultSortProperty={defaultSortProperty}

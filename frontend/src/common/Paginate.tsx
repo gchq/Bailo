@@ -36,6 +36,7 @@ interface PaginateProps<T> {
   defaultSortDirection?: SortingDirectionKeys
   hideBorders?: boolean
   hideDividers?: boolean
+  groupByProperty?: keyof T
   onSearchChange?: (query: string) => void
   children: ({ data }: { data: T }) => ReactElement
 }
@@ -65,6 +66,7 @@ export default function Paginate<T>({
   defaultSortDirection = SortingDirection.DESC,
   hideBorders = false,
   hideDividers = false,
+  groupByProperty,
   onSearchChange,
   children,
 }: PaginateProps<T>) {
@@ -110,12 +112,22 @@ export default function Paginate<T>({
 
   const sortByValue = useMemo(
     () => (a: T, b: T) => {
+      if (groupByProperty) {
+        const groupA = a[groupByProperty]
+        const groupB = b[groupByProperty]
+        if (groupA < groupB) {
+          return -1
+        }
+        if (groupA > groupB) {
+          return 1
+        }
+      }
       if (ascOrDesc === SortingDirection.ASC) {
         return a[orderByValue] < b[orderByValue] ? -1 : 1
       }
       return a[orderByValue] > b[orderByValue] ? -1 : 1
     },
-    [ascOrDesc, orderByValue],
+    [ascOrDesc, orderByValue, groupByProperty],
   )
 
   const checkMenuOption = useCallback(
