@@ -53,38 +53,30 @@ export default function FileBrowser({
       {({ data, onNavigate, searchQuery }) => {
         if (data.kind === 'folder') {
           return (
-            <Box sx={{ width: '100%' }}>
-              <Stack spacing={1} sx={{ p: 2 }}>
-                <FolderRow
-                  node={data.node}
-                  modelId={modelId}
-                  modelKind={modelKind}
-                  releases={releases}
-                  readOnly={readOnly}
-                  onNavigate={onNavigate}
-                  searchQuery={searchQuery}
-                />
-              </Stack>
-            </Box>
+            <FolderRow
+              node={data.node}
+              modelId={modelId}
+              modelKind={modelKind}
+              releases={releases}
+              readOnly={readOnly}
+              onNavigate={onNavigate}
+              searchQuery={searchQuery}
+            />
           )
         }
         return (
-          <Box sx={{ width: '100%' }}>
-            <Stack spacing={1} sx={{ p: 2 }}>
-              <FileDisplay
-                showMenuItems={{
-                  associatedReleases: !readOnly,
-                  deleteFile: !readOnly && modelKind === EntryKind.MODEL,
-                  rescanFile: !readOnly,
-                }}
-                file={data.file}
-                modelId={modelId}
-                mutator={mutator}
-                releases={releases}
-                displayName={data.file.name.includes('/') ? data.file.name.split('/').pop() : undefined}
-              />
-            </Stack>
-          </Box>
+          <FileDisplay
+            showMenuItems={{
+              associatedReleases: !readOnly,
+              deleteFile: !readOnly && modelKind === EntryKind.MODEL,
+              rescanFile: !readOnly,
+            }}
+            file={data.file}
+            modelId={modelId}
+            mutator={mutator}
+            releases={releases}
+            displayName={data.file.name.includes('/') ? data.file.name.split('/').pop() : undefined}
+          />
         )
       }}
     </FolderNavigableList>
@@ -164,7 +156,7 @@ function FolderRow({
   const totalCount = node.totalFileCount
 
   return (
-    <>
+    <Box sx={{ p: 1, width: '100%' }}>
       <Stack
         direction={{ sm: 'column', md: 'row' }}
         spacing={2}
@@ -246,6 +238,6 @@ function FolderRow({
           )}
         </Stack>
       </ConfirmationDialogue>
-    </>
+    </Box>
   )
 }
