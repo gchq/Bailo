@@ -12,25 +12,28 @@ export const getDeploymentAssessmentCurrentUserPermissionsSchema = z.object({
   }),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/permissions/mine',
-  tags: ['deployment assessments'],
-  description: 'Get all current user permissions for a deployment assessment.',
-  schema: getDeploymentAssessmentCurrentUserPermissionsSchema,
-  responses: {
-    200: {
-      description: `Details about the currently logged in user's permissions for a deploymet assessment.`,
-      content: {
-        'application/json': {
-          schema: z.object({
-            permissions: deploymentAssessmentPermissionsSchema,
-          }),
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/permissions/mine',
+    tags: ['deployment assessments'],
+    description: 'Get all current user permissions for a deployment assessment.',
+    schema: getDeploymentAssessmentCurrentUserPermissionsSchema,
+    responses: {
+      200: {
+        description: `Details about the currently logged in user's permissions for a deployment assessment.`,
+        content: {
+          'application/json': {
+            schema: z.object({
+              permissions: deploymentAssessmentPermissionsSchema,
+            }),
+          },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 interface GetDeploymentAssessmentCurrentUserPermissionsResponse {
   permissions: DeploymentAssessmentUserPermissions

@@ -40,7 +40,7 @@ export default function EditableAccessRequestForm({
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
-  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
+  const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
   const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
@@ -170,7 +170,7 @@ export default function EditableAccessRequestForm({
                     <Info color='primary' fontSize='small' />
                   </IconButton>
                   <InformationDialog
-                    open={SchemaInformationOpen}
+                    open={schemaInformationOpen}
                     schema={schema}
                     onClose={() => setSchemaInformationOpen(false)}
                   />

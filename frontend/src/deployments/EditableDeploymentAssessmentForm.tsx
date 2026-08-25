@@ -6,6 +6,7 @@ import { useGetSchema } from 'actions/schema'
 import { useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
+import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -31,7 +32,7 @@ export default function EditableAccessRequestForm({
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, _setDeleteErrorMessage] = useState('')
-  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
+  const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
 
@@ -113,7 +114,7 @@ export default function EditableAccessRequestForm({
         <EditableFormHeading
           heading={
             schema && (
-              <div>
+              <Stack>
                 <Typography
                   sx={{
                     fontWeight: 'bold',
@@ -132,12 +133,16 @@ export default function EditableAccessRequestForm({
                     <Info color='primary' fontSize='small' />
                   </IconButton>
                   <InformationDialog
-                    open={SchemaInformationOpen}
+                    open={schemaInformationOpen}
                     schema={schema}
                     onClose={() => setSchemaInformationOpen(false)}
                   />
                 </Stack>
-              </div>
+                <Stack>
+                  <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Created by</Typography>
+                  <UserDisplay dn={deploymentAssessment.createdBy} />
+                </Stack>
+              </Stack>
             )
           }
           editAction='editDeploymentAssessment'

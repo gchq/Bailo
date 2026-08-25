@@ -38,35 +38,37 @@ export default function DeploymentAssessment() {
           {isDeploymentAssessmentLoading && <Loading />}
           {deploymentAssessment && (
             <>
-              <Paper
-                color='primary'
-                sx={{
-                  backgroundColor: theme.palette.mode === 'light' ? theme.palette.info.light : 'unset',
-                  py: 1,
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                }}
-              >
-                <Stack
-                  direction='row'
-                  spacing={2}
+              {deploymentAssessment.draft && (
+                <Paper
+                  color='primary'
                   sx={{
-                    justifyContent: 'space-between',
+                    backgroundColor: theme.palette.mode === 'light' ? theme.palette.info.light : 'unset',
+                    py: 1,
+                    display: 'flex',
+                    justifyContent: 'space-around',
                     alignItems: 'center',
-                    px: 2,
-                    width: '100%',
                   }}
                 >
-                  <Stack direction='row' spacing={1}>
-                    <ReviewIcon color='primary' />
-                    <Typography>Draft</Typography>
+                  <Stack
+                    direction='row'
+                    spacing={2}
+                    sx={{
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      px: 2,
+                      width: '100%',
+                    }}
+                  >
+                    <Stack direction='row' spacing={1}>
+                      <ReviewIcon color='primary' />
+                      <Typography>Draft</Typography>
+                    </Stack>
+                    <Button variant='outlined' color='inherit' size='small' onClick={() => {}} data-test='reviewButton'>
+                      Publish
+                    </Button>
                   </Stack>
-                  <Button variant='outlined' color='inherit' size='small' onClick={() => {}} data-test='reviewButton'>
-                    Publish
-                  </Button>
-                </Stack>
-              </Paper>
+                </Paper>
+              )}
               <Stack spacing={2} sx={{ p: 4 }}>
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}
