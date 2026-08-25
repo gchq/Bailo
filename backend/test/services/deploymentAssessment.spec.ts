@@ -9,7 +9,6 @@ import {
   getDeploymentAssessmentById,
   searchDeploymentAssessments,
   updateDeploymentAssessment,
-  UpdateDeploymentAssessmentParams,
 } from '../../src/services/deploymentAssessment.js'
 import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
@@ -201,27 +200,6 @@ describe('services > deploymentAssessment', () => {
   })
 
   test.each([
-    ['null metadata', null],
-    ['a non-object', 'not-an-object'],
-    ['a missing overview', { assessment: { summary: 'Summary' } }],
-    ['a non-object overview', { overview: 'Assessment' }],
-    ['a null overview', { overview: null }],
-    ['a missing name', { overview: { riskOwner: 'user:risk-owner' } }],
-    ['a non-string name', { overview: { name: 42 } }],
-    ['a non-string risk owner', { overview: { name: 'Assessment', riskOwner: 42 } }],
-    ['a non-string justification', { overview: { name: 'Assessment', justification: 42 } }],
-    ['non-array model IDs', { overview: { name: 'Assessment', modelIds: 'model-one' } }],
-    ['non-string model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 42] } }],
-  ])('rejects schema-valid metadata with %s', async (_description, metadata) => {
-    await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })).rejects.toThrow(
-      'Deployment assessment metadata has an invalid overview.',
-    )
-    expect(authentication.getUserInformation).not.toHaveBeenCalled()
-    expect(ModelModelMock.find).not.toHaveBeenCalled()
-    expect(DeploymentAssessmentModelMock).not.toHaveBeenCalled()
-  })
-
-  test.each([
     ['only a name', { overview: { name: 'Assessment' } }],
     ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
     ['unknown extra properties', { overview: { name: 'Assessment', extra: { nested: true } }, extra: 'value' }],
@@ -334,25 +312,13 @@ describe('services > deploymentAssessment', () => {
       expect(deploymentAssessment.markModified).not.toHaveBeenCalledWith('metadata')
     })
 
-    test('rejects schema-valid metadata with an unusable overview', async () => {
-      const deploymentAssessment = existingDeploymentAssessment()
-      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-
-      await expect(
-        updateDeploymentAssessment({ dn: 'creator' }, 'da-id', {
-          metadata: { overview: { name: 42 } } as unknown as UpdateDeploymentAssessmentParams['metadata'],
-        }),
-      ).rejects.toThrow('Deployment assessment metadata has an invalid overview.')
-      expect(deploymentAssessment.save).not.toHaveBeenCalled()
-    })
-
     test('rejects switching released DA back to a draft', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.draft = false
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
 
       await expect(updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: true })).rejects.toThrow(
-        'Cannot convert a released deployment assessment back to a draft.',
+        'Cannot convert a released submitted assessment back to a draft.',
       )
       expect(deploymentAssessment.save).not.toHaveBeenCalled()
     })

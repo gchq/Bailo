@@ -31,9 +31,7 @@ export interface SearchDeploymentAssessmentsParams {
   search?: string
 }
 
-export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
-  metadata: unknown
-}
+export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft' | 'metadata'>
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft'>
 
 async function validateRiskOwner(riskOwner: string) {
@@ -80,42 +78,9 @@ async function validateModels(modelIds: string[]) {
   }
 }
 
-/** Returns the first metadata property that does not match `DeploymentAssessmentMetadata`, or undefined when it does. */
-function findInvalidMetadataProperty(metadata: unknown): string | undefined {
-  if (typeof metadata !== 'object' || metadata === null) {
-    return 'metadata'
-  }
-
-  const { overview } = metadata as { overview?: unknown }
-  if (typeof overview !== 'object' || overview === null) {
-    return 'overview'
-  }
-
-  const { name, riskOwner, justification, modelIds } = overview as Record<string, unknown>
-  if (typeof name !== 'string') {
-    return 'overview.name'
-  }
-  if (riskOwner !== undefined && typeof riskOwner !== 'string') {
-    return 'overview.riskOwner'
-  }
-  if (justification !== undefined && typeof justification !== 'string') {
-    return 'overview.justification'
-  }
-  if (modelIds !== undefined && (!Array.isArray(modelIds) || modelIds.some((id) => typeof id !== 'string'))) {
-    return 'overview.modelIds'
-  }
-
-  return undefined
-}
-
-function isDeploymentAssessmentMetadata(metadata: unknown): metadata is DeploymentAssessmentMetadata {
-  return findInvalidMetadataProperty(metadata) === undefined
-}
-
-/** Validates metadata against its schema, returning it narrowed to `DeploymentAssessmentMetadata`. */
 async function validateDeploymentAssessment(
   schemaId: DeploymentAssessmentInterface['schemaId'],
-  metadata: unknown,
+  metadata: DeploymentAssessmentInterface['metadata'],
   draft: DeploymentAssessmentInterface['draft'],
 ): Promise<DeploymentAssessmentMetadata> {
   const schema = await getSchemaById(schemaId)
@@ -126,19 +91,9 @@ async function validateDeploymentAssessment(
     throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId })
   }
 
-  const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, {
-    draft,
-  })
+  const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
   if (!valid) {
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
-  }
-
-  // The schema check above cannot narrow the type, so guard the properties this service relies on.
-  if (!isDeploymentAssessmentMetadata(metadata)) {
-    throw BadReq('Deployment assessment metadata has an invalid overview.', {
-      schemaId,
-      property: findInvalidMetadataProperty(metadata),
-    })
   }
 
   const { riskOwner, modelIds } = metadata.overview
@@ -224,13 +179,13 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
 }
 
 export async function createDeploymentAssessment(user: UserInterface, params: CreateDeploymentAssessmentParams) {
-  const metadata = await validateDeploymentAssessment(params.schemaId, params.metadata, params.draft)
+  await validateDeploymentAssessment(params.schemaId, params.metadata, params.draft)
 
-  const deploymentAssessmentId = convertStringToId(metadata.overview.name)
+  const deploymentAssessmentId = convertStringToId(params.metadata.overview.name)
   const deploymentAssessment = new DeploymentAssessmentModel({
     id: deploymentAssessmentId,
     schemaId: params.schemaId,
-    metadata,
+    metadata: params.metadata,
     draft: params.draft,
     createdBy: user.dn,
   })
@@ -251,10 +206,10 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     throw error
   }
 
-  if (!params.draft && metadata.overview.riskOwner) {
+  if (!params.draft && params.metadata.overview.riskOwner) {
     await notifyDeploymentStakeholders(
-      metadata.overview.riskOwner,
-      metadata.overview.modelIds ?? [],
+      params.metadata.overview.riskOwner,
+      params.metadata.overview.modelIds ?? [],
       deploymentAssessment,
     )
   }
@@ -286,7 +241,7 @@ export async function updateDeploymentAssessment(
   }
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
-      throw BadReq('Cannot convert a released deployment assessment back to a draft.')
+      throw BadReq('Cannot convert a submitted deployment assessment back to a draft.')
     }
     deploymentAssessment.draft = diff.draft
     deploymentAssessment.markModified('draft')
