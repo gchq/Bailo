@@ -14,7 +14,7 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 
 export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'name' | 'schemaId' | 'draft'> & {
-  metadata: unknown
+  metadata?: unknown
 }
 
 async function validateRiskOwner(riskOwner: string) {
@@ -68,21 +68,23 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId: params.schemaId })
   }
 
-  const { valid, errors } = await validateContentAgainstSchema(params.schemaId, params.metadata, {
-    draft: params.draft,
-  })
-  if (!valid) {
-    throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
-  }
-
   const metadata = params.metadata as DeploymentAssessmentMetadata
-  const { riskOwner, modelIds } = metadata.overview
+  if (metadata) {
+    const { valid, errors } = await validateContentAgainstSchema(params.schemaId, params.metadata, {
+      draft: params.draft,
+    })
+    if (!valid) {
+      throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
+    }
 
-  if (riskOwner) {
-    await validateRiskOwner(riskOwner)
-  }
-  if (modelIds?.length) {
-    await validateModels(modelIds)
+    const { riskOwner, modelIds } = metadata.overview
+
+    if (riskOwner) {
+      await validateRiskOwner(riskOwner)
+    }
+    if (modelIds?.length) {
+      await validateModels(modelIds)
+    }
   }
 
   const deploymentAssessment = new DeploymentAssessmentModel({

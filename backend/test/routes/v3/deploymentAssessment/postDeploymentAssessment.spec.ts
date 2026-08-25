@@ -77,7 +77,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
     expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
   })
 
-  test('creates a draft by default', async () => {
+  test('creates a draft by default when draft is not specified', async () => {
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce({ ...deploymentAssessment, draft: true })
     const body = {
       name: 'Assessment',
@@ -88,7 +88,20 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
     const res = await testPost('/api/v3/deployment-assessments', { body })
 
     expect(res.statusCode).toBe(201)
-    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), { ...body, draft: true })
+    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
+  })
+
+  test('creates a draft without metadata when draft is not specified', async () => {
+    serviceMock.createDeploymentAssessment.mockResolvedValueOnce({ ...deploymentAssessment, draft: true })
+    const body = {
+      name: 'Assessment',
+      schemaId: 'deployment-assessment-schema',
+    }
+
+    const res = await testPost('/api/v3/deployment-assessments', { body })
+
+    expect(res.statusCode).toBe(201)
+    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
   })
 
   test.each([
@@ -106,6 +119,10 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
         createdBy: 'attacker',
       },
       description: 'server-managed property',
+    },
+    {
+      body: { name: 'Assessment', schemaId: 'deployment-assessment-schema', draft: false },
+      description: 'missing metadata when draft is false',
     },
   ])('rejects malformed input: $description', async ({ body }) => {
     const res = await testPost('/api/v3/deployment-assessments', { body })

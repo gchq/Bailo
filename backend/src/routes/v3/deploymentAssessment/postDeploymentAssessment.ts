@@ -48,14 +48,13 @@ export const deploymentAssessmentInterfaceSchema = z.object({
 })
 
 export const postDeploymentAssessmentSchema = z.object({
-  body: z
-    .object({
-      name,
-      schemaId,
-      metadata,
-      draft: draft.optional().default(true),
-    })
-    .strict(),
+  body: z.discriminatedUnion('draft', [
+    z.object({ name, schemaId, metadata, draft: z.literal(false) }).strict(),
+    z.object({ name, schemaId, metadata: metadata.optional(), draft: z.literal(true) }).strict(),
+    z
+      .object({ name, schemaId, metadata: metadata.optional(), draft: z.undefined().openapi({ type: 'boolean' }) })
+      .strict(),
+  ]),
 })
 
 registerPath(
@@ -88,7 +87,10 @@ export const postDeploymentAssessment = [
     req.audit = AuditInfo.CreateDeploymentAssessment
     const { body } = parse(req, postDeploymentAssessmentSchema)
 
-    const deploymentAssessment = await createDeploymentAssessment(req.user, body)
+    const deploymentAssessment = await createDeploymentAssessment(req.user, {
+      draft: true,
+      ...body,
+    })
     await audit.onCreateDeploymentAssessment(req, deploymentAssessment)
 
     res.location(`/api/v3/deployment-assessments/${deploymentAssessment.id}`).status(201).json({ deploymentAssessment })

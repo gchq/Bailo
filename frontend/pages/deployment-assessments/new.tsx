@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Title from 'src/common/Title'
+import { removeEmptyValues } from 'src/entry/overview/FormEditPage'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaFormPage from 'src/schemas/SchemaFormPage'
 import SchemaSelect from 'src/schemas/SchemaSelect'
@@ -54,7 +55,7 @@ export default function NewDeploymentAssessment() {
     }
 
     const data = getStepsData(splitSchema, true)
-    const res = await postDeploymentAssessment(name, schemaId, data, true)
+    const res = await postDeploymentAssessment(name, schemaId, removeEmptyValues(data), true)
 
     if (!res.ok) {
       setErrorText(await getErrorMessage(res))

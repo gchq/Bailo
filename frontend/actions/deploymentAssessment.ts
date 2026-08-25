@@ -7,6 +7,11 @@ export function postDeploymentAssessment(
   return fetch(`/api/v3/deployment-assessments`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, schemaId, metadata: { ...form }, draft }),
+    body: JSON.stringify({
+      name,
+      schemaId,
+      ...(form && { metadata: { ...form } }),
+      draft,
+    }),
   })
 }
