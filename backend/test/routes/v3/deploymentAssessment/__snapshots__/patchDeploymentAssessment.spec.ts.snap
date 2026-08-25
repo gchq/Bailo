@@ -1,0 +1,53 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 200 > no draft 1`] = `{}`;
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 200 > ok 1`] = `{}`;
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 400 > no draft 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "boolean",
+          "message": "Required",
+          "path": [
+            "body",
+            "draft",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Path: body.draft - Message: Required",
+    "name": "Bailo Error",
+  },
+}
+`;
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 400 > no name 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "boolean",
+          "message": "Required",
+          "path": [
+            "body",
+            "draft",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Path: body.draft - Message: Required",
+    "name": "Bailo Error",
+  },
+}
+`;
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > audit > expected call 1`] = `undefined`;
