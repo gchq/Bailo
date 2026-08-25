@@ -571,7 +571,7 @@ describe('services > file', () => {
     const result = await getFilesByModel(user, modelId)
 
     expect(result).toHaveLength(1)
-    expect(result[0].example).toBe('file')
+    expect(result[0]).toEqual(expect.objectContaining({ example: 'file' }))
   })
 
   test('getFilesByModel > no permission', async () => {
@@ -604,8 +604,7 @@ describe('services > file', () => {
     const files = await getFilesByIds(user, modelId, fileIds)
 
     expect(files).toHaveLength(1)
-    expect(files[0].example).toBe('file')
-    expect(files[0].scanResults).toEqual([])
+    expect(files[0]).toEqual(expect.objectContaining({ example: 'file', scanResults: [] }))
   })
 
   test('getFilesByIds > success with scans mapped', async () => {
