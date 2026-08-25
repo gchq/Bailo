@@ -34,6 +34,7 @@ export interface SearchDeploymentAssessmentsParams {
 export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
   metadata: unknown
 }
+export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft'>
 
 async function validateRiskOwner(riskOwner: string) {
   const { kind, value } = fromEntity(riskOwner)
@@ -77,6 +78,83 @@ async function validateModels(modelIds: string[]) {
       },
     )
   }
+}
+
+/** Returns the first metadata property that does not match `DeploymentAssessmentMetadata`, or undefined when it does. */
+function findInvalidMetadataProperty(metadata: unknown): string | undefined {
+  if (typeof metadata !== 'object' || metadata === null) {
+    return 'metadata'
+  }
+
+  const { overview } = metadata as { overview?: unknown }
+  if (typeof overview !== 'object' || overview === null) {
+    return 'overview'
+  }
+
+  const { name, riskOwner, justification, modelIds } = overview as Record<string, unknown>
+  if (typeof name !== 'string') {
+    return 'overview.name'
+  }
+  if (riskOwner !== undefined && typeof riskOwner !== 'string') {
+    return 'overview.riskOwner'
+  }
+  if (justification !== undefined && typeof justification !== 'string') {
+    return 'overview.justification'
+  }
+  if (modelIds !== undefined && (!Array.isArray(modelIds) || modelIds.some((id) => typeof id !== 'string'))) {
+    return 'overview.modelIds'
+  }
+
+  return undefined
+}
+
+function isDeploymentAssessmentMetadata(metadata: unknown): metadata is DeploymentAssessmentMetadata {
+  return findInvalidMetadataProperty(metadata) === undefined
+}
+
+/** Validates metadata against its schema, returning it narrowed to `DeploymentAssessmentMetadata`. */
+async function validateDeploymentAssessment(
+  schemaId: DeploymentAssessmentInterface['schemaId'],
+  metadata: unknown,
+  draft: DeploymentAssessmentInterface['draft'],
+): Promise<DeploymentAssessmentMetadata> {
+  const schema = await getSchemaById(schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId })
+  }
+  if (schema.kind !== SchemaKind.DeploymentAssessment) {
+    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId })
+  }
+
+  const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, {
+    draft,
+  })
+  if (!valid) {
+    throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
+  }
+
+  // The schema check above cannot narrow the type, so guard the properties this service relies on.
+  if (!isDeploymentAssessmentMetadata(metadata)) {
+    throw BadReq('Deployment assessment metadata has an invalid overview.', {
+      schemaId,
+      property: findInvalidMetadataProperty(metadata),
+    })
+  }
+
+  const { riskOwner, modelIds } = metadata.overview
+
+  if (!draft && !riskOwner) {
+    throw BadReq('Deployment risk owner is required')
+  }
+
+  if (riskOwner) {
+    await validateRiskOwner(riskOwner)
+  }
+  if (modelIds?.length) {
+    await validateModels(modelIds)
+  }
+
+  return metadata
 }
 
 async function notifyDeploymentStakeholders(
@@ -146,36 +224,9 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
 }
 
 export async function createDeploymentAssessment(user: UserInterface, params: CreateDeploymentAssessmentParams) {
-  const schema = await getSchemaById(params.schemaId)
-  if (schema.hidden) {
-    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId: params.schemaId })
-  }
-  if (schema.kind !== SchemaKind.DeploymentAssessment) {
-    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId: params.schemaId })
-  }
+  const metadata = await validateDeploymentAssessment(params.schemaId, params.metadata, params.draft)
 
-  const { valid, errors } = await validateContentAgainstSchema(params.schemaId, params.metadata, {
-    draft: params.draft,
-  })
-  if (!valid) {
-    throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
-  }
-
-  const metadata = params.metadata as DeploymentAssessmentMetadata
-  const { name, riskOwner, modelIds } = metadata.overview
-
-  if (!params.draft && !riskOwner) {
-    throw BadReq('Deployment risk owner is required')
-  }
-
-  if (riskOwner) {
-    await validateRiskOwner(riskOwner)
-  }
-  if (modelIds?.length) {
-    await validateModels(modelIds)
-  }
-
-  const deploymentAssessmentId = convertStringToId(name)
+  const deploymentAssessmentId = convertStringToId(metadata.overview.name)
   const deploymentAssessment = new DeploymentAssessmentModel({
     id: deploymentAssessmentId,
     schemaId: params.schemaId,
@@ -200,9 +251,48 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     throw error
   }
 
-  if (!params.draft && riskOwner) {
-    await notifyDeploymentStakeholders(riskOwner, modelIds ?? [], deploymentAssessment)
+  if (!params.draft && metadata.overview.riskOwner) {
+    await notifyDeploymentStakeholders(
+      metadata.overview.riskOwner,
+      metadata.overview.modelIds ?? [],
+      deploymentAssessment,
+    )
   }
+
+  return deploymentAssessment
+}
+
+export async function updateDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  diff: Partial<UpdateDeploymentAssessmentParams>,
+) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  const metadata = await validateDeploymentAssessment(
+    deploymentAssessment.schemaId,
+    diff.metadata ?? deploymentAssessment.metadata,
+    diff.draft ?? deploymentAssessment.draft,
+  )
+
+  if (diff.metadata !== undefined) {
+    deploymentAssessment.metadata = metadata
+    deploymentAssessment.markModified('metadata')
+  }
+  if (diff.draft !== undefined) {
+    if (!deploymentAssessment.draft && diff.draft) {
+      throw BadReq('Cannot convert a released deployment assessment back to a draft.')
+    }
+    deploymentAssessment.draft = diff.draft
+    deploymentAssessment.markModified('draft')
+  }
+
+  await deploymentAssessment.save()
 
   return deploymentAssessment
 }
