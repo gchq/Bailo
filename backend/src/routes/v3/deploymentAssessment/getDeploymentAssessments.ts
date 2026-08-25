@@ -12,12 +12,12 @@ export const getDeploymentAssessmentsSchema = z.object({
   query: z
     .object({
       schemaId: z.string().min(1).optional(),
-      modelIds: coerceArray(z.array(z.string().min(1)).optional()),
+      modelIds: coerceArray(z.array(z.string().min(1))).optional(),
       riskOwner: z.string().min(1).optional(),
       createdBy: z.string().min(1).optional(),
       createdAfter: z.string().date().optional(),
       createdBefore: z.string().date().optional(),
-      draft: strictCoerceBoolean(z.boolean().optional()),
+      draft: strictCoerceBoolean(z.boolean()).optional(),
       search: z.string().min(1).optional(),
     })
     .strict()
@@ -34,7 +34,7 @@ export const getDeploymentAssessmentsSchema = z.object({
 export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
 
 function toDeploymentAssessmentSummary(deploymentAssessment: DeploymentAssessmentDoc): DeploymentAssessmentSummary {
-  const { name, riskOwner, modelIds, justification } = deploymentAssessment.metadata.overview
+  const { name, riskOwner, modelIds, justification } = deploymentAssessment.metadata.overview ?? {}
 
   return {
     id: deploymentAssessment.id,

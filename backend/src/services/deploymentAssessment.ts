@@ -173,7 +173,7 @@ export async function createDeploymentAssessment(user: UserInterface, params: te
     id: deploymentAssessmentId,
     name: params.name,
     schemaId: params.schemaId,
-    metadata: params.metadata,
+    metadata: params.metadata ?? {},
     draft: params.draft,
     createdBy: user.dn,
   })
