@@ -34,7 +34,7 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    const steps = getStepsFromSchema(schema, {}, [], {})
+    const steps = getStepsFromSchema(schema)
     for (const step of steps) {
       step.steps = steps
     }

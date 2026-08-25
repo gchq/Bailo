@@ -110,6 +110,10 @@ export default function ModelSelector({
       .join('\n')
   }
 
+  if (currentValue.length === 1 && currentValue[0] === null) {
+    onChange([])
+  }
+
   return (
     <CompareField
       id={id}
