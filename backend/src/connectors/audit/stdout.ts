@@ -460,6 +460,18 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onReviewDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.checkEventType(AuditInfo.ReviewDeploymentAssessment, req)
+    const event = this.generateEvent(req, { reviewId: response.parentId, decision: response.decision })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.checkEventType(AuditInfo.CommentOnDeploymentAssessment, req)
+    const event = this.generateEvent(req, { deploymentAssessmentId: response.parentId })
+    req.log.info(event, req.audit.description)
+  }
+
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
     this.checkEventType(AuditInfo.ViewCurrentUserInformation, req)
     const event = this.generateEvent(req, { userDn: userInformation.user.dn })

@@ -7,12 +7,16 @@ import { createFixture, testGet } from '../../../testUtils/routes.js'
 vi.mock('../../../../src/connectors/audit/index.js')
 
 const serviceMock = vi.hoisted(() => ({
-  getDeploymentAssessmentById: vi.fn(),
+  getDeploymentAssessmentDetails: vi.fn(),
 }))
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
 describe('routes > v3 > deploymentAssessment > getDeploymentAssessment', () => {
   test('200 > ok', async () => {
+    serviceMock.getDeploymentAssessmentDetails.mockResolvedValueOnce({
+      deploymentAssessment: { id: 'assessment-id' },
+      responses: [],
+    })
     const fixture = createFixture(getDeploymentAssessmentSchema)
     const res = await testGet(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`)
 
@@ -21,11 +25,16 @@ describe('routes > v3 > deploymentAssessment > getDeploymentAssessment', () => {
   })
 
   test('audit > expected call', async () => {
+    const deploymentAssessment = { id: 'assessment-id' }
+    serviceMock.getDeploymentAssessmentDetails.mockResolvedValueOnce({
+      deploymentAssessment,
+      responses: [],
+    })
     const fixture = createFixture(getDeploymentAssessmentSchema)
     const res = await testGet(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewDeploymentAssessment).toHaveBeenCalled()
-    expect(audit.onViewDeploymentAssessment.mock.calls.at(0)?.at(1)).toMatchSnapshot()
+    expect(audit.onViewDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), deploymentAssessment)
   })
 })

@@ -40,18 +40,18 @@ export async function respondToReview(
   })
 
   await reviewResponse.save()
-  await cancelLifecycleReviewJobs(review.modelId, reviewId)
+  await cancelLifecycleReviewJobs(review.modelId!, reviewId)
   await sendReviewResponseNotification(review, reviewResponse, user)
 
   dispatchWebhooks(
-    review.modelId,
+    review.modelId!,
     WebhookEvent.CreateReviewResponse,
-    `A new response has been added to a review requested for Model ${review.modelId}`,
+    `A new response has been added to a review requested for Model ${review.modelId!}`,
     { review: review },
   )
 
   if (review.kind === ReviewKind.Lifecycle && dueDate) {
-    await createLifecycleReview(user, review.modelId, dueDate)
+    await createLifecycleReview(user, review.modelId!, dueDate)
   }
   return reviewResponse
 }

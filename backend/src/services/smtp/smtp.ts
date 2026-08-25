@@ -345,7 +345,7 @@ async function notifyRole(review: ReviewInterface, title: string, fields: Info[]
     { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
   ])
 
-  await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
+  await dispatchEmailToModelRole(review.modelId!, review.role, emailContent)
 }
 
 export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {

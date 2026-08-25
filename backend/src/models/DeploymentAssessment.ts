@@ -23,6 +23,14 @@ export interface DeploymentAssessmentInterface {
   updatedAt: Date
 }
 
+export const DeploymentAssessmentState = {
+  NeedsReview: 'needs_review',
+  Rejected: 'rejected',
+  ChangesRequested: 'changes_requested',
+  Approved: 'approved',
+} as const
+export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
+
 export type DeploymentAssessmentDoc = HydratedDocument<DeploymentAssessmentInterface> & SoftDeleteDocument
 
 const DeploymentAssessmentSchema = new Schema<DeploymentAssessmentDoc>(

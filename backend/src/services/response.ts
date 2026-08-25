@@ -139,9 +139,9 @@ export async function respondToReview(
   await sendReviewResponseNotification(review, reviewResponse, user, isApproved)
 
   dispatchWebhooks(
-    review.modelId,
+    review.modelId!,
     WebhookEvent.CreateReviewResponse,
-    `A new response has been added to a review requested for Model ${review.modelId}`,
+    `A new response has been added to a review requested for Model ${review.modelId!}`,
     { review: review },
   )
 

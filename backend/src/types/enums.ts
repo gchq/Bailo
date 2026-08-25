@@ -11,6 +11,7 @@ export const ReviewKind = {
   Release: 'release',
   Access: 'access',
   Lifecycle: 'lifecycle',
+  DeploymentAssessment: 'deployment_assessment',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 

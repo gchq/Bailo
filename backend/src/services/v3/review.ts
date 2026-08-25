@@ -41,7 +41,7 @@ export async function findReviewById(user: UserInterface, reviewId: string): Pro
   }
 
   // Authorisation check to make sure the user can access a model
-  await getModelById(user, review.modelId)
+  await getModelById(user, review.modelId!)
 
   return review
 }
@@ -173,7 +173,7 @@ export async function createLifecycleReview(
 
 export async function notifyReviewer(user: UserInterface, reviewId: string) {
   const review = await findReviewById(user, reviewId)
-  const model = await getModelByIdNoAuth(review.modelId)
+  const model = await getModelByIdNoAuth(review.modelId!)
   // `getModelById` would only determine view access to a model, we must make sure the user has write access too
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
