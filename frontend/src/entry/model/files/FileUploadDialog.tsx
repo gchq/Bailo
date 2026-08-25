@@ -10,7 +10,7 @@ import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import { EntryInterface, EntryKind, FileInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 interface FileUploadDialogProps {
@@ -19,6 +19,7 @@ interface FileUploadDialogProps {
   onDialogClose: () => void
   mutateModelFiles: () => void
   uploadPath?: string
+  onFilesUploaded?: (files: FileInterface[]) => void
 }
 
 const Input = styled('input')({
@@ -31,6 +32,7 @@ export default function FileUploadDialog({
   model,
   mutateModelFiles,
   uploadPath = '',
+  onFilesUploaded,
 }: FileUploadDialogProps) {
   const uiConfig = useContext(UiConfigContext)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
@@ -92,6 +94,7 @@ export default function FileUploadDialog({
 
   const handleFileUpload = useCallback(async () => {
     const failedFiles: FailedFileUpload[] = []
+    const successfulFiles: FileInterface[] = []
     setIsFilesUploading(true)
     setFailedFileUploads([])
     for (const fileItem of filesToBeUploaded) {
@@ -112,6 +115,7 @@ export default function FileUploadDialog({
         )
         setCurrentFileUploadProgress(undefined)
         if (fileUploadResponse) {
+          successfulFiles.push(fileUploadResponse.data.file)
           setUploadedFiles((uploadedFiles) => [...uploadedFiles, fileItem.file.name])
           setFilesToBeUpload(
             filesToBeUploaded.filter((FileToBeUploaded) => FileToBeUploaded.file.name !== fileItem.file.name),
@@ -129,6 +133,9 @@ export default function FileUploadDialog({
         setCurrentFileUploadProgress(undefined)
       }
     }
+    if (successfulFiles.length > 0) {
+      onFilesUploaded?.(successfulFiles)
+    }
     setUploadedFiles([])
     setFailedFileUploads(failedFiles)
     setIsFilesUploading(false)
@@ -136,7 +143,7 @@ export default function FileUploadDialog({
       onDialogClose()
       setFilesToBeUpload([])
     }
-  }, [model.id, mutateModelFiles, filesToBeUploaded, onDialogClose])
+  }, [model.id, mutateModelFiles, filesToBeUploaded, onDialogClose, onFilesUploaded])
 
   const handleDeleteFileFromUploadList = useCallback(
     (fileName: string) => {

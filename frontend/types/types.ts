@@ -558,11 +558,6 @@ export interface FlattenedModelImage {
   tag: string
 }
 
-export interface FileWithMetadataAndTags {
-  fileName: string
-  metadata: FileUploadMetadata
-}
-
 export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
@@ -656,11 +651,6 @@ export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof Review
 
 export function isReviewKind(value: unknown): value is ReviewKindKeys {
   return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
-}
-
-export interface SuccessfulFileUpload {
-  fileName: string
-  fileId: string
 }
 
 export type PermissionDetail =

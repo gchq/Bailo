@@ -42,7 +42,8 @@ The screenshot above shows the Releases tab with no releases yet and a 'Draft ne
 3. The release form opens with the following fields to complete:
    - **Semver** - the version number for this release (e.g. `1.0.0`)
    - **Release notes** - describe what is included in this release
-   - **Files** - attach uploaded files to this release
+   - **Files** - select existing files from the model or upload new files via the upload dialog. Uploaded files are
+     automatically added to the release and displayed in a folder-navigable browser.
    - **Images** - attach container (Docker) images to this release
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
@@ -97,7 +98,9 @@ You can update a release's notes, files, and images after creation:
 1. Navigate to the **Releases** tab
 2. Select the release you want to edit
 3. Click **Edit release**
-4. Update the release notes, files, or images
+4. Update the release notes, add or remove files, or update images. To remove a file from the release, use the context
+   menu (⋮) on the file row and select **Remove from release** — this detaches the file without deleting it from the
+   model.
 5. **Save** your changes
 
 ## Related pages

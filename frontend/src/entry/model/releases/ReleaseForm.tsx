@@ -1,4 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import FileUpload from '@mui/icons-material/FileUpload'
+import Folder from '@mui/icons-material/Folder'
+import MoreVert from '@mui/icons-material/MoreVert'
+import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline'
 import {
   Accordion,
   AccordionDetails,
@@ -9,45 +13,49 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
-  LinearProgress,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
   MenuItem,
   Select,
   SelectChangeEvent,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetFilesForModel } from 'actions/file'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
-import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
+import FolderNavigableList from 'src/common/FolderNavigableList'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import MultiFileInput from 'src/common/MultiFileInput'
-import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileBrowser from 'src/entry/model/files/FileBrowser'
+import FileDisplay, { MutateReleases } from 'src/entry/model/files/FileDisplay'
+import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, FileInterface, FileWithMetadataAndTags, FlattenedModelImage } from 'types/types'
+import { EntryInterface, EntryKind, FileInterface, FlattenedModelImage, ReleaseInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
-import { getFileUploadName } from 'utils/fileTreeUtils'
+import { collectAllFiles, type FileTreeNode } from 'utils/fileTreeUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
-type ReleaseFormData = {
+export type ReleaseFormData = {
   semver: string
   releaseNotes: string
   isMinorRelease: boolean
-  files: (File | FileInterface)[]
+  files: FileInterface[]
   imageList: FlattenedModelImage[]
   modelCardVersion: number
 }
@@ -68,15 +76,10 @@ type ReleaseFormProps = {
   onSemverChange: (value: string) => void
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
-  onFilesChange: (value: (File | FileInterface)[]) => void
+  onFilesChange: (value: FileInterface[]) => void
   onModelCardVersionChange: (value: number) => void
-  filesMetadata: FileWithMetadataAndTags[]
-  onFilesMetadataChange: (value: FileWithMetadataAndTags[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
   onRegistryError: (value: boolean) => void
-  currentFileUploadProgress?: FileUploadProgress
-  uploadedFiles: string[]
-  filesToUploadCount: number
 } & EditableReleaseFormProps
 
 export default function ReleaseForm({
@@ -87,15 +90,10 @@ export default function ReleaseForm({
   onMinorReleaseChange,
   onFilesChange,
   onModelCardVersionChange,
-  filesMetadata,
-  onFilesMetadataChange,
   onImageListChange,
   onRegistryError,
   editable = false,
   isEdit = false,
-  currentFileUploadProgress,
-  uploadedFiles,
-  filesToUploadCount,
 }: ReleaseFormProps) {
   const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
@@ -103,10 +101,12 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
-  const { files: modelFiles } = useGetFilesForModel(model.id)
+  const { files: modelFiles, mutateFiles } = useGetFilesForModel(model.id)
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
+
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -124,6 +124,33 @@ export default function ReleaseForm({
       onModelCardVersionChange(newModelCardVersion)
     },
     [onModelCardVersionChange],
+  )
+
+  const handleFilesUploaded = useCallback(
+    (uploadedFiles: FileInterface[]) => {
+      const existingIds = new Set(formData.files.map((f) => f._id))
+      const newFiles = uploadedFiles.filter((f) => !existingIds.has(f._id))
+      if (newFiles.length > 0) {
+        onFilesChange([...formData.files, ...newFiles])
+      }
+    },
+    [formData.files, onFilesChange],
+  )
+
+  const handleRemoveFile = useCallback(
+    (fileToRemove: FileInterface) => {
+      onFilesChange(formData.files.filter((f) => f._id !== fileToRemove._id))
+    },
+    [formData.files, onFilesChange],
+  )
+
+  const handleRemoveFolderFiles = useCallback(
+    (node: FileTreeNode) => {
+      const folderFiles = collectAllFiles(node)
+      const folderIds = new Set(folderFiles.map((f) => f._id))
+      onFilesChange(formData.files.filter((f) => !folderIds.has(f._id)))
+    },
+    [formData.files, onFilesChange],
   )
 
   const releaseNotesLabel = (
@@ -154,28 +181,6 @@ export default function ReleaseForm({
       </MenuItem>
     ))
   }, [entryCardRevisions])
-
-  const handleDeleteFile = (fileToDelete: File | FileInterface) => {
-    if (formData.files) {
-      const deleteName = getFileUploadName(fileToDelete)
-      const updatedFileList = formData.files.filter((file) => getFileUploadName(file) !== deleteName)
-      onFilesChange(updatedFileList)
-    }
-  }
-
-  const handleMetadataChange = useCallback(
-    (fileWithMetadata: FileWithMetadataAndTags) => {
-      const tempFilesWithMetadata = [...filesMetadata]
-      const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
-      if (metadataIndex === -1) {
-        tempFilesWithMetadata.push(fileWithMetadata)
-      } else {
-        tempFilesWithMetadata[metadataIndex] = fileWithMetadata
-      }
-      onFilesMetadataChange(tempFilesWithMetadata)
-    },
-    [filesMetadata, onFilesMetadataChange],
-  )
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
@@ -345,79 +350,57 @@ export default function ReleaseForm({
                 />
               </Box>
             )}
-            <>
-              {!isReadOnly && (
-                <Stack spacing={2}>
-                  <Stack
-                    spacing={2}
-                    direction={{ xs: 'column', sm: 'row' }}
-                    divider={<Divider flexItem orientation='vertical' />}
+            {!isReadOnly && (
+              <Stack spacing={2}>
+                <Stack
+                  spacing={2}
+                  direction={{ xs: 'column', sm: 'row' }}
+                  divider={<Divider flexItem orientation='vertical' />}
+                >
+                  <ExistingFileSelector
+                    files={modelFiles}
+                    model={model}
+                    onChange={onFilesChange}
+                    existingReleaseFiles={formData.files}
+                  />
+                  <Button
+                    variant='outlined'
+                    sx={{ width: '100%' }}
+                    endIcon={<FileUpload />}
+                    onClick={() => setIsUploadDialogOpen(true)}
                   >
-                    <ExistingFileSelector
-                      files={modelFiles}
-                      model={model}
-                      onChange={onFilesChange}
-                      existingReleaseFiles={formData.files}
-                    />
-                    <MultiFileInput
-                      fullWidth
-                      label='Attach new files'
-                      files={formData.files}
-                      filesMetadata={filesMetadata}
-                      readOnly={isReadOnly}
-                      onFilesChange={onFilesChange}
-                      onFilesMetadataChange={onFilesMetadataChange}
-                    />
-                  </Stack>
-                  {currentFileUploadProgress && (
-                    <>
-                      <LinearProgress
-                        variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
-                        value={currentFileUploadProgress.uploadProgress}
-                      />
-                      <FileUploadProgressDisplay
-                        currentFileUploadProgress={currentFileUploadProgress}
-                        uploadedFiles={uploadedFiles.length}
-                        totalFilesToUpload={filesToUploadCount}
-                      />
-                    </>
-                  )}
-                  {formData.files.length > 0 && (
-                    <Stack
-                      spacing={1}
-                      sx={{
-                        mt: 1,
-                      }}
-                    >
-                      {formData.files.map((file, index) => {
-                        const uploadName = getFileUploadName(file)
-                        return (
-                          <div key={`${uploadName}-${file.size}-${index}`}>
-                            <MultiFileInputFileDisplay
-                              file={file}
-                              displayName={uploadName}
-                              readOnly={isReadOnly}
-                              onDelete={handleDeleteFile}
-                              onMetadataChange={handleMetadataChange}
-                            />
-                          </div>
-                        )
-                      })}
-                    </Stack>
-                  )}
+                    Upload new files
+                  </Button>
                 </Stack>
-              )}
-              {isReadOnly && (
-                <FileBrowser
-                  files={formData.files as FileInterface[]}
-                  modelId={model.id}
-                  modelKind={model.kind}
-                  releases={releases}
-                  mutator={mutateReleases}
-                  readOnly
+                <FileUploadDialog
+                  model={model}
+                  open={isUploadDialogOpen}
+                  onDialogClose={() => setIsUploadDialogOpen(false)}
+                  mutateModelFiles={mutateFiles}
+                  onFilesUploaded={handleFilesUploaded}
                 />
-              )}
-            </>
+                {formData.files.length > 0 && (
+                  <ReleaseFileBrowser
+                    files={formData.files}
+                    modelId={model.id}
+                    releases={releases}
+                    mutateReleases={mutateReleases}
+                    onRemoveFile={handleRemoveFile}
+                    onRemoveFolderFiles={handleRemoveFolderFiles}
+                  />
+                )}
+              </Stack>
+            )}
+            {isReadOnly && (
+              <FileBrowser
+                files={formData.files}
+                modelId={model.id}
+                modelKind={model.kind}
+                releases={releases}
+                mutator={mutateReleases}
+                readOnly
+              />
+            )}
           </AccordionDetails>
         </Accordion>
       </Stack>
@@ -447,5 +430,147 @@ export default function ReleaseForm({
         </Box>
       )}
     </Stack>
+  )
+}
+
+function ReleaseFileBrowser({
+  files,
+  modelId,
+  releases,
+  mutateReleases,
+  onRemoveFile,
+  onRemoveFolderFiles,
+}: {
+  files: FileInterface[]
+  modelId: string
+  releases: ReleaseInterface[]
+  mutateReleases: MutateReleases
+  onRemoveFile: (file: FileInterface) => void
+  onRemoveFolderFiles: (node: FileTreeNode) => void
+}) {
+  return (
+    <FolderNavigableList files={files}>
+      {({ data, onNavigate }) => {
+        if (data.kind === 'folder') {
+          return <ReleaseFormFolderRow node={data.node} onNavigate={onNavigate} onRemove={onRemoveFolderFiles} />
+        }
+        return (
+          <ReleaseFormFileRow
+            file={data.file}
+            modelId={modelId}
+            releases={releases}
+            mutateReleases={mutateReleases}
+            onRemove={onRemoveFile}
+          />
+        )
+      }}
+    </FolderNavigableList>
+  )
+}
+
+function ReleaseFormFolderRow({
+  node,
+  onNavigate,
+  onRemove,
+}: {
+  node: FileTreeNode
+  onNavigate: (path: string) => void
+  onRemove: (node: FileTreeNode) => void
+}) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const totalCount = node.totalFileCount
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Stack spacing={1} sx={{ p: 2 }}>
+        <Stack
+          direction={{ sm: 'column', md: 'row' }}
+          spacing={2}
+          sx={{ alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+        >
+          <Stack
+            direction='row'
+            spacing={2}
+            sx={{ alignItems: 'center', cursor: 'pointer', flex: 1 }}
+            onClick={() => onNavigate(node.fullPath)}
+          >
+            <Folder color='action' />
+            <Typography variant='h6'>{node.name}</Typography>
+            <Typography variant='caption' sx={{ width: 'max-content' }}>
+              {`${totalCount} file${totalCount !== 1 ? 's' : ''}`}
+            </Typography>
+          </Stack>
+          <Tooltip title='More options'>
+            <IconButton size='small' onClick={(e) => setAnchorEl(e.currentTarget)}>
+              <MoreVert />
+            </IconButton>
+          </Tooltip>
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null)
+                onRemove(node)
+              }}
+            >
+              <ListItemIcon>
+                <RemoveCircleOutline color='error' fontSize='small' />
+              </ListItemIcon>
+              <ListItemText>Remove folder from release</ListItemText>
+            </MenuItem>
+          </Menu>
+        </Stack>
+      </Stack>
+    </Box>
+  )
+}
+
+function ReleaseFormFileRow({
+  file,
+  modelId,
+  releases,
+  mutateReleases,
+  onRemove,
+}: {
+  file: FileInterface
+  modelId: string
+  releases: ReleaseInterface[]
+  mutateReleases: MutateReleases
+  onRemove: (file: FileInterface) => void
+}) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Stack direction='row' spacing={1} sx={{ p: 2, alignItems: 'center' }}>
+        <Box sx={{ flex: 1 }}>
+          <FileDisplay
+            file={file}
+            modelId={modelId}
+            releases={releases}
+            mutator={mutateReleases}
+            showMenuItems={{}}
+            displayName={file.name.includes('/') ? file.name.split('/').pop() : undefined}
+          />
+        </Box>
+        <Tooltip title='More options'>
+          <IconButton size='small' onClick={(e) => setAnchorEl(e.currentTarget)}>
+            <MoreVert />
+          </IconButton>
+        </Tooltip>
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null)
+              onRemove(file)
+            }}
+          >
+            <ListItemIcon>
+              <RemoveCircleOutline color='error' fontSize='small' />
+            </ListItemIcon>
+            <ListItemText>Remove from release</ListItemText>
+          </MenuItem>
+        </Menu>
+      </Stack>
+    </Box>
   )
 }
