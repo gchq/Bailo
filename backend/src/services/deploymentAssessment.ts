@@ -1,5 +1,5 @@
 import { escapeRegExp } from 'lodash-es'
-import { QueryFilter } from 'mongoose'
+import { PipelineStage, QueryFilter } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
@@ -51,8 +51,6 @@ export interface DeploymentAssessmentDetails {
   responses: ResponseInterface[]
   state?: DeploymentAssessmentStateKeys
 }
-
-const deploymentRiskOwnerRole = 'dro'
 
 async function validateRiskOwner(riskOwner: string) {
   const { kind, value } = fromEntity(riskOwner)
@@ -164,6 +162,35 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
   return deploymentAssessment
 }
 
+function lookupDeploymentAssessmentReviewResponses(): PipelineStage.Lookup {
+  return {
+    $lookup: {
+      from: 'v2_responses',
+      let: { reviewId: '$_id' },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ['$parentId', '$$reviewId'] },
+            kind: ResponseKind.Review,
+            deleted: { $ne: true },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ],
+      as: 'responses',
+    },
+  }
+}
+
+function getDeploymentAssessmentReviewRole(reviewRoles: string[]) {
+  const reviewRole = reviewRoles.at(0)
+  if (!reviewRole) {
+    throw BadReq('Deployment assessment schemas must define a review role.')
+  }
+
+  return reviewRole
+}
+
 function deriveDeploymentAssessmentState(
   deploymentAssessment: Pick<DeploymentAssessmentInterface, 'draft'>,
   latestDecision?: DecisionKeys,
@@ -193,14 +220,7 @@ export async function getDeploymentAssessmentDetails(
     ResponseModel.find({ parentId: deploymentAssessment._id, kind: ResponseKind.Comment }),
     ReviewModel.aggregate<{ responses: ResponseInterface[] }>([
       { $match: { deploymentAssessmentId, kind: ReviewKind.DeploymentAssessment, deleted: { $ne: true } } },
-      {
-        $lookup: {
-          from: 'v2_responses',
-          let: { reviewId: '$_id' },
-          pipeline: [{ $match: { $expr: { $eq: ['$parentId', '$$reviewId'] }, deleted: { $ne: true } } }],
-          as: 'responses',
-        },
-      },
+      lookupDeploymentAssessmentReviewResponses(),
       { $project: { responses: 1, _id: 0 } },
     ]),
   ])
@@ -264,7 +284,7 @@ export async function reviewDeploymentAssessment(
   const response = new ResponseModel({
     entity: toEntity('user', user.dn),
     kind: ResponseKind.Review,
-    role: deploymentRiskOwnerRole,
+    role: review.role,
     parentId: review._id,
     decision,
     ...(comment && { comment }),
@@ -317,7 +337,7 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     : new ReviewModel({
         kind: ReviewKind.DeploymentAssessment,
         deploymentAssessmentId,
-        role: deploymentRiskOwnerRole,
+        role: getDeploymentAssessmentReviewRole(schema.reviewRoles),
       })
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Create)
@@ -392,24 +412,8 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
             deleted: { $ne: true },
           },
         },
-        {
-          $lookup: {
-            from: 'v2_responses',
-            let: { reviewId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: { $eq: ['$parentId', '$$reviewId'] },
-                  kind: ResponseKind.Review,
-                  deleted: { $ne: true },
-                },
-              },
-              { $sort: { createdAt: -1 } },
-              { $limit: 1 },
-            ],
-            as: 'responses',
-          },
-        },
+        lookupDeploymentAssessmentReviewResponses(),
+        { $set: { responses: { $slice: ['$responses', 1] } } },
         { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
         { $sort: { 'responses.createdAt': -1 } },
         { $group: { _id: '$deploymentAssessmentId', decision: { $first: '$responses.decision' } } },

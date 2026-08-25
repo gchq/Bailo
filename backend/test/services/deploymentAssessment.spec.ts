@@ -61,7 +61,11 @@ const liveModel = {
 describe('services > deploymentAssessment', () => {
   beforeEach(() => {
     vi.mocked(authentication.getUserInformation).mockResolvedValue({ name: 'Risk Owner' })
-    schemaMocks.getSchemaById.mockResolvedValue({ kind: SchemaKind.DeploymentAssessment, hidden: false })
+    schemaMocks.getSchemaById.mockResolvedValue({
+      kind: SchemaKind.DeploymentAssessment,
+      hidden: false,
+      reviewRoles: ['configured-dro'],
+    })
     schemaMocks.validateContentAgainstSchema.mockResolvedValue({ valid: true, errors: [] })
     ModelModelMock.find.mockResolvedValue([liveModel])
   })
@@ -127,7 +131,7 @@ describe('services > deploymentAssessment', () => {
     expect(ReviewModelMock).toHaveBeenCalledWith({
       kind: ReviewKind.DeploymentAssessment,
       deploymentAssessmentId: 'assessment-abc123',
-      role: 'dro',
+      role: 'configured-dro',
     })
     expect(ReviewModelMock.save).toHaveBeenCalled()
   })

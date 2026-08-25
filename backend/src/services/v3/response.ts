@@ -8,6 +8,7 @@ import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
+import { getModelReview } from '../../utils/review.js'
 import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
 import { createLifecycleReview, findReviewById } from '../v3/review.js'
@@ -25,7 +26,7 @@ export async function respondToReview(
   response: ReviewResponseParams,
   dueDate?: Date,
 ) {
-  const review = await findReviewById(user, reviewId)
+  const review = getModelReview(await findReviewById(user, reviewId))
   if (response.decision === Decision.Approve) {
     validateLifecycleReview(review, dueDate)
   }
@@ -40,18 +41,18 @@ export async function respondToReview(
   })
 
   await reviewResponse.save()
-  await cancelLifecycleReviewJobs(review.modelId!, reviewId)
+  await cancelLifecycleReviewJobs(review.modelId, reviewId)
   await sendReviewResponseNotification(review, reviewResponse, user)
 
   dispatchWebhooks(
-    review.modelId!,
+    review.modelId,
     WebhookEvent.CreateReviewResponse,
-    `A new response has been added to a review requested for Model ${review.modelId!}`,
+    `A new response has been added to a review requested for Model ${review.modelId}`,
     { review: review },
   )
 
   if (review.kind === ReviewKind.Lifecycle && dueDate) {
-    await createLifecycleReview(user, review.modelId!, dueDate)
+    await createLifecycleReview(user, review.modelId, dueDate)
   }
   return reviewResponse
 }
