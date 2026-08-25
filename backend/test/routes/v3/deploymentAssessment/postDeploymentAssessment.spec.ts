@@ -27,7 +27,7 @@ const serviceMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
-describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
+describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => {
   test('creates a deployment assessment', async () => {
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce(deploymentAssessment)
     const fixture = {
@@ -88,7 +88,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
     const res = await testPost('/api/v3/deployment-assessments', { body })
 
     expect(res.statusCode).toBe(201)
-    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
+    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), { ...body, draft: true })
   })
 
   test('creates a draft without metadata when draft is not specified', async () => {
@@ -101,7 +101,7 @@ describe('routes > deploymentAssessment > postDeploymentAssessment', () => {
     const res = await testPost('/api/v3/deployment-assessments', { body })
 
     expect(res.statusCode).toBe(201)
-    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
+    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), { ...body, draft: true })
   })
 
   test.each([

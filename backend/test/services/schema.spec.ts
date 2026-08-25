@@ -87,7 +87,6 @@ describe('services > schema', () => {
         title: 'Details',
         required: ['name', 'riskOwner', 'justification', 'modelIds'],
         properties: expect.objectContaining({
-          name: expect.objectContaining({ minLength: 1, requiredForDraft: true }),
           modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),
       }),

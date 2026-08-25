@@ -434,10 +434,22 @@ export const AuditInfo = {
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Review,
   },
+  SearchDeploymentAssessments: {
+    typeId: 'SearchDeploymentAssessments',
+    description: 'Deployment assessments searched',
+    auditKind: AuditKind.Search,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
   CreateDeploymentAssessment: {
     typeId: 'CreateDeploymentAssessment',
     description: 'Deployment assessment created',
     auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
+  ViewDeploymentAssessment: {
+    typeId: 'ViewDeploymentAssessment',
+    description: 'Deployment assessment viewed',
+    auditKind: AuditKind.View,
     resourceKind: ResourceKind.DeploymentAssessment,
   },
   ViewCurrentUserInformation: {
@@ -556,7 +568,11 @@ export abstract class BaseAuditConnector {
   abstract onViewMetric(req: Request): Promise<void>
 
   abstract onCreateReview(req: Request, modelId: string): Promise<void>
+
   abstract onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]): Promise<void>
+  abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
