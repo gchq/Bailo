@@ -220,8 +220,8 @@ function FolderRow({
           )}
           {associatedReleases.length > 0 && (
             <Typography color='error'>
-              Warning: {associatedReleases.length} release{associatedReleases.length !== 1 ? 's' : ''} reference files
-              in this folder: {associatedReleases.map((r) => r.semver).join(', ')}
+              Warning: {plural(associatedReleases.length, 'release')} reference files in this folder:{' '}
+              {associatedReleases.map((r) => r.semver).join(', ')}
             </Typography>
           )}
           {allFilesInFolder.length > 0 && (
