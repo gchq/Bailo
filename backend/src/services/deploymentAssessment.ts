@@ -29,6 +29,17 @@ export interface SearchDeploymentAssessmentsParams {
   search?: string
 }
 
+export interface SearchDeploymentAssessmentsParams {
+  schemaId?: string
+  modelIds?: string[]
+  riskOwner?: string
+  createdBy?: string
+  createdAfter?: string
+  createdBefore?: string
+  draft?: boolean
+  search?: string
+}
+
 type CreateDeploymentAssessmentParamsBase = Pick<DeploymentAssessmentInterface, 'name' | 'schemaId'>
 
 export type CreateDeploymentAssessmentParams =
