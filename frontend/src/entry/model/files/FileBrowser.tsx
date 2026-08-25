@@ -212,8 +212,8 @@ function FolderRow({
         <Stack spacing={1}>
           {allFilesInFolder.length > 0 ? (
             <Typography>
-              This will delete <strong>{allFilesInFolder.length}</strong> file
-              {allFilesInFolder.length !== 1 ? 's' : ''} in this folder and all sub-folders.
+              This will delete <strong>{plural(allFilesInFolder.length, 'file')}</strong> in this folder and all
+              sub-folders.
             </Typography>
           ) : (
             <Typography>This will delete this empty folder.</Typography>
