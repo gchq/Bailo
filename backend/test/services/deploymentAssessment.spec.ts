@@ -202,11 +202,16 @@ describe('services > deploymentAssessment', () => {
   test.each([
     ['only a name', { overview: { name: 'Assessment' } }],
     ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
-    ['unknown extra properties', { overview: { name: 'Assessment', extra: { nested: true } }, extra: 'value' }],
+    ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
+    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
+    ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
+    ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
   ])('accepts metadata with %s', async (_description, metadata) => {
-    await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
+    const result = await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ metadata }))
+    expect(idMocks.convertStringToId).toHaveBeenCalledWith('Assessment')
+    expect(result.save).toHaveBeenCalled()
   })
 
   test.each([
@@ -310,6 +315,25 @@ describe('services > deploymentAssessment', () => {
         draft: false,
       })
       expect(deploymentAssessment.markModified).not.toHaveBeenCalledWith('metadata')
+    })
+
+    test.each([
+      ['only a name', { overview: { name: 'Assessment' } }],
+      ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
+      ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
+      ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
+      ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
+      ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+    ])('accepts a draft update with metadata with %s', async (_description, metadata) => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata })
+
+      expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, { draft: true })
+      expect(result.metadata).toStrictEqual(metadata)
+      expect(deploymentAssessment.markModified).toHaveBeenCalledWith('metadata')
+      expect(deploymentAssessment.save).toHaveBeenCalled()
     })
 
     test('rejects switching released DA back to a draft', async () => {
