@@ -13,6 +13,7 @@ import useNotification from 'src/hooks/useNotification'
 import { EntryKind, FileInterface, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { collectAllFiles, countMatchingFiles, type FileTreeNode, isFolderMarker } from 'utils/fileTreeUtils'
+import { plural } from 'utils/stringUtils'
 
 interface FileBrowserProps {
   files: FileInterface[]
@@ -179,8 +180,8 @@ function FolderRow({
           <Typography variant='h6'>{node.name}</Typography>
           <Typography variant='caption' sx={{ width: 'max-content' }}>
             {searchQuery && matchingCount !== totalCount
-              ? `${matchingCount} of ${totalCount} file${totalCount !== 1 ? 's' : ''} match`
-              : `${totalCount} file${totalCount !== 1 ? 's' : ''}`}
+              ? `${matchingCount} of ${plural(totalCount, 'file')} match`
+              : `${plural(totalCount, 'file')}`}
           </Typography>
         </Stack>
         {canDelete && (
