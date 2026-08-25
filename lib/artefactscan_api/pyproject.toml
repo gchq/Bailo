@@ -15,7 +15,7 @@ dependencies = [
     "oras==0.2.43",
     "pydantic_settings==2.15.0",
     "python-multipart==0.0.32",
-    "uvicorn==0.52.3",
+    "uvicorn==0.52.4",
 ]
 
 [project.optional-dependencies]
