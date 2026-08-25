@@ -17,9 +17,10 @@ RUN python -m venv ${VIRTUAL_ENV} && \
     pip install --upgrade pip setuptools wheel
 
 # Install Python dependencies with pip cache
-COPY requirements.txt .
+COPY pyproject.toml .
+COPY bailo_artefactscan_api/__init__.py bailo_artefactscan_api/__init__.py
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-compile -r requirements.txt
+    pip install --no-compile .
 
 
 FROM python:3.12.14-slim-trixie@sha256:2c941e860699f878900b0edc2403613c234d4b32eda3cc9fa7036991a2a63c4a AS base

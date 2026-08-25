@@ -55,6 +55,7 @@ backend/node_modules
 backend/docs/backenddocsvenv
 backend/docs/_build
 backend/docs/python-docs
+backend/docs/bailo_docs.egg-info
 backend/test
 
 # Frontend build artefacts

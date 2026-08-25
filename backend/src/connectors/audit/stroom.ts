@@ -598,7 +598,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
       },
       EventDetail: eventDetail,
     }
-    if (config.stroom.logOnlyMode) {
+    if (config.stroom.sendEvents) {
       await saveEvent(event)
     } else {
       log.info(

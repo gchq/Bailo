@@ -47,7 +47,7 @@ From within the `backend/docs` directory:
 ```bash
 python3 -m venv backenddocsvenv
 source backenddocsvenv/bin/activate
-pip install bailo -r requirements-dev.txt
+pip install ".[dev]" bailo
 ```
 
 #### Building
