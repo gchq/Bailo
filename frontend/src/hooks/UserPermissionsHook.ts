@@ -1,8 +1,15 @@
 import { useGetCurrentUserPermissionsForAccessRequest } from 'actions/accessRequest'
+import { useGetCurrentUserPermissionsForDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useGetCurrentUserPermissionsForEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
-import { AccessRequestUserPermissions, EntryUserPermissions, PermissionDetail, UserPermissions } from 'types/types'
+import {
+  AccessRequestUserPermissions,
+  DeploymentAssessmentPermissions,
+  EntryUserPermissions,
+  PermissionDetail,
+  UserPermissions,
+} from 'types/types'
 
 export type UserPermissionsHook = {
   userPermissions: UserPermissions
@@ -18,6 +25,11 @@ const defaultAccessRequestPermissions: AccessRequestUserPermissions = {
   deleteAccessRequest: defaultPermissionDetail,
 }
 
+const defaultDeploymentAssessmentPermissions: DeploymentAssessmentPermissions = {
+  editDeploymentAssessment: defaultPermissionDetail,
+  deleteDeploymentAssessment: defaultPermissionDetail,
+}
+
 const defaultEntryPermissions: EntryUserPermissions = {
   editEntry: defaultPermissionDetail,
   editEntryCard: defaultPermissionDetail,
@@ -30,23 +42,36 @@ const defaultEntryPermissions: EntryUserPermissions = {
   exportMirroredModel: defaultPermissionDetail,
 }
 
-export const defaultUserPermissions = { ...defaultEntryPermissions, ...defaultAccessRequestPermissions }
+export const defaultUserPermissions = {
+  ...defaultEntryPermissions,
+  ...defaultAccessRequestPermissions,
+  ...defaultDeploymentAssessmentPermissions,
+}
 
 export default function useUserPermissions(): UserPermissionsHook {
   const router = useRouter()
-  const { modelId, dataCardId, accessRequestId }: { modelId?: string; dataCardId?: string; accessRequestId?: string } =
-    router.query
+  const {
+    modelId,
+    dataCardId,
+    accessRequestId,
+    deploymentAssessmentId,
+  }: { modelId?: string; dataCardId?: string; accessRequestId?: string; deploymentAssessmentId?: string } = router.query
   const entryId = modelId || dataCardId
 
   const { entryUserPermissions } = useGetCurrentUserPermissionsForEntry(entryId)
   const { accessRequestUserPermissions } = useGetCurrentUserPermissionsForAccessRequest(entryId, accessRequestId)
+  const { deploymentAssessmentsUserPermissions } =
+    useGetCurrentUserPermissionsForDeploymentAssessment(deploymentAssessmentId)
 
   const userPermissions = useMemo(
     () => ({
       ...(entryUserPermissions ? entryUserPermissions : defaultEntryPermissions),
       ...(accessRequestUserPermissions ? accessRequestUserPermissions : defaultAccessRequestPermissions),
+      ...(deploymentAssessmentsUserPermissions
+        ? deploymentAssessmentsUserPermissions
+        : defaultDeploymentAssessmentPermissions),
     }),
-    [accessRequestUserPermissions, entryUserPermissions],
+    [accessRequestUserPermissions, deploymentAssessmentsUserPermissions, entryUserPermissions],
   )
 
   return {

@@ -495,6 +495,11 @@ export const accessRequestUserPermissionsSchema = z.object({
   deleteAccessRequest: permissionDetailSchema,
 })
 
+export const deploymentAssessmentPermissionsSchema = z.object({
+  editDeploymentAssessment: permissionDetailSchema,
+  deleteDeploymentAssessment: permissionDetailSchema,
+})
+
 export const userTokenSchema = z.object({
   description: z.string().openapi({ example: 'user token' }),
 

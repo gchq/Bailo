@@ -3,6 +3,7 @@ import { Router } from 'express'
 import { generateV3SwaggerSpec } from '../../services/specification.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
 import { getDeploymentAssessment } from './deploymentAssessment/getDeploymentAssessment.js'
+import { getDeploymentAssessmentCurrentUserPermissions } from './deploymentAssessment/getDeploymentAssessmentCurrentUserPermissions.js'
 import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
@@ -25,6 +26,10 @@ router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 
 router.post('/deployment-assessments', ...postDeploymentAssessment)
 router.get('/deployment-assessments/:deploymentAssessmentId', ...getDeploymentAssessment)
+router.get(
+  '/deployment-assessments/:deploymentAssessmentId/permissions/mine',
+  ...getDeploymentAssessmentCurrentUserPermissions,
+)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)
