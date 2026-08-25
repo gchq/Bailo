@@ -5,15 +5,21 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { DeploymentAssessmentInterface } from '../../../models/DeploymentAssessment.js'
 import { createDeploymentAssessment } from '../../../services/deploymentAssessment.js'
-import { deploymentAssessmentInterfaceSchema, registerPath } from '../../../services/specification.js'
+import {
+  deploymentAssessmentDraftSchema,
+  deploymentAssessmentInterfaceSchema,
+  deploymentAssessmentMetadataSchema,
+  deploymentAssessmentSchemaIdSchema,
+  registerPath,
+} from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postDeploymentAssessmentSchema = z.object({
-  body: deploymentAssessmentInterfaceSchema
-    .pick({
-      schemaId: true,
-      metadata: true,
-      draft: true,
+  body: z
+    .object({
+      schemaId: deploymentAssessmentSchemaIdSchema,
+      metadata: deploymentAssessmentMetadataSchema,
+      draft: deploymentAssessmentDraftSchema.optional().default(true),
     })
     .strict(),
 })

@@ -1,3 +1,6 @@
+import { escapeRegExp } from 'lodash-es'
+import { QueryFilter } from 'mongoose'
+
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -16,6 +19,17 @@ import { isMongoServerError } from '../utils/mongo.js'
 import log from './log.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
+
+export interface SearchDeploymentAssessmentsParams {
+  schemaId?: string
+  modelIds?: string[]
+  riskOwner?: string
+  createdBy?: string
+  createdAfter?: string
+  createdBefore?: string
+  draft?: boolean
+  search?: string
+}
 
 export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft'> & {
   metadata: unknown
@@ -191,4 +205,42 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   }
 
   return deploymentAssessment
+}
+
+export async function searchDeploymentAssessments(user: UserInterface, params: SearchDeploymentAssessmentsParams) {
+  const query: QueryFilter<DeploymentAssessmentInterface> = {}
+
+  if (params.schemaId) {
+    query.schemaId = params.schemaId
+  }
+  if (params.modelIds?.length) {
+    query['metadata.overview.modelIds'] = { $all: params.modelIds }
+  }
+  if (params.riskOwner) {
+    query['metadata.overview.riskOwner'] = params.riskOwner
+  }
+  if (params.createdBy) {
+    query.createdBy = params.createdBy
+  }
+  if (params.createdAfter || params.createdBefore) {
+    const beforeDate = params.createdBefore ? new Date(params.createdBefore) : undefined
+    beforeDate?.setUTCDate(beforeDate.getUTCDate() + 1)
+
+    query.createdAt = {
+      ...(params.createdAfter && { $gte: new Date(params.createdAfter) }),
+      ...(beforeDate && { $lt: beforeDate }),
+    }
+  }
+  if (params.draft !== undefined) {
+    query.draft = params.draft
+  }
+  if (params.search) {
+    const search = { $regex: escapeRegExp(params.search), $options: 'i' }
+    query.$and = [{ $or: [{ 'metadata.overview.name': search }, { 'metadata.overview.justification': search }] }]
+  }
+
+  const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
+  const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
+
+  return deploymentAssessments.filter((_, i) => auths[i].success)
 }
