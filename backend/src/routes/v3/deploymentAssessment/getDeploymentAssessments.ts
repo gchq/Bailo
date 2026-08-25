@@ -34,12 +34,12 @@ export const getDeploymentAssessmentsSchema = z.object({
 export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
 
 function toDeploymentAssessmentSummary(deploymentAssessment: DeploymentAssessmentDoc): DeploymentAssessmentSummary {
-  const { name, riskOwner, modelIds, justification } = deploymentAssessment.metadata.overview ?? {}
+  const { riskOwner, modelIds, justification } = deploymentAssessment.metadata.overview ?? {}
 
   return {
     id: deploymentAssessment.id,
     schemaId: deploymentAssessment.schemaId,
-    name,
+    name: deploymentAssessment.name,
     ...(riskOwner && { owner: riskOwner }),
     ...(modelIds && { models: modelIds }),
     ...(justification && { justification }),
