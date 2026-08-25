@@ -42,7 +42,7 @@ registerPath(
     method: 'patch',
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}',
     tags: ['deployment assessments'],
-    description: 'Get a deployment assessment.',
+    description: 'Patch the values of a deployment assessment.',
     schema: patchDeploymentAssessmentSchema,
     responses: {
       200: {

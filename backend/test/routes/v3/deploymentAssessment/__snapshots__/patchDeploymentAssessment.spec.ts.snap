@@ -4,47 +4,21 @@ exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 200 > 
 
 exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 200 > ok 1`] = `{}`;
 
-exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 400 > no draft 1`] = `
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 400 > empty body 1`] = `
 {
   "error": {
     "context": {
       "errors": [
         {
-          "code": "invalid_type",
-          "expected": "boolean",
-          "message": "Required",
+          "code": "custom",
+          "message": "Body must have at least one property defined.",
           "path": [
             "body",
-            "draft",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: body.draft - Message: Required",
-    "name": "Bailo Error",
-  },
-}
-`;
-
-exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 400 > no name 1`] = `
-{
-  "error": {
-    "context": {
-      "errors": [
-        {
-          "code": "invalid_type",
-          "expected": "boolean",
-          "message": "Required",
-          "path": [
-            "body",
-            "draft",
-          ],
-          "received": "undefined",
-        },
-      ],
-    },
-    "message": "Path: body.draft - Message: Required",
+    "message": "Path: body - Message: Body must have at least one property defined.",
     "name": "Bailo Error",
   },
 }

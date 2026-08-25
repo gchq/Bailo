@@ -38,4 +38,15 @@ describe('routes > v3 > deploymentAssessment > patchDeploymentAssessment', () =>
     expect(res.statusCode).toEqual(200)
     expect(res.body).matchSnapshot()
   })
+
+  test('400 > empty body', async () => {
+    const fixture = createFixture(patchDeploymentAssessmentSchema) as any
+
+    delete fixture.body.draft
+    delete fixture.body.metadata
+    const res = await testPatch(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`, fixture)
+
+    expect(res.statusCode).toEqual(400)
+    expect(res.body).matchSnapshot()
+  })
 })
