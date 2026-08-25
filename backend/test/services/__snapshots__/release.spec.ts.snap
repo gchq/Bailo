@@ -540,6 +540,7 @@ exports[`services > release > getModelReleases > good 1`] = `
 exports[`services > release > getModelReleases > good 2`] = `
 [
   {
+    "draft": -1,
     "updatedAt": -1,
   },
 ]

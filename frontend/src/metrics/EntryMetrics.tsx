@@ -4,7 +4,7 @@ import { useGetModelBreakdown, useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useCallback, useMemo } from 'react'
 import { FilterMenuButton } from 'src/common/FilterMenuButton'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import { useEntriesFilters } from 'src/hooks/useEntriesFilters'
 import MessageAlert from 'src/MessageAlert'
 import { MetricsBreakdownTable } from 'src/metrics/components/MetricsBreakdownTable'
@@ -103,16 +103,12 @@ export default function EntryMetrics() {
     })
   }, [setFilters])
 
-  if (isOverviewMetricsError) {
-    return <MessageAlert message={isOverviewMetricsError.info.message} />
-  }
-
-  if (isSchemasError) {
-    return <MessageAlert message={isSchemasError.info.message} />
-  }
-
-  if (isOverviewMetricsLoading || isSchemasLoading) {
-    return <Loading />
+  const queryState = renderQueryState(
+    [isOverviewMetricsError, isSchemasError],
+    isOverviewMetricsLoading || isSchemasLoading,
+  )
+  if (queryState) {
+    return queryState
   }
 
   const isClearDisabled =

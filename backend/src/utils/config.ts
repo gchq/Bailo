@@ -184,8 +184,7 @@ export interface Config {
   }
 
   stroom: {
-    logOnlyMode: boolean
-    feed: string
+    sendEvents: boolean
     url: string
     environment: string
     interval: number
@@ -194,6 +193,7 @@ export interface Config {
     xmlns: string
     schemaLocation: string
     version: string
+    headers: Record<string, string>
   }
 
   artefactScanning: {

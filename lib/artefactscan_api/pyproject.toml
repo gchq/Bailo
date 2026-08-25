@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "bailo-artefactscan-api"
 version = "4.3.0"
-description = "FastAPI scanning service for Bailo artefacts (ModelScan, Trivy, ClamAV)"
+description = "FastAPI scanning service for Bailo artefacts (ModelScan and Trivy)"
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "content-size-limit-asgi==0.1.5",
