@@ -4,8 +4,9 @@ import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useContext, useEffect, useState } from 'react'
+import { SyntheticEvent, useContext, useEffect, useMemo, useState } from 'react'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
@@ -40,6 +41,17 @@ export default function ReviewWithComment({
   const [selectOpen, setSelectOpen] = useState(false)
 
   const uiConfig = useContext(UiConfigContext)
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
+  const hasUnsavedChanges = useMemo(() => reviewComment.trim() !== '' || dueDate !== null, [reviewComment, dueDate])
+
+  useEffect(() => {
+    setUnsavedChanges(hasUnsavedChanges)
+  }, [hasUnsavedChanges, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   function showUndoButton() {
     if (reviewRequest) {
@@ -82,6 +94,8 @@ export default function ReviewWithComment({
     } else if (!reviewRequest || !reviewRequest.role) {
       setErrorText('Please select a role before submitting your review.')
     } else {
+      // The review is being persisted, so leaving the page afterwards must not warn
+      setUnsavedChanges(false)
       setReviewComment('')
       onSubmit(decision, reviewComment, reviewRequest.role, dueDate)
     }

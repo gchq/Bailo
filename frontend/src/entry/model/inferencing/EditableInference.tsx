@@ -47,6 +47,10 @@ export default function EditableInference({ inference }: EditableInferenceProps)
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
+
   const handleEdit = () => {
     onIsEditChange(true)
   }

@@ -1,7 +1,8 @@
 import Save from '@mui/icons-material/Save'
 import { Button, Divider, Stack, Typography } from '@mui/material'
 import { patchEntry, useGetCurrentUserPermissionsForEntry, useGetEntry, useGetEntryRoles } from 'actions/entry'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { isEqual } from 'lodash-es'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -21,7 +22,6 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(entry.collaborators)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const { isEntryError, mutateEntry } = useGetEntry(entry.id)
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(entry.id)
@@ -29,6 +29,13 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const sendNotification = useNotification()
+
+  // EntryAccessInput reports its value on mount as well as on edit, so compare against the stored
+  // access list rather than treating every onChange as a user edit
+  const hasUnsavedChanges = useMemo(
+    () => !isEqual(collaborators, entry.collaborators),
+    [collaborators, entry.collaborators],
+  )
 
   useEffect(() => {
     setUnsavedChanges(hasUnsavedChanges)
@@ -38,10 +45,10 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
     return () => setUnsavedChanges(false)
   }, [setUnsavedChanges])
 
-  const handleCollaboratorsChange = useCallback((updatedCollaborators: CollaboratorEntry[]) => {
-    setCollaborators(updatedCollaborators)
-    setHasUnsavedChanges(true)
-  }, [])
+  const handleCollaboratorsChange = useCallback(
+    (updatedCollaborators: CollaboratorEntry[]) => setCollaborators(updatedCollaborators),
+    [],
+  )
 
   async function updateCollaborators() {
     setLoading(true)
@@ -54,7 +61,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         msg: `${toSentenceCase(entry.kind)} access list updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      setHasUnsavedChanges(false)
+      setUnsavedChanges(false)
       mutateEntry()
       mutateEntryUserPermissions()
     }

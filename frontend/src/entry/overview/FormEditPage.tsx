@@ -123,7 +123,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const handleActionButtonClose = () => {
     setAnchorEl(null)
   }
-  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   function removeEmptyValues(value) {
     if (value === '') {
@@ -170,27 +170,41 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     }
   }
 
+  function discardChanges() {
+    if (!schema) {
+      return
+    }
+    mutateEntry()
+    const steps = getStepsFromSchema(
+      schema,
+      {},
+      ['properties.contacts'],
+      entry.card.metadata,
+      entry.mirroredCard?.metadata,
+    )
+    for (const step of steps) {
+      step.steps = steps
+    }
+    setSplitSchema({ reference: schema.id, steps })
+    handleChangeEditMode(false)
+  }
+
   function onCancel() {
-    if (schema) {
-      mutateEntry()
-      const steps = getStepsFromSchema(
-        schema,
-        {},
-        ['properties.contacts'],
-        entry.card.metadata,
-        entry.mirroredCard?.metadata,
-      )
-      for (const step of steps) {
-        step.steps = steps
-      }
-      setSplitSchema({ reference: schema.id, steps })
-      handleChangeEditMode(false)
+    // Leaving edit mode only changes the isEdit query param, which the route guard ignores, so warn here
+    if (unsavedChanges) {
+      sendWarning(() => discardChanges())
+    } else {
+      discardChanges()
     }
   }
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   function handleJsonFormOnSubmit(formData: string) {
     setJsonUploadDialogOpen(false)

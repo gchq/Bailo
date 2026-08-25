@@ -55,6 +55,10 @@ export default function ReviewRoleList() {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
+
   function removeExcessReviewRoleParams(reviewRole: ReviewRoleInterface): UpdateReviewRolesParams {
     if (reviewRole) {
       return {

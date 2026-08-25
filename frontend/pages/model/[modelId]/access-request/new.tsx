@@ -42,10 +42,7 @@ export default function NewAccessRequest() {
     return () => setUnsavedChanges(false)
   }, [setUnsavedChanges])
 
-  const handleFormChange: typeof setSplitSchema = useCallback((value) => {
-    setSplitSchema(value)
-    setFormTouched(true)
-  }, [])
+  const handleUserEdit = useCallback(() => setFormTouched(true), [])
 
   const isLoading = useMemo(
     () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
@@ -146,7 +143,8 @@ export default function NewAccessRequest() {
                 </Link>
                 <JsonSchemaForm
                   splitSchema={splitSchema}
-                  setSplitSchema={handleFormChange}
+                  setSplitSchema={setSplitSchema}
+                  onUserEdit={handleUserEdit}
                   canEdit
                   displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList

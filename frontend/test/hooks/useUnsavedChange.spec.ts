@@ -288,6 +288,25 @@ describe('useUnsavedChanges', () => {
     })
   })
 
+  describe('submitting a form', () => {
+    test('clearing unsavedChanges in the same tick as navigating does not warn', async () => {
+      const { result } = renderHook(() => useUnsavedChanges())
+
+      act(() => {
+        result.current.setUnsavedChanges(true)
+      })
+
+      // Mirrors a submit handler: clear the flag, then redirect, without an intervening render
+      await act(async () => {
+        result.current.setUnsavedChanges(false)
+        await mockRouter.push('/model/test-id/release/1.0.0')
+      })
+
+      expect(result.current.dialogOpen).toBe(false)
+      expect(mockRouter.asPath).toBe('/model/test-id/release/1.0.0')
+    })
+  })
+
   describe('confirmed navigation proceeds', () => {
     test('confirmed route change does not re-block', async () => {
       const { result } = renderHook(() => useUnsavedChanges())

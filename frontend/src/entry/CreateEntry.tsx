@@ -23,8 +23,9 @@ import {
 } from '@mui/material'
 import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
+import { isEqual } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -92,9 +93,19 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     [name, description, createEntryKind, sourceModelId],
   )
 
+  // EntryAccessInput reports its value on mount as well as on edit, so the first report is the
+  // baseline rather than a user edit
+  const initialCollaboratorsRef = useRef<CollaboratorEntry[] | null>(null)
+
   const handleCollaboratorsChange = useCallback((updatedCollaborators: CollaboratorEntry[]) => {
     setCollaborators(updatedCollaborators)
-    setFormTouched(true)
+    if (initialCollaboratorsRef.current === null) {
+      initialCollaboratorsRef.current = updatedCollaborators
+      return
+    }
+    if (!isEqual(updatedCollaborators, initialCollaboratorsRef.current)) {
+      setFormTouched(true)
+    }
   }, [])
 
   const entryKindForRedirect = useMemo(() => {

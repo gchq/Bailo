@@ -171,10 +171,11 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
       } else {
         mutateReleases()
         setOpen(false)
+        setUnsavedChanges(false)
         router.push(`/model/${model.id}?tab=releases`)
       }
     }
-  }, [model, mutateReleases, semver, router])
+  }, [model, mutateReleases, semver, router, setUnsavedChanges])
 
   const failedFileList = useMemo(
     () =>
@@ -206,6 +207,10 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
     // Filter out any deleted files from success list

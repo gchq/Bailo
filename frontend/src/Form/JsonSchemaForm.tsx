@@ -56,6 +56,7 @@ export default function JsonSchemaForm({
   compareMode = false,
   stateList,
   currentState,
+  onUserEdit,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -68,6 +69,8 @@ export default function JsonSchemaForm({
   compareMode?: boolean
   stateList?: string[]
   currentState?: string
+  /** Fires only for genuine user edits, unlike onChange which also fires when the form normalises its data. */
+  onUserEdit?: () => void
 }) {
   const theme = useTheme()
   const router = useRouter()
@@ -167,8 +170,12 @@ export default function JsonSchemaForm({
     return null
   }
 
-  const onFormChange = debounce((form: RJSFSchema) => {
+  const onFormChange = debounce((form: RJSFSchema, id?: string) => {
     if (form.schema.title === currentStep.schema.title) {
+      // RJSF only supplies an id when a specific field was edited by the user
+      if (id) {
+        onUserEdit?.()
+      }
       setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
     }
   }, 100)

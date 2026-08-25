@@ -79,6 +79,7 @@ export default function EditableAccessRequestForm({
       mutateAccessRequests()
       mutateReviews()
       setOpen(false)
+      setUnsavedChanges(false)
       router.push(`/model/${accessRequest.modelId}?tab=access`)
     }
   }
@@ -135,6 +136,10 @@ export default function EditableAccessRequestForm({
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
+
+  useEffect(() => {
+    return () => setUnsavedChanges(false)
+  }, [setUnsavedChanges])
 
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />

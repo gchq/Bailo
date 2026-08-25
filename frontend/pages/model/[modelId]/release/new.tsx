@@ -13,7 +13,6 @@ import Title from 'src/common/Title'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
   FileInterface,
@@ -44,7 +43,7 @@ export default function NewRelease() {
   const [formTouched, setFormTouched] = useState(false)
 
   const router = useRouter()
-  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   useEffect(() => {
     setUnsavedChanges(formTouched)
@@ -95,6 +94,19 @@ export default function NewRelease() {
     setSuccessfulFileUploads(filteredUploads)
     setFiles(newFiles)
   }
+
+  const navigateBackToModel = useCallback(() => {
+    setUnsavedChanges(false)
+    router.push(`/model/${modelId}?tab=releases`)
+  }, [modelId, router, setUnsavedChanges])
+
+  const handleBackToModel = useCallback(() => {
+    if (unsavedChanges) {
+      sendWarning(navigateBackToModel)
+    } else {
+      navigateBackToModel()
+    }
+  }, [unsavedChanges, sendWarning, navigateBackToModel])
 
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -223,11 +235,9 @@ export default function NewRelease() {
           <Paper sx={{ my: 4, p: 4 }}>
             <Box component='form' onSubmit={handleSubmit}>
               <Stack spacing={4}>
-                <Link href={`/model/${modelId}?tab=releases`}>
-                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                    Back to model
-                  </Button>
-                </Link>
+                <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={handleBackToModel}>
+                  Back to model
+                </Button>
                 <Stack
                   spacing={2}
                   sx={{

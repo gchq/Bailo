@@ -4,7 +4,7 @@ import { FormControl, IconButton, MenuItem, Select, SelectChangeEvent, Stack, To
 import { alpha, useTheme } from '@mui/material/styles'
 import { patchEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -34,22 +34,36 @@ export default function EntrySelect({
 }: EntrySelectInputProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  // Holds the user's choice until the server confirms it, so the field does not flash back to the old value
+  const [pendingValue, setPendingValue] = useState<string | undefined>(undefined)
   const router = useRouter()
   const theme = useTheme()
 
   const labelLowerCase = label.toLowerCase()
+  const displayValue = pendingValue ?? value
+
+  useEffect(() => {
+    if (pendingValue !== undefined && value === pendingValue) {
+      setPendingValue(undefined)
+    }
+  }, [value, pendingValue])
 
   const handleEditChange = () => {
-    setIsEdit(!isEdit)
+    setIsEdit((previous) => !previous)
   }
 
   const handleSelectOption = async (event: SelectChangeEvent) => {
+    const selectedValue = event.target.value
     setErrorMessage('')
-    const response = await patchEntry(entryId, { [field]: event.target.value })
+    setPendingValue(selectedValue)
+    const response = await patchEntry(entryId, { [field]: selectedValue })
     if (!response.ok) {
+      // The change was rejected, so show the stored value again alongside the error
+      setPendingValue(undefined)
+      setIsEdit(true)
       if (field === 'state') {
         router.replace({
-          query: { ...router.query, requiredByModelState: event.target.value, isEdit: 'true' },
+          query: { ...router.query, requiredByModelState: selectedValue, isEdit: 'true' },
         })
       }
       setErrorMessage(await getErrorMessage(response))
@@ -77,7 +91,7 @@ export default function EntrySelect({
               onClose={handleEditChange}
               error={Boolean(errorMessage)}
               id={labelLowerCase}
-              value={value ?? ''}
+              value={displayValue ?? ''}
               onChange={handleSelectOption}
               displayEmpty
               renderValue={(value: string) =>
@@ -107,8 +121,8 @@ export default function EntrySelect({
           </FormControl>
         ) : (
           <>
-            {value ? (
-              <Typography>{value}</Typography>
+            {displayValue ? (
+              <Typography>{displayValue}</Typography>
             ) : showWarningWhenUnset ? (
               <Tooltip title={`No ${labelLowerCase} has been set`}>
                 <Stack
