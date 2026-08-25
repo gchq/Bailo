@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest'
 
 import {
   buildFileTree,
+  buildFolderSearchableText,
   collectAllFileNames,
   countMatchingFiles,
   getBreadcrumbParts,
@@ -154,6 +155,43 @@ describe('utils > fileTreeUtils', () => {
       const tree = buildFileTree([makeFile('a/b.txt'), makeFile('a/c/d.txt'), makeFile('e.txt')])
       const aNode = tree.children.find((c) => c.name === 'a')!
       expect(collectAllFileNames(aNode).sort()).toEqual(['a/b.txt', 'a/c/d.txt'])
+    })
+  })
+
+  describe('buildFolderSearchableText', () => {
+    test('matches a file name within a folder', () => {
+      const tree = buildFileTree([makeFile('folder/file.txt')])
+      const folder = tree.children.find((c) => c.name === 'folder')!
+      const text = buildFolderSearchableText(folder)
+      expect(text.toLowerCase().includes('file.txt')).toBe(true)
+    })
+
+    test('does not match across name boundaries', () => {
+      const tree = buildFileTree([makeFile('folder/a.txt'), makeFile('folder/b.json')])
+      const folder = tree.children.find((c) => c.name === 'folder')!
+      const text = buildFolderSearchableText(folder)
+      expect(text.toLowerCase().includes('txt b')).toBe(false)
+    })
+
+    test('does not match trailing space queries', () => {
+      const tree = buildFileTree([makeFile('folder/file.txt'), makeFile('folder/another.bin')])
+      const folder = tree.children.find((c) => c.name === 'folder')!
+      const text = buildFolderSearchableText(folder)
+      expect(text.toLowerCase().includes('file.txt ')).toBe(false)
+    })
+
+    test('matches partial file names', () => {
+      const tree = buildFileTree([makeFile('weights/model.bin')])
+      const folder = tree.children.find((c) => c.name === 'weights')!
+      const text = buildFolderSearchableText(folder)
+      expect(text.toLowerCase().includes('model')).toBe(true)
+    })
+
+    test('matches the folder name itself', () => {
+      const tree = buildFileTree([makeFile('weights/model.bin')])
+      const folder = tree.children.find((c) => c.name === 'weights')!
+      const text = buildFolderSearchableText(folder)
+      expect(text.toLowerCase().includes('weights')).toBe(true)
     })
   })
 

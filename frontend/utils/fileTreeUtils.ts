@@ -166,6 +166,11 @@ export function collectAllFileNames(node: FileTreeNode): string[] {
   return names
 }
 
+/** Builds a searchable text string for a folder node by joining its name with all nested file names. */
+export function buildFolderSearchableText(node: FileTreeNode): string {
+  return [node.name, ...collectAllFileNames(node)].join('\n')
+}
+
 /** Collects all FileInterface objects recursively under a tree node. */
 export function collectAllFiles(node: FileTreeNode): FileInterface[] {
   const files: FileInterface[] = []

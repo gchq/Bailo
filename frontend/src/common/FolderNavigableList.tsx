@@ -5,7 +5,7 @@ import Paginate, { SortingProperty } from 'src/common/Paginate'
 import { FileInterface } from 'types/types'
 import {
   buildFileTree,
-  collectAllFileNames,
+  buildFolderSearchableText,
   type FileTreeNode,
   getBreadcrumbParts,
   getNodeAtPath,
@@ -76,13 +76,12 @@ export default function FolderNavigableList({
     const items: BrowseListItem[] = []
     for (const child of currentNode.children) {
       if (child.isDirectory) {
-        const nestedNames = collectAllFileNames(child)
         items.push({
           key: `folder-${child.fullPath}`,
           kind: 'folder',
           node: child,
           name: child.name,
-          searchableText: [child.name, ...nestedNames].join(' '),
+          searchableText: buildFolderSearchableText(child),
           size: child.totalFileCount,
           createdAt: new Date(0),
           updatedAt: new Date(0),
