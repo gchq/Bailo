@@ -157,39 +157,37 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
 
 export async function createDeploymentAssessment(
   user: UserInterface,
-  params: z.infer<typeof deploymentAssessmentSchema>,
+  { name, schemaId, draft, metadata }: z.infer<typeof deploymentAssessmentSchema>,
 ) {
-  const schema = await getSchemaById(params.schemaId)
+  const schema = await getSchemaById(schemaId)
   if (schema.hidden) {
-    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId: params.schemaId })
+    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId })
   }
   if (schema.kind !== SchemaKind.DeploymentAssessment) {
-    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId: params.schemaId })
+    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId })
   }
 
-  if (params.metadata) {
-    const { valid, errors } = await validateContentAgainstSchema(params.schemaId, params.metadata, {
-      draft: params.draft,
-    })
+  if (metadata) {
+    const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
     if (!valid) {
       throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
     }
 
-    if (params.metadata.overview.riskOwner) {
-      await validateRiskOwner(params.metadata.overview.riskOwner)
+    if (metadata.overview.riskOwner) {
+      await validateRiskOwner(metadata.overview.riskOwner)
     }
-    if (params.metadata.overview.modelIds && params.metadata.overview.modelIds.length > 0) {
-      await validateModels(params.metadata.overview.modelIds)
+    if (metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
+      await validateModels(metadata.overview.modelIds)
     }
   }
 
-  const deploymentAssessmentId = convertStringToId(params.name)
+  const deploymentAssessmentId = convertStringToId(name)
   const deploymentAssessment = new DeploymentAssessmentModel({
     id: deploymentAssessmentId,
-    name: params.name,
-    schemaId: params.schemaId,
-    metadata: params.metadata ?? {},
-    draft: params.draft,
+    name,
+    schemaId,
+    metadata: metadata ?? {},
+    draft,
     createdBy: user.dn,
   })
 
@@ -209,12 +207,8 @@ export async function createDeploymentAssessment(
     throw error
   }
 
-  if (!params.draft) {
-    await notifyDeploymentStakeholders(
-      params.metadata.overview.riskOwner,
-      params.metadata.overview.modelIds,
-      deploymentAssessment,
-    )
+  if (!draft) {
+    await notifyDeploymentStakeholders(metadata.overview.riskOwner, metadata.overview.modelIds, deploymentAssessment)
   }
 
   return deploymentAssessment
