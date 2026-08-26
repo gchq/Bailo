@@ -1154,7 +1154,6 @@ export interface BaseLifecycleMetrics {
 
 export interface DeploymentAssessmentMetadata {
   overview: {
-    name: string
     riskOwner?: string
     justification?: string
     modelIds?: string[]
@@ -1166,6 +1165,7 @@ export interface DeploymentAssessmentMetadata {
 export interface DeploymentAssessmentInterface {
   id: string
   schemaId: string
+  name: string
   metadata: DeploymentAssessmentMetadata
   draft: boolean
   createdBy: string
