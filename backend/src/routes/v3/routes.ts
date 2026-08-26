@@ -6,6 +6,7 @@ import { deleteDeploymentAssessment } from './deploymentAssessment/deleteDeploym
 import { getDeploymentAssessment } from './deploymentAssessment/getDeploymentAssessment.js'
 import { getDeploymentAssessmentCurrentUserPermissions } from './deploymentAssessment/getDeploymentAssessmentCurrentUserPermissions.js'
 import { getDeploymentAssessments } from './deploymentAssessment/getDeploymentAssessments.js'
+import { patchDeploymentAssessment } from './deploymentAssessment/patchDeploymentAssessment.js'
 import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
@@ -34,6 +35,7 @@ router.get(
   '/deployment-assessments/:deploymentAssessmentId/permissions/mine',
   ...getDeploymentAssessmentCurrentUserPermissions,
 )
+router.patch('/deployment-assessments/:deploymentAssessmentId', ...patchDeploymentAssessment)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)
