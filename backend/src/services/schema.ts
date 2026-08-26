@@ -89,7 +89,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             widget: 'modelSelector',
           },
         },
-        required: ['name', 'riskOwner', 'justification', 'modelIds'],
+        required: ['riskOwner', 'justification', 'modelIds'],
         additionalProperties: false,
       },
       ...jsonSchema.properties,

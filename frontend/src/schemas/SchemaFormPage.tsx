@@ -21,7 +21,6 @@ type SchemaFormPageProps = {
   errorText: string
   onSaveDraft?: () => void
   draftButtonLoading?: boolean
-  draftSuccessText?: string
   /** When true the form and action buttons are hidden; only children are shown inside the Paper. */
   hideForm?: boolean
   /** Tooltip shown on both disabled action buttons. Omit to leave buttons enabled. */
@@ -43,7 +42,6 @@ export default function SchemaFormPage({
   errorText,
   onSaveDraft,
   draftButtonLoading = false,
-  draftSuccessText = '',
   hideForm = false,
   disableActions,
   children,
@@ -103,7 +101,6 @@ export default function SchemaFormPage({
                     </Tooltip>
                   </Stack>
                   <MessageAlert message={errorText} severity='error' />
-                  {onSaveDraft && <MessageAlert message={draftSuccessText} severity='success' />}
                 </Stack>
               </Stack>
             )}

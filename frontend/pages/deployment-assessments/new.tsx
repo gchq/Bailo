@@ -22,7 +22,6 @@ export default function NewDeploymentAssessment() {
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [name, setName] = useState('')
   const [errorText, setErrorText] = useState('')
-  const [draftSuccessText, setDraftSuccessText] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
   const [draftButtonLoading, setDraftButtonLoading] = useState(false)
   const [formValidationErrorState, setFormValidationErrorState] = useState(false)
@@ -44,7 +43,6 @@ export default function NewDeploymentAssessment() {
 
   async function onSaveDraft() {
     setErrorText('')
-    setDraftSuccessText('')
     setDraftButtonLoading(true)
 
     if (!schemaId) {
@@ -62,13 +60,13 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    setDraftSuccessText('Draft saved successfully.')
     setDraftButtonLoading(false)
+
+    router.push('/deployment-assessments')
   }
 
   async function onSubmit() {
     setErrorText('')
-    setDraftSuccessText('')
     setSubmitButtonLoading(true)
     setFormValidationErrorState(false)
 
@@ -136,7 +134,6 @@ export default function NewDeploymentAssessment() {
       errorText={errorText}
       onSaveDraft={onSaveDraft}
       draftButtonLoading={draftButtonLoading}
-      draftSuccessText={draftSuccessText}
       disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
     >
       <LabelledInput fullWidth label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
