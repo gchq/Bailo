@@ -53,11 +53,11 @@ export default function EditableText({
           py: 1,
         }}
       >
-        <Button variant='contained' type='submit' size='small'>
-          {submitButtonText}
-        </Button>
         <Button variant='outlined' onClick={handleCancelOnClick} size='small'>
           Cancel
+        </Button>
+        <Button variant='contained' type='submit' size='small'>
+          {submitButtonText}
         </Button>
       </Stack>
     )
