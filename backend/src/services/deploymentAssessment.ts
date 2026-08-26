@@ -11,11 +11,13 @@ import DeploymentAssessmentModel, {
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind } from '../types/enums.js'
+import { DeploymentAssessmentUserPermissions } from '../types/types.js'
 import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
@@ -216,6 +218,23 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
   }
 
   return deploymentAssessment
+}
+
+export async function getCurrentUserPermissionsByDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+): Promise<DeploymentAssessmentUserPermissions> {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+
+  const [editAuth, deleteAuth] = await Promise.all([
+    authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update),
+    authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete),
+  ])
+
+  return {
+    editDeploymentAssessment: authResponseToUserPermission(editAuth),
+    deleteDeploymentAssessment: authResponseToUserPermission(deleteAuth),
+  }
 }
 
 export async function updateDeploymentAssessment(
