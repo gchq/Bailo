@@ -2,9 +2,10 @@ import Close from '@mui/icons-material/Close'
 import Info from '@mui/icons-material/Info'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
+import { deleteDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useGetSchema } from 'actions/schema'
 import { useContext, useEffect, useState } from 'react'
-import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -31,7 +32,6 @@ export default function EditableDeploymentAssessmentForm({
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
-  const [deleteErrorMessage, _setDeleteErrorMessage] = useState('')
   const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
@@ -159,13 +159,14 @@ export default function EditableDeploymentAssessmentForm({
           readOnly={readOnly}
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
-        <ConfirmationDialogue
+        <DeletionConfirmationDialogue
           open={open}
           title='Delete Deployment Assessment'
-          onConfirm={() => setOpen(false)}
           onCancel={() => setOpen(false)}
-          errorMessage={deleteErrorMessage}
-          dialogMessage={'Are you sure you want to delete this deployment assessment?'}
+          onDelete={() => deleteDeploymentAssessment(deploymentAssessment.id)}
+          confirmationText={deploymentAssessment.metadata.overview.name}
+          successMessage='Deployment assessment deleted'
+          redirectTo='/deployments'
         />
         {isEdit && (
           <Stack

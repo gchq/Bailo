@@ -1,23 +1,9 @@
-import Close from '@mui/icons-material/Close'
-import Delete from '@mui/icons-material/Delete'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Button, Divider, Stack, Typography } from '@mui/material'
 import { deleteEntry } from 'actions/entry'
-import { useRouter } from 'next/router'
+import Delete from 'node_modules/@mui/icons-material/Delete.mjs'
 import { useState } from 'react'
-import useNotification from 'src/hooks/useNotification'
-import MessageAlert from 'src/MessageAlert'
+import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
 import { EntryInterface, EntryKindLabel } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
 type EntryDeletionProps = {
@@ -25,33 +11,9 @@ type EntryDeletionProps = {
 }
 
 export default function EntryDeletion({ entry }: EntryDeletionProps) {
-  const [loading, setLoading] = useState(false)
-  const sendNotification = useNotification()
-  const [errorMessage, setErrorMessage] = useState('')
-  const router = useRouter()
-
   const [openConfirm, setOpenConfirm] = useState(false)
-  const [confirmInput, setConfirmInput] = useState('')
 
-  const handleDeleteEntry = async () => {
-    setLoading(true)
-
-    const response = await deleteEntry(entry.id)
-
-    if (!response.ok) {
-      setErrorMessage(await getErrorMessage(response))
-    } else {
-      sendNotification({
-        variant: 'success',
-        msg: `${toTitleCase(EntryKindLabel[entry.kind])} deleted`,
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
-      router.push('/')
-    }
-
-    setLoading(false)
-    setOpenConfirm(!response.ok)
-  }
+  const entryKindLabel = toTitleCase(EntryKindLabel[entry.kind])
 
   return (
     <Stack spacing={2} sx={{ mt: 2 }}>
@@ -65,54 +27,21 @@ export default function EntryDeletion({ entry }: EntryDeletionProps) {
         color='error'
         onClick={() => setOpenConfirm(true)}
         data-test='deleteEntryButton'
+        startIcon={<Delete />}
       >
-        {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}
+        {`Delete ${entryKindLabel}`}
       </Button>
-      <Dialog
-        onKeyUp={(e) => {
-          if (e.code === 'Enter' && confirmInput.trim() === entry.name) {
-            handleDeleteEntry()
-          }
-        }}
+      <DeletionConfirmationDialogue
         open={openConfirm}
-        onClose={() => setOpenConfirm(false)}
-      >
-        <DialogTitle>{`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}</DialogTitle>
-        <DialogContent>
-          <Typography gutterBottom>
-            To confirm deletion, type <strong>{entry.name}</strong> below. This action cannot be undone.
-          </Typography>
-          <TextField
-            fullWidth
-            variant='outlined'
-            value={confirmInput}
-            onChange={(e) => setConfirmInput(e.target.value)}
-            placeholder={entry.name}
-            autoFocus
-            sx={{ mt: 2 }}
-            slotProps={{
-              htmlInput: { 'data-test': 'deleteEntryInputVerification' },
-            }}
-          />
-          {errorMessage && <MessageAlert message={errorMessage} severity='error' />}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)} disabled={loading} startIcon={<Close />}>
-            Cancel
-          </Button>
-          <Button
-            color='error'
-            variant='contained'
-            onClick={handleDeleteEntry}
-            loading={loading}
-            disabled={confirmInput.trim() !== entry.name}
-            startIcon={<Delete />}
-            data-test='deleteEntryConfirm'
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title={`Delete ${entryKindLabel}`}
+        onCancel={() => setOpenConfirm(false)}
+        onDelete={() => deleteEntry(entry.id)}
+        confirmationText={entry.name}
+        successMessage={`${entryKindLabel} deleted`}
+        redirectTo='/'
+        confirmButtonDataTest='deleteEntryConfirm'
+        confirmInputDataTest='deleteEntryInputVerification'
+      />
     </Stack>
   )
 }
