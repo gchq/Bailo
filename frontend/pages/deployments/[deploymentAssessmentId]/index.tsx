@@ -30,12 +30,14 @@ export default function DeploymentAssessment() {
     return error
   }
 
+  const isLoadingDeploymentAssessment = !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment
+
   return (
     <>
       <Title text={deploymentAssessment ? deploymentAssessment.metadata.overview.name : 'Loading...'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
-          {(!deploymentAssessment || isDeploymentAssessmentLoading) && <Loading />}
+          {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (
             <>
               {deploymentAssessment.draft && (
