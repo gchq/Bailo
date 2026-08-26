@@ -2,13 +2,13 @@ import useSWR from 'swr'
 import { DeploymentAssessmentInterface, DeploymentAssessmentUserPermissions } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
-export function useGetDeploymentAssessment(deploymentId: string) {
+export function useGetDeploymentAssessment(deploymentId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       deploymentAssessment: DeploymentAssessmentInterface
     },
     ErrorInfo
-  >(`/api/v3/deployment-assessments/${deploymentId}`, fetcher)
+  >(deploymentId ? `/api/v3/deployment-assessments/${deploymentId}` : null, fetcher)
 
   return {
     mutateDeploymentAssessment: mutate,
