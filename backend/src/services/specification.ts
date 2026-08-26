@@ -121,6 +121,7 @@ export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
       name: z
         .string()
         .min(1, 'You must provide a deployment assessment name')
+        .trim()
         .openapi({ example: 'Just A Rather Very Intelligent System' }),
       schemaId: deploymentAssessmentSchemaIdSchema,
       metadata: deploymentAssessmentMetadataRequiredSchema,
@@ -132,6 +133,7 @@ export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
       name: z
         .string()
         .min(1, 'You must provide a deployment assessment name')
+        .trim()
         .openapi({ example: 'Just A Rather Very Intelligent System' }),
       schemaId: deploymentAssessmentSchemaIdSchema,
       metadata: deploymentAssessmentMetadataSchema.optional(),
