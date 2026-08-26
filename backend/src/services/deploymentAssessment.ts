@@ -33,7 +33,7 @@ export interface SearchDeploymentAssessmentsParams {
   search?: string
 }
 
-export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft'>
+export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
 export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
 
 async function validateRiskOwner(riskOwner: string) {
@@ -247,6 +247,10 @@ export async function updateDeploymentAssessment(
     diff.draft ?? deploymentAssessment.draft,
   )
 
+  if (diff.name !== undefined) {
+    deploymentAssessment.name = diff.name
+    deploymentAssessment.markModified('name')
+  }
   if (diff.metadata !== undefined) {
     deploymentAssessment.metadata = metadata
     deploymentAssessment.markModified('metadata')

@@ -62,9 +62,10 @@ export const deploymentAssessmentSchemaIdSchema = z
   .string()
   .min(1, 'You must provide a schema ID')
   .openapi({ example: 'stark-deployment-assessment-schema-v1' })
-const deploymentAssessmentNameSchema = z
+export const deploymentAssessmentNameSchema = z
   .string()
   .min(1, 'You must provide a deployment assessment name')
+  .trim()
   .openapi({ example: 'Just A Rather Very Intelligent System' })
 const deploymentAssessmentRiskOwnerSchema = z
   .string()
@@ -116,10 +117,7 @@ export const deploymentAssessmentSummarySchema = z.object({
 })
 
 const baseDeploymentAssessmentSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'You must provide a deployment assessment name')
-    .openapi({ example: 'Just A Rather Very Intelligent System' }),
+  name: deploymentAssessmentNameSchema,
   schemaId: deploymentAssessmentSchemaIdSchema,
 })
 
