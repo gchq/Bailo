@@ -1,4 +1,4 @@
-import { FileInterface } from 'types/types'
+import { FileInterface, FileUploadWithMetadata } from 'types/types'
 
 export function getFileUploadName(file: File | FileInterface): string {
   if (file instanceof File && file.webkitRelativePath) {
@@ -231,4 +231,41 @@ export function countMatchingFiles(node: FileTreeNode, query: string): number {
   }
   walk(node)
   return count
+}
+
+export interface FileConflict {
+  fileToUpload: FileUploadWithMetadata
+  existingFile: FileInterface
+}
+
+/**
+ * Compares staged upload file names against existing files to detect conflicts.
+ * Folder markers (.folder) are excluded from conflict detection as they are structural, not user files.
+ * Returns conflicts and non-conflicting files separately so the caller can prompt the user.
+ */
+export function detectFileConflicts(
+  filesToUpload: FileUploadWithMetadata[],
+  existingFiles: FileInterface[],
+): { conflicts: FileConflict[]; nonConflicting: FileUploadWithMetadata[] } {
+  const existingByName = new Map<string, FileInterface>()
+  for (const file of existingFiles) {
+    if (!isFolderMarker(file)) {
+      existingByName.set(file.name, file)
+    }
+  }
+
+  const conflicts: FileConflict[] = []
+  const nonConflicting: FileUploadWithMetadata[] = []
+
+  for (const fileToUpload of filesToUpload) {
+    const uploadName = fileToUpload.uploadPath || fileToUpload.file.name
+    const existing = existingByName.get(uploadName)
+    if (existing) {
+      conflicts.push({ fileToUpload, existingFile: existing })
+    } else {
+      nonConflicting.push(fileToUpload)
+    }
+  }
+
+  return { conflicts, nonConflicting }
 }

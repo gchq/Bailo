@@ -377,6 +377,8 @@ export default function ReleaseForm({
                   open={isUploadDialogOpen}
                   onDialogClose={() => setIsUploadDialogOpen(false)}
                   mutateModelFiles={mutateFiles}
+                  existingFiles={modelFiles}
+                  releases={releases}
                   onFilesUploaded={handleFilesUploaded}
                 />
                 {formData.files.length > 0 && (

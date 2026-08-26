@@ -115,6 +115,8 @@ export default function Files({ model }: FilesProps) {
               onDialogClose={() => setIsFileUploadDialogOpen(false)}
               mutateModelFiles={mutateModelFiles}
               uploadPath={browsingPath}
+              existingFiles={modelFiles}
+              releases={releases}
             />
             <CreatePathDialog
               open={isCreatePathOpen}

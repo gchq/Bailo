@@ -1,4 +1,4 @@
-import { FileInterface } from 'types/types'
+import { FileInterface, FileUploadWithMetadata } from 'types/types'
 import { describe, expect, test } from 'vitest'
 
 import {
@@ -6,6 +6,7 @@ import {
   buildFolderSearchableText,
   collectAllFileNames,
   countMatchingFiles,
+  detectFileConflicts,
   getBreadcrumbParts,
   getFileBaseName,
   getFolderDates,
@@ -278,6 +279,77 @@ describe('utils > fileTreeUtils', () => {
       const tree = buildFileTree([makeFile('a/Model.BIN'), makeFile('a/readme.md')])
       const aNode = tree.children.find((c) => c.name === 'a')!
       expect(countMatchingFiles(aNode, 'model')).toBe(1)
+    })
+  })
+
+  describe('detectFileConflicts', () => {
+    function makeUpload(name: string, uploadPath?: string): FileUploadWithMetadata {
+      return {
+        file: new File(['content'], name),
+        uploadPath,
+      }
+    }
+
+    test('detects conflicts when upload name matches existing file', () => {
+      const existing = [makeFile('model.bin'), makeFile('config.json')]
+      const uploads = [makeUpload('model.bin', 'model.bin')]
+      const { conflicts, nonConflicting } = detectFileConflicts(uploads, existing)
+      expect(conflicts).toHaveLength(1)
+      expect(conflicts[0].existingFile.name).toBe('model.bin')
+      expect(nonConflicting).toHaveLength(0)
+    })
+
+    test('returns non-conflicting files separately', () => {
+      const existing = [makeFile('model.bin')]
+      const uploads = [makeUpload('model.bin', 'model.bin'), makeUpload('readme.md', 'readme.md')]
+      const { conflicts, nonConflicting } = detectFileConflicts(uploads, existing)
+      expect(conflicts).toHaveLength(1)
+      expect(nonConflicting).toHaveLength(1)
+      expect(nonConflicting[0].file.name).toBe('readme.md')
+    })
+
+    test('detects conflicts with nested paths', () => {
+      const existing = [makeFile('weights/model.bin')]
+      const uploads = [makeUpload('model.bin', 'weights/model.bin')]
+      const { conflicts } = detectFileConflicts(uploads, existing)
+      expect(conflicts).toHaveLength(1)
+    })
+
+    test('excludes .folder markers from conflict detection', () => {
+      const existing = [makeFile('data/.folder')]
+      const uploads = [makeUpload('.folder', 'data/.folder')]
+      const { conflicts, nonConflicting } = detectFileConflicts(uploads, existing)
+      expect(conflicts).toHaveLength(0)
+      expect(nonConflicting).toHaveLength(1)
+    })
+
+    test('returns no conflicts when no matches', () => {
+      const existing = [makeFile('model.bin')]
+      const uploads = [makeUpload('config.json', 'config.json')]
+      const { conflicts, nonConflicting } = detectFileConflicts(uploads, existing)
+      expect(conflicts).toHaveLength(0)
+      expect(nonConflicting).toHaveLength(1)
+    })
+
+    test('handles empty existing files', () => {
+      const uploads = [makeUpload('model.bin', 'model.bin')]
+      const { conflicts, nonConflicting } = detectFileConflicts(uploads, [])
+      expect(conflicts).toHaveLength(0)
+      expect(nonConflicting).toHaveLength(1)
+    })
+
+    test('handles empty uploads', () => {
+      const existing = [makeFile('model.bin')]
+      const { conflicts, nonConflicting } = detectFileConflicts([], existing)
+      expect(conflicts).toHaveLength(0)
+      expect(nonConflicting).toHaveLength(0)
+    })
+
+    test('uses file.name as fallback when uploadPath is not set', () => {
+      const existing = [makeFile('photo.png')]
+      const uploads = [makeUpload('photo.png')]
+      const { conflicts } = detectFileConflicts(uploads, existing)
+      expect(conflicts).toHaveLength(1)
     })
   })
 })
