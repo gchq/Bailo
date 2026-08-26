@@ -5,12 +5,10 @@ import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import DeploymentAssessmentModel, {
-  DeploymentAssessmentDoc,
   DeploymentAssessmentInterface,
   DeploymentAssessmentMetadata,
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
-import { ResponseInterface } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind } from '../types/enums.js'
 import { DeploymentAssessmentUserPermissions } from '../types/types.js'
@@ -37,11 +35,6 @@ export interface SearchDeploymentAssessmentsParams {
 
 export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft' | 'metadata'>
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft'>
-
-export interface DeploymentAssessmentDetails {
-  deploymentAssessment: DeploymentAssessmentDoc
-  responses: ResponseInterface[]
-}
 
 async function validateRiskOwner(riskOwner: string) {
   const { kind, value } = fromEntity(riskOwner)
