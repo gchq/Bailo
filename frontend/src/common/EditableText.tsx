@@ -1,6 +1,7 @@
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
-import { useCallback, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
@@ -8,6 +9,7 @@ import RichTextEditor from 'src/common/RichTextEditor'
 interface EditableTextProps {
   value?: string
   onSubmit: (newValue: string | undefined) => void
+  label?: string
   tooltipText?: string
   submitButtonText?: string
   multiline?: boolean
@@ -18,6 +20,7 @@ interface EditableTextProps {
 export default function EditableText({
   value,
   onSubmit,
+  label,
   tooltipText = 'Edit this text',
   submitButtonText = 'Submit',
   multiline = false,
@@ -32,7 +35,8 @@ export default function EditableText({
     setNewValue(value)
   }, [value])
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault()
     setIsEditMode(false)
     if (newValue !== value) {
       onSubmit(newValue)
@@ -59,66 +63,71 @@ export default function EditableText({
     )
   }, [handleCancelOnClick, submitButtonText])
 
-  if (isEditMode) {
-    return (
-      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
-        {richText ? (
-          <Stack>
-            <RichTextEditor
-              value={newValue || ''}
-              onChange={(input) => setNewValue(input)}
-              aria-label='Schema description'
-            />
-            {submitButtons}
-          </Stack>
-        ) : (
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1}
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            <TextField
-              sx={{ width: '100%' }}
-              value={newValue}
-              onChange={(event) => setNewValue(event.target.value)}
-              size='small'
-              multiline={multiline}
-            />
-            {submitButtons}
-          </Stack>
-        )}
-      </Box>
-    )
-  } else {
-    return (
-      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
+  const editButton = (
+    <Tooltip title={tooltipText}>
+      <IconButton size='small' aria-label={tooltipText} onClick={() => setIsEditMode(true)}>
+        {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
+      </IconButton>
+    </Tooltip>
+  )
+
+  const content = isEditMode ? (
+    <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%' }}>
+      {richText ? (
+        <Stack>
+          <RichTextEditor value={newValue || ''} onChange={(input) => setNewValue(input)} aria-label={label} />
+          {submitButtons}
+        </Stack>
+      ) : (
         <Stack
-          direction='row'
+          direction={{ xs: 'column', sm: 'row' }}
           spacing={1}
           sx={{
             alignItems: 'center',
           }}
         >
-          <Tooltip title={tooltipText}>
-            <IconButton onClick={() => setIsEditMode(true)}>
-              {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
-            </IconButton>
-          </Tooltip>
-          {richText ? (
-            value && <MarkdownDisplay>{value}</MarkdownDisplay>
-          ) : (
-            <Typography
-              sx={{
-                fontStyle: !value ? 'italic' : 'normal',
-              }}
-            >
-              {value || 'Empty'}
-            </Typography>
-          )}
+          <TextField
+            sx={{ width: '100%' }}
+            value={newValue}
+            onChange={(event) => setNewValue(event.target.value)}
+            size='small'
+            multiline={multiline}
+            aria-label={label}
+          />
+          {submitButtons}
         </Stack>
-      </Box>
+      )}
+    </Box>
+  ) : (
+    displayValue(value, richText)
+  )
+
+  if (label) {
+    return (
+      <LabelledValue label={label} action={!isEditMode && editButton}>
+        {content}
+      </LabelledValue>
     )
   }
+
+  return (
+    <Stack
+      direction='row'
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
+      {content}
+      {!isEditMode && editButton}
+    </Stack>
+  )
+}
+
+function displayValue(value: string | undefined, richText: boolean) {
+  if (!value) {
+    return <Typography sx={{ fontStyle: 'italic' }}>Unset</Typography>
+  }
+
+  return richText ? <MarkdownDisplay>{value}</MarkdownDisplay> : <Typography>{value}</Typography>
 }

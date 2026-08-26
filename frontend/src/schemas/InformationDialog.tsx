@@ -1,6 +1,6 @@
-import { Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Stack, Typography } from '@mui/material'
 import DisplayDialog from 'src/common/DisplayDialog'
+import LabelledValue from 'src/common/LabelledValue'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import { SchemaInterface } from 'types/types'
 
@@ -11,48 +11,18 @@ type SchemaDialogProps = {
 }
 
 export default function InformationDialog({ open = false, onClose, schema }: SchemaDialogProps) {
-  const theme = useTheme()
-
   return (
     <DisplayDialog open={open} onClose={onClose} title='Schema information'>
-      <Stack spacing={2} divider={<Divider flexItem />}>
-        <Stack spacing={1}>
-          <Stack
-            direction='row'
-            spacing={1}
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-                color: theme.palette.primary.main,
-              }}
-            >
-              ID:
-            </Typography>
-            <Typography>{schema.id}</Typography>
-          </Stack>
-          <Stack
-            direction='row'
-            spacing={1}
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-                color: theme.palette.primary.main,
-              }}
-            >
-              Name:
-            </Typography>
-            <Typography>{schema.name}</Typography>
-          </Stack>
+      <Stack spacing={2}>
+        <LabelledValue label='ID'>
+          <Typography>{schema.id}</Typography>
+        </LabelledValue>
+        <LabelledValue label='Name'>
+          <Typography>{schema.name}</Typography>
+        </LabelledValue>
+        <LabelledValue label='Description'>
           <MarkdownDisplay>{schema.description}</MarkdownDisplay>
-        </Stack>
+        </LabelledValue>
       </Stack>
     </DisplayDialog>
   )
