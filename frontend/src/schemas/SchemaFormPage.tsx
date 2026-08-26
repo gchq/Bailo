@@ -55,14 +55,14 @@ export default function SchemaFormPage({
       {!isLoading && (
         <Container maxWidth='lg'>
           <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
+            <Link href={backHref}>
+              <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                {backLabel}
+              </Button>
+            </Link>
             {children}
             {!hideForm && (
               <Stack spacing={4}>
-                <Link href={backHref}>
-                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                    {backLabel}
-                  </Button>
-                </Link>
                 <JsonSchemaForm
                   splitSchema={splitSchema}
                   setSplitSchema={setSplitSchema}
