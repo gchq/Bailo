@@ -1,6 +1,6 @@
+import Delete from '@mui/icons-material/Delete'
 import { Button, Divider, Stack, Typography } from '@mui/material'
 import { deleteEntry } from 'actions/entry'
-import Delete from 'node_modules/@mui/icons-material/Delete.mjs'
 import { useState } from 'react'
 import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
 import { EntryInterface, EntryKindLabel } from 'types/types'
