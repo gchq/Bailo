@@ -7,36 +7,11 @@ import { DeploymentAssessmentInterface } from '../../../models/DeploymentAssessm
 import { createDeploymentAssessment } from '../../../services/deploymentAssessment.js'
 import {
   deploymentAssessmentInterfaceSchema,
-  deploymentAssessmentMetadataRequiredSchema,
-  deploymentAssessmentMetadataSchema,
-  deploymentAssessmentSchemaIdSchema,
+  deploymentAssessmentSchema,
   registerPath,
 } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-const name = z
-  .string()
-  .min(1, 'You must provide a deployment assessment name')
-  .openapi({ example: 'Just A Rather Very Intelligent System' })
-
-export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
-  z
-    .object({
-      name,
-      schemaId: deploymentAssessmentSchemaIdSchema,
-      metadata: deploymentAssessmentMetadataRequiredSchema,
-      draft: z.literal(false),
-    })
-    .strict(),
-  z
-    .object({
-      name,
-      schemaId: deploymentAssessmentSchemaIdSchema,
-      metadata: deploymentAssessmentMetadataSchema.optional(),
-      draft: z.literal(true).optional().default(true),
-    })
-    .strict(),
-])
 const postDeploymentAssessmentSchema = z.object({ body: deploymentAssessmentSchema })
 
 registerPath(

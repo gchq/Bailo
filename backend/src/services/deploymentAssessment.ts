@@ -8,7 +8,6 @@ import { z } from '../lib/zod.js'
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
-import { deploymentAssessmentSchema } from '../routes/v3/deploymentAssessment/postDeploymentAssessment.js'
 import { SchemaKind } from '../types/enums.js'
 import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
@@ -18,17 +17,7 @@ import { isMongoServerError } from '../utils/mongo.js'
 import log from './log.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
-
-export interface SearchDeploymentAssessmentsParams {
-  schemaId?: string
-  modelIds?: string[]
-  riskOwner?: string
-  createdBy?: string
-  createdAfter?: string
-  createdBefore?: string
-  draft?: boolean
-  search?: string
-}
+import { deploymentAssessmentSchema } from './specification.js'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string

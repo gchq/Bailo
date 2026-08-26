@@ -115,6 +115,31 @@ export const deploymentAssessmentSummarySchema = z.object({
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
 })
 
+export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
+  z
+    .object({
+      name: z
+        .string()
+        .min(1, 'You must provide a deployment assessment name')
+        .openapi({ example: 'Just A Rather Very Intelligent System' }),
+      schemaId: deploymentAssessmentSchemaIdSchema,
+      metadata: deploymentAssessmentMetadataRequiredSchema,
+      draft: z.literal(false),
+    })
+    .strict(),
+  z
+    .object({
+      name: z
+        .string()
+        .min(1, 'You must provide a deployment assessment name')
+        .openapi({ example: 'Just A Rather Very Intelligent System' }),
+      schemaId: deploymentAssessmentSchemaIdSchema,
+      metadata: deploymentAssessmentMetadataSchema.optional(),
+      draft: z.literal(true).optional().default(true),
+    })
+    .strict(),
+])
+
 export const systemStatusSchema = z.object({
   code: z.number().openapi({ example: 200 }),
   ping: z.string().openapi({ example: 'pong' }),
