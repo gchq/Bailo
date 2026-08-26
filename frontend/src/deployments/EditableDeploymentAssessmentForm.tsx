@@ -2,54 +2,41 @@ import Close from '@mui/icons-material/Close'
 import Info from '@mui/icons-material/Info'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
-import {
-  deleteAccessRequest,
-  patchAccessRequest,
-  useGetAccessRequest,
-  useGetAccessRequestsForModelId,
-} from 'actions/accessRequest'
-import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
-import { useRouter } from 'next/router'
 import { useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
+import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { AccessRequestInterface, SplitSchemaNoRender } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
+import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
+import { getStepsFromSchema, validateForm } from 'utils/formUtils'
 
-type EditableAccessRequestFormProps = {
-  accessRequest: AccessRequestInterface
+type EditableDeploymentAssessmentFormProps = {
+  deploymentAssessment: DeploymentAssessmentInterface
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
 }
 
-export default function EditableAccessRequestForm({
-  accessRequest,
+export default function EditableDeploymentAssessmentForm({
+  deploymentAssessment,
   isEdit,
   onIsEditChange,
   readOnly = false,
-}: EditableAccessRequestFormProps) {
+}: EditableDeploymentAssessmentFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
-  const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+  const [deleteErrorMessage, _setDeleteErrorMessage] = useState('')
   const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
-  const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
-  const { mutateAccessRequests } = useGetAccessRequestsForModelId(accessRequest.modelId)
-  const { mutateReviews } = useGetReviewRequestsForUser()
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
-
-  const router = useRouter()
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({
     reference: '',
@@ -61,27 +48,14 @@ export default function EditableAccessRequestForm({
       return
     }
 
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
+    const steps = getStepsFromSchema(schema, {}, [], deploymentAssessment.metadata)
 
     for (const step of steps) {
       step.steps = steps
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, accessRequest.metadata, isEdit])
-
-  const handleDeleteConfirm = async () => {
-    setDeleteErrorMessage('')
-    const res = await deleteAccessRequest(accessRequest.modelId, accessRequest.id)
-    if (!res.ok) {
-      setDeleteErrorMessage(await getErrorMessage(res))
-    } else {
-      mutateAccessRequests()
-      mutateReviews()
-      setOpen(false)
-      router.push(`/model/${accessRequest.modelId}?tab=access`)
-    }
-  }
+  }, [schema, deploymentAssessment.metadata, isEdit])
 
   async function handleSubmit() {
     if (schema) {
@@ -97,21 +71,14 @@ export default function EditableAccessRequestForm({
         }
       }
 
-      const data = getStepsData(splitSchema, true)
-      const res = await patchAccessRequest(accessRequest.modelId, accessRequest.id, data)
-      if (!res.ok) {
-        setErrorMessage(await getErrorMessage(res))
-      } else {
-        onIsEditChange(false)
-        mutateAccessRequest()
-      }
-      setIsLoading(false)
+      onIsEditChange(false)
     }
+    setIsLoading(false)
   }
 
   const resetForm = () => {
     if (schema) {
-      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], accessRequest.metadata)
+      const steps = getStepsFromSchema(schema, {}, [], deploymentAssessment.metadata)
       for (const step of steps) {
         step.steps = steps
       }
@@ -140,10 +107,6 @@ export default function EditableAccessRequestForm({
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
 
-  if (isAccessRequestError) {
-    return <MessageAlert message={isAccessRequestError.info.message} severity='error' />
-  }
-
   return (
     <>
       {isSchemaLoading && <Loading />}
@@ -151,7 +114,7 @@ export default function EditableAccessRequestForm({
         <EditableFormHeading
           heading={
             schema && (
-              <div>
+              <Stack>
                 <Typography
                   sx={{
                     fontWeight: 'bold',
@@ -175,13 +138,17 @@ export default function EditableAccessRequestForm({
                     onClose={() => setSchemaInformationOpen(false)}
                   />
                 </Stack>
-              </div>
+                <Stack>
+                  <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Created by</Typography>
+                  <UserDisplay dn={deploymentAssessment.createdBy} />
+                </Stack>
+              </Stack>
             )
           }
-          editAction='editAccessRequest'
-          deleteAction='deleteAccessRequest'
-          editButtonText='Edit Access Request'
-          deleteButtonText='Delete Request'
+          editAction='editDeploymentAssessment'
+          deleteAction='deleteDeploymentAssessment'
+          editButtonText='Edit Deployment Assessment'
+          deleteButtonText='Delete Deployment Assessment'
           isEdit={isEdit}
           isLoading={isLoading}
           onEdit={handleEdit}
@@ -194,11 +161,11 @@ export default function EditableAccessRequestForm({
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
         <ConfirmationDialogue
           open={open}
-          title='Delete Access Request'
-          onConfirm={handleDeleteConfirm}
+          title='Delete Deployment Assessment'
+          onConfirm={() => setOpen(false)}
           onCancel={() => setOpen(false)}
           errorMessage={deleteErrorMessage}
-          dialogMessage={'Are you sure you want to delete this access request?'}
+          dialogMessage={'Are you sure you want to delete this deployment assessment?'}
         />
         {isEdit && (
           <Stack

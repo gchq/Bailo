@@ -81,6 +81,11 @@ export interface AccessRequestUserPermissions {
   deleteAccessRequest: PermissionDetail
 }
 
+export interface DeploymentAssessmentUserPermissions {
+  editDeploymentAssessment: PermissionDetail
+  deleteDeploymentAssessment: PermissionDetail
+}
+
 export const FederationState = {
   DISABLED: 'disabled',
   READ_ONLY: 'readOnly',

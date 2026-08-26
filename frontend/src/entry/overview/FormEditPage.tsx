@@ -78,7 +78,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
+  const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   // For displaying the stats around model information completion
   const [calculateStats, setCalculateStats] = useState(0)
@@ -308,7 +308,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                         <Info color='primary' fontSize='small' />
                       </IconButton>
                       <InformationDialog
-                        open={SchemaInformationOpen}
+                        open={schemaInformationOpen}
                         schema={schema}
                         onClose={() => setSchemaInformationOpen(false)}
                       />

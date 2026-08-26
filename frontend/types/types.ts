@@ -703,7 +703,12 @@ export type AccessRequestUserPermissions = {
   deleteAccessRequest: PermissionDetail
 }
 
-export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions
+export type DeploymentAssessmentUserPermissions = {
+  editDeploymentAssessment: PermissionDetail
+  deleteDeploymentAssessment: PermissionDetail
+}
+
+export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions & DeploymentAssessmentUserPermissions
 
 export type RestrictedActionKeys = keyof UserPermissions
 
@@ -1145,4 +1150,25 @@ export interface BaseLifecycleMetrics {
   global: GlobalLifecycleMetrics
   byOrganisation: LifecycleMetricsByOrg[]
   lastUpdated: string
+}
+
+export interface DeploymentAssessmentMetadata {
+  overview: {
+    name: string
+    riskOwner?: string
+    justification?: string
+    modelIds?: string[]
+    [key: string]: unknown
+  }
+  [key: string]: unknown
+}
+
+export interface DeploymentAssessmentInterface {
+  id: string
+  schemaId: string
+  metadata: DeploymentAssessmentMetadata
+  draft: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
 }
