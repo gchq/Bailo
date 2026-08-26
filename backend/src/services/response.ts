@@ -70,20 +70,13 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   return response
 }
 
-export async function removeResponses(parentIds: string[]) {
-  const responses = await getResponsesByParentIds(parentIds)
-  const responseDeletions: ResponseDoc[] = []
-  for (const response of responses) {
-    try {
-      responseDeletions.push(await response.delete())
-    } catch (error) {
-      throw InternalError('The requested response could not be deleted.', {
-        responseId: response.id,
-        error,
-      })
-    }
-  }
-  return responseDeletions
+export async function removeResponses(responseIds: string[], session?: ClientSession) {
+  const objectIds = responseIds.map((id) => new Types.ObjectId(id))
+  const responses = await ResponseModel.find({ _id: { $in: objectIds } }, undefined, { session })
+
+  await ResponseModel.deleteMany({ _id: { $in: objectIds } }, session)
+
+  return responses
 }
 
 export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
@@ -243,7 +236,7 @@ export async function checkReleaseApproved(modelId: string, semver: string) {
   return totalReviews > 0 && reviewsWithoutApproval.length === 0
 }
 
-export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
+export async function removeResponsesByParentIds(parentIds: string[], session?: ClientSession) {
   const objectIds = parentIds.map((id) => new Types.ObjectId(id))
   const responses = await ResponseModel.find({
     parentId: { $in: objectIds },
