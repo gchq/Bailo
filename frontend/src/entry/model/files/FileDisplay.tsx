@@ -36,11 +36,10 @@ import {
   useMemo,
   useState,
 } from 'react'
-import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Restricted from 'src/common/Restricted'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import DeleteConfirmationDialog from 'src/entry/model/files/DeleteConfirmationDialog'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
-import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { buildChipDetails, isAnyScanInProgress, isAnyScanResults } from 'src/entry/model/scanning/scanChipUtils'
 import ScanResultDetail from 'src/entry/model/scanning/ScanResultDetail'
@@ -444,9 +443,8 @@ export default function FileDisplay({
         latestRelease={latestRelease}
         sortedAssociatedReleases={sortedAssociatedReleases}
       />
-      <ConfirmationDialogue
+      <DeleteConfirmationDialog
         open={deleteFileOpen}
-        title='Delete File'
         onConfirm={handleDeleteConfirm}
         onCancel={() => {
           if (!isDeleting) {
@@ -454,22 +452,13 @@ export default function FileDisplay({
           }
         }}
         errorMessage={deleteErrorMessage}
-        confirmDisabled={isDeleting}
         confirmLoading={isDeleting}
-        dialogMessage={
-          sortedAssociatedReleases.length > 0
-            ? 'Deleting this file will affect the following releases:'
-            : 'Deleting this file will not affect any existing releases'
-        }
-      >
-        <Box sx={{ pt: 2 }}>
-          <AssociatedReleasesList
-            modelId={modelId}
-            latestRelease={releases.length > 0 ? releases[0].semver : ''}
-            releases={sortedAssociatedReleases}
-          />
-        </Box>
-      </ConfirmationDialogue>
+        itemName={displayName ?? file.name}
+        itemType='file'
+        associatedReleases={sortedAssociatedReleases}
+        allReleases={releases}
+        modelId={modelId}
+      />
     </Box>
   )
 }

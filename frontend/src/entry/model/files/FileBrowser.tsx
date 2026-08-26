@@ -6,8 +6,8 @@ import { Box, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Too
 import { deleteEntryFiles, useGetModelFiles } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
-import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import FolderNavigableList from 'src/common/FolderNavigableList'
+import DeleteConfirmationDialog from 'src/entry/model/files/DeleteConfirmationDialog'
 import FileDisplay, { MutateFiles, MutateReleases } from 'src/entry/model/files/FileDisplay'
 import useNotification from 'src/hooks/useNotification'
 import { EntryKind, FileInterface, ReleaseInterface } from 'types/types'
@@ -201,43 +201,19 @@ function FolderRow({
           </>
         )}
       </Stack>
-      <ConfirmationDialogue
+      <DeleteConfirmationDialog
         open={deleteOpen}
-        title={`Delete folder "${node.name}"?`}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteOpen(false)}
         confirmLoading={isDeleting}
         errorMessage={deleteError}
-      >
-        <Stack spacing={1}>
-          {allFilesInFolder.length > 0 ? (
-            <Typography>
-              This will delete <strong>{plural(allFilesInFolder.length, 'file')}</strong> in this folder and all
-              sub-folders.
-            </Typography>
-          ) : (
-            <Typography>This will delete this empty folder.</Typography>
-          )}
-          {associatedReleases.length > 0 && (
-            <Typography color='error'>
-              Warning: {plural(associatedReleases.length, 'release')} reference files in this folder:{' '}
-              {associatedReleases.map((r) => r.semver).join(', ')}
-            </Typography>
-          )}
-          {allFilesInFolder.length > 0 && (
-            <>
-              <Typography variant='caption'>Files to be deleted:</Typography>
-              <Box sx={{ maxHeight: 200, overflow: 'auto', pl: 2 }}>
-                {allFilesInFolder.map((file) => (
-                  <Typography key={file._id} variant='body2'>
-                    {file.name}
-                  </Typography>
-                ))}
-              </Box>
-            </>
-          )}
-        </Stack>
-      </ConfirmationDialogue>
+        itemName={node.name}
+        itemType='folder'
+        associatedReleases={associatedReleases}
+        allReleases={releases}
+        modelId={modelId}
+        filesToDelete={allFilesInFolder}
+      />
     </Box>
   )
 }
