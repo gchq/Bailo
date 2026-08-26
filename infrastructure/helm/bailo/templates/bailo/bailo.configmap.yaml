@@ -246,7 +246,7 @@ data:
         },
 
         deploymentAssessments: {
-          deployableModelState: '{{ .Values.config.deploymentAssessments.deployableModelState }}',
+          deployableModelState: '{{ .Values.config.ui.deploymentAssessments.deployableModelState }}',
         },
       },
 
