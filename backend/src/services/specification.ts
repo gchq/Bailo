@@ -115,8 +115,6 @@ export const deploymentAssessmentSummarySchema = z.object({
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
 })
 
-export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
-  z
 const baseDeploymentAssessmentSchema = z.object({
   name: z
     .string()
