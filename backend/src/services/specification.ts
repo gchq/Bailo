@@ -117,25 +117,23 @@ export const deploymentAssessmentSummarySchema = z.object({
 
 export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
   z
-    .object({
-      name: z
-        .string()
-        .min(1, 'You must provide a deployment assessment name')
-        .trim()
-        .openapi({ example: 'Just A Rather Very Intelligent System' }),
-      schemaId: deploymentAssessmentSchemaIdSchema,
+const baseDeploymentAssessmentSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'You must provide a deployment assessment name')
+    .openapi({ example: 'Just A Rather Very Intelligent System' }),
+  schemaId: deploymentAssessmentSchemaIdSchema,
+})
+
+export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
+  baseDeploymentAssessmentSchema
+    .extend({
       metadata: deploymentAssessmentMetadataRequiredSchema,
       draft: z.literal(false),
     })
     .strict(),
-  z
-    .object({
-      name: z
-        .string()
-        .min(1, 'You must provide a deployment assessment name')
-        .trim()
-        .openapi({ example: 'Just A Rather Very Intelligent System' }),
-      schemaId: deploymentAssessmentSchemaIdSchema,
+  baseDeploymentAssessmentSchema
+    .extend({
       metadata: deploymentAssessmentMetadataSchema.optional(),
       draft: z.literal(true).optional().default(true),
     })
