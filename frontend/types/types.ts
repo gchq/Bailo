@@ -698,12 +698,12 @@ export type AccessRequestUserPermissions = {
   deleteAccessRequest: PermissionDetail
 }
 
-export type DeploymentAssessmentPermissions = {
+export type DeploymentAssessmentUserPermissions = {
   editDeploymentAssessment: PermissionDetail
   deleteDeploymentAssessment: PermissionDetail
 }
 
-export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions & DeploymentAssessmentPermissions
+export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions & DeploymentAssessmentUserPermissions
 
 export type RestrictedActionKeys = keyof UserPermissions
 

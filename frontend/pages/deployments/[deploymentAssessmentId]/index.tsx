@@ -23,7 +23,7 @@ export default function DeploymentAssessment() {
   const { deploymentAssessment, isDeploymentAssessmentLoading, isDeploymentAssessmentError } =
     useGetDeploymentAssessment(deploymentAssessmentId as string)
 
-  const error = MultipleErrorWrapper('Unable to load access request', {
+  const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
   })
   if (error) {
@@ -33,7 +33,7 @@ export default function DeploymentAssessment() {
   return (
     <>
       <Title text={deploymentAssessment ? deploymentAssessment.metadata.overview.name : 'Loading...'} />
-      <Container maxWidth='lg' sx={{ my: 4 }} data-test='accessRequestContainer'>
+      <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
           {isDeploymentAssessmentLoading && <Loading />}
           {deploymentAssessment && (
@@ -63,7 +63,13 @@ export default function DeploymentAssessment() {
                       <ReviewIcon color='primary' />
                       <Typography>Draft</Typography>
                     </Stack>
-                    <Button variant='outlined' color='inherit' size='small' onClick={() => {}} data-test='reviewButton'>
+                    <Button
+                      variant='outlined'
+                      color='inherit'
+                      size='small'
+                      onClick={() => {}}
+                      data-test='publishButton'
+                    >
                       Publish
                     </Button>
                   </Stack>
@@ -91,8 +97,8 @@ export default function DeploymentAssessment() {
                     </Typography>
                     <CopyToClipboardButton
                       textToCopy={deploymentAssessment.id}
-                      notificationText='Copied deoployment assessment ID to clipboard'
-                      ariaLabel='copy deoployment assessment ID to clipboard'
+                      notificationText='Copied deployment assessment ID to clipboard'
+                      ariaLabel='copy deployment assessment ID to clipboard'
                     />
                   </Stack>
                 </Stack>

@@ -215,20 +215,14 @@ export async function getCurrentUserPermissionsByDeploymentAssessment(
 ): Promise<DeploymentAssessmentUserPermissions> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
 
-  const editDeploymentAssessmentAuth = await authorisation.deploymentAssessment(
-    user,
-    deploymentAssessment,
-    DeploymentAssessmentAction.Update,
-  )
-  const deleteDeploymentAssessmentAuth = await authorisation.deploymentAssessment(
-    user,
-    deploymentAssessment,
-    DeploymentAssessmentAction.Delete,
-  )
+  const [editAuth, deleteAuth] = await Promise.all([
+    authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update),
+    authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete),
+  ])
 
   return {
-    editDeploymentAssessment: authResponseToUserPermission(editDeploymentAssessmentAuth),
-    deleteDeploymentAssessment: authResponseToUserPermission(deleteDeploymentAssessmentAuth),
+    editDeploymentAssessment: authResponseToUserPermission(editAuth),
+    deleteDeploymentAssessment: authResponseToUserPermission(deleteAuth),
   }
 }
 

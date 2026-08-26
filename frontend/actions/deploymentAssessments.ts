@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { DeploymentAssessmentInterface, DeploymentAssessmentPermissions } from 'types/types'
+import { DeploymentAssessmentInterface, DeploymentAssessmentUserPermissions } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetDeploymentAssessment(deploymentId: string) {
@@ -21,7 +21,7 @@ export function useGetDeploymentAssessment(deploymentId: string) {
 export function useGetCurrentUserPermissionsForDeploymentAssessment(deploymentAssessmentId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      permissions: DeploymentAssessmentPermissions
+      permissions: DeploymentAssessmentUserPermissions
     },
     ErrorInfo
   >(
@@ -32,7 +32,7 @@ export function useGetCurrentUserPermissionsForDeploymentAssessment(deploymentAs
   return {
     mutateDeploymentAssessmentsUserPermissions: mutate,
     deploymentAssessmentsUserPermissions: data?.permissions,
-    isDeploymentAssessmentstUserPermissionsLoading: isLoading,
+    isDeploymentAssessmentsUserPermissionsLoading: isLoading,
     isDeploymentAssessmentsUserPermissionsError: error,
   }
 }

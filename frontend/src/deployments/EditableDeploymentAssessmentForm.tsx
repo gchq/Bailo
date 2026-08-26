@@ -15,19 +15,19 @@ import InformationDialog from 'src/schemas/InformationDialog'
 import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema, validateForm } from 'utils/formUtils'
 
-type EditableAccessRequestFormProps = {
+type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
 }
 
-export default function EditableAccessRequestForm({
+export default function EditableDeploymentAssessmentForm({
   deploymentAssessment,
   isEdit,
   onIsEditChange,
   readOnly = false,
-}: EditableAccessRequestFormProps) {
+}: EditableDeploymentAssessmentFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
@@ -48,7 +48,7 @@ export default function EditableAccessRequestForm({
       return
     }
 
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], deploymentAssessment.metadata)
+    const steps = getStepsFromSchema(schema, {}, [], deploymentAssessment.metadata)
 
     for (const step of steps) {
       step.steps = steps
@@ -78,7 +78,7 @@ export default function EditableAccessRequestForm({
 
   const resetForm = () => {
     if (schema) {
-      const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], deploymentAssessment.metadata)
+      const steps = getStepsFromSchema(schema, {}, [], deploymentAssessment.metadata)
       for (const step of steps) {
         step.steps = steps
       }

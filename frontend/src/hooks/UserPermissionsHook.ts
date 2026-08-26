@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import {
   AccessRequestUserPermissions,
-  DeploymentAssessmentPermissions,
+  DeploymentAssessmentUserPermissions,
   EntryUserPermissions,
   PermissionDetail,
   UserPermissions,
@@ -25,7 +25,7 @@ const defaultAccessRequestPermissions: AccessRequestUserPermissions = {
   deleteAccessRequest: defaultPermissionDetail,
 }
 
-const defaultDeploymentAssessmentPermissions: DeploymentAssessmentPermissions = {
+const defaultDeploymentAssessmentPermissions: DeploymentAssessmentUserPermissions = {
   editDeploymentAssessment: defaultPermissionDetail,
   deleteDeploymentAssessment: defaultPermissionDetail,
 }
