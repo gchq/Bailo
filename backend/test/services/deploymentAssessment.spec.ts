@@ -7,6 +7,7 @@ import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
 import {
   createDeploymentAssessment,
   getDeploymentAssessmentById,
+  removeDeploymentAssessment,
   searchDeploymentAssessments,
   updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
@@ -27,6 +28,12 @@ const schemaMocks = vi.hoisted(() => ({
   validateContentAgainstSchema: vi.fn(),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
+
+const smtpMocks = vi.hoisted(() => ({
+  notifyDeploymentRiskOwner: vi.fn(),
+  notifyDeploymentModelOwners: vi.fn(),
+}))
+vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
 
 const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
@@ -345,6 +352,91 @@ describe('services > deploymentAssessment', () => {
         'Cannot convert a submitted deployment assessment back to a draft.',
       )
       expect(deploymentAssessment.save).not.toHaveBeenCalled()
+    })
+
+    test('notifies stakeholders when a draft is submitted', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      // the notification lookup uses `.lean()`, unlike the validation lookup
+      ModelModelMock.find.mockResolvedValueOnce([liveModel]).mockReturnValueOnce({ lean: () => [liveModel] })
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+        'user:risk-owner',
+        deploymentAssessment,
+        'Risk Owner',
+      )
+      expect(smtpMocks.notifyDeploymentModelOwners).toHaveBeenCalled()
+    })
+
+    test('does not notify stakeholders when the assessment stays a draft', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+    })
+
+    test('does not re-notify stakeholders when an already submitted assessment is edited', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.draft = false
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('removeDeploymentAssessment', () => {
+    test('soft deletes the assessment and returns it', async () => {
+      const deploymentAssessment = { id: 'da-id', delete: vi.fn() }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      const result = await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(authorisation.deploymentAssessment).toHaveBeenCalledWith(
+        { dn: 'creator' },
+        deploymentAssessment,
+        'deployment_assessment:delete',
+      )
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(undefined)
+      expect(result).toBe(deploymentAssessment)
+    })
+
+    test('passes the transaction session through to the deletion', async () => {
+      const deploymentAssessment = { id: 'da-id', delete: vi.fn() }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      const session = {} as any
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id', session)
+
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(session)
+    })
+
+    test('throws a not found error when the assessment does not exist', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      await expect(removeDeploymentAssessment({ dn: 'creator' }, 'da-id')).rejects.toMatchObject({ code: 404 })
+    })
+
+    test('rejects the deletion when authorisation fails', async () => {
+      const deploymentAssessment = { id: 'da-id', delete: vi.fn() }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
+        success: false,
+        info: 'You do not have permission to delete this Deployment Assessment',
+        id: 'da-id',
+      })
+
+      await expect(removeDeploymentAssessment({ dn: 'otherUser' }, 'da-id')).rejects.toThrow(
+        /^You do not have permission to delete this Deployment Assessment/,
+      )
+      expect(deploymentAssessment.delete).not.toHaveBeenCalled()
     })
   })
 
