@@ -37,9 +37,8 @@ export function useGetCurrentUserPermissionsForDeploymentAssessment(deploymentAs
   }
 }
 
-export function deleteDeploymentAssessment(deploymentAssessment: string) {
-  return fetch(`/api/v3/deployment-assessments/${deploymentAssessment}`, {
+export function deleteDeploymentAssessment(deploymentAssessmentId: string) {
+  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}`, {
     method: 'delete',
-    headers: { 'Content-Type': 'application/json' },
   })
 }

@@ -236,7 +236,7 @@ export async function removeDeploymentAssessment(
   // const { deploymentAssessment, responses } = await getDeploymentAssessmentDetails(user, deploymentAssessmentId)
   const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
   if (!deploymentAssessment) {
-    throw new Error(`Deployment Assessment '${deploymentAssessmentId}' not found`)
+    throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
   }
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete)
@@ -290,10 +290,13 @@ export async function updateDeploymentAssessment(
     diff.draft ?? deploymentAssessment.draft,
   )
 
+  // the ID is derived from the name at creation and is not regenerated, so renaming leaves the ID unchanged
   if (diff.metadata !== undefined) {
     deploymentAssessment.metadata = metadata
     deploymentAssessment.markModified('metadata')
   }
+
+  const isBeingSubmitted = deploymentAssessment.draft && diff.draft === false
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
       throw BadReq('Cannot convert a submitted deployment assessment back to a draft.')
@@ -303,6 +306,14 @@ export async function updateDeploymentAssessment(
   }
 
   await deploymentAssessment.save()
+
+  if (isBeingSubmitted && metadata.overview.riskOwner) {
+    await notifyDeploymentStakeholders(
+      metadata.overview.riskOwner,
+      metadata.overview.modelIds ?? [],
+      deploymentAssessment,
+    )
+  }
 
   return deploymentAssessment
 }
