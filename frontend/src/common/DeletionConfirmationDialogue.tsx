@@ -59,25 +59,29 @@ export default function DeletionConfirmationDialogue({
     setLoading(true)
     setErrorMessage('')
 
-    const response = await onDelete()
+    try {
+      const response = await onDelete()
 
-    if (!response.ok) {
-      setErrorMessage(await getErrorMessage(response))
-    } else {
-      if (successMessage) {
-        sendNotification({
-          variant: 'success',
-          msg: successMessage,
-          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-        })
+      if (!response.ok) {
+        setErrorMessage(await getErrorMessage(response))
+      } else {
+        if (successMessage) {
+          sendNotification({
+            variant: 'success',
+            msg: successMessage,
+            anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+          })
+        }
+        if (redirectTo) {
+          router.push(redirectTo)
+        }
+        onCancel()
       }
-      if (redirectTo) {
-        router.push(redirectTo)
-      }
-      onCancel()
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to complete the deletion request.')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
