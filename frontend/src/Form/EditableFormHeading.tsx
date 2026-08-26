@@ -79,7 +79,7 @@ export default function EditableFormHeading({
               <Restricted action={deleteAction} fallback={<Button disabled>{deleteButtonText}</Button>}>
                 <Button
                   variant='contained'
-                  color='secondary'
+                  color='error'
                   onClick={onDelete}
                   data-test='deleteFormButton'
                   disabled={isRegistryError}

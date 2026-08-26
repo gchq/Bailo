@@ -21,7 +21,7 @@ export default function DeploymentAssessment() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { deploymentAssessment, isDeploymentAssessmentLoading, isDeploymentAssessmentError } =
-    useGetDeploymentAssessment(deploymentAssessmentId as string)
+    useGetDeploymentAssessment(deploymentAssessmentId)
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
@@ -35,7 +35,7 @@ export default function DeploymentAssessment() {
       <Title text={deploymentAssessment ? deploymentAssessment.metadata.overview.name : 'Loading...'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
-          {isDeploymentAssessmentLoading && <Loading />}
+          {(!deploymentAssessment || isDeploymentAssessmentLoading) && <Loading />}
           {deploymentAssessment && (
             <>
               {deploymentAssessment.draft && (
