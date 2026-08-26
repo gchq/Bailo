@@ -5,7 +5,10 @@ import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { z } from '../lib/zod.js'
-import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
+import DeploymentAssessmentModel, {
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentMetadata,
+} from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind } from '../types/enums.js'
@@ -30,11 +33,8 @@ export interface SearchDeploymentAssessmentsParams {
   search?: string
 }
 
-type CreateDeploymentAssessmentParamsBase = Pick<DeploymentAssessmentInterface, 'name' | 'schemaId'>
-
-export type CreateDeploymentAssessmentParams =
-  | (CreateDeploymentAssessmentParamsBase & { draft: true; metadata?: unknown })
-  | (CreateDeploymentAssessmentParamsBase & { draft: false; metadata: unknown })
+export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft'>
+export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
 
 async function validateRiskOwner(riskOwner: string) {
   const { kind, value } = fromEntity(riskOwner)
@@ -76,6 +76,32 @@ async function validateModels(modelIds: string[]) {
       deployableModelState,
     })
   }
+}
+
+async function validateDeploymentAssessment(
+  schemaId: DeploymentAssessmentInterface['schemaId'],
+  metadata: DeploymentAssessmentInterface['metadata'],
+  draft: DeploymentAssessmentInterface['draft'],
+): Promise<DeploymentAssessmentMetadata> {
+  const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
+  if (!valid) {
+    throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
+  }
+
+  const { riskOwner, modelIds } = metadata.overview ?? {}
+
+  if (!draft && !riskOwner) {
+    throw BadReq('Deployment risk owner is required')
+  }
+
+  if (riskOwner) {
+    await validateRiskOwner(riskOwner)
+  }
+  if (modelIds?.length) {
+    await validateModels(modelIds)
+  }
+
+  return metadata
 }
 
 async function notifyDeploymentStakeholders(
@@ -146,7 +172,7 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
 
 export async function createDeploymentAssessment(
   user: UserInterface,
-  { name, schemaId, draft, metadata }: z.infer<typeof deploymentAssessmentSchema>,
+  { name, schemaId, draft, metadata }: CreateDeploymentAssessmentParams,
 ) {
   const schema = await getSchemaById(schemaId)
   if (schema.hidden) {
@@ -199,6 +225,41 @@ export async function createDeploymentAssessment(
   if (!draft) {
     await notifyDeploymentStakeholders(metadata.overview.riskOwner, metadata.overview.modelIds, deploymentAssessment)
   }
+
+  return deploymentAssessment
+}
+
+export async function updateDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  diff: Partial<UpdateDeploymentAssessmentParams>,
+) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  const metadata = await validateDeploymentAssessment(
+    deploymentAssessment.schemaId,
+    diff.metadata ?? deploymentAssessment.metadata,
+    diff.draft ?? deploymentAssessment.draft,
+  )
+
+  if (diff.metadata !== undefined) {
+    deploymentAssessment.metadata = metadata
+    deploymentAssessment.markModified('metadata')
+  }
+  if (diff.draft !== undefined) {
+    if (!deploymentAssessment.draft && diff.draft) {
+      throw BadReq('Cannot convert a submitted deployment assessment back to a draft.')
+    }
+    deploymentAssessment.draft = diff.draft
+    deploymentAssessment.markModified('draft')
+  }
+
+  await deploymentAssessment.save()
 
   return deploymentAssessment
 }

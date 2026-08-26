@@ -8,6 +8,7 @@ import {
   createDeploymentAssessment,
   getDeploymentAssessmentById,
   searchDeploymentAssessments,
+  updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
 import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
@@ -200,6 +201,21 @@ describe('services > deploymentAssessment', () => {
   })
 
   test.each([
+    ['only a name', { overview: { name: 'Assessment' } }],
+    ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
+    ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
+    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
+    ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
+    ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+  ])('accepts metadata with %s', async (_description, metadata) => {
+    const result = await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
+
+    expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ metadata }))
+    expect(idMocks.convertStringToId).toHaveBeenCalledWith('Assessment')
+    expect(result.save).toHaveBeenCalled()
+  })
+
+  test.each([
     [{ ...liveModel, kind: EntryKind.DataCard }, 'One or more models could not be found.'],
     [{ ...liveModel, visibility: EntryVisibility.Private }, 'Deployment assessments can only use public models.'],
     [{ ...liveModel, state: 'Review' }, 'Deployment assessments can only use models with a Production state.'],
@@ -229,6 +245,108 @@ describe('services > deploymentAssessment', () => {
     DeploymentAssessmentModelMock.save.mockRejectedValueOnce(mongoError)
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toMatchObject({ code: 409 })
+  })
+
+  describe('updateDeploymentAssessment', () => {
+    const existingDeploymentAssessment = () => ({
+      id: 'da-id',
+      schemaId: params.schemaId,
+      metadata: params.metadata,
+      draft: true,
+      createdBy: 'creator',
+      markModified: vi.fn(),
+      save: vi.fn(),
+    })
+
+    test('stores the validated metadata', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      const metadata = { overview: { name: 'Updated assessment', riskOwner: 'user:risk-owner' } }
+
+      const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata, draft: false })
+
+      expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, { draft: false })
+      expect(result.metadata).toStrictEqual(metadata)
+      expect(result.draft).toBe(false)
+      expect(deploymentAssessment.markModified).toHaveBeenCalledWith('metadata')
+      expect(deploymentAssessment.markModified).toHaveBeenCalledWith('draft')
+      expect(deploymentAssessment.save).toHaveBeenCalled()
+    })
+
+    test('leaves the draft status unchanged when the diff omits it', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', {
+        metadata: params.metadata,
+      })
+
+      expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, params.metadata, {
+        draft: true,
+      })
+      expect(result.draft).toBe(true)
+      expect(deploymentAssessment.markModified).not.toHaveBeenCalledWith('draft')
+    })
+
+    test('rejects an update when authorisation fails', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      vi.mocked(authorisation.deploymentAssessment)
+        .mockResolvedValueOnce({ success: true, id: 'da-id' })
+        .mockResolvedValueOnce({
+          success: false,
+          info: 'You do not have permission to update this Deployment Assessment',
+          id: 'da-id',
+        })
+
+      await expect(updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })).rejects.toThrow(
+        /^You do not have permission to update this Deployment Assessment/,
+      )
+      expect(schemaMocks.validateContentAgainstSchema).not.toHaveBeenCalled()
+      expect(deploymentAssessment.save).not.toHaveBeenCalled()
+    })
+
+    test('validates the existing metadata when the diff omits it', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, params.metadata, {
+        draft: false,
+      })
+      expect(deploymentAssessment.markModified).not.toHaveBeenCalledWith('metadata')
+    })
+
+    test.each([
+      ['only a name', { overview: { name: 'Assessment' } }],
+      ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
+      ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
+      ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
+      ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
+      ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+    ])('accepts a draft update with metadata with %s', async (_description, metadata) => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata })
+
+      expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, metadata, { draft: true })
+      expect(result.metadata).toStrictEqual(metadata)
+      expect(deploymentAssessment.markModified).toHaveBeenCalledWith('metadata')
+      expect(deploymentAssessment.save).toHaveBeenCalled()
+    })
+
+    test('rejects switching released DA back to a draft', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.draft = false
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await expect(updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: true })).rejects.toThrow(
+        'Cannot convert a submitted deployment assessment back to a draft.',
+      )
+      expect(deploymentAssessment.save).not.toHaveBeenCalled()
+    })
   })
 
   describe('searchDeploymentAssessments', () => {
