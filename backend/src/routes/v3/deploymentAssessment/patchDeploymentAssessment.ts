@@ -19,7 +19,9 @@ export const patchDeploymentAssessmentSchema = z.object({
       metadata: deploymentAssessmentMetadataSchema.optional(),
       draft: deploymentAssessmentDraftSchema.optional(),
     })
+    .strict()
     .refine(
+      // prevent no-op request
       (obj) => {
         for (const val of Object.values(obj)) {
           if (val !== undefined) {

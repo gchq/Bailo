@@ -83,14 +83,6 @@ async function validateDeploymentAssessment(
   metadata: DeploymentAssessmentInterface['metadata'],
   draft: DeploymentAssessmentInterface['draft'],
 ): Promise<DeploymentAssessmentMetadata> {
-  const schema = await getSchemaById(schemaId)
-  if (schema.hidden) {
-    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId })
-  }
-  if (schema.kind !== SchemaKind.DeploymentAssessment) {
-    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId })
-  }
-
   const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
   if (!valid) {
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
@@ -179,6 +171,15 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
 }
 
 export async function createDeploymentAssessment(user: UserInterface, params: CreateDeploymentAssessmentParams) {
+  // only validate schema on creation as it cannot be edited
+  const schema = await getSchemaById(params.schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId: params.schemaId })
+  }
+  if (schema.kind !== SchemaKind.DeploymentAssessment) {
+    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId: params.schemaId })
+  }
+
   await validateDeploymentAssessment(params.schemaId, params.metadata, params.draft)
 
   const deploymentAssessmentId = convertStringToId(params.metadata.overview.name)
