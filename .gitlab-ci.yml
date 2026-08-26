@@ -10,7 +10,7 @@ variables:
 opensrc-bailols:
   stage: git_sync
   rules:
-    - if: '$BFG == "true" && ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "v3")'
+    - if: '$BFG == "true" && ($CI_COMMIT_REF_NAME == "main" || $CI_COMMIT_REF_NAME == "v3")'
       when: always
       allow_failure: true
     - when: manual
@@ -26,7 +26,7 @@ opensrc-bailols:
     - git reflog expire --expire=now --all && git gc --prune=now --aggressive
     - git remote add $REPO_NAME "https://$LS_TOKEN_NAME:$LS_TOKEN@$LS_URL"
     - git push -u $REPO_NAME main --force
-    - git push -u "$REPO_NAME" v3 --force
+    - git push -u $REPO_NAME v3 --force
 
 os-backend-build:
   stage: os_build
