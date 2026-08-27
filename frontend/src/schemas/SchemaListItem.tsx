@@ -1,11 +1,12 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MenuIcon from '@mui/icons-material/Menu'
-import { Button, Chip, ListItem, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Button, Chip, ListItem, Menu, MenuItem, Stack } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
 import LabelledValue from 'src/common/LabelledValue'
+import ValueDisplay from 'src/common/ValueDisplay'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import UsageListDialog from 'src/schemas/UsageListDialog'
 import { SchemaInterface } from 'types/types'
@@ -61,7 +62,7 @@ export default function SchemaListItem({
       >
         <Stack spacing={2} sx={{ width: '100%' }}>
           <LabelledValue label='ID'>
-            <Typography>{schema.id}</Typography>
+            <ValueDisplay value={schema.id} />
           </LabelledValue>
           <EditableText
             label='Name'

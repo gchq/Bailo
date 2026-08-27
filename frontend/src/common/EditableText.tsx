@@ -83,7 +83,11 @@ export default function EditableText({
     <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%' }}>
       {richText ? (
         <Stack>
-          <RichTextEditor value={newValue || ''} onChange={(input) => setNewValue(input)} aria-label={inputLabel} />
+          <RichTextEditor
+            value={newValue || ''}
+            onChange={(input) => setNewValue(input)}
+            textareaProps={{ 'aria-label': inputLabel }}
+          />
           {submitButtons}
         </Stack>
       ) : (
@@ -100,7 +104,7 @@ export default function EditableText({
             onChange={(event) => setNewValue(event.target.value)}
             size='small'
             multiline={multiline}
-            aria-label={inputLabel}
+            slotProps={{ htmlInput: { 'aria-label': inputLabel } }}
           />
           {submitButtons}
         </Stack>
