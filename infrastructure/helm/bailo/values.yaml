@@ -252,6 +252,9 @@ config:
   log:
     level: trace
   ui:
+    deploymentAssessments:
+      deployableModelState: 'Production'
+
     banner:
       enabled: false
       text: "BAILO"
@@ -284,8 +287,6 @@ config:
     llmImport:
       enabled: false
 
-  deploymentAssessments:
-    deployableModelState: 'Production'
 
   smtp:
     #host: 'mail' #service name

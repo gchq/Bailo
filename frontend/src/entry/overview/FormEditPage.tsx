@@ -46,7 +46,7 @@ import { getDisplayFormStats, saveDisplayFormStats } from 'src/storage/userPrefe
 import { KeyedMutator } from 'swr'
 import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
+import { getStepsData, getStepsFromSchema, removeEmptyValues } from 'utils/formUtils'
 
 type FormEditPageProps = {
   entry: EntryInterface
@@ -124,28 +124,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     setAnchorEl(null)
   }
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
-
-  function removeEmptyValues(value) {
-    if (value === '') {
-      return undefined
-    }
-
-    if (Array.isArray(value)) {
-      return value.map(removeEmptyValues).filter((item) => item !== undefined)
-    }
-
-    if (value !== null && typeof value === 'object') {
-      const cleaned = Object.fromEntries(
-        Object.entries(value)
-          .map(([key, item]) => [key, removeEmptyValues(item)])
-          .filter(([, item]) => item !== undefined),
-      )
-
-      return Object.keys(cleaned).length > 0 ? cleaned : undefined
-    }
-
-    return value
-  }
 
   async function onSubmit() {
     if (schema) {

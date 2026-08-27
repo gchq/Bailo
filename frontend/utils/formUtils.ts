@@ -531,3 +531,28 @@ const iterateAndResetProperties = (object: any) => {
     }
   })
 }
+
+export function removeEmptyValues(value) {
+  if (value === '') {
+    return undefined
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return undefined
+    }
+    return value.map(removeEmptyValues).filter((item) => item !== undefined)
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const cleaned = Object.fromEntries(
+      Object.entries(value)
+        .map(([key, item]) => [key, removeEmptyValues(item)])
+        .filter(([, item]) => item !== undefined),
+    )
+
+    return Object.keys(cleaned).length > 0 ? cleaned : undefined
+  }
+
+  return value
+}

@@ -50,7 +50,6 @@ export default function JsonSchemaForm({
   calculateStats = 0,
   canEdit = false,
   displayLabelValidation = false,
-  defaultCurrentUserInEntityList = false,
   mirroredModel = false,
   displayStats = false,
   compareMode = false,
@@ -61,7 +60,6 @@ export default function JsonSchemaForm({
   calculateStats?: number // a number to be incremented in order to re-run stats
   canEdit?: boolean
   displayLabelValidation?: boolean
-  defaultCurrentUserInEntityList?: boolean
   mirroredModel?: boolean
   displayStats?: boolean
   compareMode?: boolean
@@ -309,7 +307,6 @@ export default function JsonSchemaForm({
             formContext={{
               editMode: canEdit,
               formSchema: currentStep.schema,
-              defaultCurrentUser: defaultCurrentUserInEntityList,
               mirroredState: currentStep.mirroredState,
               state: currentStep.state,
               compareFromState: currentStep.compareFromState,

@@ -34,7 +34,7 @@ export default function DeploymentAssessment() {
 
   return (
     <>
-      <Title text={deploymentAssessment ? deploymentAssessment.metadata.overview.name : 'Loading...'} />
+      <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading....'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
           {isLoadingDeploymentAssessment && <Loading />}
@@ -95,7 +95,7 @@ export default function DeploymentAssessment() {
                     }}
                   >
                     <Typography variant='h6' color='primary' component='h1'>
-                      {deploymentAssessment ? deploymentAssessment.metadata.overview.name : 'Loading...'}
+                      {deploymentAssessment ? deploymentAssessment.name : 'Loading...'}
                     </Typography>
                     <CopyToClipboardButton
                       textToCopy={deploymentAssessment.id}

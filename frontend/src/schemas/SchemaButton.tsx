@@ -29,7 +29,8 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
 
   const reviewRoleList = useMemo(
     () =>
-      schema.reviewRoles && (
+      schema.reviewRoles &&
+      schema.reviewRoles.length > 0 && (
         <Box>
           <Typography
             sx={{
@@ -45,6 +46,7 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
               </ListItem>
             ))}
           </List>
+          <Divider />
         </Box>
       ),
     [reviewRoles, schema.reviewRoles],
@@ -78,7 +80,6 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
         </CardContent>
         <CardActions sx={{ px: 2, pb: 2, textAlign: 'right' }}>
           <Stack spacing={2} sx={{ width: '100%' }}>
-            <Divider />
             <Button
               loading={loading}
               variant='contained'

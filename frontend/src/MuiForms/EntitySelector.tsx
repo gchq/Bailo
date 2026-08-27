@@ -77,7 +77,7 @@ export default function EntitySelector({
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
   function defaultSelectedEntities(): EntityObject[] | EntityObject {
-    if (registry?.formContext?.defaultCurrentUser) {
+    if (!schema.hideDefaultUser) {
       const defaultEntity = { id: currentUserId, kind: 'user' }
       return isMultiple ? [defaultEntity] : defaultEntity
     }

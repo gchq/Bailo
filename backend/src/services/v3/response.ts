@@ -8,6 +8,7 @@ import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
+import { getModelReview } from '../../utils/review.js'
 import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
 import { createLifecycleReview, findReviewById } from '../v3/review.js'
@@ -25,7 +26,7 @@ export async function respondToReview(
   response: ReviewResponseParams,
   dueDate?: Date,
 ) {
-  const review = await findReviewById(user, reviewId)
+  const review = getModelReview(await findReviewById(user, reviewId))
   if (response.decision === Decision.Approve) {
     validateLifecycleReview(review, dueDate)
   }

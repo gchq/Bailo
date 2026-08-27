@@ -512,6 +512,7 @@ export function useDocsSearchIndex(
     '',
     true,
     false,
+    undefined,
     shouldSearchEntries,
   )
 

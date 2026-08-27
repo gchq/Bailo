@@ -81,6 +81,8 @@ const audit = {
   onUpdateDeploymentAssessment: vi.fn(),
   onDeleteDeploymentAssessment: vi.fn(),
   onSearchDeploymentAssessments: vi.fn(),
+  onReviewDeploymentAssessment: vi.fn(),
+  onCommentOnDeploymentAssessment: vi.fn(),
   onViewDeploymentAssessment: vi.fn(),
 
   onViewCurrentUserInformation: vi.fn(),

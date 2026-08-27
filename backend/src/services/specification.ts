@@ -4,6 +4,7 @@ import type { AnyZodObject } from 'zod'
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
+import { DeploymentAssessmentState } from '../models/DeploymentAssessment.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
 import { Decision, ResponseKind } from '../models/Response.js'
@@ -62,9 +63,10 @@ export const deploymentAssessmentSchemaIdSchema = z
   .string()
   .min(1, 'You must provide a schema ID')
   .openapi({ example: 'stark-deployment-assessment-schema-v1' })
-const deploymentAssessmentNameSchema = z
+export const deploymentAssessmentNameSchema = z
   .string()
   .min(1, 'You must provide a deployment assessment name')
+  .trim()
   .openapi({ example: 'Just A Rather Very Intelligent System' })
 const deploymentAssessmentRiskOwnerSchema = z
   .string()
@@ -78,15 +80,29 @@ const deploymentAssessmentModelIdsSchema = z
   .array(z.string())
   .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
 export const deploymentAssessmentDraftSchema = z.boolean().openapi({ example: true })
+export const deploymentAssessmentStateSchema = z
+  .nativeEnum(DeploymentAssessmentState)
+  .openapi({ example: DeploymentAssessmentState.NeedsReview })
 
 export const deploymentAssessmentMetadataSchema = z
   .object({
     overview: z
       .object({
-        name: deploymentAssessmentNameSchema,
         riskOwner: deploymentAssessmentRiskOwnerSchema.optional(),
         justification: deploymentAssessmentJustificationSchema.optional(),
         modelIds: deploymentAssessmentModelIdsSchema.optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough()
+
+export const deploymentAssessmentMetadataRequiredSchema = z
+  .object({
+    overview: z
+      .object({
+        riskOwner: deploymentAssessmentRiskOwnerSchema,
+        justification: deploymentAssessmentJustificationSchema,
+        modelIds: deploymentAssessmentModelIdsSchema,
       })
       .passthrough(),
   })
@@ -102,7 +118,28 @@ export const deploymentAssessmentSummarySchema = z.object({
   draft: deploymentAssessmentDraftSchema,
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+  state: deploymentAssessmentStateSchema.optional(),
 })
+
+const baseDeploymentAssessmentSchema = z.object({
+  name: deploymentAssessmentNameSchema,
+  schemaId: deploymentAssessmentSchemaIdSchema,
+})
+
+export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
+  baseDeploymentAssessmentSchema
+    .extend({
+      metadata: deploymentAssessmentMetadataRequiredSchema,
+      draft: z.literal(false),
+    })
+    .strict(),
+  baseDeploymentAssessmentSchema
+    .extend({
+      metadata: deploymentAssessmentMetadataSchema.optional(),
+      draft: z.literal(true).optional().default(true),
+    })
+    .strict(),
+])
 
 export const systemStatusSchema = z.object({
   code: z.number().openapi({ example: 200 }),
@@ -380,6 +417,18 @@ export const responseInterfaceSchema = z.object({
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
   commentEditedAt: z.string().optional().openapi({ example: new Date().toISOString() }),
 
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const deploymentAssessmentResponseSchema = z.object({
+  _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  entity: z.string().openapi({ example: 'user:joe.bloggs' }),
+  kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
+  role: z.string().optional().openapi({ example: 'dro' }),
+  decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
+  comment: z.string().optional().openapi({ example: 'Looks good!' }),
+  parentId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })

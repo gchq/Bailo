@@ -335,9 +335,10 @@ export class BasicAuthorisationConnector {
   ): Promise<Array<Response>> {
     return Promise.all(
       deploymentAssessments.map(async (deploymentAssessment) => {
-        const isNamedUser = [deploymentAssessment.createdBy, deploymentAssessment.metadata.overview.riskOwner].includes(
-          user.dn,
-        )
+        const isNamedUser = [
+          deploymentAssessment.createdBy,
+          deploymentAssessment.metadata.overview?.riskOwner,
+        ].includes(user.dn)
 
         let errorInfo: string | undefined
         switch (action) {
