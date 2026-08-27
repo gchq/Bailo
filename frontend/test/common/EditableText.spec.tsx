@@ -55,12 +55,4 @@ describe('EditableText', () => {
 
     expect((await screen.findByRole<HTMLInputElement>('textbox', { name: 'Name' })).value).toBe('Changed elsewhere')
   })
-
-  it('falls back to the tooltip text for the input label when no label is provided', async () => {
-    render(<EditableText value='Original' onSubmit={vi.fn()} tooltipText='Edit schema name' />)
-
-    await userEvent.click(await screen.findByRole('button', { name: 'Edit schema name' }))
-
-    expect(await screen.findByRole('textbox', { name: 'Edit schema name' })).toBeDefined()
-  })
 })

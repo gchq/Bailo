@@ -4,12 +4,11 @@ import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
-import ValueDisplay from 'src/common/ValueDisplay'
 
 interface EditableTextProps {
+  label: string
   value?: string
   onSubmit: (newValue: string | undefined) => void
-  label?: string
   tooltipText?: string
   submitButtonText?: string
   multiline?: boolean
@@ -18,9 +17,9 @@ interface EditableTextProps {
 }
 
 export default function EditableText({
+  label,
   value,
   onSubmit,
-  label,
   tooltipText = 'Edit this text',
   submitButtonText = 'Submit',
   multiline = false,
@@ -77,61 +76,42 @@ export default function EditableText({
     </Tooltip>
   )
 
-  const inputLabel = label ?? tooltipText
-
-  const content = isEditMode ? (
-    <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%' }}>
-      {richText ? (
-        <Stack>
-          <RichTextEditor
-            value={newValue || ''}
-            onChange={(input) => setNewValue(input)}
-            textareaProps={{ 'aria-label': inputLabel }}
-          />
-          {submitButtons}
-        </Stack>
-      ) : (
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-          }}
-        >
-          <TextField
-            sx={{ width: '100%' }}
-            value={newValue}
-            onChange={(event) => setNewValue(event.target.value)}
-            size='small'
-            multiline={multiline}
-            slotProps={{ htmlInput: { 'aria-label': inputLabel } }}
-          />
-          {submitButtons}
-        </Stack>
-      )}
-    </Box>
-  ) : (
-    <ValueDisplay value={value} richText={richText} />
-  )
-
-  if (label) {
-    return (
-      <LabelledValue label={label} action={isEditMode ? undefined : editButton}>
-        {content}
-      </LabelledValue>
-    )
+  if (!isEditMode) {
+    return <LabelledValue label={label} value={value} richText={richText} action={editButton} />
   }
 
   return (
-    <Stack
-      direction='row'
-      spacing={1}
-      sx={{
-        alignItems: 'center',
-      }}
-    >
-      {content}
-      {!isEditMode && editButton}
-    </Stack>
+    <LabelledValue label={label}>
+      <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%' }}>
+        {richText ? (
+          <Stack>
+            <RichTextEditor
+              value={newValue || ''}
+              onChange={(input) => setNewValue(input)}
+              textareaProps={{ 'aria-label': label }}
+            />
+            {submitButtons}
+          </Stack>
+        ) : (
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <TextField
+              sx={{ width: '100%' }}
+              value={newValue}
+              onChange={(event) => setNewValue(event.target.value)}
+              size='small'
+              multiline={multiline}
+              slotProps={{ htmlInput: { 'aria-label': label } }}
+            />
+            {submitButtons}
+          </Stack>
+        )}
+      </Box>
+    </LabelledValue>
   )
 }

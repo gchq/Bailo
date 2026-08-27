@@ -6,7 +6,6 @@ import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
 import LabelledValue from 'src/common/LabelledValue'
-import ValueDisplay from 'src/common/ValueDisplay'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import UsageListDialog from 'src/schemas/UsageListDialog'
 import { SchemaInterface } from 'types/types'
@@ -61,9 +60,7 @@ export default function SchemaListItem({
         }}
       >
         <Stack spacing={2} sx={{ width: '100%' }}>
-          <LabelledValue label='ID'>
-            <ValueDisplay value={schema.id} />
-          </LabelledValue>
+          <LabelledValue label='ID' value={schema.id} />
           <EditableText
             label='Name'
             value={schema.name}
