@@ -32,7 +32,7 @@ export default function DeploymentAssessment() {
 
   return (
     <>
-      <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading...'} />
+      <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading....'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
           {isDeploymentAssessmentLoading && <Loading />}
