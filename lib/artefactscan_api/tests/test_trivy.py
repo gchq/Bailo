@@ -11,11 +11,8 @@ from subprocess import CalledProcessError
 from unittest.mock import Mock, patch
 
 import pytest
+from bailo_artefactscan_api import trivy
 from fastapi import BackgroundTasks, HTTPException, UploadFile
-
-# isort: split
-
-import bailo_artefactscan_api.trivy as trivy
 
 EMPTY_CONTENTS = b""
 EMPTY_DIGEST = hashlib.sha256(EMPTY_CONTENTS).hexdigest()
@@ -140,9 +137,11 @@ def test_download_database_rejects_bad_digest(mock_client_cls: Mock, tmp_path: P
 
     settings = trivy.Settings(DB_DIR=str(tmp_path / "db"))
 
-    with patch.object(trivy, "get_settings", return_value=settings):
-        with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
-            trivy.download_database()
+    with (
+        patch.object(trivy, "get_settings", return_value=settings),
+        pytest.raises(RuntimeError, match="SHA-256 mismatch"),
+    ):
+        trivy.download_database()
 
     assert not os.path.exists(str(tmp_path / "db")), "DB_DIR should not be created on failure"
 
@@ -154,9 +153,11 @@ def test_download_database_rejects_empty_manifest(mock_client_cls: Mock, tmp_pat
 
     settings = trivy.Settings(DB_DIR=str(tmp_path / "db"))
 
-    with patch.object(trivy, "get_settings", return_value=settings):
-        with pytest.raises(RuntimeError, match="contains no layers"):
-            trivy.download_database()
+    with (
+        patch.object(trivy, "get_settings", return_value=settings),
+        pytest.raises(RuntimeError, match="contains no layers"),
+    ):
+        trivy.download_database()
 
 
 @patch("bailo_artefactscan_api.trivy.oras.client.OrasClient")
@@ -197,8 +198,7 @@ def test_download_database_atomic_on_failure(mock_client_cls: Mock, tmp_path: Pa
     with patch.object(trivy, "get_settings", return_value=settings), patch("tarfile.open") as mock_tar:
         mock_tar.return_value.__enter__ = Mock()
         mock_tar.return_value.__exit__ = Mock(return_value=False)
-        with patch.object(trivy, "safe_extract"):
-            with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
-                trivy.download_database()
+        with patch.object(trivy, "safe_extract"), pytest.raises(RuntimeError, match="SHA-256 mismatch"):
+            trivy.download_database()
 
     assert sentinel.read_text() == "original", "Original DB should be preserved on failure"
