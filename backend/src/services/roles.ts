@@ -27,15 +27,13 @@ export async function getAllEntryRoles(
       }
 
       modelReviewRoles = await findReviewRoles([model.card.schemaId, ...accessRequestSchemaIds])
-      schemaRoles = modelReviewRoles
-        .filter((role) => role.shortName !== 'dro')
-        .map((role) => ({
-          name: role.name,
-          kind: RoleKind.REVIEW,
-          description: role.description,
-          shortName: role.shortName,
-          systemRole: role.systemRole,
-        }))
+      schemaRoles = modelReviewRoles.map((role) => ({
+        name: role.name,
+        kind: RoleKind.REVIEW,
+        description: role.description,
+        shortName: role.shortName,
+        systemRole: role.systemRole,
+      }))
     } else {
       log.info({ modelId }, 'Schema has not been set on the model. Returning system roles.')
     }

@@ -1,5 +1,5 @@
 import { escapeRegExp } from 'lodash-es'
-import { PipelineStage, QueryFilter } from 'mongoose'
+import { QueryFilter } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
@@ -26,6 +26,7 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
+import { getResponses } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
@@ -191,26 +192,6 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
   return deploymentAssessment
 }
 
-function lookupDeploymentAssessmentReviewResponses(): PipelineStage.Lookup {
-  return {
-    $lookup: {
-      from: 'v2_responses',
-      let: { reviewId: '$_id' },
-      pipeline: [
-        {
-          $match: {
-            $expr: { $eq: ['$parentId', '$$reviewId'] },
-            kind: ResponseKind.Review,
-            deleted: { $ne: true },
-          },
-        },
-        { $sort: { createdAt: -1 } },
-      ],
-      as: 'responses',
-    },
-  }
-}
-
 function deriveDeploymentAssessmentState(
   deploymentAssessment: Pick<DeploymentAssessmentInterface, 'draft'>,
   latestDecision?: DecisionKeys,
@@ -236,18 +217,7 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  const [comments, reviews] = await Promise.all([
-    ResponseModel.find({ parentId: deploymentAssessment._id, kind: ResponseKind.Comment }),
-    ReviewModel.aggregate<{ responses: ResponseInterface[] }>([
-      { $match: { deploymentAssessmentId, kind: ReviewKind.DeploymentAssessment, deleted: { $ne: true } } },
-      lookupDeploymentAssessmentReviewResponses(),
-      { $project: { responses: 1, _id: 0 } },
-    ]),
-  ])
-
-  const responses = [...comments, ...reviews.flatMap(({ responses: reviewResponses }) => reviewResponses)].sort(
-    (first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime(),
-  )
+  const responses = getResponses(deploymentAssessmentId)
   const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
 
   return {
@@ -482,10 +452,24 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
           $match: {
             deploymentAssessmentId: { $in: assessmentIds },
             kind: ReviewKind.DeploymentAssessment,
-            deleted: { $ne: true },
           },
         },
-        lookupDeploymentAssessmentReviewResponses(),
+        {
+          $lookup: {
+            from: 'v2_responses',
+            let: { reviewId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ['$parentId', '$$reviewId'] },
+                  kind: ResponseKind.Review,
+                },
+              },
+              { $sort: { createdAt: -1 } },
+            ],
+            as: 'responses',
+          },
+        },
         { $set: { responses: { $slice: ['$responses', 1] } } },
         { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
         { $sort: { 'responses.createdAt': -1 } },
