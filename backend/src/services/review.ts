@@ -368,7 +368,7 @@ export async function findReviewRole(user: UserInterface, shortName: string) {
 }
 
 export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleDoc[]> {
-  const mongoQuery: QueryFilter<ReviewRoleInterface> = {}
+  const mongoQuery: QueryFilter<ReviewRoleInterface> = { shortName: { $ne: 'dro' } }
 
   if (schemaIds) {
     const schemas = await searchSchemas(undefined, undefined, undefined, schemaIds)
@@ -376,7 +376,7 @@ export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleD
       throw BadReq('Unable to find schemas', { schemaIds })
     }
     const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
-    mongoQuery.shortName = { $in: uniqueRoles }
+    mongoQuery.shortName = { $in: uniqueRoles, $ne: 'dro' }
   }
 
   return await ReviewRoleModel.find(mongoQuery)

@@ -66,14 +66,14 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         type: 'object',
         properties: {
           riskOwner: {
-            title: 'Who is the risk owner attached to this deployment assessment?',
+            title: `Who is the ${config.ui.roleDisplayNames.riskOwner} attached to this deployment assessment?`,
             type: 'string',
             minLength: 1,
             widget: 'entitySelector',
             hideDefaultUser: true,
           },
           justification: {
-            title: 'Justify why the risk owner has been assigned',
+            title: `Justify why the ${config.ui.roleDisplayNames.riskOwner} has been assigned`,
             type: 'string',
             minLength: 1,
           },
