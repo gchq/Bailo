@@ -116,8 +116,11 @@ export async function notifyDeploymentRiskOwner(
       },
     ],
     [
-      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
-      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployments` },
+      {
+        name: 'Open Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
     ],
     true,
   )
@@ -150,8 +153,14 @@ export async function notifyDeploymentModelOwners(
       },
     ],
     [
-      { name: 'View Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
-      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployments?tab=all-assessments&models=${model.id}` },
+      {
+        name: 'View Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      {
+        name: 'View Deployment Assessments',
+        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
+      },
       { name: 'Open Model', url: modelUrl },
     ],
     false,

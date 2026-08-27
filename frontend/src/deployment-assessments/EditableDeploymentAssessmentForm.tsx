@@ -166,7 +166,7 @@ export default function EditableDeploymentAssessmentForm({
           onDelete={() => deleteDeploymentAssessment(deploymentAssessment.id)}
           confirmationText={deploymentAssessment.name}
           successMessage='Deployment assessment deleted'
-          redirectTo='/deployments'
+          redirectTo='/deployment-assessments'
         />
         {isEdit && (
           <Stack

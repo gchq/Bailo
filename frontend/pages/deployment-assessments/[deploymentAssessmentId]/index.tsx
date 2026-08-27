@@ -8,7 +8,7 @@ import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
-import EditableDeploymentAssessmentForm from 'src/deployments/EditableDeploymentAssessmentForm'
+import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 
@@ -83,7 +83,7 @@ export default function DeploymentAssessment() {
                   spacing={2}
                   divider={<Divider flexItem orientation='vertical' />}
                 >
-                  <Link href={`/deployments`}>
+                  <Link href={`/deployment-assessments`}>
                     <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                       Back to deployments
                     </Button>
