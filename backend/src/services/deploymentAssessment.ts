@@ -26,7 +26,7 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
-import { removeResponses } from './response.js'
+import { removeResponsesByParentIds } from './response.js'
 import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
@@ -397,22 +397,21 @@ export async function removeDeploymentAssessment(
   deploymentAssessmentId: string,
   session?: ClientSession,
 ) {
-  const { deploymentAssessment, responses } = await getDeploymentAssessmentDetails(user, deploymentAssessmentId)
-  if (!deploymentAssessment) {
-    throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
-  }
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
-  await deploymentAssessment.delete(session)
-  await removeResponses(
-    responses.map((response) => response._id.toString()),
+  // Delete children before DA so that a failure part way through leaves DA so deletion safe to retry
+  const reviews = await ReviewModel.find({ deploymentAssessmentId }, undefined, { session })
+  await removeResponsesByParentIds(
+    [deploymentAssessment._id.toString(), ...reviews.map((review) => review._id.toString())],
     session,
   )
   await removeDeploymentAssessmentReviews(deploymentAssessmentId, session)
+  await deploymentAssessment.delete(session)
 
   return deploymentAssessment
 }

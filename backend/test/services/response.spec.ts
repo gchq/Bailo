@@ -7,7 +7,7 @@ import {
   checkReleaseApproved,
   findResponseById,
   getResponsesByParentIds,
-  removeResponses,
+  removeResponsesByParentIds,
   respondToReview,
   sendReviewResponseNotification,
   updateResponse,
@@ -126,44 +126,44 @@ describe('services > response', () => {
     )
   })
 
-  test('removeResponses > deletes the given responses and returns them', async () => {
-    const firstId = new Types.ObjectId()
-    const secondId = new Types.ObjectId()
-    const mockResponses = [{ _id: firstId }, { _id: secondId }]
-    ResponseModelMock.find.mockResolvedValueOnce(mockResponses)
+  test('removeResponsesByParentIds > deletes every response under the given parents in one query', async () => {
+    const firstParentId = new Types.ObjectId()
+    const secondParentId = new Types.ObjectId()
+    const responses = [{ _id: 'first' }, { _id: 'second' }]
+    ResponseModelMock.find.mockResolvedValueOnce(responses)
 
-    const result = await removeResponses([firstId.toHexString(), secondId.toHexString()])
+    const result = await removeResponsesByParentIds([firstParentId.toHexString(), secondParentId.toHexString()])
 
-    expect(ResponseModelMock.find).toHaveBeenCalledWith({ _id: { $in: [firstId, secondId] } }, undefined, {
-      session: undefined,
-    })
-    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [firstId, secondId] } }, undefined)
-    expect(result).toBe(mockResponses)
+    const filter = { parentId: { $in: [firstParentId, secondParentId] } }
+    expect(ResponseModelMock.find).toHaveBeenCalledWith(filter, undefined, { session: undefined })
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(filter, undefined)
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledTimes(1)
+    expect(result).toBe(responses)
   })
 
-  test('removeResponses > passes the transaction session through', async () => {
-    const responseId = new Types.ObjectId()
+  test('removeResponsesByParentIds > passes the transaction session through', async () => {
+    const parentId = new Types.ObjectId()
     const session = {} as any
-    ResponseModelMock.find.mockResolvedValueOnce([{ _id: responseId }])
+    ResponseModelMock.find.mockResolvedValueOnce([{ _id: 'first' }])
 
-    await removeResponses([responseId.toHexString()], session)
+    await removeResponsesByParentIds([parentId.toHexString()], session)
 
-    expect(ResponseModelMock.find).toHaveBeenCalledWith({ _id: { $in: [responseId] } }, undefined, { session })
-    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [responseId] } }, session)
+    const filter = { parentId: { $in: [parentId] } }
+    expect(ResponseModelMock.find).toHaveBeenCalledWith(filter, undefined, { session })
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(filter, session)
   })
 
-  test('removeResponses > handles an empty list of response IDs', async () => {
+  test('removeResponsesByParentIds > handles parents with no responses', async () => {
     ResponseModelMock.find.mockResolvedValueOnce([])
 
-    const result = await removeResponses([])
+    const result = await removeResponsesByParentIds([new Types.ObjectId().toHexString()])
 
-    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [] } }, undefined)
     expect(result).toStrictEqual([])
   })
 
-  test('removeResponses > rejects an invalid response ID', async () => {
-    await expect(removeResponses(['not-an-object-id'])).rejects.toThrow()
-    expect(ResponseModelMock.deleteMany).not.toHaveBeenCalled()
+  test('removeResponsesByParentIds > rejects an invalid parent ID', async () => {
+    await expect(removeResponsesByParentIds(['not-an-object-id'])).rejects.toThrow()
+    expect(ResponseModelMock.find).not.toHaveBeenCalled()
   })
 
   test('updateResponse > success', async () => {

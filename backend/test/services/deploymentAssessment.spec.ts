@@ -566,30 +566,24 @@ describe('services > deploymentAssessment', () => {
   })
 
   describe('removeDeploymentAssessment', () => {
-    const commentId = new Types.ObjectId()
-    const reviewResponseId = new Types.ObjectId()
+    const assessmentId = new Types.ObjectId()
+    const reviewId = new Types.ObjectId()
 
-    // `removeDeploymentAssessment` reads the assessment through `getDeploymentAssessmentDetails`, so the comment
-    // lookup, the review aggregation and the response lookup made by `removeResponses` all have to be stubbed.
-    const mockAssessmentWithResponses = () => {
-      const deploymentAssessment = { id: 'da-id', draft: false, delete: vi.fn() }
+    // The assessment's children are removed before the assessment itself. `ReviewModel.find` is called twice - once
+    // to collect the parent IDs for the responses, and again inside `removeDeploymentAssessmentReviews`.
+    const mockAssessmentWithChildren = () => {
+      const deploymentAssessment = { id: 'da-id', _id: assessmentId, draft: false, delete: vi.fn() }
+      const review = { _id: reviewId }
+
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-      ResponseModelMock.find.mockResolvedValueOnce([
-        { _id: commentId, kind: ResponseKind.Comment, createdAt: '2024-01-01T00:00:00Z' },
-      ])
-      ReviewModelMock.aggregate.mockResolvedValueOnce([
-        {
-          responses: [{ _id: reviewResponseId, kind: ResponseKind.Review, createdAt: '2024-01-02T00:00:00Z' }],
-        },
-      ])
-      ResponseModelMock.find.mockResolvedValueOnce([])
-      ReviewModelMock.find.mockResolvedValueOnce([])
+      ReviewModelMock.find.mockResolvedValueOnce([review]).mockResolvedValueOnce([review])
+      ResponseModelMock.find.mockResolvedValueOnce([{ _id: new Types.ObjectId() }])
 
-      return deploymentAssessment
+      return { deploymentAssessment }
     }
 
     test('soft deletes the assessment and returns it', async () => {
-      const deploymentAssessment = mockAssessmentWithResponses()
+      const { deploymentAssessment } = mockAssessmentWithChildren()
 
       const result = await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
 
@@ -603,55 +597,50 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('deletes the comments and review responses belonging to the assessment', async () => {
-      mockAssessmentWithResponses()
+      mockAssessmentWithChildren()
 
       await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
 
       expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(
-        { _id: { $in: [commentId, reviewResponseId] } },
+        { parentId: { $in: [assessmentId, reviewId] } },
         undefined,
       )
     })
 
-    test('deletes the review rounds belonging to the assessment', async () => {
-      mockAssessmentWithResponses()
+    test('deletes the reviews belonging to the assessment', async () => {
+      mockAssessmentWithChildren()
 
       await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
 
       expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined)
     })
 
-    test('deletes an assessment that has no responses', async () => {
-      const deploymentAssessment = { id: 'da-id', draft: true, delete: vi.fn() }
+    test('deletes an assessment that has no reviews or responses', async () => {
+      const deploymentAssessment = { id: 'da-id', _id: assessmentId, draft: true, delete: vi.fn() }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      ReviewModelMock.find.mockResolvedValueOnce([]).mockResolvedValueOnce([])
       ResponseModelMock.find.mockResolvedValueOnce([])
-      ReviewModelMock.aggregate.mockResolvedValueOnce([])
-      ResponseModelMock.find.mockResolvedValueOnce([])
-      ReviewModelMock.find.mockResolvedValueOnce([])
 
       await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
 
-      expect(deploymentAssessment.delete).toHaveBeenCalledWith(undefined)
-      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [] } }, undefined)
+      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ parentId: { $in: [assessmentId] } }, undefined)
       expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined)
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(undefined)
     })
 
     test('passes the transaction session through to every deletion', async () => {
-      const deploymentAssessment = mockAssessmentWithResponses()
+      const { deploymentAssessment } = mockAssessmentWithChildren()
       const session = {} as any
 
       await removeDeploymentAssessment({ dn: 'creator' }, 'da-id', session)
 
-      expect(deploymentAssessment.delete).toHaveBeenCalledWith(session)
-      expect(ResponseModelMock.find).toHaveBeenCalledWith({ _id: { $in: [commentId, reviewResponseId] } }, undefined, {
-        session,
-      })
+      expect(ReviewModelMock.find).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined, { session })
       expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(
-        { _id: { $in: [commentId, reviewResponseId] } },
+        { parentId: { $in: [assessmentId, reviewId] } },
         session,
       )
-      expect(ReviewModelMock.find).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined, { session })
       expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, session)
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(session)
     })
 
     test('throws a not found error when the assessment does not exist', async () => {
@@ -661,7 +650,7 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('rejects the deletion when the user cannot view the assessment', async () => {
-      const deploymentAssessment = mockAssessmentWithResponses()
+      const { deploymentAssessment } = mockAssessmentWithChildren()
       vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
         success: false,
         info: 'You do not have permission to view this Deployment Assessment',
@@ -675,7 +664,7 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('rejects the deletion when authorisation fails', async () => {
-      const deploymentAssessment = mockAssessmentWithResponses()
+      const { deploymentAssessment } = mockAssessmentWithChildren()
       vi.mocked(authorisation.deploymentAssessment)
         .mockResolvedValueOnce({ success: true, id: 'da-id' })
         .mockResolvedValueOnce({
