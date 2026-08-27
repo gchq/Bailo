@@ -63,7 +63,7 @@ export default function NewDeploymentAssessment() {
     setDraftButtonLoading(false)
 
     const body = await res.json()
-    router.push(`/deployments/${body.deploymentAssessment.id}`)
+    router.push(`/deployment-assessments/${body.deploymentAssessment.id}`)
   }
 
   async function onSubmit() {
@@ -102,7 +102,7 @@ export default function NewDeploymentAssessment() {
     }
 
     const body = await res.json()
-    router.push(`/deployments/${body.deploymentAssessment.id}`)
+    router.push(`/deployment-assessmentss/${body.deploymentAssessment.id}`)
   }
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment page', {
