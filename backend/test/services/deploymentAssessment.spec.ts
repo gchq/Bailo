@@ -332,7 +332,7 @@ describe('services > deploymentAssessment', () => {
         state: 'approved',
       })
       expect(ResponseModelMock.find).toHaveBeenCalledWith({
-        parentId: assessment._id,
+        parentId: assessment.id,
         kind: ResponseKind.Comment,
       })
     })
