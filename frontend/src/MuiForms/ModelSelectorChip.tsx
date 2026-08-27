@@ -17,25 +17,27 @@ export default function ModelSelectorChip({ label, modelId }: ModelSelectorChips
 
   return (
     <>
-      <Chip component='button' label={label} onClick={() => setIsDialogOpen(true)} sx={{ width: 'fit-content' }} />
-      {entry && (
-        <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth>
-          <DialogTitle color='primary'>{label}</DialogTitle>
-          <DialogContent>
-            {isEntryLoading && <Loading />}
-            {isEntryError && (
-              <MessageAlert message='Unable to load model details. Please try again.' severity='error' />
-            )}
-            {entry && <EntryOverviewDetails entry={entry} mutateEntry={mutateEntry} dialogView />}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-            <Button component={Link} href={`/model/${entry.id}`} variant='contained'>
-              Go to Model
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+      <Chip
+        aria-label={`Chip button for displaying information about model ${modelId}`}
+        component='button'
+        label={label}
+        onClick={() => setIsDialogOpen(true)}
+        sx={{ width: 'fit-content' }}
+      />
+      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth>
+        <DialogTitle color='primary'>{label}</DialogTitle>
+        <DialogContent>
+          {isEntryLoading && <Loading />}
+          {isEntryError && <MessageAlert message='Unable to load model details. Please try again.' severity='error' />}
+          {entry && <EntryOverviewDetails entry={entry} mutateEntry={mutateEntry} dialogView />}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
+          <Button component={Link} href={`/model/${modelId}`} variant='contained'>
+            Go to Model
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

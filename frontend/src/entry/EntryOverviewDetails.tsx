@@ -80,6 +80,7 @@ export default function EntryOverviewDetails({
   }, [entry])
 
   const updateEntryPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
+  const isEditable = updateEntryPermission.hasPermission && !dialogView
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
     setEntryTagUpdateErrorMessage('')
@@ -130,7 +131,7 @@ export default function EntryOverviewDetails({
           {uiConfig.modelDetails.organisations.length > 0 && (
             <EntrySelect
               label='Organisation'
-              editable={updateEntryPermission.hasPermission && !dialogView}
+              editable={isEditable}
               value={entry.organisation}
               entryId={entry.id}
               field='organisation'
@@ -141,7 +142,7 @@ export default function EntryOverviewDetails({
           {uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={updateEntryPermission.hasPermission && !dialogView}
+              editable={isEditable}
               value={entry.state}
               entryId={entry.id}
               field='state'
@@ -155,7 +156,7 @@ export default function EntryOverviewDetails({
             <Typography color='primary' sx={{ fontWeight: 'bold' }}>
               Model card review
             </Typography>
-            {!dialogView && updateEntryPermission.hasPermission && reviews.length === 0 && (
+            {isEditable && reviews.length === 0 && (
               <>
                 <DatePicker
                   value={reviewDate}
@@ -184,7 +185,7 @@ export default function EntryOverviewDetails({
                     : 'Invalid date'}
                 </Typography>
               )}
-              {!dialogView && updateEntryPermission.hasPermission && reviews[0] && (
+              {isEditable && reviews[0] && (
                 <Button
                   size='small'
                   sx={{ width: 'fit-content' }}
