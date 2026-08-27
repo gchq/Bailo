@@ -63,9 +63,10 @@ export const deploymentAssessmentSchemaIdSchema = z
   .string()
   .min(1, 'You must provide a schema ID')
   .openapi({ example: 'stark-deployment-assessment-schema-v1' })
-const deploymentAssessmentNameSchema = z
+export const deploymentAssessmentNameSchema = z
   .string()
   .min(1, 'You must provide a deployment assessment name')
+  .trim()
   .openapi({ example: 'Just A Rather Very Intelligent System' })
 const deploymentAssessmentRiskOwnerSchema = z
   .string()
@@ -87,10 +88,21 @@ export const deploymentAssessmentMetadataSchema = z
   .object({
     overview: z
       .object({
-        name: deploymentAssessmentNameSchema,
         riskOwner: deploymentAssessmentRiskOwnerSchema.optional(),
         justification: deploymentAssessmentJustificationSchema.optional(),
         modelIds: deploymentAssessmentModelIdsSchema.optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough()
+
+export const deploymentAssessmentMetadataRequiredSchema = z
+  .object({
+    overview: z
+      .object({
+        riskOwner: deploymentAssessmentRiskOwnerSchema,
+        justification: deploymentAssessmentJustificationSchema,
+        modelIds: deploymentAssessmentModelIdsSchema,
       })
       .passthrough(),
   })
@@ -108,6 +120,26 @@ export const deploymentAssessmentSummarySchema = z.object({
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
   state: deploymentAssessmentStateSchema.optional(),
 })
+
+const baseDeploymentAssessmentSchema = z.object({
+  name: deploymentAssessmentNameSchema,
+  schemaId: deploymentAssessmentSchemaIdSchema,
+})
+
+export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
+  baseDeploymentAssessmentSchema
+    .extend({
+      metadata: deploymentAssessmentMetadataRequiredSchema,
+      draft: z.literal(false),
+    })
+    .strict(),
+  baseDeploymentAssessmentSchema
+    .extend({
+      metadata: deploymentAssessmentMetadataSchema.optional(),
+      draft: z.literal(true).optional().default(true),
+    })
+    .strict(),
+])
 
 export const systemStatusSchema = z.object({
   code: z.number().openapi({ example: 200 }),

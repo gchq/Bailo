@@ -3,8 +3,7 @@ import { HydratedDocument, model, Schema } from 'mongoose'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export interface DeploymentAssessmentMetadata {
-  overview: {
-    name: string
+  overview?: {
     riskOwner?: string
     justification?: string
     modelIds?: string[]
@@ -15,6 +14,7 @@ export interface DeploymentAssessmentMetadata {
 
 export interface DeploymentAssessmentInterface {
   id: string
+  name: string
   schemaId: string
   metadata: DeploymentAssessmentMetadata
   draft: boolean
@@ -36,8 +36,9 @@ export type DeploymentAssessmentDoc = HydratedDocument<DeploymentAssessmentInter
 const DeploymentAssessmentSchema = new Schema<DeploymentAssessmentDoc>(
   {
     id: { type: String, unique: true, required: true, index: true },
+    name: { type: String, required: true },
     schemaId: { type: String, required: true },
-    metadata: { type: Schema.Types.Mixed, required: true, default: {} },
+    metadata: { type: Schema.Types.Mixed, default: {} },
     draft: { type: Boolean, required: true, default: true },
     createdBy: { type: String, required: true },
   },

@@ -300,6 +300,10 @@ module.exports = {
     llmImport: {
       enabled: false,
     },
+
+    deploymentAssessments: {
+      deployableModelState: 'Production',
+    },
   },
 
   connectors: {
@@ -347,10 +351,6 @@ module.exports = {
       uploads: 'uploads',
       registry: 'registry',
     },
-  },
-
-  deploymentAssessments: {
-    deployableModelState: 'Production',
   },
 
   instrumentation: {

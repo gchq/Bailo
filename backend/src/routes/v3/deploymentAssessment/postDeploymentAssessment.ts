@@ -6,23 +6,13 @@ import { z } from '../../../lib/zod.js'
 import { DeploymentAssessmentInterface } from '../../../models/DeploymentAssessment.js'
 import { createDeploymentAssessment } from '../../../services/deploymentAssessment.js'
 import {
-  deploymentAssessmentDraftSchema,
   deploymentAssessmentInterfaceSchema,
-  deploymentAssessmentMetadataSchema,
-  deploymentAssessmentSchemaIdSchema,
+  deploymentAssessmentSchema,
   registerPath,
 } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const postDeploymentAssessmentSchema = z.object({
-  body: z
-    .object({
-      schemaId: deploymentAssessmentSchemaIdSchema,
-      metadata: deploymentAssessmentMetadataSchema,
-      draft: deploymentAssessmentDraftSchema.optional().default(true),
-    })
-    .strict(),
-})
+const postDeploymentAssessmentSchema = z.object({ body: deploymentAssessmentSchema })
 
 registerPath(
   {

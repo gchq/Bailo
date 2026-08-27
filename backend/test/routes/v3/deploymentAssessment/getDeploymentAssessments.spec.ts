@@ -9,10 +9,10 @@ const deploymentAssessment = {
   _id: 'mongo-object-id',
   __v: 1,
   id: 'assessment-abc123',
+  name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      name: 'Assessment',
       riskOwner: 'user:risk-owner',
       justification: 'Owns the deployment risk.',
       modelIds: ['model-one', 'model-two'],

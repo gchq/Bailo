@@ -244,10 +244,10 @@ data:
           untrustedModelShortDescription: '{{ .Values.config.ui.untrustedModel.untrustedModelShortDescription }}',
           fileUploadGuidance: '{{ .Values.config.ui.untrustedModel.fileUploadGuidance }}',
         },
-      },
 
-      deploymentAssessments: {
-        deployableModelState: '{{ .Values.config.deploymentAssessments.deployableModelState }}',
+        deploymentAssessments: {
+          deployableModelState: '{{ .Values.config.ui.deploymentAssessments.deployableModelState }}',
+        },
       },
 
       connectors: {

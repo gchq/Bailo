@@ -88,6 +88,10 @@ export interface UiConfig {
   llmImport: {
     enabled: boolean
   }
+
+  deploymentAssessments: {
+    deployableModelState: string
+  }
 }
 
 export interface FileInterface {
@@ -280,6 +284,7 @@ export const SchemaKindLabel = {
   model: 'model',
   accessRequest: 'access request',
   dataCard: 'data card',
+  deploymentAssessment: 'deployment assessment',
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
 
@@ -1149,7 +1154,6 @@ export interface BaseLifecycleMetrics {
 
 export interface DeploymentAssessmentMetadata {
   overview: {
-    name: string
     riskOwner?: string
     justification?: string
     modelIds?: string[]
@@ -1161,6 +1165,7 @@ export interface DeploymentAssessmentMetadata {
 export interface DeploymentAssessmentInterface {
   id: string
   schemaId: string
+  name: string
   metadata: DeploymentAssessmentMetadata
   draft: boolean
   createdBy: string

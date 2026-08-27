@@ -65,18 +65,12 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         title: 'Details',
         type: 'object',
         properties: {
-          name: {
-            title: 'What is the name of the deployment assessment?',
-            description: 'This will be used to distinguish your deployment assessment.',
-            type: 'string',
-            minLength: 1,
-            requiredForDraft: true,
-          },
           riskOwner: {
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'string',
             minLength: 1,
             widget: 'entitySelector',
+            hideDefaultUser: true,
           },
           justification: {
             title: 'Justify why the risk owner has been assigned',
@@ -95,7 +89,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             widget: 'modelSelector',
           },
         },
-        required: ['name', 'riskOwner', 'justification', 'modelIds'],
+        required: ['riskOwner', 'justification', 'modelIds'],
         additionalProperties: false,
       },
       ...jsonSchema.properties,

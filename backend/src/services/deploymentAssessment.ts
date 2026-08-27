@@ -4,6 +4,7 @@ import { PipelineStage, QueryFilter } from 'mongoose'
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { z } from '../lib/zod.js'
 import DeploymentAssessmentModel, {
   DeploymentAssessmentDoc,
   DeploymentAssessmentInterface,
@@ -22,11 +23,12 @@ import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
-import { useTransaction } from '../utils/transactions.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
+import { deploymentAssessmentSchema } from './specification.js'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string
@@ -44,8 +46,8 @@ export type DeploymentAssessmentSearchResult = DeploymentAssessmentDoc & {
   state?: DeploymentAssessmentDetails['state']
 }
 
-export type CreateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'schemaId' | 'draft' | 'metadata'>
-export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft'>
+export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
+export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
 
 export interface DeploymentAssessmentDetails {
   deploymentAssessment: DeploymentAssessmentDoc
@@ -83,17 +85,15 @@ async function validateModels(modelIds: string[]) {
     throw BadReq('Deployment assessments can only use public models.', { modelIds: privateModelIds })
   }
 
+  const deployableModelState = config.ui.deploymentAssessments.deployableModelState
   const nonDeployableStateModelIds = models
-    .filter((model) => model.state !== config.deploymentAssessments.deployableModelState)
+    .filter((model) => model.state !== deployableModelState)
     .map((model) => model.id)
   if (nonDeployableStateModelIds.length > 0) {
-    throw BadReq(
-      `Deployment assessments can only use models with a ${config.deploymentAssessments.deployableModelState.toLowerCase()} state.`,
-      {
-        modelIds: nonDeployableStateModelIds,
-        deployableModelState: config.deploymentAssessments.deployableModelState,
-      },
-    )
+    throw BadReq(`Deployment assessments can only use models with a ${deployableModelState} state.`, {
+      modelIds: nonDeployableStateModelIds,
+      deployableModelState,
+    })
   }
 }
 
@@ -107,7 +107,7 @@ async function validateDeploymentAssessment(
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
 
-  const { riskOwner, modelIds } = metadata.overview
+  const { riskOwner, modelIds } = metadata.overview ?? {}
 
   if (!draft && !riskOwner) {
     throw BadReq('Deployment risk owner is required')
@@ -303,7 +303,7 @@ export async function reviewDeploymentAssessment(
   if (deploymentAssessment.draft) {
     throw BadReq('Draft deployment assessments cannot be reviewed.', { deploymentAssessmentId })
   }
-  if (deploymentAssessment.metadata.overview.riskOwner !== toEntity('user', user.dn)) {
+  if (deploymentAssessment.metadata.overview?.riskOwner !== toEntity('user', user.dn)) {
     throw Forbidden('Only the deployment risk owner can review a deployment assessment.', { deploymentAssessmentId })
   }
 
@@ -320,28 +320,43 @@ export async function reviewDeploymentAssessment(
   return response
 }
 
-export async function createDeploymentAssessment(user: UserInterface, params: CreateDeploymentAssessmentParams) {
-  // only validate schema on creation as it cannot be edited
-  const schema = await getSchemaById(params.schemaId)
+export async function createDeploymentAssessment(
+  user: UserInterface,
+  { name, schemaId, draft, metadata }: CreateDeploymentAssessmentParams,
+) {
+  const schema = await getSchemaById(schemaId)
   if (schema.hidden) {
-    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId: params.schemaId })
+    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId })
   }
   if (schema.kind !== SchemaKind.DeploymentAssessment) {
-    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId: params.schemaId })
+    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId })
   }
 
-  await validateDeploymentAssessment(params.schemaId, params.metadata, params.draft)
+  if (metadata) {
+    const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
+    if (!valid) {
+      throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
+    }
 
-  const deploymentAssessmentId = convertStringToId(params.metadata.overview.name)
+    if (metadata.overview.riskOwner) {
+      await validateRiskOwner(metadata.overview.riskOwner)
+    }
+    if (metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
+      await validateModels(metadata.overview.modelIds)
+    }
+  }
+
+  const deploymentAssessmentId = convertStringToId(name)
   const deploymentAssessment = new DeploymentAssessmentModel({
     id: deploymentAssessmentId,
-    schemaId: params.schemaId,
-    metadata: params.metadata,
-    draft: params.draft,
+    name,
+    schemaId,
+    metadata: metadata ?? {},
+    draft,
     createdBy: user.dn,
   })
 
-  const review = params.draft
+  const review = draft
     ? undefined
     : new ReviewModel({
         kind: ReviewKind.DeploymentAssessment,
@@ -368,12 +383,8 @@ export async function createDeploymentAssessment(user: UserInterface, params: Cr
     throw error
   }
 
-  if (!params.draft && params.metadata.overview.riskOwner) {
-    await notifyDeploymentStakeholders(
-      params.metadata.overview.riskOwner,
-      params.metadata.overview.modelIds ?? [],
-      deploymentAssessment,
-    )
+  if (!draft) {
+    await notifyDeploymentStakeholders(metadata.overview.riskOwner, metadata.overview.modelIds, deploymentAssessment)
   }
 
   return deploymentAssessment
@@ -414,6 +425,10 @@ export async function updateDeploymentAssessment(
     diff.draft ?? deploymentAssessment.draft,
   )
 
+  if (diff.name !== undefined) {
+    deploymentAssessment.name = diff.name
+    deploymentAssessment.markModified('name')
+  }
   if (diff.metadata !== undefined) {
     deploymentAssessment.metadata = metadata
     deploymentAssessment.markModified('metadata')
