@@ -7,6 +7,7 @@ import {
   checkReleaseApproved,
   findResponseById,
   getResponsesByParentIds,
+  removeResponses,
   respondToReview,
   sendReviewResponseNotification,
   updateResponse,
@@ -123,6 +124,46 @@ describe('services > response', () => {
     await expect(getResponsesByParentIds(['507f1f77bcf86cd799439011'])).rejects.toThrow(
       'The requested response was not found.',
     )
+  })
+
+  test('removeResponses > deletes the given responses and returns them', async () => {
+    const firstId = new Types.ObjectId()
+    const secondId = new Types.ObjectId()
+    const mockResponses = [{ _id: firstId }, { _id: secondId }]
+    ResponseModelMock.find.mockResolvedValueOnce(mockResponses)
+
+    const result = await removeResponses([firstId.toHexString(), secondId.toHexString()])
+
+    expect(ResponseModelMock.find).toHaveBeenCalledWith({ _id: { $in: [firstId, secondId] } }, undefined, {
+      session: undefined,
+    })
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [firstId, secondId] } }, undefined)
+    expect(result).toBe(mockResponses)
+  })
+
+  test('removeResponses > passes the transaction session through', async () => {
+    const responseId = new Types.ObjectId()
+    const session = {} as any
+    ResponseModelMock.find.mockResolvedValueOnce([{ _id: responseId }])
+
+    await removeResponses([responseId.toHexString()], session)
+
+    expect(ResponseModelMock.find).toHaveBeenCalledWith({ _id: { $in: [responseId] } }, undefined, { session })
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [responseId] } }, session)
+  })
+
+  test('removeResponses > handles an empty list of response IDs', async () => {
+    ResponseModelMock.find.mockResolvedValueOnce([])
+
+    const result = await removeResponses([])
+
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [] } }, undefined)
+    expect(result).toStrictEqual([])
+  })
+
+  test('removeResponses > rejects an invalid response ID', async () => {
+    await expect(removeResponses(['not-an-object-id'])).rejects.toThrow()
+    expect(ResponseModelMock.deleteMany).not.toHaveBeenCalled()
   })
 
   test('updateResponse > success', async () => {

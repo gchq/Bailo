@@ -1,4 +1,5 @@
 import { MongoServerError } from 'mongodb'
+import { Types } from 'mongoose'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authentication from '../../src/connectors/authentication/index.js'
@@ -565,9 +566,30 @@ describe('services > deploymentAssessment', () => {
   })
 
   describe('removeDeploymentAssessment', () => {
-    test('soft deletes the assessment and returns it', async () => {
-      const deploymentAssessment = { id: 'da-id', delete: vi.fn() }
+    const commentId = new Types.ObjectId()
+    const reviewResponseId = new Types.ObjectId()
+
+    // `removeDeploymentAssessment` reads the assessment through `getDeploymentAssessmentDetails`, so the comment
+    // lookup, the review aggregation and the response lookup made by `removeResponses` all have to be stubbed.
+    const mockAssessmentWithResponses = () => {
+      const deploymentAssessment = { id: 'da-id', draft: false, delete: vi.fn() }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      ResponseModelMock.find.mockResolvedValueOnce([
+        { _id: commentId, kind: ResponseKind.Comment, createdAt: '2024-01-01T00:00:00Z' },
+      ])
+      ReviewModelMock.aggregate.mockResolvedValueOnce([
+        {
+          responses: [{ _id: reviewResponseId, kind: ResponseKind.Review, createdAt: '2024-01-02T00:00:00Z' }],
+        },
+      ])
+      ResponseModelMock.find.mockResolvedValueOnce([])
+      ReviewModelMock.find.mockResolvedValueOnce([])
+
+      return deploymentAssessment
+    }
+
+    test('soft deletes the assessment and returns it', async () => {
+      const deploymentAssessment = mockAssessmentWithResponses()
 
       const result = await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
 
@@ -580,14 +602,56 @@ describe('services > deploymentAssessment', () => {
       expect(result).toBe(deploymentAssessment)
     })
 
-    test('passes the transaction session through to the deletion', async () => {
-      const deploymentAssessment = { id: 'da-id', delete: vi.fn() }
+    test('deletes the comments and review responses belonging to the assessment', async () => {
+      mockAssessmentWithResponses()
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(
+        { _id: { $in: [commentId, reviewResponseId] } },
+        undefined,
+      )
+    })
+
+    test('deletes the review rounds belonging to the assessment', async () => {
+      mockAssessmentWithResponses()
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined)
+    })
+
+    test('deletes an assessment that has no responses', async () => {
+      const deploymentAssessment = { id: 'da-id', draft: true, delete: vi.fn() }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      ResponseModelMock.find.mockResolvedValueOnce([])
+      ReviewModelMock.aggregate.mockResolvedValueOnce([])
+      ResponseModelMock.find.mockResolvedValueOnce([])
+      ReviewModelMock.find.mockResolvedValueOnce([])
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(undefined)
+      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ _id: { $in: [] } }, undefined)
+      expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined)
+    })
+
+    test('passes the transaction session through to every deletion', async () => {
+      const deploymentAssessment = mockAssessmentWithResponses()
       const session = {} as any
 
       await removeDeploymentAssessment({ dn: 'creator' }, 'da-id', session)
 
       expect(deploymentAssessment.delete).toHaveBeenCalledWith(session)
+      expect(ResponseModelMock.find).toHaveBeenCalledWith({ _id: { $in: [commentId, reviewResponseId] } }, undefined, {
+        session,
+      })
+      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(
+        { _id: { $in: [commentId, reviewResponseId] } },
+        session,
+      )
+      expect(ReviewModelMock.find).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined, { session })
+      expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, session)
     })
 
     test('throws a not found error when the assessment does not exist', async () => {
@@ -596,19 +660,36 @@ describe('services > deploymentAssessment', () => {
       await expect(removeDeploymentAssessment({ dn: 'creator' }, 'da-id')).rejects.toMatchObject({ code: 404 })
     })
 
-    test('rejects the deletion when authorisation fails', async () => {
-      const deploymentAssessment = { id: 'da-id', delete: vi.fn() }
-      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+    test('rejects the deletion when the user cannot view the assessment', async () => {
+      const deploymentAssessment = mockAssessmentWithResponses()
       vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
         success: false,
-        info: 'You do not have permission to delete this Deployment Assessment',
+        info: 'You do not have permission to view this Deployment Assessment',
         id: 'da-id',
       })
+
+      await expect(removeDeploymentAssessment({ dn: 'otherUser' }, 'da-id')).rejects.toThrow(
+        /^You do not have permission to view this Deployment Assessment/,
+      )
+      expect(deploymentAssessment.delete).not.toHaveBeenCalled()
+    })
+
+    test('rejects the deletion when authorisation fails', async () => {
+      const deploymentAssessment = mockAssessmentWithResponses()
+      vi.mocked(authorisation.deploymentAssessment)
+        .mockResolvedValueOnce({ success: true, id: 'da-id' })
+        .mockResolvedValueOnce({
+          success: false,
+          info: 'You do not have permission to delete this Deployment Assessment',
+          id: 'da-id',
+        })
 
       await expect(removeDeploymentAssessment({ dn: 'otherUser' }, 'da-id')).rejects.toThrow(
         /^You do not have permission to delete this Deployment Assessment/,
       )
       expect(deploymentAssessment.delete).not.toHaveBeenCalled()
+      expect(ResponseModelMock.deleteMany).not.toHaveBeenCalled()
+      expect(ReviewModelMock.deleteMany).not.toHaveBeenCalled()
     })
   })
 
