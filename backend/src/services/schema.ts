@@ -157,7 +157,12 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 
   if (overwrite) {
-    await SchemaModel.deleteOne({ id: schema.id })
+    await SchemaModel.replaceOne({ id: schema.id }, { ...schema, deleted: false }, { upsert: true })
+    const replaced = await SchemaModel.findOne({ id: schema.id })
+    if (!replaced) {
+      throw NotFound('The schema could not be found after upsert.', { schemaId: schema.id })
+    }
+    return replaced
   }
 
   try {
@@ -259,38 +264,29 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 export async function addDefaultSchemas() {
   for (const schema of config.defaultSchemas.modelCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.Model,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
+    await SchemaModel.replaceOne(
+      { id: schema.id },
+      { ...schema, kind: SchemaKind.Model, active: true, hidden: false, deleted: false },
+      { upsert: true },
+    )
   }
 
   for (const schema of config.defaultSchemas.dataCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const dataCardSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.DataCard,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await dataCardSchema.save()
+    await SchemaModel.replaceOne(
+      { id: schema.id },
+      { ...schema, kind: SchemaKind.DataCard, active: true, hidden: false, deleted: false },
+      { upsert: true },
+    )
   }
 
   for (const schema of config.defaultSchemas.accessRequests) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.AccessRequest,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
+    await SchemaModel.replaceOne(
+      { id: schema.id },
+      { ...schema, kind: SchemaKind.AccessRequest, active: true, hidden: false, deleted: false },
+      { upsert: true },
+    )
   }
 }
 

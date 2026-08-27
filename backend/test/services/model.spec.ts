@@ -189,7 +189,8 @@ describe('services > model', () => {
 
       const result = await removeModel({} as any, 'modelId')
 
-      expect(result).toMatchSnapshot()
+      expect(result.id).toBe('mock-id')
+      expect(result.delete).toHaveBeenCalledWith(undefined)
       expect(reviewMock.findReviews).toHaveBeenCalled()
       expect(registryMock.listModelImages).toHaveBeenCalled()
       expect(releaseMock.getModelReleases).toHaveBeenCalled()
@@ -256,7 +257,8 @@ describe('services > model', () => {
 
       const result = await removeModel(user, modelId)
 
-      expect(result).toMatchSnapshot()
+      expect(result.id).toBe('mock-id')
+      expect(result.delete).toHaveBeenCalledWith(undefined)
       expect(reviewMock.findReviews).toHaveBeenCalled()
       expect(registryMock.listModelImages).toHaveBeenCalled()
       expect(releaseMock.getModelReleases).toHaveBeenCalled()
