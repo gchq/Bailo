@@ -43,7 +43,7 @@ export default function ModelSelector({
     entries: models,
     isEntriesLoading: isModelsLoading,
     isEntriesError: isModelsError,
-  } = useListEntries(EntryKind.MODEL)
+  } = useListEntries([EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL])
 
   const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
 
