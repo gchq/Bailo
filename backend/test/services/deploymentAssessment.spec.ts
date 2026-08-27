@@ -414,6 +414,9 @@ describe('services > deploymentAssessment', () => {
         reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve),
       ).resolves.toBeDefined()
       expect(ResponseModelMock).toHaveBeenCalledWith(expect.objectContaining({ decision: Decision.Approve }))
+    })
+  })
+
   describe('updateDeploymentAssessment', () => {
     const existingDeploymentAssessment = () => ({
       id: 'da-id',
