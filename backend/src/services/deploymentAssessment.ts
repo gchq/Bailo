@@ -217,7 +217,7 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  const responses = await getResponses(deploymentAssessmentId)
+  const responses = await getResponses(deploymentAssessment._id)
   const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
 
   return {
