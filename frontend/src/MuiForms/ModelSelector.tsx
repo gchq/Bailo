@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useContext, useEffect, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -60,6 +60,8 @@ export default function ModelSelector({
     undefined,
     'public',
   )
+
+  const modelsById = useMemo(() => new Map(models.map((model) => [model.id, model])), [models])
 
   const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
 
@@ -176,7 +178,7 @@ export default function ModelSelector({
             {currentValue.map((currentModelId) => (
               <ModelSelectorChip
                 key={currentModelId}
-                label={models.find((model) => model.id === currentModelId)?.name || 'Unable to find model name'}
+                label={modelsById.get(currentModelId)?.name ?? 'Unable to find model name'}
                 modelId={currentModelId}
               />
             ))}

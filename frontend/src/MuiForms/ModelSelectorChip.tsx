@@ -1,8 +1,9 @@
-import { Button, Chip, Dialog, DialogActions, DialogContent } from '@mui/material'
+import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import EntryOverviewDetails from 'src/entry/EntryOverviewDetails'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 
 interface ModelSelectorChipsProps {
@@ -11,34 +12,25 @@ interface ModelSelectorChipsProps {
 }
 
 export default function ModelSelectorChip({ label, modelId }: ModelSelectorChipsProps) {
-  const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetModel(modelId)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-  if (isEntryLoading) {
-    return <Loading />
-  }
-
-  if (isEntryError) {
-    return <MessageAlert message={isEntryError.info.message} severity='error' />
-  }
+  const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetModel(isDialogOpen ? modelId : null)
 
   return (
     <>
-      <Chip
-        component='button'
-        label={label}
-        key={modelId}
-        onClick={() => setIsDialogOpen(true)}
-        sx={{ width: 'fit-content' }}
-      />
+      <Chip component='button' label={label} onClick={() => setIsDialogOpen(true)} sx={{ width: 'fit-content' }} />
       {entry && (
         <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth>
+          <DialogTitle color='primary'>{label}</DialogTitle>
           <DialogContent>
-            <EntryOverviewDetails entry={entry} mutateEntry={mutateEntry} showAsDialog />
+            {isEntryLoading && <Loading />}
+            {isEntryError && (
+              <MessageAlert message='Unable to load model details. Please try again.' severity='error' />
+            )}
+            {entry && <EntryOverviewDetails entry={entry} mutateEntry={mutateEntry} dialogView />}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-            <Button variant='contained' href={`/model/${entry.id}`}>
+            <Button component={Link} href={`/model/${entry.id}`} variant='contained'>
               Go to Model
             </Button>
           </DialogActions>
