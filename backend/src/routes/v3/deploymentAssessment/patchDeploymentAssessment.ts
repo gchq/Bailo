@@ -9,6 +9,7 @@ import {
   deploymentAssessmentDraftSchema,
   deploymentAssessmentInterfaceSchema,
   deploymentAssessmentMetadataSchema,
+  deploymentAssessmentNameSchema,
   registerPath,
 } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -16,6 +17,7 @@ import { parse } from '../../../utils/validate.js'
 export const patchDeploymentAssessmentSchema = z.object({
   body: z
     .object({
+      name: deploymentAssessmentNameSchema.optional(),
       metadata: deploymentAssessmentMetadataSchema.optional(),
       draft: deploymentAssessmentDraftSchema.optional(),
     })

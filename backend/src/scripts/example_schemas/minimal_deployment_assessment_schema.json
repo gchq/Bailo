@@ -7,10 +7,11 @@
       "type": "object",
       "properties": {
         "deploymentSummary": {
-          "title": "What is the name of the deployment assessment?",
-          "description": "This will be used to distinguish your deployment assessment.",
+          "title": "What does the deployment do?",
+          "description": "A description of what the deployment does.",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 5000
         },
         "deploymentDate": {
           "title": "When is this deployment due to start?",

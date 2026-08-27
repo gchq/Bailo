@@ -85,9 +85,8 @@ describe('services > schema', () => {
     expect(result[0].jsonSchema.properties).toEqual({
       overview: expect.objectContaining({
         title: 'Details',
-        required: ['name', 'riskOwner', 'justification', 'modelIds'],
+        required: ['riskOwner', 'justification', 'modelIds'],
         properties: expect.objectContaining({
-          name: expect.objectContaining({ minLength: 1, requiredForDraft: true }),
           modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),
       }),

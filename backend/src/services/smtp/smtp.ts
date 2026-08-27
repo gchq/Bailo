@@ -107,7 +107,7 @@ export async function notifyDeploymentRiskOwner(
   const emailContent = buildEmail(
     `A deployment assessment is ready for your review`,
     [
-      { title: 'Deployment Assessment Name', data: deployment.metadata.overview.name },
+      { title: 'Deployment Assessment Name', data: deployment.name },
       { title: 'Deployment Assessment ID', data: deployment.id },
       {
         title: 'Created By',

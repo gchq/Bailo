@@ -50,7 +50,7 @@ describe.skip('Make and approve an access request', () => {
     cy.get('#root_name').type(accessRequestName)
     // We use a debounce for form entry, so wait until it has rendered
     cy.wait(500)
-    cy.get('[data-test=createAccessRequestButton]', { timeout: 15000 }).click()
+    cy.contains('button', 'Submit', { timeout: 15000 }).click()
 
     cy.url().should('contain', `/model/${modelUuid}/access-request`)
     cy.get('[data-test=accessRequestContainer]').contains(accessRequestName)
