@@ -53,6 +53,7 @@ export function useListEntries(
   schemaId?: string,
   titleOnly?: boolean,
   adminAccess?: boolean,
+  visibility?: EntryVisibilityKeys,
   enabled = true,
 ) {
   const queryParams = {
@@ -68,6 +69,7 @@ export function useListEntries(
     ...(schemaId && { schemaId }),
     ...(titleOnly && { titleOnly }),
     ...(adminAccess && { adminAccess }),
+    ...(visibility && { visibility }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {

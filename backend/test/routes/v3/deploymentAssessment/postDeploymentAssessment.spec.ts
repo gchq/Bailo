@@ -7,10 +7,10 @@ vi.mock('../../../../src/connectors/audit/index.js')
 
 const deploymentAssessment = {
   id: 'assessment-abc123',
+  name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      name: 'Assessment',
       riskOwner: 'user:risk-owner',
       justification: 'Owns the deployment risk.',
       modelIds: ['model-one'],
@@ -32,6 +32,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce(deploymentAssessment)
     const fixture = {
       body: {
+        name: 'Assessment',
         schemaId: 'deployment-assessment-schema',
         metadata: deploymentAssessment.metadata,
         draft: false,
@@ -53,9 +54,9 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
   })
 
   test.each([
-    { name: 'Assessment' },
-    { name: 'Assessment', riskOwner: 'user:risk-owner', modelIds: [] },
-    { name: 'Assessment', justification: 'Owns the deployment risk.', modelIds: ['model-one'] },
+    { riskOwner: 'user:risk-owner', modelIds: [] },
+    { justification: 'Owns the deployment risk.', modelIds: ['model-one'] },
+    {},
   ])('creates a draft with overview fields set to %j', async (overview) => {
     const draftAssessment = {
       ...deploymentAssessment,
@@ -64,6 +65,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
     }
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce(draftAssessment)
     const body = {
+      name: 'Assessment',
       schemaId: 'deployment-assessment-schema',
       metadata: { overview },
       draft: true,
@@ -75,11 +77,25 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
     expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
   })
 
-  test('creates a draft by default', async () => {
+  test('creates a draft by default when draft is not specified', async () => {
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce({ ...deploymentAssessment, draft: true })
     const body = {
+      name: 'Assessment',
       schemaId: 'deployment-assessment-schema',
-      metadata: { overview: { name: 'Assessment' } },
+      metadata: { overview: {} },
+    }
+
+    const res = await testPost('/api/v3/deployment-assessments', { body })
+
+    expect(res.statusCode).toBe(201)
+    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), { ...body, draft: true })
+  })
+
+  test('creates a draft without metadata when draft is not specified', async () => {
+    serviceMock.createDeploymentAssessment.mockResolvedValueOnce({ ...deploymentAssessment, draft: true })
+    const body = {
+      name: 'Assessment',
+      schemaId: 'deployment-assessment-schema',
     }
 
     const res = await testPost('/api/v3/deployment-assessments', { body })
@@ -97,11 +113,16 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
     { body: { schemaId: 'deployment-assessment-schema', metadata: 'invalid' }, description: 'non-object metadata' },
     {
       body: {
+        name: 'Assessment',
         schemaId: 'deployment-assessment-schema',
         metadata: deploymentAssessment.metadata,
         createdBy: 'attacker',
       },
       description: 'server-managed property',
+    },
+    {
+      body: { name: 'Assessment', schemaId: 'deployment-assessment-schema', draft: false },
+      description: 'missing metadata when draft is false',
     },
   ])('rejects malformed input: $description', async ({ body }) => {
     const res = await testPost('/api/v3/deployment-assessments', { body })

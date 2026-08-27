@@ -34,7 +34,7 @@ export default function Deployments() {
         tabs={tabs}
         displayActionButton
         actionButtonTitle='Create deployment assessment'
-        actionButtonOnClick={() => router.push('/deployments/new')}
+        actionButtonOnClick={() => router.push('/deployment-assessments/new')}
         actionButtonIcon={<Add />}
         buttonHelpDialog={{
           title: 'What are deployment assessments?',

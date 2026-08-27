@@ -5,9 +5,10 @@ import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useContext, useEffect, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import ModelSelectorChip from 'src/MuiForms/ModelSelectorChip'
 import { EntryKind } from 'types/types'
@@ -38,12 +39,27 @@ export default function ModelSelector({
   const [open, setOpen] = useState(false)
   const [modelListQuery, setModelListQuery] = useState('')
   const theme = useTheme()
+  const uiConfig = useContext(UiConfigContext)
 
   const {
     entries: models,
     isEntriesLoading: isModelsLoading,
     isEntriesError: isModelsError,
-  } = useListEntries([EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL])
+  } = useListEntries(
+    [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    [uiConfig.deploymentAssessments.deployableModelState],
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    'public',
+  )
 
   const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
 
@@ -90,6 +106,10 @@ export default function ModelSelector({
       .map((cardId) => models?.find((model) => model.id === cardId)?.name ?? 'Unable to find model name')
       .sort((a, b) => a.localeCompare(b))
       .join('\n')
+  }
+
+  if (currentValue.length === 1 && currentValue[0] === null) {
+    onChange([])
   }
 
   return (

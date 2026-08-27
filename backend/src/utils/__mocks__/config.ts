@@ -27,9 +27,6 @@ const config: PartialDeep<Config> = {
       registry: 'registry',
     },
   },
-  deploymentAssessments: {
-    deployableModelState: 'Production',
-  },
   connectors: {
     authentication: {
       kind: 'silly',
@@ -147,6 +144,9 @@ const config: PartialDeep<Config> = {
       enabled: false,
       untrustedModelLongDescription: 'tbd',
       untrustedModelShortDescription: 'tbd',
+    },
+    deploymentAssessments: {
+      deployableModelState: 'Production',
     },
   },
   modelMirror: {
