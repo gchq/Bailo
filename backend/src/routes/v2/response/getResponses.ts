@@ -23,7 +23,7 @@ registerPath({
   schema: getResponseSchema,
   responses: {
     200: {
-      description: 'An array of responsess.',
+      description: 'An array of responses.',
       content: {
         'application/json': {
           schema: z.array(
