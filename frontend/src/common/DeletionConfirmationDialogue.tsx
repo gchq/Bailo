@@ -11,14 +11,11 @@ import { getErrorMessage } from 'utils/fetcher'
 type DeletionConfirmationDialogueProps = {
   open: boolean
   title: string
-  /** Closes the dialogue. Called when the user cancels and after a successful deletion. */
   onClose: () => void
-  /** Performs the delete request. The dialogue owns loading, error, notification and redirect. */
   onDelete: () => Promise<Response>
   /** When provided, the user must type this exact string before the delete button is enabled. */
   confirmationText?: string
   dialogMessage?: string
-  /** Success snackbar text. Omit to send no notification. */
   successMessage?: string
   /** Route pushed on success. Omit to stay on the current page. */
   redirectTo?: string

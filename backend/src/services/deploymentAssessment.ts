@@ -451,7 +451,6 @@ export async function updateDeploymentAssessment(
     diff.draft ?? deploymentAssessment.draft,
   )
 
-  // the ID is derived from the name at creation and is not regenerated, so renaming leaves the ID unchanged
   if (diff.name !== undefined) {
     deploymentAssessment.name = diff.name
     deploymentAssessment.markModified('name')
