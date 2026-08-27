@@ -118,13 +118,6 @@ module.exports = {
       description: 'Reviewer',
       systemRole: 'owner',
     },
-    {
-      name: 'Deployment Risk Owner',
-      shortName: 'dro',
-      kind: 'review',
-      description: 'Deployment assessment reviewer',
-      systemRole: 'owner',
-    },
   ],
 
   defaultSchemas: {
@@ -163,7 +156,6 @@ module.exports = {
         id: 'minimal-deployment-assessment-schema-v1',
         description: 'A minimal deployment assessment capturing the deployment name and details.',
         jsonSchema: require('../src/scripts/example_schemas/minimal_deployment_assessment_schema.json'),
-        reviewRoles: ['dro'],
       },
     ],
   },
@@ -286,6 +278,7 @@ module.exports = {
       owner: 'Owner',
       contributor: 'Contributor',
       consumer: 'Consumer',
+      riskOwner: 'Deployment Risk Owner',
     },
 
     untrustedModel: {
