@@ -1,10 +1,11 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MenuIcon from '@mui/icons-material/Menu'
-import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { Button, Chip, ListItem, Menu, MenuItem, Stack } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
+import LabelledValue from 'src/common/LabelledValue'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import UsageListDialog from 'src/schemas/UsageListDialog'
 import { SchemaInterface } from 'types/types'
@@ -50,30 +51,36 @@ export default function SchemaListItem({
 
   return (
     <ListItem divider={index < schemasLength - 1} key={schema.id}>
-      <Stack direction={{ xs: 'column', sm: 'row' }}>
-        <ListItemText
-          primary={
-            <EditableText
-              value={schema.name}
-              onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { name: newValue })}
-              tooltipText='Edit schema name'
-            />
-          }
-          secondary={
-            <EditableText
-              value={schema.description}
-              onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { description: newValue })}
-              tooltipText='Edit schema description'
-              richText
-            />
-          }
-        />
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        sx={{
+          width: '100%',
+          alignItems: { xs: 'stretch', sm: 'flex-start' },
+        }}
+      >
+        <Stack spacing={2} sx={{ width: '100%' }}>
+          <LabelledValue label='ID' value={schema.id} />
+          <EditableText
+            label='Name'
+            value={schema.name}
+            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { name: newValue })}
+            tooltipText='Edit schema name'
+          />
+          <EditableText
+            label='Description'
+            value={schema.description}
+            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { description: newValue })}
+            tooltipText='Edit schema description'
+            richText
+          />
+        </Stack>
         <Stack
           spacing={1}
           direction={{ xs: 'column', md: 'row' }}
           sx={{
             alignItems: 'center',
-            ml: 2,
+            flexShrink: 0,
           }}
         >
           <Chip

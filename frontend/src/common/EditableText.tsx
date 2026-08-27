@@ -1,11 +1,12 @@
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
-import { useCallback, useMemo, useState } from 'react'
+import { Box, Button, IconButton, Stack, TextField, Tooltip } from '@mui/material'
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 
 interface EditableTextProps {
+  label: string
   value?: string
   onSubmit: (newValue: string | undefined) => void
   tooltipText?: string
@@ -16,6 +17,7 @@ interface EditableTextProps {
 }
 
 export default function EditableText({
+  label,
   value,
   onSubmit,
   tooltipText = 'Edit this text',
@@ -32,7 +34,8 @@ export default function EditableText({
     setNewValue(value)
   }, [value])
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault()
     setIsEditMode(false)
     if (newValue !== value) {
       onSubmit(newValue)
@@ -49,25 +52,43 @@ export default function EditableText({
           py: 1,
         }}
       >
-        <Button variant='contained' type='submit' size='small'>
-          {submitButtonText}
-        </Button>
         <Button variant='outlined' onClick={handleCancelOnClick} size='small'>
           Cancel
+        </Button>
+        <Button variant='contained' type='submit' size='small'>
+          {submitButtonText}
         </Button>
       </Stack>
     )
   }, [handleCancelOnClick, submitButtonText])
 
-  if (isEditMode) {
-    return (
-      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
+  const handleEditOnClick = useCallback(() => {
+    // Resync with the latest value in case it has changed since this component was mounted.
+    setNewValue(value)
+    setIsEditMode(true)
+  }, [value])
+
+  const editButton = (
+    <Tooltip title={tooltipText}>
+      <IconButton size='small' aria-label={tooltipText} onClick={handleEditOnClick}>
+        {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
+      </IconButton>
+    </Tooltip>
+  )
+
+  if (!isEditMode) {
+    return <LabelledValue label={label} value={value} richText={richText} action={editButton} />
+  }
+
+  return (
+    <LabelledValue label={label}>
+      <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%' }}>
         {richText ? (
           <Stack>
             <RichTextEditor
               value={newValue || ''}
               onChange={(input) => setNewValue(input)}
-              aria-label='Schema description'
+              textareaProps={{ 'aria-label': label }}
             />
             {submitButtons}
           </Stack>
@@ -85,40 +106,12 @@ export default function EditableText({
               onChange={(event) => setNewValue(event.target.value)}
               size='small'
               multiline={multiline}
+              slotProps={{ htmlInput: { 'aria-label': label } }}
             />
             {submitButtons}
           </Stack>
         )}
       </Box>
-    )
-  } else {
-    return (
-      <Box component='form' onSubmit={handleSubmit} sx={{ pl: 5 }}>
-        <Stack
-          direction='row'
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-          }}
-        >
-          <Tooltip title={tooltipText}>
-            <IconButton onClick={() => setIsEditMode(true)}>
-              {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
-            </IconButton>
-          </Tooltip>
-          {richText ? (
-            value && <MarkdownDisplay>{value}</MarkdownDisplay>
-          ) : (
-            <Typography
-              sx={{
-                fontStyle: !value ? 'italic' : 'normal',
-              }}
-            >
-              {value || 'Empty'}
-            </Typography>
-          )}
-        </Stack>
-      </Box>
-    )
-  }
+    </LabelledValue>
+  )
 }

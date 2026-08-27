@@ -17,13 +17,18 @@ import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
 const jsonSchemaValidator = new Validator()
-const schemaCache = new NodeCache()
+const schemaCacheTtlSeconds = 60 * 60 // 1 hour
+const schemaCache = new NodeCache({ stdTTL: schemaCacheTtlSeconds })
 export interface DefaultSchema {
   name: string
   id: string
   description: string
   jsonSchema: JsonSchema
   reviewRoles?: string[]
+}
+
+function deleteCacheKeys(schemaId: string) {
+  schemaCache.del(schemaCache.keys().filter((key) => JSON.parse(key).schemaId === schemaId))
 }
 
 export async function searchSchemas(
@@ -142,6 +147,8 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
 
   await schema.deleteOne()
 
+  deleteCacheKeys(schemaId)
+
   return schema
 }
 
@@ -202,6 +209,8 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 
   Object.assign(schema, diff)
   await schema.save()
+
+  deleteCacheKeys(schemaId)
 
   if (diff.reviewRoles) {
     const models = await ModelModel.find({ 'card.schemaId': schemaId })
