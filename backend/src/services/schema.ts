@@ -17,7 +17,9 @@ import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
 const jsonSchemaValidator = new Validator()
-const schemaCache = new NodeCache()
+// Bounded TTL so that a replica which did not serve the mutating request still recovers from a stale schema.
+const schemaCacheTtlSeconds = 300
+const schemaCache = new NodeCache({ stdTTL: schemaCacheTtlSeconds })
 export interface DefaultSchema {
   name: string
   id: string
@@ -27,9 +29,7 @@ export interface DefaultSchema {
 }
 
 function deleteCacheKeys(schemaId: string) {
-  schemaCache.del(
-    [undefined, ...config.ui.modelDetails.states].map((modelState) => JSON.stringify({ schemaId, modelState })),
-  )
+  schemaCache.del(schemaCache.keys().filter((key) => JSON.parse(key).schemaId === schemaId))
 }
 
 export async function searchSchemas(
@@ -206,6 +206,8 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
   Object.assign(schema, diff)
   await schema.save()
 
+  deleteCacheKeys(schemaId)
+
   if (diff.reviewRoles) {
     const models = await ModelModel.find({ 'card.schemaId': schemaId })
     const reviewRoles = await ReviewRoleModel.find({ shortName: { $in: diff.reviewRoles } })
@@ -260,8 +262,6 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
       await model.save()
     }
   }
-
-  deleteCacheKeys(schemaId)
 
   return schema
 }
