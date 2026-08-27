@@ -126,7 +126,7 @@ export default function EditableText({
 
 function displayValue(value: string | undefined, richText: boolean) {
   if (!value) {
-    return <Typography sx={{ fontStyle: 'italic' }}>Unset</Typography>
+    return <Typography sx={{ fontStyle: 'italic' }}>Empty</Typography>
   }
 
   return richText ? <MarkdownDisplay>{value}</MarkdownDisplay> : <Typography>{value}</Typography>

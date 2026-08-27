@@ -21,7 +21,11 @@ export default function InformationDialog({ open = false, onClose, schema }: Sch
           <Typography>{schema.name}</Typography>
         </LabelledValue>
         <LabelledValue label='Description'>
-          <MarkdownDisplay>{schema.description}</MarkdownDisplay>
+          {!schema.description ? (
+            <Typography sx={{ fontStyle: 'italic' }}>Empty</Typography>
+          ) : (
+            <MarkdownDisplay>{schema.description}</MarkdownDisplay>
+          )}
         </LabelledValue>
       </Stack>
     </DisplayDialog>
