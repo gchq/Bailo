@@ -26,9 +26,14 @@ import { toSentenceCase } from 'utils/stringUtils'
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
   mutateEntry: () => void
+  showAsPopover?: boolean
 }
 
-export default function EntryOverviewDetails({ entry, mutateEntry }: OrganisationAndStateDetailsProps) {
+export default function EntryOverviewDetails({
+  entry,
+  mutateEntry,
+  showAsPopover = false,
+}: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
@@ -117,13 +122,13 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
         sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}
       >
         <Typography color='primary' variant='h6' component='h2'>
-          {toSentenceCase(entry.kind)} details
+          {showAsPopover ? entry.name : `${toSentenceCase(entry.kind)} details`}
         </Typography>
         <Stack>
           {uiConfig.modelDetails.organisations.length > 0 && (
             <EntrySelect
               label='Organisation'
-              editable={updateEntryPermission.hasPermission}
+              editable={updateEntryPermission.hasPermission && !showAsPopover}
               value={entry.organisation}
               entryId={entry.id}
               field='organisation'
@@ -134,7 +139,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
           {uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={updateEntryPermission.hasPermission}
+              editable={updateEntryPermission.hasPermission && !showAsPopover}
               value={entry.state}
               entryId={entry.id}
               field='state'
@@ -148,7 +153,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
             <Typography color='primary' sx={{ fontWeight: 'bold' }}>
               Model card review
             </Typography>
-            {updateEntryPermission.hasPermission && reviews.length === 0 && (
+            {!showAsPopover && updateEntryPermission.hasPermission && reviews.length === 0 && (
               <>
                 <DatePicker
                   value={reviewDate}
@@ -177,7 +182,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                     : 'Invalid date'}
                 </Typography>
               )}
-              {updateEntryPermission.hasPermission && reviews[0] && (
+              {!showAsPopover && updateEntryPermission.hasPermission && reviews[0] && (
                 <Button
                   size='small'
                   sx={{ width: 'fit-content' }}
@@ -187,7 +192,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                   Review
                 </Button>
               )}
-              {archivedReviews.length > 0 && (
+              {!showAsPopover && archivedReviews.length > 0 && (
                 <Button
                   size='small'
                   onClick={() => {
@@ -213,16 +218,19 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
           {collaboratorList}
         </Stack>
         <Box>
-          <Restricted action='editEntry' fallback={<></>}>
-            <Button
-              sx={{ width: 'fit-content' }}
-              size='small'
-              startIcon={<LocalOffer />}
-              onClick={(event) => setAnchorEl(event.currentTarget)}
-            >
-              {`Edit ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
-            </Button>
-          </Restricted>
+          {!showAsPopover && (
+            <Restricted action='editEntry' fallback={<></>}>
+              <Button
+                sx={{ width: 'fit-content' }}
+                size='small'
+                startIcon={<LocalOffer />}
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+              >
+                {`Edit ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
+              </Button>
+            </Restricted>
+          )}
+          {showAsPopover && entry.tags.length === 0 && <em>No tags selected</em>}
           <EntryTagSelector
             anchorEl={anchorEl}
             setAnchorEl={setAnchorEl}

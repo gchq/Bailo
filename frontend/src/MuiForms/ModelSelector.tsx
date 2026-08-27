@@ -5,11 +5,11 @@ import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
-import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
+import ModelSelectorChip from 'src/MuiForms/ModelSelectorChip'
 import { EntryKind } from 'types/types'
 
 import MessageAlert from '../MessageAlert'
@@ -54,8 +54,6 @@ export default function ModelSelector({
 
     setSelectedModels(models.filter((card) => currentValue.includes(card.id)))
   }, [models, currentValue])
-
-  const router = useRouter()
 
   const handleSelectedModelsChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntrySearchResult[]) => {
@@ -156,11 +154,10 @@ export default function ModelSelector({
         <Box sx={{ overflowX: 'auto', p: 1 }}>
           <Stack spacing={1} direction='row'>
             {currentValue.map((currentModelId) => (
-              <Chip
-                label={models.find((model) => model.id === currentModelId)?.name || 'Unable to find model name'}
+              <ModelSelectorChip
                 key={currentModelId}
-                onClick={() => router.push(`/model/${currentModelId}`)}
-                sx={{ width: 'fit-content' }}
+                label={models.find((model) => model.id === currentModelId)?.name || 'Unable to find model name'}
+                modelId={currentModelId}
               />
             ))}
           </Stack>
