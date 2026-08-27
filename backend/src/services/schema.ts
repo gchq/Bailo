@@ -26,6 +26,12 @@ export interface DefaultSchema {
   reviewRoles?: string[]
 }
 
+function deleteCacheKeys(schemaId: string) {
+  schemaCache.del(
+    [undefined, ...config.ui.modelDetails.states].map((modelState) => JSON.stringify({ schemaId, modelState })),
+  )
+}
+
 export async function searchSchemas(
   kind?: SchemaKindKeys,
   hidden?: boolean,
@@ -142,6 +148,8 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
 
   await schema.deleteOne()
 
+  deleteCacheKeys(schemaId)
+
   return schema
 }
 
@@ -252,6 +260,8 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
       await model.save()
     }
   }
+
+  deleteCacheKeys(schemaId)
 
   return schema
 }
