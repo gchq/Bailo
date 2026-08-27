@@ -1,7 +1,7 @@
-import { Stack, Typography } from '@mui/material'
+import { Stack } from '@mui/material'
 import DisplayDialog from 'src/common/DisplayDialog'
 import LabelledValue from 'src/common/LabelledValue'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
+import ValueDisplay from 'src/common/ValueDisplay'
 import { SchemaInterface } from 'types/types'
 
 type SchemaDialogProps = {
@@ -15,17 +15,13 @@ export default function InformationDialog({ open = false, onClose, schema }: Sch
     <DisplayDialog open={open} onClose={onClose} title='Schema information'>
       <Stack spacing={2}>
         <LabelledValue label='ID'>
-          <Typography>{schema.id}</Typography>
+          <ValueDisplay value={schema.id} />
         </LabelledValue>
         <LabelledValue label='Name'>
-          <Typography>{schema.name}</Typography>
+          <ValueDisplay value={schema.name} />
         </LabelledValue>
         <LabelledValue label='Description'>
-          {!schema.description ? (
-            <Typography sx={{ fontStyle: 'italic' }}>Empty</Typography>
-          ) : (
-            <MarkdownDisplay>{schema.description}</MarkdownDisplay>
-          )}
+          <ValueDisplay value={schema.description} richText />
         </LabelledValue>
       </Stack>
     </DisplayDialog>

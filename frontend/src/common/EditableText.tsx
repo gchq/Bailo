@@ -1,10 +1,10 @@
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, Button, IconButton, Stack, TextField, Tooltip } from '@mui/material'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
+import ValueDisplay from 'src/common/ValueDisplay'
 
 interface EditableTextProps {
   value?: string
@@ -63,19 +63,27 @@ export default function EditableText({
     )
   }, [handleCancelOnClick, submitButtonText])
 
+  const handleEditOnClick = useCallback(() => {
+    // Resync with the latest value in case it has changed since this component was mounted.
+    setNewValue(value)
+    setIsEditMode(true)
+  }, [value])
+
   const editButton = (
     <Tooltip title={tooltipText}>
-      <IconButton size='small' aria-label={tooltipText} onClick={() => setIsEditMode(true)}>
+      <IconButton size='small' aria-label={tooltipText} onClick={handleEditOnClick}>
         {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
       </IconButton>
     </Tooltip>
   )
 
+  const inputLabel = label ?? tooltipText
+
   const content = isEditMode ? (
     <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%' }}>
       {richText ? (
         <Stack>
-          <RichTextEditor value={newValue || ''} onChange={(input) => setNewValue(input)} aria-label={label} />
+          <RichTextEditor value={newValue || ''} onChange={(input) => setNewValue(input)} aria-label={inputLabel} />
           {submitButtons}
         </Stack>
       ) : (
@@ -92,19 +100,19 @@ export default function EditableText({
             onChange={(event) => setNewValue(event.target.value)}
             size='small'
             multiline={multiline}
-            aria-label={label}
+            aria-label={inputLabel}
           />
           {submitButtons}
         </Stack>
       )}
     </Box>
   ) : (
-    displayValue(value, richText)
+    <ValueDisplay value={value} richText={richText} />
   )
 
   if (label) {
     return (
-      <LabelledValue label={label} action={!isEditMode && editButton}>
+      <LabelledValue label={label} action={isEditMode ? undefined : editButton}>
         {content}
       </LabelledValue>
     )
@@ -122,12 +130,4 @@ export default function EditableText({
       {!isEditMode && editButton}
     </Stack>
   )
-}
-
-function displayValue(value: string | undefined, richText: boolean) {
-  if (!value) {
-    return <Typography sx={{ fontStyle: 'italic' }}>Empty</Typography>
-  }
-
-  return richText ? <MarkdownDisplay>{value}</MarkdownDisplay> : <Typography>{value}</Typography>
 }
