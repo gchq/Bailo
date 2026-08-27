@@ -32,6 +32,8 @@ import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
 
+export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
+
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string
   modelIds?: string[]
@@ -211,15 +213,6 @@ function lookupDeploymentAssessmentReviewResponses(): PipelineStage.Lookup {
   }
 }
 
-function getDeploymentAssessmentReviewRole(reviewRoles: string[]) {
-  const reviewRole = reviewRoles.at(0)
-  if (!reviewRole) {
-    throw BadReq('Deployment assessment schemas must define a review role.')
-  }
-
-  return reviewRole
-}
-
 function deriveDeploymentAssessmentState(
   deploymentAssessment: Pick<DeploymentAssessmentInterface, 'draft'>,
   latestDecision?: DecisionKeys,
@@ -363,7 +356,7 @@ export async function createDeploymentAssessment(
     : new ReviewModel({
         kind: ReviewKind.DeploymentAssessment,
         deploymentAssessmentId,
-        role: getDeploymentAssessmentReviewRole(schema.reviewRoles),
+        role: deploymentAssessmentRiskOwnerRole,
       })
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Create)

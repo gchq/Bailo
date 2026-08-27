@@ -290,6 +290,7 @@ export const testUiConfig: UiConfig = {
     owner: 'Model Developer',
     contributor: 'Contributor',
     consumer: 'Consumer',
+    riskOwner: 'Deployment Risk Owner',
   },
   development: {
     logUrl: '',
