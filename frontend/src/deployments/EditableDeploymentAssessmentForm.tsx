@@ -164,7 +164,7 @@ export default function EditableDeploymentAssessmentForm({
           title='Delete Deployment Assessment'
           onCancel={() => setOpen(false)}
           onDelete={() => deleteDeploymentAssessment(deploymentAssessment.id)}
-          confirmationText={deploymentAssessment.metadata.overview.name}
+          confirmationText={deploymentAssessment.name}
           successMessage='Deployment assessment deleted'
           redirectTo='/deployments'
         />

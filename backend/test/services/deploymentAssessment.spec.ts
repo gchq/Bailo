@@ -664,7 +664,7 @@ describe('services > deploymentAssessment', () => {
         $and: [
           {
             $or: [
-              { 'metadata.overview.name': { $regex: 'Assessment\\.\\*', $options: 'i' } },
+              { name: { $regex: 'Assessment\\.\\*', $options: 'i' } },
               { 'metadata.overview.justification': { $regex: 'Assessment\\.\\*', $options: 'i' } },
             ],
           },
