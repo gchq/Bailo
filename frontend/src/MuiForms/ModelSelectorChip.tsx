@@ -34,7 +34,7 @@ export default function ModelSelectorChip({ label, modelId }: ModelSelectorChips
       {entry && (
         <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth>
           <DialogContent>
-            <EntryOverviewDetails entry={entry} mutateEntry={mutateEntry} showAsPopover />
+            <EntryOverviewDetails entry={entry} mutateEntry={mutateEntry} showAsDialog />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setIsDialogOpen(false)}>Close</Button>

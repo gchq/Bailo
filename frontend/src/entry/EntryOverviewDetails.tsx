@@ -26,13 +26,13 @@ import { toSentenceCase } from 'utils/stringUtils'
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
   mutateEntry: () => void
-  showAsPopover?: boolean
+  showAsDialog?: boolean
 }
 
 export default function EntryOverviewDetails({
   entry,
   mutateEntry,
-  showAsPopover = false,
+  showAsDialog = false,
 }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
@@ -122,13 +122,13 @@ export default function EntryOverviewDetails({
         sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}
       >
         <Typography color='primary' variant='h6' component='h2'>
-          {showAsPopover ? entry.name : `${toSentenceCase(entry.kind)} details`}
+          {showAsDialog ? entry.name : `${toSentenceCase(entry.kind)} details`}
         </Typography>
         <Stack>
           {uiConfig.modelDetails.organisations.length > 0 && (
             <EntrySelect
               label='Organisation'
-              editable={updateEntryPermission.hasPermission && !showAsPopover}
+              editable={updateEntryPermission.hasPermission && !showAsDialog}
               value={entry.organisation}
               entryId={entry.id}
               field='organisation'
@@ -139,7 +139,7 @@ export default function EntryOverviewDetails({
           {uiConfig.modelDetails.states.length > 0 && entry.card && (
             <EntrySelect
               label='State'
-              editable={updateEntryPermission.hasPermission && !showAsPopover}
+              editable={updateEntryPermission.hasPermission && !showAsDialog}
               value={entry.state}
               entryId={entry.id}
               field='state'
@@ -153,7 +153,7 @@ export default function EntryOverviewDetails({
             <Typography color='primary' sx={{ fontWeight: 'bold' }}>
               Model card review
             </Typography>
-            {!showAsPopover && updateEntryPermission.hasPermission && reviews.length === 0 && (
+            {!showAsDialog && updateEntryPermission.hasPermission && reviews.length === 0 && (
               <>
                 <DatePicker
                   value={reviewDate}
@@ -182,7 +182,7 @@ export default function EntryOverviewDetails({
                     : 'Invalid date'}
                 </Typography>
               )}
-              {!showAsPopover && updateEntryPermission.hasPermission && reviews[0] && (
+              {!showAsDialog && updateEntryPermission.hasPermission && reviews[0] && (
                 <Button
                   size='small'
                   sx={{ width: 'fit-content' }}
@@ -192,7 +192,7 @@ export default function EntryOverviewDetails({
                   Review
                 </Button>
               )}
-              {!showAsPopover && archivedReviews.length > 0 && (
+              {!showAsDialog && archivedReviews.length > 0 && (
                 <Button
                   size='small'
                   onClick={() => {
@@ -218,7 +218,7 @@ export default function EntryOverviewDetails({
           {collaboratorList}
         </Stack>
         <Box>
-          {!showAsPopover && (
+          {!showAsDialog && (
             <Restricted action='editEntry' fallback={<></>}>
               <Button
                 sx={{ width: 'fit-content' }}
@@ -230,7 +230,7 @@ export default function EntryOverviewDetails({
               </Button>
             </Restricted>
           )}
-          {showAsPopover && entry.tags.length === 0 && <em>No tags selected</em>}
+          {showAsDialog && entry.tags.length === 0 && <em>No tags selected</em>}
           <EntryTagSelector
             anchorEl={anchorEl}
             setAnchorEl={setAnchorEl}
