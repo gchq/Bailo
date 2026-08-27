@@ -17,8 +17,7 @@ import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
 const jsonSchemaValidator = new Validator()
-// Bounded TTL so that a replica which did not serve the mutating request still recovers from a stale schema.
-const schemaCacheTtlSeconds = 300
+const schemaCacheTtlSeconds = 60 * 60 // 1 hour
 const schemaCache = new NodeCache({ stdTTL: schemaCacheTtlSeconds })
 export interface DefaultSchema {
   name: string
