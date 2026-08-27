@@ -34,7 +34,7 @@ export default function EntryDeletion({ entry }: EntryDeletionProps) {
       <DeletionConfirmationDialogue
         open={openConfirm}
         title={`Delete ${entryKindLabel}`}
-        onCancel={() => setOpenConfirm(false)}
+        onClose={() => setOpenConfirm(false)}
         onDelete={() => deleteEntry(entry.id)}
         confirmationText={entry.name}
         successMessage={`${entryKindLabel} deleted`}

@@ -11,7 +11,8 @@ import { getErrorMessage } from 'utils/fetcher'
 type DeletionConfirmationDialogueProps = {
   open: boolean
   title: string
-  onCancel: () => void
+  /** Closes the dialogue. Called when the user cancels and after a successful deletion. */
+  onClose: () => void
   /** Performs the delete request. The dialogue owns loading, error, notification and redirect. */
   onDelete: () => Promise<Response>
   /** When provided, the user must type this exact string before the delete button is enabled. */
@@ -29,7 +30,7 @@ type DeletionConfirmationDialogueProps = {
 export default function DeletionConfirmationDialogue({
   open,
   title,
-  onCancel,
+  onClose,
   onDelete,
   confirmationText,
   dialogMessage = 'Are you sure you want to perform this action? This action cannot be undone.',
@@ -75,7 +76,7 @@ export default function DeletionConfirmationDialogue({
         if (redirectTo) {
           router.push(redirectTo)
         }
-        onCancel()
+        onClose()
       }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to complete the deletion request.')
@@ -88,9 +89,11 @@ export default function DeletionConfirmationDialogue({
     <Dialog
       fullWidth
       open={open}
-      onClose={onCancel}
+      onClose={onClose}
       onKeyUp={(e) => {
-        if (e.code === 'Enter' && isConfirmed && !loading) {
+        // Only offer the keyboard shortcut when the user has had to type the confirmation text, otherwise a stray
+        // Enter - including the one that opened the dialogue - would delete without any confirmation at all.
+        if (e.code === 'Enter' && confirmationText && isConfirmed && !loading) {
           handleDelete()
         }
       }}
@@ -123,7 +126,7 @@ export default function DeletionConfirmationDialogue({
         {children}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onCancel} disabled={loading} startIcon={<Close />}>
+        <Button onClick={onClose} disabled={loading} startIcon={<Close />}>
           Cancel
         </Button>
         <Button

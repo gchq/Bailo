@@ -162,7 +162,7 @@ export default function EditableDeploymentAssessmentForm({
         <DeletionConfirmationDialogue
           open={open}
           title='Delete Deployment Assessment'
-          onCancel={() => setOpen(false)}
+          onClose={() => setOpen(false)}
           onDelete={() => deleteDeploymentAssessment(deploymentAssessment.id)}
           confirmationText={deploymentAssessment.name}
           successMessage='Deployment assessment deleted'

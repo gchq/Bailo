@@ -48,11 +48,11 @@ export const deleteDeploymentAssessment = [
       params: { deploymentAssessmentId },
     } = parse(req, deleteDeploymentAssessmentSchema)
 
-    const transactionResult = await useTransaction([
+    const [deploymentAssessment] = await useTransaction([
       (session) => removeDeploymentAssessment(req.user, deploymentAssessmentId, session),
     ])
 
-    await audit.onDeleteDeploymentAssessment(req, transactionResult[0])
+    await audit.onDeleteDeploymentAssessment(req, deploymentAssessment)
 
     res.json({
       message: 'Successfully removed deployment assessment.',
