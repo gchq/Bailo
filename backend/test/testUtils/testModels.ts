@@ -77,13 +77,13 @@ export const testDeploymentAssessment = {
   metadata: {
     overview: {
       riskOwner: 'user:user',
-      riskOwnerJustification: 'Test',
+      justification: 'Test',
       modelIds: ['my-model-123'],
     },
   },
   schemaId: 'test-deployment-assessment-schema',
   draft: false,
-  createdBy: 'user:user',
+  createdBy: 'user',
   createdAt: new Date('2023-07-28T10:50:00.928Z'),
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
