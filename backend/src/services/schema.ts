@@ -383,6 +383,7 @@ export async function validateContentAgainstSchema(
 ) {
   const schema = await getSchemaById(schemaId, options.modelState)
   const jsonSchema = options.draft ? makeSchemaOptional(schema.jsonSchema) : schema.jsonSchema
+
   const result = jsonSchemaValidator.validate(content, jsonSchema, {
     required: true,
   })

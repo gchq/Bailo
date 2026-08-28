@@ -2,8 +2,10 @@ import Close from '@mui/icons-material/Close'
 import Info from '@mui/icons-material/Info'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
+import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetSchema } from 'actions/schema'
-import { useContext, useEffect, useState } from 'react'
+import { KeyedMutator } from 'node_modules/swr/dist/index/index.mjs'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
@@ -13,10 +15,14 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
-import { getStepsFromSchema, validateForm } from 'utils/formUtils'
+import { getErrorMessage } from 'utils/fetcher'
+import { getStepsFromSchema, removeEmptyValues } from 'utils/formUtils'
 
 type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
+  mutate: KeyedMutator<{
+    deploymentAssessment: DeploymentAssessmentInterface
+  }>
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
@@ -24,6 +30,7 @@ type EditableDeploymentAssessmentFormProps = {
 
 export default function EditableDeploymentAssessmentForm({
   deploymentAssessment,
+  mutate,
   isEdit,
   onIsEditChange,
   readOnly = false,
@@ -62,16 +69,18 @@ export default function EditableDeploymentAssessmentForm({
       setErrorMessage('')
       setIsLoading(true)
 
-      for (const step of splitSchema.steps) {
-        const isValid = validateForm(step)
+      const response = await patchDeploymentAssessment(
+        deploymentAssessment.id,
+        removeEmptyValues(deploymentAssessment.metadata),
+        deploymentAssessment.draft,
+      )
 
-        if (!isValid) {
-          setIsLoading(false)
-          return
-        }
+      if (!response.ok) {
+        setErrorMessage(await getErrorMessage(response))
+      } else {
+        mutate()
+        onIsEditChange(false)
       }
-
-      onIsEditChange(false)
     }
     setIsLoading(false)
   }
@@ -103,6 +112,45 @@ export default function EditableDeploymentAssessmentForm({
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  const formHeading = useMemo(
+    () => (
+      <>
+        {schema && (
+          <Stack>
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              Schema
+            </Typography>
+            <Stack
+              direction='row'
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Typography>{schema?.name}</Typography>
+              <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                <Info color='primary' fontSize='small' />
+              </IconButton>
+              <InformationDialog
+                open={schemaInformationOpen}
+                schema={schema}
+                onClose={() => setSchemaInformationOpen(false)}
+              />
+            </Stack>
+            <Stack>
+              <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Created by</Typography>
+              <UserDisplay dn={deploymentAssessment.createdBy} />
+            </Stack>
+          </Stack>
+        )}
+      </>
+    ),
+    [deploymentAssessment.createdBy, schema, schemaInformationOpen],
+  )
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -112,39 +160,7 @@ export default function EditableDeploymentAssessmentForm({
       {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
         <EditableFormHeading
-          heading={
-            schema && (
-              <Stack>
-                <Typography
-                  sx={{
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Schema
-                </Typography>
-                <Stack
-                  direction='row'
-                  sx={{
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography>{schema?.name}</Typography>
-                  <IconButton onClick={() => setSchemaInformationOpen(true)}>
-                    <Info color='primary' fontSize='small' />
-                  </IconButton>
-                  <InformationDialog
-                    open={schemaInformationOpen}
-                    schema={schema}
-                    onClose={() => setSchemaInformationOpen(false)}
-                  />
-                </Stack>
-                <Stack>
-                  <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Created by</Typography>
-                  <UserDisplay dn={deploymentAssessment.createdBy} />
-                </Stack>
-              </Stack>
-            )
-          }
+          heading={formHeading}
           editAction='editDeploymentAssessment'
           deleteAction='deleteDeploymentAssessment'
           editButtonText='Edit Deployment Assessment'

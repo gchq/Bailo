@@ -1,3 +1,5 @@
+import { DeploymentAssessmentMetadata } from 'types/types'
+
 export function postDeploymentAssessment(
   name: string,
   schemaId: string,
@@ -11,6 +13,23 @@ export function postDeploymentAssessment(
       name,
       schemaId,
       ...(form && { metadata: { ...form } }),
+      draft,
+    }),
+  })
+}
+
+export function patchDeploymentAssessment(
+  deploymentAssessmentId: string,
+  metadata?: DeploymentAssessmentMetadata,
+  draft?: boolean,
+  deploymentAssessmentName?: string,
+) {
+  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      deploymentAssessmentName,
+      ...(metadata && { metadata }),
       draft,
     }),
   })

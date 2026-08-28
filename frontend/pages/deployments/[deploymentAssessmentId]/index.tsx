@@ -2,15 +2,18 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import ReviewIcon from '@mui/icons-material/Comment'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableDeploymentAssessmentForm from 'src/deployments/EditableDeploymentAssessmentForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import { getErrorMessage } from 'utils/fetcher'
 
 export default function DeploymentAssessment() {
   const router = useRouter()
@@ -19,15 +22,35 @@ export default function DeploymentAssessment() {
   const theme = useTheme()
 
   const [isEdit, setIsEdit] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [publishOpen, setPublishOpen] = useState(false)
+  const [patchErrorMessage, setPatchErrorMessage] = useState('')
 
-  const { deploymentAssessment, isDeploymentAssessmentLoading, isDeploymentAssessmentError } =
-    useGetDeploymentAssessment(deploymentAssessmentId as string)
+  const {
+    deploymentAssessment,
+    isDeploymentAssessmentLoading,
+    isDeploymentAssessmentError,
+    mutateDeploymentAssessment,
+  } = useGetDeploymentAssessment(deploymentAssessmentId as string)
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
   })
   if (error) {
     return error
+  }
+
+  async function handlePublish() {
+    if (deploymentAssessment) {
+      setIsLoading(true)
+      const response = await patchDeploymentAssessment(deploymentAssessment.id, undefined, false)
+      if (!response.ok) {
+        setPatchErrorMessage(await getErrorMessage(response))
+      } else {
+        mutateDeploymentAssessment()
+      }
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -67,11 +90,25 @@ export default function DeploymentAssessment() {
                       variant='outlined'
                       color='inherit'
                       size='small'
-                      onClick={() => {}}
+                      onClick={() => {
+                        setPublishOpen(true)
+                      }}
+                      loading={isLoading}
                       data-test='publishButton'
                     >
                       Publish
                     </Button>
+                    <ConfirmationDialogue
+                      open={publishOpen}
+                      title='Delete Deployment Assessment'
+                      onConfirm={handlePublish}
+                      onCancel={() => setPublishOpen(false)}
+                      errorMessage={patchErrorMessage}
+                      dialogMessage={
+                        'Are you sure you want to publish this deployment assessment? This is irreversible.'
+                      }
+                      confirmLoading={isLoading}
+                    />
                   </Stack>
                 </Paper>
               )}
@@ -96,7 +133,7 @@ export default function DeploymentAssessment() {
                       {deploymentAssessment ? deploymentAssessment.name : 'Loading...'}
                     </Typography>
                     <CopyToClipboardButton
-                      textToCopy={deploymentAssessment.id}
+                      textToCopy={deploymentAssessment.name}
                       notificationText='Copied deployment assessment ID to clipboard'
                       ariaLabel='copy deployment assessment ID to clipboard'
                     />
@@ -105,6 +142,7 @@ export default function DeploymentAssessment() {
                 {deploymentAssessment && (
                   <EditableDeploymentAssessmentForm
                     deploymentAssessment={deploymentAssessment}
+                    mutate={mutateDeploymentAssessment}
                     isEdit={isEdit}
                     onIsEditChange={setIsEdit}
                   />

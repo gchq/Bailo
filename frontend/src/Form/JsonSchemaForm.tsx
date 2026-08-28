@@ -290,7 +290,7 @@ export default function JsonSchemaForm({
                 </Stack>
               )}
               <Typography sx={{ pt: 1 }}>
-                Required fields for this state are marked with an asterisk
+                Fields required for publishing are marked with an asterisk
                 <span style={{ color: theme.palette.error.main }}> *</span>
               </Typography>
             </Stack>
