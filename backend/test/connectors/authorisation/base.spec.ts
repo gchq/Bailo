@@ -1040,7 +1040,7 @@ describe('connectors > authorisation > base', () => {
       id: 'da-1',
       createdBy: 'creator',
       draft: false,
-      metadata: { overview: { riskOwner: 'riskOwner' } },
+      metadata: { overview: { riskOwner: ['riskOwner'] } },
     } as any
 
     test('view non-draft DA as non-named user', async () => {

@@ -40,7 +40,7 @@ function toDeploymentAssessmentSummary(deploymentAssessment: DeploymentAssessmen
     id: deploymentAssessment.id,
     schemaId: deploymentAssessment.schemaId,
     name: deploymentAssessment.name,
-    ...(riskOwner && { owner: riskOwner }),
+    ...(riskOwner && riskOwner.length > 0 && { owner: riskOwner }),
     ...(modelIds && { models: modelIds }),
     ...(justification && { justification }),
     draft: deploymentAssessment.draft,
