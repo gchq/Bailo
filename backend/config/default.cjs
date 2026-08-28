@@ -295,6 +295,7 @@ module.exports = {
 
     deploymentAssessments: {
       deployableModelState: 'Production',
+    },
 
     lifecycle: {
       maxReviewInterval: '',
