@@ -24,8 +24,13 @@ registerPath({
   method: 'get',
   path: '/api/v2/responses',
   tags: ['response'],
-  description: 'Get a list of responses with matching parent IDs',
-  schema: getResponseSchema,
+  description: 'Get a list of responses with matching parent IDs.',
+  schema: z.object({
+    query: z.object({
+      parentIds: z.array(z.string()).optional(),
+      mine: z.boolean().optional(),
+    }),
+  }),
   responses: {
     200: {
       description: 'An array of responsess.',
