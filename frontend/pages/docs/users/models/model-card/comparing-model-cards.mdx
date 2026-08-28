@@ -91,14 +91,22 @@ When comparing different models, consider whether:
 The comparison shows the information recorded in each selected model card. It does not indicate that one model is better
 or more suitable than the other.
 
-## Mirrored Models
+## Mirrored models
 
 Mirrored model cards can also be included in model card comparisons.
 
-When comparing a mirrored model card with a non-mirrored model card, the comparison displays the additional local
-information recorded on the mirrored model alongside the corresponding static information on the non-mirrored model.
+When comparing a mirrored model with a non-mirrored model, Bailo compares:
 
-Source content in the mirrored model remains read-only and is not overwritten or changed by the comparison.
+- The read-only source card from the mirrored model
+- The editable local card from the non-mirrored model
+
+Locally added information on the mirrored model is not used as the primary card in this comparison. The revision
+selector therefore shows source-card revisions for the mirrored model and local-card revisions for the non-mirrored
+model.
+
+This behaviour is based on the model type rather than its position in the comparison. Swapping the **From** and **To**
+models does not change which card is used. The mirrored source content remains read-only and is not overwritten or
+changed by the comparison.
 
 ## Related pages
 

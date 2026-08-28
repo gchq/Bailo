@@ -26,6 +26,7 @@ const CHAINABLE_METHODS = [
   'updateMany',
   'updateOne',
   'markModified',
+  'replaceOne',
 ] as const
 
 const QUERY_LIKE_METHODS = [
