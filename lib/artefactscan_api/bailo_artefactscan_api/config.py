@@ -7,6 +7,8 @@ from typing import Any
 from modelscan.settings import DEFAULT_SETTINGS
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from bailo_artefactscan_api import __version__
+
 
 class Settings(BaseSettings):
     """Basic settings object for the FastAPI app.
@@ -17,13 +19,14 @@ class Settings(BaseSettings):
     app_name: str = "Bailo ArtefactScan API"
     app_summary: str = "API for scanning files and container image layers for security threats and vulnerabilities."
     app_description: str = (
-        "The Bailo ArtefactScan API provides programmatic scanning capabilities for artefacts submitted to Bailo. It integrates:\n"
+        "The Bailo ArtefactScan API provides programmatic scanning capabilities for artefacts"
+        " submitted to Bailo. It integrates:\n"
         "* **ProtectAI ModelScan** for detecting malicious or unsafe content within uploaded files.\n"
         "* **Aqua Trivy vulnerability database** for identifying known vulnerabilities in container image layers.\n"
         "\n"
         "Clients can upload files or image layers and retrieve structured scan results via a REST interface."
     )
-    app_version: str = "4.1.0"
+    app_version: str = __version__
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     maximum_filesize: int = 4 * 1024**3  # 4GB

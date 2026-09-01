@@ -271,6 +271,10 @@ export const testUiConfig: UiConfig = {
     enabled: false,
   },
 
+  lifecycle: {
+    maxReviewInterval: '1 year',
+  },
+
   announcement: {
     enabled: false,
     text: '',

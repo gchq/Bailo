@@ -17,13 +17,18 @@ import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
 const jsonSchemaValidator = new Validator()
-const schemaCache = new NodeCache()
+const schemaCacheTtlSeconds = 60 * 60 // 1 hour
+const schemaCache = new NodeCache({ stdTTL: schemaCacheTtlSeconds })
 export interface DefaultSchema {
   name: string
   id: string
   description: string
   jsonSchema: JsonSchema
   reviewRoles?: string[]
+}
+
+function deleteCacheKeys(schemaId: string) {
+  schemaCache.del(schemaCache.keys().filter((key) => JSON.parse(key).schemaId === schemaId))
 }
 
 export async function searchSchemas(
@@ -67,8 +72,14 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         properties: {
           riskOwner: {
             title: 'Who is the risk owner attached to this deployment assessment?',
-            type: 'string',
-            minLength: 1,
+            type: 'array',
+            items: {
+              type: 'string',
+              minLength: 1,
+            },
+            minItems: 1,
+            maxItems: 1,
+            uniqueItems: true,
             widget: 'entitySelector',
             hideDefaultUser: true,
           },
@@ -203,6 +214,8 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
 
   await schema.deleteOne()
 
+  deleteCacheKeys(schemaId)
+
   return schema
 }
 
@@ -218,7 +231,12 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 
   if (overwrite) {
-    await SchemaModel.deleteOne({ id: schema.id })
+    await SchemaModel.replaceOne({ id: schema.id }, { ...schema, deleted: false }, { upsert: true })
+    const replaced = await SchemaModel.findOne({ id: schema.id })
+    if (!replaced) {
+      throw NotFound('The schema could not be found after upsert.', { schemaId: schema.id })
+    }
+    return replaced
   }
 
   try {
@@ -258,6 +276,8 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 
   Object.assign(schema, diff)
   await schema.save()
+
+  deleteCacheKeys(schemaId)
 
   if (diff.reviewRoles) {
     const models = await ModelModel.find({ 'card.schemaId': schemaId })
@@ -320,17 +340,10 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 async function addSchemas(schemas: DefaultSchema[], kind: SchemaKindKeys) {
   for (const schema of schemas) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    await SchemaModel.findOneAndUpdate(
+    await SchemaModel.replaceOne(
       { id: schema.id },
-      {
-        ...schema,
-        kind,
-        active: true,
-        hidden: false,
-      },
-      {
-        upsert: true,
-      },
+      { ...schema, kind, active: true, hidden: false, deleted: false },
+      { upsert: true },
     )
   }
 }

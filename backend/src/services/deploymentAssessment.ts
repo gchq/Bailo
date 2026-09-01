@@ -38,16 +38,18 @@ export interface SearchDeploymentAssessmentsParams {
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
 export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
 
-async function validateRiskOwner(riskOwner: string) {
-  const { kind, value } = fromEntity(riskOwner)
-  if (kind !== 'user' || !value) {
-    throw BadReq('The risk owner must be a valid user entity.', { riskOwner })
-  }
+async function validateRiskOwner(riskOwners: string[]) {
+  for (const riskOwner of riskOwners) {
+    const { kind, value } = fromEntity(riskOwner)
+    if (kind !== 'user' || !value) {
+      throw BadReq('The risk owner must be a valid user entity.', { riskOwner })
+    }
 
-  try {
-    await authentication.getUserInformation(riskOwner)
-  } catch (error) {
-    throw BadReq('The risk owner could not be found.', { riskOwner, internal: error })
+    try {
+      await authentication.getUserInformation(riskOwner)
+    } catch (error) {
+      throw BadReq('The risk owner could not be found.', { riskOwner, internal: error })
+    }
   }
 }
 
@@ -92,11 +94,11 @@ async function validateDeploymentAssessment(
 
   const { riskOwner, modelIds } = metadata.overview ?? {}
 
-  if (!draft && !riskOwner) {
+  if (!draft && (!riskOwner || riskOwner.length === 0)) {
     throw BadReq('Deployment risk owner is required')
   }
 
-  if (riskOwner) {
+  if (riskOwner && riskOwner.length > 0) {
     await validateRiskOwner(riskOwner)
   }
   if (modelIds?.length) {
@@ -107,7 +109,7 @@ async function validateDeploymentAssessment(
 }
 
 async function notifyDeploymentStakeholders(
-  riskOwner: string,
+  riskOwners: string[],
   modelIds: string[],
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
@@ -120,7 +122,7 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName),
+      ...riskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -190,7 +192,7 @@ export async function createDeploymentAssessment(
       throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
     }
 
-    if (metadata.overview.riskOwner) {
+    if (metadata.overview.riskOwner && metadata.overview.riskOwner.length > 0) {
       await validateRiskOwner(metadata.overview.riskOwner)
     }
     if (metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
@@ -297,7 +299,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     query['metadata.overview.modelIds'] = { $all: params.modelIds }
   }
   if (params.riskOwner) {
-    query['metadata.overview.riskOwner'] = params.riskOwner
+    query['metadata.overview.riskOwner'] = { $elemMatch: { $eq: params.riskOwner } }
   }
   if (params.createdBy) {
     query.createdBy = params.createdBy

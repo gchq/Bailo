@@ -1,0 +1,36 @@
+---
+# Instance Settings
+frontend:
+  podSecurityContext:
+    runAsUser: 1001
+backend:
+  podSecurityContext:
+    runAsUser: 1001
+config:
+  ui:
+    banner:
+      enabled: "true"
+      text: "BAILO TEST"
+  build:
+    environment: img
+# Bailo
+image:
+  frontendRepository: "bailo_frontend"
+  frontendTag: latest
+  backendRepository: "bailo_backend"
+  backendTag: latest
+  artefactscanRepository: "bailo_artefactscan"
+  artefactscanTag: latest
+# Used for k8s not openshift
+ingress:
+  enabled: false
+route:
+  enabled: false
+  appPublicRoute: localhost
+mongodb:
+  architecture: standalone
+  auth:
+    passwords:
+      - MongoDBPassword
+    usernames:
+      - bailo_user
