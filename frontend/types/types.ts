@@ -93,6 +93,10 @@ export interface UiConfig {
   deploymentAssessments: {
     deployableModelState: string
   }
+
+  lifecycle: {
+    maxReviewInterval: string
+  }
 }
 
 export interface FileInterface {

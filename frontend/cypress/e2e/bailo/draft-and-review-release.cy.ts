@@ -2,7 +2,7 @@ let modelUuidForRelease = ''
 const modelNameForRelease = 'Test Model'
 const releaseVersion = '1.0.0'
 
-describe('Draft and review a model release', () => {
+describe('Create and review a model release', () => {
   before(() => {
     cy.log('Upload new model and set schema via API')
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
@@ -28,14 +28,14 @@ describe('Draft and review a model release', () => {
     })
   })
 
-  it('drafts a new release for a model', () => {
+  it('creates a new release for a model', () => {
     cy.visit(`/model/${modelUuidForRelease}`)
     cy.contains(modelNameForRelease)
 
-    cy.log('Navigating to releases tab to draft a new release')
+    cy.log('Navigating to releases tab to create a new release')
     cy.get('[data-test=releasesTab]').click({ force: true })
-    cy.contains('Draft new release')
-    cy.get('[data-test=draftNewReleaseButton').click()
+    cy.contains('Create new release')
+    cy.get('[data-test=createNewReleaseButton').click()
     cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
     cy.log('Filling out release form and submitting')
@@ -93,7 +93,7 @@ describe('Draft and review a model release', () => {
   it('can download a release artefact', () => {
     cy.log('Navigating to the releases tab for a model')
     cy.visit(`/model/${modelUuidForRelease}?tab=releases  `)
-    cy.contains('Draft new release')
+    cy.contains('Create new release')
     // The following logic is to get around a known bug with Cypress and downloading files from anchor tags
     cy.log('Clicking the test file that is attached to a release')
     cy.get('[data-test="release-files-accordion-1.0.0"]').click()

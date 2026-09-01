@@ -1,7 +1,6 @@
 import { Types } from 'mongoose'
 
-import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
-import { ReviewDoc } from '../../models/Review.js'
+import ResponseModel, { ResponseKind } from '../../models/Response.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
@@ -13,12 +12,6 @@ import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
 import { createLifecycleReview, findReviewById } from '../v3/review.js'
 import { dispatchWebhooks } from '../webhook.js'
-
-function validateLifecycleReview(review: ReviewDoc, dueDate?: Date | undefined) {
-  if (!dueDate || dueDate.getTime() <= Date.now()) {
-    throw BadReq('Due date of next review cannot be in the past.')
-  }
-}
 
 export async function respondToReview(
   user: UserInterface,

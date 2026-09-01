@@ -17,7 +17,6 @@ export const putReleaseSchema = z.object({
     notes: z.string().min(1, 'Please provide release notes.'),
     draft: z.coerce.boolean().optional().default(false),
     modelCardVersion: z.number().openapi({ example: 1 }),
-
     fileIds: z.array(z.string()),
     images: z.array(
       z.object({
@@ -60,7 +59,6 @@ export const putRelease = [
       params: { modelId, semver },
       body,
     } = parse(req, putReleaseSchema)
-
     const release = await updateRelease(req.user, modelId, semver, body)
     await audit.onUpdateRelease(req, release)
 

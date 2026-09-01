@@ -6,7 +6,7 @@ import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
 import { MouseEvent, useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import SchemaListItem from 'src/schemas/SchemaListItem'
@@ -160,20 +160,12 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     ))
   }, [theme.palette.primary.main, objectsToDelete])
 
-  if (isSchemasError) {
-    return <MessageAlert message={isSchemasError.info.message} severity='error' />
-  }
-
-  if (isEntriesError) {
-    return <MessageAlert message={isEntriesError.info.message} severity='error' />
-  }
-
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
-  }
-
-  if (isReviewsLoading || isEntriesLoading || isSchemasLoading) {
-    return <Loading />
+  const queryState = renderQueryState(
+    [isSchemasError, isEntriesError, isReviewsError],
+    isReviewsLoading || isEntriesLoading || isSchemasLoading,
+  )
+  if (queryState) {
+    return queryState
   }
 
   return (

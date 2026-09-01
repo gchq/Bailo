@@ -292,6 +292,7 @@ export async function findReviewForResponse(
       .match(await findUserInCollaborators(user))
       .limit(1)
   ).at(0)
+
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }

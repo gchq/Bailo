@@ -288,6 +288,8 @@ config:
     llmImport:
       enabled: false
 
+    lifecycle:
+      maxReviewInterval: ''
 
   smtp:
     #host: 'mail' #service name
@@ -331,8 +333,7 @@ instrumentation:
   debug: false
 
 stroom:
-  logOnlyMode: true
-  feed: 'feed'
+  sendEvents: true
   url: 'https://url'
   environment: 'local'
   interval: 1000 * 50
@@ -341,6 +342,8 @@ stroom:
   xmlns: 'default-namespace'
   schemaLocation: 'default-namespace file://schema-location.xsd'
   version: '1.0.0'
+  headers:
+    Content-Encoding: 'gzip'
 
 modelMirror:
   import:
