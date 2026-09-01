@@ -184,19 +184,12 @@ updates:
     schedule:
       interval: 'weekly'
 
-  # Python - bailo client library
-  - package-ecosystem: 'pip'
+  # Python (uv) - group all so a common dep (e.g. ruff) has a single PR rather than 1 per dir
+  - package-ecosystem: 'uv'
     directories:
       - '/lib/python'
-    schedule:
-      interval: 'weekly'
-    versioning-strategy: increase
-    open-pull-requests-limit: 10
-
-  # Python - artefactscan API
-  - package-ecosystem: 'pip'
-    directories:
       - '/lib/artefactscan_api'
+      - '/backend/docs'
     schedule:
       interval: 'weekly'
     versioning-strategy: increase
@@ -205,37 +198,26 @@ updates:
       scanning-stack:
         patterns:
           - modelscan
-          - modelscan[*]
           - oras
       server-stack:
         patterns:
           - fastapi
-          - fastapi[*]
           - uvicorn
-          - pydantic_settings
+          - pydantic-settings
           - python-multipart
           - content-size-limit-asgi
-      testing-stack:
-        patterns:
-          - pytest
-          - pytest-*
-          - pre_commit
-
-  # Python - backend docs
-  - package-ecosystem: 'pip'
-    directories:
-      - '/backend/docs'
-    schedule:
-      interval: 'weekly'
-    versioning-strategy: increase
-    open-pull-requests-limit: 10
-    groups:
       sphinx-stack:
         patterns:
           - sphinx
           - sphinx-*
-          - myst_parser
+          - myst-parser
           - nbsphinx
+      dev-tooling:
+        patterns:
+          - pre-commit
+          - pytest
+          - pytest-*
+          - ruff
 
   # GitHub Actions
   - package-ecosystem: 'github-actions'
