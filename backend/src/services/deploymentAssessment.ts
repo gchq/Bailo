@@ -268,8 +268,9 @@ export async function reviewDeploymentAssessment(
   if (deploymentAssessment.draft) {
     throw BadReq('Draft deployment assessments cannot be reviewed.', { deploymentAssessmentId })
   }
-  if (deploymentAssessment.metadata.overview?.riskOwner !== toEntity('user', user.dn)) {
-    throw Forbidden('Only the deployment risk owner can review a deployment assessment.', { deploymentAssessmentId })
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
   const review = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)

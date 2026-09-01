@@ -2,6 +2,7 @@ import { MongoServerError } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authentication from '../../src/connectors/authentication/index.js'
+import { DeploymentAssessmentAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
 import { Decision, ResponseKind } from '../../src/models/Response.js'
@@ -69,6 +70,7 @@ describe('services > deploymentAssessment', () => {
     })
     schemaMocks.validateContentAgainstSchema.mockResolvedValue({ valid: true, errors: [] })
     ModelModelMock.find.mockResolvedValue([liveModel])
+    vi.mocked(authorisation.deploymentAssessment).mockResolvedValue({ success: true, id: 'assessment-id' })
   })
 
   describe('getDeploymentAssessmentById', () => {
@@ -270,7 +272,7 @@ describe('services > deploymentAssessment', () => {
       id: 'assessment-id',
       draft: false,
       createdBy: 'creator',
-      metadata: { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } },
+      metadata: { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } },
     }
     const review = { _id: 'review-object-id', kind: ReviewKind.DeploymentAssessment, role: 'dro' }
 
@@ -362,6 +364,11 @@ describe('services > deploymentAssessment', () => {
         'Please update this.',
       )
 
+      expect(authorisation.deploymentAssessment).toHaveBeenCalledWith(
+        { dn: 'risk-owner' },
+        assessment,
+        DeploymentAssessmentAction.Update,
+      )
       expect(ResponseModelMock).toHaveBeenCalledWith({
         entity: 'user:risk-owner',
         kind: ResponseKind.Review,
@@ -384,6 +391,9 @@ describe('services > deploymentAssessment', () => {
 
     test('rejects a decision from a viewer who is not the risk owner', async () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      vi.mocked(authorisation.deploymentAssessment)
+        .mockResolvedValueOnce({ success: true, id: assessment.id })
+        .mockResolvedValueOnce({ success: false, info: 'Forbidden', id: assessment.id })
 
       await expect(reviewDeploymentAssessment({ dn: 'viewer' }, assessment.id, Decision.Approve)).rejects.toMatchObject(
         {
