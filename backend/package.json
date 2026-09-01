@@ -90,7 +90,7 @@
   "devDependencies": {
     "@anatine/zod-mock": "^3.14.0",
     "@eslint/js": "^10.0.1",
-    "@types/bytes": "^3.1.5",
+    "@types/bytes": "^3.1.6",
     "@types/clamscan": "^2.4.0",
     "@types/config": "^4.4.0",
     "@types/content-disposition": "^0.5.9",
@@ -101,7 +101,7 @@
     "@types/mjml": "^5.0.0",
     "@types/mjml-core": "^5.1.0",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.4.0",
     "@types/node-fetch": "^2.6.13",
     "@types/nodemailer": "^8.0.0",
     "@types/sanitize-html": "^2.16.1",
