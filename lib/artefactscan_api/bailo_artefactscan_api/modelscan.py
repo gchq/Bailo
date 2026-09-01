@@ -68,8 +68,6 @@ def is_valid_pickle(file_path: Path, max_bytes: int = 2 * 1024 * 1024) -> bool:
     try:
         # Attempt to iterate through all opcodes
         ops = list(genops(BytesIO(data)))
-        if not ops:
-            return False
-        return True
+        return bool(ops)
     except (ValueError, UnpicklingError):
         return False

@@ -397,7 +397,7 @@ export default function Marketplace() {
       <Container maxWidth='xl'>
         <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
           <Box sx={{ mb: 2 }}>
-            <Stack spacing={2} sx={{ maxWidth: { sm: '100%', mb: '300px' } }}>
+            <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '350px' } }}>
               <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
                 Create
               </Button>
@@ -499,7 +499,7 @@ export default function Marketplace() {
                         <Box>
                           <ChipSelector
                             label='External repositories'
-                            chipTooltipTitle={'Include external repostories'}
+                            chipTooltipTitle={'Include external repositories'}
                             options={Array.from(peers.keys())}
                             unreachableOptions={unreachablePeerList}
                             expandThreshold={10}

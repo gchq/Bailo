@@ -11,13 +11,10 @@ from unittest.mock import Mock, patch
 
 import modelscan
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
-# isort: split
-
 from bailo_artefactscan_api.config import Settings
 from bailo_artefactscan_api.main import app, get_settings
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture(scope="module")
@@ -56,9 +53,8 @@ def test_shutdown_waits_for_db_lock(mocker):
     lock = mocker.patch("bailo_artefactscan_api.trivy._DB_LOCK")
     rm = mocker.patch("shutil.rmtree")
 
-    with pytest.warns():
-        with TestClient(app):
-            pass
+    with pytest.warns(), TestClient(app):
+        pass
 
     lock.__enter__.assert_called()
     rm.assert_called()

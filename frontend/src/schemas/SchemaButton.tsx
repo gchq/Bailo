@@ -13,9 +13,8 @@ import {
 } from '@mui/material'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useMemo } from 'react'
-import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import MessageAlert from 'src/MessageAlert'
+import renderQueryState from 'src/common/renderQueryState'
 import { SchemaInterface } from 'types/types'
 
 interface SchemaButtonProps {
@@ -52,12 +51,9 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
     [reviewRoles, schema.reviewRoles],
   )
 
-  if (isReviewRolesLoading) {
-    return <Loading />
-  }
-
-  if (isReviewRolesError) {
-    return <MessageAlert message={isReviewRolesError.info.message} severity='error' />
+  const queryState = renderQueryState([isReviewRolesError], isReviewRolesLoading)
+  if (queryState) {
+    return queryState
   }
   return (
     <Grid size={{ md: 6, sm: 12 }}>

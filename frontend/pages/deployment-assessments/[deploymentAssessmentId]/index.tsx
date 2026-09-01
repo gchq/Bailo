@@ -118,7 +118,7 @@ export default function DeploymentAssessment() {
                   spacing={2}
                   divider={<Divider flexItem orientation='vertical' />}
                 >
-                  <Link href={`/deployments`}>
+                  <Link href={`/deployment-assessments`}>
                     <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                       Back to deployments
                     </Button>

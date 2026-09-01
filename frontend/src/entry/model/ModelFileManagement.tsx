@@ -3,13 +3,12 @@ import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useContext, useState } from 'react'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind } from 'types/types'
 
 type FilesProps = {
@@ -43,16 +42,9 @@ export default function Files({ model }: FilesProps) {
     </Box>
   )
 
-  if (isModelFilesError) {
-    return <MessageAlert message={isModelFilesError.info.message} severity='error' />
-  }
-
-  if (isModelFilesLoading || isReleasesLoading) {
-    return <Loading />
-  }
-
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  const queryState = renderQueryState([isModelFilesError, isReleasesError], isModelFilesLoading || isReleasesLoading)
+  if (queryState) {
+    return queryState
   }
   return (
     <>
