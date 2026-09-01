@@ -1,6 +1,6 @@
 import { Types } from 'mongoose'
 
-import ResponseModel, { ResponseKind } from '../../models/Response.js'
+import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
@@ -10,7 +10,7 @@ import { BadReq, NotFound } from '../../utils/error.js'
 import { getModelReview } from '../../utils/review.js'
 import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
-import { createLifecycleReview, findReviewById } from '../v3/review.js'
+import { createLifecycleReview, findReviewById, isLifecycleReviewDateValid } from '../v3/review.js'
 import { dispatchWebhooks } from '../webhook.js'
 
 export async function respondToReview(
@@ -20,8 +20,10 @@ export async function respondToReview(
   dueDate?: Date,
 ) {
   const review = getModelReview(await findReviewById(user, reviewId))
-  if (response.decision === Decision.Approve) {
-    validateLifecycleReview(review, dueDate)
+  if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve && dueDate) {
+    if (dueDate.getTime() <= Date.now() || !isLifecycleReviewDateValid(dueDate)) {
+      throw BadReq('Due date of next review is invalid.')
+    }
   }
 
   // Store the response
