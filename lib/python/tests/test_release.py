@@ -104,7 +104,7 @@ def test_create_get_from_version_update_and_delete_release(
 @pytest.mark.integration
 def test_nonexistent_file_ids(integration_client, example_model):
     with pytest.raises(BailoException):
-        release = Release.create(
+        Release.create(
             client=integration_client,
             model_id=example_model.model_id,
             version="1.0.2",
@@ -119,7 +119,7 @@ def test_nonexistent_file_ids(integration_client, example_model):
 @pytest.mark.integration
 def test_incorrect_format_file_ids(integration_client, example_model):
     with pytest.raises(BailoException):
-        release = Release.create(
+        Release.create(
             client=integration_client,
             model_id=example_model.model_id,
             version="1.0.2",

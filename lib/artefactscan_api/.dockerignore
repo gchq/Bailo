@@ -6,9 +6,9 @@
 Dockerfile
 .dockerignore
 
-# Byte-compiled / optimized / DLL files
-**__pycache__/
-**.py[cod]
+# Byte-compiled / optimised / DLL files
+**/__pycache__/
+**/*.py[cod]
 **$py.class
 
 # Python venv
@@ -22,4 +22,12 @@ tests/
 README.md
 .pre-commit-config.yaml
 requirements-dev.txt
-pytest.ini
+
+# Environment files
+.env*
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json

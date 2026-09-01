@@ -95,7 +95,7 @@ From within the `lib/artefactscan_api` directory:
 ```bash
 python3 -m venv artefactscanvenv
 source artefactscanvenv/bin/activate
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 ```
 
 ### Developer Mode via Docker

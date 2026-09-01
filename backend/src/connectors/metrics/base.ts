@@ -124,7 +124,10 @@ async function calculateTotalEntries(filter: ModelFilter): Promise<number> {
 async function countDistinctEntriesWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
   if (filter.organisation === undefined) {
     const ids = await collection.distinct('modelId')
-    return ids.length
+    if (ids.length === 0) {
+      return 0
+    }
+    return ModelModel.countDocuments({ id: { $in: ids } })
   }
 
   const pipeline: PipelineStage[] = [
@@ -212,8 +215,7 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
  * Calculates the full set of usage metrics either globally
  * or scoped to a specific organisation.
  */
-async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): Promise<BaseMetrics> {
-  await checkUserIsAuthorised(user)
+async function calculateUsageMetrics(filter: ModelFilter): Promise<BaseMetrics> {
   const [totalEntries, stateMetrics, schemaMetrics, totalEntriesWithReleases, totalEntriesWithAccessRequests] =
     await Promise.all([
       calculateTotalEntries(filter),
@@ -800,62 +802,26 @@ export class BaseMetricsConnector {
       }
     }
 
+    await checkUserIsAuthorised(user)
+
     const organisationIds = await this.getOrganisationIds()
 
-    const byOrganisation = await Promise.all(
-      organisationIds.map(async (orgRaw) => {
-        const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
-
-        const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
-
-        const metrics = await calculateUsageMetrics(user, filter)
-
-        return { organisation, ...metrics }
-      }),
-    )
-
-    const schemaCounts = new Map<string, SchemaInfo>()
-    const stateCounts = new Map<string, StateInfo>()
-
-    let entries = 0
-    let withReleases = 0
-    let withAccessRequest = 0
-
-    // Tally up the metrics for each org to get global metrics
-    for (const org of byOrganisation) {
-      entries += org.entries
-      withReleases += org.withReleases
-      withAccessRequest += org.withAccessRequest
-
-      for (const schema of org.schemaBreakdown ?? []) {
-        const key = String(schema.schemaId)
-        const existing = schemaCounts.get(key)
-
-        if (existing) {
-          existing.count += schema.count
-        } else {
-          schemaCounts.set(key, { ...schema, schemaId: key })
-        }
-      }
-
-      for (const state of org.entryState ?? []) {
-        const existing = stateCounts.get(state.state)
-
-        if (existing) {
-          existing.count += state.count
-        } else {
-          stateCounts.set(state.state, { ...state })
-        }
-      }
-    }
+    const [byOrganisation, globalMetrics, users] = await Promise.all([
+      Promise.all(
+        organisationIds.map(async (orgRaw) => {
+          const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
+          const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
+          const metrics = await calculateUsageMetrics(filter)
+          return { organisation, ...metrics }
+        }),
+      ),
+      calculateUsageMetrics({}),
+      calculateTotalUsers(),
+    ])
 
     const global: BaseMetrics = {
-      users: await calculateTotalUsers(),
-      entries,
-      withReleases,
-      withAccessRequest,
-      schemaBreakdown: Array.from(schemaCounts.values()),
-      entryState: Array.from(stateCounts.values()).sort((a, b) => b.count - a.count),
+      ...globalMetrics,
+      users,
     }
 
     const result = { global, byOrganisation }

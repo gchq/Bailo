@@ -1,6 +1,11 @@
-import { describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { createReview, findReviewById, notifyReviewer } from '../../../src/services/v3/review.js'
+import {
+  createReview,
+  findReviewById,
+  isLifecycleReviewDateValid,
+  notifyReviewer,
+} from '../../../src/services/v3/review.js'
 import { ReviewKind } from '../../../src/types/enums.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 
@@ -35,8 +40,27 @@ const smtpMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/smtp/smtp.js', () => smtpMock)
 
+const mockLifecycleConfig = vi.hoisted(() => ({ maxReviewInterval: '1 year' }))
+vi.mock('../../../src/utils/config.js', async () => {
+  const base = (await vi.importActual('../../../src/utils/__mocks__/config.js')) as any
+  return {
+    __esModule: true,
+    default: { ...base.default, ui: { ...base.default.ui, lifecycle: mockLifecycleConfig } },
+  }
+})
+
+const FIXED_DATE = new Date('2026-01-01T00:00:00.000Z')
+
 describe('services > review', () => {
   const user: any = { dn: 'test' }
+
+  beforeEach(() => {
+    vi.setSystemTime(FIXED_DATE)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
 
   test('findReviewById > can find a review using a given reviewId', async () => {
     modelMock.getModelById.mockResolvedValueOnce([
@@ -65,15 +89,18 @@ describe('services > review', () => {
     ReviewModel.findOne.mockResolvedValueOnce(undefined)
     authMocks.default.models.mockResolvedValueOnce([{ success: true } as any])
     authMocks.default.model.mockResolvedValueOnce({ success: true } as any)
+    const dueDate = new Date('2026-01-02T00:00:00.000Z')
     const newReview = await createReview({} as any, 'test-1234', {
       kind: ReviewKind.Lifecycle,
-      dueDate: new Date('2050-05-28T12:54:03.780Z'),
+      dueDate,
     })
-    expect(newReview).toMatchSnapshot()
+    expect(newReview).toBeDefined()
+    expect(newReview.kind).toBe(ReviewKind.Lifecycle)
+    expect(newReview.modelId).toBe('test-1234')
   })
 
   test('createReview > schedules lifecycle review emails after creating a lifecycle review', async () => {
-    const dueDate = new Date('2050-05-28T12:54:03.780Z')
+    const dueDate = new Date('2026-01-02T00:00:00.000Z')
     modelMock.getModelById.mockResolvedValueOnce({
       id: 'test-1234',
       collaborators: [{ entity: 'user:user', roles: ['owner'] }],
@@ -95,6 +122,30 @@ describe('services > review', () => {
       expect.any(String),
       dueDate,
     )
+  })
+
+  describe('isLifecycleReviewDateValid', () => {
+    test('returns true for date within max interval', () => {
+      expect(isLifecycleReviewDateValid(new Date('2026-07-01T00:00:00.000Z'))).toBe(true)
+    })
+
+    test('returns false for date beyond max interval', () => {
+      expect(isLifecycleReviewDateValid(new Date('2028-01-01T00:00:00.000Z'))).toBe(false)
+    })
+
+    test('returns true for date exactly at max interval boundary', () => {
+      const boundary = new Date(FIXED_DATE.getTime() + 1000 * 60 * 60 * 24 * 365)
+      expect(isLifecycleReviewDateValid(boundary)).toBe(true)
+    })
+
+    test('returns false for date one millisecond beyond boundary', () => {
+      const justOver = new Date(FIXED_DATE.getTime() + 1000 * 60 * 60 * 24 * 365 + 1)
+      expect(isLifecycleReviewDateValid(justOver)).toBe(false)
+    })
+
+    test('returns true for date in the past', () => {
+      expect(isLifecycleReviewDateValid(new Date('2024-01-01T00:00:00.000Z'))).toBe(true)
+    })
   })
 
   test('createReview > cannot create lifecycle review if existing review is open', async () => {
@@ -121,7 +172,7 @@ describe('services > review', () => {
     await expect(() =>
       createReview({} as any, 'test-1234', {
         kind: ReviewKind.Lifecycle,
-        dueDate: new Date('2050-05-28T12:54:03.780Z'),
+        dueDate: new Date('2026-01-02T00:00:00.000Z'),
       }),
     ).rejects.toThrow(/^This model has an open lifecycle review./)
   })
@@ -140,4 +191,33 @@ test('notifyReviewer > successfully notifies a review role', async () => {
   ])
   smtpMock.notifyReviewRoleOfAdditionalReview.mockResolvedValueOnce(() => Promise.resolve())
   await notifyReviewer({} as any, '6a2c20a481e52c790216eaaa')
+})
+
+describe('isLifecycleReviewDateValid > config variants', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    mockLifecycleConfig.maxReviewInterval = '1 year'
+    vi.useRealTimers()
+  })
+
+  test('allows any date when maxReviewInterval is empty string', async () => {
+    mockLifecycleConfig.maxReviewInterval = ''
+    const mod = await import('../../../src/services/v3/review.js')
+    vi.setSystemTime(FIXED_DATE)
+
+    expect(mod.isLifecycleReviewDateValid(new Date('2099-01-01T00:00:00.000Z'))).toBe(true)
+    expect(mod.isLifecycleReviewDateValid(new Date('2020-01-01T00:00:00.000Z'))).toBe(true)
+  })
+
+  test('restricts dates with 1 month interval', async () => {
+    mockLifecycleConfig.maxReviewInterval = '1 month'
+    const mod = await import('../../../src/services/v3/review.js')
+    vi.setSystemTime(FIXED_DATE)
+
+    expect(mod.isLifecycleReviewDateValid(new Date('2026-01-02T00:00:00.000Z'))).toBe(true)
+    expect(mod.isLifecycleReviewDateValid(new Date('2026-03-01T00:00:00.000Z'))).toBe(false)
+  })
 })

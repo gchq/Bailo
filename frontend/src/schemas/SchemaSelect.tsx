@@ -26,7 +26,9 @@ import Link from 'src/Link'
 import SchemaButton from 'src/schemas/SchemaButton'
 import {
   EntryInterface,
+  EntryKindKeys,
   EntryKindLabel,
+  MODEL_ENTRY_KINDS,
   SchemaInterface,
   SchemaKind,
   SchemaKindKeys,
@@ -52,7 +54,11 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const { mutateEntry } = useGetEntry(entry?.id, entry?.kind)
+  // workaround different callers having different SWR cache keys
+  const entryKind =
+    entry?.kind && (MODEL_ENTRY_KINDS as EntryKindKeys[]).includes(entry.kind) ? MODEL_ENTRY_KINDS : entry?.kind
+  // `useGetEntry(entry.id, MODEL_ENTRY_KINDS)` === `useGetModel(entry.id)`
+  const { mutateEntry } = useGetEntry(entry?.id, entryKind)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,

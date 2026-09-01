@@ -34,6 +34,7 @@ interface PaginateProps<T> {
   hideSearchInput?: boolean
   defaultSortProperty: keyof T
   defaultSortDirection?: SortingDirectionKeys
+  prioritiseItems?: (a: T, b: T) => number
   hideBorders?: boolean
   hideDividers?: boolean
   children: ({ data }: { data: T }) => ReactElement
@@ -62,6 +63,7 @@ export default function Paginate<T>({
   hideSearchInput = false,
   defaultSortProperty,
   defaultSortDirection = SortingDirection.DESC,
+  prioritiseItems,
   hideBorders = false,
   hideDividers = false,
   children,
@@ -138,6 +140,10 @@ export default function Paginate<T>({
 
   const compareSemanticVersions = useCallback(
     (a: T, b: T) => {
+      const priority = prioritiseItems?.(a, b) ?? 0
+      if (priority !== 0) {
+        return priority
+      }
       if (typeof a[orderByValue] !== 'string' || typeof b[orderByValue] !== 'string') {
         return 1
       }
@@ -147,7 +153,7 @@ export default function Paginate<T>({
         return semver.gt(b[orderByValue], a[orderByValue]) ? 1 : -1
       }
     },
-    [ascOrDesc, orderByValue],
+    [ascOrDesc, orderByValue, prioritiseItems],
   )
 
   const orderByMenuListItems = useCallback(

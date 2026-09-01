@@ -21,8 +21,7 @@ export async function sendEvents(events: string) {
     body: passThrough,
     signal: controller.signal,
     headers: {
-      'Content-Encoding': 'gzip',
-      Feed: config.stroom.feed,
+      ...config.stroom.headers,
     },
     agent: getHttpsAgent({ rejectUnauthorized: config.stroom.rejectUnauthorized }),
   })

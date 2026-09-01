@@ -5,7 +5,7 @@ This module allows interaction of Models, Releases, Access Requests and Schemas.
 
 >>> from bailo import Model, Client
 >>>
->>> client = Client("https://bailo.com") # URL of Bailo
+>>> client = Client("https://bailo.com")  # URL of Bailo
 
 To import a resource from Bailo:
 
