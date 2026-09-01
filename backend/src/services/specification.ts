@@ -121,6 +121,7 @@ const baseDeploymentAssessmentSchema = z.object({
   schemaId: deploymentAssessmentSchemaIdSchema,
 })
 
+//Here
 export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
   baseDeploymentAssessmentSchema
     .extend({
@@ -447,30 +448,12 @@ export const accessRequestInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
-const deploymentAssessmentOverview = z
-  .object({
-    name: z
-      .string()
-      .min(1, 'You must provide a deployment assessment name')
-      .openapi({ example: 'Just A Rather Very Intelligent System' }),
-    riskOwner: z.string().min(1, 'You must provide a risk owner').openapi({ example: 'user:tony' }).optional(),
-    justification: z
-      .string()
-      .min(1, 'You must provide a justification')
-      .openapi({ example: 'The risk owner is accountable for the deployed service.' })
-      .optional(),
-    modelIds: z
-      .array(z.string())
-      .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
-      .optional(),
-  })
-  .passthrough()
-
 export const deploymentAssessmentInterfaceSchema = z.object({
-  id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
-  schemaId: schemaId.openapi({ example: 'stark-deployment-assessment-schema-v1' }),
-  metadata: z.object({ overview: deploymentAssessmentOverview }).passthrough(),
-  draft: draft.optional().default(true).openapi({ example: true }),
+  id: deploymentAssessmentIdSchema,
+  name: deploymentAssessmentNameSchema,
+  schemaId: deploymentAssessmentSchemaIdSchema,
+  metadata: deploymentAssessmentMetadataSchema,
+  draft: deploymentAssessmentDraftSchema.optional().default(true),
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),

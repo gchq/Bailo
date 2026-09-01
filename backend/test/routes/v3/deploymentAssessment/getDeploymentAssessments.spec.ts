@@ -2,27 +2,18 @@ import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { testGet } from '../../../testUtils/routes.js'
+import { testDeploymentAssessment } from '../../../testUtils/testModels.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
 const deploymentAssessment = {
+  ...testDeploymentAssessment,
   _id: 'mongo-object-id',
   __v: 1,
-  id: 'assessment-abc123',
-  name: 'Assessment',
-  schemaId: 'deployment-assessment-schema',
   metadata: {
-    overview: {
-      riskOwner: 'user:risk-owner',
-      justification: 'Owns the deployment risk.',
-      modelIds: ['model-one', 'model-two'],
-    },
+    ...testDeploymentAssessment.metadata,
     deletedInformation: 'must not be returned',
   },
-  draft: false,
-  createdBy: 'creator',
-  createdAt: new Date('2026-01-01T00:00:00.000Z'),
-  updatedAt: new Date('2026-01-02T00:00:00.000Z'),
   deletedAt: new Date('2026-01-03T00:00:00.000Z'),
 }
 
@@ -35,33 +26,44 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
   test('searches deployment assessments using all filters', async () => {
     serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessment])
 
-    const res = await testGet(
-      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification',
-    )
+    const { id, schemaId, name, draft, createdBy, createdAt } = testDeploymentAssessment
+    const { riskOwner, modelIds, justification } = testDeploymentAssessment.metadata.overview
+    const query = new URLSearchParams({
+      schemaId,
+      riskOwner,
+      createdBy,
+      createdAfter: '2023-07-28',
+      createdBefore: '2023-07-31',
+      draft: String(draft),
+      search: 'deployment justification',
+    })
+    modelIds.forEach((modelId) => query.append('modelIds', modelId))
+
+    const res = await testGet(`/api/v3/deployment-assessments?${query}`)
 
     expect(res.statusCode).toBe(200)
     expect(serviceMock.searchDeploymentAssessments).toHaveBeenCalledWith(expect.anything(), {
-      schemaId: 'deployment-assessment-schema',
-      modelIds: ['model-one', 'model-two'],
-      riskOwner: 'user:risk-owner',
-      createdBy: 'creator',
-      createdAfter: '2026-01-01',
-      createdBefore: '2026-01-31',
-      draft: false,
+      schemaId,
+      modelIds,
+      riskOwner,
+      createdBy,
+      createdAfter: '2023-07-28',
+      createdBefore: '2023-07-31',
+      draft,
       search: 'deployment justification',
     })
     expect(res.body).toEqual({
       deploymentAssessments: [
         {
-          id: 'assessment-abc123',
-          schemaId: 'deployment-assessment-schema',
-          name: 'Assessment',
-          owner: 'user:risk-owner',
-          models: ['model-one', 'model-two'],
-          justification: 'Owns the deployment risk.',
-          draft: false,
-          createdBy: 'creator',
-          createdAt: '2026-01-01T00:00:00.000Z',
+          id,
+          schemaId,
+          name,
+          owner: riskOwner,
+          models: modelIds,
+          justification,
+          draft,
+          createdBy,
+          createdAt: createdAt.toISOString(),
         },
       ],
     })

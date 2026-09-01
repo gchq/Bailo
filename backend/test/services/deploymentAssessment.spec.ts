@@ -12,6 +12,7 @@ import {
 } from '../../src/services/deploymentAssessment.js'
 import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
+import { testDeploymentAssessment } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authentication/index.js', () => ({
   default: { getUserInformation: vi.fn() },
@@ -19,7 +20,7 @@ vi.mock('../../src/connectors/authentication/index.js', () => ({
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
-const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => 'assessment-abc123') }))
+const idMocks = vi.hoisted(() => ({ convertStringToId: vi.fn(() => testDeploymentAssessment.id) }))
 vi.mock('../../src/utils/id.js', () => idMocks)
 
 const schemaMocks = vi.hoisted(() => ({
@@ -31,22 +32,10 @@ vi.mock('../../src/services/schema.js', () => schemaMocks)
 const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
 
-const params = {
-  name: 'Assessment',
-  schemaId: 'deployment-assessment-schema',
-  metadata: {
-    overview: {
-      riskOwner: 'user:risk-owner',
-      justification: 'Owns the deployment risk.',
-      modelIds: ['model-one'],
-    },
-    assessment: { summary: 'Summary' },
-  },
-  draft: false,
-}
+const { createdAt: _a, updatedAt: _b, ...params } = testDeploymentAssessment
 
 const liveModel = {
-  id: 'model-one',
+  id: testDeploymentAssessment.metadata.overview.modelIds[0],
   kind: EntryKind.Model,
   visibility: EntryVisibility.Public,
   state: 'Production',
@@ -102,20 +91,13 @@ describe('services > deploymentAssessment', () => {
   })
 
   test('creates an assessment with a generated ID and authenticated creator', async () => {
-    const result = await createDeploymentAssessment({ dn: 'creator' }, params)
+    const result = await createDeploymentAssessment({ dn: testDeploymentAssessment.createdBy }, params)
 
-    expect(authentication.getUserInformation).toHaveBeenCalledWith('user:risk-owner')
+    expect(authentication.getUserInformation).toHaveBeenCalledWith(testDeploymentAssessment.metadata.overview.riskOwner)
     expect(ModelModelMock.find).toHaveBeenCalledWith({
-      id: { $in: ['model-one'] },
+      id: { $in: [liveModel.id] },
     })
-    expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith({
-      id: 'assessment-abc123',
-      name: params.name,
-      schemaId: params.schemaId,
-      metadata: params.metadata,
-      draft: params.draft,
-      createdBy: 'creator',
-    })
+    expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(params)
     expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith(params.schemaId, params.metadata, {
       draft: false,
     })
@@ -137,9 +119,9 @@ describe('services > deploymentAssessment', () => {
   test('validates references supplied in a draft', async () => {
     await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true })
 
-    expect(authentication.getUserInformation).toHaveBeenCalledWith('user:risk-owner')
+    expect(authentication.getUserInformation).toHaveBeenCalledWith(params.metadata.overview.riskOwner)
     expect(ModelModelMock.find).toHaveBeenCalledWith({
-      id: { $in: ['model-one'] },
+      id: { $in: params.metadata.overview.modelIds },
     })
   })
 
@@ -204,14 +186,25 @@ describe('services > deploymentAssessment', () => {
     ['only a name', { overview: { name: 'Assessment' } }],
     ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
     ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
-    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
-    ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
-    ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: params.metadata.overview.riskOwner } }],
+    [
+      'models but no risk owner',
+      { overview: { name: 'Assessment', modelIds: [params.metadata.overview.modelIds[0]] } },
+    ],
+    [
+      'repeated model IDs',
+      {
+        overview: {
+          name: 'Assessment',
+          modelIds: [params.metadata.overview.modelIds[0], params.metadata.overview.modelIds[0]],
+        },
+      },
+    ],
   ])('accepts metadata with %s', async (_description, metadata) => {
     const result = await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
     expect(DeploymentAssessmentModelMock).toHaveBeenCalledWith(expect.objectContaining({ metadata }))
-    expect(idMocks.convertStringToId).toHaveBeenCalledWith('Assessment')
+    expect(idMocks.convertStringToId).toHaveBeenCalledWith(params.name)
     expect(result.save).toHaveBeenCalled()
   })
 
@@ -322,9 +315,23 @@ describe('services > deploymentAssessment', () => {
       ['only a name', { overview: { name: 'Assessment' } }],
       ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
       ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
-      ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
-      ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
-      ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+      [
+        'a risk owner but no models',
+        { overview: { name: 'Assessment', riskOwner: params.metadata.overview.riskOwner } },
+      ],
+      [
+        'models but no risk owner',
+        { overview: { name: 'Assessment', modelIds: [params.metadata.overview.modelIds[0]] } },
+      ],
+      [
+        'repeated model IDs',
+        {
+          overview: {
+            name: 'Assessment',
+            modelIds: [params.metadata.overview.modelIds[0], params.metadata.overview.modelIds[0]],
+          },
+        },
+      ],
     ])('accepts a draft update with metadata with %s', async (_description, metadata) => {
       const deploymentAssessment = existingDeploymentAssessment()
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
