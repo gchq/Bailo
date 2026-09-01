@@ -136,8 +136,18 @@ describe('services > schema', () => {
         required: ['riskOwner', 'justification', 'modelIds'],
         properties: expect.objectContaining({
           riskOwner: expect.objectContaining({
-            title: 'Who is the Deployment Risk Owner attached to this deployment assessment?',
+            title: 'Who is the risk owner attached to this deployment assessment?',
+            type: 'array',
+            minItems: 1,
+            maxItems: 1,
+            uniqueItems: true,
+            hideDefaultUser: true,
             widget: 'entitySelector',
+          }),
+          justification: expect.objectContaining({
+            title: 'Justify why the Deployment Risk Owner has been assigned',
+            type: 'string',
+            minLength: 1,
           }),
           modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),

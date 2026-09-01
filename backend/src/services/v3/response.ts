@@ -22,7 +22,7 @@ export async function respondToReview(
   const review = getModelReview(await findReviewById(user, reviewId))
   if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve && dueDate) {
     if (dueDate.getTime() <= Date.now() || !isLifecycleReviewDateValid(dueDate)) {
-      throw BadReq('Due date of next review is invalid.')
+      throw BadReq('Due date of next review is invalid.', { dueDate })
     }
   }
 
