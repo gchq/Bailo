@@ -83,7 +83,7 @@ export default function Release() {
               text='This is a draft release'
               draft={release.draft}
               handlePublish={handlePublishRelease}
-              showButton={true}
+              showButton
               disableButton={isEdit}
               isLoading={isLoading}
               errorMessage={putErrorMessage}

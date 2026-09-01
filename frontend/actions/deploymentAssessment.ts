@@ -22,13 +22,13 @@ export function patchDeploymentAssessment(
   deploymentAssessmentId: string,
   metadata?: DeploymentAssessmentMetadata,
   draft?: boolean,
-  deploymentAssessmentName?: string,
+  name?: string,
 ) {
   return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      deploymentAssessmentName,
+      name,
       ...(metadata && { metadata }),
       draft,
     }),
