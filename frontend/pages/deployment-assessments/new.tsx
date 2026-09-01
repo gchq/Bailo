@@ -3,9 +3,10 @@ import { postDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Title from 'src/common/Title'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaFormPage from 'src/schemas/SchemaFormPage'
 import SchemaSelect from 'src/schemas/SchemaSelect'
@@ -28,6 +29,8 @@ export default function NewDeploymentAssessment() {
 
   const isFormLoading = useMemo(() => isSchemaLoading || isCurrentUserLoading, [isSchemaLoading, isCurrentUserLoading])
 
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
   useEffect(() => {
     if (!schema || !currentUser) {
       return
@@ -44,6 +47,7 @@ export default function NewDeploymentAssessment() {
   async function onSaveDraft() {
     setErrorText('')
     setDraftButtonLoading(true)
+    setUnsavedChanges(false)
 
     if (!schemaId) {
       setErrorText('Please wait until the page has finished loading before attempting to save.')
@@ -69,6 +73,7 @@ export default function NewDeploymentAssessment() {
   async function onSubmit() {
     setErrorText('')
     setSubmitButtonLoading(true)
+    setUnsavedChanges(false)
     setFormValidationErrorState(false)
 
     if (!schemaId) {
@@ -104,6 +109,12 @@ export default function NewDeploymentAssessment() {
     const body = await res.json()
     router.push(`/deployment-assessmentss/${body.deploymentAssessment.id}`)
   }
+
+  useEffect(() => {
+    if (schemaId) {
+      setUnsavedChanges(true)
+    }
+  }, [schemaId, setUnsavedChanges])
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment page', {
     isSchemaError,
