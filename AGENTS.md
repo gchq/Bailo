@@ -64,30 +64,43 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 - Cypress E2E (open): `npm run cy:open`
 - Cypress E2E (headless): `npm run cy:run`
 
+Each Python project is an independent [uv](https://docs.astral.sh/uv/) project with its own
+`uv.lock`. They are deliberately not a uv workspace: a workspace forces a single
+`requires-python` across all members (the intersection here is Python 3.12 only), which would
+break the `bailo` 3.10-3.14 test matrix.
+
+Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
+
 ### Python client (`lib/python/`)
 
 ```bash
-python3 -m venv libpythonvenv && source libpythonvenv/bin/activate
-pip install -e .[test]
+uv sync --extra mlflow --group test
 ```
 
-- Unit tests: `pytest`
-- Integration tests: `pytest -m integration` (requires Bailo running on `https://localhost:8080`)
-- MLFlow tests: `pytest -m mlflow`
-- Format check: `ruff format --check .`
-- Lint: `ruff check src/bailo`
+- Unit tests: `uv run pytest`
+- Integration tests: `uv run pytest -m integration` (requires Bailo running on `https://localhost:8080`)
+- MLFlow tests: `uv run pytest -m mlflow`
+- Format check: `uv run ruff format --check .`
+- Lint: `uv run ruff check src/bailo`
 
 ### ArtefactScan API (`lib/artefactscan_api/`)
 
 ```bash
-python3 -m venv artefactscanvenv && source artefactscanvenv/bin/activate
-pip install -e ".[dev]"
+uv sync --group dev
 ```
 
-- Unit tests: `pytest`
-- Integration tests: `pytest -m integration`
+- Unit tests: `uv run pytest`
+- Integration tests: `uv run pytest -m integration`
 - Docker build & run:
   `docker build -t artefactscan_rest_api:latest . && docker run -p 0.0.0.0:3311:3311 artefactscan_rest_api:latest`
+
+### Backend docs (`backend/docs/`)
+
+```bash
+uv sync --group dev && uv pip install ../../lib/python
+```
+
+- Build: `uv run make html`
 
 ## Coding conventions
 
