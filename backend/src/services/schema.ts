@@ -71,9 +71,15 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         type: 'object',
         properties: {
           riskOwner: {
-            title: `Who is the ${config.ui.roleDisplayNames.riskOwner} attached to this deployment assessment?`,
-            type: 'string',
-            minLength: 1,
+            title: 'Who is the risk owner attached to this deployment assessment?',
+            type: 'array',
+            items: {
+              type: 'string',
+              minLength: 1,
+            },
+            minItems: 1,
+            maxItems: 1,
+            uniqueItems: true,
             widget: 'entitySelector',
             hideDefaultUser: true,
           },

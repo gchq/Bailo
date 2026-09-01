@@ -13,7 +13,7 @@ const deploymentAssessment = {
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      riskOwner: 'user:risk-owner',
+      riskOwner: ['user:risk-owner'],
       justification: 'Owns the deployment risk.',
       modelIds: ['model-one', 'model-two'],
     },
@@ -57,7 +57,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
           id: 'assessment-abc123',
           schemaId: 'deployment-assessment-schema',
           name: 'Assessment',
-          owner: 'user:risk-owner',
+          owner: ['user:risk-owner'],
           models: ['model-one', 'model-two'],
           justification: 'Owns the deployment risk.',
           draft: false,

@@ -42,7 +42,7 @@ const params = {
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      riskOwner: 'user:risk-owner',
+      riskOwner: ['user:risk-owner'],
       justification: 'Owns the deployment risk.',
       modelIds: ['model-one'],
     },
@@ -75,7 +75,7 @@ describe('services > deploymentAssessment', () => {
     test('gets an existing DA by its ID', async () => {
       const mockDA = {
         createdBy: 'creator',
-        metadata: { overview: { riskOwner: 'user' } },
+        metadata: { overview: { riskOwner: ['user'] } },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
 
@@ -96,7 +96,7 @@ describe('services > deploymentAssessment', () => {
     test('forbidden when authorisation fails', async () => {
       const mockDA = {
         createdBy: 'creator',
-        metadata: { overview: { riskOwner: 'user' } },
+        metadata: { overview: { riskOwner: ['user'] } },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
       vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
@@ -166,7 +166,7 @@ describe('services > deploymentAssessment', () => {
         { dn: 'creator' },
         {
           ...params,
-          metadata: { ...params.metadata, overview: { ...params.metadata.overview, riskOwner: 'group:risk' } },
+          metadata: { ...params.metadata, overview: { ...params.metadata.overview, riskOwner: ['group:risk'] } },
         },
       ),
     ).rejects.toThrow('The risk owner must be a valid user entity.')
@@ -221,7 +221,7 @@ describe('services > deploymentAssessment', () => {
     ['only a name', { overview: { name: 'Assessment' } }],
     ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
     ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
-    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
+    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
     ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
     ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
   ])('accepts metadata with %s', async (_description, metadata) => {
@@ -432,7 +432,7 @@ describe('services > deploymentAssessment', () => {
     test('stores the validated metadata', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-      const metadata = { overview: { name: 'Updated assessment', riskOwner: 'user:risk-owner' } }
+      const metadata = { overview: { name: 'Updated assessment', riskOwner: ['user:risk-owner'] } }
 
       const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata, draft: false })
 
@@ -493,7 +493,7 @@ describe('services > deploymentAssessment', () => {
       ['only a name', { overview: { name: 'Assessment' } }],
       ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
       ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
-      ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: 'user:risk-owner' } }],
+      ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
       ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
       ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
     ])('accepts a draft update with metadata with %s', async (_description, metadata) => {
@@ -562,7 +562,7 @@ describe('services > deploymentAssessment', () => {
       expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
         schemaId: 'deployment-assessment-schema',
         'metadata.overview.modelIds': { $all: ['model-one', 'model-two'] },
-        'metadata.overview.riskOwner': 'user:risk-owner',
+        'metadata.overview.riskOwner': { $elemMatch: { $eq: 'user:risk-owner' } },
         createdBy: 'creator',
         createdAt: {
           $gte: new Date('2026-01-01T00:00:00.000Z'),
