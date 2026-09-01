@@ -9,18 +9,28 @@ import { registerPath, responseInterfaceSchema } from '../../../services/specifi
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getResponseSchema = z.object({
-  query: z.object({
-    parentIds: coerceArray(z.array(z.string())).optional(),
-    mine: strictCoerceBoolean(z.boolean().optional()),
-  }),
+  query: z
+    .object({
+      parentIds: coerceArray(z.array(z.string())),
+    })
+    .or(
+      z.object({
+        mine: strictCoerceBoolean(z.boolean()),
+      }),
+    ),
 })
 
 registerPath({
   method: 'get',
   path: '/api/v2/responses',
   tags: ['response'],
-  description: 'Get a list of responses with matching parent IDs',
-  schema: getResponseSchema,
+  description: 'Get a list of responses with matching parent IDs.',
+  schema: z.object({
+    query: z.object({
+      parentIds: z.array(z.string()).optional(),
+      mine: z.boolean().optional(),
+    }),
+  }),
   responses: {
     200: {
       description: 'An array of responses.',
@@ -44,15 +54,13 @@ interface getResponsesResponse {
 export const getResponses = [
   async (req: Request, res: Response<getResponsesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewResponses
-    const {
-      query: { parentIds, mine },
-    } = parse(req, getResponseSchema)
+    const { query } = parse(req, getResponseSchema)
 
     let responses: ResponseInterface[]
-    if (mine) {
+    if ('mine' in query) {
       responses = await getResponsesByUser(req.user)
     } else {
-      responses = await getResponsesByParentIds(parentIds)
+      responses = await getResponsesByParentIds(query.parentIds)
     }
     await audit.onViewResponses(req, responses)
 
