@@ -173,6 +173,15 @@ describe('services > deploymentAssessment', () => {
     )
   })
 
+  test('rejects a model the user is not authorised to view', async () => {
+    vi.mocked(authorisation.models).mockResolvedValueOnce([{ success: false, id: 'model-one', info: '' }])
+
+    await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
+      'You do not have permission to use one or more of the specified models.',
+    )
+    expect(DeploymentAssessmentModelMock).not.toHaveBeenCalled()
+  })
+
   test('rejects a hidden schema', async () => {
     schemaMocks.getSchemaById.mockResolvedValueOnce({ kind: SchemaKind.DeploymentAssessment, hidden: true })
 
@@ -303,6 +312,17 @@ describe('services > deploymentAssessment', () => {
         /^You do not have permission to update this Deployment Assessment/,
       )
       expect(schemaMocks.validateContentAgainstSchema).not.toHaveBeenCalled()
+      expect(deploymentAssessment.save).not.toHaveBeenCalled()
+    })
+
+    test('rejects a model the user is not authorised to view', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      vi.mocked(authorisation.models).mockResolvedValueOnce([{ success: false, id: 'model-one', info: '' }])
+
+      await expect(
+        updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata }),
+      ).rejects.toThrow('You do not have permission to use one or more of the specified models.')
       expect(deploymentAssessment.save).not.toHaveBeenCalled()
     })
 
