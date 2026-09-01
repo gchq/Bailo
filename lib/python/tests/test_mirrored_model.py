@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, Role
-
-# isort: split
-
-from bailo import Client, Datacard, Experiment, MirroredModel, ModelVisibility
+from bailo import Client, MirroredModel, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, Role
 from bailo.core.exceptions import BailoException
-from bailo.core.utils import NestedDict
 
 
 def test_model_card_defaults(local_mirrored_model):
@@ -116,9 +112,25 @@ def test_mirrored_model(local_mirrored_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "sourceModelId", "organisation", "tags", "visibility", "collaborators"),
+    (
+        "name",
+        "description",
+        "sourceModelId",
+        "organisation",
+        "tags",
+        "visibility",
+        "collaborators",
+    ),
     [
-        ("test-mirrored-model", "test", "test-1234", None, None, ModelVisibility.PUBLIC, None),
+        (
+            "test-mirrored-model",
+            "test",
+            "test-1234",
+            None,
+            None,
+            ModelVisibility.PUBLIC,
+            None,
+        ),
         (
             "test-mirrored-model",
             "test",
@@ -263,7 +275,7 @@ def test_get_releases(integration_client):
         visibility=ModelVisibility.PUBLIC,
     )
 
-    releases = model.get_releases()
+    model.get_releases()
 
     with pytest.raises(BailoException):
         model.get_latest_release()

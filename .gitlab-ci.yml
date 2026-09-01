@@ -10,7 +10,10 @@ variables:
 opensrc-bailols:
   stage: git_sync
   rules:
-    - if: '$BFG == "true" && ($CI_COMMIT_REF_NAME == "main" || $CI_COMMIT_REF_NAME == "v3")'
+    - if: '$CI_COMMIT_BRANCH == "main" && $BFG == "true"'
+      when: always
+      allow_failure: true
+    - if: '$CI_COMMIT_BRANCH == "v3" && $BFG == "true"'
       when: always
       allow_failure: true
     - when: manual

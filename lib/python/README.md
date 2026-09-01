@@ -62,20 +62,13 @@ from bailo import Client, Model
 client = Client("http://localhost:8080")
 
 # Create a model
-yolo = Model.create(
-    client=client,
-    name="YoloV4",
-    description="You only look once!"
-)
+yolo = Model.create(client=client, name="YoloV4", description="You only look once!")
 
 # Populate datacard using a predefined schema
 yolo.card_from_schema("minimal-general-v10")
 
 # Create a new release
-my_release = yolo.create_release(
-    version="0.1.0",
-    notes="Beta"
-)
+my_release = yolo.create_release(version="0.1.0", notes="Beta")
 
 # Upload a binary file to the release
 with open("yolo.onnx") as f:

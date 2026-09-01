@@ -300,7 +300,8 @@ def download_database():
         _login_to_database_registry(client, settings)
 
         # Fetch the OCI manifest to get layer digests for SHA-256 verification.
-        # Call `get_manifest` + `download_blob` instead of `client.pull()` to verify each layer's hash against the manifest before extracting
+        # Use get_manifest + download_blob instead of client.pull() to verify
+        # each layer's hash against the manifest before extracting.
         container = oras.container.Container(settings.DB_IMAGE)
         manifest = client.get_manifest(container)
         layers = manifest.get("layers", [])
@@ -360,7 +361,7 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
     blob_digest = blob_hash.hexdigest()
 
     if blob_digest != filename:
-        logger.exception("Calculated digest %s does not match expected digest %s", blob_digest, filename)
+        logger.error("Calculated digest %s does not match expected digest %s", blob_digest, filename)
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST.value,
             detail=f"Uploaded blob {filename} did not match expected digest",
@@ -393,7 +394,8 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
             blob_digest,
         )
 
-    # Check if the DB needs refreshing. `_DB_LOCK` is held only for the metadata read so concurrent scans aren't blocked.
+    # Check if the DB needs refreshing. _DB_LOCK is held only for the
+    # metadata read so concurrent scans aren't blocked.
     with _DB_LOCK:
         next_update = _read_next_update()
     if next_update is not None and next_update < datetime.datetime.now(datetime.timezone.utc):

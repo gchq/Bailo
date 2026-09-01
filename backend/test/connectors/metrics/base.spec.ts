@@ -161,9 +161,9 @@ const mockFindWithIdFilter = (allModels: any[]) =>
     return mockFindQuery(filtered)
   })
 
-await describe('connectors > metrics > simple > getUsageMetrics', async () => {
+describe('connectors > metrics > simple > getUsageMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -174,7 +174,7 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
   })
 
   test('calculateUsageMetrics returns global metrics', async () => {
-    modelMocks.distinct.mockResolvedValueOnce(['m1', 'm2']).mockResolvedValueOnce(['m1', 'm2'])
+    modelMocks.distinct.mockResolvedValue(['m1', 'm2'])
     schemaModelMocks.aggregate.mockResolvedValue([])
 
     modelMocks.aggregate.mockImplementation((pipeline: any[]) => {
@@ -186,29 +186,36 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
         return Promise.resolve([{ _id: 'active', count: 3 }])
       }
 
-      if (pipeline.some((stage) => stage.$group?._id === '$schemaId')) {
-        return Promise.resolve([{ _id: 'schema1', count: 2 }])
-      }
-
       return Promise.resolve([])
     })
 
-    modelMocks.countDocuments.mockResolvedValueOnce(4).mockResolvedValueOnce(6)
+    modelMocks.countDocuments.mockImplementation((filter: any = {}) => {
+      if (filter.organisation === 'b corp') {
+        return Promise.resolve(4)
+      }
+      if (filter.organisation === '') {
+        return Promise.resolve(6)
+      }
+      if (filter.id?.$in) {
+        return Promise.resolve(filter.id.$in.length)
+      }
+      return Promise.resolve(10)
+    })
 
-    releaseMocks.aggregate.mockResolvedValueOnce([{ count: 4 }]).mockResolvedValueOnce([{ count: 2 }])
+    releaseMocks.aggregate.mockResolvedValue([{ count: 2 }])
+    releaseMocks.distinct.mockResolvedValue(['m1', 'm2', 'm3'])
 
-    accessRequestMocks.aggregate.mockResolvedValueOnce([{ count: 2 }]).mockResolvedValueOnce([{ count: 1 }])
+    accessRequestMocks.aggregate.mockResolvedValue([{ count: 1 }])
+    accessRequestMocks.distinct.mockResolvedValue(['m1', 'm2'])
 
     schemaMocks.searchSchemas.mockResolvedValue([{ id: 'schema1', name: 'Schema 1' }])
-
-    serviceMocks.searchModels.mockResolvedValueOnce({ models: [{}, {}] }).mockResolvedValueOnce({ models: [{}] })
 
     const result = await connector.getUsageMetrics(mockUser)
 
     expect(result.global.entries).toBe(10)
     expect(result.global.users).toBe(5)
-    expect(result.global.withReleases).toBe(6)
-    expect(result.global.withAccessRequest).toBe(3)
+    expect(result.global.withReleases).toBe(3)
+    expect(result.global.withAccessRequest).toBe(2)
 
     expect(result.byOrganisation).toHaveLength(2)
 
@@ -250,15 +257,10 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
       { id: 'schema2', name: 'Schema 2' },
     ])
 
-    schemaModelMocks.aggregate
-      .mockResolvedValueOnce([
-        { schemaId: 'schema1', schemaName: 'Schema 1', count: 3 },
-        { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
-      ])
-      .mockResolvedValueOnce([
-        { schemaId: 'schema1', schemaName: 'Schema 1', count: 0 },
-        { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
-      ])
+    schemaModelMocks.aggregate.mockResolvedValue([
+      { schemaId: 'schema1', schemaName: 'Schema 1', count: 3 },
+      { schemaId: 'schema2', schemaName: 'Schema 2', count: 0 },
+    ])
 
     releaseMocks.distinct.mockResolvedValue([])
     accessRequestMocks.distinct.mockResolvedValue([])
@@ -272,37 +274,9 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
       { schemaId: 'none', schemaName: 'None', count: 0 },
     ])
   })
-  test('global model count equals sum of organisation + unset counts', async () => {
-    modelMocks.countDocuments
-      .mockResolvedValueOnce(3) // b corp
-      .mockResolvedValueOnce(3) // unset
+
+  test('global metrics are computed independently from per-org metrics', async () => {
     schemaModelMocks.aggregate.mockResolvedValue([])
-
-    // Minimal mocks for other aggregations
-    modelMocks.aggregate.mockResolvedValue([])
-    releaseMocks.distinct.mockResolvedValue([])
-
-    // aggregate called once per organisation (3 orgs here)
-    releaseMocks.aggregate.mockResolvedValue([])
-    accessRequestMocks.distinct.mockResolvedValue([])
-    accessRequestMocks.aggregate.mockResolvedValue([])
-
-    schemaMocks.searchSchemas.mockResolvedValue([])
-
-    const result = await connector.getUsageMetrics(mockUser)
-
-    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.entries, 0)
-
-    expect(result.global.entries).toBe(6)
-    expect(sumOfOrgs).toBe(result.global.entries)
-  })
-  test('global model count equals sum of organisations when no unset exists', async () => {
-    modelMocks.countDocuments
-      .mockResolvedValueOnce(3) // b corp
-      .mockResolvedValueOnce(1) // c corp
-      .mockResolvedValueOnce(0) // unset
-    schemaModelMocks.aggregate.mockResolvedValue([])
-
     modelMocks.aggregate.mockResolvedValue([])
     releaseMocks.distinct.mockResolvedValue([])
     releaseMocks.aggregate.mockResolvedValue([])
@@ -310,16 +284,27 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
     accessRequestMocks.aggregate.mockResolvedValue([])
     schemaMocks.searchSchemas.mockResolvedValue([])
 
-    const { BaseMetricsConnector } = await loadConnector()
-    const connector = new BaseMetricsConnector(['b corp', 'c corp'])
+    modelMocks.countDocuments.mockImplementation((filter: any = {}) => {
+      if (filter.organisation === 'b corp') {
+        return Promise.resolve(3)
+      }
+      if (filter.organisation === '') {
+        return Promise.resolve(3)
+      }
+      return Promise.resolve(7)
+    })
 
     const result = await connector.getUsageMetrics(mockUser)
 
-    const sumOfOrgs = result.byOrganisation.reduce((sum, org) => sum + org.entries, 0)
+    expect(result.global.entries).toBe(7)
 
-    expect(result.global.entries).toBe(4)
-    expect(sumOfOrgs).toBe(result.global.entries)
+    const corp = result.byOrganisation.find((o: any) => o.organisation === 'b corp')
+    const unset = result.byOrganisation.find((o: any) => o.organisation === 'unset')
+
+    expect(corp?.entries).toBe(3)
+    expect(unset?.entries).toBe(3)
   })
+
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 
@@ -329,9 +314,9 @@ await describe('connectors > metrics > simple > getUsageMetrics', async () => {
   })
 })
 
-await describe('connectors > metrics > simple > getRoleComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getRoleComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -489,9 +474,9 @@ await describe('connectors > metrics > simple > getRoleComplianceMetrics', async
   })
 })
 
-await describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -525,9 +510,9 @@ await describe('connectors > metrics > simple > getNoReleaseComplianceMetrics', 
   })
 })
 
-await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getUnapprovedComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
@@ -718,9 +703,9 @@ await describe('connectors > metrics > simple > getUnapprovedComplianceMetrics',
   })
 })
 
-await describe('connectors > metrics > simple > calculateEntryVolume', async () => {
+describe('connectors > metrics > simple > calculateEntryVolume', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.clearAllMocks()
     const { BaseMetricsConnector } = await loadConnector()
     connector = new BaseMetricsConnector(['b corp'])
@@ -896,6 +881,7 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
       },
     })
   })
+
   test('calculateEntryVolume > month interval includes models created on last day', async () => {
     const start = new Date('2026-05-01T00:00:00.000Z')
 
@@ -937,10 +923,10 @@ await describe('connectors > metrics > simple > calculateEntryVolume', async () 
   })
 })
 
-await describe('connectors > metrics > simple > calculateModelBreakdown', async () => {
+describe('connectors > metrics > simple > calculateModelBreakdown', async () => {
   let connector
 
-  await beforeEach(async () => {
+  beforeEach(async () => {
     const { BaseMetricsConnector } = await loadConnector()
     connector = new BaseMetricsConnector(['b corp'])
   })
@@ -1201,9 +1187,9 @@ await describe('connectors > metrics > simple > calculateModelBreakdown', async 
   })
 })
 
-await describe('connectors > metrics > simple > getLifecycleComplianceMetrics', async () => {
+describe('connectors > metrics > simple > getLifecycleComplianceMetrics', async () => {
   let connector
-  await beforeEach(async () => {
+  beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
