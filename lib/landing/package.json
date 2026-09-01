@@ -27,9 +27,9 @@
     "@mdx-js/react": "^3.1.1",
     "@mui/icons-material": "9.2.0",
     "@mui/material": "9.2.0",
-    "@next/mdx": "^16.3.0",
+    "@next/mdx": "^16.3.3",
     "dedent-js": "^1.0.1",
-    "next": "16.3.0",
+    "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "rehype-highlight": "^7.0.1",
@@ -37,7 +37,7 @@
     "remark-gfm": "4.0.1",
     "shelljs": "^0.10.0",
     "styled-components": "^6.4.4",
-    "swagger-ui-dist": "^5.32.12",
+    "swagger-ui-dist": "^5.32.14",
     "swiper": "^14.0.7"
   },
   "devDependencies": {

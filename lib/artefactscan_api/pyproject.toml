@@ -10,7 +10,7 @@ requires-python = ">=3.10,<3.13"
 dependencies = [
     "content-size-limit-asgi==0.1.5",
     "fastapi[standard-no-fastapi-cloud-cli]==0.141.1",
-    "filelock==3.32.3",
+    "filelock==3.32.4",
     "modelscan[tensorflow,h5py]==0.8.8",
     "oras==0.2.43",
     "pydantic_settings==2.15.0",
@@ -24,7 +24,7 @@ dev = [
     "pytest==9.1.1",
     "pytest-github-actions-annotate-failures==0.4.2",
     "pytest-mock==3.15.1",
-    "ruff==0.16.4",
+    "ruff==0.16.5",
 ]
 
 [tool.flit.module]
