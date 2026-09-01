@@ -1158,7 +1158,7 @@ export interface BaseLifecycleMetrics {
 
 export interface DeploymentAssessmentMetadata {
   overview: {
-    riskOwner?: string
+    riskOwner?: string[]
     justification?: string
     modelIds?: string[]
     [key: string]: unknown

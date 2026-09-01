@@ -11,7 +11,7 @@ const deploymentAssessment = {
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      riskOwner: 'user:risk-owner',
+      riskOwner: ['user:risk-owner'],
       justification: 'Owns the deployment risk.',
       modelIds: ['model-one'],
     },
@@ -54,7 +54,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
   })
 
   test.each([
-    { riskOwner: 'user:risk-owner', modelIds: [] },
+    { riskOwner: ['user:risk-owner'], modelIds: [] },
     { justification: 'Owns the deployment risk.', modelIds: ['model-one'] },
     {},
   ])('creates a draft with overview fields set to %j', async (overview) => {
