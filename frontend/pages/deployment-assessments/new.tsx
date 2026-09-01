@@ -102,7 +102,7 @@ export default function NewDeploymentAssessment() {
     }
 
     const body = await res.json()
-    router.push(`/deployment-assessmentss/${body.deploymentAssessment.id}`)
+    router.push(`/deployment-assessments/${body.deploymentAssessment.id}`)
   }
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment page', {
