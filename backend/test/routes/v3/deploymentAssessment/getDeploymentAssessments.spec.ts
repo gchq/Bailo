@@ -36,7 +36,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessment])
 
     const res = await testGet(
-      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification&state=approved',
+      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification&state=approved&needsAction=true',
     )
 
     expect(res.statusCode).toBe(200)
@@ -50,6 +50,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
       draft: false,
       search: 'deployment justification',
       state: 'approved',
+      needsAction: true,
     })
     expect(res.body).toEqual({
       deploymentAssessments: [
@@ -106,11 +107,35 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     'draft=invalid',
     'search=',
     'state=invalid',
+    'needsAction=invalid',
     'unknown=value',
   ])('rejects the malformed query %s', async (query) => {
     const res = await testGet(`/api/v3/deployment-assessments?${query}`)
 
     expect(res.statusCode).toBe(400)
     expect(serviceMock.searchDeploymentAssessments).not.toHaveBeenCalled()
+  })
+
+  test('returns the timestamp of the latest review', async () => {
+    serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([
+      { ...deploymentAssessment, state: 'rejected', reviewedAt: new Date('2026-02-03T00:00:00.000Z') },
+    ])
+
+    const res = await testGet('/api/v3/deployment-assessments?needsAction=true')
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body.deploymentAssessments[0]).toMatchObject({
+      state: 'rejected',
+      reviewedAt: '2026-02-03T00:00:00.000Z',
+    })
+  })
+
+  test('omits the review timestamp when the assessment has not been reviewed', async () => {
+    serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([{ ...deploymentAssessment, draft: true }])
+
+    const res = await testGet('/api/v3/deployment-assessments?needsAction=true')
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body.deploymentAssessments[0]).not.toHaveProperty('reviewedAt')
   })
 })
