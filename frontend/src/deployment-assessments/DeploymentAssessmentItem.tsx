@@ -53,6 +53,7 @@ export default function DeploymentAssessmentItem({ deploymentAssessment }: Deplo
                 // Styles with vendor prefixes may not support all browsers. Use with caution
                 display: '-webkit-box',
                 overflow: 'hidden',
+                textOverflow: 'ellipsis',
                 WebkitBoxOrient: 'vertical',
                 WebkitLineClamp: 2,
               }}
