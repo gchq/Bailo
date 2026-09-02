@@ -5,6 +5,7 @@ import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/mate
 import { useTheme } from '@mui/material/styles'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetSchema } from 'actions/schema'
+import { getChangedFields } from 'node_modules/@rjsf/utils/lib'
 import { KeyedMutator } from 'node_modules/swr/dist/index/index.mjs'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
@@ -37,6 +38,10 @@ export default function EditableDeploymentAssessmentForm({
   onIsEditChange,
   readOnly = false,
 }: EditableDeploymentAssessmentFormProps) {
+  const [originalSplitSchema, setOriginalSplitSchema] = useState<SplitSchemaNoRender>({
+    reference: '',
+    steps: [],
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
@@ -72,14 +77,25 @@ export default function EditableDeploymentAssessmentForm({
     if (schema) {
       setErrorMessage('')
       setIsLoading(true)
-      //check old like in formeditpage to see if changed
+
+      const oldData = getStepsData(originalSplitSchema, true)
       const data = getStepsData(splitSchema, true)
+
+      const answersChanged = getChangedFields(oldData, data).length > 0
       const nameChanged = deploymentAssessment.name !== newName
+      const nothingChanged = !answersChanged && !nameChanged
+
+      if (nothingChanged) {
+        setIsLoading(false)
+        onIsEditChange(false)
+        return
+      }
+
       const response = await patchDeploymentAssessment(
         deploymentAssessment.id,
-        removeEmptyValues(data),
-        deploymentAssessment.draft,
-        nameChanged ? newName : deploymentAssessment.name,
+        answersChanged ? removeEmptyValues(data) : undefined,
+        undefined,
+        nameChanged ? newName : undefined,
       )
 
       if (!response.ok) {
@@ -104,6 +120,7 @@ export default function EditableDeploymentAssessmentForm({
 
   function handleEdit() {
     onIsEditChange(true)
+    setOriginalSplitSchema(splitSchema)
   }
 
   function handleCancel() {

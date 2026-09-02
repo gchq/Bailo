@@ -50,7 +50,7 @@ export default function EditableFormHeading({
         spacing={2}
         sx={{
           justifyContent: { xs: 'center', sm: 'space-between' },
-          alignItems: 'center',
+          alignItems: 'start',
         }}
       >
         {heading}
