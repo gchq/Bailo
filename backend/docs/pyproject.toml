@@ -9,7 +9,7 @@ description = "Sphinx documentation for the Bailo Python client"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
 dependencies = [
-    "ipython>=9.16.1,<10",
+    "ipython>=9.17.0,<10",
     "myst-parser>=5.1.0,<6",
     "nbsphinx>=0.9.8,<0.10",
     "sphinx>=9.1.0,<10",
@@ -20,7 +20,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.6.2,<5",
-    "ruff>=0.16.4,<0.17",
+    "ruff>=0.16.5,<0.17",
 ]
 
 [tool.setuptools]

@@ -29,7 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 mlflow = [
-    "mlflow-skinny>=3.15.1,<4",
+    "mlflow-skinny>=3.15.2,<4",
 ]
 
 [project.urls]
@@ -46,7 +46,7 @@ test = [
     "pytest-github-actions-annotate-failures>=0.4.2,<0.5",
     "pytest-mock>=3.15.1,<4",
     "requests-mock>=1.12.1,<2",
-    "ruff>=0.16.4,<0.17",
+    "ruff>=0.16.5,<0.17",
 ]
 
 [tool.flit.module]

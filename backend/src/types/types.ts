@@ -230,18 +230,18 @@ export interface EntrySearchOptions {
 export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
 
 export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
-  kind: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
+  kind: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
   task: z.string().toLowerCase().optional(),
-  libraries: coerceArray(z.array(z.string().toLowerCase()).optional()),
-  organisations: coerceArray(z.array(z.string()).optional()),
-  states: coerceArray(z.array(z.string()).optional()),
-  filters: coerceArray(z.array(z.string()).optional()),
+  libraries: coerceArray(z.array(z.string().toLowerCase())).optional(),
+  organisations: coerceArray(z.array(z.string())).optional(),
+  states: coerceArray(z.array(z.string())).optional(),
+  filters: coerceArray(z.array(z.string())).optional(),
   search: z.string().optional(),
-  allowTemplating: strictCoerceBoolean(z.boolean().optional()),
+  allowTemplating: strictCoerceBoolean(z.boolean()).optional(),
   schemaId: z.string().optional(),
-  adminAccess: strictCoerceBoolean(z.boolean().optional()),
-  peers: coerceArray(z.array(z.string()).optional()),
-  titleOnly: strictCoerceBoolean(z.boolean().optional()),
+  adminAccess: strictCoerceBoolean(z.boolean()).optional(),
+  peers: coerceArray(z.array(z.string())).optional(),
+  titleOnly: strictCoerceBoolean(z.boolean()).optional(),
 })
 
 export const EntryFilter = {
@@ -267,7 +267,7 @@ export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOption
     organisation: z.string().optional(),
     state: z.string().optional(),
     schemaId: z.string().optional(),
-    kinds: coerceArray(z.array(z.nativeEnum(EntryKind)).optional()),
+    kinds: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
     release: z.enum(getEnumValues(EntryFilter)).optional(),
     accessRequest: z.enum(getEnumValues(EntryFilter)).optional(),
     startMonth: z
