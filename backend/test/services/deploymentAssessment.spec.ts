@@ -628,11 +628,13 @@ describe('services > deploymentAssessment', () => {
 
     test('returns the timestamp of the latest review response', async () => {
       const reviewed = { id: 'reviewed-assessment', draft: false }
+      const awaitingReview = { id: 'awaiting-review-assessment', draft: false }
       const draft = { id: 'draft-assessment', draft: true }
-      const sort = vi.fn().mockResolvedValue([reviewed, draft])
+      const sort = vi.fn().mockResolvedValue([reviewed, awaitingReview, draft])
       DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
       vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([
         { success: true, id: reviewed.id },
+        { success: true, id: awaitingReview.id },
         { success: true, id: draft.id },
       ])
       ReviewModelMock.aggregate.mockResolvedValueOnce([
@@ -643,6 +645,7 @@ describe('services > deploymentAssessment', () => {
 
       expect(result[0]).toMatchObject({ id: reviewed.id, reviewedAt: new Date('2026-02-03T00:00:00.000Z') })
       expect(result[1]).not.toHaveProperty('reviewedAt')
+      expect(result[2]).not.toHaveProperty('reviewedAt')
     })
 
     describe('needsAction', () => {
@@ -654,7 +657,7 @@ describe('services > deploymentAssessment', () => {
         await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
 
         expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-          $or: [{ 'metadata.overview.riskOwner': { $elemMatch: { $in: ['user:joe', 'joe'] } } }, { createdBy: 'joe' }],
+          $or: [{ 'metadata.overview.riskOwner': { $in: ['user:joe', 'joe'] } }, { createdBy: 'joe' }],
         })
       })
 

@@ -473,7 +473,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   }
   if (params.needsAction) {
     query.$or = [
-      { 'metadata.overview.riskOwner': { $elemMatch: { $in: [toEntity('user', user.dn), user.dn] } } },
+      { 'metadata.overview.riskOwner': { $in: [toEntity('user', user.dn), user.dn] } },
       { createdBy: user.dn },
     ]
   }
@@ -530,7 +530,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
 
     const { decision, reviewedAt } = latestDecisionsByAssessmentId.get(assessment.id) ?? {}
     const state = deriveDeploymentAssessmentState(assessment, decision)
-    return Object.assign(assessment, { state, reviewedAt })
+    return Object.assign(assessment, { state, ...(reviewedAt && { reviewedAt }) })
   })
 
   return searchResults

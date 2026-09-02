@@ -52,7 +52,7 @@ function toDeploymentAssessmentSummary(
     ...(modelIds && { models: modelIds }),
     ...(justification && { justification }),
     ...(deploymentAssessment.state && { state: deploymentAssessment.state }),
-    ...(deploymentAssessment.reviewedAt && { reviewedAt: new Date(deploymentAssessment.reviewedAt).toISOString() }),
+    ...(deploymentAssessment.reviewedAt && { reviewedAt: deploymentAssessment.reviewedAt.toISOString() }),
     draft: deploymentAssessment.draft,
     createdBy: deploymentAssessment.createdBy,
     createdAt: deploymentAssessment.createdAt.toISOString(),
