@@ -20,7 +20,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
-import { MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
+import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
 
@@ -95,6 +95,11 @@ export default function Paginate<T>({
     () => (isArray(filteredList) ? Math.ceil(filteredList.length / pageSize) : 10),
     [filteredList, pageSize],
   )
+  const currentPage = Math.min(page, Math.max(pageCount, 1))
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, Math.max(pageCount, 1)))
+  }, [pageCount])
 
   const handlePageOnChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
@@ -234,10 +239,10 @@ export default function Paginate<T>({
     let sortedList
     if (orderByValue === 'semver') {
       sortedList = filteredList.sort(compareSemanticVersions)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     } else {
       sortedList = filteredList.sort(sortByValue)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     }
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
@@ -246,7 +251,7 @@ export default function Paginate<T>({
         </div>
       ))
     }
-  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, page, pageSize, children])
+  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, currentPage, pageSize, children])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />
@@ -332,7 +337,7 @@ export default function Paginate<T>({
         <Pagination
           count={pageCount}
           color='secondary'
-          page={page}
+          page={currentPage}
           onChange={handlePageOnChange}
           aria-label='bottom page pagination navigation'
         />
