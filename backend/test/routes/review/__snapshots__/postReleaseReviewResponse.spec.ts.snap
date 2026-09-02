@@ -23,9 +23,10 @@ exports[`routes > review > postReleaseReviewResponse > missing review decision 1
       "errors": [
         {
           "code": "invalid_union_discriminator",
-          "message": "Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
+          "message": "Invalid discriminator value. Expected 'approve' | 'reject' | 'undo' | 'request_changes'",
           "options": [
             "approve",
+            "reject",
             "undo",
             "request_changes",
           ],
@@ -36,7 +37,7 @@ exports[`routes > review > postReleaseReviewResponse > missing review decision 1
         },
       ],
     },
-    "message": "Path: body.decision - Message: Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
+    "message": "Path: body.decision - Message: Invalid discriminator value. Expected 'approve' | 'reject' | 'undo' | 'request_changes'",
     "name": "Bailo Error",
   },
 }

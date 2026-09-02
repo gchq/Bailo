@@ -84,7 +84,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             hideDefaultUser: true,
           },
           justification: {
-            title: 'Justify why the risk owner has been assigned',
+            title: `Justify why the ${config.ui.roleDisplayNames.riskOwner} has been assigned`,
             type: 'string',
             minLength: 1,
           },

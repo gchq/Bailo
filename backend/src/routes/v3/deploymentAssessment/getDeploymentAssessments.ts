@@ -5,7 +5,11 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { DeploymentAssessmentDoc } from '../../../models/DeploymentAssessment.js'
 import { searchDeploymentAssessments } from '../../../services/deploymentAssessment.js'
-import { deploymentAssessmentSummarySchema, registerPath } from '../../../services/specification.js'
+import {
+  deploymentAssessmentStateSchema,
+  deploymentAssessmentSummarySchema,
+  registerPath,
+} from '../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getDeploymentAssessmentsSchema = z.object({
@@ -19,6 +23,7 @@ export const getDeploymentAssessmentsSchema = z.object({
       createdBefore: z.string().date().optional(),
       draft: strictCoerceBoolean(z.boolean()).optional(),
       search: z.string().min(1).optional(),
+      state: deploymentAssessmentStateSchema.optional(),
     })
     .strict()
     .refine(
@@ -33,7 +38,9 @@ export const getDeploymentAssessmentsSchema = z.object({
 
 export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
 
-function toDeploymentAssessmentSummary(deploymentAssessment: DeploymentAssessmentDoc): DeploymentAssessmentSummary {
+function toDeploymentAssessmentSummary(
+  deploymentAssessment: DeploymentAssessmentDoc & { state?: DeploymentAssessmentSummary['state'] },
+): DeploymentAssessmentSummary {
   const { riskOwner, modelIds, justification } = deploymentAssessment.metadata.overview ?? {}
 
   return {
@@ -43,6 +50,7 @@ function toDeploymentAssessmentSummary(deploymentAssessment: DeploymentAssessmen
     ...(riskOwner && riskOwner.length > 0 && { owner: riskOwner }),
     ...(modelIds && { models: modelIds }),
     ...(justification && { justification }),
+    ...(deploymentAssessment.state && { state: deploymentAssessment.state }),
     draft: deploymentAssessment.draft,
     createdBy: deploymentAssessment.createdBy,
     createdAt: deploymentAssessment.createdAt.toISOString(),
