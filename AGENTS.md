@@ -49,6 +49,7 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 - Dev server: `npm run dev`
 - Build: `npm run build`
 - Test: `npm run test`
+- Test (single run, no coverage): `npx vitest run --coverage.enabled=false [path/to/file.spec.ts]`
 - Lint: `npm run lint`
 - Format check: `npm run check-style`
 - Run a script: `npm run script`
@@ -59,6 +60,7 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 - Dev server: `npm run dev`
 - Build: `npm run build`
 - Test: `npm run test`
+- Test (single run): `npx vitest run [path/to/file.spec.tsx]`
 - Lint: `npm run lint`
 - Format check: `npm run check-style`
 - Cypress E2E (open): `npm run cy:open`
@@ -121,6 +123,10 @@ pip install -e ".[dev]"
 
 Bug fixes require regression tests that fail before the fix and pass after it. New features require tests covering edge
 cases and invalid input.
+
+When running Vitest while developing, use `npx vitest run --coverage.enabled=false` rather than `npm run test`. The
+backend `vitest.config.ts` enables coverage by default, and the resulting per-file table buries the pass/fail summary.
+Coverage is only needed for the full CI run.
 
 ### Backend (Vitest)
 
