@@ -13,13 +13,15 @@ export interface DeploymentAssessmentSearchParams {
   needsAction?: boolean
 }
 
-export function useGetDeploymentAssessments(queryParams: DeploymentAssessmentSearchParams = {}) {
+export function useGetDeploymentAssessments({ needsAction }: DeploymentAssessmentSearchParams = {}) {
+  // Omit rather than pass undefined, which stringifies to an empty value the API rejects
+  const queryParams = { ...(needsAction !== undefined && { needsAction }) }
   const { data, isLoading, error, mutate } = useSWR<
     {
       deploymentAssessments: DeploymentAssessmentSummary[]
     },
     ErrorInfo
-  >(`/api/v3/deployment-assessments?${qs.stringify({ ...queryParams })}`, fetcher)
+  >(`/api/v3/deployment-assessments?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateDeploymentAssessments: mutate,

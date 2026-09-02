@@ -116,6 +116,24 @@ describe('NeedsAction', () => {
       })
     })
 
+    it('drops a selected status that is no longer on offer', async () => {
+      mockDeploymentAssessments([draft, rejected])
+      const { rerender } = render(<NeedsAction />)
+
+      fireEvent.click(await screen.findByTestId('chipOption-Rejected'))
+      await waitFor(async () => expect(await screen.findAllByTestId('deploymentAssessmentItem')).toHaveLength(1))
+
+      // The rejected assessment is actioned elsewhere and disappears on the next revalidation
+      mockDeploymentAssessments([draft])
+      rerender(<NeedsAction />)
+
+      await waitFor(async () => {
+        expect(await screen.findAllByTestId('deploymentAssessmentItem')).toHaveLength(1)
+        expect(await screen.findByText('A Model to make everything')).toBeDefined()
+        expect(screen.queryByText('No deployment assessments match the selected statuses')).toBeNull()
+      })
+    })
+
     it('shows every assessment again once the status is deselected', async () => {
       mockDeploymentAssessments([draft, rejected])
       render(<NeedsAction />)

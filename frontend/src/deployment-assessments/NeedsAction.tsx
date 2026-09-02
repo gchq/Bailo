@@ -1,12 +1,14 @@
 import { Stack } from '@mui/material'
 import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
-import { memoize } from 'lodash-es'
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Paginate from 'src/common/Paginate'
 import renderQueryState from 'src/common/renderQueryState'
 import DeploymentAssessmentItem from 'src/deployment-assessments/DeploymentAssessmentItem'
+import { DeploymentAssessmentSummary } from 'types/types'
 import { deploymentAssessmentStatusOrder, getDeploymentAssessmentDisplayState } from 'utils/deploymentAssessmentUtils'
+
+type PaginatedDeploymentAssessment = DeploymentAssessmentSummary & { key: string }
 
 export default function NeedsAction() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
@@ -23,6 +25,13 @@ export default function NeedsAction() {
     return deploymentAssessmentStatusOrder.filter((status) => presentStatuses.has(status))
   }, [deploymentAssessments])
 
+  useEffect(() => {
+    setSelectedStatuses((statuses) => {
+      const availableStatuses = statuses.filter((status) => statusOptions.includes(status))
+      return availableStatuses.length === statuses.length ? statuses : availableStatuses
+    })
+  }, [statusOptions])
+
   const filteredDeploymentAssessments = useMemo(
     () =>
       deploymentAssessments.filter(
@@ -33,9 +42,11 @@ export default function NeedsAction() {
     [deploymentAssessments, selectedStatuses],
   )
 
-  const DeploymentAssessmentListItem = memoize(({ data }) => (
-    <DeploymentAssessmentItem deploymentAssessment={data} key={data.id} />
-  ))
+  // Stable identity, so Paginate's memoised list is not rebuilt on every render
+  const renderDeploymentAssessment = useCallback(
+    ({ data }: { data: PaginatedDeploymentAssessment }) => <DeploymentAssessmentItem deploymentAssessment={data} />,
+    [],
+  )
 
   const queryState = renderQueryState([isDeploymentAssessmentsError], isDeploymentAssessmentsLoading)
   if (queryState) {
@@ -75,7 +86,7 @@ export default function NeedsAction() {
         searchFilterProperty='name'
         searchPlaceholderText='Search by name'
       >
-        {DeploymentAssessmentListItem}
+        {renderDeploymentAssessment}
       </Paginate>
     </Stack>
   )

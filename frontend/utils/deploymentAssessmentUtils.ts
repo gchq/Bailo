@@ -7,8 +7,6 @@ export interface DeploymentAssessmentDisplayState {
   colour: DeploymentAssessmentStateColour
 }
 
-export const deploymentAssessmentStatusOrder = ['Draft', 'Awaiting review', 'Changes requested', 'Rejected', 'Approved']
-
 export function getDeploymentAssessmentDisplayState({
   draft,
   state,
@@ -28,3 +26,15 @@ export function getDeploymentAssessmentDisplayState({
       return { label: 'Approved', colour: 'default' }
   }
 }
+
+const deploymentAssessmentStatuses: Pick<DeploymentAssessmentSummary, 'draft' | 'state'>[] = [
+  { draft: true },
+  { draft: false, state: DeploymentAssessmentState.NeedsReview },
+  { draft: false, state: DeploymentAssessmentState.ChangesRequested },
+  { draft: false, state: DeploymentAssessmentState.Rejected },
+  { draft: false, state: DeploymentAssessmentState.Approved },
+]
+
+export const deploymentAssessmentStatusOrder = deploymentAssessmentStatuses.map(
+  (deploymentAssessment) => getDeploymentAssessmentDisplayState(deploymentAssessment).label,
+)
