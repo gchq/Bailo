@@ -1,9 +1,9 @@
-import { PassThrough, Readable } from 'node:stream'
+import { PassThrough, Readable, Writable } from 'node:stream'
 import { json } from 'node:stream/consumers'
 import { finished, pipeline } from 'node:stream/promises'
 import zlib from 'node:zlib'
 
-import { extract, Pack, pack } from 'tar-stream'
+import { Extract, extract, Pack, pack } from 'tar-stream'
 
 import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
@@ -19,6 +19,13 @@ import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/base.js'
 import { getImporter } from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
+
+export type TarEntrySink = ReturnType<Pack['entry']>
+
+/** `tar-stream` uses `streamx` streams: runtime-compatible with `node:stream`, but not assignable to it. */
+function asNodeWritable(stream: Extract | TarEntrySink): Writable {
+  return stream as unknown as Writable
+}
 
 function createTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
@@ -81,7 +88,7 @@ export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, lo
       type: 'file',
     })
 
-    await pipeline(entry.stream, tarEntryStream)
+    await pipeline(entry.stream, asNodeWritable(tarEntryStream))
   } else {
     throw InternalError('Unable to handle entry for tar.gz packing stream.', {
       entry,
@@ -171,7 +178,7 @@ export async function extractTarGzStream(
     }
 
     // Stream lifecycle errors (gzip corruption, tar parse errors, premature close)
-    finished(untarStream).catch((err) => {
+    finished(asNodeWritable(untarStream)).catch((err) => {
       fail(err)
     })
 
@@ -257,6 +264,6 @@ export async function extractTarGzStream(
       })().catch((err) => fail(err))
     })
 
-    pipeline(tarGzStream, ungzipStream, untarStream).catch(fail)
+    pipeline(tarGzStream, ungzipStream, asNodeWritable(untarStream)).catch(fail)
   })
 }

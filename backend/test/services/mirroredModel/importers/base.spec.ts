@@ -1,13 +1,13 @@
 import { PassThrough } from 'node:stream'
 
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { BaseImporter, BaseMirrorMetadata } from '../../../../src/services/mirroredModel/importers/base.js'
 import { InternalError } from '../../../../src/utils/error.js'
 
 class TestImporter extends BaseImporter {
-  processEntry(_entry: Headers, _stream: PassThrough) {
+  processEntry(_entry: Header, _stream: PassThrough) {
     // mock implementation
   }
 }
@@ -75,7 +75,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
 
   test('processEntry > success implemented by subclass', () => {
     const importer = new TestImporter(mockMetadata, mockLogData)
-    const fakeEntry = {} as Headers
+    const fakeEntry = {} as Header
     const fakeStream = new PassThrough()
 
     expect(() => importer.processEntry(fakeEntry, fakeStream)).not.toThrow()

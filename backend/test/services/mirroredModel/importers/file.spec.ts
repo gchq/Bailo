@@ -1,6 +1,6 @@
 import { PassThrough } from 'node:stream'
 
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { FileImporter, FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
@@ -81,7 +81,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
     FileModelMock.findOne.mockResolvedValue(null)
 
     const importer = new FileImporter(mockMetadata, mockLogData)
-    const entry: Headers = { name: 'file1', type: 'file' } as Headers
+    const entry: Header = { name: 'file1', type: 'file' } as Header
     const stream = new PassThrough()
     stream.end('file-contents')
 
@@ -95,7 +95,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   test('processEntry > success skip already existing file', async () => {
     FileModelMock.findOne.mockResolvedValue({ id: 'existingId' })
     const importer = new FileImporter(mockMetadata, mockLogData)
-    const entry: Headers = { name: 'file1', type: 'file' } as Headers
+    const entry: Header = { name: 'file1', type: 'file' } as Header
     const stream = new PassThrough()
     stream.end('file-contents')
     const resumeSpy = vi.spyOn(stream, 'resume')
@@ -110,7 +110,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   test('processEntry > error on multiple files', async () => {
     FileModelMock.findOne.mockResolvedValue(null)
     const importer = new FileImporter(mockMetadata, mockLogData)
-    const entry: Headers = { name: 'file1', type: 'file' } as Headers
+    const entry: Header = { name: 'file1', type: 'file' } as Header
     const stream = new PassThrough()
     stream.end('file-contents')
     const stream2 = new PassThrough()
@@ -125,7 +125,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
   test('processEntry > success skip non-file entries', async () => {
     const importer = new FileImporter(mockMetadata, mockLogData)
-    const entry: Headers = { name: 'dir', type: 'directory' } as Headers
+    const entry: Header = { name: 'dir', type: 'directory' } as Header
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)

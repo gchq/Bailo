@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 
 import { ObjectId } from 'mongodb'
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import {
@@ -98,7 +98,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     modelMocks.saveImportedModelCard.mockResolvedValue({ saved: true })
 
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'content-dir/1.json', type: 'file' } as Headers
+    const entry: Header = { name: 'content-dir/1.json', type: 'file' } as Header
     const stream = new PassThrough()
     stream.end(JSON.stringify({ some: 'data' }))
 
@@ -119,10 +119,10 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     authMocks.default.releases.mockResolvedValue([{ success: true }])
 
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/releases/release1.json',
       type: 'file',
-    } as Headers
+    } as Header
     const stream = new PassThrough()
     stream.end(JSON.stringify({ some: 'release' }))
 
@@ -139,10 +139,10 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     authMocks.default.releases.mockResolvedValue([{ success: false }])
 
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/releases/releaseFail.json',
       type: 'file',
-    } as Headers
+    } as Header
     const stream = new PassThrough()
     stream.end(JSON.stringify({ some: 'release' }))
 
@@ -156,10 +156,10 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     fileMocks.saveImportedFile.mockResolvedValue(true)
 
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/files/file1.json',
       type: 'file',
-    } as Headers
+    } as Header
     const stream = new PassThrough()
     stream.end(JSON.stringify({ some: 'file' }))
 
@@ -172,10 +172,10 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
 
   test('processEntry > error unknown file path', async () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/unknown/file.json',
       type: 'file',
-    } as Headers
+    } as Header
     const stream = new PassThrough()
     stream.end(JSON.stringify({}))
 
@@ -186,7 +186,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
 
   test('processEntry > success skip non-file entry', async () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'dir', type: 'directory' } as Headers
+    const entry: Header = { name: 'dir', type: 'directory' } as Header
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)

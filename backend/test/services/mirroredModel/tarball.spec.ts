@@ -10,6 +10,7 @@ import {
   extractTarGzStream,
   finaliseTarGzUpload,
   initialiseTarGzUpload,
+  TarEntrySink,
 } from '../../../src/services/mirroredModel/tarball.js'
 import config from '../../../src/utils/__mocks__/config.js'
 
@@ -140,7 +141,7 @@ describe('service > mirroredModel > tarball', () => {
     // `cb: any` due to TS mis-inferring type
     const entrySpy = vi.spyOn(tarStream, 'entry').mockImplementation((_header, cb: any) => {
       cb?.()
-      return new PassThrough()
+      return new PassThrough() as unknown as TarEntrySink
     })
     const stream = new PassThrough()
     stream.end('data')
@@ -155,7 +156,7 @@ describe('service > mirroredModel > tarball', () => {
     const tarEntryStream = new PassThrough()
     const entrySpy = vi.spyOn(tarStream, 'entry').mockImplementation((_header, cb: any) => {
       cb?.()
-      return tarEntryStream
+      return tarEntryStream as unknown as TarEntrySink
     })
     const stream = new PassThrough()
     setImmediate(() => {
