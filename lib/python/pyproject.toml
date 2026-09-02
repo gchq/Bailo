@@ -22,14 +22,14 @@ classifiers = [
 requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies = [
-    "requests>=2.34.2,<3",
-    "semantic-version>=2.10.0,<3",
-    "tqdm>=4.70.0,<5",
+    "requests>=2.26",
+    "semantic-version>=2.4",
+    "tqdm>=4.40",
 ]
 
 [project.optional-dependencies]
 mlflow = [
-    "mlflow-skinny>=3.15.2,<4",
+    "mlflow-skinny>=3",
 ]
 
 [project.urls]
@@ -40,13 +40,13 @@ Changelog = "https://github.com/gchq/Bailo/blob/main/lib/python/CHANGELOG.md"
 
 [dependency-groups]
 test = [
-    "pre-commit>=4.6.2,<5",
-    "pytest>=9.1.1,<10",
-    "pytest-cov>=7.1.0,<8",
-    "pytest-github-actions-annotate-failures>=0.4.2,<0.5",
-    "pytest-mock>=3.15.1,<4",
-    "requests-mock>=1.12.1,<2",
-    "ruff>=0.16.5,<0.17",
+    "pre-commit>=4",
+    "pytest>=9",
+    "pytest-cov>=7",
+    "pytest-github-actions-annotate-failures>=0.4",
+    "pytest-mock>=3",
+    "requests-mock>=1",
+    "ruff>=0.16",
 ]
 
 [tool.flit.module]
