@@ -187,7 +187,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     throw error
   }
 
-  if (!release.minor) {
+  if (!release.minor && !release.draft) {
     try {
       await createReleaseReviews(model, release)
     } catch (error) {
@@ -213,6 +213,11 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   }
   const release = await getReleaseBySemver(user, model, semver)
 
+  //Attempt to draft a published release
+  if (!release.draft && delta.draft) {
+    throw BadReq('Once a release has been published, it cannot be returned to draft status.')
+  }
+
   Object.assign(release, delta)
   await validateRelease(user, model, release)
 
@@ -227,6 +232,15 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  if (release.draft && !delta.draft) {
+    try {
+      await createReleaseReviews(model, updatedRelease)
+    } catch (error) {
+      // Transactions here would solve this issue.
+      log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this release')
+    }
   }
 
   dispatchWebhooks(
@@ -276,7 +290,7 @@ export async function getModelReleases(
   const query = querySemver === undefined ? { modelId } : convertSemverQueryToMongoQuery(querySemver, modelId)
   const results = await ReleaseModel.aggregate()
     .match(query)
-    .sort({ updatedAt: -1 })
+    .sort({ draft: -1, updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     .lookup({
       from: 'v2_files',

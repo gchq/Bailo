@@ -1,9 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
-# isort: split
-
 from bailo import Client, Datacard, Model, ModelVisibility
 from bailo.core.enums import CollaboratorEntry, Role
 from bailo.core.exceptions import BailoException
@@ -108,4 +105,4 @@ def test_get_model_as_datacard(integration_client):
     )
 
     with pytest.raises(BailoException):
-        datacard = Datacard.from_id(client=integration_client, datacard_id=model.model_id)
+        Datacard.from_id(client=integration_client, datacard_id=model.model_id)

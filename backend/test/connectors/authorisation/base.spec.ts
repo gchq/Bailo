@@ -206,6 +206,29 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
+  test('model > create untrusted model with the untrusted model role', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAuthentication.hasRole.mockResolvedValueOnce(true)
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'untrustedModel',
+        kind: EntryKind.UntrustedModel,
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Create,
+    )
+
+    expect(mockAuthentication.hasRole).toHaveBeenCalledWith(user, Roles.UntrustedModel)
+
+    expect(result).toStrictEqual({
+      id: 'untrustedModel',
+      success: true,
+    })
+  })
+
   describe('Update model card', () => {
     test('model > update model card as owner', async () => {
       const connector = new BasicAuthorisationConnector()
@@ -1040,7 +1063,7 @@ describe('connectors > authorisation > base', () => {
       id: 'da-1',
       createdBy: 'creator',
       draft: false,
-      metadata: { overview: { riskOwner: 'riskOwner' } },
+      metadata: { overview: { riskOwner: ['riskOwner'] } },
     } as any
 
     test('view non-draft DA as non-named user', async () => {

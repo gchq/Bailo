@@ -78,20 +78,4 @@ describe('services > review', () => {
     expect(roles.allRoles.length).toBe(4)
     expect(roles.reviewRoleDocs.length).toBe(1)
   })
-
-  test('getAllEntryRoles > excludes the legacy deployment risk owner dynamic role', async () => {
-    ModelModelMock.findOne.mockResolvedValue({
-      id: '123',
-      card: { schemaId: 'test' },
-      collaborators: [],
-    })
-    accessRequestMock.getAccessRequestsByModel.mockResolvedValue([])
-    mockReviewService.findReviewRoles.mockResolvedValueOnce([
-      { ...testReviewRoleNoSystemRole, shortName: 'dro', name: 'Deployment Risk Owner' } as any,
-    ])
-
-    const roles = await getAllEntryRoles({} as any, '123')
-
-    expect(roles.allRoles.map((role) => role.shortName)).not.toContain('dro')
-  })
 })

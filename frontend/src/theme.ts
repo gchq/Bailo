@@ -211,7 +211,7 @@ export const darkTheme = createTheme({
       main: green.A700,
     },
     background: {
-      paper: '#282828;',
+      paper: '#282828',
       default: '#2d2d2d',
     },
     action: {

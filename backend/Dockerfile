@@ -1,34 +1,29 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.14.2-trixie@sha256:4878b7ad12a3c49e49c775ea617df0d2169605eaffc5ede31977e1c3dd913eae AS sphinx-docs
+FROM python:3.14.2-alpine3.23@sha256:31da4cb527055e4e3d7e9e006dffe9329f84ebea79eaca0a1f1c27ce61e40ca5 AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Cache packages with run cache, update system packages, install pandoc
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends pandoc
+RUN apk add --no-cache pandoc make
 
 WORKDIR /app/docs
 
-COPY docs .
-# Only get the required dirs & files (ignore tests etc.)
+COPY docs/pyproject.toml .
 COPY --from=python pyproject.toml /app/python/
 COPY --from=python README.md /app/python/
 COPY --from=python src /app/python/src
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install . -e /app/python
+
+COPY docs .
 
 RUN make html
 
 FROM node:26.7.0-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS node-base
 
-RUN apk add --no-cache libc6-compat ca-certificates && \
-    apk update
+RUN apk add --no-cache libc6-compat ca-certificates
 
 WORKDIR /app
 

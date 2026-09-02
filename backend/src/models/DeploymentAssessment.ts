@@ -4,7 +4,7 @@ import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlug
 
 export interface DeploymentAssessmentMetadata {
   overview?: {
-    riskOwner?: string
+    riskOwner?: string[]
     justification?: string
     modelIds?: string[]
     [key: string]: unknown

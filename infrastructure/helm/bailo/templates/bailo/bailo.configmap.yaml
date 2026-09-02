@@ -248,6 +248,9 @@ data:
 
         deploymentAssessments: {
           deployableModelState: '{{ .Values.config.ui.deploymentAssessments.deployableModelState }}',
+
+        lifecycle: {
+          maxReviewInterval: '{{ .Values.config.ui.lifecycle.maxReviewInterval }}',
         },
       },
 
@@ -312,8 +315,7 @@ data:
       },
 
       stroom: {
-        logOnlyMode: {{ .Values.stroom.logOnlyMode }},
-        feed: '{{ .Values.stroom.feed }}',
+        sendEvents: {{ .Values.stroom.sendEvents }},
         url: '{{ .Values.stroom.url }}',
         environment: '{{ .Values.stroom.environment }}',
         interval: {{ .Values.stroom.interval }},
@@ -322,6 +324,7 @@ data:
         xmlns: '{{ .Values.stroom.xmlns }}',
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
+        headers: {{ toJson .Values.stroom.headers }},
       },
 
       llm: {

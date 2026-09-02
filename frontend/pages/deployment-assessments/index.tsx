@@ -11,9 +11,9 @@ export default function Deployments() {
   const uiConfig = useContext(UiConfigContext)
   const tabs = useMemo(
     () => [
-      { title: 'Needs Action', path: 'needs-action', view: <></> },
-      { title: 'My Assessments', path: 'my-assessments', view: <></> },
-      { title: 'All Assessments', path: 'all-assessments', view: <></> },
+      { title: 'Needs action', path: 'needs-action', view: <></> },
+      { title: 'My assessments', path: 'my-assessments', view: <></> },
+      { title: 'All assessments', path: 'all-assessments', view: <></> },
     ],
     [],
   )

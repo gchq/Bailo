@@ -1,9 +1,10 @@
 import { MongoServerError } from 'mongodb'
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
 import {
   createSchema,
+  deleteSchemaById,
   getSchemaById,
   searchSchemas,
   updateSchema,
@@ -70,19 +71,39 @@ const validatorResultErrorMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/types/ValidatorResultError.js', async () => validatorResultErrorMock)
 
-const cacheGetSetMock = vi.hoisted(() => ({
+const cacheMock = vi.hoisted(() => ({
+  store: new Map<string, unknown>(),
   get: vi.fn(),
   set: vi.fn(),
+  keys: vi.fn(),
+  del: vi.fn(),
 }))
 vi.mock('node-cache', () => ({
   __esModule: true,
   default: vi.fn(
     class {
-      get = cacheGetSetMock.get
-      set = cacheGetSetMock.set
+      get = cacheMock.get
+      set = cacheMock.set
+      keys = cacheMock.keys
+      del = cacheMock.del
     },
   ),
 }))
+
+// Back the cache mock with an in-memory store so that invalidation can be asserted end to end.
+beforeEach(() => {
+  cacheMock.store.clear()
+  cacheMock.get.mockImplementation((key: string) => cacheMock.store.get(key))
+  cacheMock.set.mockImplementation((key: string, value: unknown) => {
+    cacheMock.store.set(key, value)
+    return true
+  })
+  cacheMock.keys.mockImplementation(() => [...cacheMock.store.keys()])
+  cacheMock.del.mockImplementation((keys: string | string[]) => {
+    const keysToDelete = Array.isArray(keys) ? keys : [keys]
+    return keysToDelete.filter((key) => cacheMock.store.delete(key)).length
+  })
+})
 
 describe('services > schema', () => {
   const testUser = { dn: 'user' } as any
@@ -115,8 +136,18 @@ describe('services > schema', () => {
         required: ['riskOwner', 'justification', 'modelIds'],
         properties: expect.objectContaining({
           riskOwner: expect.objectContaining({
-            title: 'Who is the Deployment Risk Owner attached to this deployment assessment?',
+            title: 'Who is the risk owner attached to this deployment assessment?',
+            type: 'array',
+            minItems: 1,
+            maxItems: 1,
+            uniqueItems: true,
+            hideDefaultUser: true,
             widget: 'entitySelector',
+          }),
+          justification: expect.objectContaining({
+            title: 'Justify why the Deployment Risk Owner has been assigned',
+            type: 'string',
+            minLength: 1,
           }),
           modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),
@@ -160,10 +191,16 @@ describe('services > schema', () => {
   })
 
   test('a schema can be overwritten', async () => {
-    SchemaModelModelMock.save.mockResolvedValueOnce(testModelSchema)
+    SchemaModelModelMock.replaceOne.mockResolvedValueOnce({})
+    SchemaModelModelMock.findOne.mockResolvedValueOnce(testModelSchema)
     const result = await createSchema(testUser, testModelSchema, true)
-    expect(SchemaModelModelMock.deleteOne).toHaveBeenCalledTimes(1)
-    expect(SchemaModelModelMock.save).toHaveBeenCalledTimes(1)
+    expect(SchemaModelModelMock.replaceOne).toHaveBeenCalledTimes(1)
+    expect(SchemaModelModelMock.replaceOne).toHaveBeenCalledWith(
+      { id: testModelSchema.id },
+      expect.objectContaining({ ...testModelSchema, deleted: false }),
+      { upsert: true },
+    )
+    expect(SchemaModelModelMock.save).not.toHaveBeenCalled()
     expect(result).toBe(testModelSchema)
   })
 
@@ -275,7 +312,7 @@ describe('services > schema', () => {
   test('that a cached schema is returned when the cache is populated', async () => {
     const cachedSchema = { id: 'cached-schema', jsonSchema: { type: 'object' } } as any
 
-    cacheGetSetMock.get.mockReturnValueOnce(cachedSchema)
+    cacheMock.get.mockReturnValueOnce(cachedSchema)
     SchemaModelModelMock.findOne.mockResolvedValueOnce({
       ...testModelSchema,
       toObject: vi.fn().mockReturnValue(testModelSchema),
@@ -284,10 +321,10 @@ describe('services > schema', () => {
     const result = await getSchemaById(testModelSchema.id, 'Development')
 
     expect(result).toBe(cachedSchema)
-    expect(cacheGetSetMock.get).toHaveBeenCalledWith(
+    expect(cacheMock.get).toHaveBeenCalledWith(
       JSON.stringify({ schemaId: testModelSchema.id, modelState: 'Development' }),
     )
-    expect(cacheGetSetMock.set).not.toHaveBeenCalled()
+    expect(cacheMock.set).not.toHaveBeenCalled()
   })
 
   test('that a schema is stored in cache on a cache miss', async () => {
@@ -301,10 +338,10 @@ describe('services > schema', () => {
 
     await getSchemaById(testModelSchema.id, 'Development')
 
-    expect(cacheGetSetMock.get).toHaveBeenCalledWith(
+    expect(cacheMock.get).toHaveBeenCalledWith(
       JSON.stringify({ schemaId: testModelSchema.id, modelState: 'Development' }),
     )
-    expect(cacheGetSetMock.set).toHaveBeenCalledWith(
+    expect(cacheMock.set).toHaveBeenCalledWith(
       JSON.stringify({ schemaId: testModelSchema.id, modelState: 'Development' }),
       expect.objectContaining({ id: testModelSchema.id }),
     )
@@ -463,5 +500,65 @@ describe('services > schema', () => {
     const updatedSchema = await updateSchema({} as any, 'schema-123', diff)
 
     expect(updatedSchema.reviewRoles.includes(testReviewer))
+  })
+
+  test.each([undefined, '', 'Development'])(
+    'that updating a schema invalidates the cache for modelState %o',
+    async (modelState) => {
+      const jsonSchema = { type: 'object', properties: {} }
+      const mockSchemaDoc = (name: string) => ({
+        ...testModelSchema,
+        name,
+        jsonSchema,
+        save: vi.fn(),
+        toObject: vi.fn().mockReturnValue({ ...testModelSchema, name, jsonSchema }),
+      })
+
+      SchemaModelModelMock.findOne.mockResolvedValueOnce(mockSchemaDoc('Original name'))
+      expect((await getSchemaById(testModelSchema.id, modelState)).name).toBe('Original name')
+
+      SchemaModelModelMock.findOne.mockResolvedValueOnce(mockSchemaDoc('Original name'))
+      await updateSchema(testUser, testModelSchema.id, { name: 'Updated name' })
+
+      SchemaModelModelMock.findOne.mockResolvedValueOnce(mockSchemaDoc('Updated name'))
+      expect((await getSchemaById(testModelSchema.id, modelState)).name).toBe('Updated name')
+    },
+  )
+
+  test('that updating a schema leaves other schemas cached', async () => {
+    const jsonSchema = { type: 'object', properties: {} }
+    const otherSchemaKey = JSON.stringify({ schemaId: 'other-schema', modelState: 'Development' })
+
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'other-schema',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'other-schema', jsonSchema }),
+    })
+    await getSchemaById('other-schema', 'Development')
+    expect(cacheMock.store.has(otherSchemaKey)).toBe(true)
+
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({ ...testModelSchema, save: vi.fn() })
+    await updateSchema(testUser, testModelSchema.id, { name: 'Updated name' })
+
+    expect(cacheMock.store.has(otherSchemaKey)).toBe(true)
+  })
+
+  test('that deleting a schema invalidates every cached modelState for that schema', async () => {
+    const jsonSchema = { type: 'object', properties: {} }
+
+    for (const modelState of [undefined, '', 'Development']) {
+      SchemaModelModelMock.findOne.mockResolvedValueOnce({
+        ...testModelSchema,
+        jsonSchema,
+        toObject: vi.fn().mockReturnValue({ ...testModelSchema, jsonSchema }),
+      })
+      await getSchemaById(testModelSchema.id, modelState)
+    }
+    expect(cacheMock.store.size).toBe(3)
+
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({ ...testModelSchema, deleteOne: vi.fn() })
+    await deleteSchemaById(testUser, testModelSchema.id)
+
+    expect(cacheMock.store.size).toBe(0)
   })
 })

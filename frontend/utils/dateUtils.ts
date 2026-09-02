@@ -1,4 +1,5 @@
 import dayjs, { Dayjs } from '@dayjs'
+import humanInterval from 'human-interval'
 import { plural } from 'utils/stringUtils'
 
 export const currentTimestampSimple = (): string => {
@@ -94,6 +95,12 @@ export const setAsLastDayOfMonth = (date: Dayjs): string => {
 export const increaseCurrentDateInDays = (daysToAdd: number) => {
   const currentDate = dayjs(new Date())
   return currentDate.add(daysToAdd, 'day')
+}
+
+export function increaseCurrentDateByHumanInterval(interval: string): Dayjs {
+  const currentDate = dayjs(new Date())
+  const intervalMs = humanInterval(interval) ?? 0
+  return currentDate.add(intervalMs, 'millisecond')
 }
 
 export const isOverdue = (dueDate: string): boolean => {

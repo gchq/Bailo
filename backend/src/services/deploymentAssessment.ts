@@ -1,5 +1,5 @@
 import { escapeRegExp } from 'lodash-es'
-import { ClientSession, PipelineStage, QueryFilter } from 'mongoose'
+import { ClientSession, QueryFilter } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
@@ -27,7 +27,7 @@ import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
-import { removeDeploymentAssessmentReviews } from './review.js'
+import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
@@ -46,6 +46,12 @@ export interface SearchDeploymentAssessmentsParams {
   state?: DeploymentAssessmentStateKeys
 }
 
+export interface DeploymentAssessmentDetails {
+  deploymentAssessment: DeploymentAssessmentDoc
+  responses: ResponseInterface[]
+  state?: DeploymentAssessmentStateKeys
+}
+
 export type DeploymentAssessmentSearchResult = DeploymentAssessmentDoc & {
   state?: DeploymentAssessmentDetails['state']
 }
@@ -53,22 +59,18 @@ export type DeploymentAssessmentSearchResult = DeploymentAssessmentDoc & {
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
 export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
 
-export interface DeploymentAssessmentDetails {
-  deploymentAssessment: DeploymentAssessmentDoc
-  responses: ResponseInterface[]
-  state?: DeploymentAssessmentStateKeys
-}
+async function validateRiskOwner(riskOwners: string[]) {
+  for (const riskOwner of riskOwners) {
+    const { kind, value } = fromEntity(riskOwner)
+    if (kind !== 'user' || !value) {
+      throw BadReq('The risk owner must be a valid user entity.', { riskOwner })
+    }
 
-async function validateRiskOwner(riskOwner: string) {
-  const { kind, value } = fromEntity(riskOwner)
-  if (kind !== 'user' || !value) {
-    throw BadReq('The risk owner must be a valid user entity.', { riskOwner })
-  }
-
-  try {
-    await authentication.getUserInformation(riskOwner)
-  } catch (error) {
-    throw BadReq('The risk owner could not be found.', { riskOwner, internal: error })
+    try {
+      await authentication.getUserInformation(riskOwner)
+    } catch (error) {
+      throw BadReq('The risk owner could not be found.', { riskOwner, internal: error })
+    }
   }
 }
 
@@ -113,11 +115,11 @@ async function validateDeploymentAssessment(
 
   const { riskOwner, modelIds } = metadata.overview ?? {}
 
-  if (!draft && !riskOwner) {
+  if (!draft && (!riskOwner || riskOwner.length === 0)) {
     throw BadReq('Deployment risk owner is required')
   }
 
-  if (riskOwner) {
+  if (riskOwner && riskOwner.length > 0) {
     await validateRiskOwner(riskOwner)
   }
   if (modelIds?.length) {
@@ -128,7 +130,7 @@ async function validateDeploymentAssessment(
 }
 
 async function notifyDeploymentStakeholders(
-  riskOwner: string,
+  riskOwners: string[],
   modelIds: string[],
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
@@ -141,7 +143,7 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName),
+      ...riskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -193,26 +195,6 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
   return deploymentAssessment
 }
 
-function lookupDeploymentAssessmentReviewResponses(): PipelineStage.Lookup {
-  return {
-    $lookup: {
-      from: 'v2_responses',
-      let: { reviewId: '$_id' },
-      pipeline: [
-        {
-          $match: {
-            $expr: { $eq: ['$parentId', '$$reviewId'] },
-            kind: ResponseKind.Review,
-            deleted: { $ne: true },
-          },
-        },
-        { $sort: { createdAt: -1 } },
-      ],
-      as: 'responses',
-    },
-  }
-}
-
 function deriveDeploymentAssessmentState(
   deploymentAssessment: Pick<DeploymentAssessmentInterface, 'draft'>,
   latestDecision?: DecisionKeys,
@@ -238,18 +220,7 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  const [comments, reviews] = await Promise.all([
-    ResponseModel.find({ parentId: deploymentAssessment._id, kind: ResponseKind.Comment }),
-    ReviewModel.aggregate<{ responses: ResponseInterface[] }>([
-      { $match: { deploymentAssessmentId, kind: ReviewKind.DeploymentAssessment, deleted: { $ne: true } } },
-      lookupDeploymentAssessmentReviewResponses(),
-      { $project: { responses: 1, _id: 0 } },
-    ]),
-  ])
-
-  const responses = [...comments, ...reviews.flatMap(({ responses: reviewResponses }) => reviewResponses)].sort(
-    (first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime(),
-  )
+  const responses = await getResponses(deploymentAssessment._id)
   const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
 
   return {
@@ -298,8 +269,9 @@ export async function reviewDeploymentAssessment(
   if (deploymentAssessment.draft) {
     throw BadReq('Draft deployment assessments cannot be reviewed.', { deploymentAssessmentId })
   }
-  if (deploymentAssessment.metadata.overview?.riskOwner !== toEntity('user', user.dn)) {
-    throw Forbidden('Only the deployment risk owner can review a deployment assessment.', { deploymentAssessmentId })
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
   const review = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
@@ -333,7 +305,7 @@ export async function createDeploymentAssessment(
       throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
     }
 
-    if (metadata.overview.riskOwner) {
+    if (metadata.overview.riskOwner && metadata.overview.riskOwner.length > 0) {
       await validateRiskOwner(metadata.overview.riskOwner)
     }
     if (metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
@@ -485,7 +457,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     query['metadata.overview.modelIds'] = { $all: params.modelIds }
   }
   if (params.riskOwner) {
-    query['metadata.overview.riskOwner'] = params.riskOwner
+    query['metadata.overview.riskOwner'] = { $elemMatch: { $eq: params.riskOwner } }
   }
   if (params.createdBy) {
     query.createdBy = params.createdBy
@@ -518,10 +490,24 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
           $match: {
             deploymentAssessmentId: { $in: assessmentIds },
             kind: ReviewKind.DeploymentAssessment,
-            deleted: { $ne: true },
           },
         },
-        lookupDeploymentAssessmentReviewResponses(),
+        {
+          $lookup: {
+            from: 'v2_responses',
+            let: { reviewId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ['$parentId', '$$reviewId'] },
+                  kind: ResponseKind.Review,
+                },
+              },
+              { $sort: { createdAt: -1 } },
+            ],
+            as: 'responses',
+          },
+        },
         { $set: { responses: { $slice: ['$responses', 1] } } },
         { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
         { $sort: { 'responses.createdAt': -1 } },
