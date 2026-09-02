@@ -553,6 +553,34 @@ describe('services > deploymentAssessment', () => {
       expect(smtpMocks.notifyDeploymentModelOwners).toHaveBeenCalled()
     })
 
+    test('notifies each risk owner once when a draft with several is submitted', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.metadata = {
+        ...params.metadata,
+        overview: {
+          ...params.metadata.overview,
+          riskOwner: ['user:risk-owner', 'user:other-owner', 'user:risk-owner'],
+        },
+      }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      // the notification lookup uses `.lean()`, unlike the validation lookup
+      ModelModelMock.find.mockResolvedValueOnce([liveModel]).mockReturnValueOnce({ lean: () => [liveModel] })
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledTimes(2)
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+        'user:risk-owner',
+        deploymentAssessment,
+        'Risk Owner',
+      )
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+        'user:other-owner',
+        deploymentAssessment,
+        'Risk Owner',
+      )
+    })
+
     test('does not notify stakeholders when the assessment stays a draft', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)

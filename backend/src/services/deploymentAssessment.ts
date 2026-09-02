@@ -130,10 +130,15 @@ async function validateDeploymentAssessment(
 }
 
 async function notifyDeploymentStakeholders(
-  riskOwners: string[],
-  modelIds: string[],
+  riskOwners: string[] = [],
+  modelIds: string[] = [],
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
+  const uniqueRiskOwners = [...new Set(riskOwners)]
+  if (uniqueRiskOwners.length === 0 && modelIds.length === 0) {
+    return
+  }
+
   try {
     const models = await ModelModel.find({
       id: { $in: modelIds },
@@ -143,7 +148,7 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...riskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
+      ...uniqueRiskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -181,8 +186,14 @@ async function notifyDeploymentStakeholders(
   }
 }
 
-export async function getDeploymentAssessmentById(user: UserInterface, deploymentAssessmentId: string) {
-  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
+export async function getDeploymentAssessmentById(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  session?: ClientSession,
+) {
+  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId }, undefined, {
+    session,
+  })
   if (!deploymentAssessment) {
     throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
   }
@@ -351,7 +362,11 @@ export async function createDeploymentAssessment(
   }
 
   if (!draft) {
-    await notifyDeploymentStakeholders(metadata.overview.riskOwner, metadata.overview.modelIds, deploymentAssessment)
+    await notifyDeploymentStakeholders(
+      metadata.overview.riskOwner,
+      metadata.overview.modelIds ?? [],
+      deploymentAssessment,
+    )
   }
 
   return deploymentAssessment
@@ -362,7 +377,7 @@ export async function removeDeploymentAssessment(
   deploymentAssessmentId: string,
   session?: ClientSession,
 ) {
-  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId, session)
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete)
   if (!auth.success) {
@@ -436,10 +451,10 @@ export async function updateDeploymentAssessment(
 
   await deploymentAssessment.save()
 
-  if (isBeingSubmitted && metadata.overview && metadata.overview.riskOwner) {
+  if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      metadata.overview.riskOwner,
-      metadata.overview.modelIds ?? [],
+      metadata.overview?.riskOwner ?? [],
+      metadata.overview?.modelIds ?? [],
       deploymentAssessment,
     )
   }
