@@ -1,6 +1,33 @@
+import qs from 'querystring'
 import useSWR from 'swr'
-import { DeploymentAssessmentInterface, DeploymentAssessmentUserPermissions } from 'types/types'
+import {
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentSummary,
+  DeploymentAssessmentUserPermissions,
+} from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
+
+const emptyDeploymentAssessmentList: DeploymentAssessmentSummary[] = []
+
+export interface DeploymentAssessmentSearchParams {
+  needsAction?: boolean
+}
+
+export function useGetDeploymentAssessments(queryParams: DeploymentAssessmentSearchParams = {}) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      deploymentAssessments: DeploymentAssessmentSummary[]
+    },
+    ErrorInfo
+  >(`/api/v3/deployment-assessments?${qs.stringify({ ...queryParams })}`, fetcher)
+
+  return {
+    mutateDeploymentAssessments: mutate,
+    deploymentAssessments: data ? data.deploymentAssessments : emptyDeploymentAssessmentList,
+    isDeploymentAssessmentsLoading: isLoading,
+    isDeploymentAssessmentsError: error,
+  }
+}
 
 export function useGetDeploymentAssessment(deploymentId?: string) {
   const { data, isLoading, error, mutate } = useSWR<

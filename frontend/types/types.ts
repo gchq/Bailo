@@ -1177,3 +1177,25 @@ export interface DeploymentAssessmentInterface {
   createdAt: Date
   updatedAt: Date
 }
+
+export const DeploymentAssessmentState = {
+  NeedsReview: 'needs_review',
+  Rejected: 'rejected',
+  ChangesRequested: 'changes_requested',
+  Approved: 'approved',
+} as const
+export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
+
+export interface DeploymentAssessmentSummary {
+  id: string
+  schemaId: string
+  name: string
+  owner?: string[]
+  models?: string[]
+  justification?: string
+  draft: boolean
+  createdBy: string
+  createdAt: string
+  state?: DeploymentAssessmentStateKeys
+  reviewedAt?: string
+}
