@@ -42,17 +42,15 @@ jobs:
 
       - name: Install dependencies
         working-directory: lib/python
-        run: uv sync --extra mlflow --group test --locked
+        run: uv sync --group test --locked
 
       - name: Check formatting
         working-directory: lib/python
         run: uv run ruff format --check .
-        continue-on-error: true
 
       - name: Check linting
         working-directory: lib/python
         run: uv run ruff check src/bailo
-        continue-on-error: true
 
 
   python_test:
