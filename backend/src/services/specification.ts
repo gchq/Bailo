@@ -119,6 +119,7 @@ export const deploymentAssessmentSummarySchema = z.object({
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
   state: deploymentAssessmentStateSchema.optional(),
+  reviewedAt: z.string().datetime().optional().openapi({ example: new Date().toISOString() }),
 })
 
 const baseDeploymentAssessmentSchema = z.object({

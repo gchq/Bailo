@@ -17,12 +17,19 @@ type PartialChipSelectorProps =
       onChange: (value: string) => void
     }
 
+/** Either one value shared by every chip, or one derived per chip from its option. */
+type ChipText = string | ((option: string) => string)
+
+function resolveChipText(chipText: ChipText, option: string): string {
+  return typeof chipText === 'function' ? chipText(option) : chipText
+}
+
 type ChipSelectorProps = {
   label?: string
   subheading?: string
   size?: 'small' | 'medium'
   expandThreshold?: number
-  chipTooltipTitle?: string
+  chipTooltipTitle?: ChipText
   ariaLabel?: string
   accordion?: boolean
   variant?: 'filled' | 'outlined'
@@ -75,7 +82,9 @@ export default function ChipSelector({
       activeChip={selectedChips.includes(option)}
       handleChange={handleChange}
       chipTooltipTitle={
-        unreachableOptions && unreachableOptions.includes(option) ? 'This is unreachable.' : chipTooltipTitle
+        unreachableOptions && unreachableOptions.includes(option)
+          ? 'This is unreachable.'
+          : resolveChipText(chipTooltipTitle, option)
       }
       ariaLabel={ariaLabel}
       variant={variant}

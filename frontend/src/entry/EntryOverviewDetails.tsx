@@ -79,7 +79,7 @@ export default function EntryOverviewDetails({
         }}
       >
         {entry.collaborators.slice(0, 5).map((collaborator) => {
-          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar />
+          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar highlightCurrentUser />
         })}
         {entry.collaborators.length > 5 && <Typography>...and {entry.collaborators.length - 5} more</Typography>}
       </Stack>

@@ -815,5 +815,147 @@ describe('services > deploymentAssessment', () => {
         createdAt: expectedCreatedAt,
       })
     })
+
+    test('returns the timestamp of the latest review response', async () => {
+      const reviewed = { id: 'reviewed-assessment', draft: false }
+      const awaitingReview = { id: 'awaiting-review-assessment', draft: false }
+      const draft = { id: 'draft-assessment', draft: true }
+      const sort = vi.fn().mockResolvedValue([reviewed, awaitingReview, draft])
+      DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+      vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([
+        { success: true, id: reviewed.id },
+        { success: true, id: awaitingReview.id },
+        { success: true, id: draft.id },
+      ])
+      ReviewModelMock.aggregate.mockResolvedValueOnce([
+        { _id: reviewed.id, decision: Decision.Reject, reviewedAt: new Date('2026-02-03T00:00:00.000Z') },
+      ])
+
+      const result = await searchDeploymentAssessments({ dn: 'creator' }, {})
+
+      expect(result[0]).toMatchObject({ id: reviewed.id, reviewedAt: new Date('2026-02-03T00:00:00.000Z') })
+      expect(result[1]).not.toHaveProperty('reviewedAt')
+      expect(result[2]).not.toHaveProperty('reviewedAt')
+    })
+
+    describe('needsAction', () => {
+      test('restricts the query to assessments the user owns the risk for or created', async () => {
+        const sort = vi.fn().mockResolvedValue([])
+        DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+        vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([])
+
+        await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+
+        expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
+          $or: [{ 'metadata.overview.riskOwner': { $in: ['user:joe', 'joe'] } }, { createdBy: 'joe' }],
+        })
+      })
+
+      test.each([
+        ['entity form', 'user:joe'],
+        ['bare dn', 'joe'],
+      ])('returns assessments awaiting the risk owner in %s', async (_form, riskOwner) => {
+        const assessment = {
+          id: 'awaiting-review',
+          draft: false,
+          createdBy: 'someone-else',
+          metadata: { overview: { riskOwner: [riskOwner] } },
+        }
+        const sort = vi.fn().mockResolvedValue([assessment])
+        DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+        vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
+        ReviewModelMock.aggregate.mockResolvedValueOnce([])
+
+        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+
+        expect(result).toHaveLength(1)
+        expect(result[0]).toMatchObject({ id: assessment.id, state: 'needs_review' })
+      })
+
+      test('does not return assessments the risk owner has already approved', async () => {
+        const assessment = {
+          id: 'approved',
+          draft: false,
+          createdBy: 'someone-else',
+          metadata: { overview: { riskOwner: ['user:joe'] } },
+        }
+        const sort = vi.fn().mockResolvedValue([assessment])
+        DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+        vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
+        ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: assessment.id, decision: Decision.Approve }])
+
+        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+
+        expect(result).toStrictEqual([])
+      })
+
+      test.each([
+        ['drafts', Decision.Undo, true],
+        ['rejections', Decision.Reject, false],
+        ['change requests', Decision.RequestChanges, false],
+      ])('returns the creator their %s', async (_label, decision, draft) => {
+        const assessment = { id: 'mine', draft, createdBy: 'joe', metadata: { overview: {} } }
+        const sort = vi.fn().mockResolvedValue([assessment])
+        DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+        vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
+        ReviewModelMock.aggregate.mockResolvedValueOnce(draft ? [] : [{ _id: assessment.id, decision }])
+
+        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+
+        expect(result).toHaveLength(1)
+        expect(result[0]).toMatchObject({ id: assessment.id })
+      })
+
+      test('does not return the creator their approved or awaiting review assessments', async () => {
+        const approved = { id: 'approved', draft: false, createdBy: 'joe', metadata: { overview: {} } }
+        const awaitingReview = { id: 'awaiting-review', draft: false, createdBy: 'joe', metadata: { overview: {} } }
+        const sort = vi.fn().mockResolvedValue([approved, awaitingReview])
+        DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+        vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([
+          { success: true, id: approved.id },
+          { success: true, id: awaitingReview.id },
+        ])
+        ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: approved.id, decision: Decision.Approve }])
+
+        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+
+        expect(result).toStrictEqual([])
+      })
+
+      test('excludes assessments the user neither created nor owns the risk for', async () => {
+        const assessment = {
+          id: 'unrelated',
+          draft: false,
+          createdBy: 'someone-else',
+          metadata: { overview: { riskOwner: ['user:another'] } },
+        }
+        const sort = vi.fn().mockResolvedValue([assessment])
+        DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+        vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
+        ReviewModelMock.aggregate.mockResolvedValueOnce([])
+
+        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+
+        expect(result).toStrictEqual([])
+      })
+
+      test('returns an assessment the user both created and owns the risk for exactly once', async () => {
+        const assessment = {
+          id: 'mine-and-reviewed-by-me',
+          draft: false,
+          createdBy: 'joe',
+          metadata: { overview: { riskOwner: ['user:joe'] } },
+        }
+        const sort = vi.fn().mockResolvedValue([assessment])
+        DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
+        vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
+        ReviewModelMock.aggregate.mockResolvedValueOnce([])
+
+        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+
+        expect(result).toHaveLength(1)
+        expect(result[0]).toMatchObject({ id: assessment.id, state: 'needs_review' })
+      })
+    })
   })
 })

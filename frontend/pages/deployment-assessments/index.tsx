@@ -1,21 +1,31 @@
 import Add from '@mui/icons-material/Add'
+import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import NeedsAction from 'src/deployment-assessments/NeedsAction'
 
 export default function Deployments() {
   const router = useRouter()
   const uiConfig = useContext(UiConfigContext)
+
+  // Shares an SWR cache key with the tab's own list, so the count costs no extra request
+  const { deploymentAssessments } = useGetDeploymentAssessments({ needsAction: true })
+
   const tabs = useMemo(
     () => [
-      { title: 'Needs action', path: 'needs-action', view: <></> },
+      {
+        title: deploymentAssessments.length ? `Needs action (${deploymentAssessments.length})` : 'Needs action',
+        path: 'needs-action',
+        view: <NeedsAction />,
+      },
       { title: 'My assessments', path: 'my-assessments', view: <></> },
       { title: 'All assessments', path: 'all-assessments', view: <></> },
     ],
-    [],
+    [deploymentAssessments.length],
   )
 
   const deploymentAssessmentInfo = `

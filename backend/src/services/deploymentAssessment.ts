@@ -44,6 +44,7 @@ export interface SearchDeploymentAssessmentsParams {
   draft?: boolean
   search?: string
   state?: DeploymentAssessmentStateKeys
+  needsAction?: boolean
 }
 
 export interface DeploymentAssessmentDetails {
@@ -54,6 +55,7 @@ export interface DeploymentAssessmentDetails {
 
 export type DeploymentAssessmentSearchResult = DeploymentAssessmentDoc & {
   state?: DeploymentAssessmentDetails['state']
+  reviewedAt?: Date
 }
 
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
@@ -224,6 +226,32 @@ function deriveDeploymentAssessmentState(
     default:
       return DeploymentAssessmentState.NeedsReview
   }
+}
+
+/** Risk owners are persisted in entity form, but bare DNs are matched too for legacy and seeded data. */
+function isRiskOwner(deploymentAssessment: Pick<DeploymentAssessmentInterface, 'metadata'>, user: UserInterface) {
+  const riskOwners = deploymentAssessment.metadata.overview?.riskOwner ?? []
+  return riskOwners.some((riskOwner) => riskOwner === user.dn || riskOwner === toEntity('user', user.dn))
+}
+
+/**
+ * A risk owner needs to act on assessments awaiting their review, and a creator needs to act on assessments
+ * that are still drafts or that have been sent back to them. Approved assessments need no further action.
+ */
+function needsUserAction(deploymentAssessment: DeploymentAssessmentSearchResult, user: UserInterface) {
+  if (isRiskOwner(deploymentAssessment, user) && deploymentAssessment.state === DeploymentAssessmentState.NeedsReview) {
+    return true
+  }
+
+  if (deploymentAssessment.createdBy !== user.dn) {
+    return false
+  }
+
+  return (
+    deploymentAssessment.draft ||
+    deploymentAssessment.state === DeploymentAssessmentState.Rejected ||
+    deploymentAssessment.state === DeploymentAssessmentState.ChangesRequested
+  )
 }
 
 export async function getDeploymentAssessmentDetails(
@@ -493,6 +521,12 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     const search = { $regex: escapeRegExp(params.search), $options: 'i' }
     query.$and = [{ $or: [{ name: search }, { 'metadata.overview.justification': search }] }]
   }
+  if (params.needsAction) {
+    query.$or = [
+      { 'metadata.overview.riskOwner': { $in: [toEntity('user', user.dn), user.dn] } },
+      { createdBy: user.dn },
+    ]
+  }
 
   const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
   const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
@@ -500,7 +534,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   const authorisedAssessments = deploymentAssessments.filter((_, i) => auths[i].success)
   const assessmentIds = authorisedAssessments.filter(({ draft }) => draft === false).map(({ id }) => id)
   const latestDecisions = assessmentIds.length
-    ? await ReviewModel.aggregate<{ _id: string; decision?: DecisionKeys }>([
+    ? await ReviewModel.aggregate<{ _id: string; decision?: DecisionKeys; reviewedAt?: Date }>([
         {
           $match: {
             deploymentAssessmentId: { $in: assessmentIds },
@@ -526,19 +560,30 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
         { $set: { responses: { $slice: ['$responses', 1] } } },
         { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
         { $sort: { 'responses.createdAt': -1 } },
-        { $group: { _id: '$deploymentAssessmentId', decision: { $first: '$responses.decision' } } },
+        {
+          $group: {
+            _id: '$deploymentAssessmentId',
+            decision: { $first: '$responses.decision' },
+            reviewedAt: { $first: '$responses.createdAt' },
+          },
+        },
       ])
     : []
-  const decisionsByAssessmentId = new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
+  const latestDecisionsByAssessmentId = new Map(
+    latestDecisions.map(({ _id, decision, reviewedAt }) => [_id, { decision, reviewedAt }]),
+  )
 
   const searchResults: DeploymentAssessmentSearchResult[] = authorisedAssessments.map((assessment) => {
     if (assessment.draft !== false) {
       return assessment
     }
 
-    const state = deriveDeploymentAssessmentState(assessment, decisionsByAssessmentId.get(assessment.id))
-    return Object.assign(assessment, { state })
+    const { decision, reviewedAt } = latestDecisionsByAssessmentId.get(assessment.id) ?? {}
+    const state = deriveDeploymentAssessmentState(assessment, decision)
+    return Object.assign(assessment, { state, ...(reviewedAt && { reviewedAt }) })
   })
 
-  return searchResults.filter(({ state }) => !params.state || state === params.state)
+  return searchResults
+    .filter(({ state }) => !params.state || state === params.state)
+    .filter((assessment) => !params.needsAction || needsUserAction(assessment, user))
 }
