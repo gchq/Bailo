@@ -65,8 +65,8 @@ function AssessmentStateChip({ assessment, selectedState, onSelectedStateChange 
 
   const palette = {
     [DeploymentAssessmentState.NEEDS_REVIEW]: {
-      main: theme.palette.grey[400],
-      contrastText: theme.palette.getContrastText(theme.palette.grey[400]),
+      main: theme.palette.grey[600],
+      contrastText: theme.palette.getContrastText(theme.palette.grey[600]),
     },
     [DeploymentAssessmentState.CHANGES_REQUESTED]: theme.palette.warning,
     [DeploymentAssessmentState.REJECTED]: theme.palette.error,
