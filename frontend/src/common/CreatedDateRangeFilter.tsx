@@ -15,7 +15,7 @@ export default function CreatedDateRangeFilter({
   onCreatedAfterChange,
   onCreatedBeforeChange,
 }: CreatedDateRangeFilterProps) {
-  const hasError = Boolean(createdAfter && createdBefore && createdAfter > createdBefore)
+  const hasError = Boolean(createdAfter && createdBefore && dayjs(createdAfter).isAfter(dayjs(createdBefore)))
   const pickerSx = { width: 180 }
 
   return (

@@ -1187,15 +1187,28 @@ export const DeploymentAssessmentState = {
 
 export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
 
-export interface DeploymentAssessmentSummary {
+interface DeploymentAssessmentSummaryBase {
   id: string
   schemaId: string
   name: string
+  createdBy: string
+  createdAt: string
+}
+
+interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: true
   owner?: string | string[]
   models?: string[]
   justification?: string
-  draft: boolean
-  createdBy: string
-  createdAt: string
-  state?: DeploymentAssessmentStateKeys
+  state?: never
 }
+
+interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: false
+  owner: string | string[]
+  models: string[]
+  justification: string
+  state: DeploymentAssessmentStateKeys
+}
+
+export type DeploymentAssessmentSummary = DraftDeploymentAssessmentSummary | PublishedDeploymentAssessmentSummary
