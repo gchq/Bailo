@@ -1,16 +1,12 @@
 import { Box, Card, Chip, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetSchemas } from 'actions/schema'
+import { useGetSchema } from 'actions/schema'
 import ChipSelector from 'src/common/ChipSelector'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
+import { DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
 import Link from 'src/Link'
-import {
-  DeploymentAssessmentState,
-  DeploymentAssessmentStateKeys,
-  DeploymentAssessmentSummary,
-  SchemaKind,
-} from 'types/types'
+import { DeploymentAssessmentState, DeploymentAssessmentStateKeys, DeploymentAssessmentSummary } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 interface DeploymentAssessmentSummaryCardProps {
@@ -18,6 +14,8 @@ interface DeploymentAssessmentSummaryCardProps {
   returnTo?: string
   selectedModelIds: string[]
   onSelectedModelIdsChange: (modelIds: string[]) => void
+  selectedState?: DeploymentAssessmentStatusKeys
+  onSelectedStateChange: (state?: DeploymentAssessmentStatusKeys) => void
 }
 
 const stateLabels: Record<DeploymentAssessmentStateKeys, string> = {
@@ -27,22 +25,42 @@ const stateLabels: Record<DeploymentAssessmentStateKeys, string> = {
   [DeploymentAssessmentState.APPROVED]: 'Approved',
 }
 
-function AssessmentStateChip({ assessment }: Pick<DeploymentAssessmentSummaryCardProps, 'assessment'>) {
+interface AssessmentStateChipProps {
+  assessment: DeploymentAssessmentSummary
+  selectedState?: DeploymentAssessmentStatusKeys
+  onSelectedStateChange: (state?: DeploymentAssessmentStatusKeys) => void
+}
+
+function AssessmentStateChip({ assessment, selectedState, onSelectedStateChange }: AssessmentStateChipProps) {
   const theme = useTheme()
 
   if (assessment.draft) {
+    const isSelected = selectedState === 'draft'
+
     return (
       <Chip
         label='Draft'
         size='small'
-        sx={{ backgroundColor: theme.palette.info.main, color: theme.palette.info.contrastText }}
+        clickable
+        onClick={() => {
+          onSelectedStateChange(isSelected ? undefined : 'draft')
+        }}
+        variant={isSelected ? 'filled' : 'outlined'}
+        sx={{
+          backgroundColor: isSelected ? theme.palette.info.main : 'transparent',
+          color: isSelected ? theme.palette.info.contrastText : theme.palette.info.main,
+          borderColor: theme.palette.info.main,
+          '&.MuiChip-clickable:hover': {
+            backgroundColor: theme.palette.info.main,
+            color: theme.palette.info.contrastText,
+          },
+        }}
       />
     )
   }
 
-  if (!assessment.state) {
-    return <Chip label='Submitted' size='small' color='info' />
-  }
+  const state = assessment.state
+  const isSelected = selectedState === state
 
   const palette = {
     [DeploymentAssessmentState.NEEDS_REVIEW]: {
@@ -52,13 +70,26 @@ function AssessmentStateChip({ assessment }: Pick<DeploymentAssessmentSummaryCar
     [DeploymentAssessmentState.CHANGES_REQUESTED]: theme.palette.warning,
     [DeploymentAssessmentState.REJECTED]: theme.palette.error,
     [DeploymentAssessmentState.APPROVED]: theme.palette.success,
-  }[assessment.state]
+  }[state]
 
   return (
     <Chip
-      label={stateLabels[assessment.state]}
+      label={stateLabels[state]}
       size='small'
-      sx={{ backgroundColor: palette.main, color: palette.contrastText }}
+      clickable
+      onClick={() => {
+        onSelectedStateChange(isSelected ? undefined : state)
+      }}
+      variant={isSelected ? 'filled' : 'outlined'}
+      sx={{
+        backgroundColor: isSelected ? palette.main : 'transparent',
+        color: isSelected ? palette.contrastText : palette.main,
+        borderColor: palette.main,
+        '&.MuiChip-clickable:hover': {
+          backgroundColor: palette.main,
+          color: palette.contrastText,
+        },
+      }}
     />
   )
 }
@@ -68,10 +99,13 @@ export default function DeploymentAssessmentSummaryCard({
   returnTo,
   selectedModelIds,
   onSelectedModelIdsChange,
+  selectedState,
+  onSelectedStateChange,
 }: DeploymentAssessmentSummaryCardProps) {
-  const { schemas } = useGetSchemas(SchemaKind.DEPLOYMENT_ASSESSMENT)
-  const schemaName = schemas.find((schema) => schema.id === assessment.schemaId)?.name ?? assessment.schemaId
+  const { schema } = useGetSchema(assessment.schemaId)
+
   const owners = assessment.owner ? (Array.isArray(assessment.owner) ? assessment.owner : [assessment.owner]) : []
+
   return (
     <Box sx={{ p: 2 }}>
       <Stack spacing={2}>
@@ -89,12 +123,16 @@ export default function DeploymentAssessmentSummaryCard({
               </Typography>
             </Link>
             <CopyToClipboardButton
-              textToCopy={assessment.id}
-              notificationText='Copied deployment assessment ID to clipboard'
-              ariaLabel='copy deployment assessment ID to clipboard'
+              textToCopy={assessment.name}
+              notificationText='Copied deployment assessment name to clipboard'
+              ariaLabel='copy deployment assessment name to clipboard'
             />
           </Stack>
-          <AssessmentStateChip assessment={assessment} />
+          <AssessmentStateChip
+            assessment={assessment}
+            selectedState={selectedState}
+            onSelectedStateChange={onSelectedStateChange}
+          />
         </Stack>
         <Stack direction='row'>
           <Typography variant='caption'>
@@ -137,7 +175,7 @@ export default function DeploymentAssessmentSummaryCard({
               <Box component='span' sx={{ fontWeight: 'bold' }}>
                 Schema:
               </Box>{' '}
-              {schemaName}
+              {schema?.name ?? assessment.schemaId}
             </Typography>
             <Typography variant='body2' component='div'>
               <Box component='span' sx={{ fontWeight: 'bold' }}>

@@ -115,6 +115,7 @@ export default function DeploymentAssessmentsList() {
             />
           </Stack>
           <Box sx={{ width: { xs: '100%', sm: 280 } }}>
+            {/* TODO: Add a user only property to the following component. Enforce options based on this */}
             <EntityAutocompleteFilter
               label='Risk owner'
               value={filters.riskOwner}
@@ -202,6 +203,8 @@ export default function DeploymentAssessmentsList() {
                 returnTo={returnTo}
                 selectedModelIds={filters.modelIds}
                 onSelectedModelIdsChange={(modelIds) => setFilters({ modelIds })}
+                selectedState={filters.status}
+                onSelectedStateChange={(status) => setFilters({ status })}
               />
             )}
           </Paginate>
