@@ -1,6 +1,6 @@
 import { PassThrough } from 'node:stream'
 
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
@@ -90,7 +90,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
   test('processEntry > success extract manifest.json', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'content-dir/manifest.json', type: 'file' } as Headers
+    const entry: Header = { name: 'content-dir/manifest.json', type: 'file' } as Header
     const mockManifest = {
       schemaVersion: 2,
       mediaType: DockerManifestMediaType,
@@ -119,11 +119,11 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   test('processEntry > success skips blob if it exists in registry', async () => {
     registryClientMocks.doesLayerExist.mockResolvedValue(true)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/blobs/sha256/' + 'a'.repeat(64),
       type: 'file',
       size: 10,
-    } as Headers
+    } as Header
     const stream = new PassThrough()
     const resumeSpy = vi.spyOn(stream, 'resume')
 
@@ -136,10 +136,10 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   test('processEntry > success uploads blob if not in registry', async () => {
     registryClientMocks.doesLayerExist.mockResolvedValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
       type: 'file',
-    } as Headers
+    } as Header
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)
@@ -159,11 +159,11 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
       throw new Error('init fail')
     })
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/blobs/sha256/' + 'c'.repeat(64),
       type: 'file',
       size: 30,
-    } as Headers
+    } as Header
     const stream = new PassThrough()
 
     await expect(importer.processEntry(entry, stream)).rejects.toThrow(/^Failed to upload blob to registry\./)
@@ -171,7 +171,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
   test('processEntry > error for unrecognised file path', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'content-dir/invalid.json', type: 'file' } as Headers
+    const entry: Header = { name: 'content-dir/invalid.json', type: 'file' } as Header
     const stream = new PassThrough()
 
     await expect(importer.processEntry(entry, stream)).rejects.toThrow(
@@ -181,7 +181,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
   test('processEntry > success warns & skips non-file entries', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'some-dir', type: 'directory' } as Headers
+    const entry: Header = { name: 'some-dir', type: 'directory' } as Header
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)
