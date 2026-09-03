@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 
 interface LabelledInputProps {
   label: string
-  htmlFor: string
+  htmlFor?: string
   children: ReactNode
   required?: boolean
   fullWidth?: boolean
@@ -28,16 +28,16 @@ export default function LabelledInput({
         htmlFor={htmlFor}
         sx={{
           fontWeight: 'bold',
+          color: theme.palette.primary.main,
         }}
       >
         {label}
         {required && (
           <Box
             component='span'
-            style={{ color: theme.palette.primary.main }}
             sx={{
               ml: 0.5,
-              color: theme.palette.primary.main,
+              color: theme.palette.error.main,
             }}
           >
             *

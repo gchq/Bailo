@@ -2,14 +2,16 @@ import Close from '@mui/icons-material/Close'
 import Info from '@mui/icons-material/Info'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetSchema } from 'actions/schema'
+import cloneDeep from 'lodash-es/cloneDeep'
 import { getChangedFields } from 'node_modules/@rjsf/utils/lib'
 import { KeyedMutator } from 'node_modules/swr/dist/index/index.mjs'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
+import LabelledInput from 'src/common/LabelledInput'
+import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -19,7 +21,7 @@ import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema, removeEmptyValues } from 'utils/formUtils'
+import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
 
 type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
@@ -50,7 +52,6 @@ export default function EditableDeploymentAssessmentForm({
   const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
-  const theme = useTheme()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -91,6 +92,16 @@ export default function EditableDeploymentAssessmentForm({
         return
       }
 
+      for (const step of splitSchema.steps) {
+        const isValid = validateForm(step)
+
+        if (!isValid) {
+          setErrorMessage('Please make sure that all sections have been completed.')
+          setIsLoading(false)
+          return
+        }
+      }
+
       const response = await patchDeploymentAssessment(
         deploymentAssessment.id,
         answersChanged ? removeEmptyValues(data) : undefined,
@@ -120,7 +131,7 @@ export default function EditableDeploymentAssessmentForm({
 
   function handleEdit() {
     onIsEditChange(true)
-    setOriginalSplitSchema(splitSchema)
+    setOriginalSplitSchema(cloneDeep(splitSchema))
   }
 
   function handleCancel() {
@@ -141,70 +152,58 @@ export default function EditableDeploymentAssessmentForm({
       <>
         {schema && (
           <Stack>
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >
-              Schema
-            </Typography>
-            <Stack
-              direction='row'
-              sx={{
-                alignItems: 'center',
-              }}
-            >
-              <Typography>{schema?.name}</Typography>
-              <IconButton onClick={() => setSchemaInformationOpen(true)}>
-                <Info color='primary' fontSize='small' />
-              </IconButton>
-              <InformationDialog
-                open={schemaInformationOpen}
-                schema={schema}
-                onClose={() => setSchemaInformationOpen(false)}
-              />
-            </Stack>
-            <Stack>
-              <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Created by</Typography>
-              <UserDisplay dn={deploymentAssessment.createdBy} />
-            </Stack>
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >
-              Name
-              {isEdit && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-            </Typography>
-            <Stack
-              direction='row'
-              sx={{
-                alignItems: 'left',
-              }}
-            >
-              {isEdit ? (
-                <TextField
-                  sx={{ width: '100%' }}
-                  value={newName}
-                  onChange={(event) => setNewName(event.target.value)}
-                  size='small'
+            <LabelledValue label='Schema'>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
+                <Typography>{schema?.name}</Typography>
+                <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                  <Info color='primary' fontSize='small' />
+                </IconButton>
+                <InformationDialog
+                  open={schemaInformationOpen}
+                  schema={schema}
+                  onClose={() => setSchemaInformationOpen(false)}
                 />
-              ) : (
-                <>
-                  <Typography>{deploymentAssessment ? deploymentAssessment.name : 'Loading...'}</Typography>
-                  <CopyToClipboardButton
-                    textToCopy={deploymentAssessment.name}
-                    notificationText='Copied deployment assessment ID to clipboard'
-                    ariaLabel='copy deployment assessment ID to clipboard'
+              </Stack>
+            </LabelledValue>
+            <LabelledValue label='Created by'>
+              <UserDisplay dn={deploymentAssessment.createdBy} />
+            </LabelledValue>
+            <LabelledInput label='Name' fullWidth required={isEdit}>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'left',
+                }}
+              >
+                {isEdit ? (
+                  <TextField
+                    sx={{ width: '100%' }}
+                    value={newName}
+                    onChange={(event) => setNewName(event.target.value)}
+                    size='small'
                   />
-                </>
-              )}
-            </Stack>
+                ) : (
+                  <>
+                    <Typography>{deploymentAssessment ? deploymentAssessment.name : 'Loading...'}</Typography>
+                    <CopyToClipboardButton
+                      textToCopy={deploymentAssessment.name}
+                      notificationText='Copied deployment assessment name to clipboard'
+                      ariaLabel='copy deployment assessment name to clipboard'
+                    />
+                  </>
+                )}
+              </Stack>
+            </LabelledInput>
           </Stack>
         )}
       </>
     ),
-    [deploymentAssessment, isEdit, newName, schema, schemaInformationOpen, theme.palette.error.main],
+    [deploymentAssessment, isEdit, newName, schema, schemaInformationOpen],
   )
 
   if (isSchemaError) {
