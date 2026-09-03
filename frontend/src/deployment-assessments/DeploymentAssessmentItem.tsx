@@ -36,7 +36,12 @@ export default function DeploymentAssessmentItem({ deploymentAssessment }: Deplo
             spacing={1}
             sx={{ justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}
           >
-            <Typography sx={{ wordBreak: 'break-all', fontWeight: 'bold' }} color='primary' variant='h6' component='h2'>
+            <Typography
+              sx={{ wordBreak: 'break-word', fontWeight: 'bold' }}
+              color='primary'
+              variant='h6'
+              component='h2'
+            >
               {deploymentAssessment.name}
             </Typography>
             <Chip
