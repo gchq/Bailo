@@ -574,7 +574,7 @@ function buildReleaseRoleMap(reviews: ReleaseReview[], approvedReviewIds: Set<st
   const releaseRoleMap: ReleaseRoleMap = new Map()
 
   for (const review of reviews) {
-    if (review.semver === undefined) {
+    if (review.modelId === undefined || review.semver === undefined) {
       continue
     }
 

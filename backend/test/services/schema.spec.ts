@@ -15,6 +15,33 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
+const configMock = vi.hoisted(
+  () =>
+    ({
+      ui: {
+        modelDetails: {
+          organisations: ['Example Organisation'],
+          states: ['Development', 'Review', 'Production'],
+        },
+        roleDisplayNames: {
+          owner: 'Owner',
+          contributor: 'Contributor',
+          consumer: 'Consumer',
+          riskOwner: 'Deployment Risk Owner',
+        },
+      },
+      log: {
+        level: 'info',
+      },
+      instrumentation: {
+        enabled: true,
+      },
+    }) as any,
+)
+vi.mock('../../src/utils/config.js', () => ({
+  __esModule: true,
+  default: configMock,
+}))
 
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
@@ -108,6 +135,20 @@ describe('services > schema', () => {
         title: 'Details',
         required: ['riskOwner', 'justification', 'modelIds'],
         properties: expect.objectContaining({
+          riskOwner: expect.objectContaining({
+            title: 'Who is the risk owner attached to this deployment assessment?',
+            type: 'array',
+            minItems: 1,
+            maxItems: 1,
+            uniqueItems: true,
+            hideDefaultUser: true,
+            widget: 'entitySelector',
+          }),
+          justification: expect.objectContaining({
+            title: 'Justify why the Deployment Risk Owner has been assigned',
+            type: 'string',
+            minLength: 1,
+          }),
           modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),
       }),

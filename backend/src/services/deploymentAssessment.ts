@@ -6,12 +6,17 @@ import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.
 import authorisation from '../connectors/authorisation/index.js'
 import { z } from '../lib/zod.js'
 import DeploymentAssessmentModel, {
+  DeploymentAssessmentDoc,
   DeploymentAssessmentInterface,
   DeploymentAssessmentMetadata,
+  DeploymentAssessmentState,
+  DeploymentAssessmentStateKeys,
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
+import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
+import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
-import { SchemaKind } from '../types/enums.js'
+import { ReviewKind, SchemaKind } from '../types/enums.js'
 import { DeploymentAssessmentUserPermissions } from '../types/types.js'
 import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
@@ -19,10 +24,14 @@ import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
+import { getResponses } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
+
+export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string
@@ -33,6 +42,17 @@ export interface SearchDeploymentAssessmentsParams {
   createdBefore?: string
   draft?: boolean
   search?: string
+  state?: DeploymentAssessmentStateKeys
+}
+
+export interface DeploymentAssessmentDetails {
+  deploymentAssessment: DeploymentAssessmentDoc
+  responses: ResponseInterface[]
+  state?: DeploymentAssessmentStateKeys
+}
+
+export type DeploymentAssessmentSearchResult = DeploymentAssessmentDoc & {
+  state?: DeploymentAssessmentDetails['state']
 }
 
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
@@ -174,6 +194,98 @@ export async function getDeploymentAssessmentById(user: UserInterface, deploymen
   return deploymentAssessment
 }
 
+function deriveDeploymentAssessmentState(
+  deploymentAssessment: Pick<DeploymentAssessmentInterface, 'draft'>,
+  latestDecision?: DecisionKeys,
+): DeploymentAssessmentStateKeys | undefined {
+  if (deploymentAssessment.draft) {
+    return undefined
+  }
+
+  switch (latestDecision) {
+    case Decision.Approve:
+      return DeploymentAssessmentState.Approved
+    case Decision.Reject:
+      return DeploymentAssessmentState.Rejected
+    case Decision.RequestChanges:
+      return DeploymentAssessmentState.ChangesRequested
+    default:
+      return DeploymentAssessmentState.NeedsReview
+  }
+}
+
+export async function getDeploymentAssessmentDetails(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+): Promise<DeploymentAssessmentDetails> {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const responses = await getResponses(deploymentAssessment._id)
+  const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
+
+  return {
+    deploymentAssessment,
+    responses,
+    state: deriveDeploymentAssessmentState(deploymentAssessment, latestDecision),
+  }
+}
+
+async function getLatestDeploymentAssessmentReview(deploymentAssessmentId: string) {
+  const review = await ReviewModel.findOne({
+    deploymentAssessmentId,
+    kind: ReviewKind.DeploymentAssessment,
+  }).sort({ createdAt: -1 })
+
+  if (!review) {
+    throw NotFound('The deployment assessment does not have a review round.', { deploymentAssessmentId })
+  }
+
+  return review
+}
+
+export async function commentOnDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  comment: string,
+) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const response = new ResponseModel({
+    entity: toEntity('user', user.dn),
+    kind: ResponseKind.Comment,
+    parentId: deploymentAssessment._id,
+    comment,
+  })
+  await response.save()
+  return response
+}
+
+export async function reviewDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  decision: Exclude<DecisionKeys, 'undo'>,
+  comment?: string,
+) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  if (deploymentAssessment.draft) {
+    throw BadReq('Draft deployment assessments cannot be reviewed.', { deploymentAssessmentId })
+  }
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  const review = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+  const response = new ResponseModel({
+    entity: toEntity('user', user.dn),
+    kind: ResponseKind.Review,
+    role: review.role,
+    parentId: review._id,
+    decision,
+    ...(comment && { comment }),
+  })
+  await response.save()
+  return response
+}
+
 export async function createDeploymentAssessment(
   user: UserInterface,
   { name, schemaId, draft, metadata }: CreateDeploymentAssessmentParams,
@@ -210,13 +322,24 @@ export async function createDeploymentAssessment(
     createdBy: user.dn,
   })
 
+  const review = draft
+    ? undefined
+    : new ReviewModel({
+        kind: ReviewKind.DeploymentAssessment,
+        deploymentAssessmentId,
+        role: deploymentAssessmentRiskOwnerRole,
+      })
+
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Create)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
   try {
-    await deploymentAssessment.save()
+    await useTransaction([
+      (session) => deploymentAssessment.save({ session }),
+      ...(review ? [(session) => review.save({ session })] : []),
+    ])
   } catch (error) {
     if (isMongoServerError(error) && error.code === 11000) {
       throw Conflict('A deployment assessment with this ID already exists.', {
@@ -324,5 +447,48 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
   const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
 
-  return deploymentAssessments.filter((_, i) => auths[i].success)
+  const authorisedAssessments = deploymentAssessments.filter((_, i) => auths[i].success)
+  const assessmentIds = authorisedAssessments.filter(({ draft }) => draft === false).map(({ id }) => id)
+  const latestDecisions = assessmentIds.length
+    ? await ReviewModel.aggregate<{ _id: string; decision?: DecisionKeys }>([
+        {
+          $match: {
+            deploymentAssessmentId: { $in: assessmentIds },
+            kind: ReviewKind.DeploymentAssessment,
+          },
+        },
+        {
+          $lookup: {
+            from: 'v2_responses',
+            let: { reviewId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ['$parentId', '$$reviewId'] },
+                  kind: ResponseKind.Review,
+                },
+              },
+              { $sort: { createdAt: -1 } },
+            ],
+            as: 'responses',
+          },
+        },
+        { $set: { responses: { $slice: ['$responses', 1] } } },
+        { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
+        { $sort: { 'responses.createdAt': -1 } },
+        { $group: { _id: '$deploymentAssessmentId', decision: { $first: '$responses.decision' } } },
+      ])
+    : []
+  const decisionsByAssessmentId = new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
+
+  const searchResults: DeploymentAssessmentSearchResult[] = authorisedAssessments.map((assessment) => {
+    if (assessment.draft !== false) {
+      return assessment
+    }
+
+    const state = deriveDeploymentAssessmentState(assessment, decisionsByAssessmentId.get(assessment.id))
+    return Object.assign(assessment, { state })
+  })
+
+  return searchResults.filter(({ state }) => !params.state || state === params.state)
 }
