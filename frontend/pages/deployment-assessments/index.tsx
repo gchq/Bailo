@@ -5,6 +5,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import MyAssessments from 'src/deployments/MyAssessments'
 
 export default function Deployments() {
   const router = useRouter()
@@ -12,7 +13,7 @@ export default function Deployments() {
   const tabs = useMemo(
     () => [
       { title: 'Needs action', path: 'needs-action', view: <></> },
-      { title: 'My assessments', path: 'my-assessments', view: <></> },
+      { title: 'My assessments', path: 'my-assessments', view: <MyAssessments /> },
       { title: 'All assessments', path: 'all-assessments', view: <></> },
     ],
     [],
