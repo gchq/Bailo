@@ -5,7 +5,6 @@ import { memoize } from 'lodash-es'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import DeploymentAssessmentSummaryCard from 'src/deployment-assessments/DeploymentAssessmentSummaryCard'
-import { useDeploymentAssessmentFilters } from 'src/hooks/useDeploymentAssessmentFilters'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
@@ -15,15 +14,15 @@ type DeploymentAssessmentsProps = {
 }
 
 export default function DeploymentAssessments({ model }: DeploymentAssessmentsProps) {
-  const { filters, setFilters } = useDeploymentAssessmentFilters()
   const { deploymentAssessments, isDeploymentAssessmentsLoading, isDeploymentAssessmentsError } =
     useGetDeploymentAssessments({ modelIds: [model.id] })
 
   const deploymentAssessmentListItem = memoize(({ data }) => (
     <DeploymentAssessmentSummaryCard
       assessment={data}
-      selectedModelIds={filters.modelIds}
-      onSelectedModelIdsChange={(modelIds) => setFilters({ modelIds })}
+      selectedModelIds={[]}
+      onSelectedModelIdsChange={(_modelIds) => {}}
+      onSelectedStateChange={(_state) => {}}
     />
   ))
 
