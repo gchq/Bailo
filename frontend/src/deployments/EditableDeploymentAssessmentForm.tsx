@@ -7,7 +7,7 @@ import { useGetSchema } from 'actions/schema'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { getChangedFields } from 'node_modules/@rjsf/utils/lib'
 import { KeyedMutator } from 'node_modules/swr/dist/index/index.mjs'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { Fragment, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import LabelledInput from 'src/common/LabelledInput'
@@ -131,11 +131,13 @@ export default function EditableDeploymentAssessmentForm({
 
   function handleEdit() {
     onIsEditChange(true)
+    setErrorMessage('')
     setOriginalSplitSchema(cloneDeep(splitSchema))
   }
 
   function handleCancel() {
     onIsEditChange(false)
+    setErrorMessage('')
     resetForm()
   }
 
@@ -151,7 +153,35 @@ export default function EditableDeploymentAssessmentForm({
     () => (
       <>
         {schema && (
-          <Stack>
+          <Stack sx={{ overflow: 'hidden' }}>
+            <LabelledInput label='Name' fullWidth required={isEdit}>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'left',
+                }}
+              >
+                {isEdit ? (
+                  <TextField
+                    value={newName}
+                    fullWidth
+                    onChange={(event) => setNewName(event.target.value)}
+                    size='small'
+                  />
+                ) : (
+                  <>
+                    <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {deploymentAssessment ? deploymentAssessment.name : 'Loading...'}
+                    </Typography>
+                    <CopyToClipboardButton
+                      textToCopy={deploymentAssessment.name}
+                      notificationText='Copied deployment assessment name to clipboard'
+                      ariaLabel='copy deployment assessment name to clipboard'
+                    />
+                  </>
+                )}
+              </Stack>
+            </LabelledInput>
             <LabelledValue label='Schema'>
               <Stack
                 direction='row'
@@ -173,32 +203,6 @@ export default function EditableDeploymentAssessmentForm({
             <LabelledValue label='Created by'>
               <UserDisplay dn={deploymentAssessment.createdBy} />
             </LabelledValue>
-            <LabelledInput label='Name' fullWidth required={isEdit}>
-              <Stack
-                direction='row'
-                sx={{
-                  alignItems: 'left',
-                }}
-              >
-                {isEdit ? (
-                  <TextField
-                    sx={{ width: '100%' }}
-                    value={newName}
-                    onChange={(event) => setNewName(event.target.value)}
-                    size='small'
-                  />
-                ) : (
-                  <>
-                    <Typography>{deploymentAssessment ? deploymentAssessment.name : 'Loading...'}</Typography>
-                    <CopyToClipboardButton
-                      textToCopy={deploymentAssessment.name}
-                      notificationText='Copied deployment assessment name to clipboard'
-                      ariaLabel='copy deployment assessment name to clipboard'
-                    />
-                  </>
-                )}
-              </Stack>
-            </LabelledInput>
           </Stack>
         )}
       </>
