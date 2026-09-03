@@ -4,10 +4,12 @@
 
 export interface UserPreferences {
   displayFormStats: boolean
+  hiddenDeploymentAssessmentColumns: string[]
 }
 
 const defaultPreferences: UserPreferences = {
   displayFormStats: false,
+  hiddenDeploymentAssessmentColumns: [],
 }
 
 const USER_PREFERENCES_KEY = 'user-preferences'
@@ -26,7 +28,7 @@ export const saveUserPreferences = (preferences: UserPreferences) => {
  */
 export const getUserPreferences = (): UserPreferences => {
   const storedValue = localStorage.getItem(USER_PREFERENCES_KEY)
-  return storedValue ? JSON.parse(storedValue) : defaultPreferences
+  return storedValue ? { ...defaultPreferences, ...JSON.parse(storedValue) } : defaultPreferences
 }
 
 /**
@@ -44,5 +46,22 @@ export const getDisplayFormStats = (): boolean => {
 export const saveDisplayFormStats = (newValue: boolean) => {
   const preferences: UserPreferences = getUserPreferences() ?? defaultPreferences
   preferences.displayFormStats = newValue
+  saveUserPreferences(preferences)
+}
+
+/**
+ * Get the columns to be hidden in the My Assessments tab.
+ */
+export const getHiddenDeploymentAssessmentColumns = (): string[] => {
+  const preferences: UserPreferences = getUserPreferences()
+  return preferences?.hiddenDeploymentAssessmentColumns ?? []
+}
+
+/**
+ * Save the columns to be hidden in the My Assessments tab.
+ */
+export const saveHiddenDeploymentAssessmentColumns = (columnKeys: string[]) => {
+  const preferences: UserPreferences = getUserPreferences() ?? defaultPreferences
+  preferences.hiddenDeploymentAssessmentColumns = columnKeys
   saveUserPreferences(preferences)
 }
