@@ -9,15 +9,6 @@ import Link from 'src/Link'
 import { DeploymentAssessmentState, DeploymentAssessmentStateKeys, DeploymentAssessmentSummary } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
-interface DeploymentAssessmentSummaryCardProps {
-  assessment: DeploymentAssessmentSummary
-  returnTo?: string
-  selectedModelIds: string[]
-  onSelectedModelIdsChange: (modelIds: string[]) => void
-  selectedState?: DeploymentAssessmentStatusKeys
-  onSelectedStateChange: (state?: DeploymentAssessmentStatusKeys) => void
-}
-
 const stateLabels: Record<DeploymentAssessmentStateKeys, string> = {
   [DeploymentAssessmentState.NEEDS_REVIEW]: 'Needs review',
   [DeploymentAssessmentState.REJECTED]: 'Rejected',
@@ -25,30 +16,40 @@ const stateLabels: Record<DeploymentAssessmentStateKeys, string> = {
   [DeploymentAssessmentState.APPROVED]: 'Approved',
 }
 
+interface DeploymentAssessmentSummaryCardProps {
+  assessment: DeploymentAssessmentSummary
+  returnTo?: string
+
+  selectedModelIds?: string[]
+  onSelectedModelIdsChange?: (modelIds: string[]) => void
+
+  selectedState?: DeploymentAssessmentStatusKeys
+  onSelectedStateChange?: (state?: DeploymentAssessmentStatusKeys) => void
+}
+
 interface AssessmentStateChipProps {
   assessment: DeploymentAssessmentSummary
   selectedState?: DeploymentAssessmentStatusKeys
-  onSelectedStateChange: (state?: DeploymentAssessmentStatusKeys) => void
+  onSelectedStateChange?: (state?: DeploymentAssessmentStatusKeys) => void
 }
 
 function AssessmentStateChip({ assessment, selectedState, onSelectedStateChange }: AssessmentStateChipProps) {
   const theme = useTheme()
+  const selectable = onSelectedStateChange !== undefined
 
   if (assessment.draft) {
-    const isSelected = selectedState === 'draft'
+    const isSelected = selectable && selectedState === 'draft'
 
     return (
       <Chip
         label='Draft'
         size='small'
-        clickable
-        onClick={() => {
-          onSelectedStateChange(isSelected ? undefined : 'draft')
-        }}
-        variant={isSelected ? 'filled' : 'outlined'}
+        clickable={selectable}
+        onClick={selectable ? () => onSelectedStateChange(isSelected ? undefined : 'draft') : undefined}
+        variant={selectable && !isSelected ? 'outlined' : 'filled'}
         sx={{
-          backgroundColor: isSelected ? theme.palette.info.main : 'transparent',
-          color: isSelected ? theme.palette.info.contrastText : theme.palette.info.main,
+          backgroundColor: selectable && !isSelected ? 'transparent' : theme.palette.info.main,
+          color: selectable && !isSelected ? theme.palette.info.main : theme.palette.info.contrastText,
           borderColor: theme.palette.info.main,
           '&.MuiChip-clickable:hover': {
             backgroundColor: theme.palette.info.main,
@@ -60,7 +61,7 @@ function AssessmentStateChip({ assessment, selectedState, onSelectedStateChange 
   }
 
   const state = assessment.state
-  const isSelected = selectedState === state
+  const isSelected = selectable && selectedState === state
 
   const palette = {
     [DeploymentAssessmentState.NEEDS_REVIEW]: {
@@ -76,14 +77,12 @@ function AssessmentStateChip({ assessment, selectedState, onSelectedStateChange 
     <Chip
       label={stateLabels[state]}
       size='small'
-      clickable
-      onClick={() => {
-        onSelectedStateChange(isSelected ? undefined : state)
-      }}
-      variant={isSelected ? 'filled' : 'outlined'}
+      clickable={selectable}
+      onClick={selectable ? () => onSelectedStateChange(isSelected ? undefined : state) : undefined}
+      variant={selectable && !isSelected ? 'outlined' : 'filled'}
       sx={{
-        backgroundColor: isSelected ? palette.main : 'transparent',
-        color: isSelected ? palette.contrastText : palette.main,
+        backgroundColor: selectable && !isSelected ? 'transparent' : palette.main,
+        color: selectable && !isSelected ? palette.main : palette.contrastText,
         borderColor: palette.main,
         '&.MuiChip-clickable:hover': {
           backgroundColor: palette.main,
@@ -103,6 +102,8 @@ export default function DeploymentAssessmentSummaryCard({
   onSelectedStateChange,
 }: DeploymentAssessmentSummaryCardProps) {
   const { schema } = useGetSchema(assessment.schemaId)
+
+  const canSelectModels = selectedModelIds !== undefined && onSelectedModelIdsChange !== undefined
 
   const owners = assessment.owner ? (Array.isArray(assessment.owner) ? assessment.owner : [assessment.owner]) : []
 
@@ -153,17 +154,23 @@ export default function DeploymentAssessmentSummaryCard({
               Models:
             </Box>{' '}
             {assessment.models?.length ? (
-              <ChipSelector
-                chipTooltipTitle='Filter by model'
-                options={assessment.models}
-                multiple
-                selectedChips={selectedModelIds}
-                onChange={onSelectedModelIdsChange}
-                size='small'
-                variant='outlined'
-                ariaLabel='add model to deployment assessment filters'
-                style={{ maxWidth: '400px' }}
-              />
+              canSelectModels ? (
+                <ChipSelector
+                  chipTooltipTitle='Filter by model'
+                  options={assessment.models}
+                  multiple
+                  selectedChips={selectedModelIds}
+                  onChange={onSelectedModelIdsChange}
+                  size='small'
+                  variant='outlined'
+                  ariaLabel='add model to deployment assessment filters'
+                  style={{ maxWidth: '400px' }}
+                />
+              ) : (
+                <Typography component='span' variant='body2'>
+                  {assessment.models.join(', ')}
+                </Typography>
+              )
             ) : (
               <Typography variant='body2' component='em'>
                 No models specified
