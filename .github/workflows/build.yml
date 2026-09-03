@@ -446,31 +446,25 @@ jobs:
           CYPRESS_BASE_URL: http://localhost:8081
 
       # Python integration
-      - name: Set up Python
+      - name: Set up uv
         if: matrix.job_name == 'integration_python'
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: "3.14"
-
-      - name: Cache python pip
-        if: matrix.job_name == 'integration_python'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          enable-cache: true
+          cache-dependency-glob: lib/python/uv.lock
 
       - name: Install dependencies
         if: matrix.job_name == 'integration_python'
-        run: |
-          python -m pip install --upgrade pip
-          cd lib/python
-          python -m pip install -e .[test]
+        working-directory: lib/python
+        run: uv sync --extra mlflow --group test --locked
 
       - name: Get MLFlow version from installed package
         if: matrix.job_name == 'integration_python'
         id: mlflow_version
+        working-directory: lib/python
         run: |
-          version=$(python -m pip show mlflow-skinny | awk '/Version:/ {print $2}')
+          version=$(uv pip show mlflow-skinny | awk '/Version:/ {print $2}')
           echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Start MLFlow via Docker
@@ -486,10 +480,10 @@ jobs:
 
       - name: Test with pytest
         if: matrix.job_name == 'integration_python'
+        working-directory: lib/python
         run: |
-          cd lib/python
-          python -m pytest -m integration
-          python -m pytest -m mlflow
+          uv run pytest -m integration
+          uv run pytest -m mlflow
         env:
           PYTEST_RUN_PATH: "lib/python"
 

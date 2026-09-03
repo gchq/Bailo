@@ -3,24 +3,33 @@
 ARG UID=65532
 ARG GID=65532
 
+FROM ghcr.io/astral-sh/uv:0.12.8@sha256:d1cbaeadc234fe19c0d93daabcf5e98738cd93c6d1dd4918ef6aa30735feb23a AS uv
+
 FROM python:3.12.14-slim-trixie@sha256:e5c9fa26ffb76e11e0f054f30dc2523a2f9693f0c36c0cf1e39b27e152d899fc AS build
+
+COPY --from=uv /uv /bin/uv
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/venv \
-    PATH="/venv/bin:$PATH"
+    PATH="/venv/bin:$PATH" \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy
 
 WORKDIR /build
 
-# Create virtual environment and upgrade packaging tooling
-RUN python -m venv ${VIRTUAL_ENV} && \
-    pip install --upgrade pip setuptools wheel
+# `--no-install-project` keeps layer cached against dependency changes only
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project
 
-# Install Python dependencies with pip cache
-COPY pyproject.toml .
-COPY bailo_artefactscan_api/__init__.py bailo_artefactscan_api/__init__.py
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-compile .
+# `--no-deps` as uv sync already installed the lock
+COPY pyproject.toml ./
+COPY bailo_artefactscan_api ./bailo_artefactscan_api
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --no-deps .
 
 
 FROM python:3.12.14-slim-trixie@sha256:e5c9fa26ffb76e11e0f054f30dc2523a2f9693f0c36c0cf1e39b27e152d899fc AS base

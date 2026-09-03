@@ -97,38 +97,41 @@ Refer to [backend/docs/README.md](https://github.com/gchq/Bailo/blob/main/backen
 
 The following steps are only required for users who wish to extend or develop the Bailo Python client locally.
 
+> **Requires:** Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
 ### Python Setup
 
 From within the `lib/python` directory:
 
 ```bash
-python3 -m venv libpythonvenv
-source libpythonvenv/bin/activate
-pip install -e .[test]
+uv sync --extra mlflow --group test
 ```
+
+This creates a `.venv` and installs the pinned dependencies from `uv.lock`. Prefix commands with
+`uv run` to use it, or activate it with `source .venv/bin/activate`.
 
 ### Running Tests
 
 To run the unit tests:
 
 ```bash
-pytest
+uv run pytest
 ```
 
 To run the integration tests (requires Bailo running on `https://localhost:8080`):
 
 ```bash
-pytest -m integration
+uv run pytest -m integration
 ```
 
 To run the mlflow integration tests (requires Bailo running on `https://localhost:8080` and mlflow running on `https://localhost:5050` e.g. via docker):
 
 ```bash
 docker run -p 5050:5000 \
-    "ghcr.io/mlflow/mlflow:v$(python -m pip show mlflow-skinny | awk '/Version:/ {print $2}')" \
+    "ghcr.io/mlflow/mlflow:v$(uv pip show mlflow-skinny | awk '/Version:/ {print $2}')" \
     mlflow server --host 0.0.0.0 --port 5000
 
-pytest -m mlflow
+uv run pytest -m mlflow
 ```
 
 <!-- MARKDOWN LINKS & IMAGES -->
