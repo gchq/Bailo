@@ -45,6 +45,8 @@ export default function DeploymentAssessmentItem({ deploymentAssessment }: Deplo
               variant='outlined'
               color={displayState.colour}
               data-test='deploymentAssessmentStateChip'
+              // A long assessment name would otherwise squash the label on narrow screens
+              sx={{ flexShrink: 0 }}
             />
           </Stack>
           {deploymentAssessment.justification && (
