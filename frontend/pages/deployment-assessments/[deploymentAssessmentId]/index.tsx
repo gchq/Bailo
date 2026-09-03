@@ -14,7 +14,12 @@ import Link from 'src/Link'
 
 export default function DeploymentAssessment() {
   const router = useRouter()
-  const { deploymentAssessmentId }: { deploymentAssessmentId?: string } = router.query
+  const { deploymentAssessmentId, returnTo }: { deploymentAssessmentId?: string; returnTo?: string } = router.query
+  const backHref =
+    typeof returnTo === 'string' &&
+    (returnTo === '/deployment-assessments' || returnTo.startsWith('/deployment-assessments?'))
+      ? returnTo
+      : '/deployment-assessments?tab=all-assessments'
 
   const theme = useTheme()
 
@@ -81,7 +86,7 @@ export default function DeploymentAssessment() {
                   spacing={2}
                   divider={<Divider flexItem orientation='vertical' />}
                 >
-                  <Link href={`/deployment-assessments`}>
+                  <Link href={backHref}>
                     <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                       Back to deployments
                     </Button>
