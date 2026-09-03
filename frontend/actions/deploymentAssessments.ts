@@ -1,4 +1,3 @@
-import qs from 'querystring'
 import useSWR from 'swr'
 import {
   DeploymentAssessmentInterface,
@@ -101,24 +100,5 @@ export function useGetCurrentUserPermissionsForDeploymentAssessment(deploymentAs
     deploymentAssessmentsUserPermissions: data?.permissions,
     isDeploymentAssessmentsUserPermissionsLoading: isLoading,
     isDeploymentAssessmentsUserPermissionsError: error,
-  }
-}
-
-export function useGetDeploymentAssessments(modelIds?: string[]) {
-  const queryParams = {
-    ...(modelIds && { modelIds }),
-  }
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      deploymentAssessments: DeploymentAssessmentInterface[]
-    },
-    ErrorInfo
-  >(modelIds ? `/api/v3/deployment-assessments/?${qs.stringify(queryParams)}` : null, fetcher)
-
-  return {
-    mutateDeploymentAssessment: mutate,
-    deploymentAssessments: data ? data.deploymentAssessments : [],
-    isDeploymentAssessmentsLoading: isLoading,
-    isDeploymentAssessmentsError: error,
   }
 }

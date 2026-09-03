@@ -1,22 +1,31 @@
 import Create from '@mui/icons-material/Create'
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
 import { memoize } from 'lodash-es'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import DeploymentAssessmentSummaryCard from 'src/deployments/DeploymentAssessmentSummaryCard'
+import { useDeploymentAssessmentFilters } from 'src/hooks/useDeploymentAssessmentFilters'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 
-type DeploymentAssessments = {
+type DeploymentAssessmentsProps = {
   model: EntryInterface
 }
 
-export default function DeploymentAssessments({ model }: DeploymentAssessments) {
+export default function DeploymentAssessments({ model }: DeploymentAssessmentsProps) {
+  const { filters, setFilters } = useDeploymentAssessmentFilters()
   const { deploymentAssessments, isDeploymentAssessmentsLoading, isDeploymentAssessmentsError } =
-    useGetDeploymentAssessments([model.id])
+    useGetDeploymentAssessments({ modelIds: [model.id] })
 
-  const deploymentAssessmentListItem = memoize(({ data }) => <Typography>{data.name}</Typography>)
+  const deploymentAssessmentListItem = memoize(({ data }) => (
+    <DeploymentAssessmentSummaryCard
+      assessment={data}
+      selectedModelIds={filters.modelIds}
+      onSelectedModelIdsChange={(modelIds) => setFilters({ modelIds })}
+    />
+  ))
 
   if (isDeploymentAssessmentsLoading) {
     return <Loading />
@@ -42,17 +51,15 @@ export default function DeploymentAssessments({ model }: DeploymentAssessments) 
           </Link>
         </Box>
         <Paginate
-          list={deploymentAssessments.map((deployment) => {
-            return { key: deployment.id, ...deployment }
-          })}
-          emptyListText={`No deployment assessments found for model ${model.name}`}
+          list={deploymentAssessments}
+          emptyListText='No deployment assessments found'
           sortingProperties={[
-            { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-            { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+            { value: 'name', title: 'Name', iconKind: 'text' },
+            { value: 'createdAt', title: 'Created date', iconKind: 'date' },
           ]}
-          searchPlaceholderText='Search by name'
-          defaultSortProperty='createdAt'
           searchFilterProperty='name'
+          hideSearchInput
+          defaultSortProperty='createdAt'
         >
           {deploymentAssessmentListItem}
         </Paginate>
