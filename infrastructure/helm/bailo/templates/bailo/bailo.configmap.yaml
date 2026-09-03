@@ -236,6 +236,7 @@ data:
           owner: '{{ .Values.config.ui.roleDisplayNames.owner }}',
           consumer: '{{ .Values.config.ui.roleDisplayNames.consumer }}',
           contributor: '{{ .Values.config.ui.roleDisplayNames.contributor }}',
+          riskOwner: '{{ .Values.config.ui.roleDisplayNames.riskOwner }}',
         },
 
         untrustedModel: {

@@ -10,6 +10,7 @@ import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
 import config from '../../utils/config.js'
 import { BadReq, ConfigurationError, Forbidden, InternalError, NotFound } from '../../utils/error.js'
+import { getModelReview } from '../../utils/review.js'
 import log from '../log.js'
 import { getModelById, getModelByIdNoAuth } from '../model.js'
 import { scheduleLifeCycleReviewEmails } from '../schedule/scheduler.js'
@@ -49,10 +50,12 @@ export async function findReviewById(user: UserInterface, reviewId: string): Pro
     throw NotFound(`Unable to find Review to respond to.`, { reviewId })
   }
 
-  // Authorisation check to make sure the user can access a model
-  await getModelById(user, review.modelId)
+  const modelReview = getModelReview(review)
 
-  return review
+  // Authorisation check to make sure the user can access a model
+  await getModelById(user, modelReview.modelId)
+
+  return modelReview
 }
 
 /**
@@ -178,7 +181,8 @@ export async function createLifecycleReview(
 
 export async function notifyReviewer(user: UserInterface, reviewId: string) {
   const review = await findReviewById(user, reviewId)
-  const model = await getModelByIdNoAuth(review.modelId)
+  const modelReview = getModelReview(review)
+  const model = await getModelByIdNoAuth(modelReview.modelId)
   // `getModelById` would only determine view access to a model, we must make sure the user has write access too
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {

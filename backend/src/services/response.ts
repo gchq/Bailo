@@ -14,6 +14,7 @@ import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
 import { Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { getModelReview } from '../utils/review.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
@@ -121,7 +122,7 @@ export async function respondToReview(
   kind: ReviewKindKeys,
   reviewId: string,
 ): Promise<ResponseInterface> {
-  const review = await findReviewForResponse(user, modelId, role, kind, reviewId)
+  const review = getModelReview(await findReviewForResponse(user, modelId, role, kind, reviewId))
   let isApproved = false
   if (kind === ReviewKind.Release && review.semver) {
     isApproved = await checkReleaseApproved(modelId, review.semver)

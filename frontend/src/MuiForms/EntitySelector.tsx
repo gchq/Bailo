@@ -72,6 +72,13 @@ export default function EntitySelector({
 
   const isMultiple = schema.type === 'array'
 
+  const normalisedValue = useMemo<string[] | string>(() => {
+    if (!isMultiple) {
+      return currentValue
+    }
+    return (Array.isArray(currentValue) ? currentValue : [currentValue]).filter(Boolean)
+  }, [isMultiple, currentValue])
+
   const theme = useTheme()
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
@@ -82,11 +89,11 @@ export default function EntitySelector({
       return isMultiple ? [defaultEntity] : defaultEntity
     }
 
-    if (!currentValue) {
+    if (!normalisedValue || normalisedValue.length === 0) {
       return []
     }
 
-    const values = Array.isArray(currentValue) ? currentValue : [currentValue]
+    const values = Array.isArray(normalisedValue) ? normalisedValue : [normalisedValue]
     const entities = values.map((value) => {
       const [kind, id] = value.split(':')
       return { kind, id }
@@ -101,8 +108,11 @@ export default function EntitySelector({
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject[] | EntityObject) => {
       onChange(getEntitySelectorValue(newValue, isMultiple))
       setSelectedEntities(newValue)
+      if (schema.maxItems !== undefined && Array.isArray(newValue) && newValue.length >= schema.maxItems) {
+        setOpen(false)
+      }
     },
-    [isMultiple, onChange],
+    [isMultiple, onChange, schema.maxItems],
   )
 
   const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
@@ -135,7 +145,7 @@ export default function EntitySelector({
     return <Loading />
   }
 
-  const currentValueString = formatEntityValue(currentValue)
+  const currentValueString = formatEntityValue(normalisedValue)
 
   return (
     <CompareField
@@ -144,9 +154,9 @@ export default function EntitySelector({
       required={required}
       description={schema.description}
       compare={compare}
-      value={currentValue}
+      value={normalisedValue}
       formatter={formatEntity}
-      hasValue={Array.isArray(currentValue) || currentValue !== undefined}
+      hasValue={Array.isArray(normalisedValue) ? normalisedValue.length > 0 : normalisedValue !== undefined}
     >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
@@ -160,7 +170,13 @@ export default function EntitySelector({
             open={open}
             size='small'
             onOpen={() => {
-              setOpen(true)
+              const atLimit =
+                schema.maxItems !== undefined &&
+                Array.isArray(selectedEntities) &&
+                selectedEntities.length >= schema.maxItems
+              if (!atLimit) {
+                setOpen(true)
+              }
             }}
             onClose={() => {
               setOpen(false)
@@ -197,19 +213,23 @@ export default function EntitySelector({
             )}
           />
         </>
-      ) : compare.inMirroredCompare && currentValue.length ? (
+      ) : compare.inMirroredCompare && normalisedValue.length ? (
         <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
       ) : (
-        currentValue &&
-        currentValue.length > 0 && (
+        normalisedValue &&
+        normalisedValue.length > 0 && (
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
-              {Array.isArray(currentValue) ? (
-                currentValue.map((entity) => (
+              {Array.isArray(normalisedValue) ? (
+                normalisedValue.map((entity) => (
                   <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
                 ))
               ) : (
-                <Chip label={<UserDisplay dn={currentValue} />} key={currentValue} sx={{ width: 'fit-content' }} />
+                <Chip
+                  label={<UserDisplay dn={normalisedValue} />}
+                  key={normalisedValue}
+                  sx={{ width: 'fit-content' }}
+                />
               )}
             </Stack>
           </Box>

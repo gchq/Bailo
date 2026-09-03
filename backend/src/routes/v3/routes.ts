@@ -7,6 +7,8 @@ import { getDeploymentAssessmentCurrentUserPermissions } from './deploymentAsses
 import { getDeploymentAssessments } from './deploymentAssessment/getDeploymentAssessments.js'
 import { patchDeploymentAssessment } from './deploymentAssessment/patchDeploymentAssessment.js'
 import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
+import { postDeploymentAssessmentComment } from './deploymentAssessment/postDeploymentAssessmentComment.js'
+import { postDeploymentAssessmentReview } from './deploymentAssessment/postDeploymentAssessmentReview.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
 import { getLifecycleComplianceMetrics } from './metrics/getLifecycleComplianceMetrics.js'
@@ -29,6 +31,8 @@ router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 router.get('/deployment-assessments', ...getDeploymentAssessments)
 router.post('/deployment-assessments', ...postDeploymentAssessment)
 router.get('/deployment-assessments/:deploymentAssessmentId', ...getDeploymentAssessment)
+router.post('/deployment-assessments/:deploymentAssessmentId/comments', ...postDeploymentAssessmentComment)
+router.post('/deployment-assessments/:deploymentAssessmentId/review', ...postDeploymentAssessmentReview)
 router.get(
   '/deployment-assessments/:deploymentAssessmentId/permissions/mine',
   ...getDeploymentAssessmentCurrentUserPermissions,
