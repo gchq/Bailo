@@ -64,10 +64,9 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 - Cypress E2E (open): `npm run cy:open`
 - Cypress E2E (headless): `npm run cy:run`
 
-Each Python project is an independent [uv](https://docs.astral.sh/uv/) project with its own
-`uv.lock`. They are deliberately not a uv workspace: a workspace forces a single
-`requires-python` across all members (the intersection here is Python 3.12 only), which would
-break the `bailo` 3.10-3.14 test matrix.
+Each Python project is an independent [uv](https://docs.astral.sh/uv/) project with its own `uv.lock`. They are
+deliberately not a uv workspace: a workspace forces a single `requires-python` across all members (the intersection here
+is Python 3.12 only), which would break the `bailo` 3.10-3.14 test matrix.
 
 Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
 
