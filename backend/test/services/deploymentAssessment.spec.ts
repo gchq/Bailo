@@ -1,4 +1,5 @@
 import { MongoServerError } from 'mongodb'
+import { Types } from 'mongoose'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authentication from '../../src/connectors/authentication/index.js'
@@ -11,6 +12,7 @@ import {
   createDeploymentAssessment,
   getDeploymentAssessmentById,
   getDeploymentAssessmentDetails,
+  removeDeploymentAssessment,
   reviewDeploymentAssessment,
   searchDeploymentAssessments,
   updateDeploymentAssessment,
@@ -32,6 +34,12 @@ const schemaMocks = vi.hoisted(() => ({
   validateContentAgainstSchema: vi.fn(),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
+
+const smtpMocks = vi.hoisted(() => ({
+  notifyDeploymentRiskOwner: vi.fn(),
+  notifyDeploymentModelOwners: vi.fn(),
+}))
+vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
 
 const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
@@ -528,6 +536,188 @@ describe('services > deploymentAssessment', () => {
       )
       expect(deploymentAssessment.save).not.toHaveBeenCalled()
     })
+
+    test('notifies stakeholders when a draft is submitted', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      // the notification lookup uses `.lean()`, unlike the validation lookup
+      ModelModelMock.find.mockResolvedValueOnce([liveModel]).mockReturnValueOnce({ lean: () => [liveModel] })
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+        'user:risk-owner',
+        deploymentAssessment,
+        'Risk Owner',
+      )
+      expect(smtpMocks.notifyDeploymentModelOwners).toHaveBeenCalled()
+    })
+
+    test('notifies each risk owner once when a draft with several is submitted', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.metadata = {
+        ...params.metadata,
+        overview: {
+          ...params.metadata.overview,
+          riskOwner: ['user:risk-owner', 'user:other-owner', 'user:risk-owner'],
+        },
+      }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      // the notification lookup uses `.lean()`, unlike the validation lookup
+      ModelModelMock.find.mockResolvedValueOnce([liveModel]).mockReturnValueOnce({ lean: () => [liveModel] })
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledTimes(2)
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+        'user:risk-owner',
+        deploymentAssessment,
+        'Risk Owner',
+      )
+      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+        'user:other-owner',
+        deploymentAssessment,
+        'Risk Owner',
+      )
+    })
+
+    test('does not notify stakeholders when the assessment stays a draft', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+    })
+
+    test('does not re-notify stakeholders when an already submitted assessment is edited', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.draft = false
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('removeDeploymentAssessment', () => {
+    const assessmentId = new Types.ObjectId()
+    const reviewId = new Types.ObjectId()
+
+    // The assessment's children are removed before the assessment itself. `ReviewModel.find` is called twice - once
+    // to collect the parent IDs for the responses, and again inside `removeDeploymentAssessmentReviews`.
+    const mockAssessmentWithChildren = () => {
+      const deploymentAssessment = { id: 'da-id', _id: assessmentId, draft: false, delete: vi.fn() }
+      const review = { _id: reviewId }
+
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      ReviewModelMock.find.mockResolvedValueOnce([review]).mockResolvedValueOnce([review])
+      ResponseModelMock.find.mockResolvedValueOnce([{ _id: new Types.ObjectId() }])
+
+      return { deploymentAssessment }
+    }
+
+    test('soft deletes the assessment and returns it', async () => {
+      const { deploymentAssessment } = mockAssessmentWithChildren()
+
+      const result = await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(authorisation.deploymentAssessment).toHaveBeenCalledWith(
+        { dn: 'creator' },
+        deploymentAssessment,
+        'deployment_assessment:delete',
+      )
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(undefined)
+      expect(result).toBe(deploymentAssessment)
+    })
+
+    test('deletes the comments and review responses belonging to the assessment', async () => {
+      mockAssessmentWithChildren()
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(
+        { parentId: { $in: [assessmentId, reviewId] } },
+        undefined,
+      )
+    })
+
+    test('deletes the reviews belonging to the assessment', async () => {
+      mockAssessmentWithChildren()
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined)
+    })
+
+    test('deletes an assessment that has no reviews or responses', async () => {
+      const deploymentAssessment = { id: 'da-id', _id: assessmentId, draft: true, delete: vi.fn() }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      ReviewModelMock.find.mockResolvedValueOnce([]).mockResolvedValueOnce([])
+      ResponseModelMock.find.mockResolvedValueOnce([])
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id')
+
+      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith({ parentId: { $in: [assessmentId] } }, undefined)
+      expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined)
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(undefined)
+    })
+
+    test('passes the transaction session through to every deletion', async () => {
+      const { deploymentAssessment } = mockAssessmentWithChildren()
+      const session = {} as any
+
+      await removeDeploymentAssessment({ dn: 'creator' }, 'da-id', session)
+
+      expect(ReviewModelMock.find).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, undefined, { session })
+      expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(
+        { parentId: { $in: [assessmentId, reviewId] } },
+        session,
+      )
+      expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith({ deploymentAssessmentId: 'da-id' }, session)
+      expect(deploymentAssessment.delete).toHaveBeenCalledWith(session)
+    })
+
+    test('throws a not found error when the assessment does not exist', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(undefined)
+
+      await expect(removeDeploymentAssessment({ dn: 'creator' }, 'da-id')).rejects.toMatchObject({ code: 404 })
+    })
+
+    test('rejects the deletion when the user cannot view the assessment', async () => {
+      const { deploymentAssessment } = mockAssessmentWithChildren()
+      vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
+        success: false,
+        info: 'You do not have permission to view this Deployment Assessment',
+        id: 'da-id',
+      })
+
+      await expect(removeDeploymentAssessment({ dn: 'otherUser' }, 'da-id')).rejects.toThrow(
+        /^You do not have permission to view this Deployment Assessment/,
+      )
+      expect(deploymentAssessment.delete).not.toHaveBeenCalled()
+    })
+
+    test('rejects the deletion when authorisation fails', async () => {
+      const { deploymentAssessment } = mockAssessmentWithChildren()
+      vi.mocked(authorisation.deploymentAssessment)
+        .mockResolvedValueOnce({ success: true, id: 'da-id' })
+        .mockResolvedValueOnce({
+          success: false,
+          info: 'You do not have permission to delete this Deployment Assessment',
+          id: 'da-id',
+        })
+
+      await expect(removeDeploymentAssessment({ dn: 'otherUser' }, 'da-id')).rejects.toThrow(
+        /^You do not have permission to delete this Deployment Assessment/,
+      )
+      expect(deploymentAssessment.delete).not.toHaveBeenCalled()
+      expect(ResponseModelMock.deleteMany).not.toHaveBeenCalled()
+      expect(ReviewModelMock.deleteMany).not.toHaveBeenCalled()
+    })
   })
 
   describe('searchDeploymentAssessments', () => {
@@ -582,7 +772,7 @@ describe('services > deploymentAssessment', () => {
         $and: [
           {
             $or: [
-              { 'metadata.overview.name': { $regex: 'Assessment\\.\\*', $options: 'i' } },
+              { name: { $regex: 'Assessment\\.\\*', $options: 'i' } },
               { 'metadata.overview.justification': { $regex: 'Assessment\\.\\*', $options: 'i' } },
             ],
           },

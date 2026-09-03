@@ -8,7 +8,7 @@ import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
-import EditableDeploymentAssessmentForm from 'src/deployments/EditableDeploymentAssessmentForm'
+import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 
@@ -21,7 +21,7 @@ export default function DeploymentAssessment() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { deploymentAssessment, isDeploymentAssessmentLoading, isDeploymentAssessmentError } =
-    useGetDeploymentAssessment(deploymentAssessmentId as string)
+    useGetDeploymentAssessment(deploymentAssessmentId)
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
@@ -30,12 +30,14 @@ export default function DeploymentAssessment() {
     return error
   }
 
+  const isLoadingDeploymentAssessment = !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment
+
   return (
     <>
       <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading....'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
-          {isDeploymentAssessmentLoading && <Loading />}
+          {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (
             <>
               {deploymentAssessment.draft && (
