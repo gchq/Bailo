@@ -17,14 +17,7 @@ export default function DeploymentAssessments({ model }: DeploymentAssessmentsPr
   const { deploymentAssessments, isDeploymentAssessmentsLoading, isDeploymentAssessmentsError } =
     useGetDeploymentAssessments({ modelIds: [model.id] })
 
-  const deploymentAssessmentListItem = memoize(({ data }) => (
-    <DeploymentAssessmentSummaryCard
-      assessment={data}
-      selectedModelIds={[]}
-      onSelectedModelIdsChange={(_modelIds) => {}}
-      onSelectedStateChange={(_state) => {}}
-    />
-  ))
+  const deploymentAssessmentListItem = memoize(({ data }) => <DeploymentAssessmentSummaryCard assessment={data} />)
 
   if (isDeploymentAssessmentsLoading) {
     return <Loading />
