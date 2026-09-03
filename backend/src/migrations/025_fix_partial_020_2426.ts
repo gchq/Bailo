@@ -1,6 +1,6 @@
 import ReleaseModel from '../models/Release.js'
 import Review, { ReviewDoc } from '../models/Review.js'
-import { removeResponses } from '../services/response.js'
+import { removeResponsesByParentIds } from '../services/response.js'
 
 // Fix for 020_2426_remove_orphaned_reviews_responses.ts failing part way through
 export async function up() {
@@ -21,7 +21,7 @@ export async function up() {
   // Rest of script as in 020_2426_remove_orphaned_reviews_responses.ts
   const reviewIds = deletedReviews.map((r) => r.id)
   // For each deleted review, delete the responses associated with it
-  const deletedResponses = await removeResponses(reviewIds)
+  const deletedResponses = await removeResponsesByParentIds(reviewIds)
 
   // Store some basic metadata about the migration
   return {

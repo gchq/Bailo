@@ -5,7 +5,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
-import DeploymentAssessmentsList from 'src/deployments/DeploymentAssessmentsList'
+import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
 
 export default function Deployments() {
   const router = useRouter()

@@ -179,6 +179,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
+  // TODO: future work to handle how DAs that reference this model are cleaned up
+
   const [
     allModelReviews,
     allModelImages,

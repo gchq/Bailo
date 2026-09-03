@@ -102,3 +102,9 @@ export function useGetCurrentUserPermissionsForDeploymentAssessment(deploymentAs
     isDeploymentAssessmentsUserPermissionsError: error,
   }
 }
+
+export function deleteDeploymentAssessment(deploymentAssessmentId: string) {
+  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}`, {
+    method: 'delete',
+  })
+}
