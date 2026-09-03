@@ -1,5 +1,5 @@
 import { escapeRegExp } from 'lodash-es'
-import { QueryFilter } from 'mongoose'
+import { ClientSession, QueryFilter } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
@@ -26,7 +26,8 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
-import { getResponses } from './review.js'
+import { removeResponsesByParentIds } from './response.js'
+import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
@@ -131,10 +132,15 @@ async function validateDeploymentAssessment(
 }
 
 async function notifyDeploymentStakeholders(
-  riskOwners: string[],
-  modelIds: string[],
+  riskOwners: string[] = [],
+  modelIds: string[] = [],
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
+  const uniqueRiskOwners = [...new Set(riskOwners)]
+  if (uniqueRiskOwners.length === 0 && modelIds.length === 0) {
+    return
+  }
+
   try {
     const models = await ModelModel.find({
       id: { $in: modelIds },
@@ -144,7 +150,7 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...riskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
+      ...uniqueRiskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -182,8 +188,14 @@ async function notifyDeploymentStakeholders(
   }
 }
 
-export async function getDeploymentAssessmentById(user: UserInterface, deploymentAssessmentId: string) {
-  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
+export async function getDeploymentAssessmentById(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  session?: ClientSession,
+) {
+  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId }, undefined, {
+    session,
+  })
   if (!deploymentAssessment) {
     throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
   }
@@ -378,8 +390,36 @@ export async function createDeploymentAssessment(
   }
 
   if (!draft) {
-    await notifyDeploymentStakeholders(metadata.overview.riskOwner, metadata.overview.modelIds, deploymentAssessment)
+    await notifyDeploymentStakeholders(
+      metadata.overview.riskOwner,
+      metadata.overview.modelIds ?? [],
+      deploymentAssessment,
+    )
   }
+
+  return deploymentAssessment
+}
+
+export async function removeDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  session?: ClientSession,
+) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId, session)
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  // Delete children before DA so that a failure part way through leaves DA so deletion safe to retry
+  const reviews = await ReviewModel.find({ deploymentAssessmentId }, undefined, { session })
+  await removeResponsesByParentIds(
+    [deploymentAssessment._id.toString(), ...reviews.map((review) => review._id.toString())],
+    session,
+  )
+  await removeDeploymentAssessmentReviews(deploymentAssessmentId, session)
+  await deploymentAssessment.delete(session)
 
   return deploymentAssessment
 }
@@ -427,6 +467,8 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.metadata = metadata
     deploymentAssessment.markModified('metadata')
   }
+
+  const isBeingSubmitted = deploymentAssessment.draft && diff.draft === false
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
       throw BadReq('Cannot convert a submitted deployment assessment back to a draft.')
@@ -436,6 +478,14 @@ export async function updateDeploymentAssessment(
   }
 
   await deploymentAssessment.save()
+
+  if (isBeingSubmitted) {
+    await notifyDeploymentStakeholders(
+      metadata.overview?.riskOwner ?? [],
+      metadata.overview?.modelIds ?? [],
+      deploymentAssessment,
+    )
+  }
 
   return deploymentAssessment
 }
@@ -469,7 +519,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   }
   if (params.search) {
     const search = { $regex: escapeRegExp(params.search), $options: 'i' }
-    query.$and = [{ $or: [{ 'metadata.overview.name': search }, { 'metadata.overview.justification': search }] }]
+    query.$and = [{ $or: [{ name: search }, { 'metadata.overview.justification': search }] }]
   }
   if (params.needsAction) {
     query.$or = [

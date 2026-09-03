@@ -255,6 +255,17 @@ export async function removeReleaseReviews(
   return reviews
 }
 
+export async function removeDeploymentAssessmentReviews(
+  deploymentAssessmentId: string,
+  session?: ClientSession,
+): Promise<ReviewDoc[]> {
+  const reviews = await ReviewModel.find({ deploymentAssessmentId }, undefined, { session })
+
+  await ReviewModel.deleteMany({ deploymentAssessmentId }, session)
+
+  return reviews
+}
+
 export async function findReviewForResponse(
   user: UserInterface,
   modelId: string,
