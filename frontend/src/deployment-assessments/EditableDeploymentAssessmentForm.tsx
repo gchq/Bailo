@@ -3,13 +3,14 @@ import Info from '@mui/icons-material/Info'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
+import { deleteDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useGetSchema } from 'actions/schema'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { getChangedFields } from 'node_modules/@rjsf/utils/lib'
 import { KeyedMutator } from 'node_modules/swr/dist/index/index.mjs'
 import { Fragment, useContext, useEffect, useMemo, useState } from 'react'
-import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
+import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
 import LabelledInput from 'src/common/LabelledInput'
 import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
@@ -48,7 +49,6 @@ export default function EditableDeploymentAssessmentForm({
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [newName, setNewName] = useState(deploymentAssessment.name)
-  const [deleteErrorMessage, _setDeleteErrorMessage] = useState('')
   const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
@@ -234,13 +234,14 @@ export default function EditableDeploymentAssessmentForm({
           readOnly={readOnly}
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
-        <ConfirmationDialogue
+        <DeletionConfirmationDialogue
           open={open}
           title='Delete Deployment Assessment'
-          onConfirm={() => setOpen(false)}
-          onCancel={() => setOpen(false)}
-          errorMessage={deleteErrorMessage}
-          dialogMessage={'Are you sure you want to delete this deployment assessment?'}
+          onClose={() => setOpen(false)}
+          onDelete={() => deleteDeploymentAssessment(deploymentAssessment.id)}
+          confirmationText={deploymentAssessment.name}
+          successMessage='Deployment assessment deleted'
+          redirectTo='/deployment-assessments'
         />
         {isEdit && (
           <Stack

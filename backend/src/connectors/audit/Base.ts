@@ -452,6 +452,12 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.DeploymentAssessment,
   },
+  DeleteDeploymentAssessment: {
+    typeId: 'DeleteDeploymentAssessment',
+    description: 'Deployment assessment deleted',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
   ViewDeploymentAssessment: {
     typeId: 'ViewDeploymentAssessment',
     description: 'Deployment assessment viewed',
@@ -589,6 +595,7 @@ export abstract class BaseAuditConnector {
 
   abstract onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onUpdateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]): Promise<void>
   abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onReviewDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>

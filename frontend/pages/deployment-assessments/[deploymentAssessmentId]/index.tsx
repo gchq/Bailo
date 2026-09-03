@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
-import EditableDeploymentAssessmentForm from 'src/deployments/EditableDeploymentAssessmentForm'
+import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -47,12 +47,14 @@ export default function DeploymentAssessment() {
     }
   }
 
+  const isLoadingDeploymentAssessment = !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment
+
   return (
     <>
       <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading....'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
-          {isDeploymentAssessmentLoading && <Loading />}
+          {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (
             <>
               <DraftBanner
