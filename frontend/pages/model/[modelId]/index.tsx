@@ -18,7 +18,7 @@ import Overview from 'src/entry/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind } from 'types/types'
+import { EntryKind, EntryVisibility } from 'types/types'
 
 export default function Model() {
   const router = useRouter()
@@ -62,11 +62,13 @@ export default function Model() {
               path: 'deployments',
               view: <DeploymentAssessments model={entry} />,
               datatest: 'deploymentAssessmentsTab',
-              disabled: !entry.card,
+              disabled:
+                entry.visibility === EntryVisibility.Private ||
+                entry.state !== uiConfig.deploymentAssessments.deployableModelState,
               disabledText:
-                entry.kind === EntryKind.UNTRUSTED_MODEL
-                  ? 'Deployment assessments are not available for untrusted models.'
-                  : 'Select a schema to view this tab.',
+                entry.visibility === EntryVisibility.Private
+                  ? 'Deployment assessments are not available for private models.'
+                  : `This model's state must be set to ${uiConfig.deploymentAssessments.deployableModelState} in order for it to be included in deployment assessments.`,
             },
             {
               title: 'Registry',
