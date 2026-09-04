@@ -282,7 +282,12 @@ describe('services > deploymentAssessment', () => {
       createdBy: 'creator',
       metadata: { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } },
     }
-    const review = { _id: 'review-object-id', kind: ReviewKind.DeploymentAssessment, role: 'dro' }
+    const review = {
+      _id: 'review-object-id',
+      kind: ReviewKind.DeploymentAssessment,
+      role: 'dro',
+      createdAt: new Date('10/10/2026'),
+    }
 
     test.each([false, true])('allows an authorised viewer to comment when draft is %s', async (draft) => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce({ ...assessment, draft })
@@ -318,33 +323,24 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('returns authorised comments and review history', async () => {
-      const comments = [{ kind: ResponseKind.Comment, comment: 'A question' }]
-      const reviews = [
+      const reviewResponses = [
         {
-          review,
-          responses: [
-            {
-              _id: { toString: () => 'response-id' },
-              kind: ResponseKind.Review,
-              decision: Decision.Approve,
-              createdAt: '2026-01-02T00:00:00.000Z',
-            },
-          ],
+          _id: { toString: () => 'response-id' },
+          kind: ResponseKind.Review,
+          decision: Decision.Approve,
+          createdAt: '2026-01-02T00:00:00.000Z',
         },
       ]
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
-      ResponseModelMock.find.mockResolvedValueOnce(comments)
-      ReviewModelMock.aggregate.mockResolvedValueOnce(reviews)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.find.mockResolvedValueOnce(reviewResponses)
 
       await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, assessment.id)).resolves.toEqual({
         deploymentAssessment: assessment,
-        responses: [comments[0], reviews[0].responses[0]],
+        responses: reviewResponses,
         state: 'approved',
       })
-      expect(ResponseModelMock.find).toHaveBeenCalledWith({
-        parentId: assessment._id,
-        kind: ResponseKind.Comment,
-      })
+      expect(ResponseModelMock.find).toHaveBeenCalledWith({ parentId: review._id })
     })
 
     test('does not read history when assessment view authorisation fails', async () => {

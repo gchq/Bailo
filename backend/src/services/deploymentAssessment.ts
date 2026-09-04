@@ -27,7 +27,7 @@ import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
-import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
+import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
@@ -230,41 +230,14 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  const responses = await getResponses(deploymentAssessment._id)
+  const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+  const responses = await ResponseModel.find({ parentId: latestReview._id })
 
-  const latestDecision = await ReviewModel.aggregate<{ _id: string; decision?: DecisionKeys }>([
-    {
-      $match: {
-        deploymentAssessmentId: deploymentAssessment.id,
-        kind: ReviewKind.DeploymentAssessment,
-      },
-    },
-    {
-      $lookup: {
-        from: 'v2_responses',
-        let: { reviewId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ['$parentId', '$$reviewId'] },
-              kind: ResponseKind.Review,
-            },
-          },
-          { $sort: { createdAt: -1 } },
-        ],
-        as: 'responses',
-      },
-    },
-    { $set: { responses: { $slice: ['$responses', 1] } } },
-    { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
-    { $sort: { 'responses.createdAt': -1 } },
-    { $group: { _id: '$deploymentAssessmentId', decision: { $first: '$responses.decision' } } },
-  ])
-  const decisionsByAssessmentId = new Map(latestDecision.map(({ _id, decision }) => [_id, decision]))
-  const state = deriveDeploymentAssessmentState(
-    deploymentAssessment,
-    decisionsByAssessmentId.get(deploymentAssessment.id),
-  )
+  const latestDecision = responses
+    .filter((r) => r.kind === ResponseKind.Review)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .at(0)?.decision as DecisionKeys | undefined
+  const state = deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
 
   return {
     deploymentAssessment,
