@@ -15,7 +15,7 @@ type DeploymentAssessmentsProps = {
 
 export default function DeploymentAssessments({ model }: DeploymentAssessmentsProps) {
   const { deploymentAssessments, isDeploymentAssessmentsLoading, isDeploymentAssessmentsError } =
-    useGetDeploymentAssessments({ modelIds: [model.id] })
+    useGetDeploymentAssessments({ modelIds: [model.id], draft: false })
 
   const deploymentAssessmentListItem = memoize(({ data }) => <DeploymentAssessmentSummaryCard assessment={data} />)
 
