@@ -1,16 +1,16 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import ReviewIcon from '@mui/icons-material/Comment'
-import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Button, Container, Divider, Paper, Stack } from '@mui/material'
+import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
+import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import { getErrorMessage } from 'utils/fetcher'
 
 export default function DeploymentAssessment() {
   const router = useRouter()
@@ -21,18 +21,35 @@ export default function DeploymentAssessment() {
       ? returnTo
       : '/deployment-assessments?tab=all-assessments'
 
-  const theme = useTheme()
-
   const [isEdit, setIsEdit] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [patchErrorMessage, setPatchErrorMessage] = useState('')
 
-  const { deploymentAssessment, isDeploymentAssessmentLoading, isDeploymentAssessmentError } =
-    useGetDeploymentAssessment(deploymentAssessmentId)
+  const {
+    deploymentAssessment,
+    isDeploymentAssessmentLoading,
+    isDeploymentAssessmentError,
+    mutateDeploymentAssessment,
+  } = useGetDeploymentAssessment(deploymentAssessmentId as string)
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
   })
   if (error) {
     return error
+  }
+
+  async function handlePublish() {
+    if (deploymentAssessment) {
+      setIsLoading(true)
+      const response = await patchDeploymentAssessment(deploymentAssessment.id, undefined, false)
+      if (!response.ok) {
+        setPatchErrorMessage(await getErrorMessage(response))
+      } else {
+        mutateDeploymentAssessment()
+      }
+      setIsLoading(false)
+    }
   }
 
   const isLoadingDeploymentAssessment = !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment
@@ -45,43 +62,15 @@ export default function DeploymentAssessment() {
           {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (
             <>
-              {deploymentAssessment.draft && (
-                <Paper
-                  color='primary'
-                  sx={{
-                    backgroundColor: theme.palette.mode === 'light' ? theme.palette.info.light : 'unset',
-                    py: 1,
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Stack
-                    direction='row'
-                    spacing={2}
-                    sx={{
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      px: 2,
-                      width: '100%',
-                    }}
-                  >
-                    <Stack direction='row' spacing={1}>
-                      <ReviewIcon color='primary' />
-                      <Typography>Draft</Typography>
-                    </Stack>
-                    <Button
-                      variant='outlined'
-                      color='inherit'
-                      size='small'
-                      onClick={() => {}}
-                      data-test='publishButton'
-                    >
-                      Publish
-                    </Button>
-                  </Stack>
-                </Paper>
-              )}
+              <DraftBanner
+                errorMessage={patchErrorMessage}
+                disableButton={isEdit}
+                isLoading={isLoading}
+                handlePublish={handlePublish}
+                draft={deploymentAssessment.draft}
+                text='This is a draft deployment assessment'
+                showButton
+              />
               <Stack spacing={2} sx={{ p: 4 }}>
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}
@@ -93,25 +82,11 @@ export default function DeploymentAssessment() {
                       Back to deployments
                     </Button>
                   </Link>
-                  <Stack
-                    direction='row'
-                    sx={{
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography variant='h6' color='primary' component='h1'>
-                      {deploymentAssessment ? deploymentAssessment.name : 'Loading...'}
-                    </Typography>
-                    <CopyToClipboardButton
-                      textToCopy={deploymentAssessment.id}
-                      notificationText='Copied deployment assessment ID to clipboard'
-                      ariaLabel='copy deployment assessment ID to clipboard'
-                    />
-                  </Stack>
                 </Stack>
                 {deploymentAssessment && (
                   <EditableDeploymentAssessmentForm
                     deploymentAssessment={deploymentAssessment}
+                    mutate={mutateDeploymentAssessment}
                     isEdit={isEdit}
                     onIsEditChange={setIsEdit}
                   />

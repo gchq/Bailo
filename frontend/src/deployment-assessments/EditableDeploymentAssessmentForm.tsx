@@ -1,11 +1,18 @@
 import Close from '@mui/icons-material/Close'
 import Info from '@mui/icons-material/Info'
 import Save from '@mui/icons-material/Save'
-import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
+import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material'
+import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { deleteDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useGetSchema } from 'actions/schema'
-import { useContext, useEffect, useState } from 'react'
+import cloneDeep from 'lodash-es/cloneDeep'
+import { getChangedFields } from 'node_modules/@rjsf/utils/lib'
+import { KeyedMutator } from 'node_modules/swr/dist/index/index.mjs'
+import { Fragment, useContext, useEffect, useMemo, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
+import LabelledInput from 'src/common/LabelledInput'
+import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -14,10 +21,14 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
-import { getStepsFromSchema, validateForm } from 'utils/formUtils'
+import { getErrorMessage } from 'utils/fetcher'
+import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
 
 type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
+  mutate: KeyedMutator<{
+    deploymentAssessment: DeploymentAssessmentInterface
+  }>
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
@@ -25,13 +36,19 @@ type EditableDeploymentAssessmentFormProps = {
 
 export default function EditableDeploymentAssessmentForm({
   deploymentAssessment,
+  mutate,
   isEdit,
   onIsEditChange,
   readOnly = false,
 }: EditableDeploymentAssessmentFormProps) {
+  const [originalSplitSchema, setOriginalSplitSchema] = useState<SplitSchemaNoRender>({
+    reference: '',
+    steps: [],
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
+  const [newName, setNewName] = useState(deploymentAssessment.name)
   const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
@@ -62,16 +79,42 @@ export default function EditableDeploymentAssessmentForm({
       setErrorMessage('')
       setIsLoading(true)
 
+      const oldData = getStepsData(originalSplitSchema, true)
+      const data = getStepsData(splitSchema, true)
+
+      const answersChanged = getChangedFields(oldData, data).length > 0
+      const nameChanged = deploymentAssessment.name !== newName
+      const nothingChanged = !answersChanged && !nameChanged
+
+      if (nothingChanged) {
+        setIsLoading(false)
+        onIsEditChange(false)
+        return
+      }
+
       for (const step of splitSchema.steps) {
         const isValid = validateForm(step)
 
         if (!isValid) {
+          setErrorMessage('Please make sure that all sections have been completed.')
           setIsLoading(false)
           return
         }
       }
 
-      onIsEditChange(false)
+      const response = await patchDeploymentAssessment(
+        deploymentAssessment.id,
+        answersChanged ? removeEmptyValues(data) : undefined,
+        undefined,
+        nameChanged ? newName : undefined,
+      )
+
+      if (!response.ok) {
+        setErrorMessage(await getErrorMessage(response))
+      } else {
+        mutate()
+        onIsEditChange(false)
+      }
     }
     setIsLoading(false)
   }
@@ -88,10 +131,13 @@ export default function EditableDeploymentAssessmentForm({
 
   function handleEdit() {
     onIsEditChange(true)
+    setErrorMessage('')
+    setOriginalSplitSchema(cloneDeep(splitSchema))
   }
 
   function handleCancel() {
     onIsEditChange(false)
+    setErrorMessage('')
     resetForm()
   }
 
@@ -103,6 +149,67 @@ export default function EditableDeploymentAssessmentForm({
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  const formHeading = useMemo(
+    () => (
+      <>
+        {schema && (
+          <Stack sx={{ overflow: 'hidden' }}>
+            <LabelledInput label='Name' fullWidth required={isEdit}>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'left',
+                }}
+              >
+                {isEdit ? (
+                  <TextField
+                    value={newName}
+                    fullWidth
+                    onChange={(event) => setNewName(event.target.value)}
+                    size='small'
+                  />
+                ) : (
+                  <>
+                    <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {deploymentAssessment ? deploymentAssessment.name : 'Loading...'}
+                    </Typography>
+                    <CopyToClipboardButton
+                      textToCopy={deploymentAssessment.name}
+                      notificationText='Copied deployment assessment name to clipboard'
+                      ariaLabel='copy deployment assessment name to clipboard'
+                    />
+                  </>
+                )}
+              </Stack>
+            </LabelledInput>
+            <LabelledValue label='Schema'>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
+                <Typography>{schema?.name}</Typography>
+                <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                  <Info color='primary' fontSize='small' />
+                </IconButton>
+                <InformationDialog
+                  open={schemaInformationOpen}
+                  schema={schema}
+                  onClose={() => setSchemaInformationOpen(false)}
+                />
+              </Stack>
+            </LabelledValue>
+            <LabelledValue label='Created by'>
+              <UserDisplay dn={deploymentAssessment.createdBy} />
+            </LabelledValue>
+          </Stack>
+        )}
+      </>
+    ),
+    [deploymentAssessment, isEdit, newName, schema, schemaInformationOpen],
+  )
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -112,39 +219,7 @@ export default function EditableDeploymentAssessmentForm({
       {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
         <EditableFormHeading
-          heading={
-            schema && (
-              <Stack>
-                <Typography
-                  sx={{
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Schema
-                </Typography>
-                <Stack
-                  direction='row'
-                  sx={{
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography>{schema?.name}</Typography>
-                  <IconButton onClick={() => setSchemaInformationOpen(true)}>
-                    <Info color='primary' fontSize='small' />
-                  </IconButton>
-                  <InformationDialog
-                    open={schemaInformationOpen}
-                    schema={schema}
-                    onClose={() => setSchemaInformationOpen(false)}
-                  />
-                </Stack>
-                <Stack>
-                  <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Created by</Typography>
-                  <UserDisplay dn={deploymentAssessment.createdBy} />
-                </Stack>
-              </Stack>
-            )
-          }
+          heading={formHeading}
           editAction='editDeploymentAssessment'
           deleteAction='deleteDeploymentAssessment'
           editButtonText='Edit Deployment Assessment'

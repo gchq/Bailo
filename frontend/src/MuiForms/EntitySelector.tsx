@@ -24,15 +24,25 @@ interface EntitySelectorProps {
 }
 
 export function getEntitySelectorValue(
-  selectedEntities: EntityObject[] | EntityObject,
+  selectedEntities: EntityObject[] | EntityObject | null | undefined,
   isMultiple: boolean,
 ): string[] | string {
   if (isMultiple) {
-    const entities = Array.isArray(selectedEntities) ? selectedEntities : [selectedEntities]
+    const entities = (Array.isArray(selectedEntities) ? selectedEntities : [selectedEntities]).filter(
+      (entity): entity is EntityObject => entity !== null && entity !== undefined,
+    )
     return entities.map((entity) => `${entity.kind}:${entity.id}`)
   }
 
+  if (!selectedEntities) {
+    return ''
+  }
+
   const entity = Array.isArray(selectedEntities) ? selectedEntities[0] : selectedEntities
+  if (!entity) {
+    return ''
+  }
+
   return `${entity.kind}:${entity.id}`
 }
 
@@ -145,25 +155,22 @@ export default function EntitySelector({
         />
       ) : compare.inMirroredCompare && normalisedValue.length ? (
         <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
+      ) : normalisedValue && normalisedValue.length > 0 ? (
+        <Box sx={{ overflowX: 'auto', p: 1 }}>
+          <Stack spacing={1} direction='row'>
+            {Array.isArray(normalisedValue) ? (
+              normalisedValue.map((entity) => (
+                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+              ))
+            ) : (
+              <Chip label={<UserDisplay dn={normalisedValue} />} key={normalisedValue} sx={{ width: 'fit-content' }} />
+            )}
+          </Stack>
+        </Box>
       ) : (
-        normalisedValue &&
-        normalisedValue.length > 0 && (
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {Array.isArray(normalisedValue) ? (
-                normalisedValue.map((entity) => (
-                  <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
-                ))
-              ) : (
-                <Chip
-                  label={<UserDisplay dn={normalisedValue} />}
-                  key={normalisedValue}
-                  sx={{ width: 'fit-content' }}
-                />
-              )}
-            </Stack>
-          </Box>
-        )
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          None
+        </Typography>
       )}
     </CompareField>
   )

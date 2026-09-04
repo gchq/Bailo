@@ -316,10 +316,10 @@ export async function createDeploymentAssessment(
       throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
     }
 
-    if (metadata.overview.riskOwner && metadata.overview.riskOwner.length > 0) {
+    if (metadata.overview && metadata.overview.riskOwner && metadata.overview.riskOwner.length > 0) {
       await validateRiskOwner(metadata.overview.riskOwner)
     }
-    if (metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
+    if (metadata.overview && metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
       await validateModels(metadata.overview.modelIds)
     }
   }
