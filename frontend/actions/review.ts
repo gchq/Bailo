@@ -14,6 +14,13 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
 
+function toSafePathId(value: string): string {
+  if (!/^[A-Za-z0-9-]+$/.test(value)) {
+    throw new Error('Invalid deployment assessment ID')
+  }
+  return encodeURIComponent(value)
+}
+
 const REVIEW_ID_PATTERN = /^[A-Za-z0-9_-]+$/
 function isValidReviewId(reviewId: string) {
   return REVIEW_ID_PATTERN.test(reviewId)
@@ -233,7 +240,8 @@ export async function postDeploymentAssessmentReviewResponse({
   comment,
   decision,
 }: postDeploymentAssessmentReviewResponseParams) {
-  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}/review`, {
+  const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
+  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/review`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment, decision }),
@@ -241,7 +249,8 @@ export async function postDeploymentAssessmentReviewResponse({
 }
 
 export async function postDeploymentAssessmentReviewComment(deploymentAssessmentId: string, comment: string) {
-  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}/comments`, {
+  const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
+  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/comments`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment }),
