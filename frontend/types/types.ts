@@ -1167,13 +1167,13 @@ export interface DeploymentAssessmentMetadata {
   [key: string]: unknown
 }
 
-export const DeploymentStates = {
+export const DeploymentAssessmentState = {
   NeedsReview: 'needs_review',
   Rejected: 'rejected',
   ChangesRequested: 'changes_requested',
   Approved: 'approved',
 } as const
-export type DeploymentStateKeys = (typeof DeploymentStates)[keyof typeof DeploymentStates]
+export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
 
 export interface DeploymentAssessmentInterface {
   id: string
@@ -1181,7 +1181,7 @@ export interface DeploymentAssessmentInterface {
   name: string
   metadata: DeploymentAssessmentMetadata
   draft: boolean
-  state: DeploymentStateKeys
+  state: DeploymentAssessmentStateKeys
   justification: string
   owner: string[]
   createdBy: string

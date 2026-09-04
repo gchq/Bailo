@@ -7,14 +7,14 @@ import {
   getHiddenDeploymentAssessmentColumns,
   saveHiddenDeploymentAssessmentColumns,
 } from 'src/storage/userPreferences'
-import { DeploymentAssessmentInterface, DeploymentStates } from 'types/types'
+import { DeploymentAssessmentInterface, DeploymentAssessmentState } from 'types/types'
 
 const COLUMNS = [
   { key: 'in_draft', label: 'In Draft' },
-  { key: DeploymentStates.NeedsReview, label: 'Needs Review' },
-  { key: DeploymentStates.ChangesRequested, label: 'Changes Requested' },
-  { key: DeploymentStates.Rejected, label: 'Rejected' },
-  { key: DeploymentStates.Approved, label: 'Approved' },
+  { key: DeploymentAssessmentState.NeedsReview, label: 'Needs Review' },
+  { key: DeploymentAssessmentState.ChangesRequested, label: 'Changes Requested' },
+  { key: DeploymentAssessmentState.Rejected, label: 'Rejected' },
+  { key: DeploymentAssessmentState.Approved, label: 'Approved' },
 ]
 
 function getColumnKey(assessment: DeploymentAssessmentInterface): string {
