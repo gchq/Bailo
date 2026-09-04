@@ -22,7 +22,7 @@ export default function ReleaseReview() {
 
   const [errorMessage, setErrorMessage] = useState('')
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
-  const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false)
+  const [isAssessmentDialogOpen, setIsAssessmentDialogOpen] = useState(false)
 
   const { deploymentAssessment, isDeploymentAssessmentLoading, isDeploymentAssessmentError } =
     useGetDeploymentAssessment(deploymentAssessmentId)
@@ -82,7 +82,7 @@ export default function ReleaseReview() {
               <Typography variant='h6' component='h1' color='primary'>
                 {deploymentAssessment ? `Reviewing deployment assessment ${deploymentAssessment.name}` : 'Loading...'}
               </Typography>
-              <Button onClick={() => setIsReleaseDialogOpen(true)}>View full release</Button>
+              <Button onClick={() => setIsAssessmentDialogOpen(true)}>View full deployment assessment</Button>
             </Stack>
             <ReviewWithComment
               onSubmit={handleSubmit}
@@ -108,7 +108,12 @@ export default function ReleaseReview() {
               </Typography>
             </Stack>
           </Stack>
-          <Dialog open={isReleaseDialogOpen} onClose={() => setIsReleaseDialogOpen(false)} maxWidth='md' fullWidth>
+          <Dialog
+            open={isAssessmentDialogOpen}
+            onClose={() => setIsAssessmentDialogOpen(false)}
+            maxWidth='md'
+            fullWidth
+          >
             <DialogContent sx={{ p: 4 }}>
               <EditableDeploymentAssessmentForm
                 deploymentAssessment={deploymentAssessment}

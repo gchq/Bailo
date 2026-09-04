@@ -44,6 +44,9 @@ export default function ReviewWithComment({
   const uiConfig = useContext(UiConfigContext)
 
   function showUndoButton() {
+    if (deploymentAssessmentReview) {
+      return false
+    }
     if (reviewRequest) {
       const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
         (latestReview) => latestReview.role === reviewRequest.role,
@@ -206,6 +209,19 @@ export default function ReviewWithComment({
                 >
                   Approve
                 </Button>
+                {deploymentAssessmentReview && (
+                  <Button
+                    variant='contained'
+                    onClick={() => submitForm(Decision.Reject)}
+                    loading={loading}
+                    data-test='approveReviewButton'
+                    size='small'
+                    disabled={includeDueDate && !dueDate}
+                    color='error'
+                  >
+                    Reject
+                  </Button>
+                )}
               </Stack>
             </Stack>
           </Stack>

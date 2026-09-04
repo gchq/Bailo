@@ -6,6 +6,7 @@ import {
   DecisionKeys,
   EntryInterface,
   ReleaseInterface,
+  ReviewKind,
   ReviewKindKeys,
   ReviewRequestInterface,
 } from 'types/types'
@@ -211,20 +212,22 @@ export async function postNotifyReviewer(reviewId: string) {
   })
 }
 
-export function useGetReviewsForDeploymentAssessment(deploymentAssessmentId: string | undefined) {
-  const queryParams = {
-    ...(deploymentAssessmentId !== undefined && { deploymentAssessmentId }),
-  }
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      reviews: ReviewRequestInterface[]
-    },
-    ErrorInfo
-  >(`/api/v2/reviews?${qs.stringify(queryParams)}`, fetcher)
+export function useGetReviewsForDeploymentAssessment(deploymentAssessmentId?: string) {
+  const queryParams = deploymentAssessmentId
+    ? {
+        deploymentAssessmentId,
+        kind: ReviewKind.DEPLOYMENTS,
+      }
+    : undefined
+
+  const { data, isLoading, error, mutate } = useSWR<{ reviews: ReviewRequestInterface[] }, ErrorInfo>(
+    queryParams ? `/api/v2/reviews?${qs.stringify(queryParams)}` : null,
+    fetcher,
+  )
 
   return {
     mutateReviews: mutate,
-    reviews: data ? data.reviews : emptyReviewList,
+    reviews: data?.reviews ?? emptyReviewList,
     isReviewsLoading: isLoading,
     isReviewsError: error,
   }

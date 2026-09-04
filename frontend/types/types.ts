@@ -583,6 +583,7 @@ export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
   Undo: 'undo',
+  Reject: 'reject',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
