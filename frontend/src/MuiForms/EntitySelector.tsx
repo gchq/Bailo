@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
 import UserDisplay from 'src/common/UserDisplay'
@@ -18,12 +18,16 @@ import MessageAlert from '../MessageAlert'
 interface EntitySelectorProps {
   label?: string
   required?: boolean
-  value: string[] | string
+  value: Array<string | null | undefined> | string | null | undefined
   onChange: (newValue: string[] | string) => void
   registry?: Registry
   rawErrors?: string[]
   id: string
   schema: RJSFSchema
+}
+
+function isEmptyEntry(entry: string | null | undefined): boolean {
+  return entry === null || entry === undefined || entry === ''
 }
 
 export function getEntitySelectorValue(
@@ -84,10 +88,32 @@ export default function EntitySelector({
 
   const normalisedValue = useMemo<string[] | string>(() => {
     if (!isMultiple) {
-      return currentValue
+      return typeof currentValue === 'string' ? currentValue : ''
     }
-    return (Array.isArray(currentValue) ? currentValue : [currentValue]).filter(Boolean)
+    return (Array.isArray(currentValue) ? currentValue : [currentValue]).filter(
+      (entry): entry is string => typeof entry === 'string' && entry.length > 0,
+    )
   }, [isMultiple, currentValue])
+
+  // RJSF pre-populates required, array fields with [null] when minItems: 1.
+  // This normalises to '' in this case
+  useEffect(() => {
+    if (isMultiple) {
+      if (!Array.isArray(currentValue)) {
+        return
+      }
+      if (!currentValue.some(isEmptyEntry)) {
+        return
+      }
+      const cleaned = currentValue.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+      onChange(cleaned)
+      return
+    }
+
+    if (currentValue === null || currentValue === undefined) {
+      onChange('')
+    }
+  }, [isMultiple, currentValue, onChange])
 
   const theme = useTheme()
 
@@ -166,7 +192,7 @@ export default function EntitySelector({
       compare={compare}
       value={normalisedValue}
       formatter={formatEntity}
-      hasValue={Array.isArray(normalisedValue) ? normalisedValue.length > 0 : normalisedValue !== undefined}
+      hasValue={Array.isArray(normalisedValue) ? normalisedValue.length > 0 : normalisedValue.length > 0}
     >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>

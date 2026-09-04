@@ -74,11 +74,11 @@ export function DraftBanner({
               </Button>
               <ConfirmationDialogue
                 open={open}
-                title='Delete Release'
+                title='Delete Confirmation'
                 onConfirm={handlePublish}
                 onCancel={() => setOpen(false)}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to publish this release? This is irreversible.'}
+                dialogMessage={'Are you sure you want to publish this? This is irreversible.'}
                 confirmLoading={isLoading}
               />
             </>

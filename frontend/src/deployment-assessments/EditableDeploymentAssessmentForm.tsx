@@ -2,13 +2,12 @@ import Close from '@mui/icons-material/Close'
 import Info from '@mui/icons-material/Info'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material'
+import { getChangedFields } from '@rjsf/utils'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { deleteDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useGetSchema } from 'actions/schema'
 import cloneDeep from 'lodash-es/cloneDeep'
-import { getChangedFields } from 'node_modules/@rjsf/utils/lib'
-import { KeyedMutator } from 'node_modules/swr/dist/index/index.mjs'
-import { Fragment, useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
 import LabelledInput from 'src/common/LabelledInput'
@@ -20,6 +19,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
+import { KeyedMutator } from 'swr'
 import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
@@ -92,13 +92,15 @@ export default function EditableDeploymentAssessmentForm({
         return
       }
 
-      for (const step of splitSchema.steps) {
-        const isValid = validateForm(step)
+      if (!deploymentAssessment.draft) {
+        for (const step of splitSchema.steps) {
+          const isValid = validateForm(step)
 
-        if (!isValid) {
-          setErrorMessage('Please make sure that all sections have been completed.')
-          setIsLoading(false)
-          return
+          if (!isValid) {
+            setErrorMessage('Please make sure that all sections have been completed.')
+            setIsLoading(false)
+            return
+          }
         }
       }
 
@@ -137,6 +139,7 @@ export default function EditableDeploymentAssessmentForm({
 
   function handleCancel() {
     onIsEditChange(false)
+    setNewName(deploymentAssessment.name)
     setErrorMessage('')
     resetForm()
   }
