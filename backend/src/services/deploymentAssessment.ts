@@ -27,7 +27,7 @@ import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
-import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
+import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
@@ -202,7 +202,6 @@ export async function getDeploymentAssessmentById(
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
-
   return deploymentAssessment
 }
 
@@ -231,13 +230,19 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  const responses = await getResponses(deploymentAssessment._id)
-  const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
+  const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+  const responses = await ResponseModel.find({ parentId: latestReview._id })
+
+  const latestDecision = responses
+    .filter((r) => r.kind === ResponseKind.Review)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .at(0)?.decision as DecisionKeys | undefined
+  const state = deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
 
   return {
     deploymentAssessment,
     responses,
-    state: deriveDeploymentAssessmentState(deploymentAssessment, latestDecision),
+    state,
   }
 }
 

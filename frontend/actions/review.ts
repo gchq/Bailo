@@ -6,6 +6,7 @@ import {
   DecisionKeys,
   EntryInterface,
   ReleaseInterface,
+  ReviewKind,
   ReviewKindKeys,
   ReviewRequestInterface,
 } from 'types/types'
@@ -13,6 +14,13 @@ import {
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
+
+function toSafePathId(value: string): string {
+  if (!/^[A-Za-z0-9-]+$/.test(value)) {
+    throw new Error('Invalid deployment assessment ID')
+  }
+  return encodeURIComponent(value)
+}
 
 const REVIEW_ID_PATTERN = /^[A-Za-z0-9_-]+$/
 function isValidReviewId(reviewId: string) {
@@ -37,8 +45,8 @@ export function useHeadReviewRequestsForUser(open?: boolean, kind?: ReviewKindKe
   }
 }
 
-export function useGetReviewRequestsForUser(open?: boolean) {
-  const queryParams = { ...(open !== undefined && { open }) }
+export function useGetReviewRequestsForUser(open?: boolean, kind?: ReviewKindKeys) {
+  const queryParams = { ...(open !== undefined && { open }), ...(kind !== undefined && { kind }) }
   const { data, isLoading, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
@@ -201,5 +209,53 @@ export async function postNotifyReviewer(reviewId: string) {
   return fetch(`/api/v3/review/${reviewId}/notify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+export function useGetReviewsForDeploymentAssessment(deploymentAssessmentId?: string) {
+  const queryParams = deploymentAssessmentId
+    ? {
+        deploymentAssessmentId,
+        kind: ReviewKind.DEPLOYMENTS,
+      }
+    : undefined
+
+  const { data, isLoading, error, mutate } = useSWR<{ reviews: ReviewRequestInterface[] }, ErrorInfo>(
+    queryParams ? `/api/v2/reviews?${qs.stringify(queryParams)}` : null,
+    fetcher,
+  )
+
+  return {
+    mutateReviews: mutate,
+    reviews: data?.reviews ?? emptyReviewList,
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+  }
+}
+
+type postDeploymentAssessmentReviewResponseParams = {
+  deploymentAssessmentId: string
+  decision: DecisionKeys
+  comment: string
+}
+export async function postDeploymentAssessmentReviewResponse({
+  deploymentAssessmentId,
+  comment,
+  decision,
+}: postDeploymentAssessmentReviewResponseParams) {
+  const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
+  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/review`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment, decision }),
+  })
+}
+
+export async function postDeploymentAssessmentReviewComment(deploymentAssessmentId: string, comment: string) {
+  const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
+  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/comments`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
   })
 }

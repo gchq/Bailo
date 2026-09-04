@@ -2,7 +2,7 @@ import { Box, Button, Stack } from '@mui/material'
 import { postAccessRequestComment } from 'actions/accessRequest'
 import { postReleaseComment } from 'actions/release'
 import { useGetResponses } from 'actions/response'
-import { useGetReviewRequestsForModel } from 'actions/review'
+import { postDeploymentAssessmentReviewComment, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -59,6 +59,11 @@ export default function ReviewComments({
           return {}
         }
         return { accessRequestId: identifier }
+      case ReviewKind.DEPLOYMENTS:
+        if (!identifier) {
+          return {}
+        }
+        return { deploymentAssessmentId: identifier }
       default:
         return {}
     }
@@ -137,6 +142,15 @@ export default function ReviewComments({
       }
     } else if (kind === ReviewKind.ACCESS && identifier) {
       const res = await postAccessRequestComment(entryId, identifier, newReviewComment)
+      if (res.ok) {
+        mutator()
+        mutateResponses()
+        setNewReviewComment('')
+      } else {
+        setCommentSubmissionError(await getErrorMessage(res))
+      }
+    } else if (kind === ReviewKind.DEPLOYMENTS && identifier) {
+      const res = await postDeploymentAssessmentReviewComment(identifier, newReviewComment)
       if (res.ok) {
         mutator()
         mutateResponses()

@@ -1,3 +1,4 @@
+import Close from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
@@ -133,7 +134,7 @@ export default function ReviewDecisionDisplay({
             >
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
-                spacing={1}
+                spacing={0.5}
                 sx={{
                   alignItems: 'center',
                 }}
@@ -145,15 +146,22 @@ export default function ReviewDecisionDisplay({
                 <span data-test='reviewDecisionDisplayRequestChanges'>
                   {response.decision === Decision.RequestChanges && 'has requested changes'}
                 </span>
+                <span data-test='reviewDecisionRejected'>
+                  {response.decision === Decision.Reject && 'has rejected'}
+                </span>
                 <span>{response.decision === Decision.Undo && 'has undone their review'}</span>
                 <span>{response.decision === Decision.Approve && <Done color='success' fontSize='small' />}</span>
                 <span>
                   {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
                 </span>
                 <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
+                <span>{response.decision === Decision.Reject && <Close color='error' fontSize='small' />}</span>
               </Stack>
-              {response.role && (
+              {response.role && response.role !== 'riskOwner' && (
                 <Typography variant='caption'>as {getRoleDisplayName(response.role, entryRoles)}</Typography>
+              )}
+              {response.role && response.role === 'riskOwner' && (
+                <Typography variant='caption'>as Risk Owner</Typography>
               )}
               <span>
                 {response.outdated && (

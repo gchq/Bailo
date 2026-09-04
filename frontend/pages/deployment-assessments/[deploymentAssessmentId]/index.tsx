@@ -8,9 +8,12 @@ import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import ReviewComments from 'src/reviews/ReviewComments'
+import { ReviewKind } from 'types/types'
 
 export default function DeploymentAssessment() {
   const router = useRouter()
@@ -25,8 +28,12 @@ export default function DeploymentAssessment() {
 
   const [isEdit, setIsEdit] = useState(false)
 
-  const { deploymentAssessment, isDeploymentAssessmentLoading, isDeploymentAssessmentError } =
-    useGetDeploymentAssessment(deploymentAssessmentId)
+  const {
+    deploymentAssessment,
+    isDeploymentAssessmentLoading,
+    isDeploymentAssessmentError,
+    mutateDeploymentAssessment,
+  } = useGetDeploymentAssessment(deploymentAssessmentId)
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
@@ -87,6 +94,7 @@ export default function DeploymentAssessment() {
                   direction={{ sm: 'row', xs: 'column' }}
                   spacing={2}
                   divider={<Divider flexItem orientation='vertical' />}
+                  sx={{ alignItems: 'center' }}
                 >
                   <Link href={backHref}>
                     <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
@@ -108,6 +116,7 @@ export default function DeploymentAssessment() {
                       ariaLabel='copy deployment assessment ID to clipboard'
                     />
                   </Stack>
+                  <AssessmentStateChip assessment={deploymentAssessment} />
                 </Stack>
                 {deploymentAssessment && (
                   <EditableDeploymentAssessmentForm
@@ -116,6 +125,14 @@ export default function DeploymentAssessment() {
                     onIsEditChange={setIsEdit}
                   />
                 )}
+                <ReviewComments
+                  identifier={deploymentAssessment.id}
+                  parentId={deploymentAssessment._id}
+                  kind={ReviewKind.DEPLOYMENTS}
+                  isEdit={isEdit}
+                  mutator={mutateDeploymentAssessment}
+                  entryId={''}
+                />
               </Stack>
             </>
           )}
