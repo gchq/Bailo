@@ -1,23 +1,26 @@
 {
   "name": "@bailo/backend",
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
   "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts",
-    "dev": "nodemon",
-    "copy-templates": "cd src && find . -name '*.hbs' | cpio -pdm ../dist/src",
     "build": "tsc && npm run copy-templates",
-    "test": "vitest",
-    "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings=0",
-    "style": "prettier --write .",
-    "check-style": "prettier --check .",
-    "script": "tsx src/scripts/runScript.ts",
     "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && tsx src/scripts/generateJWKS.ts",
-    "seed": "tsx src/seeds/index.ts"
+    "check-style": "prettier --check .",
+    "copy-templates": "cd src && find . -name '*.hbs' | cpio -pdm ../dist/src",
+    "dev": "nodemon",
+    "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings=0",
+    "script": "tsx src/scripts/runScript.ts",
+    "seed": "tsx src/seeds/index.ts",
+    "start": "tsx src/index.ts",
+    "style": "prettier --write .",
+    "test": "vitest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "overrides": {
+    "mv": "npm:dry-uninstall"
+  },
   "dependencies": {
     "@agendajs/mongo-backend": "^4.0.3",
     "@asteasolutions/zod-to-openapi": "^7.3.4",
@@ -124,8 +127,5 @@
     "vite": "^7.3.2",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.5"
-  },
-  "overrides": {
-    "mv": "npm:dry-uninstall"
   }
 }
