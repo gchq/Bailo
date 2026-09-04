@@ -72,13 +72,14 @@ export function useGetDeploymentAssessment(deploymentId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       deploymentAssessment: DeploymentAssessmentInterface
+      state: DeploymentAssessmentStateKeys
     },
     ErrorInfo
   >(deploymentId ? `/api/v3/deployment-assessments/${deploymentId}` : null, fetcher)
 
   return {
     mutateDeploymentAssessment: mutate,
-    deploymentAssessment: data?.deploymentAssessment,
+    deploymentAssessment: data && { ...data?.deploymentAssessment, state: data?.state },
     isDeploymentAssessmentLoading: isLoading,
     isDeploymentAssessmentError: error,
   }

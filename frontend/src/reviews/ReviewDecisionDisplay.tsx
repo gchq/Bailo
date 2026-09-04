@@ -133,7 +133,7 @@ export default function ReviewDecisionDisplay({
             >
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
-                spacing={1}
+                spacing={0.5}
                 sx={{
                   alignItems: 'center',
                 }}

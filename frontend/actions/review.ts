@@ -37,8 +37,8 @@ export function useHeadReviewRequestsForUser(open?: boolean, kind?: ReviewKindKe
   }
 }
 
-export function useGetReviewRequestsForUser(open?: boolean) {
-  const queryParams = { ...(open !== undefined && { open }) }
+export function useGetReviewRequestsForUser(open?: boolean, kind?: ReviewKindKeys) {
+  const queryParams = { ...(open !== undefined && { open }), ...(kind !== undefined && { kind }) }
   const { data, isLoading, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
@@ -201,5 +201,49 @@ export async function postNotifyReviewer(reviewId: string) {
   return fetch(`/api/v3/review/${reviewId}/notify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+export function useGetReviewsForDeploymentAssessment(deploymentAssessmentId: string | undefined) {
+  const queryParams = {
+    ...(deploymentAssessmentId !== undefined && { deploymentAssessmentId }),
+  }
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      reviews: ReviewRequestInterface[]
+    },
+    ErrorInfo
+  >(`/api/v2/reviews?${qs.stringify(queryParams)}`, fetcher)
+
+  return {
+    mutateReviews: mutate,
+    reviews: data ? data.reviews : emptyReviewList,
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+  }
+}
+
+type postDeploymentAssessmentReviewResponseParams = {
+  deploymentAssessmentId: string
+  decision: DecisionKeys
+  comment: string
+}
+export async function postDeploymentAssessmentReviewResponse({
+  deploymentAssessmentId,
+  comment,
+  decision,
+}: postDeploymentAssessmentReviewResponseParams) {
+  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}/review`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment, decision }),
+  })
+}
+
+export async function postDeploymentAssessmentReviewComment(deploymentAssessmentId: string, comment: string) {
+  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}/comments`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
   })
 }

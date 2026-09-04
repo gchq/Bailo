@@ -619,6 +619,7 @@ export const ReviewKind = {
   ACCESS: 'access',
   RELEASE: 'release',
   LIFECYCLE: 'lifecycle',
+  DEPLOYMENTS: 'deployment_assessment',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
@@ -637,18 +638,32 @@ export type ReviewRequestInterface =
       dueDate?: never
       semver?: never
       accessRequestId: string
+      deploymentAssessment?: never
+      deploymentAssessmentId?: never
     } & PartialReviewRequestInterface)
   | ({
       kind: 'release'
       dueDate?: never
       semver: string
       accessRequestId?: never
+      deploymentAssessment?: never
+      deploymentAssessmentId?: never
     } & PartialReviewRequestInterface)
   | ({
       kind: 'lifecycle'
       dueDate: Date
       semver?: never
       accessRequestId?: never
+      deploymentAssessment?: never
+      deploymentAssessmentId?: never
+    } & PartialReviewRequestInterface)
+  | ({
+      kind: 'deployment_assessment'
+      dueDate?: never
+      semver?: never
+      accessRequestId?: never
+      deploymentAssessmentId: string
+      deploymentAssessment: DeploymentAssessmentInterface
     } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {
@@ -1168,6 +1183,7 @@ export interface DeploymentAssessmentMetadata {
 }
 
 export interface DeploymentAssessmentInterface {
+  _id: string
   id: string
   schemaId: string
   name: string
@@ -1176,6 +1192,7 @@ export interface DeploymentAssessmentInterface {
   createdBy: string
   createdAt: Date
   updatedAt: Date
+  state: DeploymentAssessmentStateKeys
 }
 
 export const DeploymentAssessmentState = {

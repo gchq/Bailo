@@ -202,7 +202,6 @@ export async function getDeploymentAssessmentById(
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
-
   return deploymentAssessment
 }
 
@@ -232,12 +231,45 @@ export async function getDeploymentAssessmentDetails(
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
   const responses = await getResponses(deploymentAssessment._id)
-  const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
+
+  const latestDecision = await ReviewModel.aggregate<{ _id: string; decision?: DecisionKeys }>([
+    {
+      $match: {
+        deploymentAssessmentId: deploymentAssessment.id,
+        kind: ReviewKind.DeploymentAssessment,
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        let: { reviewId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$parentId', '$$reviewId'] },
+              kind: ResponseKind.Review,
+            },
+          },
+          { $sort: { createdAt: -1 } },
+        ],
+        as: 'responses',
+      },
+    },
+    { $set: { responses: { $slice: ['$responses', 1] } } },
+    { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
+    { $sort: { 'responses.createdAt': -1 } },
+    { $group: { _id: '$deploymentAssessmentId', decision: { $first: '$responses.decision' } } },
+  ])
+  const decisionsByAssessmentId = new Map(latestDecision.map(({ _id, decision }) => [_id, decision]))
+  const state = deriveDeploymentAssessmentState(
+    deploymentAssessment,
+    decisionsByAssessmentId.get(deploymentAssessment.id),
+  )
 
   return {
     deploymentAssessment,
     responses,
-    state: deriveDeploymentAssessmentState(deploymentAssessment, latestDecision),
+    state,
   }
 }
 

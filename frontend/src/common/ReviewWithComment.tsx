@@ -19,9 +19,10 @@ type ReviewWithCommentProps = {
   onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate: Dayjs | null) => void
   loading?: boolean
   reviews: ReviewRequestInterface[]
-  modelId: string
+  modelId?: string
   includeDueDate?: boolean
   hideRequestChangesButton?: boolean
+  deploymentAssessmentReview?: boolean
 }
 
 export default function ReviewWithComment({
@@ -31,6 +32,7 @@ export default function ReviewWithComment({
   modelId,
   includeDueDate = false,
   hideRequestChangesButton = false,
+  deploymentAssessmentReview = false,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
@@ -110,24 +112,26 @@ export default function ReviewWithComment({
         )}
         {entryRoles.length > 0 && (
           <Stack spacing={2}>
-            <Autocomplete
-              sx={{ pt: 1 }}
-              open={selectOpen}
-              onOpen={() => {
-                setSelectOpen(true)
-              }}
-              onClose={() => {
-                setSelectOpen(false)
-              }}
-              isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
-                option.role === value.role
-              }
-              onChange={onChange}
-              value={reviewRequest}
-              getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
-              options={reviews}
-              renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
-            />
+            {!deploymentAssessmentReview && (
+              <Autocomplete
+                sx={{ pt: 1 }}
+                open={selectOpen}
+                onOpen={() => {
+                  setSelectOpen(true)
+                }}
+                onClose={() => {
+                  setSelectOpen(false)
+                }}
+                isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
+                  option.role === value.role
+                }
+                onChange={onChange}
+                value={reviewRequest}
+                getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
+                options={reviews}
+                renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
+              />
+            )}
             <TextField
               size='small'
               minRows={4}
