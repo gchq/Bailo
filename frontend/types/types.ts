@@ -1179,23 +1179,36 @@ export interface DeploymentAssessmentInterface {
 }
 
 export const DeploymentAssessmentState = {
-  NeedsReview: 'needs_review',
-  Rejected: 'rejected',
-  ChangesRequested: 'changes_requested',
-  Approved: 'approved',
+  NEEDS_REVIEW: 'needs_review',
+  REJECTED: 'rejected',
+  CHANGES_REQUESTED: 'changes_requested',
+  APPROVED: 'approved',
 } as const
+
 export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
 
-export interface DeploymentAssessmentSummary {
+interface DeploymentAssessmentSummaryBase {
   id: string
   schemaId: string
   name: string
-  owner?: string[]
-  models?: string[]
-  justification?: string
-  draft: boolean
   createdBy: string
   createdAt: string
-  state?: DeploymentAssessmentStateKeys
-  reviewedAt?: string
 }
+
+interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: true
+  owner?: string | string[]
+  models?: string[]
+  justification?: string
+  state?: never
+}
+
+interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: false
+  owner: string | string[]
+  models: string[]
+  justification: string
+  state: DeploymentAssessmentStateKeys
+}
+
+export type DeploymentAssessmentSummary = DraftDeploymentAssessmentSummary | PublishedDeploymentAssessmentSummary

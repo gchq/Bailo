@@ -6,6 +6,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
 import NeedsAction from 'src/deployment-assessments/NeedsAction'
 
 export default function Deployments() {
@@ -23,7 +24,7 @@ export default function Deployments() {
         view: <NeedsAction />,
       },
       { title: 'My assessments', path: 'my-assessments', view: <></> },
-      { title: 'All assessments', path: 'all-assessments', view: <></> },
+      { title: 'All assessments', path: 'all-assessments', view: <DeploymentAssessmentsList /> },
     ],
     [deploymentAssessments.length],
   )

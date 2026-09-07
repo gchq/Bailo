@@ -2,6 +2,7 @@ import qs from 'querystring'
 import useSWR from 'swr'
 import {
   DeploymentAssessmentInterface,
+  DeploymentAssessmentStateKeys,
   DeploymentAssessmentSummary,
   DeploymentAssessmentUserPermissions,
 } from 'types/types'
@@ -9,23 +10,78 @@ import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyDeploymentAssessmentList: DeploymentAssessmentSummary[] = []
 
-export interface DeploymentAssessmentSearchParams {
+export interface DeploymentAssessmentFilters {
+  schemaId?: string
+  modelIds?: string[]
+  riskOwner?: string
+  createdBy?: string
+  createdAfter?: string
+  createdBefore?: string
+  draft?: boolean
+  search?: string
+  state?: DeploymentAssessmentStateKeys
   needsAction?: boolean
 }
 
-export function useGetDeploymentAssessments({ needsAction }: DeploymentAssessmentSearchParams = {}) {
-  // Omit rather than pass undefined, which stringifies to an empty value the API rejects
-  const queryParams = { ...(needsAction !== undefined && { needsAction }) }
+export function buildDeploymentAssessmentsUrl(filters: DeploymentAssessmentFilters = {}): string {
+  const queryParams: Record<string, string | string[] | boolean> = {}
+
+  if (filters.schemaId) {
+    queryParams.schemaId = filters.schemaId
+  }
+
+  if (filters.modelIds?.length) {
+    queryParams.modelIds = filters.modelIds
+  }
+
+  if (filters.riskOwner) {
+    queryParams.riskOwner = filters.riskOwner
+  }
+
+  if (filters.createdBy) {
+    queryParams.createdBy = filters.createdBy
+  }
+
+  if (filters.createdAfter) {
+    queryParams.createdAfter = filters.createdAfter
+  }
+
+  if (filters.createdBefore) {
+    queryParams.createdBefore = filters.createdBefore
+  }
+
+  if (filters.draft !== undefined) {
+    queryParams.draft = filters.draft
+  }
+
+  if (filters.search) {
+    queryParams.search = filters.search
+  }
+
+  if (filters.state) {
+    queryParams.state = filters.state
+  }
+
+  if (filters.needsAction !== undefined) {
+    queryParams.needsAction = filters.needsAction
+  }
+
+  const queryString = qs.stringify(queryParams)
+
+  return `/api/v3/deployment-assessments${queryString ? `?${queryString}` : ''}`
+}
+
+export function useGetDeploymentAssessments(filters: DeploymentAssessmentFilters = {}, enabled = true) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       deploymentAssessments: DeploymentAssessmentSummary[]
     },
     ErrorInfo
-  >(`/api/v3/deployment-assessments?${qs.stringify(queryParams)}`, fetcher)
+  >(enabled ? buildDeploymentAssessmentsUrl(filters) : null, fetcher)
 
   return {
     mutateDeploymentAssessments: mutate,
-    deploymentAssessments: data ? data.deploymentAssessments : emptyDeploymentAssessmentList,
+    deploymentAssessments: data?.deploymentAssessments ?? emptyDeploymentAssessmentList,
     isDeploymentAssessmentsLoading: isLoading,
     isDeploymentAssessmentsError: error,
   }

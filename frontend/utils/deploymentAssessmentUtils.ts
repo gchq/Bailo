@@ -16,11 +16,11 @@ export function getDeploymentAssessmentDisplayState({
   }
 
   switch (state) {
-    case DeploymentAssessmentState.NeedsReview:
+    case DeploymentAssessmentState.NEEDS_REVIEW:
       return { label: 'Awaiting review', colour: 'default' }
-    case DeploymentAssessmentState.ChangesRequested:
+    case DeploymentAssessmentState.CHANGES_REQUESTED:
       return { label: 'Changes requested', colour: 'warning' }
-    case DeploymentAssessmentState.Rejected:
+    case DeploymentAssessmentState.REJECTED:
       return { label: 'Rejected', colour: 'error' }
     default:
       return { label: 'Approved', colour: 'default' }
@@ -29,10 +29,10 @@ export function getDeploymentAssessmentDisplayState({
 
 const deploymentAssessmentStatuses: Pick<DeploymentAssessmentSummary, 'draft' | 'state'>[] = [
   { draft: true },
-  { draft: false, state: DeploymentAssessmentState.NeedsReview },
-  { draft: false, state: DeploymentAssessmentState.ChangesRequested },
-  { draft: false, state: DeploymentAssessmentState.Rejected },
-  { draft: false, state: DeploymentAssessmentState.Approved },
+  { draft: false, state: DeploymentAssessmentState.NEEDS_REVIEW },
+  { draft: false, state: DeploymentAssessmentState.CHANGES_REQUESTED },
+  { draft: false, state: DeploymentAssessmentState.REJECTED },
+  { draft: false, state: DeploymentAssessmentState.APPROVED },
 ]
 
 export const deploymentAssessmentStatusOrder = deploymentAssessmentStatuses.map(
