@@ -2,12 +2,12 @@ import { Box, Chip, Container, Typography } from '@mui/material'
 import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
 import { useEffect, useMemo, useState } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
-import { SwimLaneColumn } from 'src/deployments/components/SwimLaneColumn'
+import { SwimLaneColumn } from 'src/deployment-assessments/components/SwimLaneColumn'
 import {
   getHiddenDeploymentAssessmentColumns,
   saveHiddenDeploymentAssessmentColumns,
 } from 'src/storage/userPreferences'
-import { DeploymentAssessmentInterface, DeploymentAssessmentState } from 'types/types'
+import { DeploymentAssessmentState, DeploymentAssessmentSummary } from 'types/types'
 
 const COLUMNS = [
   { key: 'in_draft', label: 'In Draft' },
@@ -17,7 +17,7 @@ const COLUMNS = [
   { key: DeploymentAssessmentState.Approved, label: 'Approved' },
 ]
 
-function getColumnKey(assessment: DeploymentAssessmentInterface): string {
+function getColumnKey(assessment: DeploymentAssessmentSummary): string {
   return assessment.draft ? 'in_draft' : assessment.state
 }
 
@@ -32,11 +32,10 @@ export default function MyAssessments() {
   }, [hiddenColumnKeys])
 
   const columns = useMemo(() => {
-    const grouped = new Map<string, DeploymentAssessmentInterface[]>(COLUMNS.map((column) => [column.key, []]))
+    const grouped = new Map<string, DeploymentAssessmentSummary[]>(COLUMNS.map((column) => [column.key, []]))
     for (const assessment of deploymentAssessments ?? []) {
       grouped.get(getColumnKey(assessment))?.push(assessment)
     }
-
     return COLUMNS.map((column) => ({
       ...column,
       items: grouped.get(column.key) ?? [],

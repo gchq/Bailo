@@ -1,13 +1,20 @@
 import { Box, Card, CardContent, Typography } from '@mui/material'
 import UserDisplay from 'src/common/UserDisplay'
-import { DeploymentAssessmentInterface } from 'types/types'
+import { DeploymentAssessmentSummary } from 'types/types'
 
-interface DeploymentAssessmentCardProps {
-  assessment: DeploymentAssessmentInterface
+interface SwimLaneAssessmentCardProps {
+  assessment: DeploymentAssessmentSummary
 }
 
-export function DeploymentAssessmentCard({ assessment }: DeploymentAssessmentCardProps) {
-  const owner = assessment.owner?.[0]
+function getFirstOwner(owner: string | string[] | undefined): string {
+  if (!owner) {
+    return 'Unknown'
+  }
+  return Array.isArray(owner) ? owner[0] : owner
+}
+
+export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardProps) {
+  const owner = getFirstOwner(assessment.owner)
   const deployer = assessment.createdBy
 
   return (

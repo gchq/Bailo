@@ -5,7 +5,8 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
-import MyAssessments from 'src/deployments/MyAssessments'
+import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
+import MyAssessments from 'src/deployment-assessments/MyAssessments'
 
 export default function Deployments() {
   const router = useRouter()
@@ -14,7 +15,7 @@ export default function Deployments() {
     () => [
       { title: 'Needs action', path: 'needs-action', view: <></> },
       { title: 'My assessments', path: 'my-assessments', view: <MyAssessments /> },
-      { title: 'All assessments', path: 'all-assessments', view: <></> },
+      { title: 'All assessments', path: 'all-assessments', view: <DeploymentAssessmentsList /> },
     ],
     [],
   )

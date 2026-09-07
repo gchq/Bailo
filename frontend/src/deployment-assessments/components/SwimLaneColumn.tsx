@@ -1,12 +1,12 @@
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { DeploymentAssessmentCard } from 'src/deployments/components/DeploymentAssessmentCard'
-import { DeploymentAssessmentInterface } from 'types/types'
+import { SwimLaneAssessmentCard } from 'src/deployment-assessments/components/SwimLaneAssessmentCard'
+import { DeploymentAssessmentSummary } from 'types/types'
 
 interface SwimLaneColumnProps {
   title: string
-  assessments: DeploymentAssessmentInterface[]
+  assessments: DeploymentAssessmentSummary[]
   onHide: () => void
 }
 
@@ -45,7 +45,7 @@ export function SwimLaneColumn({ title, assessments, onHide }: SwimLaneColumnPro
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, pt: 1 }}>
         {assessments.map((assessment) => (
-          <DeploymentAssessmentCard key={assessment.id} assessment={assessment} />
+          <SwimLaneAssessmentCard key={assessment.id} assessment={assessment} />
         ))}
         {assessments.length === 0 && (
           <Typography component='p' variant='caption' color='text.secondary'>

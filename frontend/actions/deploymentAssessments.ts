@@ -1,59 +1,68 @@
 import useSWR from 'swr'
-import { DeploymentAssessmentInterface, DeploymentAssessmentUserPermissions } from 'types/types'
+import {
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentStateKeys,
+  DeploymentAssessmentSummary,
+  DeploymentAssessmentUserPermissions,
+} from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
-export interface DeploymentAssessmentsQuery {
+const emptyDeploymentAssessmentList: DeploymentAssessmentSummary[] = []
+
+export interface DeploymentAssessmentFilters {
   schemaId?: string
-  modelIds?: string | string[]
+  modelIds?: string[]
   riskOwner?: string
   createdBy?: string
   createdAfter?: string
   createdBefore?: string
   draft?: boolean
   search?: string
-  state?: string
+  state?: DeploymentAssessmentStateKeys
 }
 
-function buildDeploymentAssessmentsQueryString(query?: DeploymentAssessmentsQuery): string {
-  if (!query) {
-    return ''
+export function buildDeploymentAssessmentsUrl(filters: DeploymentAssessmentFilters): string {
+  const query = new URLSearchParams()
+
+  if (filters.schemaId) {
+    query.set('schemaId', filters.schemaId)
+  }
+  filters.modelIds?.forEach((modelId) => query.append('modelIds', modelId))
+  if (filters.riskOwner) {
+    query.set('riskOwner', filters.riskOwner)
+  }
+  if (filters.createdBy) {
+    query.set('createdBy', filters.createdBy)
+  }
+  if (filters.createdAfter) {
+    query.set('createdAfter', filters.createdAfter)
+  }
+  if (filters.createdBefore) {
+    query.set('createdBefore', filters.createdBefore)
+  }
+  if (filters.draft !== undefined) {
+    query.set('draft', String(filters.draft))
+  }
+  if (filters.search) {
+    query.set('search', filters.search)
+  }
+  if (filters.state) {
+    query.set('state', filters.state)
   }
 
-  const params = new URLSearchParams()
-
-  Object.entries(query).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === '') {
-      return
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach((item) => {
-        if (item !== undefined && item !== null && item !== '') {
-          params.append(key, String(item))
-        }
-      })
-    } else {
-      params.append(key, String(value))
-    }
-  })
-
-  const queryString = params.toString()
-  return queryString ? `?${queryString}` : ''
+  const queryString = query.toString()
+  return `/api/v3/deployment-assessments${queryString ? `?${queryString}` : ''}`
 }
 
-export function useGetDeploymentAssessments(query?: DeploymentAssessmentsQuery) {
-  const queryString = buildDeploymentAssessmentsQueryString(query)
-
+export function useGetDeploymentAssessments(filters: DeploymentAssessmentFilters = {}, enabled = true) {
   const { data, isLoading, error, mutate } = useSWR<
-    {
-      deploymentAssessments: DeploymentAssessmentInterface[]
-    },
+    { deploymentAssessments: DeploymentAssessmentSummary[] },
     ErrorInfo
-  >(`/api/v3/deployment-assessments${queryString}`, fetcher)
+  >(enabled ? buildDeploymentAssessmentsUrl(filters) : null, fetcher)
 
   return {
     mutateDeploymentAssessments: mutate,
-    deploymentAssessments: data?.deploymentAssessments ?? [],
+    deploymentAssessments: data?.deploymentAssessments ?? emptyDeploymentAssessmentList,
     isDeploymentAssessmentsLoading: isLoading,
     isDeploymentAssessmentsError: error,
   }
@@ -92,4 +101,10 @@ export function useGetCurrentUserPermissionsForDeploymentAssessment(deploymentAs
     isDeploymentAssessmentsUserPermissionsLoading: isLoading,
     isDeploymentAssessmentsUserPermissionsError: error,
   }
+}
+
+export function deleteDeploymentAssessment(deploymentAssessmentId: string) {
+  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}`, {
+    method: 'delete',
+  })
 }

@@ -1188,3 +1188,29 @@ export interface DeploymentAssessmentInterface {
   createdAt: Date
   updatedAt: Date
 }
+
+interface DeploymentAssessmentSummaryBase {
+  id: string
+  schemaId: string
+  name: string
+  createdBy: string
+  createdAt: string
+}
+
+interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: true
+  owner?: string | string[]
+  models?: string[]
+  justification?: string
+  state?: never
+}
+
+interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: false
+  owner: string | string[]
+  models: string[]
+  justification: string
+  state: DeploymentAssessmentStateKeys
+}
+
+export type DeploymentAssessmentSummary = DraftDeploymentAssessmentSummary | PublishedDeploymentAssessmentSummary
