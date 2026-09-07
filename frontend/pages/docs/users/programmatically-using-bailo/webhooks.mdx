@@ -49,6 +49,7 @@ A Bailo model's webhook can be triggered by the following events:
 - **createReviewResponse** - Fires when a reviewer submits a response (approval or change request)
 - **createAccessRequest** - Fires when a user submits an access request for the model
 - **importModel** - Fires when a mirrored model completes an import of all data and artefacts.
+- **scanComplete** - Fires after all configured scanners finish scanning a file or all layers of a Docker image.
 
 ## Request format
 
@@ -121,6 +122,36 @@ The body of the webhook's request varies depending on the type of event.
   "createdBy": "user",
   "createdAt": "2025-01-21T12:00:00.000Z",
   "updatedAt": "2025-01-21T12:00:00.000Z"
+}
+```
+
+### scanComplete
+
+The scan completion payload includes final scanner states and summaries. Raw scanner output is not included. For Docker
+images, each result includes the layer digest so results can be associated with the layer that was scanned.
+
+```json
+{
+  "event": "scanComplete",
+  "description": "Scan completed for file model.bin",
+  "scan": {
+    "modelId": "model-abc123",
+    "artefactKind": "file",
+    "artefact": {
+      "id": "0123456789abcdef01234567",
+      "name": "model.bin"
+    },
+    "results": [
+      {
+        "toolName": "ClamAV",
+        "scannerVersion": "1.4.3",
+        "state": "complete",
+        "summary": [],
+        "lastRunAt": "2026-09-07T09:00:00.000Z",
+        "artefactKind": "file"
+      }
+    ]
+  }
 }
 ```
 
