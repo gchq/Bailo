@@ -1,9 +1,21 @@
 import BlockOutlined from '@mui/icons-material/BlockOutlined'
 import Done from '@mui/icons-material/Done'
 import ErrorIcon from '@mui/icons-material/Error'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import HourglassTop from '@mui/icons-material/HourglassTop'
 import Warning from '@mui/icons-material/Warning'
-import { Chip, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Chip,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { ReactElement } from 'react'
 import { ArtefactScanState, ClamAVSummary, ModelScanSummary, ScanResultInterface } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
@@ -18,7 +30,7 @@ interface ScanResultDetailProps {
  */
 export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) {
   const hasFindings = !!scanResult.summary && scanResult.summary.length > 0
-  const { state, toolName, scannerVersion, lastRunAt, summary } = scanResult
+  const { state, toolName, scannerVersion, lastRunAt, summary, additionalInfo } = scanResult
 
   const renderHeader = (): ReactElement => {
     if (hasFindings) {
@@ -132,6 +144,31 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
         <List sx={{ listStyleType: 'disc', pl: 2, py: 0 }}>
           {summary.map((vulnerability) => renderFindingItem(vulnerability))}
         </List>
+      )}
+      {additionalInfo && (
+        <Accordion disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+            <Typography sx={{ fontWeight: 'bold' }}>Detailed scanner output</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ px: 0, pt: 0 }}>
+            <Box
+              component='pre'
+              sx={{
+                bgcolor: 'action.hover',
+                borderRadius: 1,
+                m: 0,
+                maxHeight: 320,
+                maxWidth: 640,
+                overflow: 'auto',
+                overflowWrap: 'anywhere',
+                p: 1,
+                whiteSpace: 'pre-wrap',
+              }}
+            >
+              {JSON.stringify(additionalInfo, null, 2)}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
       )}
     </Stack>
   )
