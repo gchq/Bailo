@@ -517,15 +517,33 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   if (params.draft !== undefined) {
     query.draft = params.draft
   }
+
+  query.$and = []
+
   if (params.search) {
-    const search = { $regex: escapeRegExp(params.search), $options: 'i' }
-    query.$and = [{ $or: [{ name: search }, { 'metadata.overview.justification': search }] }]
+    const search = {
+      $regex: escapeRegExp(params.search),
+      $options: 'i',
+    }
+
+    query.$and.push({
+      $or: [{ name: search }, { 'metadata.overview.justification': search }],
+    })
   }
-  if (params.needsAction) {
-    query.$or = [
-      { 'metadata.overview.riskOwner': { $in: [toEntity('user', user.dn), user.dn] } },
-      { createdBy: user.dn },
+
+  if (params.needsAction !== undefined) {
+    const actionConditions = [
+      {
+        'metadata.overview.riskOwner': {
+          $in: [toEntity('user', user.dn), user.dn],
+        },
+      },
+      {
+        createdBy: user.dn,
+      },
     ]
+
+    query.$and.push(params.needsAction ? { $or: actionConditions } : { $nor: actionConditions })
   }
 
   const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })

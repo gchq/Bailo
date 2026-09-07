@@ -1,51 +1,23 @@
 import { Stack } from '@mui/material'
 import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import ChipSelector from 'src/common/ChipSelector'
+import { useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import renderQueryState from 'src/common/renderQueryState'
-import DeploymentAssessmentItem from 'src/deployment-assessments/DeploymentAssessmentItem'
-import { DeploymentAssessmentSummary } from 'types/types'
-import { deploymentAssessmentStatusOrder, getDeploymentAssessmentDisplayState } from 'utils/deploymentAssessmentUtils'
-
-type PaginatedDeploymentAssessment = DeploymentAssessmentSummary & { key: string }
+import DeploymentAssessmentSummaryCard from 'src/deployment-assessments/DeploymentAssessmentSummaryCard'
+import { DeploymentAssessmentStateKeys, DeploymentAssessmentSummary } from 'types/types'
 
 export default function NeedsAction() {
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
+  const [selectedStatus, setSelectedStatus] = useState<DeploymentAssessmentStateKeys>()
 
   const { deploymentAssessments, isDeploymentAssessmentsLoading, isDeploymentAssessmentsError } =
-    useGetDeploymentAssessments({ needsAction: true })
+    useGetDeploymentAssessments({ needsAction: true, state: selectedStatus })
 
-  const statusOptions = useMemo(() => {
-    const presentStatuses = new Set(
-      deploymentAssessments.map(
-        (deploymentAssessment) => getDeploymentAssessmentDisplayState(deploymentAssessment).label,
-      ),
-    )
-    return deploymentAssessmentStatusOrder.filter((status) => presentStatuses.has(status))
-  }, [deploymentAssessments])
-
-  useEffect(() => {
-    setSelectedStatuses((statuses) => {
-      const availableStatuses = statuses.filter((status) => statusOptions.includes(status))
-      return availableStatuses.length === statuses.length ? statuses : availableStatuses
-    })
-  }, [statusOptions])
-
-  const filteredDeploymentAssessments = useMemo(
-    () =>
-      deploymentAssessments.filter(
-        (deploymentAssessment) =>
-          selectedStatuses.length === 0 ||
-          selectedStatuses.includes(getDeploymentAssessmentDisplayState(deploymentAssessment).label),
-      ),
-    [deploymentAssessments, selectedStatuses],
-  )
-
-  // Stable identity, so Paginate's memoised list is not rebuilt on every render
-  const renderDeploymentAssessment = useCallback(
-    ({ data }: { data: PaginatedDeploymentAssessment }) => <DeploymentAssessmentItem deploymentAssessment={data} />,
-    [],
+  const renderDeploymentAssessment = ({ data }: { data: DeploymentAssessmentSummary & { key: string } }) => (
+    <DeploymentAssessmentSummaryCard
+      assessment={data}
+      selectedState={selectedStatus}
+      onSelectedStateChange={() => setSelectedStatus}
+    />
   )
 
   const queryState = renderQueryState([isDeploymentAssessmentsError], isDeploymentAssessmentsLoading)
@@ -55,29 +27,12 @@ export default function NeedsAction() {
 
   return (
     <Stack spacing={1}>
-      {statusOptions.length > 1 && (
-        <div>
-          <ChipSelector
-            label='Status'
-            multiple
-            options={statusOptions}
-            selectedChips={selectedStatuses}
-            onChange={setSelectedStatuses}
-            size='small'
-            chipTooltipTitle={(status) => `Filter by status: ${status}`}
-          />
-        </div>
-      )}
       <Paginate
-        list={filteredDeploymentAssessments.map((deploymentAssessment) => ({
+        list={deploymentAssessments.map((deploymentAssessment) => ({
           key: deploymentAssessment.id,
           ...deploymentAssessment,
         }))}
-        emptyListText={
-          selectedStatuses.length > 0
-            ? 'No deployment assessments match the selected statuses'
-            : 'No deployment assessments need your action'
-        }
+        emptyListText={'No deployment assessments need your action'}
         sortingProperties={[
           { value: 'createdAt', title: 'Date created', iconKind: 'date' },
           { value: 'name', title: 'Name', iconKind: 'text' },

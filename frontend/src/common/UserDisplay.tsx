@@ -3,14 +3,13 @@ import Error from '@mui/icons-material/Error'
 import Label from '@mui/icons-material/Label'
 import UserIcon from '@mui/icons-material/Person'
 import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
-import { useGetCurrentUser, useGetUserInformation } from 'actions/user'
+import { useGetUserInformation } from 'actions/user'
 import { MouseEvent, useMemo, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
 import EntityIcon from 'src/entry/EntityIcon'
 import { EntityKind } from 'types/types'
-import { isCurrentUserEntity } from 'utils/entityUtils'
 
 export type UserInformation = {
   name?: string
@@ -27,7 +26,6 @@ export type UserDisplayProps = {
   displayAsAvatar?: boolean
   showIcon?: boolean
   fontWeight?: string
-  highlightCurrentUser?: boolean
 }
 
 export default function UserDisplay({
@@ -36,19 +34,12 @@ export default function UserDisplay({
   displayAsAvatar = false,
   showIcon = false,
   fontWeight = '500',
-  highlightCurrentUser = false,
 }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const ref = useRef<HTMLDivElement>(null)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     dn.includes(':') ? dn.split(':')[1] : dn,
-  )
-  const { currentUser } = useGetCurrentUser()
-
-  const isCurrentUser = useMemo(
-    () => highlightCurrentUser && isCurrentUserEntity(dn, currentUser),
-    [highlightCurrentUser, dn, currentUser],
   )
 
   const popoverEnter = () => {
@@ -83,7 +74,6 @@ export default function UserDisplay({
         {displayAsAvatar ? (
           <UserAvatar
             entity={{ kind: (dn.split(':')[0] as EntityKind) || EntityKind.USER, id: dn.split(':')[1] || dn }}
-            highlight={isCurrentUser}
           />
         ) : (
           <>
@@ -103,9 +93,7 @@ export default function UserDisplay({
                     }}
                   />
                 )}
-                <Typography sx={{ fontWeight }} color={isCurrentUser ? 'secondary' : undefined}>
-                  {isCurrentUser ? `${userInformation.name} (you)` : userInformation.name}
-                </Typography>
+                <Typography sx={{ fontWeight }}>{userInformation.name}</Typography>
               </Stack>
             ) : (
               <Stack

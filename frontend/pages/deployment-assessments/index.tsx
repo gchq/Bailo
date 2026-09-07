@@ -13,7 +13,6 @@ export default function Deployments() {
   const router = useRouter()
   const uiConfig = useContext(UiConfigContext)
 
-  // Shares an SWR cache key with the tab's own list, so the count costs no extra request
   const { deploymentAssessments } = useGetDeploymentAssessments({ needsAction: true })
 
   const tabs = useMemo(

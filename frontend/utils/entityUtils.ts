@@ -1,17 +1,7 @@
-import { EntityKind, User } from 'types/types'
-
-/** Matches both the entity form (`user:joe`) and a bare distinguished name (`joe`). */
-export const isCurrentUserEntity = (entity: string, currentUser: User | undefined) => {
-  if (!currentUser) {
-    return false
-  }
-
-  const { kind, id } = fromEntity(entity)
-  return entity === currentUser.dn || (kind === EntityKind.USER && id === currentUser.dn)
-}
+import { User } from 'types/types'
 
 export const entitiesIncludesCurrentUser = (entities: string[], currentUser: User | undefined) => {
-  return entities.some((entity) => isCurrentUserEntity(entity, currentUser))
+  return entities.some((entity) => entity.split(':')[1] === currentUser?.dn)
 }
 
 export function toEntity(kind: string, value: string) {
