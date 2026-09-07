@@ -1,0 +1,128 @@
+name: uv Lockfiles
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# jobs define their own permissions
+permissions: {}
+
+# Serialise per ref so concurrent runs avoid race condition on `git push`
+concurrency:
+  group: uv-lock-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  uv_lock:
+    runs-on: ubuntu-latest
+    # Read-only is enough; the App token below does the pushing
+    permissions:
+      contents: read
+
+    steps:
+      # Commits made with GITHUB_TOKEN do not emit `pull_request: synchronize`, so the other
+      # checks would never re-run against the fix. Requires a GitHub App with `contents: write`
+      # registered in BOTH the Actions and Dependabot secret stores under the same names, as
+      # Dependabot-triggered runs cannot read Actions secrets (`vars` they can read).
+      # Forks get no secrets, so this step fails there - allowed, so the job can still report
+      # the fix command rather than dying with an opaque token error.
+      - name: Mint App token
+        id: app-token
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.UV_LOCK_APP_CLIENT_ID }}
+          private-key: ${{ secrets.UV_LOCK_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Must be set here, not at push time: checkout persists these credentials for `git push`
+          token: ${{ steps.app-token.outputs.token || github.token }}
+          # The branch itself, not the merge commit, so a fix can be committed back to it
+          ref: ${{ github.head_ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: '**/uv.lock'
+
+      - name: Check lockfiles are up to date
+        id: check
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          stale=""
+          for project in lib/python lib/artefactscan_api backend/docs; do
+            if uv lock --check --project "$project"; then
+              echo "::notice::$project/uv.lock is up to date"
+            else
+              echo "::warning::$project/uv.lock is out of date"
+              stale="$stale $project"
+            fi
+          done
+          echo "stale=${stale# }" >> "$GITHUB_OUTPUT"
+          test -z "$stale"
+
+      # Dependabot can update pyproject.toml without regenerating uv.lock. No `--upgrade`, so
+      # this only applies what pyproject.toml forces and never bumps a dependency itself.
+      - name: Refresh stale lockfiles
+        if: steps.check.outcome == 'failure'
+        # use env to safely prevent potential shell injection
+        env:
+          STALE: ${{ steps.check.outputs.stale }}
+        run: |
+          set -euo pipefail
+          for project in $STALE; do
+            echo "Relocking $project"
+            uv lock --project "$project"
+          done
+
+      - name: Commit refreshed lockfiles
+        if: steps.check.outcome == 'failure'
+        env:
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+          IS_SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          STALE: ${{ steps.check.outputs.stale }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          LOCKS="lib/python/uv.lock lib/artefactscan_api/uv.lock backend/docs/uv.lock"
+
+          # No lockfile change means the check failed for some other reason (network, bad manifest)
+          if git diff --quiet -- $LOCKS; then
+            echo "::error::uv lock --check failed but relocking changed no lockfile. Inspect the check step output."
+            exit 1
+          fi
+
+          FIX_CMD=""
+          for project in $STALE; do
+            FIX_CMD="$FIX_CMD uv lock --project $project;"
+          done
+
+          # Pushes to main, and fork pull requests, are not auto-fixed
+          if [ "$IS_PR" != "true" ] || [ "$IS_SAME_REPO" != "true" ]; then
+            echo "::error::Lockfiles are out of date. Run:$FIX_CMD"
+            git --no-pager diff --stat -- $LOCKS
+            exit 1
+          fi
+
+          # Attribute the commit to the App that authenticates the push, so the author and
+          # the pusher match. Noreply addresses are `<user-id>+<login>@users.noreply.github.com`
+          # and the `[bot]` brackets need URL-encoding for the API lookup.
+          BOT_LOGIN="${APP_SLUG}[bot]"
+          BOT_ID=$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)
+          git config user.name "$BOT_LOGIN"
+          git config user.email "${BOT_ID}+${BOT_LOGIN}@users.noreply.github.com"
+
+          # Lockfiles only, so an unrelated dirty file cannot ride along
+          git commit --message 'chore: refresh uv lockfiles' -- $LOCKS
+          git push
+
+          echo "::notice::Refreshed and pushed uv lockfiles; checks will re-run against the new commit."

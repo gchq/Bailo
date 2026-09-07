@@ -33,36 +33,24 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: "3.14"
-
-      - name: Cache pip dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-static-${{ hashFiles('lib/python/pyproject.toml') }}-python3.14
-          restore-keys: |
-            ${{ runner.os }}-pip-static-python3.14
+          enable-cache: true
+          cache-dependency-glob: lib/python/uv.lock
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          cd lib/python
-          python -m pip install -e .[test]
+        working-directory: lib/python
+        run: uv sync --group test --locked
 
       - name: Check formatting
-        run: |
-          cd lib/python
-          ruff format --check .
-        continue-on-error: true
+        working-directory: lib/python
+        run: uv run ruff format --check .
 
       - name: Check linting
-        run: |
-          cd lib/python
-          ruff check src/bailo
-        continue-on-error: true
+        working-directory: lib/python
+        run: uv run ruff check src/bailo
 
 
   python_test:
@@ -76,30 +64,21 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Cache pip dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-test-${{ matrix.python-version }}-${{ hashFiles('lib/python/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-test-${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: lib/python/uv.lock
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          cd lib/python
-          python -m pip install -e .[test]
+        working-directory: lib/python
+        run: uv sync --extra mlflow --group test --locked
 
       # Pytest
       - name: Run basic testing
-        run: |
-          cd lib/python
-          python -m pytest
+        working-directory: lib/python
+        run: uv run pytest
         env:
           PYTEST_RUN_PATH: "lib/python"
 
