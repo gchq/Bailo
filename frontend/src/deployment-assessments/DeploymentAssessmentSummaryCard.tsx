@@ -135,17 +135,17 @@ export default function DeploymentAssessmentSummaryCard({
             onSelectedStateChange={onSelectedStateChange}
           />
         </Stack>
-        <Stack direction='row'>
-          <Typography variant='caption'>
-            Created by {<UserDisplay dn={assessment.createdBy} />} on
-            <Typography
-              variant='caption'
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >
-              {` ${formatDateString(assessment.createdAt)} `}
-            </Typography>
+        <Stack direction='row' spacing={0.5}>
+          <Typography variant='caption'>Created by</Typography>
+          <UserDisplay dn={assessment.createdBy} />
+          <Typography>on</Typography>
+          <Typography
+            variant='caption'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            {`${formatDateString(assessment.createdAt)} `}
           </Typography>
         </Stack>
         <Card variant='outlined' sx={{ height: '100%', p: 2 }}>
