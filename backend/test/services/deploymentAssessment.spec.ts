@@ -844,16 +844,16 @@ describe('services > deploymentAssessment', () => {
         DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([])
 
-        await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+        await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
         expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-          $or: [{ 'metadata.overview.riskOwner': { $in: ['user:joe', 'joe'] } }, { createdBy: 'joe' }],
+          $and: [{ $or: [{ 'metadata.overview.riskOwner': { $in: ['user:user', 'user'] } }, { createdBy: 'user' }] }],
         })
       })
 
       test.each([
-        ['entity form', 'user:joe'],
-        ['bare dn', 'joe'],
+        ['entity form', 'user:user'],
+        ['bare dn', 'user'],
       ])('returns assessments awaiting the risk owner in %s', async (_form, riskOwner) => {
         const assessment = {
           id: 'awaiting-review',
@@ -866,7 +866,7 @@ describe('services > deploymentAssessment', () => {
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
         ReviewModelMock.aggregate.mockResolvedValueOnce([])
 
-        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
         expect(result).toHaveLength(1)
         expect(result[0]).toMatchObject({ id: assessment.id, state: 'needs_review' })
@@ -877,14 +877,14 @@ describe('services > deploymentAssessment', () => {
           id: 'approved',
           draft: false,
           createdBy: 'someone-else',
-          metadata: { overview: { riskOwner: ['user:joe'] } },
+          metadata: { overview: { riskOwner: ['user:user'] } },
         }
         const sort = vi.fn().mockResolvedValue([assessment])
         DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
         ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: assessment.id, decision: Decision.Approve }])
 
-        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
         expect(result).toStrictEqual([])
       })
@@ -894,21 +894,21 @@ describe('services > deploymentAssessment', () => {
         ['rejections', Decision.Reject, false],
         ['change requests', Decision.RequestChanges, false],
       ])('returns the creator their %s', async (_label, decision, draft) => {
-        const assessment = { id: 'mine', draft, createdBy: 'joe', metadata: { overview: {} } }
+        const assessment = { id: 'mine', draft, createdBy: 'user', metadata: { overview: {} } }
         const sort = vi.fn().mockResolvedValue([assessment])
         DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
         ReviewModelMock.aggregate.mockResolvedValueOnce(draft ? [] : [{ _id: assessment.id, decision }])
 
-        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
         expect(result).toHaveLength(1)
         expect(result[0]).toMatchObject({ id: assessment.id })
       })
 
       test('does not return the creator their approved or awaiting review assessments', async () => {
-        const approved = { id: 'approved', draft: false, createdBy: 'joe', metadata: { overview: {} } }
-        const awaitingReview = { id: 'awaiting-review', draft: false, createdBy: 'joe', metadata: { overview: {} } }
+        const approved = { id: 'approved', draft: false, createdBy: 'user', metadata: { overview: {} } }
+        const awaitingReview = { id: 'awaiting-review', draft: false, createdBy: 'user', metadata: { overview: {} } }
         const sort = vi.fn().mockResolvedValue([approved, awaitingReview])
         DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([
@@ -917,7 +917,7 @@ describe('services > deploymentAssessment', () => {
         ])
         ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: approved.id, decision: Decision.Approve }])
 
-        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
         expect(result).toStrictEqual([])
       })
@@ -934,7 +934,7 @@ describe('services > deploymentAssessment', () => {
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
         ReviewModelMock.aggregate.mockResolvedValueOnce([])
 
-        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
         expect(result).toStrictEqual([])
       })
@@ -943,15 +943,15 @@ describe('services > deploymentAssessment', () => {
         const assessment = {
           id: 'mine-and-reviewed-by-me',
           draft: false,
-          createdBy: 'joe',
-          metadata: { overview: { riskOwner: ['user:joe'] } },
+          createdBy: 'user',
+          metadata: { overview: { riskOwner: ['user:user'] } },
         }
         const sort = vi.fn().mockResolvedValue([assessment])
         DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
         ReviewModelMock.aggregate.mockResolvedValueOnce([])
 
-        const result = await searchDeploymentAssessments({ dn: 'joe' }, { needsAction: true })
+        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
         expect(result).toHaveLength(1)
         expect(result[0]).toMatchObject({ id: assessment.id, state: 'needs_review' })

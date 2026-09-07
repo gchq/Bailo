@@ -518,7 +518,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     query.draft = params.draft
   }
 
-  query.$and = []
+  const andClauses: QueryFilter<DeploymentAssessmentInterface>[] = []
 
   if (params.search) {
     const search = {
@@ -526,7 +526,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
       $options: 'i',
     }
 
-    query.$and.push({
+    andClauses.push({
       $or: [{ name: search }, { 'metadata.overview.justification': search }],
     })
   }
@@ -543,7 +543,10 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
       },
     ]
 
-    query.$and.push(params.needsAction ? { $or: actionConditions } : { $nor: actionConditions })
+    andClauses.push(params.needsAction ? { $or: actionConditions } : { $nor: actionConditions })
+  }
+  if (andClauses.length !== 0) {
+    query.$and = andClauses
   }
 
   const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
