@@ -10,6 +10,7 @@ import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
+import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
@@ -52,6 +53,7 @@ export default function DeploymentAssessment() {
           {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (
             <>
+              <ReviewBanner deploymentAssessment={deploymentAssessment} />
               {deploymentAssessment.draft && (
                 <Paper
                   color='primary'

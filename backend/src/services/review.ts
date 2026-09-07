@@ -34,6 +34,7 @@ export async function findReviews(
   semver?: string,
   reviewId?: string,
   accessRequestId?: string,
+  deploymentAssessmentId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface; latestReviewResponses?: DecisionKeys })[]> {
   if (reviewId && !Types.ObjectId.isValid(reviewId)) {
@@ -46,6 +47,7 @@ export async function findReviews(
         ...(kind !== ReviewKind.DeploymentAssessment && modelId && { modelId }),
         ...(semver && { semver }),
         ...(accessRequestId && { accessRequestId }),
+        ...(deploymentAssessmentId && { deploymentAssessmentId }),
         ...(reviewId && { _id: new Types.ObjectId(reviewId) }),
         ...(kind && { kind }),
       },
