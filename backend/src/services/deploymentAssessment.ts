@@ -449,8 +449,8 @@ export async function updateDeploymentAssessment(
 
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      metadata.overview?.riskOwner ?? [],
-      metadata.overview?.modelIds ?? [],
+      diff.metadata?.overview?.riskOwner ?? [],
+      diff.metadata?.overview?.modelIds ?? [],
       deploymentAssessment,
     )
   }
