@@ -158,6 +158,23 @@ describe('services > accessRequest', () => {
     expect(accessRequests).toEqual([{ id: 'a' }])
   })
 
+  test('findAccessRequests > mine includes requests created by or assigned to the user', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    AccessRequestModelMock.aggregate.mockResolvedValueOnce([])
+
+    await findAccessRequests(user, [], '', true, false)
+
+    expect(AccessRequestModelMock.aggregate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        {
+          $match: {
+            $or: [{ createdBy: 'testUser' }, { 'metadata.overview.entities': { $in: ['user:testUser'] } }],
+          },
+        },
+      ]),
+    )
+  })
+
   test('findAccessRequests > all filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
     AccessRequestModelMock.aggregate.mockResolvedValueOnce([

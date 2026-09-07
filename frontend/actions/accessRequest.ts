@@ -28,7 +28,7 @@ export function useGetAccessRequests(
   adminAccess?: boolean,
 ) {
   const queryParams = {
-    ...(modelIds.length > 0 && { modelIds }),
+    ...(modelIds.length > 0 && { modelId: modelIds }),
     ...(schemaId.length && { schemaId }),
     ...(mine && { mine }),
     ...(adminAccess && { adminAccess }),

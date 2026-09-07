@@ -8,6 +8,7 @@ import KeyboardDoubleArrowLeft from '@mui/icons-material/KeyboardDoubleArrowLeft
 import KeyboardDoubleArrowRight from '@mui/icons-material/KeyboardDoubleArrowRight'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
+import VpnKey from '@mui/icons-material/VpnKey'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar, useMediaQuery } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled, useTheme } from '@mui/material/styles'
@@ -157,6 +158,15 @@ export default function SideNavigation({
                   title='Review'
                   icon={<ListAltIcon />}
                   badgeCount={reviewCount}
+                />
+                <NavMenuItem
+                  href='/access'
+                  selectedPage={page}
+                  primaryText='Your access'
+                  drawerOpen={drawerOpen}
+                  menuPage='access'
+                  title='Your access requests'
+                  icon={<VpnKey />}
                 />
                 <Divider aria-hidden='true' />
                 <NavMenuItem
