@@ -16,6 +16,7 @@ export default function NeedsAction() {
   const renderDeploymentAssessment = ({ data }: { data: DeploymentAssessmentSummary & { key: string } }) => (
     <DeploymentAssessmentSummaryCard
       assessment={data}
+      returnTo='/deployment-assessments?tab=needs-action'
       selectedState={selectedStatus}
       onSelectedStateChange={(state) => setSelectedStatus(state)}
     />
