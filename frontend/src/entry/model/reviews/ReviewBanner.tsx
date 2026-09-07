@@ -6,7 +6,13 @@ import { useTheme } from '@mui/material/styles'
 import { useHeadReviewRequests } from 'actions/review'
 import { useRouter } from 'next/router'
 import renderQueryState from 'src/common/renderQueryState'
-import { AccessRequestInterface, DeploymentAssessmentInterface, ReleaseInterface, ReviewKind } from 'types/types'
+import {
+  AccessRequestInterface,
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentSummary,
+  ReleaseInterface,
+  ReviewKind,
+} from 'types/types'
 
 export type ReviewBannerProps =
   | {
@@ -22,7 +28,7 @@ export type ReviewBannerProps =
   | {
       release?: never
       accessRequest?: never
-      deploymentAssessment: DeploymentAssessmentInterface
+      deploymentAssessment: DeploymentAssessmentInterface | DeploymentAssessmentSummary
     }
 
 export default function ReviewBanner({ release, accessRequest, deploymentAssessment }: ReviewBannerProps) {
