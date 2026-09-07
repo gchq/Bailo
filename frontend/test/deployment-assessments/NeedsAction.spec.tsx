@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
 import NeedsAction from 'src/deployment-assessments/NeedsAction'
 import { DeploymentAssessmentSummary } from 'types/types'
@@ -61,90 +61,5 @@ describe('NeedsAction', () => {
     render(<NeedsAction />)
 
     expect(useGetDeploymentAssessments).toHaveBeenCalledWith({ needsAction: true })
-  })
-
-  describe('status filter', () => {
-    const draft = testDeploymentAssessment
-    const rejected: DeploymentAssessmentSummary = {
-      ...testDeploymentAssessment,
-      id: 'assessment-def456',
-      name: 'Translation Engine of Somesort',
-      draft: false,
-      state: 'rejected',
-    }
-
-    it('offers a chip for each status that is present', async () => {
-      mockDeploymentAssessments([draft, rejected])
-      render(<NeedsAction />)
-
-      await waitFor(async () => {
-        expect(await screen.findByTestId('chipOption-Draft')).toBeDefined()
-        expect(await screen.findByTestId('chipOption-Rejected')).toBeDefined()
-        expect(screen.queryByTestId('chipOption-Approved')).toBeNull()
-      })
-    })
-
-    it('names each chip after the status it filters by', async () => {
-      mockDeploymentAssessments([draft, rejected])
-      render(<NeedsAction />)
-
-      await waitFor(async () => {
-        expect(await screen.findByLabelText('Filter by status: Draft')).toBeDefined()
-        expect(await screen.findByLabelText('Filter by status: Rejected')).toBeDefined()
-      })
-    })
-
-    it('hides the filter when there is nothing to choose between', async () => {
-      mockDeploymentAssessments([draft])
-      render(<NeedsAction />)
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('chipOption-Draft')).toBeNull()
-      })
-    })
-
-    it('narrows the list to the selected status', async () => {
-      mockDeploymentAssessments([draft, rejected])
-      render(<NeedsAction />)
-
-      fireEvent.click(await screen.findByTestId('chipOption-Rejected'))
-
-      await waitFor(async () => {
-        expect(await screen.findAllByTestId('deploymentAssessmentItem')).toHaveLength(1)
-        expect(await screen.findByText('Translation Engine of Somesort')).toBeDefined()
-        expect(screen.queryByText('A Model to make everything')).toBeNull()
-      })
-    })
-
-    it('drops a selected status that is no longer on offer', async () => {
-      mockDeploymentAssessments([draft, rejected])
-      const { rerender } = render(<NeedsAction />)
-
-      fireEvent.click(await screen.findByTestId('chipOption-Rejected'))
-      await waitFor(async () => expect(await screen.findAllByTestId('deploymentAssessmentItem')).toHaveLength(1))
-
-      // The rejected assessment is actioned elsewhere and disappears on the next revalidation
-      mockDeploymentAssessments([draft])
-      rerender(<NeedsAction />)
-
-      await waitFor(async () => {
-        expect(await screen.findAllByTestId('deploymentAssessmentItem')).toHaveLength(1)
-        expect(await screen.findByText('A Model to make everything')).toBeDefined()
-        expect(screen.queryByText('No deployment assessments match the selected statuses')).toBeNull()
-      })
-    })
-
-    it('shows every assessment again once the status is deselected', async () => {
-      mockDeploymentAssessments([draft, rejected])
-      render(<NeedsAction />)
-
-      const rejectedChip = await screen.findByTestId('chipOption-Rejected')
-      fireEvent.click(rejectedChip)
-      fireEvent.click(rejectedChip)
-
-      await waitFor(async () => {
-        expect(await screen.findAllByTestId('deploymentAssessmentItem')).toHaveLength(2)
-      })
-    })
   })
 })

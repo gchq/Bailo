@@ -4,19 +4,20 @@ import { useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import renderQueryState from 'src/common/renderQueryState'
 import DeploymentAssessmentSummaryCard from 'src/deployment-assessments/DeploymentAssessmentSummaryCard'
-import { DeploymentAssessmentStateKeys, DeploymentAssessmentSummary } from 'types/types'
+import { DeploymentAssessmentStatusKeys, statusToApiFilters } from 'src/hooks/useDeploymentAssessmentFilters'
+import { DeploymentAssessmentSummary } from 'types/types'
 
 export default function NeedsAction() {
-  const [selectedStatus, setSelectedStatus] = useState<DeploymentAssessmentStateKeys>()
+  const [selectedStatus, setSelectedStatus] = useState<DeploymentAssessmentStatusKeys>()
 
   const { deploymentAssessments, isDeploymentAssessmentsLoading, isDeploymentAssessmentsError } =
-    useGetDeploymentAssessments({ needsAction: true, state: selectedStatus })
+    useGetDeploymentAssessments({ needsAction: true, ...statusToApiFilters(selectedStatus) })
 
   const renderDeploymentAssessment = ({ data }: { data: DeploymentAssessmentSummary & { key: string } }) => (
     <DeploymentAssessmentSummaryCard
       assessment={data}
       selectedState={selectedStatus}
-      onSelectedStateChange={() => setSelectedStatus}
+      onSelectedStateChange={(state) => setSelectedStatus(state)}
     />
   )
 
