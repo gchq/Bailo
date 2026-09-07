@@ -20,6 +20,7 @@ import { postAccessRequestComment } from './model/accessRequest/postAccessReques
 import { deleteModel } from './model/deleteModel.js'
 import { deleteFile } from './model/file/deleteFile.js'
 import { getDownloadFile } from './model/file/getDownloadFile.js'
+import { getDownloadReleaseFiles } from './model/file/getDownloadReleaseFiles.js'
 import { getFiles } from './model/file/getFiles.js'
 import { patchFile } from './model/file/patchFile.js'
 import { postFinishMultipartUpload } from './model/file/postFinishMultipartUpload.js'
@@ -120,6 +121,8 @@ router.post('/model/:modelId/import-model-card-text', ...postImportModelCardText
 router.post('/model/:modelId/releases', ...postRelease)
 router.get('/model/:modelId/releases', ...getReleases)
 router.get('/model/:modelId/release/:semver', ...getRelease)
+router.get('/model/:modelId/release/:semver/files/download', ...getDownloadReleaseFiles)
+router.get('/token/model/:modelId/release/:semver/files/download', ...getDownloadReleaseFiles)
 router.get('/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
 // This is a temporary workaround to split out the URL to disable authorisation.
 router.get('/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
