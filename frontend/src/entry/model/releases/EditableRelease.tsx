@@ -10,7 +10,7 @@ import {
 } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
@@ -30,14 +30,112 @@ import {
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
-type EditableReleaseProps = {
-  release: ReleaseInterface
-  isEdit: boolean
-  onIsEditChange: (value: boolean) => void
-  readOnly?: boolean
+type EditableReleaseProps = { release: ReleaseInterface } & (
+  | {
+      readOnly: false
+      isEdit: boolean
+      onIsEditChange: Dispatch<SetStateAction<boolean>>
+      isLoading: boolean
+      setIsLoading: Dispatch<SetStateAction<boolean>>
+    }
+  | {
+      readOnly: true
+      isEdit?: never
+      onIsEditChange?: never
+      isLoading?: never
+      setIsLoading?: never
+    }
+)
+
+type EditableReleaseInnerProps = Extract<EditableReleaseProps, { readOnly: false }>
+
+export default function EditableRelease(props: EditableReleaseProps) {
+  if (props.readOnly) {
+    return <ReadOnlyRelease release={props.release} />
+  }
+  return <EditableReleaseInner {...props} />
 }
 
-export default function EditableRelease({ release, isEdit, onIsEditChange, readOnly = false }: EditableReleaseProps) {
+function ReadOnlyRelease({ release }: { release: ReleaseInterface }) {
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(release.modelId)
+
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
+  }
+
+  if (!model || isModelLoading) {
+    return <Loading />
+  }
+
+  const noop = () => {
+    /* read-only view: edit/delete/submit handlers are never invoked */
+  }
+
+  return (
+    <Stack spacing={2}>
+      <EditableFormHeading
+        heading={
+          <Stack
+            sx={{
+              overflow: 'hidden',
+              justifyContent: 'center',
+            }}
+          >
+            <Stack direction='row' spacing={1}>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                Release name
+              </Typography>
+              <HelpPopover>
+                The release name is automatically generated using the model name and release semantic version.
+              </HelpPopover>
+            </Stack>
+            <Typography noWrap>{`${model.name} - ${release.semver}`}</Typography>
+          </Stack>
+        }
+        editAction='editRelease'
+        editButtonText='Edit release'
+        isEdit={false}
+        isLoading={false}
+        onEdit={noop}
+        onCancel={noop}
+        onSubmit={noop}
+        readOnly
+      />
+      <Divider />
+      <ReleaseForm
+        editable
+        isEdit={false}
+        model={model}
+        formData={{
+          semver: release.semver,
+          releaseNotes: release.notes,
+          isMinorRelease: release.minor,
+          files: release.files,
+          imageList: release.images,
+          modelCardVersion: release.modelCardVersion,
+        }}
+        filesMetadata={[]}
+        onSemverChange={noop}
+        onReleaseNotesChange={noop}
+        onFilesChange={noop}
+        onMinorReleaseChange={noop}
+        onFilesMetadataChange={noop}
+        onModelCardVersionChange={noop}
+        onImageListChange={noop}
+        onRegistryError={noop}
+        currentFileUploadProgress={undefined}
+        uploadedFiles={[]}
+        filesToUploadCount={0}
+      />
+    </Stack>
+  )
+}
+
+function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setIsLoading }: EditableReleaseInnerProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
@@ -46,7 +144,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [modelCardVersion, setModelCardVersion] = useState(release.modelCardVersion)
   const [errorMessage, setErrorMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [isRegistryError, setIsRegistryError] = useState(false)
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
@@ -217,7 +314,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
       semver,
       modelCardVersion: modelCardVersion,
       notes: releaseNotes,
-      minor: isMinorRelease,
+      draft: release.draft,
       fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
     }
@@ -273,7 +370,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         onDelete={() => setOpen(true)}
         errorMessage={errorMessage}
         isRegistryError={isRegistryError}
-        readOnly={readOnly}
         disableSaveButton={releaseNotes === ''}
       />
       {failedFileUploads.length > 0 && (

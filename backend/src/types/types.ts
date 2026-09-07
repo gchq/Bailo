@@ -184,6 +184,7 @@ export interface UiConfig {
     owner: string
     contributor: string
     consumer: string
+    riskOwner: string
   }
 
   untrustedModel: {
@@ -199,6 +200,10 @@ export interface UiConfig {
 
   deploymentAssessments: {
     deployableModelState: string
+  }
+
+  lifecycle: {
+    maxReviewInterval: string
   }
 }
 

@@ -5,6 +5,7 @@ import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlug
 export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
+  Reject: 'reject',
   Undo: 'undo',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]

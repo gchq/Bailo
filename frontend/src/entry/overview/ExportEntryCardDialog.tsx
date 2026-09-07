@@ -1,13 +1,7 @@
-import { Button, DialogActions, DialogContent, Divider, Stack, Typography } from '@mui/material'
-import Dialog from '@mui/material/Dialog'
-import { useTheme } from '@mui/material/styles'
 import { Form } from '@rjsf/mui'
 import validator from '@rjsf/validator-ajv8'
-import Image from 'next/image'
-import logo from 'public/horizontal-dark.png'
-import { useMemo, useRef } from 'react'
-import { useReactToPrint } from 'react-to-print'
-import { Transition } from 'src/common/Transition'
+import { useMemo } from 'react'
+import ExportPreviewDialog from 'src/common/ExportPreviewDialog'
 import { ArrayFieldTemplate, DescriptionFieldTemplate, ObjectFieldTemplate } from 'src/Form/FormTemplates'
 import { EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { widgets } from 'utils/formUtils'
@@ -20,19 +14,6 @@ type ExportEntryCardDialogProps = {
 }
 
 export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpen }: ExportEntryCardDialogProps) {
-  const theme = useTheme()
-  const modelCardContentRef = useRef<HTMLDivElement>(null)
-  const exportModelCard = useReactToPrint({
-    contentRef: modelCardContentRef,
-    documentTitle: entry.name.replace(' ', '_'),
-  })
-
-  const handleExportOnClick = () => {
-    if (modelCardContentRef) {
-      exportModelCard()
-    }
-  }
-
   const steps = useMemo(() => {
     return splitSchema.steps.map((currentStep) => (
       <Form
@@ -60,34 +41,8 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
   }, [splitSchema.steps])
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md' slots={{ transition: Transition }}>
-      <DialogContent ref={modelCardContentRef}>
-        <Stack spacing={2} divider={<Divider />}>
-          <Stack direction='row' sx={{ alignItems: 'center' }}>
-            <Image src={logo} alt='bailo logo' width={180} height={70} />
-            <Typography
-              variant='h4'
-              component='h1'
-              color={theme.palette.secondary.main}
-              sx={{
-                fontWeight: 'bold',
-                pl: 1,
-              }}
-            >
-              {entry.name}
-            </Typography>
-          </Stack>
-          {steps}
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button color='secondary' variant='outlined' onClick={() => setOpen(false)}>
-          Close
-        </Button>
-        <Button color='secondary' variant='contained' onClick={handleExportOnClick}>
-          Export
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <ExportPreviewDialog open={open} setOpen={setOpen} documentTitle={entry.name}>
+      {steps}
+    </ExportPreviewDialog>
   )
 }

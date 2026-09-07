@@ -16,9 +16,10 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
-import EntryCardRevision, { EntryCardSnapshot } from 'src/entry/overview/EntryCardRevision'
+import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
+import { buildSnapshots, EntryCardSnapshot } from 'src/entry/overview/EntryCardSnapshotSelector'
 import MessageAlert from 'src/MessageAlert'
-import { EntryCardKindLabel, EntryCardRevisionInterface, EntryInterface, EntryKind } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, EntryKind } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
 type EntryCardHistoryDialogProps = {
@@ -28,32 +29,7 @@ type EntryCardHistoryDialogProps = {
 
 const MAX_SELECTED = 2
 
-export function buildSnapshots(revisions: EntryCardRevisionInterface[]): EntryCardSnapshot[] {
-  const ordered = [...revisions].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-
-  let currentLocal: number | undefined
-  let currentMirrored: number | undefined
-  const snapshots: EntryCardSnapshot[] = []
-
-  for (const revision of ordered) {
-    if (revision.mirrored) {
-      currentMirrored = revision.version
-    } else {
-      currentLocal = revision.version
-    }
-    snapshots.push({
-      key: `local${currentLocal ?? '_'}-mirrored${currentMirrored ?? '_'}-@${revision.createdAt}`,
-      local: currentLocal,
-      mirrored: currentMirrored,
-      createdAt: revision.createdAt,
-      createdBy: revision.createdBy,
-      changedStream: revision.mirrored ? 'mirrored' : 'local',
-      changedVersion: revision.version,
-    })
-  }
-
-  return snapshots
-}
+export { buildSnapshots } from 'src/entry/overview/EntryCardSnapshotSelector'
 
 export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHistoryDialogProps) {
   const theme = useTheme()

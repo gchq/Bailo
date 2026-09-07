@@ -29,9 +29,6 @@ jobs:
     needs: changes
     if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
-    outputs:
-      black: ${{ steps.black.outputs.status }}
-      pylint: ${{ steps.pylint.outputs.status }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -55,18 +52,16 @@ jobs:
           cd lib/python
           python -m pip install -e .[test]
 
-      # Black
       - name: Check formatting
         run: |
           cd lib/python
-          black --check --verbose . || echo "black_check=false"
+          ruff format --check .
         continue-on-error: true
 
-      # Pylint
       - name: Check linting
         run: |
           cd lib/python
-          pylint src/bailo --verbose --exit-zero --fail-on=F,E || echo "pylint_error=false"
+          ruff check src/bailo
         continue-on-error: true
 
 

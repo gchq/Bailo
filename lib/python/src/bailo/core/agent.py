@@ -3,12 +3,11 @@ from __future__ import annotations
 import getpass
 import logging
 import os
+from http import HTTPStatus
 from json import JSONDecodeError
 
 import requests
 from requests.auth import HTTPBasicAuth
-
-# isort: split
 
 from bailo.core.exceptions import BailoException, ResponseException
 
@@ -50,7 +49,7 @@ class Agent:
         res = self.session.request(method, *args, **kwargs)
 
         # Check response for a valid range
-        if res.status_code < 400:
+        if res.status_code < HTTPStatus.BAD_REQUEST:
             return res
 
         try:

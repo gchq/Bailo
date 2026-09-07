@@ -13,7 +13,7 @@ const deploymentAssessment = {
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      riskOwner: 'user:risk-owner',
+      riskOwner: ['user:risk-owner'],
       justification: 'Owns the deployment risk.',
       modelIds: ['model-one', 'model-two'],
     },
@@ -36,7 +36,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessment])
 
     const res = await testGet(
-      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification',
+      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification&state=approved',
     )
 
     expect(res.statusCode).toBe(200)
@@ -49,6 +49,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
       createdBefore: '2026-01-31',
       draft: false,
       search: 'deployment justification',
+      state: 'approved',
     })
     expect(res.body).toEqual({
       deploymentAssessments: [
@@ -56,7 +57,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
           id: 'assessment-abc123',
           schemaId: 'deployment-assessment-schema',
           name: 'Assessment',
-          owner: 'user:risk-owner',
+          owner: ['user:risk-owner'],
           models: ['model-one', 'model-two'],
           justification: 'Owns the deployment risk.',
           draft: false,
@@ -104,6 +105,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     'createdBefore=2026-01-01T00%3A00%3A00.000Z',
     'draft=invalid',
     'search=',
+    'state=invalid',
     'unknown=value',
   ])('rejects the malformed query %s', async (query) => {
     const res = await testGet(`/api/v3/deployment-assessments?${query}`)

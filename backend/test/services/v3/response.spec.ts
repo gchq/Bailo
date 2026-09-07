@@ -1,7 +1,8 @@
-import { describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { Decision } from '../../../src/models/Response.js'
 import { getLatestResponseForReview, respondToReview } from '../../../src/services/v3/response.js'
+import { ReviewKind } from '../../../src/types/enums.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 import { testReleaseReview, testResponse } from '../../testUtils/testModels.js'
 
@@ -22,6 +23,7 @@ const reviewV3Mock = vi.hoisted(() => ({
     return [testReleaseReview]
   }),
   createLifecycleReview: vi.fn(),
+  isLifecycleReviewDateValid: vi.fn(() => true),
 }))
 vi.mock('../../../src/services/v3/review.js', () => reviewV3Mock)
 
@@ -46,8 +48,18 @@ const mockSchedulerService = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/schedule/scheduler.js', () => mockSchedulerService)
 
+const FIXED_DATE = new Date('2026-01-01T00:00:00.000Z')
+
 describe('services > v3 > response', () => {
   const user: any = { dn: 'test' }
+
+  beforeEach(() => {
+    vi.setSystemTime(FIXED_DATE)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
 
   test('respondToReview > successful', async () => {
     reviewV3Mock.findReviewById.mockReturnValue(testReleaseReview as any)
@@ -80,6 +92,30 @@ describe('services > v3 > response', () => {
       testReleaseReview.modelId,
       '6a058ab4db7a3be341fb3cca',
     )
+  })
+
+  test('respondToReview > creates new lifecycle review when dueDate provided', async () => {
+    const lifecycleReview = { ...testReleaseReview, kind: ReviewKind.Lifecycle }
+    reviewV3Mock.findReviewById.mockReturnValue(lifecycleReview as any)
+    ReviewModel.aggregate.mockResolvedValue([{ modelId: lifecycleReview.modelId, role: 'owner' }])
+
+    const dueDate = new Date('2026-01-02T00:00:00.000Z')
+    await respondToReview(user, '6a058ab4db7a3be341fb3cca', { decision: Decision.Approve, comment: '' }, dueDate)
+
+    expect(reviewV3Mock.createLifecycleReview).toHaveBeenCalledWith(user, lifecycleReview.modelId, dueDate)
+  })
+
+  test('respondToReview > does not create lifecycle review when no dueDate', async () => {
+    const lifecycleReview = { ...testReleaseReview, kind: ReviewKind.Lifecycle }
+    reviewV3Mock.findReviewById.mockReturnValue(lifecycleReview as any)
+    ReviewModel.aggregate.mockResolvedValue([{ modelId: lifecycleReview.modelId, role: 'owner' }])
+
+    await respondToReview(user, '6a058ab4db7a3be341fb3cca', {
+      decision: Decision.Approve,
+      comment: '',
+    })
+
+    expect(reviewV3Mock.createLifecycleReview).not.toHaveBeenCalled()
   })
 
   test('find latest response for review > successful', async () => {

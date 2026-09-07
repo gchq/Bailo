@@ -1,23 +1,17 @@
 import { Types } from 'mongoose'
 
 import ResponseModel, { Decision, ResponseKind } from '../../models/Response.js'
-import { ReviewDoc } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { WebhookEvent } from '../../models/Webhook.js'
 import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
+import { getModelReview } from '../../utils/review.js'
 import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
-import { createLifecycleReview, findReviewById } from '../v3/review.js'
+import { createLifecycleReview, findReviewById, isLifecycleReviewDateValid } from '../v3/review.js'
 import { dispatchWebhooks } from '../webhook.js'
-
-function validateLifecycleReview(review: ReviewDoc, dueDate?: Date | undefined) {
-  if (!dueDate || dueDate.getTime() <= Date.now()) {
-    throw BadReq('Due date of next review cannot be in the past.')
-  }
-}
 
 export async function respondToReview(
   user: UserInterface,
@@ -25,9 +19,11 @@ export async function respondToReview(
   response: ReviewResponseParams,
   dueDate?: Date,
 ) {
-  const review = await findReviewById(user, reviewId)
-  if (response.decision === Decision.Approve) {
-    validateLifecycleReview(review, dueDate)
+  const review = getModelReview(await findReviewById(user, reviewId))
+  if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve && dueDate) {
+    if (dueDate.getTime() <= Date.now() || !isLifecycleReviewDateValid(dueDate)) {
+      throw BadReq('Due date of next review is invalid.', { dueDate })
+    }
   }
 
   // Store the response

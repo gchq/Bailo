@@ -3,7 +3,6 @@ import { ClientSession, Types } from 'mongoose'
 import ResponseModel, {
   Decision,
   ReactionKindKeys,
-  ResponseDoc,
   ResponseInterface,
   ResponseKind,
   ResponseReaction,
@@ -14,6 +13,7 @@ import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
 import { Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { getModelReview } from '../utils/review.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
@@ -70,22 +70,6 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   return response
 }
 
-export async function removeResponses(parentIds: string[]) {
-  const responses = await getResponsesByParentIds(parentIds)
-  const responseDeletions: ResponseDoc[] = []
-  for (const response of responses) {
-    try {
-      responseDeletions.push(await response.delete())
-    } catch (error) {
-      throw InternalError('The requested response could not be deleted.', {
-        responseId: response.id,
-        error,
-      })
-    }
-  }
-  return responseDeletions
-}
-
 export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
   const response = await ResponseModel.findOne({ _id: responseId })
 
@@ -121,7 +105,7 @@ export async function respondToReview(
   kind: ReviewKindKeys,
   reviewId: string,
 ): Promise<ResponseInterface> {
-  const review = await findReviewForResponse(user, modelId, role, kind, reviewId)
+  const review = getModelReview(await findReviewForResponse(user, modelId, role, kind, reviewId))
   let isApproved = false
   if (kind === ReviewKind.Release && review.semver) {
     isApproved = await checkReleaseApproved(modelId, review.semver)
@@ -243,23 +227,12 @@ export async function checkReleaseApproved(modelId: string, semver: string) {
   return totalReviews > 0 && reviewsWithoutApproval.length === 0
 }
 
-export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
-  const objectIds = parentIds.map((id) => new Types.ObjectId(id))
-  const responses = await ResponseModel.find({
-    parentId: { $in: objectIds },
-  })
+/** Soft deletes every response under the given parents, returning the responses that were deleted. */
+export async function removeResponsesByParentIds(parentIds: string[], session?: ClientSession) {
+  const filter = { parentId: { $in: parentIds.map((id) => new Types.ObjectId(id)) } }
+  const responses = await ResponseModel.find(filter, undefined, { session })
 
-  const deletions: ResponseDoc[] = []
-  for (const response of responses) {
-    try {
-      deletions.push(await response.delete(session))
-    } catch (error) {
-      throw InternalError('The requested response could not be deleted.', {
-        responseId: response._id,
-        error,
-      })
-    }
-  }
+  await ResponseModel.deleteMany(filter, session)
 
-  return deletions
+  return responses
 }

@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { Decision } from '../../../../src/models/Response.js'
@@ -14,13 +14,23 @@ const mockResponseService = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/v3/response.js', () => mockResponseService)
 
+const FIXED_DATE = new Date('2026-01-01T00:00:00.000Z')
+
 describe('routes > review > postReviewResponse', () => {
+  beforeEach(() => {
+    vi.setSystemTime(FIXED_DATE)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   const lifecycleReviewBody = {
     role: 'owner',
     decision: Decision.Approve,
     kind: ReviewKind.Lifecycle,
     modelId: 'model-123',
-    dueDate: new Date('01/01/2051'),
+    dueDate: new Date('2026-01-02T00:00:00.000Z'),
   } as any
 
   const releaseReviewBody = {
@@ -65,5 +75,29 @@ describe('routes > review > postReviewResponse', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
+  })
+
+  test('rejects due date in the past', async () => {
+    const fixture = createFixture(postReviewResponseSchema)
+    fixture.body = {
+      ...lifecycleReviewBody,
+      dueDate: new Date('2024-01-01T00:00:00.000Z'),
+    }
+    const res = await testPost(`/api/v3/review/test-123/response`, fixture)
+
+    expect(res.statusCode).toBe(400)
+    expect(res.body.error.message).toMatch(/cannot be in the past/)
+  })
+
+  test('rejects due date beyond max review interval', async () => {
+    const fixture = createFixture(postReviewResponseSchema)
+    fixture.body = {
+      ...lifecycleReviewBody,
+      dueDate: new Date('2027-01-01T12:00:00.000Z'),
+    }
+    const res = await testPost(`/api/v3/review/test-123/response`, fixture)
+
+    expect(res.statusCode).toBe(400)
+    expect(res.body.error.message).toMatch(/cannot be further than/)
   })
 })

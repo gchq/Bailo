@@ -29,8 +29,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   async hasRole(_user: UserInterface, role: RoleKeys) {
-    const availableRoles = [Roles.Admin, Roles.Compliance, Roles.UntrustedModel]
-    return availableRoles.includes(role)
+    return Object.values(Roles).includes(role)
   }
 
   async queryEntities(_query: string) {

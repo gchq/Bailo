@@ -7,8 +7,7 @@ import {
   useLifecyclePolicyMetrics,
 } from 'actions/metrics'
 import { ReactElement, useCallback, useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import renderQueryState from 'src/common/renderQueryState'
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import PolicyLifecycleMetricsCharts from 'src/metrics/PolicyLifecycleMetricsCharts'
 import PolicyNoReleasesMetricsCharts from 'src/metrics/PolicyNoReleasesMetricsCharts'
@@ -118,33 +117,22 @@ export default function PolicyMetrics() {
     unapprovedReleasesPolicyMetrics,
   ])
 
-  if (isRolePolicyMetricsError) {
-    return <MessageAlert message={isRolePolicyMetricsError.info.message} />
-  }
-
-  if (isNoReleasesPolicyMetricsError) {
-    return <MessageAlert message={isNoReleasesPolicyMetricsError.info.message} />
-  }
-
-  if (isUnapprovedReleasesPolicyMetricsError) {
-    return <MessageAlert message={isUnapprovedReleasesPolicyMetricsError.info.message} />
-  }
-
-  if (isLifecyclePolicyMetricsError) {
-    return <MessageAlert message={isLifecyclePolicyMetricsError.info.message} />
-  }
-  if (isEntryRolesError) {
-    return <MessageAlert message={isEntryRolesError.info.message} />
-  }
-
-  if (
+  const queryState = renderQueryState(
+    [
+      isRolePolicyMetricsError,
+      isNoReleasesPolicyMetricsError,
+      isUnapprovedReleasesPolicyMetricsError,
+      isLifecyclePolicyMetricsError,
+      isEntryRolesError,
+    ],
     isRolePolicyMetricsLoading ||
-    isNoReleasesPolicyMetricsLoading ||
-    isUnapprovedReleasesPolicyMetricsLoading ||
-    isLifecyclePolicyMetricsLoading ||
-    isEntryRolesLoading
-  ) {
-    return <Loading />
+      isNoReleasesPolicyMetricsLoading ||
+      isUnapprovedReleasesPolicyMetricsLoading ||
+      isLifecyclePolicyMetricsLoading ||
+      isEntryRolesLoading,
+  )
+  if (queryState) {
+    return queryState
   }
 
   return (

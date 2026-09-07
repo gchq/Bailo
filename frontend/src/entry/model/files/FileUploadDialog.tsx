@@ -6,6 +6,7 @@ import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import { Transition } from 'src/common/Transition'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import MessageAlert from 'src/MessageAlert'
@@ -151,7 +152,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
   )
 
   return (
-    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
+    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth slots={{ transition: Transition }}>
       <DialogContent>
         <Stack spacing={2}>
           <label htmlFor='add-files-button' style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>

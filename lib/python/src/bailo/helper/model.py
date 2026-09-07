@@ -9,8 +9,6 @@ from typing import Any
 
 from semantic_version import Version
 
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
@@ -611,7 +609,8 @@ class Experiment:
             )
         else:
             warnings.warn(
-                f"MLFlow experiment {experiment_id} does not have any runs and publishing requires at least one valid run. Are you sure the ID is correct?"
+                f"MLFlow experiment {experiment_id} does not have any runs and publishing requires at least one valid run. Are you sure the ID is correct?",
+                stacklevel=2,
             )
 
         for run in runs:
@@ -649,7 +648,7 @@ class Experiment:
 
         logger.info("Successfully imported MLFlow experiment %s.", experiment_id)
 
-    def publish(
+    def publish(  # noqa: PLR0912
         self,
         mc_loc: str,
         semver: str = "0.1.0",
@@ -715,7 +714,7 @@ class Experiment:
             try:
                 release_latest_version = self.model.get_latest_release().version
                 release_new_version = release_latest_version.next_minor()
-            except:
+            except Exception:
                 release_new_version = semver
 
             run_id = sel_run["run"]
@@ -744,7 +743,7 @@ class Experiment:
     def __select_run(self, select_by: str) -> dict:
         # Parse target and order from select_by string
         select_by_split = select_by.split(" ")
-        if len(select_by_split) != 2:
+        if len(select_by_split) != 2:  # noqa: PLR2004
             raise BailoException("Invalid select_by string. Expected format is 'metric_name MIN|MAX'.")
         order_str = select_by_split[1].upper()
         order_opt = {"MIN": 0, "MAX": -1}

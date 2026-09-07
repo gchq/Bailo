@@ -1,10 +1,9 @@
 import { Grid, Stack } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
 import { Fragment, useMemo } from 'react'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryRolesChipSet from 'src/entry/overview/EntryRolesChipSet'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 
 type EntryRoleListProps = {
@@ -36,12 +35,9 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
     [entry.collaborators, entryRoles],
   )
 
-  if (isEntryRolesLoading) {
-    return <Loading />
-  }
-
-  if (isEntryRolesError) {
-    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
+  const queryState = renderQueryState([isEntryRolesError], isEntryRolesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

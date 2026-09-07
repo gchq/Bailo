@@ -5,10 +5,6 @@ from io import BytesIO
 from pathlib import Path
 
 import pytest
-
-# isort: split
-
-from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
 from bailo.helper.model import Model
 

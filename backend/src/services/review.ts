@@ -6,7 +6,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
 import ModelModel, { ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
-import { Decision, DecisionKeys } from '../models/Response.js'
+import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
@@ -124,6 +124,38 @@ export async function findReviews(
   return reviews.filter((_, i) => auths[i].success)
 }
 
+export async function getResponses(parentId) {
+  const [comments, reviews] = await Promise.all([
+    ResponseModel.find({ parentId, kind: ResponseKind.Comment }),
+    ReviewModel.aggregate<{ responses: ResponseInterface[] }>([
+      { $match: { parentId } },
+      {
+        $lookup: {
+          from: 'v2_responses',
+          let: { reviewId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$parentId', '$$reviewId'] },
+                kind: ResponseKind.Review,
+              },
+            },
+            { $sort: { createdAt: -1 } },
+          ],
+          as: 'responses',
+        },
+      },
+      { $project: { responses: 1, _id: 0 } },
+    ]),
+  ])
+
+  const responses = [...comments, ...reviews.flatMap(({ responses: reviewResponses }) => reviewResponses)].sort(
+    (first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime(),
+  )
+
+  return responses
+}
+
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
   if (!model.card) {
     throw BadReq('A model needs to have a model card before a review can be made for its releases', {
@@ -223,6 +255,17 @@ export async function removeReleaseReviews(
   return reviews
 }
 
+export async function removeDeploymentAssessmentReviews(
+  deploymentAssessmentId: string,
+  session?: ClientSession,
+): Promise<ReviewDoc[]> {
+  const reviews = await ReviewModel.find({ deploymentAssessmentId }, undefined, { session })
+
+  await ReviewModel.deleteMany({ deploymentAssessmentId }, session)
+
+  return reviews
+}
+
 export async function findReviewForResponse(
   user: UserInterface,
   modelId: string,
@@ -260,6 +303,7 @@ export async function findReviewForResponse(
       .match(await findUserInCollaborators(user))
       .limit(1)
   ).at(0)
+
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }
@@ -368,7 +412,7 @@ export async function findReviewRole(user: UserInterface, shortName: string) {
 }
 
 export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleDoc[]> {
-  const mongoQuery: QueryFilter<ReviewRoleInterface> = {}
+  const mongoQuery: QueryFilter<ReviewRoleInterface> = { shortName: { $ne: 'dro' } }
 
   if (schemaIds) {
     const schemas = await searchSchemas(undefined, undefined, undefined, schemaIds)

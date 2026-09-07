@@ -451,6 +451,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.checkEventType(AuditInfo.DeleteDeploymentAssessment, req)
+    const event = this.generateEvent(req, { id: deploymentAssessment.id })
+    req.log.info(event, req.audit.description)
+  }
+
   async onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]) {
     this.checkEventType(AuditInfo.SearchDeploymentAssessments, req)
     const event = this.generateEvent(req, {
@@ -466,6 +472,18 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onReviewDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.checkEventType(AuditInfo.ReviewDeploymentAssessment, req)
+    const event = this.generateEvent(req, { reviewId: response.parentId, decision: response.decision })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.checkEventType(AuditInfo.CommentOnDeploymentAssessment, req)
+    const event = this.generateEvent(req, { deploymentAssessmentId: response.parentId })
+    req.log.info(event, req.audit.description)
+  }
+
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
     this.checkEventType(AuditInfo.ViewCurrentUserInformation, req)
     const event = this.generateEvent(req, { userDn: userInformation.user.dn })
@@ -478,21 +496,21 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onRegistryImagePulled(req: Request, userDn: string): Promise<void> {
+  async onRegistryImagePulled(req: Request, registryImage: string): Promise<void> {
     this.checkEventType(AuditInfo.RegistryImagePulled, req)
-    const event = this.generateEvent(req, { userDn: userDn })
+    const event = this.generateEvent(req, { registryImage })
     req.log.info(event, req.audit.description)
   }
 
-  async onRegistryImagePushed(req: Request, userDn: string): Promise<void> {
+  async onRegistryImagePushed(req: Request, registryImage: string): Promise<void> {
     this.checkEventType(AuditInfo.RegistryImagePushed, req)
-    const event = this.generateEvent(req, { userDn: userDn })
+    const event = this.generateEvent(req, { registryImage })
     req.log.info(event, req.audit.description)
   }
 
-  async onRegistryImageDeleted(req: Request, userDn: string): Promise<void> {
+  async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
     this.checkEventType(AuditInfo.RegistryImageDeleted, req)
-    const event = this.generateEvent(req, { userDn: userDn })
+    const event = this.generateEvent(req, { registryImage })
     req.log.info(event, req.audit.description)
   }
 

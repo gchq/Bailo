@@ -1,7 +1,6 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import { Transition } from 'src/common/Transition'
+import { Stack } from '@mui/material'
+import DisplayDialog from 'src/common/DisplayDialog'
+import LabelledValue from 'src/common/LabelledValue'
 import { SchemaInterface } from 'types/types'
 
 type SchemaDialogProps = {
@@ -11,57 +10,13 @@ type SchemaDialogProps = {
 }
 
 export default function InformationDialog({ open = false, onClose, schema }: SchemaDialogProps) {
-  const theme = useTheme()
-
   return (
-    <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
-      <DialogTitle>Schema information</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} divider={<Divider flexItem />}>
-          <Stack spacing={1}>
-            <Stack
-              direction='row'
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-              }}
-            >
-              <Typography
-                sx={{
-                  fontWeight: 'bold',
-                  color: theme.palette.primary.main,
-                }}
-              >
-                ID:
-              </Typography>
-              <Typography>{schema.id}</Typography>
-            </Stack>
-            <Stack
-              direction='row'
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-              }}
-            >
-              <Typography
-                sx={{
-                  fontWeight: 'bold',
-                  color: theme.palette.primary.main,
-                }}
-              >
-                Name:
-              </Typography>
-              <Typography>{schema.name}</Typography>
-            </Stack>
-            <MarkdownDisplay>{schema.description}</MarkdownDisplay>
-          </Stack>
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button variant='contained' onClick={onClose}>
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <DisplayDialog open={open} onClose={onClose} title='Schema information'>
+      <Stack spacing={2}>
+        <LabelledValue label='ID' value={schema.id} />
+        <LabelledValue label='Name' value={schema.name} />
+        <LabelledValue label='Description' value={schema.description} richText />
+      </Stack>
+    </DisplayDialog>
   )
 }

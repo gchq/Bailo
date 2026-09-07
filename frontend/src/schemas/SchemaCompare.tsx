@@ -5,8 +5,7 @@ import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import renderQueryState from 'src/common/renderQueryState'
 import { SchemaInterface } from 'types/types'
 
 export default function SchemaCompare() {
@@ -49,12 +48,9 @@ export default function SchemaCompare() {
     }
   }, [beforeSchema, afterSchema, theme])
 
-  if (isSchemasError) {
-    return <MessageAlert message={isSchemasError.info.message} severity='error' />
-  }
-
-  if (isSchemasLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isSchemasError], isSchemasLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

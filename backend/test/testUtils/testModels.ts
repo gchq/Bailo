@@ -76,7 +76,7 @@ export const testDeploymentAssessment = {
   name: 'My Deployment Assessment',
   metadata: {
     overview: {
-      riskOwner: 'user:user',
+      riskOwner: ['user:user'],
       riskOwnerJustification: 'Test',
       modelIds: ['my-model-123'],
     },

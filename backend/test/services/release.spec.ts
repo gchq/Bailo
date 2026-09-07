@@ -397,10 +397,21 @@ describe('services > release', () => {
     vi.mocked(ReleaseModelMock.append).mockReturnValueOnce([])
     await getModelReleases({ dn: 'user' } as UserInterface, 'modelId')
 
-    expect(ReleaseModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReleaseModelMock.sort.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReleaseModelMock.lookup.mock.calls.at(0)).toMatchSnapshot()
-    expect(ReleaseModelMock.append.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReleaseModelMock.match).toHaveBeenCalledWith({ modelId: 'modelId' })
+    expect(ReleaseModelMock.sort).toHaveBeenCalledWith({ draft: -1, updatedAt: -1 })
+    expect(ReleaseModelMock.lookup).toHaveBeenCalledWith({
+      as: 'model',
+      foreignField: 'id',
+      from: 'v2_models',
+      localField: 'modelId',
+    })
+    expect(ReleaseModelMock.append).toHaveBeenCalledWith({
+      $set: {
+        model: {
+          $arrayElemAt: ['$model', 0],
+        },
+      },
+    })
   })
 
   test('semverObjectToString > deals with edge cases', () => {
@@ -423,13 +434,42 @@ describe('services > release', () => {
   test('getModelReleases > convertSemverQueryToMongoQuery functions', async () => {
     vi.mocked(ReleaseModelMock.append).mockReturnValueOnce([])
     await getModelReleases({ dn: 'user' } as UserInterface, 'modelId', '2.2.X')
-    expect(ReleaseModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReleaseModelMock.match).toHaveBeenCalledWith({
+      $and: [
+        {
+          $or: [
+            { 'semver.major': { $gte: 2 }, 'semver.minor': { $gte: 2 }, 'semver.patch': { $gte: 0 } },
+            { 'semver.major': { $gt: 2 } },
+            { 'semver.major': { $gte: 2 }, 'semver.minor': { $gt: 2 } },
+          ],
+        },
+        {
+          $or: [
+            { 'semver.major': { $lte: 2 }, 'semver.minor': { $lte: 3 }, 'semver.patch': { $lt: 0 } },
+            { 'semver.major': { $lt: 2 } },
+            { 'semver.major': { $lte: 2 }, 'semver.minor': { $lt: 3 } },
+          ],
+        },
+      ],
+      modelId: 'modelId',
+    })
   })
 
   test('getModelReleases > convertSemverQueryToMongoQuery functions with less than', async () => {
     vi.mocked(ReleaseModelMock.append).mockReturnValueOnce([])
     await getModelReleases({ dn: 'user' } as UserInterface, 'modelID', '<2.2.2')
-    expect(ReleaseModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(ReleaseModelMock.match).toHaveBeenCalledWith({
+      $and: [
+        {
+          $or: [
+            { 'semver.major': { $lte: 2 }, 'semver.minor': { $lte: 2 }, 'semver.patch': { $lt: 2 } },
+            { 'semver.major': { $lt: 2 } },
+            { 'semver.major': { $lte: 2 }, 'semver.minor': { $lt: 2 } },
+          ],
+        },
+      ],
+      modelId: 'modelID',
+    })
   })
 
   test('convertSemverQueryToMongoQuery > convertSemverQueryToMongoQuery handles bad semver', async () => {
@@ -471,14 +511,19 @@ describe('services > release', () => {
 
   test('deleteRelease > success', async () => {
     ReviewModelMock.find.mockResolvedValue([])
-    expect(await deleteRelease({} as any, 'test', 'test')).toMatchSnapshot()
+    const result = await deleteRelease({} as any, 'test', 'test')
+    expect(result.id).toBe('mock-id')
+    expect(ReleaseModelMock.delete).toHaveBeenCalled()
   })
 
   describe('deleteReleases', () => {
     test('success', async () => {
       ReviewModelMock.find.mockResolvedValue([])
 
-      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'])).toMatchSnapshot()
+      const result = await deleteReleases({} as any, 'test', ['test1', 'test2'])
+      expect(result).toHaveLength(2)
+      expect(result[0].id).toBe('mock-id')
+      expect(result[1].id).toBe('mock-id')
       expect(ReleaseModelMock.delete).toHaveBeenCalledTimes(2)
     })
 
@@ -512,7 +557,10 @@ describe('services > release', () => {
       })
       ReviewModelMock.find.mockResolvedValue([])
 
-      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'], true)).toMatchSnapshot()
+      const result = await deleteReleases({} as any, 'test', ['test1', 'test2'], true)
+      expect(result).toHaveLength(2)
+      expect(result[0].id).toBe('mock-id')
+      expect(result[1].id).toBe('mock-id')
       expect(ReleaseModelMock.delete).toHaveBeenCalledTimes(2)
     })
 

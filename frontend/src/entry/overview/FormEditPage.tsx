@@ -28,7 +28,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -254,16 +254,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     })
   }
 
-  if (isSchemaError) {
-    return <MessageAlert message={isSchemaError.info.message} severity='error' />
-  }
-
-  if (isSchemaMigrationsError) {
-    return <MessageAlert message={isSchemaMigrationsError.info.message} severity='error' />
-  }
-
-  if (isSchemaMigrationsLoading || isSchemaLoading) {
-    return <Loading />
+  const queryState = renderQueryState(
+    [isSchemaError, isSchemaMigrationsError],
+    isSchemaMigrationsLoading || isSchemaLoading,
+  )
+  if (queryState) {
+    return queryState
   }
 
   return (
@@ -429,6 +425,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           canEdit={isEdit}
           displayStats={displayFormStats}
           stateList={(schema?.jsonSchema as { stateList?: string[] } | undefined)?.stateList || []}
+          currentState={entry.state}
         />
         {isEdit && (
           <SaveAndCancelButtons

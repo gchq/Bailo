@@ -128,6 +128,10 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
+        if (model.kind === EntryKind.UntrustedModel && !(await authentication.hasRole(user, Roles.UntrustedModel))) {
+          return { id: model.id, success: false, info: 'You do not have permission to manage untrusted models.' }
+        }
+
         // Prohibit non-collaborators from interacting with private models
         if (ModelAction.Import !== action && !(await this.hasModelVisibilityAccess(user, model))) {
           return {
@@ -152,14 +156,6 @@ export class BasicAuthorisationConnector {
           !(await authentication.hasRole(user, Roles.Admin))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
-        }
-
-        if (
-          ModelAction.Create === action &&
-          model.kind === EntryKind.UntrustedModel &&
-          !(await authentication.hasRole(user, Roles.UntrustedModel))
-        ) {
-          return { id: model.id, success: false, info: 'You do not have permission to manage untrusted models.' }
         }
 
         if (ModelAction.Import === action && (await missingRequiredRole(user, model, ['owner']))) {
@@ -257,15 +253,25 @@ export class BasicAuthorisationConnector {
     releases: Array<ReleaseDoc | ReleaseInterface>,
     action: ReleaseActionKeys,
   ): Promise<Array<Response>> {
-    // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
-    // We do need to map some actions to other model actions.
-    const actionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+    const actionMap: Record<Exclude<ReleaseActionKeys, typeof ReleaseAction.View>, ModelActionKeys> = {
       [ReleaseAction.Create]: ModelAction.Write,
       [ReleaseAction.Delete]: ModelAction.Write,
       [ReleaseAction.Update]: ModelAction.Update,
-      [ReleaseAction.View]: ModelAction.View,
       [ReleaseAction.Import]: ModelAction.Import,
       [ReleaseAction.Export]: ModelAction.Export,
+    }
+
+    // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
+    // We do need to map some actions to other model actions.
+    const releaseActionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+      ...actionMap,
+      [ReleaseAction.View]: ModelAction.View,
+    }
+
+    //If release is draft, map view action to update instead
+    const draftActionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+      ...actionMap,
+      [ReleaseAction.View]: ModelAction.Update,
     }
 
     // Is this a constrained user token.
@@ -274,7 +280,15 @@ export class BasicAuthorisationConnector {
       return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
-    return new Array(releases.length || 1).fill(await this.model(user, model, actionMap[action]))
+    if (!releases || releases.length === 0) {
+      const response = await this.model(user, model, actionMap[action])
+      return [response]
+    }
+
+    const draftResponse = await this.model(user, model, draftActionMap[action])
+    const response = await this.model(user, model, releaseActionMap[action])
+
+    return releases.map((release) => (release.draft ? draftResponse : response))
   }
 
   async accessRequests(
@@ -335,10 +349,9 @@ export class BasicAuthorisationConnector {
   ): Promise<Array<Response>> {
     return Promise.all(
       deploymentAssessments.map(async (deploymentAssessment) => {
-        const isNamedUser = [
-          deploymentAssessment.createdBy,
-          deploymentAssessment.metadata.overview?.riskOwner,
-        ].includes(user.dn)
+        const isNamedUser =
+          deploymentAssessment.createdBy === user.dn ||
+          (deploymentAssessment.metadata.overview?.riskOwner ?? []).includes(user.dn)
 
         let errorInfo: string | undefined
         switch (action) {

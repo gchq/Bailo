@@ -6,8 +6,6 @@ from typing import Any
 
 import requests
 
-# isort: split
-
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
 from bailo.core.exceptions import BailoException, ResponseException
@@ -607,10 +605,7 @@ class Client:
         :param data: File chunk as BytesIO or bytes
         :return: JSON response object containing the ETag for this part
         """
-        if isinstance(data, BytesIO):
-            content_length = data.getbuffer().nbytes
-        else:
-            content_length = len(data)
+        content_length = data.getbuffer().nbytes if isinstance(data, BytesIO) else len(data)
 
         return self._parse_json(
             self.agent.post(

@@ -26,6 +26,7 @@ node_modules/
 dist
 docs/_build
 docs/python-docs
+docs/bailo_docs.egg-info
 
 # Python venv
 docs/backenddocsvenv
@@ -38,8 +39,29 @@ docs/backenddocsvenv
 # Tests
 test
 
+# Environment files
+.env*
+
+# Lint/format configs
+eslint.config.mjs
+.prettierrc.json
+.prettierignore
+lint-staged.config.js
+
+# Test config
+vitest.config.ts
+
+# TSConfig for eslint only
+tsconfig.eslint.json
+
 # Extras
 README.md
 
 # Statically built Swagger/OpenAPI spec
 openapi-specs/
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json

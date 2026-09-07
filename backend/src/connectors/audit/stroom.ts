@@ -505,6 +505,10 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, deploymentAssessment.id)
   }
 
+  async onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
   async onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]): Promise<void> {
     this.auditSearchEvent(
       req,
@@ -516,6 +520,14 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, deploymentAssessment.id)
   }
 
+  async onReviewDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.auditGenericEvent(req, `${response._id}`)
+  }
+
+  async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.auditGenericEvent(req, `${response._id}`)
+  }
+
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
     this.auditGenericEvent(req, userInformation.user.dn)
   }
@@ -524,16 +536,16 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, reviewId)
   }
 
-  async onRegistryImagePulled(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImagePulled(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
-  async onRegistryImagePushed(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImagePushed(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
-  async onRegistryImageDeleted(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
   async onError(req: Request, error: BailoError): Promise<void> {
@@ -618,7 +630,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
       },
       EventDetail: eventDetail,
     }
-    if (config.stroom.logOnlyMode) {
+    if (config.stroom.sendEvents) {
       await saveEvent(event)
     } else {
       log.info(

@@ -37,6 +37,13 @@ describe('connectors > authentication > silly', () => {
     expect(result).toBe(true)
   })
 
+  test('hasRole > returns true for UntrustedModel role', async () => {
+    const connector = new SillyAuthenticationConnector()
+    const result = await connector.hasRole({} as any, Roles.UntrustedModel)
+
+    expect(result).toBe(true)
+  })
+
   test('hasRole > returns false for an unrecognised role', async () => {
     const connector = new SillyAuthenticationConnector()
     const result = await connector.hasRole({} as any, 'unknown-role' as any)

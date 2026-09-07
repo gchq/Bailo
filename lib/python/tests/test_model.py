@@ -3,12 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from bailo.core.enums import CollaboratorEntry, MinimalSchema, Role
-
-# isort: split
-
 from bailo import Client, Datacard, Experiment, Model, ModelVisibility
-from bailo.core.enums import EntryKind
+from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, Role
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 
@@ -270,7 +266,7 @@ def test_get_datacard_as_model(integration_client):
     )
 
     with pytest.raises(BailoException):
-        model = Model.from_id(client=integration_client, model_id=datacard.datacard_id)
+        Model.from_id(client=integration_client, model_id=datacard.datacard_id)
 
 
 @pytest.mark.integration
@@ -324,7 +320,7 @@ def test_import_model_from_mlflow(integration_client, mlflow_model, request):
 @pytest.mark.mlflow
 def test_import_nonexistent_model_from_mlflow(integration_client, request):
     with pytest.raises(BailoException):
-        model = Model.from_mlflow(
+        Model.from_mlflow(
             client=integration_client,
             mlflow_uri=request.config.mlflow_uri,
             schema_id="minimal-general-v10",
@@ -335,7 +331,7 @@ def test_import_nonexistent_model_from_mlflow(integration_client, request):
 @pytest.mark.mlflow
 def test_import_model_files_no_run(integration_client, mlflow_model_no_run, request):
     with pytest.raises(BailoException):
-        model = Model.from_mlflow(
+        Model.from_mlflow(
             client=integration_client,
             mlflow_uri=request.config.mlflow_uri,
             schema_id="minimal-general-v10",

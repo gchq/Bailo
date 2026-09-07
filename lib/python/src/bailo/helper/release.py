@@ -11,8 +11,6 @@ from semantic_version import Version
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NO_COLOR
@@ -184,23 +182,22 @@ class Release:
                 path = filename
             total_size = int(res.headers.get("content-length", 0))
 
-            if NO_COLOR:
-                colour = "white"
-            else:
-                colour = "green"
+            colour = "white" if NO_COLOR else "green"
 
-            with tqdm(
-                total=total_size,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=BLOCK_SIZE,
-                postfix=f"downloading {filename} as {path}",
-                colour=colour,
-            ) as t:
-                with open(path, "wb") as f:
-                    for data in res.iter_content(BLOCK_SIZE):
-                        t.update(len(data))
-                        f.write(data)
+            with (
+                tqdm(
+                    total=total_size,
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=BLOCK_SIZE,
+                    postfix=f"downloading {filename} as {path}",
+                    colour=colour,
+                ) as t,
+                open(path, "wb") as f,
+            ):
+                for data in res.iter_content(BLOCK_SIZE):
+                    t.update(len(data))
+                    f.write(data)
 
             logger.info("File written to %s", path)
 
@@ -290,7 +287,7 @@ class Release:
                 path = f"{name}.zip"
                 name = path
 
-            data: BytesIO = open(path, "rb")  # type: ignore[reportAssignmentType]
+            data: BytesIO = open(path, "rb")  # noqa: SIM115  # type: ignore[reportAssignmentType]
             to_close = True
 
             if zip_required:
@@ -302,10 +299,7 @@ class Release:
         size = data.tell()
         data.seek(old_file_position, os.SEEK_SET)
 
-        if NO_COLOR:
-            colour = "white"
-        else:
-            colour = "blue"
+        colour = "white" if NO_COLOR else "blue"
 
         with tqdm(
             total=size,

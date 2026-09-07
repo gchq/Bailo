@@ -3,9 +3,6 @@ from __future__ import annotations
 import pickle
 from pathlib import Path
 
-# isort: split
-
-from bailo_artefactscan_api.config import Settings
 from bailo_artefactscan_api.modelscan import extract_supported_file_types, is_valid_pickle
 
 

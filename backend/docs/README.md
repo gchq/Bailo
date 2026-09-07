@@ -47,7 +47,7 @@ From within the `backend/docs` directory:
 ```bash
 python3 -m venv backenddocsvenv
 source backenddocsvenv/bin/activate
-pip install bailo -r requirements-dev.txt
+pip install ".[dev]" bailo
 ```
 
 #### Building
@@ -56,4 +56,4 @@ Run either `make html` (Linux & Mac) or `make.bat` (Windows). This will build th
 
 #### Notebook Formatting
 
-Notebook files are automatically normalized on commit via a pre-commit hook using black. This ensures `source` fields use the canonical array-of-lines format, as well as maintaining consistent styling with `lib/python`.
+Notebook files are automatically normalised on commit via a pre-commit hook using ruff. This ensures `source` fields use the canonical array-of-lines format, as well as maintaining consistent styling with `lib/python`.

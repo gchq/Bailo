@@ -2,11 +2,10 @@ import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { memoize } from 'lodash-es'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDisplay'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 
 type AccessRequestsProps = {
@@ -20,12 +19,9 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
     <AccessRequestDisplay accessRequest={data} key={data.metadata.overview.name} />
   ))
 
-  if (isAccessRequestsLoading) {
-    return <Loading />
-  }
-
-  if (isAccessRequestsError) {
-    return <MessageAlert message={isAccessRequestsError.info.message} severity='error' />
+  const queryState = renderQueryState([isAccessRequestsError], isAccessRequestsLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

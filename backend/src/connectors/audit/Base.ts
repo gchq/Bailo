@@ -185,19 +185,19 @@ export const AuditInfo = {
     typeId: 'CreateUserToken',
     description: 'Token Created',
     auditKind: AuditKind.Create,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   ViewUserTokens: {
     typeId: 'ViewUserToken',
     description: 'Token Viewed',
     auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   DeleteUserToken: {
     typeId: 'DeleteUserToken',
     description: 'Token Deleted',
     auditKind: AuditKind.Delete,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
 
   CreateAccessRequest: {
@@ -221,7 +221,7 @@ export const AuditInfo = {
   DeleteAccessRequest: {
     typeId: 'UpdateAccessRequest',
     description: 'Access Request Deleted',
-    auditKind: AuditKind.Update,
+    auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.AccessRequest,
   },
   ViewAccessRequests: {
@@ -452,11 +452,29 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.DeploymentAssessment,
   },
+  DeleteDeploymentAssessment: {
+    typeId: 'DeleteDeploymentAssessment',
+    description: 'Deployment assessment deleted',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
   ViewDeploymentAssessment: {
     typeId: 'ViewDeploymentAssessment',
     description: 'Deployment assessment viewed',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.DeploymentAssessment,
+  },
+  ReviewDeploymentAssessment: {
+    typeId: 'ReviewDeploymentAssessment',
+    description: 'Deployment assessment review decision created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.ReviewResponse,
+  },
+  CommentOnDeploymentAssessment: {
+    typeId: 'CommentOnDeploymentAssessment',
+    description: 'Deployment assessment comment created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Response,
   },
   ViewCurrentUserInformation: {
     typeId: 'ViewCurrentUserInformation',
@@ -577,21 +595,24 @@ export abstract class BaseAuditConnector {
 
   abstract onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onUpdateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]): Promise<void>
   abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onReviewDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
+  abstract onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
 
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
 
-  abstract onRegistryImagePulled(req: Request, userDn: string): Promise<void>
-  abstract onRegistryImagePushed(req: Request, userDn: string): Promise<void>
-  abstract onRegistryImageDeleted(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImagePulled(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImagePushed(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImageDeleted(req: Request, registryImage: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
-    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
+    if (auditInfo.typeId !== req.audit.typeId || auditInfo.description !== req.audit.description) {
       throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but received '${JSON.stringify(req.audit)}'`)
     }
   }

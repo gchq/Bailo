@@ -86,7 +86,7 @@ def test_access_request_eq():
         for i in range(2)
     ]
 
-    assert not (access_requests[0] == access_requests[1])
+    assert access_requests[0] != access_requests[1]
 
 
 def test_access_request_eq_not_implemented():
@@ -102,7 +102,7 @@ def test_access_request_eq_not_implemented():
     )
 
     # NotImplemented evaluates to false
-    assert not (access_request == {})
+    assert access_request != {}
 
 
 @pytest.mark.integration

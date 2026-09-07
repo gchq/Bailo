@@ -13,6 +13,7 @@ import { ReviewKind } from '../../types/enums.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
+import { getModelReview } from '../../utils/review.js'
 import { entryKindForRedirect } from '../../utils/routerUtils.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
@@ -115,8 +116,11 @@ export async function notifyDeploymentRiskOwner(
       },
     ],
     [
-      { name: 'Open Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
-      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployments` },
+      {
+        name: 'Open Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
     ],
     true,
   )
@@ -149,8 +153,14 @@ export async function notifyDeploymentModelOwners(
       },
     ],
     [
-      { name: 'View Deployment Assessment', url: `${appBaseUrl}/deployments/${encodeURIComponent(deployment.id)}` },
-      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployments?tab=all-assessments&models=${model.id}` },
+      {
+        name: 'View Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      {
+        name: 'View Deployment Assessments',
+        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
+      },
       { name: 'Open Model', url: modelUrl },
     ],
     false,
@@ -345,7 +355,8 @@ async function notifyRole(review: ReviewInterface, title: string, fields: Info[]
     { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
   ])
 
-  await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
+  const modelReview = getModelReview(review)
+  await dispatchEmailToModelRole(modelReview.modelId, modelReview.role, emailContent)
 }
 
 export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {

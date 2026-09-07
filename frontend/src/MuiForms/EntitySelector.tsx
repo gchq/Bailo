@@ -1,17 +1,14 @@
-import { Box, Chip, Stack, Typography } from '@mui/material'
-import Autocomplete from '@mui/material/Autocomplete'
-import { useTheme } from '@mui/material/styles'
-import TextField from '@mui/material/TextField'
+import { Box, Chip, Stack } from '@mui/material'
 import { Registry, RJSFSchema } from '@rjsf/utils'
-import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
+import EntityAutocomplete from 'src/common/EntityAutocomplete'
 import InlineDiff from 'src/common/InlineDiff'
 import UserDisplay from 'src/common/UserDisplay'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntityObject } from 'types/types'
 
-import { useGetCurrentUser, useListEntities } from '../../actions/user'
+import { useGetCurrentUser } from '../../actions/user'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
@@ -64,15 +61,16 @@ export default function EntitySelector({
   id,
   schema,
 }: EntitySelectorProps) {
-  const [open, setOpen] = useState(false)
-  const [userListQuery, setUserListQuery] = useState('')
-
-  const { users, isUsersLoading, isUsersError } = useListEntities(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const isMultiple = schema.type === 'array'
 
-  const theme = useTheme()
+  const normalisedValue = useMemo<string[] | string>(() => {
+    if (!isMultiple) {
+      return currentValue
+    }
+    return (Array.isArray(currentValue) ? currentValue : [currentValue]).filter(Boolean)
+  }, [isMultiple, currentValue])
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
@@ -82,11 +80,11 @@ export default function EntitySelector({
       return isMultiple ? [defaultEntity] : defaultEntity
     }
 
-    if (!currentValue) {
+    if (!normalisedValue || normalisedValue.length === 0) {
       return []
     }
 
-    const values = Array.isArray(currentValue) ? currentValue : [currentValue]
+    const values = Array.isArray(normalisedValue) ? normalisedValue : [normalisedValue]
     const entities = values.map((value) => {
       const [kind, id] = value.split(':')
       return { kind, id }
@@ -98,29 +96,15 @@ export default function EntitySelector({
   const [selectedEntities, setSelectedEntities] = useState<EntityObject[] | EntityObject>(defaultSelectedEntities())
 
   const handleUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValue: EntityObject[] | EntityObject) => {
+    (newValue: EntityObject[] | EntityObject) => {
       onChange(getEntitySelectorValue(newValue, isMultiple))
       setSelectedEntities(newValue)
     },
     [isMultiple, onChange],
   )
 
-  const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
-    setUserListQuery(value)
-  }, [])
-
-  const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
-    handleInputChange(event, value)
-  }, 500)
-
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
-
-  if (isUsersError) {
-    if (isUsersError.status !== 413) {
-      return <MessageAlert message={isUsersError.info.message} severity='error' />
-    }
   }
 
   if (!registry || !registry.formContext) {
@@ -135,7 +119,7 @@ export default function EntitySelector({
     return <Loading />
   }
 
-  const currentValueString = formatEntityValue(currentValue)
+  const currentValueString = formatEntityValue(normalisedValue)
 
   return (
     <CompareField
@@ -144,72 +128,38 @@ export default function EntitySelector({
       required={required}
       description={schema.description}
       compare={compare}
-      value={currentValue}
+      value={normalisedValue}
       formatter={formatEntity}
-      hasValue={Array.isArray(currentValue) || currentValue !== undefined}
+      hasValue={Array.isArray(normalisedValue) ? normalisedValue.length > 0 : normalisedValue !== undefined}
     >
-      {isUsersError && isUsersError.status === 413 && (
-        <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
-      )}
       {currentUser && compare.editMode ? (
-        <>
-          <Autocomplete<EntityObject, boolean, true>
-            multiple={isMultiple}
-            data-test='entitySelector'
-            loading={userListQuery.length > 3 && isUsersLoading}
-            open={open}
-            size='small'
-            onOpen={() => {
-              setOpen(true)
-            }}
-            onClose={() => {
-              setOpen(false)
-            }}
-            disableClearable
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            getOptionLabel={(option) => option.id}
-            value={
-              isMultiple
-                ? Array.isArray(selectedEntities)
-                  ? selectedEntities
-                  : [selectedEntities]
-                : Array.isArray(selectedEntities)
-                  ? selectedEntities[0]
-                  : selectedEntities
-            }
-            filterOptions={(x) => x}
-            onChange={handleUserChange}
-            noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
-            onInputChange={debounceOnInputChange}
-            options={users || []}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder='Username or group name'
-                error={rawErrors && rawErrors.length > 0}
-                id={id}
-                onKeyDown={(event: KeyboardEvent) => {
-                  if (event.key === 'Backspace') {
-                    event.stopPropagation()
-                  }
-                }}
-              />
-            )}
-          />
-        </>
-      ) : compare.inMirroredCompare && currentValue.length ? (
+        <EntityAutocomplete
+          id={id}
+          multiple={isMultiple}
+          dataTest='entitySelector'
+          value={selectedEntities}
+          onChange={handleUserChange}
+          maxItems={schema.maxItems}
+          disableClearable
+          error={Boolean(rawErrors?.length)}
+        />
+      ) : compare.inMirroredCompare && normalisedValue.length ? (
         <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
       ) : (
-        currentValue &&
-        currentValue.length > 0 && (
+        normalisedValue &&
+        normalisedValue.length > 0 && (
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
-              {Array.isArray(currentValue) ? (
-                currentValue.map((entity) => (
+              {Array.isArray(normalisedValue) ? (
+                normalisedValue.map((entity) => (
                   <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
                 ))
               ) : (
-                <Chip label={<UserDisplay dn={currentValue} />} key={currentValue} sx={{ width: 'fit-content' }} />
+                <Chip
+                  label={<UserDisplay dn={normalisedValue} />}
+                  key={normalisedValue}
+                  sx={{ width: 'fit-content' }}
+                />
               )}
             </Stack>
           </Box>

@@ -28,6 +28,7 @@ const configMock = vi.hoisted(
           owner: 'Owner',
           contributor: 'Contributor',
           consumer: 'Consumer',
+          riskOwner: 'Deployment Risk Owner',
         },
       },
       log: {

@@ -4,7 +4,7 @@ import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlug
 
 export interface DeploymentAssessmentMetadata {
   overview?: {
-    riskOwner?: string
+    riskOwner?: string[]
     justification?: string
     modelIds?: string[]
     [key: string]: unknown
@@ -22,6 +22,14 @@ export interface DeploymentAssessmentInterface {
   createdAt: Date
   updatedAt: Date
 }
+
+export const DeploymentAssessmentState = {
+  NeedsReview: 'needs_review',
+  Rejected: 'rejected',
+  ChangesRequested: 'changes_requested',
+  Approved: 'approved',
+} as const
+export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
 
 export type DeploymentAssessmentDoc = HydratedDocument<DeploymentAssessmentInterface> & SoftDeleteDocument
 

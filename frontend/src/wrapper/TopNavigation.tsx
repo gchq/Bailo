@@ -93,8 +93,6 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
       sx={(theme) => ({
         ...pageTopStyling,
         top: 'unset',
-        // TODO - use "theme.applyStyles" when implementing dark mode
-        background: '#242424',
         ...theme.applyStyles('light', {
           background: `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`,
         }),

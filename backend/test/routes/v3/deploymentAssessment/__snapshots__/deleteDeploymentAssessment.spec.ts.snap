@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > v3 > deploymentAssessment > deleteDeploymentAssessment > 200 > ok 1`] = `
+{
+  "message": "Successfully removed deployment assessment.",
+}
+`;
+
+exports[`routes > v3 > deploymentAssessment > deleteDeploymentAssessment > audit > expected call 1`] = `
+{
+  "id": "deployment-assessment-id",
+}
+`;

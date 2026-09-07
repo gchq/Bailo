@@ -74,14 +74,14 @@ pip install -e .[test]
 - Unit tests: `pytest`
 - Integration tests: `pytest -m integration` (requires Bailo running on `https://localhost:8080`)
 - MLFlow tests: `pytest -m mlflow`
-- Format check: `black --check .`
-- Lint: `pylint bailo`
+- Format check: `ruff format --check .`
+- Lint: `ruff check src/bailo`
 
 ### ArtefactScan API (`lib/artefactscan_api/`)
 
 ```bash
 python3 -m venv artefactscanvenv && source artefactscanvenv/bin/activate
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 ```
 
 - Unit tests: `pytest`
@@ -105,8 +105,7 @@ pip install -r requirements-dev.txt
 
 ### Python
 
-- **Black** for formatting (line-length 120). Do not manually override.
-- **pylint** for linting. Follow **PEP 8** where not overridden by Black.
+- **ruff** for formatting and linting (line-length 120). Configuration in root `ruff.toml`.
 - Use **reStructuredText (reST)** format for docstrings.
 - Add inline comments only where the code is non-obvious.
 
@@ -157,7 +156,7 @@ All PRs to `main` must pass these `.github/workflows/` checks:
 
 Path-filtered (only run when relevant files change):
 
-9. **Python static checks** - `black --check` + `pylint` (when `lib/python/` changes)
+9. **Python static checks** - `ruff format --check` + `ruff check` (when `lib/python/` changes)
 10. **Python unit tests** - pytest across Python 3.10-3.14 (when `lib/python/` changes)
 11. **ArtefactScan tests** - pytest (when `lib/artefactscan_api/` changes)
 12. **Docs style** - `frontend/scripts/check-docs-style.sh` (when `frontend/pages/docs/**/*.mdx` changes)

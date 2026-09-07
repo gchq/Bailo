@@ -89,12 +89,15 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onCreateReview(_req: Request, _modelId: string) {}
   async onCreateDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc) {}
   async onUpdateDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc) {}
+  async onDeleteDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
   async onSearchDeploymentAssessments(_req: Request, _deploymentAssessments: DeploymentAssessmentDoc[]) {}
   async onViewDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
+  async onReviewDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
+  async onCommentOnDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
   async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
   async onNotifyReviewers(_req: Request, _reviewId: string): Promise<void> {}
-  async onRegistryImagePulled(_req: Request, _userDn: string): Promise<void> {}
-  async onRegistryImagePushed(_req: Request, _userDn: string): Promise<void> {}
-  async onRegistryImageDeleted(_req: Request, _userDn: string): Promise<void> {}
+  async onRegistryImagePulled(_req: Request, _registryImage: string): Promise<void> {}
+  async onRegistryImagePushed(_req: Request, _registryImage: string): Promise<void> {}
+  async onRegistryImageDeleted(_req: Request, _registryImage: string): Promise<void> {}
   async onError(_req: Request, _error: BailoError): Promise<void> {}
 }

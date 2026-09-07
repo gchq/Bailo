@@ -247,7 +247,7 @@ export default function SchemaMigrationSelector() {
                   >
                     <MoveDown fontSize='large' color='primary' />
                     <Typography>
-                      {`Questions on an older schema can be mapped to a new question (using the the "Move" action type) so that
+                      {`Questions on an older schema can be mapped to a new question (using the "Move" action type) so that
                   existing data is not lost when a question is moved from one section on the form to another.`}
                     </Typography>
                   </Stack>

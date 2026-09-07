@@ -165,7 +165,20 @@ describe('services > file', () => {
 
     expect(s3Mocks.putObjectStream).toHaveBeenCalled()
     expect(FileModelMock.save).toHaveBeenCalled()
-    expect(result).toMatchSnapshot()
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'mock-id',
+        complete: true,
+        size: 100,
+        mime: 'text/plain',
+        modelId: 'testModelId',
+        name: 'testFile',
+        path: 'beta/model/testModelId/files/mock-long-id',
+        scanResults: [],
+        tags: [],
+      }),
+    )
+    expect(result.save).toHaveBeenCalled()
   })
 
   test('uploadFile > virus scan initialised', async () => {
@@ -187,8 +200,21 @@ describe('services > file', () => {
 
     expect(s3Mocks.putObjectStream).toHaveBeenCalled()
     expect(FileModelMock.save).toHaveBeenCalled()
-    expect(result).toMatchSnapshot()
-    expect(clamscan.on.mock.calls).toMatchSnapshot()
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'mock-id',
+        complete: true,
+        size: 100,
+        mime: 'text/plain',
+        modelId: 'testModelId',
+        name: 'testFile',
+        path: 'beta/model/testModelId/files/mock-long-id',
+        scanResults: [],
+        tags: [],
+      }),
+    )
+    expect(result.save).toHaveBeenCalled()
+    expect(clamscan.on).not.toHaveBeenCalled()
   })
 
   test('uploadFile > no permission', async () => {
@@ -240,7 +266,23 @@ describe('services > file', () => {
 
     expect(s3Mocks.startMultipartUpload).toHaveBeenCalled()
     expect(FileModelMock.save).toHaveBeenCalled()
-    expect(result).toMatchSnapshot()
+    expect(result.uploadId).toBe('uploadId')
+    expect(result.chunks).toEqual([
+      { startByte: 0, endByte: 5242879 },
+      { startByte: 5242880, endByte: 10485759 },
+    ])
+    expect(result.file).toEqual(
+      expect.objectContaining({
+        id: 'mock-id',
+        complete: false,
+        mime: 'text/plain',
+        modelId: 'testModelId',
+        name: 'testFile',
+        path: 'beta/model/testModelId/files/mock-long-id',
+        tags: [],
+      }),
+    )
+    expect(result.file.save).toHaveBeenCalled()
   })
 
   test('startUploadMultipartFile > no permission', async () => {
@@ -291,7 +333,7 @@ describe('services > file', () => {
     const result = await uploadMultipartFilePart({} as any, modelId, testFileId, uploadId, partNumber, stream, bodySize)
 
     expect(s3Mocks.putObjectPartStream).toHaveBeenCalledWith(path, uploadId, partNumber, stream, bodySize)
-    expect(result).toMatchSnapshot()
+    expect(result).toEqual({ ETag: 'test-etag', PartNumber: 1 })
   })
 
   test('uploadMultipartFilePart > no permission', async () => {
@@ -344,7 +386,16 @@ describe('services > file', () => {
     expect(s3Mocks.completeMultipartUpload).toHaveBeenCalled()
     expect(s3Mocks.headObject).toHaveBeenCalled()
     expect(FileModelMock.save).toHaveBeenCalled()
-    expect(result).toMatchSnapshot()
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'mock-id',
+        complete: true,
+        size: 100,
+        scanResults: [],
+        tags: [],
+      }),
+    )
+    expect(result.save).toHaveBeenCalled()
   })
 
   test('finishUploadMultipartFile > no permission', async () => {
@@ -386,7 +437,7 @@ describe('services > file', () => {
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledWith({ fileId: { $eq: testFileId } }, undefined)
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalled()
-    expect(result).toMatchSnapshot()
+    expect(result).toEqual({ id: testFileId, modelId: 'testModel' })
   })
 
   test('removeFiles > success', async () => {
@@ -401,10 +452,15 @@ describe('services > file', () => {
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
-    expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
+    expect(ScanModelMock.deleteMany).toHaveBeenNthCalledWith(1, { fileId: { $eq: undefined } }, undefined)
+    expect(ScanModelMock.deleteMany).toHaveBeenNthCalledWith(2, { fileId: { $eq: undefined } }, undefined)
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(s3Mocks.deleteObject).not.toHaveBeenCalled()
-    expect(result).toMatchSnapshot()
+    expect(result).toHaveLength(2)
+    expect(result[0].modelId).toBe('testModel')
+    expect(result[0].id).toBeUndefined()
+    expect(result[1].modelId).toBe('testModel2')
+    expect(result[1].id).toBeUndefined()
   })
 
   test('removeFiles > success hard delete', async () => {
@@ -419,10 +475,15 @@ describe('services > file', () => {
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
-    expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
+    expect(ScanModelMock.deleteMany).toHaveBeenNthCalledWith(1, { fileId: { $eq: undefined } }, undefined)
+    expect(ScanModelMock.deleteMany).toHaveBeenNthCalledWith(2, { fileId: { $eq: undefined } }, undefined)
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(s3Mocks.deleteObject).toHaveBeenCalledTimes(2)
-    expect(result).toMatchSnapshot()
+    expect(result).toHaveLength(2)
+    expect(result[0].modelId).toBe('testModel')
+    expect(result[0].id).toBeUndefined()
+    expect(result[1].modelId).toBe('testModel2')
+    expect(result[1].id).toBeUndefined()
   })
 
   test('removeFiles > no release permission', async () => {
@@ -480,9 +541,14 @@ describe('services > file', () => {
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledTimes(2)
-    expect(ScanModelMock.deleteMany.mock.calls).toMatchSnapshot()
+    expect(ScanModelMock.deleteMany).toHaveBeenNthCalledWith(1, { fileId: { $eq: undefined } }, undefined)
+    expect(ScanModelMock.deleteMany).toHaveBeenNthCalledWith(2, { fileId: { $eq: undefined } }, undefined)
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
-    expect(result).toMatchSnapshot()
+    expect(result).toHaveLength(2)
+    expect(result[0].modelId).toBe('testModel')
+    expect(result[0].id).toBeUndefined()
+    expect(result[1].modelId).toBe('testModel2')
+    expect(result[1].id).toBeUndefined()
   })
 
   test('removeFiles > throw on mirrored model', async () => {
@@ -504,7 +570,8 @@ describe('services > file', () => {
 
     const result = await getFilesByModel(user, modelId)
 
-    expect(result).toMatchSnapshot()
+    expect(result).toHaveLength(1)
+    expect(result[0]).toEqual(expect.objectContaining({ example: 'file' }))
   })
 
   test('getFilesByModel > no permission', async () => {
@@ -536,7 +603,8 @@ describe('services > file', () => {
 
     const files = await getFilesByIds(user, modelId, fileIds)
 
-    expect(files).toMatchSnapshot()
+    expect(files).toHaveLength(1)
+    expect(files[0]).toEqual(expect.objectContaining({ example: 'file', scanResults: [] }))
   })
 
   test('getFilesByIds > success with scans mapped', async () => {
@@ -563,7 +631,18 @@ describe('services > file', () => {
 
     const files = await getFilesByIds(user, modelId, fileIds)
 
-    expect(files).toMatchSnapshot()
+    expect(files).toEqual([
+      {
+        _id: '123',
+        example: 'file',
+        scanResults: [{ fileId: '123' }, { fileId: '123' }],
+      },
+      {
+        _id: '321',
+        example: 'file',
+        scanResults: [{ fileId: '321' }],
+      },
+    ])
   })
 
   test('getFilesByIds > no file ids', async () => {
@@ -620,7 +699,9 @@ describe('services > file', () => {
 
     const result = await downloadFile(user, testFileId, range)
 
-    expect(result).toMatchSnapshot()
+    expect(result.on).toHaveBeenCalledWith('data', expect.any(Function))
+    expect(result.on).toHaveBeenCalledWith('close', expect.any(Function))
+    expect(result.pipe).toBeDefined()
   })
 
   test('downloadFile > no permission', async () => {
@@ -661,7 +742,8 @@ describe('services > file', () => {
 
     const result = await updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
-    expect(result).toMatchSnapshot()
+    expect(result.modelId).toBe('testModel')
+    expect(result.id).toBeUndefined()
     expect(FileModelMock.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 
@@ -677,7 +759,8 @@ describe('services > file', () => {
       mime: 'text/plain',
     })
 
-    expect(result).toMatchSnapshot()
+    expect(result.modelId).toBe('testModel')
+    expect(result.id).toBeUndefined()
     expect(FileModelMock.findOneAndUpdate).toHaveBeenCalledWith(
       { _id: testFileId },
       {

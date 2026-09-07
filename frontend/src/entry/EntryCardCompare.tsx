@@ -11,25 +11,21 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { EntrySearchResult, useListEntries } from 'actions/entry'
+import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
-import UserDisplay from 'src/common/UserDisplay'
+import EntryCardSnapshotSelector, {
+  buildSnapshots,
+  EntryCardSnapshot,
+  EntryCardSnapshotStream,
+} from 'src/entry/overview/EntryCardSnapshotSelector'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
-import {
-  EntryCardRevisionInterface,
-  EntryKind,
-  EntryKindKeys,
-  EntryKindLabel,
-  MODEL_ENTRY_KINDS,
-  SplitSchemaNoRender,
-} from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/arrayUtils'
-import { formatDateTimeString } from 'utils/dateUtils'
+import useDebounce from 'src/hooks/useDebounce'
+import { EntryKind, EntryKindKeys, EntryKindLabel, MODEL_ENTRY_KINDS, SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
 import { entryKindForRedirect, updateQuery } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
@@ -41,13 +37,6 @@ const QueryDiffSide = {
 
 type QueryDiffSide = (typeof QueryDiffSide)[keyof typeof QueryDiffSide]
 
-const QueryCardType = {
-  Standard: 'Version',
-  Mirror: 'MirroredVersion',
-} as const
-
-type QueryCardType = (typeof QueryCardType)[keyof typeof QueryCardType]
-
 type EntryCardCompareProps = {
   entryKind: EntryKindKeys
   fromEntryId?: string
@@ -58,26 +47,7 @@ type EntryCardCompareProps = {
   toMirroredVersion?: number
 }
 
-const RevisionDetails = ({ revision }: { revision?: EntryCardRevisionInterface | null }) => {
-  if (!revision) {
-    return null
-  }
-
-  return (
-    <Stack direction='row' spacing={0.5} sx={{ minHeight: 20, alignItems: 'center' }}>
-      <Typography component='span' variant='caption'>
-        Updated by
-      </Typography>
-      <UserDisplay dn={revision.createdBy} />
-      <Typography component='span' variant='caption'>
-        on
-      </Typography>
-      <Typography component='span' variant='caption' sx={{ fontWeight: 'bold' }}>
-        {formatDateTimeString(revision.createdAt)}
-      </Typography>
-    </Stack>
-  )
-}
+type EntryOption = Pick<EntrySearchResult, 'id' | 'name' | 'kind'>
 
 export default function EntryCardCompare({
   entryKind,
@@ -90,10 +60,16 @@ export default function EntryCardCompare({
 }: EntryCardCompareProps) {
   const router = useRouter()
 
+  const [fromInput, setFromInput] = useState('')
+  const [toInput, setToInput] = useState('')
   const [fromSearch, setFromSearch] = useState('')
   const [toSearch, setToSearch] = useState('')
+  const debouncedFromSearch = useDebounce(fromSearch, 250)
+  const debouncedToSearch = useDebounce(toSearch, 250)
 
   const searchKinds = entryKind === EntryKind.MODEL ? MODEL_ENTRY_KINDS : entryKind
+  const { entry: fromEntry } = useGetEntry(fromEntryId, searchKinds)
+  const { entry: toEntry } = useGetEntry(toEntryId, searchKinds)
 
   const { entries: fromEntriesRaw, isEntriesLoading: isFromEntriesLoading } = useListEntries(
     searchKinds,
@@ -103,7 +79,7 @@ export default function EntryCardCompare({
     [],
     [],
     [],
-    fromSearch,
+    debouncedFromSearch,
     undefined,
     undefined,
     true,
@@ -116,23 +92,18 @@ export default function EntryCardCompare({
     [],
     [],
     [],
-    toSearch,
+    debouncedToSearch,
     undefined,
     undefined,
     true,
   )
 
-  const fromEntries = fromEntriesRaw
-  const toEntries = toEntriesRaw
-
-  const fromEntry = useMemo(
-    () => (fromEntryId ? fromEntries.find((entry) => entry.id === fromEntryId) : undefined),
-    [fromEntries, fromEntryId],
-  )
-  const toEntry = useMemo(
-    () => (toEntryId ? toEntries.find((entry) => entry.id === toEntryId) : undefined),
-    [toEntries, toEntryId],
-  )
+  const fromEntries: EntryOption[] =
+    fromEntry && !fromEntriesRaw.some((entry) => entry.id === fromEntry.id)
+      ? [fromEntry, ...fromEntriesRaw]
+      : fromEntriesRaw
+  const toEntries: EntryOption[] =
+    toEntry && !toEntriesRaw.some((entry) => entry.id === toEntry.id) ? [toEntry, ...toEntriesRaw] : toEntriesRaw
 
   const {
     entryCardRevisions: fromRevisions,
@@ -168,6 +139,20 @@ export default function EntryCardCompare({
 
   const hasLocalPair = !!fromLocalCard && !!toLocalCard
   const hasMirroredPair = !!fromMirroredCard && !!toMirroredCard
+  const fromIsMirroredModel = fromEntry?.kind === EntryKind.MIRRORED_MODEL
+  const toIsMirroredModel = toEntry?.kind === EntryKind.MIRRORED_MODEL
+  const isMixedModelComparison =
+    !!fromEntryId &&
+    !!toEntryId &&
+    fromIsMirroredModel !== toIsMirroredModel &&
+    (fromIsMirroredModel || toIsMirroredModel)
+
+  const effectiveFromCard = isMixedModelComparison
+    ? fromIsMirroredModel
+      ? fromMirroredCard
+      : fromLocalCard
+    : undefined
+  const effectiveToCard = isMixedModelComparison ? (toIsMirroredModel ? toMirroredCard : toLocalCard) : undefined
 
   const hasFromCard = !!fromLocalCard || !!fromMirroredCard
   const hasToCard = !!toLocalCard || !!toMirroredCard
@@ -175,13 +160,21 @@ export default function EntryCardCompare({
 
   const previewCard = fromLocalCard ?? fromMirroredCard
 
+  const mixedSchemaId =
+    effectiveFromCard && effectiveToCard && effectiveFromCard.schemaId === effectiveToCard.schemaId
+      ? effectiveToCard.schemaId
+      : undefined
   const localSchemaId =
-    hasLocalPair && fromLocalCard.schemaId === toLocalCard.schemaId ? toLocalCard.schemaId : undefined
+    !isMixedModelComparison && hasLocalPair && fromLocalCard.schemaId === toLocalCard.schemaId
+      ? toLocalCard.schemaId
+      : undefined
   const mirroredSchemaId =
-    hasMirroredPair && fromMirroredCard.schemaId === toMirroredCard.schemaId ? toMirroredCard.schemaId : undefined
+    !isMixedModelComparison && hasMirroredPair && fromMirroredCard.schemaId === toMirroredCard.schemaId
+      ? toMirroredCard.schemaId
+      : undefined
 
   const singleSideSchemaId = fromOnly ? previewCard?.schemaId : undefined
-  const chosenSchemaId = localSchemaId ?? mirroredSchemaId ?? singleSideSchemaId
+  const chosenSchemaId = mixedSchemaId ?? localSchemaId ?? mirroredSchemaId ?? singleSideSchemaId
 
   const {
     schema: chosenSchema,
@@ -189,22 +182,21 @@ export default function EntryCardCompare({
     isSchemaError: isSchemaError,
   } = useGetSchema(chosenSchemaId ?? '')
 
-  const sortedFromLocalRevisions = useMemo(
-    () => [...fromRevisions].filter((revision) => !revision.mirrored).sort(sortByCreatedAtDescending),
-    [fromRevisions],
+  const fromSnapshotStream: EntryCardSnapshotStream | undefined = isMixedModelComparison
+    ? fromIsMirroredModel
+      ? 'mirrored'
+      : 'local'
+    : undefined
+  const toSnapshotStream: EntryCardSnapshotStream | undefined = isMixedModelComparison
+    ? toIsMirroredModel
+      ? 'mirrored'
+      : 'local'
+    : undefined
+  const fromSnapshots = useMemo(
+    () => buildSnapshots(fromRevisions, fromSnapshotStream),
+    [fromRevisions, fromSnapshotStream],
   )
-  const sortedFromMirroredRevisions = useMemo(
-    () => [...fromRevisions].filter((revision) => revision.mirrored).sort(sortByCreatedAtDescending),
-    [fromRevisions],
-  )
-  const sortedToLocalRevisions = useMemo(
-    () => [...toRevisions].filter((revision) => !revision.mirrored).sort(sortByCreatedAtDescending),
-    [toRevisions],
-  )
-  const sortedToMirroredRevisions = useMemo(
-    () => [...toRevisions].filter((revision) => revision.mirrored).sort(sortByCreatedAtDescending),
-    [toRevisions],
-  )
+  const toSnapshots = useMemo(() => buildSnapshots(toRevisions, toSnapshotStream), [toRevisions, toSnapshotStream])
 
   const useMirroredLayout = hasMirroredPair
 
@@ -218,15 +210,24 @@ export default function EntryCardCompare({
     const fromMirroredState = fromMirroredCard?.metadata ?? {}
     const steps = fromOnly
       ? getStepsFromSchema(chosenSchema, {}, ['properties.contacts'], fromState, fromMirroredState)
-      : getStepsFromSchema(
-          chosenSchema,
-          {},
-          ['properties.contacts'],
-          toState,
-          toMirroredState,
-          fromState,
-          fromMirroredState,
-        )
+      : isMixedModelComparison
+        ? getStepsFromSchema(
+            chosenSchema,
+            {},
+            ['properties.contacts'],
+            effectiveToCard?.metadata ?? {},
+            {},
+            effectiveFromCard?.metadata ?? {},
+          )
+        : getStepsFromSchema(
+            chosenSchema,
+            {},
+            ['properties.contacts'],
+            toState,
+            toMirroredState,
+            fromState,
+            fromMirroredState,
+          )
     for (const step of steps) {
       step.steps = steps
     }
@@ -236,6 +237,9 @@ export default function EntryCardCompare({
     fromLocalCard?.metadata,
     fromMirroredCard?.metadata,
     fromOnly,
+    isMixedModelComparison,
+    effectiveFromCard?.metadata,
+    effectiveToCard?.metadata,
     toLocalCard?.metadata,
     toMirroredCard?.metadata,
   ])
@@ -259,18 +263,119 @@ export default function EntryCardCompare({
     setLastKey(currentKey)
   }
 
-  const setModel = (side: QueryDiffSide, model: EntrySearchResult | null) => {
+  const setModel = (side: QueryDiffSide, model: EntryOption | null) => {
     if (side === QueryDiffSide.From) {
+      setFromInput(model ? `${model.name} (${model.id})` : '')
+      setFromSearch('')
       updateQuery(router, { fromEntry: model?.id, fromVersion: undefined, fromMirroredVersion: undefined })
     } else {
+      setToInput(model ? `${model.name} (${model.id})` : '')
+      setToSearch('')
       updateQuery(router, { toEntry: model?.id, toVersion: undefined, toMirroredVersion: undefined })
     }
   }
 
-  const setVersion = (side: QueryDiffSide, cardType: QueryCardType, version?: number) => {
-    const key = `${side}${cardType}`
-    updateQuery(router, { [key]: version === undefined ? undefined : String(version) })
-  }
+  const setSnapshot = useCallback(
+    (side: QueryDiffSide, snapshot: EntryCardSnapshot) => {
+      updateQuery(router, {
+        [`${side}Version`]: snapshot.local === undefined ? undefined : String(snapshot.local),
+        [`${side}MirroredVersion`]: snapshot.mirrored === undefined ? undefined : String(snapshot.mirrored),
+      })
+    },
+    [router],
+  )
+
+  const defaultedFromEntryId = useRef<string | undefined>(undefined)
+  const defaultedToEntryId = useRef<string | undefined>(undefined)
+
+  useEffect(() => {
+    setFromInput(fromEntry ? `${fromEntry.name} (${fromEntry.id})` : '')
+    setFromSearch('')
+  }, [fromEntry, fromEntryId])
+
+  useEffect(() => {
+    setToInput(toEntry ? `${toEntry.name} (${toEntry.id})` : '')
+    setToSearch('')
+  }, [toEntry, toEntryId])
+
+  useEffect(() => {
+    if (!isMixedModelComparison) {
+      return
+    }
+
+    const hasIrrelevantFromVersion =
+      (fromSnapshotStream === 'local' && fromMirroredVersion !== undefined) ||
+      (fromSnapshotStream === 'mirrored' && fromVersion !== undefined)
+    const hasIrrelevantToVersion =
+      (toSnapshotStream === 'local' && toMirroredVersion !== undefined) ||
+      (toSnapshotStream === 'mirrored' && toVersion !== undefined)
+
+    if (!hasIrrelevantFromVersion && !hasIrrelevantToVersion) {
+      return
+    }
+
+    updateQuery(router, {
+      ...(hasIrrelevantFromVersion && {
+        [fromSnapshotStream === 'local' ? 'fromMirroredVersion' : 'fromVersion']: undefined,
+      }),
+      ...(hasIrrelevantToVersion && {
+        [toSnapshotStream === 'local' ? 'toMirroredVersion' : 'toVersion']: undefined,
+      }),
+    })
+  }, [
+    fromMirroredVersion,
+    fromSnapshotStream,
+    fromVersion,
+    isMixedModelComparison,
+    router,
+    toMirroredVersion,
+    toSnapshotStream,
+    toVersion,
+  ])
+
+  useEffect(() => {
+    const selectedVersion =
+      fromSnapshotStream === 'mirrored'
+        ? fromMirroredVersion
+        : fromSnapshotStream === 'local'
+          ? fromVersion
+          : (fromVersion ?? fromMirroredVersion)
+    if (selectedVersion !== undefined) {
+      defaultedFromEntryId.current = undefined
+      return
+    }
+    const latestSnapshot = fromSnapshots.at(-1)
+    if (fromEntryId && latestSnapshot && !isFromRevisionsLoading && defaultedFromEntryId.current !== fromEntryId) {
+      defaultedFromEntryId.current = fromEntryId
+      setSnapshot(QueryDiffSide.From, latestSnapshot)
+    }
+  }, [
+    fromEntryId,
+    fromMirroredVersion,
+    fromSnapshots,
+    fromSnapshotStream,
+    fromVersion,
+    isFromRevisionsLoading,
+    setSnapshot,
+  ])
+
+  useEffect(() => {
+    const selectedVersion =
+      toSnapshotStream === 'mirrored'
+        ? toMirroredVersion
+        : toSnapshotStream === 'local'
+          ? toVersion
+          : (toVersion ?? toMirroredVersion)
+    if (selectedVersion !== undefined) {
+      defaultedToEntryId.current = undefined
+      return
+    }
+    const latestSnapshot = toSnapshots.at(-1)
+    if (toEntryId && latestSnapshot && !isToRevisionsLoading && defaultedToEntryId.current !== toEntryId) {
+      defaultedToEntryId.current = toEntryId
+      setSnapshot(QueryDiffSide.To, latestSnapshot)
+    }
+  }, [isToRevisionsLoading, setSnapshot, toEntryId, toMirroredVersion, toSnapshots, toSnapshotStream, toVersion])
 
   useEffect(() => {
     setSplitSchema(initialSplit)
@@ -300,33 +405,20 @@ export default function EntryCardCompare({
         (toMirroredVersion !== undefined && isToMirroredLoading))) ||
     (!!chosenSchemaId && isSchemaLoading)
 
-  const renderVersionLabel = (revision: EntryCardRevisionInterface) => `Version ${revision.version}`
+  const renderEntryLabel = (entry: EntryOption) => `${entry.name} (${entry.id})`
 
-  const renderEntryLabel = (entry: EntrySearchResult) => `${entry.name} (${entry.id})`
+  const snapshotMatchesVersions = (snapshot: EntryCardSnapshot, localVersion?: number, mirroredVersion?: number) =>
+    snapshot.local === localVersion && snapshot.mirrored === mirroredVersion
 
-  const fromLocalOption = sortedFromLocalRevisions.find((revision) => revision.version === fromVersion) ?? null
-  const fromMirroredOption =
-    sortedFromMirroredRevisions.find((revision) => revision.version === fromMirroredVersion) ?? null
-  const toLocalOption = sortedToLocalRevisions.find((revision) => revision.version === toVersion) ?? null
-  const toMirroredOption = sortedToMirroredRevisions.find((revision) => revision.version === toMirroredVersion) ?? null
-
-  const fromHasMirroredRevisions = sortedFromMirroredRevisions.length > 0
-  const toHasMirroredRevisions = sortedToMirroredRevisions.length > 0
-
+  const fromSnapshot = fromSnapshots.find((snapshot) =>
+    snapshotMatchesVersions(snapshot, fromVersion, fromMirroredVersion),
+  )
+  const toSnapshot = toSnapshots.find((snapshot) => snapshotMatchesVersions(snapshot, toVersion, toMirroredVersion))
   const sameEntrySelected = !!fromEntryId && fromEntryId === toEntryId
-
-  const isToLocalOptionDisabled = (revision: EntryCardRevisionInterface) =>
-    sameEntrySelected && fromVersion !== undefined && revision.version === fromVersion
-
-  const isFromLocalOptionDisabled = (revision: EntryCardRevisionInterface) =>
-    sameEntrySelected && toVersion !== undefined && revision.version === toVersion
-
-  const isToMirroredOptionDisabled = (revision: EntryCardRevisionInterface) =>
-    sameEntrySelected && fromMirroredVersion !== undefined && revision.version === fromMirroredVersion
 
   const kindLabel = EntryKindLabel[entryKind]
 
-  const renderGotoEntryButton = (entry?: EntrySearchResult) => {
+  const renderGotoEntryButton = (entry?: EntryOption) => {
     const href = entry ? `/${entryKindForRedirect(entry.kind)}/${entry.id}` : undefined
 
     return (
@@ -339,9 +431,15 @@ export default function EntryCardCompare({
   const hasAnyVersionFrom = !!fromEntryId && (fromVersion !== undefined || fromMirroredVersion !== undefined)
   const hasAnyVersionTo = !!toEntryId && (toVersion !== undefined || toMirroredVersion !== undefined)
 
-  const localSchemasDiverge = hasLocalPair && fromLocalCard.schemaId !== toLocalCard.schemaId
-  const mirroredSchemasDiverge = hasMirroredPair && fromMirroredCard.schemaId !== toMirroredCard.schemaId
-  const schemasDiverge = localSchemasDiverge || mirroredSchemasDiverge
+  const mixedSchemasDiverge =
+    isMixedModelComparison &&
+    !!effectiveFromCard &&
+    !!effectiveToCard &&
+    effectiveFromCard.schemaId !== effectiveToCard.schemaId
+  const localSchemasDiverge = !isMixedModelComparison && hasLocalPair && fromLocalCard.schemaId !== toLocalCard.schemaId
+  const mirroredSchemasDiverge =
+    !isMixedModelComparison && hasMirroredPair && fromMirroredCard.schemaId !== toMirroredCard.schemaId
+  const schemasDiverge = mixedSchemasDiverge || localSchemasDiverge || mirroredSchemasDiverge
 
   const canRenderForm = !loading && !!chosenSchema && splitSchema.steps.length > 0 && !schemasDiverge
 
@@ -379,50 +477,29 @@ export default function EntryCardCompare({
                 fullWidth
                 size='small'
                 value={fromEntry ?? null}
+                inputValue={fromInput}
                 getOptionLabel={renderEntryLabel}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onInputChange={(_event, value, reason) => {
                   if (reason === 'input') {
+                    setFromInput(value)
                     setFromSearch(value)
                   }
                 }}
                 onChange={(_event, value) => setModel(QueryDiffSide.From, value)}
                 renderInput={(params) => <TextField {...params} label={kindLabel} />}
               />
-              <Autocomplete
-                disablePortal
-                options={sortedFromLocalRevisions}
-                disabled={!fromEntryId}
-                loading={isFromRevisionsLoading}
-                fullWidth
-                size='small'
-                value={fromLocalOption}
-                getOptionLabel={renderVersionLabel}
-                getOptionDisabled={isFromLocalOptionDisabled}
-                isOptionEqualToValue={(option, value) => option.version === value.version}
-                onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Standard, value?.version)}
-                renderInput={(params) => <TextField {...params} label='Version' />}
+              <EntryCardSnapshotSelector
+                snapshots={fromSnapshots}
+                selected={fromSnapshot}
+                disabled={!fromEntryId || isFromRevisionsLoading}
+                isSnapshotDisabled={(snapshot) =>
+                  sameEntrySelected &&
+                  !!toSnapshot &&
+                  snapshotMatchesVersions(snapshot, toSnapshot.local, toSnapshot.mirrored)
+                }
+                onSelect={(snapshot) => setSnapshot(QueryDiffSide.From, snapshot)}
               />
-              <RevisionDetails revision={fromLocalOption} />
-              {fromHasMirroredRevisions && (
-                <>
-                  <Autocomplete
-                    disablePortal
-                    options={sortedFromMirroredRevisions}
-                    disabled={!fromEntryId}
-                    loading={isFromRevisionsLoading}
-                    fullWidth
-                    size='small'
-                    value={fromMirroredOption}
-                    getOptionLabel={renderVersionLabel}
-                    getOptionDisabled={isFromLocalOptionDisabled}
-                    isOptionEqualToValue={(option, value) => option.version === value.version}
-                    onChange={(_event, value) => setVersion(QueryDiffSide.From, QueryCardType.Mirror, value?.version)}
-                    renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
-                  />
-                  <RevisionDetails revision={fromMirroredOption} />
-                </>
-              )}
             </Stack>
             <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
               <Typography>&nbsp;</Typography>
@@ -469,50 +546,29 @@ export default function EntryCardCompare({
                 fullWidth
                 size='small'
                 value={toEntry ?? null}
+                inputValue={toInput}
                 getOptionLabel={renderEntryLabel}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onInputChange={(_event, value, reason) => {
                   if (reason === 'input') {
+                    setToInput(value)
                     setToSearch(value)
                   }
                 }}
                 onChange={(_event, value) => setModel(QueryDiffSide.To, value)}
                 renderInput={(params) => <TextField {...params} label={kindLabel} />}
               />
-              <Autocomplete
-                disablePortal
-                options={sortedToLocalRevisions}
-                disabled={!toEntryId}
-                loading={isToRevisionsLoading}
-                fullWidth
-                size='small'
-                value={toLocalOption}
-                getOptionLabel={renderVersionLabel}
-                getOptionDisabled={isToLocalOptionDisabled}
-                isOptionEqualToValue={(option, value) => option.version === value.version}
-                onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Standard, value?.version)}
-                renderInput={(params) => <TextField {...params} label='Version' />}
+              <EntryCardSnapshotSelector
+                snapshots={toSnapshots}
+                selected={toSnapshot}
+                disabled={!toEntryId || isToRevisionsLoading}
+                isSnapshotDisabled={(snapshot) =>
+                  sameEntrySelected &&
+                  !!fromSnapshot &&
+                  snapshotMatchesVersions(snapshot, fromSnapshot.local, fromSnapshot.mirrored)
+                }
+                onSelect={(snapshot) => setSnapshot(QueryDiffSide.To, snapshot)}
               />
-              <RevisionDetails revision={toLocalOption} />
-              {toHasMirroredRevisions && (
-                <>
-                  <Autocomplete
-                    disablePortal
-                    options={sortedToMirroredRevisions}
-                    disabled={!toEntryId}
-                    loading={isToRevisionsLoading}
-                    fullWidth
-                    size='small'
-                    value={toMirroredOption}
-                    getOptionLabel={renderVersionLabel}
-                    getOptionDisabled={isToMirroredOptionDisabled}
-                    isOptionEqualToValue={(option, value) => option.version === value.version}
-                    onChange={(_event, value) => setVersion(QueryDiffSide.To, QueryCardType.Mirror, value?.version)}
-                    renderInput={(params) => <TextField {...params} label='Mirrored Version' />}
-                  />
-                  <RevisionDetails revision={toMirroredOption} />
-                </>
-              )}
             </Stack>
           </Stack>
           {loading && <Loading />}
@@ -537,7 +593,7 @@ export default function EntryCardCompare({
               setSplitSchema={setSplitSchema}
               canEdit={false}
               compareMode={!fromOnly}
-              mirroredModel={fromOnly ? !!fromMirroredCard : useMirroredLayout}
+              mirroredModel={fromOnly ? !!fromMirroredCard : !isMixedModelComparison && useMirroredLayout}
             />
           )}
         </Stack>

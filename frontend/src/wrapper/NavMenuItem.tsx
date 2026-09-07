@@ -1,6 +1,6 @@
 import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement, useContext, useEffect, useState } from 'react'
+import { ReactElement, useContext } from 'react'
 import CurrentUserContext from 'src/contexts/currentUserContext'
 import Link from 'src/Link'
 import { RoleKeys } from 'types/types'
@@ -33,30 +33,13 @@ export function NavMenuItem({
 }: NavMenuItemProps) {
   const currentUser = useContext(CurrentUserContext)
   const theme = useTheme()
-  const newBadgeStorageKey = `nav-new-dismissed-${menuPage}`
-  const [newBadgeDismissed, setNewBadgeDismissed] = useState(
-    () => isNew && localStorage.getItem(newBadgeStorageKey) === 'true',
-  )
-
-  useEffect(() => {
-    if (isNew) {
-      setNewBadgeDismissed(localStorage.getItem(newBadgeStorageKey) === 'true')
-    }
-  }, [isNew, newBadgeStorageKey])
-
-  const dismissNewBadge = () => {
-    if (isNew && !newBadgeDismissed) {
-      localStorage.setItem(newBadgeStorageKey, 'true')
-      setNewBadgeDismissed(true)
-    }
-  }
 
   if (requiredRole && !currentUser.systemRoles.includes(requiredRole)) {
     return
   }
 
   const iconWithBadges = (
-    <Badge badgeContent='New' color='success' invisible={!isNew || newBadgeDismissed}>
+    <Badge badgeContent='New' color='success' invisible={!isNew}>
       <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
         {icon}
       </Badge>
@@ -66,7 +49,7 @@ export function NavMenuItem({
   return (
     <ListItem disablePadding>
       <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%', textDecoration: 'none' }}>
-        <ListItemButton selected={selectedPage === menuPage} onClick={dismissNewBadge}>
+        <ListItemButton selected={selectedPage === menuPage}>
           <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>

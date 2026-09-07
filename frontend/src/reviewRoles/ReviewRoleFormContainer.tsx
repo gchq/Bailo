@@ -19,7 +19,7 @@ import { useGetEntryRoles } from 'actions/entry'
 import { UpdateReviewRolesParams } from 'actions/reviewRoles'
 import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -73,12 +73,9 @@ export default function ReviewRoleFormContainer<
     )
   }, [draftFormData.defaultEntities, handleCollaboratorsChange])
 
-  if (isEntryRolesError) {
-    return <MessageAlert message={isEntryRolesError.info.message} />
-  }
-
-  if (isEntryRolesLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isEntryRolesError], isEntryRolesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

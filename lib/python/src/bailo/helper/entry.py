@@ -116,7 +116,8 @@ class Entry:
             logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(
-                f"ID {self.id} does not have any associated cards. If needed, create a card with the .card_from_schema() method."
+                f"ID {self.id} does not have any associated cards. If needed, create a card with the .card_from_schema() method.",
+                stacklevel=2,
             )
 
     def get_card_revision(self, version: str) -> None:

@@ -3,9 +3,13 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { DeploymentAssessmentInterface } from '../../../models/DeploymentAssessment.js'
-import { getDeploymentAssessmentById } from '../../../services/deploymentAssessment.js'
-import { deploymentAssessmentInterfaceSchema, registerPath } from '../../../services/specification.js'
+import { getDeploymentAssessmentDetails } from '../../../services/deploymentAssessment.js'
+import {
+  deploymentAssessmentInterfaceSchema,
+  deploymentAssessmentResponseSchema,
+  deploymentAssessmentStateSchema,
+  registerPath,
+} from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getDeploymentAssessmentSchema = z.object({
@@ -28,6 +32,8 @@ registerPath(
           'application/json': {
             schema: z.object({
               deploymentAssessment: deploymentAssessmentInterfaceSchema,
+              state: deploymentAssessmentStateSchema.optional(),
+              responses: z.array(deploymentAssessmentResponseSchema),
             }),
           },
         },
@@ -37,21 +43,15 @@ registerPath(
   'v3',
 )
 
-interface GetDeploymentAssessmentResponse {
-  deploymentAssessment: DeploymentAssessmentInterface
-}
-
 export const getDeploymentAssessment = [
-  async (req: Request, res: Response<GetDeploymentAssessmentResponse>): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     req.audit = AuditInfo.ViewDeploymentAssessment
     const { params } = parse(req, getDeploymentAssessmentSchema)
 
-    const deploymentAssessment = await getDeploymentAssessmentById(req.user, params.deploymentAssessmentId)
+    const details = await getDeploymentAssessmentDetails(req.user, params.deploymentAssessmentId)
 
-    await audit.onViewDeploymentAssessment(req, deploymentAssessment)
+    await audit.onViewDeploymentAssessment(req, details.deploymentAssessment)
 
-    res.json({
-      deploymentAssessment,
-    })
+    res.json(details)
   },
 ]

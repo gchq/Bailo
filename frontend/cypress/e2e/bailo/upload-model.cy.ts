@@ -71,10 +71,10 @@ describe('Create new model', () => {
     cy.visit(`/model/${modelUuid}`)
     cy.contains(modelUuid)
 
-    cy.log('Navigating to releases tab to draft a new release')
+    cy.log('Navigating to releases tab to create a new release')
     cy.get('[data-test=releasesTab]').click({ force: true })
-    cy.contains('Draft new release')
-    cy.get('[data-test=draftNewReleaseButton').click()
+    cy.contains('Create new release')
+    cy.get('[data-test=createNewReleaseButton').click()
     cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
     cy.log('Filling out release form and submitting')

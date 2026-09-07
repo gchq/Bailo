@@ -6,8 +6,6 @@ from typing import Any
 
 from semantic_version import Version
 
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility
 from bailo.core.exceptions import BailoException
@@ -324,11 +322,11 @@ class MirroredModel(Entry):
             self._unpack_card(res["model"]["card"])
             logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
-            warnings.warn(f"ID {self.id} does not have any associated model card.")
+            warnings.warn(f"ID {self.id} does not have any associated model card.", stacklevel=2)
         if "mirroredCard" in res["model"]:
             self._unpack_card(res["model"]["mirroredCard"], True)
         else:
-            warnings.warn(f"ID {self.id} does not have any associated additional information.")
+            warnings.warn(f"ID {self.id} does not have any associated additional information.", stacklevel=2)
 
     def _unpack_card(self, res, mirrored=False) -> None:
         if mirrored:

@@ -20,7 +20,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
-import { MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
+import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
 
@@ -34,6 +34,7 @@ interface PaginateProps<T> {
   hideSearchInput?: boolean
   defaultSortProperty: keyof T
   defaultSortDirection?: SortingDirectionKeys
+  prioritiseItems?: (a: T, b: T) => number
   hideBorders?: boolean
   hideDividers?: boolean
   children: ({ data }: { data: T }) => ReactElement
@@ -62,6 +63,7 @@ export default function Paginate<T>({
   hideSearchInput = false,
   defaultSortProperty,
   defaultSortDirection = SortingDirection.DESC,
+  prioritiseItems,
   hideBorders = false,
   hideDividers = false,
   children,
@@ -93,6 +95,11 @@ export default function Paginate<T>({
     () => (isArray(filteredList) ? Math.ceil(filteredList.length / pageSize) : 10),
     [filteredList, pageSize],
   )
+  const currentPage = Math.min(page, Math.max(pageCount, 1))
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, Math.max(pageCount, 1)))
+  }, [pageCount])
 
   const handlePageOnChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
@@ -138,6 +145,10 @@ export default function Paginate<T>({
 
   const compareSemanticVersions = useCallback(
     (a: T, b: T) => {
+      const priority = prioritiseItems?.(a, b) ?? 0
+      if (priority !== 0) {
+        return priority
+      }
       if (typeof a[orderByValue] !== 'string' || typeof b[orderByValue] !== 'string') {
         return 1
       }
@@ -147,7 +158,7 @@ export default function Paginate<T>({
         return semver.gt(b[orderByValue], a[orderByValue]) ? 1 : -1
       }
     },
-    [ascOrDesc, orderByValue],
+    [ascOrDesc, orderByValue, prioritiseItems],
   )
 
   const orderByMenuListItems = useCallback(
@@ -228,10 +239,10 @@ export default function Paginate<T>({
     let sortedList
     if (orderByValue === 'semver') {
       sortedList = filteredList.sort(compareSemanticVersions)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     } else {
       sortedList = filteredList.sort(sortByValue)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     }
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
@@ -240,7 +251,7 @@ export default function Paginate<T>({
         </div>
       ))
     }
-  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, page, pageSize, children])
+  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, currentPage, pageSize, children])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />
@@ -326,7 +337,7 @@ export default function Paginate<T>({
         <Pagination
           count={pageCount}
           color='secondary'
-          page={page}
+          page={currentPage}
           onChange={handlePageOnChange}
           aria-label='bottom page pagination navigation'
         />
