@@ -169,6 +169,91 @@ export async function notifyDeploymentModelOwners(
   await dispatchEmail(entities, await emailContent)
 }
 
+export async function notifyDeploymentAssessmentCreator(
+  deployment: DeploymentAssessmentInterface,
+  decision: string,
+  assessmentReviewer: string,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  let emailTitle: string
+
+  if (decision === 'reject') {
+    emailTitle = `A deployment assessment you own has been rejected`
+  } else if (decision === 'request_changes') {
+    emailTitle = `A deployment assessment you own has had changes requested`
+  } else {
+    emailTitle = `A deployment assessment has been reviewed with decision: ${decision}`
+  }
+
+  const emailContent = buildEmail(
+    `${emailTitle}`,
+    [
+      { title: 'Deployment Assessment Name', data: deployment.name },
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      {
+        title: 'Reviewed By',
+        data:
+          (await authentication.getUserInformation(toEntity('user', assessmentReviewer))).name || assessmentReviewer,
+      },
+    ],
+    [
+      {
+        name: 'Open Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
+    ],
+    false,
+  )
+
+  await dispatchEmail([toEntity('user', deployment.createdBy)], await emailContent)
+}
+
+export async function notifyModelDevelopers(
+  modelDevelopers: string[],
+  deployment: DeploymentAssessmentInterface,
+  model: ModelInterface,
+  creatorName: string,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
+
+  const emailContent = buildEmail(
+    `A deployment assessment, containing a model you own, has been approved`,
+    [
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      { title: 'Model Name', data: model.name },
+      { title: 'Model ID', data: model.id },
+      {
+        title: 'Created By',
+        data: (await authentication.getUserInformation(toEntity('user', creatorName))).name || creatorName,
+      },
+    ],
+    [
+      {
+        name: 'View Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      {
+        name: 'View Deployment Assessments',
+        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
+      },
+      { name: 'Open Model', url: modelUrl },
+    ],
+    false,
+  )
+
+  await dispatchEmail(modelDevelopers, await emailContent)
+}
+
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')

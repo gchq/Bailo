@@ -29,7 +29,12 @@ import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
 import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
-import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
+import {
+  notifyDeploymentAssessmentCreator,
+  notifyDeploymentModelOwners,
+  notifyDeploymentRiskOwner,
+  notifyModelDevelopers,
+} from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
 
 export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
@@ -295,7 +300,61 @@ export async function reviewDeploymentAssessment(
     ...(comment && { comment }),
   })
   await response.save()
+
+  await notifyDeploymentAssessmentReviewed(deploymentAssessment, decision)
+
   return response
+}
+
+async function notifyDeploymentAssessmentReviewed(
+  deploymentAssessment: DeploymentAssessmentInterface,
+  decision: Exclude<DecisionKeys, 'undo'>,
+): Promise<void> {
+  try {
+    const assessmentReviewer = deploymentAssessment.metadata.overview?.riskOwner?.toString() ?? ''
+    switch (decision) {
+      case Decision.Reject:
+      case Decision.RequestChanges:
+        await notifyDeploymentAssessmentCreator(deploymentAssessment, decision, assessmentReviewer)
+        break
+
+      case Decision.Approve: {
+        const modelDevelopers = await getModelDevelopers(deploymentAssessment)
+        for (const { model, developers } of modelDevelopers) {
+          await notifyModelDevelopers(developers, deploymentAssessment, model, deploymentAssessment.createdBy)
+        }
+        break
+      }
+    }
+  } catch (error) {
+    log.warn(
+      {
+        error,
+        deploymentAssessmentId: deploymentAssessment.id,
+        decision,
+      },
+      'Failed to send deployment assessment review notification',
+    )
+  }
+}
+
+async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
+  const models = await ModelModel.find({
+    id: { $in: deploymentAssessment.metadata.overview?.modelIds ?? [] },
+  }).lean()
+
+  const modelDevelopers = models.map((model) => ({
+    model,
+    developers: [
+      ...new Set(
+        model.collaborators
+          .filter((collaborator) => collaborator.roles.includes(SystemRoles.Owner))
+          .map((collaborator) => collaborator.entity),
+      ),
+    ],
+  }))
+
+  return modelDevelopers
 }
 
 export async function createDeploymentAssessment(
