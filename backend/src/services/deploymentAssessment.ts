@@ -55,7 +55,6 @@ export interface DeploymentAssessmentDetails {
 
 export type DeploymentAssessmentSearchResult = DeploymentAssessmentDoc & {
   state?: DeploymentAssessmentDetails['state']
-  reviewedAt?: Date
 }
 
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
@@ -499,7 +498,9 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   }
 
   if (params.riskOwner) {
-    query['metadata.overview.riskOwner'] = { $elemMatch: { $eq: params.riskOwner } }
+    query['metadata.overview.riskOwner'] = {
+      $elemMatch: { $eq: params.riskOwner },
+    }
   }
 
   if (params.createdBy) {
@@ -511,8 +512,12 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     beforeDate?.setUTCDate(beforeDate.getUTCDate() + 1)
 
     query.createdAt = {
-      ...(params.createdAfter && { $gte: new Date(params.createdAfter) }),
-      ...(beforeDate && { $lt: beforeDate }),
+      ...(params.createdAfter && {
+        $gte: new Date(params.createdAfter),
+      }),
+      ...(beforeDate && {
+        $lt: beforeDate,
+      }),
     }
   }
 
@@ -540,7 +545,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
 
   const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
 
-  const authorisedAssessments = deploymentAssessments.filter((_, i) => auths[i].success)
+  const authorisedAssessments = deploymentAssessments.filter((_, index) => auths[index].success)
 
   const assessmentIds = authorisedAssessments.filter(({ draft }) => draft === false).map(({ id }) => id)
 
@@ -548,7 +553,6 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     ? await ReviewModel.aggregate<{
         _id: string
         decision?: DecisionKeys
-        reviewedAt?: Date
       }>([
         {
           $match: {
@@ -570,58 +574,53 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
               {
                 $sort: { createdAt: -1 },
               },
+              {
+                $limit: 1,
+              },
             ],
-            as: 'responses',
-          },
-        },
-        {
-          $set: {
-            responses: { $slice: ['$responses', 1] },
+            as: 'latestResponse',
           },
         },
         {
           $unwind: {
-            path: '$responses',
+            path: '$latestResponse',
             preserveNullAndEmptyArrays: false,
           },
         },
         {
           $sort: {
-            'responses.createdAt': -1,
+            'latestResponse.createdAt': -1,
           },
         },
         {
           $group: {
             _id: '$deploymentAssessmentId',
-            decision: { $first: '$responses.decision' },
-            reviewedAt: { $first: '$responses.createdAt' },
+            decision: { $first: '$latestResponse.decision' },
           },
         },
       ])
     : []
 
-  const latestDecisionsByAssessmentId = new Map(
-    latestDecisions.map(({ _id, decision, reviewedAt }) => [_id, { decision, reviewedAt }]),
-  )
+  const latestDecisionsByAssessmentId = new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
 
   const searchResults: DeploymentAssessmentSearchResult[] = authorisedAssessments.map((assessment) => {
     if (assessment.draft !== false) {
       return assessment
     }
 
-    const { decision, reviewedAt } = latestDecisionsByAssessmentId.get(assessment.id) ?? {}
-
+    const decision = latestDecisionsByAssessmentId.get(assessment.id)
     const state = deriveDeploymentAssessmentState(assessment, decision)
 
-    return Object.assign(assessment, {
-      state,
-      ...(reviewedAt && { reviewedAt }),
-    })
+    return Object.assign(assessment, { state })
   })
 
-  return searchResults
-    .filter(({ state }) => params.state === undefined || state === params.state)
-    .filter(
-      (assessment) => params.needsAction === undefined || needsUserAction(assessment, user) === params.needsAction,
-    )
+  if (params.state === undefined && params.needsAction === undefined) {
+    return searchResults
+  }
+
+  return searchResults.filter(
+    (assessment) =>
+      (params.state === undefined || assessment.state === params.state) &&
+      (params.needsAction === undefined || needsUserAction(assessment, user) === params.needsAction),
+  )
 }

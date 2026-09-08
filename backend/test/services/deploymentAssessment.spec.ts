@@ -816,28 +816,6 @@ describe('services > deploymentAssessment', () => {
       })
     })
 
-    test('returns the timestamp of the latest review response', async () => {
-      const reviewed = { id: 'reviewed-assessment', draft: false }
-      const awaitingReview = { id: 'awaiting-review-assessment', draft: false }
-      const draft = { id: 'draft-assessment', draft: true }
-      const sort = vi.fn().mockResolvedValue([reviewed, awaitingReview, draft])
-      DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
-      vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([
-        { success: true, id: reviewed.id },
-        { success: true, id: awaitingReview.id },
-        { success: true, id: draft.id },
-      ])
-      ReviewModelMock.aggregate.mockResolvedValueOnce([
-        { _id: reviewed.id, decision: Decision.Reject, reviewedAt: new Date('2026-02-03T00:00:00.000Z') },
-      ])
-
-      const result = await searchDeploymentAssessments({ dn: 'creator' }, {})
-
-      expect(result[0]).toMatchObject({ id: reviewed.id, reviewedAt: new Date('2026-02-03T00:00:00.000Z') })
-      expect(result[1]).not.toHaveProperty('reviewedAt')
-      expect(result[2]).not.toHaveProperty('reviewedAt')
-    })
-
     describe('needsAction', () => {
       test('does not apply needsAction to the database query', async () => {
         const sort = vi.fn().mockResolvedValue([])

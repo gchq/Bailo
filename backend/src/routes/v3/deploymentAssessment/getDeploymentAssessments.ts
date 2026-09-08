@@ -40,7 +40,7 @@ export const getDeploymentAssessmentsSchema = z.object({
 export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
 
 function toDeploymentAssessmentSummary(
-  deploymentAssessment: DeploymentAssessmentDoc & { state?: DeploymentAssessmentSummary['state']; reviewedAt?: Date },
+  deploymentAssessment: DeploymentAssessmentDoc & { state?: DeploymentAssessmentSummary['state'] },
 ): DeploymentAssessmentSummary {
   const { riskOwner, modelIds, justification } = deploymentAssessment.metadata.overview ?? {}
 
@@ -52,7 +52,6 @@ function toDeploymentAssessmentSummary(
     ...(modelIds && { models: modelIds }),
     ...(justification && { justification }),
     ...(deploymentAssessment.state && { state: deploymentAssessment.state }),
-    ...(deploymentAssessment.reviewedAt && { reviewedAt: deploymentAssessment.reviewedAt.toISOString() }),
     draft: deploymentAssessment.draft,
     createdBy: deploymentAssessment.createdBy,
     createdAt: deploymentAssessment.createdAt.toISOString(),

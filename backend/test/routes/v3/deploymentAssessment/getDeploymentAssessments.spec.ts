@@ -115,27 +115,4 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     expect(res.statusCode).toBe(400)
     expect(serviceMock.searchDeploymentAssessments).not.toHaveBeenCalled()
   })
-
-  test('returns the timestamp of the latest review', async () => {
-    serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([
-      { ...deploymentAssessment, state: 'rejected', reviewedAt: new Date('2026-02-03T00:00:00.000Z') },
-    ])
-
-    const res = await testGet('/api/v3/deployment-assessments?needsAction=true')
-
-    expect(res.statusCode).toBe(200)
-    expect(res.body.deploymentAssessments[0]).toMatchObject({
-      state: 'rejected',
-      reviewedAt: '2026-02-03T00:00:00.000Z',
-    })
-  })
-
-  test('omits the review timestamp when the assessment has not been reviewed', async () => {
-    serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([{ ...deploymentAssessment, draft: true }])
-
-    const res = await testGet('/api/v3/deployment-assessments?needsAction=true')
-
-    expect(res.statusCode).toBe(200)
-    expect(res.body.deploymentAssessments[0]).not.toHaveProperty('reviewedAt')
-  })
 })
