@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import authentication from '../../src/connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
+import { EntryKind, EntryVisibility, SystemRoles } from '../../src/models/Model.js'
 import { Decision, ResponseKind } from '../../src/models/Response.js'
 import {
   commentOnDeploymentAssessment,
@@ -17,6 +17,7 @@ import {
   searchDeploymentAssessments,
   updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
+import { notifyDeploymentAssessmentCreator, notifyModelDevelopers } from '../../src/services/smtp/smtp.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -38,6 +39,8 @@ vi.mock('../../src/services/schema.js', () => schemaMocks)
 const smtpMocks = vi.hoisted(() => ({
   notifyDeploymentRiskOwner: vi.fn(),
   notifyDeploymentModelOwners: vi.fn(),
+  notifyDeploymentAssessmentCreator: vi.fn(),
+  notifyModelDevelopers: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
 
@@ -433,6 +436,83 @@ describe('services > deploymentAssessment', () => {
         reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve),
       ).resolves.toBeDefined()
       expect(ResponseModelMock).toHaveBeenCalledWith(expect.objectContaining({ decision: Decision.Approve }))
+    })
+
+    test('notifies deployment assessment creator when changes are requested', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue({ decision: Decision.RequestChanges }),
+      })
+
+      await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.RequestChanges)
+
+      expect(notifyDeploymentAssessmentCreator).toHaveBeenCalledWith(
+        assessment,
+        Decision.RequestChanges,
+        expect.any(String),
+      )
+    })
+
+    test('notifies deployment assessment creator when rejected', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue({ decision: Decision.Reject }),
+      })
+
+      await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Reject)
+
+      expect(notifyDeploymentAssessmentCreator).toHaveBeenCalledWith(assessment, Decision.Reject, expect.any(String))
+    })
+
+    test('notifies model developers when deployment assessment containing their models is approved', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue(review),
+      })
+
+      ModelModelMock.find.mockReturnValueOnce({
+        lean: vi.fn().mockResolvedValue([
+          {
+            id: 'model-1',
+            name: 'Test Model',
+            collaborators: [
+              {
+                entity: 'user:model-owner',
+                roles: [SystemRoles.Owner],
+              },
+            ],
+          },
+        ]),
+      })
+
+      await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve)
+
+      expect(notifyModelDevelopers).toHaveBeenCalledWith(
+        ['user:model-owner'],
+        assessment,
+        expect.objectContaining({
+          id: 'model-1',
+        }),
+        assessment.createdBy,
+      )
+    })
+
+    test('no review failure when notification fails', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue({ decision: Decision.Reject }),
+      })
+
+      vi.mocked(notifyDeploymentAssessmentCreator).mockRejectedValueOnce(new Error('SMTP example failure'))
+
+      await expect(
+        reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Reject),
+      ).resolves.toBeDefined()
+
+      expect(ResponseModelMock).toHaveBeenCalled()
     })
   })
 
