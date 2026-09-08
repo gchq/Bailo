@@ -230,6 +230,14 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+
+  if (deploymentAssessment.draft === true) {
+    return {
+      deploymentAssessment,
+      responses: [],
+    }
+  }
+
   const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
   const responses = await ResponseModel.find({ parentId: latestReview._id })
 
