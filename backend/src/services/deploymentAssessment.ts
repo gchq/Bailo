@@ -228,18 +228,15 @@ function deriveDeploymentAssessmentState(
   }
 }
 
-/** Risk owners are persisted in entity form, but bare DNs are matched too for legacy and seeded data. */
-function isRiskOwner(deploymentAssessment: Pick<DeploymentAssessmentInterface, 'metadata'>, user: UserInterface) {
-  const riskOwners = deploymentAssessment.metadata.overview?.riskOwner ?? []
-  return riskOwners.some((riskOwner) => riskOwner === user.dn || riskOwner === toEntity('user', user.dn))
-}
-
 /**
  * A risk owner needs to act on assessments awaiting their review, and a creator needs to act on assessments
  * that are still drafts or that have been sent back to them. Approved assessments need no further action.
  */
 function needsUserAction(deploymentAssessment: DeploymentAssessmentSearchResult, user: UserInterface) {
-  if (isRiskOwner(deploymentAssessment, user) && deploymentAssessment.state === DeploymentAssessmentState.NeedsReview) {
+  if (
+    deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
+    deploymentAssessment.state === DeploymentAssessmentState.NeedsReview
+  ) {
     return true
   }
 
@@ -496,15 +493,19 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   if (params.schemaId) {
     query.schemaId = params.schemaId
   }
+
   if (params.modelIds?.length) {
     query['metadata.overview.modelIds'] = { $all: params.modelIds }
   }
+
   if (params.riskOwner) {
     query['metadata.overview.riskOwner'] = { $elemMatch: { $eq: params.riskOwner } }
   }
+
   if (params.createdBy) {
     query.createdBy = params.createdBy
   }
+
   if (params.createdAfter || params.createdBefore) {
     const beforeDate = params.createdBefore ? new Date(params.createdBefore) : undefined
     beforeDate?.setUTCDate(beforeDate.getUTCDate() + 1)
@@ -514,11 +515,10 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
       ...(beforeDate && { $lt: beforeDate }),
     }
   }
+
   if (params.draft !== undefined) {
     query.draft = params.draft
   }
-
-  const andClauses: QueryFilter<DeploymentAssessmentInterface>[] = []
 
   if (params.search) {
     const search = {
@@ -526,36 +526,30 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
       $options: 'i',
     }
 
-    andClauses.push({
-      $or: [{ name: search }, { 'metadata.overview.justification': search }],
-    })
-  }
-
-  if (params.needsAction !== undefined) {
-    const actionConditions = [
+    query.$and = [
       {
-        'metadata.overview.riskOwner': {
-          $in: [toEntity('user', user.dn), user.dn],
-        },
-      },
-      {
-        createdBy: user.dn,
+        $or: [{ name: search }, { 'metadata.overview.justification': search }],
       },
     ]
-
-    andClauses.push(params.needsAction ? { $or: actionConditions } : { $nor: actionConditions })
-  }
-  if (andClauses.length !== 0) {
-    query.$and = andClauses
   }
 
-  const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
+  const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({
+    draft: -1,
+    updatedAt: -1,
+  })
+
   const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
 
   const authorisedAssessments = deploymentAssessments.filter((_, i) => auths[i].success)
+
   const assessmentIds = authorisedAssessments.filter(({ draft }) => draft === false).map(({ id }) => id)
+
   const latestDecisions = assessmentIds.length
-    ? await ReviewModel.aggregate<{ _id: string; decision?: DecisionKeys; reviewedAt?: Date }>([
+    ? await ReviewModel.aggregate<{
+        _id: string
+        decision?: DecisionKeys
+        reviewedAt?: Date
+      }>([
         {
           $match: {
             deploymentAssessmentId: { $in: assessmentIds },
@@ -573,14 +567,29 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
                   kind: ResponseKind.Review,
                 },
               },
-              { $sort: { createdAt: -1 } },
+              {
+                $sort: { createdAt: -1 },
+              },
             ],
             as: 'responses',
           },
         },
-        { $set: { responses: { $slice: ['$responses', 1] } } },
-        { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
-        { $sort: { 'responses.createdAt': -1 } },
+        {
+          $set: {
+            responses: { $slice: ['$responses', 1] },
+          },
+        },
+        {
+          $unwind: {
+            path: '$responses',
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $sort: {
+            'responses.createdAt': -1,
+          },
+        },
         {
           $group: {
             _id: '$deploymentAssessmentId',
@@ -590,6 +599,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
         },
       ])
     : []
+
   const latestDecisionsByAssessmentId = new Map(
     latestDecisions.map(({ _id, decision, reviewedAt }) => [_id, { decision, reviewedAt }]),
   )
@@ -600,11 +610,18 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
     }
 
     const { decision, reviewedAt } = latestDecisionsByAssessmentId.get(assessment.id) ?? {}
+
     const state = deriveDeploymentAssessmentState(assessment, decision)
-    return Object.assign(assessment, { state, ...(reviewedAt && { reviewedAt }) })
+
+    return Object.assign(assessment, {
+      state,
+      ...(reviewedAt && { reviewedAt }),
+    })
   })
 
   return searchResults
-    .filter(({ state }) => !params.state || state === params.state)
-    .filter((assessment) => !params.needsAction || needsUserAction(assessment, user))
+    .filter(({ state }) => params.state === undefined || state === params.state)
+    .filter(
+      (assessment) => params.needsAction === undefined || needsUserAction(assessment, user) === params.needsAction,
+    )
 }

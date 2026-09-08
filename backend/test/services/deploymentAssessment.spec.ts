@@ -839,37 +839,45 @@ describe('services > deploymentAssessment', () => {
     })
 
     describe('needsAction', () => {
-      test('restricts the query to assessments the user owns the risk for or created', async () => {
+      test('does not apply needsAction to the database query', async () => {
         const sort = vi.fn().mockResolvedValue([])
         DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([])
 
         await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
 
-        expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-          $and: [{ $or: [{ 'metadata.overview.riskOwner': { $in: ['user:user', 'user'] } }, { createdBy: 'user' }] }],
-        })
+        expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({})
       })
 
-      test.each([
-        ['entity form', 'user:user'],
-        ['bare dn', 'user'],
-      ])('returns assessments awaiting the risk owner in %s', async (_form, riskOwner) => {
+      test('returns an approved assessment owned or created by the user when needsAction is false', async () => {
         const assessment = {
-          id: 'awaiting-review',
+          id: 'approved',
           draft: false,
-          createdBy: 'someone-else',
-          metadata: { overview: { riskOwner: [riskOwner] } },
+          createdBy: 'user',
+          metadata: {
+            overview: {
+              riskOwner: ['user:user'],
+            },
+          },
         }
+
         const sort = vi.fn().mockResolvedValue([assessment])
         DeploymentAssessmentModelMock.find.mockReturnValueOnce({ sort })
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
-        ReviewModelMock.aggregate.mockResolvedValueOnce([])
+        ReviewModelMock.aggregate.mockResolvedValueOnce([
+          {
+            _id: assessment.id,
+            decision: Decision.Approve,
+          },
+        ])
 
-        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: true })
+        const result = await searchDeploymentAssessments({ dn: 'user' }, { needsAction: false })
 
         expect(result).toHaveLength(1)
-        expect(result[0]).toMatchObject({ id: assessment.id, state: 'needs_review' })
+        expect(result[0]).toMatchObject({
+          id: assessment.id,
+          state: 'approved',
+        })
       })
 
       test('does not return assessments the risk owner has already approved', async () => {
