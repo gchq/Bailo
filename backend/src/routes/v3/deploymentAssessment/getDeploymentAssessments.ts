@@ -24,6 +24,7 @@ export const getDeploymentAssessmentsSchema = z.object({
       draft: strictCoerceBoolean(z.boolean()).optional(),
       search: z.string().min(1).optional(),
       state: deploymentAssessmentStateSchema.optional(),
+      needsAction: strictCoerceBoolean(z.boolean()).optional(),
     })
     .strict()
     .refine(
