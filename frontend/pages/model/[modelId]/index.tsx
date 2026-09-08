@@ -8,6 +8,7 @@ import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
+import DeploymentAssessments from 'src/entry/model/DeploymentAssessments'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import SourceModelIdField from 'src/entry/model/mirroredModels/SourceModelIdField'
 import ModelFileManagement from 'src/entry/model/ModelFileManagement'
@@ -17,7 +18,7 @@ import Overview from 'src/entry/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind } from 'types/types'
+import { EntryKind, EntryVisibility } from 'types/types'
 
 export default function Model() {
   const router = useRouter()
@@ -55,6 +56,19 @@ export default function Model() {
                 entry.kind === EntryKind.UNTRUSTED_MODEL
                   ? 'Access requests are not available for untrusted models.'
                   : 'Select a schema to view this tab.',
+            },
+            {
+              title: 'Deployment assessments',
+              path: 'deployments',
+              view: <DeploymentAssessments model={entry} />,
+              datatest: 'deploymentAssessmentsTab',
+              disabled:
+                entry.visibility === EntryVisibility.Private ||
+                entry.state !== uiConfig.deploymentAssessments.deployableModelState,
+              disabledText:
+                entry.visibility === EntryVisibility.Private
+                  ? 'Deployment assessments are not available for private models.'
+                  : `This model's state must be set to ${uiConfig.deploymentAssessments.deployableModelState} in order for it to be included in deployment assessments.`,
             },
             {
               title: 'Registry',
