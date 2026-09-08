@@ -2,13 +2,12 @@ import { escapeRegExp } from 'lodash-es'
 import { ClientSession, QueryFilter } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
-import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
+import { DeploymentAssessmentAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { z } from '../lib/zod.js'
 import DeploymentAssessmentModel, {
   DeploymentAssessmentDoc,
   DeploymentAssessmentInterface,
-  DeploymentAssessmentMetadata,
   DeploymentAssessmentState,
   DeploymentAssessmentStateKeys,
 } from '../models/DeploymentAssessment.js'
@@ -79,16 +78,23 @@ async function validateRiskOwner(riskOwners: string[]) {
   }
 }
 
-async function validateModels(modelIds: string[]) {
+async function validateModels(user: UserInterface, modelIds: string[]) {
   const models = await ModelModel.find({ id: { $in: modelIds } })
   const modelKinds = new Set([EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] as string[])
   const modelsById = new Set(models.map((model) => model.id))
 
   const missingModelIds = modelIds.filter((modelId) => !modelsById.has(modelId))
   const nonModelIds = models.filter((model) => !modelKinds.has(model.kind)).map((model) => model.id)
-
   if (missingModelIds.length > 0 || nonModelIds.length > 0) {
     throw BadReq('One or more models could not be found.', { modelIds: missingModelIds })
+  }
+
+  const auths = await authorisation.models(user, models, ModelAction.View)
+  const unauthorisedModelIds = auths.filter((auth) => !auth.success).map((auth) => auth.id)
+  if (unauthorisedModelIds.length > 0) {
+    throw BadReq('You do not have permission to use one or more of the specified models.', {
+      modelIds: unauthorisedModelIds,
+    })
   }
 
   const privateModelIds = models.filter((model) => model.visibility !== EntryVisibility.Public).map((model) => model.id)
@@ -109,10 +115,11 @@ async function validateModels(modelIds: string[]) {
 }
 
 async function validateDeploymentAssessment(
+  user: UserInterface,
   schemaId: DeploymentAssessmentInterface['schemaId'],
   metadata: DeploymentAssessmentInterface['metadata'],
   draft: DeploymentAssessmentInterface['draft'],
-): Promise<DeploymentAssessmentMetadata> {
+) {
   const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
   if (!valid) {
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
@@ -128,10 +135,8 @@ async function validateDeploymentAssessment(
     await validateRiskOwner(riskOwner)
   }
   if (modelIds?.length) {
-    await validateModels(modelIds)
+    await validateModels(user, modelIds)
   }
-
-  return metadata
 }
 
 async function notifyDeploymentStakeholders(
@@ -370,17 +375,7 @@ export async function createDeploymentAssessment(
   }
 
   if (metadata) {
-    const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
-    if (!valid) {
-      throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
-    }
-
-    if (metadata.overview.riskOwner && metadata.overview.riskOwner.length > 0) {
-      await validateRiskOwner(metadata.overview.riskOwner)
-    }
-    if (metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
-      await validateModels(metadata.overview.modelIds)
-    }
+    await validateDeploymentAssessment(user, schemaId, metadata, draft)
   }
 
   const deploymentAssessmentId = convertStringToId(name)
@@ -484,7 +479,8 @@ export async function updateDeploymentAssessment(
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
-  const metadata = await validateDeploymentAssessment(
+  await validateDeploymentAssessment(
+    user,
     deploymentAssessment.schemaId,
     diff.metadata ?? deploymentAssessment.metadata,
     diff.draft ?? deploymentAssessment.draft,
@@ -495,7 +491,7 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('name')
   }
   if (diff.metadata !== undefined) {
-    deploymentAssessment.metadata = metadata
+    deploymentAssessment.metadata = diff.metadata
     deploymentAssessment.markModified('metadata')
   }
 
@@ -512,8 +508,8 @@ export async function updateDeploymentAssessment(
 
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      metadata.overview?.riskOwner ?? [],
-      metadata.overview?.modelIds ?? [],
+      deploymentAssessment.metadata?.overview?.riskOwner ?? [],
+      deploymentAssessment.metadata?.overview?.modelIds ?? [],
       deploymentAssessment,
     )
   }
