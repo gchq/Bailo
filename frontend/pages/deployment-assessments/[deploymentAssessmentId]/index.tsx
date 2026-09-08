@@ -59,11 +59,13 @@ export default function DeploymentAssessment() {
             <>
               <DraftBanner
                 errorMessage={patchErrorMessage}
+                setErrorMessage={setPatchErrorMessage}
                 disableButton={isEdit}
                 isLoading={isLoading}
                 handlePublish={handlePublish}
                 draft={deploymentAssessment.draft}
                 text='This is a draft deployment assessment'
+                dialogTitle='Confirm publish'
                 showButton
               />
               <Stack spacing={2} sx={{ p: 4 }}>
