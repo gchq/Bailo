@@ -36,7 +36,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessment])
 
     const res = await testGet(
-      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification&state=approved',
+      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification&state=approved&needsAction=true',
     )
 
     expect(res.statusCode).toBe(200)
@@ -50,6 +50,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
       draft: false,
       search: 'deployment justification',
       state: 'approved',
+      needsAction: true,
     })
     expect(res.body).toEqual({
       deploymentAssessments: [
@@ -106,6 +107,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     'draft=invalid',
     'search=',
     'state=invalid',
+    'needsAction=invalid',
     'unknown=value',
   ])('rejects the malformed query %s', async (query) => {
     const res = await testGet(`/api/v3/deployment-assessments?${query}`)

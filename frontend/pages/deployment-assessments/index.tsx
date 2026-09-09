@@ -1,4 +1,5 @@
 import Add from '@mui/icons-material/Add'
+import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -7,17 +8,25 @@ import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
 import MyAssessments from 'src/deployment-assessments/MyAssessments'
+import NeedsAction from 'src/deployment-assessments/NeedsAction'
 
 export default function Deployments() {
   const router = useRouter()
   const uiConfig = useContext(UiConfigContext)
+
+  const { deploymentAssessments } = useGetDeploymentAssessments({ needsAction: true })
+
   const tabs = useMemo(
     () => [
-      { title: 'Needs action', path: 'needs-action', view: <></> },
+      {
+        title: deploymentAssessments.length ? `Needs action (${deploymentAssessments.length})` : 'Needs action',
+        path: 'needs-action',
+        view: <NeedsAction />,
+      },
       { title: 'My assessments', path: 'my-assessments', view: <MyAssessments /> },
       { title: 'All assessments', path: 'all-assessments', view: <DeploymentAssessmentsList /> },
     ],
-    [],
+    [deploymentAssessments.length],
   )
 
   const deploymentAssessmentInfo = `
