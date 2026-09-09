@@ -9,6 +9,7 @@ import Title from 'src/common/Title'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -20,6 +21,8 @@ export default function DeploymentAssessment() {
     (returnTo === '/deployment-assessments' || returnTo.startsWith('/deployment-assessments?'))
       ? returnTo
       : '/deployment-assessments?tab=all-assessments'
+
+  const sendNotification = useNotification()
 
   const [isEdit, setIsEdit] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -47,6 +50,7 @@ export default function DeploymentAssessment() {
         setPatchErrorMessage(await getErrorMessage(response))
       } else {
         mutateDeploymentAssessment()
+        sendNotification({ msg: 'Deployment Assessment successfully published.', variant: 'success' })
       }
       setIsLoading(false)
     }
