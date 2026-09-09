@@ -83,11 +83,6 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             widget: 'entitySelector',
             hideDefaultUser: true,
           },
-          justification: {
-            title: `Justify why the ${config.ui.roleDisplayNames.riskOwner} has been assigned`,
-            type: 'string',
-            minLength: 1,
-          },
           modelIds: {
             title: 'List all models assigned to this deployment assessment',
             type: 'array',
@@ -100,7 +95,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             widget: 'modelSelector',
           },
         },
-        required: ['riskOwner', 'justification', 'modelIds'],
+        required: ['riskOwner', 'modelIds'],
         additionalProperties: false,
       },
       ...jsonSchema.properties,

@@ -52,7 +52,6 @@ const params = {
   metadata: {
     overview: {
       riskOwner: ['user:risk-owner'],
-      justification: 'Owns the deployment risk.',
       modelIds: ['model-one'],
     },
     assessment: { summary: 'Summary' },
@@ -239,7 +238,6 @@ describe('services > deploymentAssessment', () => {
   test.each([
     ['only a name', { overview: { name: 'Assessment' } }],
     ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
-    ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
     ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
     ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
     ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
@@ -530,7 +528,6 @@ describe('services > deploymentAssessment', () => {
     test.each([
       ['only a name', { overview: { name: 'Assessment' } }],
       ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
-      ['an empty justification', { overview: { name: 'Assessment', justification: '' } }],
       ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
       ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
       ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
@@ -789,14 +786,7 @@ describe('services > deploymentAssessment', () => {
           $lt: new Date('2026-02-01T00:00:00.000Z'),
         },
         draft: true,
-        $and: [
-          {
-            $or: [
-              { name: { $regex: 'Assessment\\.\\*', $options: 'i' } },
-              { 'metadata.overview.justification': { $regex: 'Assessment\\.\\*', $options: 'i' } },
-            ],
-          },
-        ],
+        name: { $regex: 'Assessment\\.\\*', $options: 'i' },
       })
       expect(sort).toHaveBeenCalledWith({ draft: -1, updatedAt: -1 })
     })

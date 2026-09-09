@@ -1160,7 +1160,6 @@ export interface BaseLifecycleMetrics {
 export interface DeploymentAssessmentMetadata {
   overview: {
     riskOwner?: string[]
-    justification?: string
     modelIds?: string[]
     [key: string]: unknown
   }
@@ -1201,7 +1200,6 @@ interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBa
   draft: true
   owner?: string | string[]
   models?: string[]
-  justification?: string
   state?: never
 }
 
@@ -1209,7 +1207,6 @@ interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSumma
   draft: false
   owner: string | string[]
   models: string[]
-  justification: string
   state: DeploymentAssessmentStateKeys
 }
 

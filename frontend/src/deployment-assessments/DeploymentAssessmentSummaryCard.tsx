@@ -198,12 +198,6 @@ export default function DeploymentAssessmentSummaryCard({
                 <em>Not specified</em>
               )}
             </Typography>
-            <Typography variant='body2'>
-              <Box component='span' sx={{ fontWeight: 'bold' }}>
-                Justification:
-              </Box>{' '}
-              {assessment.justification}
-            </Typography>
           </Stack>
         </Card>
       </Stack>
