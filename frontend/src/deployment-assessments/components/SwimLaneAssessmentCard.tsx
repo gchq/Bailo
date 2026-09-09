@@ -58,7 +58,7 @@ export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardPro
   const returnTo = '/deployment-assessments?tab=my-assessments'
 
   return (
-    <Card variant='outlined' sx={{ minHeight: 140 }}>
+    <Card variant='outlined' sx={{ minHeight: 120 }}>
       <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
         <Link
           href={{
@@ -71,25 +71,7 @@ export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardPro
             {assessment.name}
           </Typography>
         </Link>
-        <Box sx={{ mt: 1, mb: 1 }}>
-          <Typography variant='body2'>
-            <Box component='span' sx={{ fontWeight: 'bold' }}>
-              Justification
-            </Box>
-          </Typography>
-          <Typography
-            variant='body2'
-            sx={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {assessment.justification}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
           <TextRow label='Models' value={models} />
           <UserRow label='Risk Owner' dn={riskOwner} />
           <UserRow label='Deployer' dn={deployer} />
