@@ -1,6 +1,7 @@
-import { Box, Chip, Stack } from '@mui/material'
+import { Box, Chip, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import EntityAutocomplete from 'src/common/EntityAutocomplete'
 import InlineDiff from 'src/common/InlineDiff'
@@ -15,7 +16,7 @@ import MessageAlert from '../MessageAlert'
 interface EntitySelectorProps {
   label?: string
   required?: boolean
-  value: string[] | string
+  value: Array<string | null | undefined> | string | null | undefined
   onChange: (newValue: string[] | string) => void
   registry?: Registry
   rawErrors?: string[]
@@ -23,16 +24,30 @@ interface EntitySelectorProps {
   schema: RJSFSchema
 }
 
+function isEmptyEntry(entry: string | null | undefined): boolean {
+  return entry === null || entry === undefined || entry === ''
+}
+
 export function getEntitySelectorValue(
-  selectedEntities: EntityObject[] | EntityObject,
+  selectedEntities: EntityObject[] | EntityObject | null | undefined,
   isMultiple: boolean,
 ): string[] | string {
   if (isMultiple) {
-    const entities = Array.isArray(selectedEntities) ? selectedEntities : [selectedEntities]
+    const entities = (Array.isArray(selectedEntities) ? selectedEntities : [selectedEntities]).filter(
+      (entity): entity is EntityObject => entity !== null && entity !== undefined,
+    )
     return entities.map((entity) => `${entity.kind}:${entity.id}`)
   }
 
+  if (!selectedEntities) {
+    return ''
+  }
+
   const entity = Array.isArray(selectedEntities) ? selectedEntities[0] : selectedEntities
+  if (!entity) {
+    return ''
+  }
+
   return `${entity.kind}:${entity.id}`
 }
 
@@ -67,10 +82,34 @@ export default function EntitySelector({
 
   const normalisedValue = useMemo<string[] | string>(() => {
     if (!isMultiple) {
-      return currentValue
+      return typeof currentValue === 'string' ? currentValue : ''
     }
-    return (Array.isArray(currentValue) ? currentValue : [currentValue]).filter(Boolean)
+    return (Array.isArray(currentValue) ? currentValue : [currentValue]).filter(
+      (entry): entry is string => typeof entry === 'string' && entry.length > 0,
+    )
   }, [isMultiple, currentValue])
+
+  // RJSF pre-populates required, array fields with [null] when minItems: 1.
+  // This normalises to '' in this case
+  useEffect(() => {
+    if (isMultiple) {
+      if (!Array.isArray(currentValue)) {
+        return
+      }
+      if (!currentValue.some(isEmptyEntry)) {
+        return
+      }
+      const cleaned = currentValue.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+      onChange(cleaned)
+      return
+    }
+
+    if (currentValue === null || currentValue === undefined) {
+      onChange('')
+    }
+  }, [isMultiple, currentValue, onChange])
+
+  const theme = useTheme()
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
@@ -130,7 +169,7 @@ export default function EntitySelector({
       compare={compare}
       value={normalisedValue}
       formatter={formatEntity}
-      hasValue={Array.isArray(normalisedValue) ? normalisedValue.length > 0 : normalisedValue !== undefined}
+      hasValue={Array.isArray(normalisedValue) ? normalisedValue.length > 0 : normalisedValue.length > 0}
     >
       {currentUser && compare.editMode ? (
         <EntityAutocomplete
@@ -145,25 +184,22 @@ export default function EntitySelector({
         />
       ) : compare.inMirroredCompare && normalisedValue.length ? (
         <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
+      ) : normalisedValue && normalisedValue.length > 0 ? (
+        <Box sx={{ overflowX: 'auto', p: 1 }}>
+          <Stack spacing={1} direction='row'>
+            {Array.isArray(normalisedValue) ? (
+              normalisedValue.map((entity) => (
+                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+              ))
+            ) : (
+              <Chip label={<UserDisplay dn={normalisedValue} />} key={normalisedValue} sx={{ width: 'fit-content' }} />
+            )}
+          </Stack>
+        </Box>
       ) : (
-        normalisedValue &&
-        normalisedValue.length > 0 && (
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {Array.isArray(normalisedValue) ? (
-                normalisedValue.map((entity) => (
-                  <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
-                ))
-              ) : (
-                <Chip
-                  label={<UserDisplay dn={normalisedValue} />}
-                  key={normalisedValue}
-                  sx={{ width: 'fit-content' }}
-                />
-              )}
-            </Stack>
-          </Box>
-        )
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          None
+        </Typography>
       )}
     </CompareField>
   )

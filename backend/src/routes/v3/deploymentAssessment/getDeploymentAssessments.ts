@@ -24,6 +24,7 @@ export const getDeploymentAssessmentsSchema = z.object({
       draft: strictCoerceBoolean(z.boolean()).optional(),
       search: z.string().min(1).optional(),
       state: deploymentAssessmentStateSchema.optional(),
+      needsAction: strictCoerceBoolean(z.boolean()).optional(),
     })
     .strict()
     .refine(
@@ -41,7 +42,7 @@ export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSum
 function toDeploymentAssessmentSummary(
   deploymentAssessment: DeploymentAssessmentDoc & { state?: DeploymentAssessmentSummary['state'] },
 ): DeploymentAssessmentSummary {
-  const { riskOwner, modelIds, justification } = deploymentAssessment.metadata.overview ?? {}
+  const { riskOwner, modelIds } = deploymentAssessment.metadata.overview ?? {}
 
   return {
     id: deploymentAssessment.id,
@@ -49,7 +50,6 @@ function toDeploymentAssessmentSummary(
     name: deploymentAssessment.name,
     ...(riskOwner && riskOwner.length > 0 && { owner: riskOwner }),
     ...(modelIds && { models: modelIds }),
-    ...(justification && { justification }),
     ...(deploymentAssessment.state && { state: deploymentAssessment.state }),
     draft: deploymentAssessment.draft,
     createdBy: deploymentAssessment.createdBy,
