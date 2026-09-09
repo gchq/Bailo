@@ -65,11 +65,6 @@ export default function DeploymentAssessmentSummaryCard({
               onSelectedStateChange={onSelectedStateChange}
             />
           </Stack>
-          <AssessmentStateChip
-            assessment={assessment}
-            selectedState={selectedState}
-            onSelectedStateChange={onSelectedStateChange}
-          />
         </Stack>
         <Stack direction='row' spacing={0.5}>
           <Typography variant='caption'>Created by</Typography>

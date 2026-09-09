@@ -20,7 +20,7 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { KeyedMutator } from 'swr'
-import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
+import { DeploymentAssessmentInterface, DeploymentAssessmentStateKeys, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
 
@@ -28,6 +28,7 @@ type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
   mutate: KeyedMutator<{
     deploymentAssessment: DeploymentAssessmentInterface
+    state: DeploymentAssessmentStateKeys
   }>
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
