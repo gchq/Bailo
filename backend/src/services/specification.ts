@@ -92,7 +92,8 @@ export const deploymentAssessmentMetadataSchema = z
         justification: deploymentAssessmentJustificationSchema.optional(),
         modelIds: deploymentAssessmentModelIdsSchema.optional(),
       })
-      .passthrough(),
+      .passthrough()
+      .optional(),
   })
   .passthrough()
 
