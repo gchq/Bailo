@@ -102,7 +102,7 @@ export default function DeploymentAssessment() {
   return (
     <>
       <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading....'} />
-      <Container maxWidth='lg' sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
+      <Container maxWidth={isReviewPanelShown ? 'xl' : 'lg'} sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
         <Paper>
           {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (

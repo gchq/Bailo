@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography } from '@mui/material'
+import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { useGetSchema } from 'actions/schema'
 import ChipSelector from 'src/common/ChipSelector'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -37,7 +37,6 @@ export default function DeploymentAssessmentSummaryCard({
 
   return (
     <>
-      <ReviewBanner deploymentAssessment={assessment} />
       <Box sx={{ p: 2 }}>
         <Stack spacing={2}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ justifyContent: 'space-between' }}>
@@ -59,11 +58,19 @@ export default function DeploymentAssessmentSummaryCard({
                 ariaLabel='copy deployment assessment name to clipboard'
               />
             </Stack>
-            <AssessmentStateChip
-              assessment={assessment}
-              selectedState={selectedState}
-              onSelectedStateChange={onSelectedStateChange}
-            />
+            <Stack
+              direction='row'
+              spacing={2}
+              sx={{ alignItems: 'center' }}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              <ReviewBanner deploymentAssessment={assessment} slimView />
+              <AssessmentStateChip
+                assessment={assessment}
+                selectedState={selectedState}
+                onSelectedStateChange={onSelectedStateChange}
+              />
+            </Stack>
           </Stack>
         </Stack>
         <Stack direction='row' spacing={0.5}>

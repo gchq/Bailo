@@ -33,6 +33,7 @@ export type ReviewBannerProps =
 
 type OptionalReviewBannerProps = {
   onReviewButtonClicked?: () => void | undefined
+  slimView?: boolean
 }
 
 export default function ReviewBanner({
@@ -40,6 +41,7 @@ export default function ReviewBanner({
   accessRequest,
   deploymentAssessment,
   onReviewButtonClicked,
+  slimView = false,
 }: ReviewBannerProps & OptionalReviewBannerProps) {
   const theme = useTheme()
   const router = useRouter()
@@ -73,6 +75,28 @@ export default function ReviewBanner({
     return <></>
   }
 
+  if (slimView) {
+    return (
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        <Stack direction='row' spacing={1}>
+          <ReviewIcon color='primary' />
+          <Typography color='primary'>Ready for review</Typography>
+        </Stack>
+        <Button variant='outlined' size='small' onClick={handleReviewOnClick} data-test='reviewButton'>
+          Review
+        </Button>
+      </Stack>
+    )
+  }
+
   return (
     reviewCountHeader > 0 && (
       <Paper
@@ -86,7 +110,7 @@ export default function ReviewBanner({
           borderWidth: '1px',
           borderStyle: 'solid',
           borderColor: theme.palette.primary.main,
-          borderRadius: 0,
+          borderRadius: slimView ? 6 : 0,
         }}
       >
         <Stack
