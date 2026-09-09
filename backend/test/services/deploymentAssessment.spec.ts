@@ -17,7 +17,10 @@ import {
   searchDeploymentAssessments,
   updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
-import { notifyModelDevelopers, notifyReviewResponseForDeploymentAssessment } from '../../src/services/smtp/smtp.js'
+import {
+  notifyModelOwnersOfDeploymentApproval,
+  notifyReviewResponseForDeploymentAssessment,
+} from '../../src/services/smtp/smtp.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -37,10 +40,10 @@ const schemaMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/schema.js', () => schemaMocks)
 
 const smtpMocks = vi.hoisted(() => ({
-  notifyDeploymentRiskOwner: vi.fn(),
-  notifyDeploymentModelOwners: vi.fn(),
+  notifyRiskOwnerOfDeploymentAssessment: vi.fn(),
+  notifyModelOwnersOfDeploymentAssessment: vi.fn(),
   notifyReviewResponseForDeploymentAssessment: vi.fn(),
-  notifyModelDevelopers: vi.fn(),
+  notifyModelOwnersOfDeploymentApproval: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
 
@@ -502,7 +505,7 @@ describe('services > deploymentAssessment', () => {
 
       await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve)
 
-      expect(notifyModelDevelopers).toHaveBeenCalledWith(
+      expect(notifyModelOwnersOfDeploymentApproval).toHaveBeenCalledWith(
         ['user:model-owner'],
         assessment,
         expect.objectContaining({
@@ -649,12 +652,12 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:risk-owner',
         deploymentAssessment,
         'Risk Owner',
       )
-      expect(smtpMocks.notifyDeploymentModelOwners).toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
     })
 
     test('notifies each risk owner once when a draft with several is submitted', async () => {
@@ -672,13 +675,13 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledTimes(2)
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledTimes(2)
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:risk-owner',
         deploymentAssessment,
         'Risk Owner',
       )
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:other-owner',
         deploymentAssessment,
         'Risk Owner',
@@ -691,8 +694,8 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
-      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
     })
 
     test('does not re-notify stakeholders when an already submitted assessment is edited', async () => {
@@ -702,8 +705,8 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
-      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
     })
   })
 

@@ -29,10 +29,10 @@ import { removeResponsesByParentIds } from './response.js'
 import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import {
-  notifyDeploymentModelOwners,
-  notifyDeploymentRiskOwner,
-  notifyModelDevelopers,
+  notifyModelOwnersOfDeploymentApproval,
+  notifyModelOwnersOfDeploymentAssessment,
   notifyReviewResponseForDeploymentAssessment,
+  notifyRiskOwnerOfDeploymentAssessment,
 } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
 
@@ -159,7 +159,9 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...uniqueRiskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
+      ...uniqueRiskOwners.map((riskOwner) =>
+        notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
+      ),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -169,7 +171,9 @@ async function notifyDeploymentStakeholders(
           ),
         ]
 
-        return owners.length ? [notifyDeploymentModelOwners(owners, deploymentAssessment, model, creatorName)] : []
+        return owners.length
+          ? [notifyModelOwnersOfDeploymentAssessment(owners, deploymentAssessment, model, creatorName)]
+          : []
       }),
     ]
 
@@ -350,7 +354,12 @@ async function notifyDeploymentAssessmentReviewed(
       case Decision.Approve: {
         const modelDevelopers = await getModelDevelopers(deploymentAssessment)
         for (const { model, developers } of modelDevelopers) {
-          await notifyModelDevelopers(developers, deploymentAssessment, model, deploymentAssessment.createdBy)
+          await notifyModelOwnersOfDeploymentApproval(
+            developers,
+            deploymentAssessment,
+            model,
+            deploymentAssessment.createdBy,
+          )
         }
         break
       }

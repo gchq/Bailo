@@ -3,15 +3,15 @@ import { describe, expect, test, vi } from 'vitest'
 import { ReviewInterface } from '../../../src/models/Review.js'
 import { UserInterface } from '../../../src/models/User.js'
 import {
-  notifyDeploymentModelOwners,
-  notifyDeploymentRiskOwner,
   notifyLifeCycleReview,
-  notifyModelDevelopers,
+  notifyModelOwnersOfDeploymentApproval,
+  notifyModelOwnersOfDeploymentAssessment,
   notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
   notifyReviewResponseForDeploymentAssessment,
   notifyReviewResponseForRelease,
   notifyReviewRoleOfAdditionalReview,
+  notifyRiskOwnerOfDeploymentAssessment,
   requestReviewForAccessRequest,
   requestReviewForRelease,
   startImportNotification,
@@ -202,14 +202,14 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is not sent to a DRO after a deployment assessment is created if disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await notifyDeploymentRiskOwner('user:test', testDeploymentAssessment, 'user:user')
+    await notifyRiskOwnerOfDeploymentAssessment('user:test', testDeploymentAssessment, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent to model owners after a deployment assessment is created if disabled in config', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, testModel, 'user:user')
+    await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
@@ -347,13 +347,13 @@ describe('services > smtp > smtp', () => {
 
   test('that an email is sent to a DRO on deployment assessment creation', async () => {
     getModelByIdMock.mockReturnValue(testModel)
-    await notifyDeploymentRiskOwner('user:user', testDeploymentAssessment, 'user:user')
+    await notifyRiskOwnerOfDeploymentAssessment('user:user', testDeploymentAssessment, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
   test('that an email is sent to all model owners on deployment assessment creation', async () => {
     getModelByIdMock.mockReturnValue(testModel)
-    await notifyDeploymentModelOwners(['user:user'], testDeploymentAssessment, testModel, 'user:user')
+    await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
@@ -369,13 +369,23 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent to all model developers when a DRO approves a DA that contains their models', async () => {
-    await notifyModelDevelopers(['user:user1', 'user:user2'], testDeploymentAssessment, testModel, 'user:user')
+    await notifyModelOwnersOfDeploymentApproval(
+      ['user:user1', 'user:user2'],
+      testDeploymentAssessment,
+      testModel,
+      'user:user',
+    )
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
   test('that an email is not sent to all model developers when a DRO approves a DA that contains their models when smtp is disabled', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await notifyModelDevelopers(['user:user1', 'user:user2'], testDeploymentAssessment, testModel, 'user:user')
+    await notifyModelOwnersOfDeploymentApproval(
+      ['user:user1', 'user:user2'],
+      testDeploymentAssessment,
+      testModel,
+      'user:user',
+    )
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 })

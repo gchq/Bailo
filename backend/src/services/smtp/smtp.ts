@@ -95,7 +95,7 @@ export async function getApprovedAccessRequests(modelId: string) {
   return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
 }
 
-export async function notifyDeploymentRiskOwner(
+export async function notifyRiskOwnerOfDeploymentAssessment(
   riskOwner: string,
   deployment: DeploymentAssessmentInterface,
   creatorName: string,
@@ -128,7 +128,7 @@ export async function notifyDeploymentRiskOwner(
   await dispatchEmail([riskOwner], emailContent)
 }
 
-export async function notifyDeploymentModelOwners(
+export async function notifyModelOwnersOfDeploymentAssessment(
   entities: string[],
   deployment: DeploymentAssessmentInterface,
   model: ModelInterface,
@@ -213,7 +213,7 @@ export async function notifyReviewResponseForDeploymentAssessment(
   await dispatchEmail([toEntity('user', deployment.createdBy)], emailContent)
 }
 
-export async function notifyModelDevelopers(
+export async function notifyModelOwnersOfDeploymentApproval(
   modelDevelopers: string[],
   deployment: DeploymentAssessmentInterface,
   model: ModelInterface,
