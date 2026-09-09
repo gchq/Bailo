@@ -17,7 +17,7 @@ import {
   searchDeploymentAssessments,
   updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
-import { notifyDeploymentAssessmentCreator, notifyModelDevelopers } from '../../src/services/smtp/smtp.js'
+import { notifyModelDevelopers, notifyReviewResponseForDeploymentAssessment } from '../../src/services/smtp/smtp.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -39,7 +39,7 @@ vi.mock('../../src/services/schema.js', () => schemaMocks)
 const smtpMocks = vi.hoisted(() => ({
   notifyDeploymentRiskOwner: vi.fn(),
   notifyDeploymentModelOwners: vi.fn(),
-  notifyDeploymentAssessmentCreator: vi.fn(),
+  notifyReviewResponseForDeploymentAssessment: vi.fn(),
   notifyModelDevelopers: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
@@ -456,7 +456,7 @@ describe('services > deploymentAssessment', () => {
 
       await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.RequestChanges)
 
-      expect(notifyDeploymentAssessmentCreator).toHaveBeenCalledWith(
+      expect(notifyReviewResponseForDeploymentAssessment).toHaveBeenCalledWith(
         assessment,
         Decision.RequestChanges,
         expect.any(String),
@@ -472,7 +472,11 @@ describe('services > deploymentAssessment', () => {
 
       await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Reject)
 
-      expect(notifyDeploymentAssessmentCreator).toHaveBeenCalledWith(assessment, Decision.Reject, expect.any(String))
+      expect(notifyReviewResponseForDeploymentAssessment).toHaveBeenCalledWith(
+        assessment,
+        Decision.Reject,
+        expect.any(String),
+      )
     })
 
     test('notifies model developers when deployment assessment containing their models is approved', async () => {
@@ -515,7 +519,7 @@ describe('services > deploymentAssessment', () => {
         sort: vi.fn().mockResolvedValue({ decision: Decision.Reject }),
       })
 
-      vi.mocked(notifyDeploymentAssessmentCreator).mockRejectedValueOnce(new Error('SMTP example failure'))
+      vi.mocked(notifyReviewResponseForDeploymentAssessment).mockRejectedValueOnce(new Error('SMTP example failure'))
 
       await expect(
         reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Reject),

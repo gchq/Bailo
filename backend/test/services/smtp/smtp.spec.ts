@@ -3,13 +3,13 @@ import { describe, expect, test, vi } from 'vitest'
 import { ReviewInterface } from '../../../src/models/Review.js'
 import { UserInterface } from '../../../src/models/User.js'
 import {
-  notifyDeploymentAssessmentCreator,
   notifyDeploymentModelOwners,
   notifyDeploymentRiskOwner,
   notifyLifeCycleReview,
   notifyModelDevelopers,
   notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
+  notifyReviewResponseForDeploymentAssessment,
   notifyReviewResponseForRelease,
   notifyReviewRoleOfAdditionalReview,
   requestReviewForAccessRequest,
@@ -358,13 +358,13 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent to the DA creator when it is reviewed by a DRO', async () => {
-    await notifyDeploymentAssessmentCreator(testDeploymentAssessment, 'reject', 'user:user')
+    await notifyReviewResponseForDeploymentAssessment(testDeploymentAssessment, 'reject', 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
   test('that an email is not sent to the DA creator when it is reviewed by a DRO when smtp is disabled', async () => {
     vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
-    await notifyDeploymentAssessmentCreator(testDeploymentAssessment, 'reject', 'user:user')
+    await notifyReviewResponseForDeploymentAssessment(testDeploymentAssessment, 'reject', 'user:user')
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 

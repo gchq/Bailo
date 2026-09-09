@@ -29,10 +29,10 @@ import { removeResponsesByParentIds } from './response.js'
 import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import {
-  notifyDeploymentAssessmentCreator,
   notifyDeploymentModelOwners,
   notifyDeploymentRiskOwner,
   notifyModelDevelopers,
+  notifyReviewResponseForDeploymentAssessment,
 } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
 
@@ -320,7 +320,7 @@ async function notifyDeploymentAssessmentReviewed(
     switch (decision) {
       case Decision.Reject:
       case Decision.RequestChanges:
-        await notifyDeploymentAssessmentCreator(deploymentAssessment, decision, assessmentReviewer)
+        await notifyReviewResponseForDeploymentAssessment(deploymentAssessment, decision, assessmentReviewer)
         break
 
       case Decision.Approve: {
