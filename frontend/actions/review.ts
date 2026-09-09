@@ -10,22 +10,11 @@ import {
   ReviewKindKeys,
   ReviewRequestInterface,
 } from 'types/types'
+import { toSafePathId } from 'utils/stringUtils'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
-
-function toSafePathId(value: string): string {
-  if (!/^[A-Za-z0-9-]+$/.test(value)) {
-    throw new Error('Invalid deployment assessment ID')
-  }
-  return encodeURIComponent(value)
-}
-
-const REVIEW_ID_PATTERN = /^[A-Za-z0-9_-]+$/
-function isValidReviewId(reviewId: string) {
-  return REVIEW_ID_PATTERN.test(reviewId)
-}
 
 export function useHeadReviewRequestsForUser(open?: boolean, kind?: ReviewKindKeys) {
   const queryParams = { ...(open !== undefined && { open }), ...(kind !== undefined && { kind }) }
@@ -198,11 +187,8 @@ export async function postGenericReviewResponse({
   decision,
   dueDate,
 }: PostGenericReviewResponseParams) {
-  if (!isValidReviewId(reviewId)) {
-    throw new Error('Invalid review ID')
-  }
-
-  return fetch(`/api/v3/review/${reviewId}/response`, {
+  const safeReviewId = toSafePathId(reviewId)
+  return fetch(`/api/v3/review/${safeReviewId}/response`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment, decision, dueDate, kind }),

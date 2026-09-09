@@ -133,7 +133,7 @@ export default function DeploymentAssessment() {
                   kind={ReviewKind.DEPLOYMENTS}
                   isEdit={isEdit}
                   mutator={mutateDeploymentAssessment}
-                  entryId={''}
+                  entryId=''
                 />
               </Stack>
             </>

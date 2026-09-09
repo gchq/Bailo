@@ -130,6 +130,12 @@ export async function findReviews(
                   branches: [
                     {
                       case: {
+                        $in: [Decision.Reject, '$decisions'],
+                      },
+                      then: Decision.Reject,
+                    },
+                    {
+                      case: {
                         $in: [Decision.RequestChanges, '$decisions'],
                       },
                       then: Decision.RequestChanges,

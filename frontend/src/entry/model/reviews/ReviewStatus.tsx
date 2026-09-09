@@ -1,15 +1,17 @@
+import CloseIcon from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import { Stack, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
+import HourglassEmpty from 'node_modules/@mui/icons-material/HourglassEmpty.mjs'
 import { useContext, useMemo, useState } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
 import UiConfigContext from 'src/contexts/uiConfigContext'
-import { ChangesRequestedDisplay } from 'src/entry/model/reviews/ChangesRequestedDisplay'
+import { ReviewStatusDisplay } from 'src/entry/model/reviews/ReviewStatusDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { Decision, ReviewRequestInterface } from 'types/types'
 
 export interface ReviewStatusProps {
-  modelId: string
+  modelId: string | null
   review: ReviewRequestInterface
   showCurrentUserResponses?: boolean
 }
@@ -54,12 +56,28 @@ export default function ReviewStatus({ review, modelId, showCurrentUserResponses
       )}
       {review.status === Decision.RequestChanges && (
         <>
-          <ChangesRequestedDisplay
+          <ReviewStatusDisplay
             review={review}
             key={review._id}
             roleNameDisplay={roleNameDisplay}
             setErrorMessage={setErrorMessage}
             showCurrentUserResponses={showCurrentUserResponses}
+            decision={review.status}
+            icon={<HourglassEmpty color='warning' fontSize='small' />}
+          />
+          <MessageAlert message={errorMessage} severity='error' />
+        </>
+      )}
+      {review.status === Decision.Reject && (
+        <>
+          <ReviewStatusDisplay
+            review={review}
+            key={review._id}
+            roleNameDisplay={roleNameDisplay}
+            setErrorMessage={setErrorMessage}
+            showCurrentUserResponses={showCurrentUserResponses}
+            decision={review.status}
+            icon={<CloseIcon color='warning' fontSize='small' />}
           />
           <MessageAlert message={errorMessage} severity='error' />
         </>

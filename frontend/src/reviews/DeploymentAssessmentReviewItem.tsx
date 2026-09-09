@@ -1,7 +1,8 @@
-import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined'
 import { ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
+import CurrentUserContext from 'src/contexts/currentUserContext'
+import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import { ReviewRequestInterface } from 'types/types'
 import { timeDifference } from 'utils/dateUtils'
 
@@ -10,6 +11,7 @@ type ReviewItemProps = {
 }
 
 export default function DeploymentAssessmentReviewItem({ review }: ReviewItemProps) {
+  const currentUser = useContext(CurrentUserContext)
   const router = useRouter()
 
   function handleListItemClick() {
@@ -40,23 +42,11 @@ export default function DeploymentAssessmentReviewItem({ review }: ReviewItemPro
               {editedAdornment()}
             </Typography>
           </Stack>
-          <Stack
-            direction='row'
-            spacing={1}
-            sx={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium' }} color='warning' />
-            <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }} component='p'>
-              This deployment assessment needs to be reviewed by the deployment risk owner.
-            </Typography>
-          </Stack>
+          <ReviewStatus review={review} modelId={null} showCurrentUserResponses={currentUser !== undefined} />
         </Stack>
       )
     }
-  }, [editedAdornment, review])
+  }, [currentUser, editedAdornment, review])
 
   return (
     <>

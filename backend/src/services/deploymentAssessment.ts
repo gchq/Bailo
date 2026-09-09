@@ -238,13 +238,12 @@ export async function getDeploymentAssessmentDetails(
     }
   }
 
+  // Get the latest review and its corresponding responses to determine the state of this deployment assessment
   const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
   const responses = await ResponseModel.find({ parentId: latestReview._id })
 
-  const latestDecision = responses
-    .filter((r) => r.kind === ResponseKind.Review)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .at(0)?.decision as DecisionKeys | undefined
+  const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
+    DecisionKeys | undefined
   const state = deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
 
   return {
