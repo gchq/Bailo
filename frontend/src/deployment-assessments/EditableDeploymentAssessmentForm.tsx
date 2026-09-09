@@ -21,6 +21,7 @@ type EditableDeploymentAssessmentFormProps = {
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
+  hideSchemaInfo?: boolean
 }
 
 export default function EditableDeploymentAssessmentForm({
@@ -28,6 +29,7 @@ export default function EditableDeploymentAssessmentForm({
   isEdit,
   onIsEditChange,
   readOnly = false,
+  hideSchemaInfo = false,
 }: EditableDeploymentAssessmentFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -115,30 +117,34 @@ export default function EditableDeploymentAssessmentForm({
           heading={
             schema && (
               <Stack>
-                <Typography
-                  sx={{
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Schema
-                </Typography>
-                <Stack
-                  direction='row'
-                  sx={{
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography>{schema?.name}</Typography>
-                  <IconButton onClick={() => setSchemaInformationOpen(true)}>
-                    <Info color='primary' fontSize='small' />
-                  </IconButton>
-                  <InformationDialog
-                    open={schemaInformationOpen}
-                    schema={schema}
-                    onClose={() => setSchemaInformationOpen(false)}
-                  />
-                </Stack>
-                <Stack>
+                {!hideSchemaInfo && (
+                  <>
+                    <Typography
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Schema
+                    </Typography>
+                    <Stack
+                      direction='row'
+                      sx={{
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Typography>{schema?.name}</Typography>
+                      <IconButton onClick={() => setSchemaInformationOpen(true)}>
+                        <Info color='primary' fontSize='small' />
+                      </IconButton>
+                      <InformationDialog
+                        open={schemaInformationOpen}
+                        schema={schema}
+                        onClose={() => setSchemaInformationOpen(false)}
+                      />
+                    </Stack>
+                  </>
+                )}
+                <Stack direction='row' spacing={0.5}>
                   <Typography sx={{ fontWeight: 'bold', mb: 0.5 }}>Created by</Typography>
                   <UserDisplay dn={deploymentAssessment.createdBy} />
                 </Stack>

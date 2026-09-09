@@ -1,20 +1,25 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
+import CloseIcon from '@mui/icons-material/Close'
 import ReviewIcon from '@mui/icons-material/Comment'
-import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, IconButton, Paper, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
+import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { ReviewKind } from 'types/types'
+import { DecisionKeys, ReviewKind } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 
 export default function DeploymentAssessment() {
   const router = useRouter()
@@ -28,6 +33,9 @@ export default function DeploymentAssessment() {
   const theme = useTheme()
 
   const [isEdit, setIsEdit] = useState(false)
+  const [isReviewPanelShown, setIsReviewPanelShown] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
 
   const {
     deploymentAssessment,
@@ -35,15 +43,44 @@ export default function DeploymentAssessment() {
     isDeploymentAssessmentError,
     mutateDeploymentAssessment,
   } = useGetDeploymentAssessment(deploymentAssessmentId)
+  const { reviews, isReviewsLoading, isReviewsError, mutateReviews } =
+    useGetReviewsForDeploymentAssessment(deploymentAssessmentId)
+
+  async function handleSubmit(decision: DecisionKeys, comment: string) {
+    setErrorMessage('')
+    if (!deploymentAssessmentId) {
+      return setErrorMessage('Could not find deployment assessment ID')
+    }
+
+    setIsReviewButtonLoading(true)
+    const res = await postDeploymentAssessmentReviewResponse({
+      deploymentAssessmentId: deploymentAssessmentId,
+      comment,
+      decision,
+    })
+
+    if (!res.ok) {
+      setIsReviewButtonLoading(false)
+      setErrorMessage(await getErrorMessage(res))
+    } else {
+      setErrorMessage('')
+      setIsReviewButtonLoading(false)
+      setIsReviewPanelShown(false)
+      mutateReviews()
+      mutateDeploymentAssessment()
+    }
+  }
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
+    isReviewsError,
   })
   if (error) {
     return error
   }
 
-  const isLoadingDeploymentAssessment = !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment
+  const isLoadingDeploymentAssessment =
+    !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment || isReviewsLoading
 
   return (
     <>
@@ -53,7 +90,10 @@ export default function DeploymentAssessment() {
           {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (
             <>
-              <ReviewBanner deploymentAssessment={deploymentAssessment} />
+              <ReviewBanner
+                deploymentAssessment={deploymentAssessment}
+                onReviewButtonClicked={() => setIsReviewPanelShown(true)}
+              />
               {deploymentAssessment.draft && (
                 <Paper
                   color='primary'
@@ -120,13 +160,36 @@ export default function DeploymentAssessment() {
                   </Stack>
                   <AssessmentStateChip assessment={deploymentAssessment} />
                 </Stack>
-                {deploymentAssessment && (
-                  <EditableDeploymentAssessmentForm
-                    deploymentAssessment={deploymentAssessment}
-                    isEdit={isEdit}
-                    onIsEditChange={setIsEdit}
-                  />
-                )}
+                <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
+                  {deploymentAssessment && (
+                    <Box sx={{ width: '100%' }}>
+                      <EditableDeploymentAssessmentForm
+                        deploymentAssessment={deploymentAssessment}
+                        isEdit={isEdit}
+                        onIsEditChange={setIsEdit}
+                      />
+                    </Box>
+                  )}
+                  {isReviewPanelShown && (
+                    <Stack direction='row'>
+                      <Stack spacing={2} sx={{ width: '350px' }}>
+                        <ReviewWithComment
+                          onSubmit={handleSubmit}
+                          reviews={reviews}
+                          loading={isReviewButtonLoading}
+                          deploymentAssessmentReview
+                        />
+                        <MessageAlert message={errorMessage} severity='error' />
+                      </Stack>
+                      <IconButton
+                        onClick={() => setIsReviewPanelShown(!isReviewPanelShown)}
+                        sx={{ height: 'fit-content' }}
+                      >
+                        <CloseIcon fontSize='small' />
+                      </IconButton>
+                    </Stack>
+                  )}
+                </Stack>
                 <ReviewComments
                   identifier={deploymentAssessment.id}
                   parentId={deploymentAssessment._id}

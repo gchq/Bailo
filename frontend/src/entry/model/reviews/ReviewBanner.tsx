@@ -31,7 +31,16 @@ export type ReviewBannerProps =
       deploymentAssessment: DeploymentAssessmentInterface | DeploymentAssessmentSummary
     }
 
-export default function ReviewBanner({ release, accessRequest, deploymentAssessment }: ReviewBannerProps) {
+type OptionalReviewBannerProps = {
+  onReviewButtonClicked: () => void | undefined
+}
+
+export default function ReviewBanner({
+  release,
+  accessRequest,
+  deploymentAssessment,
+  onReviewButtonClicked,
+}: ReviewBannerProps & OptionalReviewBannerProps) {
   const theme = useTheme()
   const router = useRouter()
 
@@ -42,12 +51,16 @@ export default function ReviewBanner({ release, accessRequest, deploymentAssessm
   })
 
   const handleReviewOnClick = () => {
-    if (release) {
-      router.push(`/model/${release.modelId}/release/${release.semver}/review`)
-    } else if (accessRequest) {
-      router.push(`/model/${accessRequest.modelId}/access-request/${accessRequest.id}/review`)
-    } else if (deploymentAssessment) {
-      router.push(`/deployment-assessments/${deploymentAssessment.id}/review`)
+    if (onReviewButtonClicked !== undefined) {
+      onReviewButtonClicked()
+    } else {
+      if (release) {
+        router.push(`/model/${release.modelId}/release/${release.semver}/review`)
+      } else if (accessRequest) {
+        router.push(`/model/${accessRequest.modelId}/access-request/${accessRequest.id}/review`)
+      } else if (deploymentAssessment) {
+        router.push(`/deployment-assessments/${deploymentAssessment.id}/review`)
+      }
     }
   }
 

@@ -15,7 +15,7 @@ export default function DeploymentAssessmentReviewItem({ review }: ReviewItemPro
   const router = useRouter()
 
   function handleListItemClick() {
-    router.push(`/deployment-assessments/${review.deploymentAssessmentId}/review`)
+    router.push(`/deployment-assessments/${review.deploymentAssessmentId}`)
   }
 
   const editedAdornment = useCallback(() => {

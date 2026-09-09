@@ -177,19 +177,6 @@ export default function ReviewComments({
   return (
     <Stack spacing={2} ref={ref}>
       {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
-      <Paginate
-        list={reviewDetails}
-        emptyListText='No responses found'
-        sortingProperties={[
-          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-        ]}
-        defaultSortProperty='createdAt'
-        hideSearchInput
-        searchFilterProperty='createdAt'
-      >
-        {ResponseListItem}
-      </Paginate>
       {!isEdit && showComments && (
         <Stack spacing={1} sx={{ justifyContent: 'center', alignItems: 'flex-end' }}>
           <Box sx={{ width: '100%' }}>
@@ -211,6 +198,19 @@ export default function ReviewComments({
           <MessageAlert severity='error' message={commentSubmissionError} />
         </Stack>
       )}
+      <Paginate
+        list={reviewDetails}
+        emptyListText='No responses found'
+        sortingProperties={[
+          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+        ]}
+        defaultSortProperty='createdAt'
+        hideSearchInput
+        searchFilterProperty='createdAt'
+      >
+        {ResponseListItem}
+      </Paginate>
     </Stack>
   )
 }
