@@ -13,25 +13,31 @@ type DraftBannerProps = {
 } & (
   | {
       showButton: false
+      dialogTitle?: never
       disableButton?: never
       handlePublish?: never
       isLoading?: never
       errorMessage?: never
+      setErrorMessage?: never
     }
   | {
       showButton: true
+      dialogTitle: string
       disableButton: boolean
       handlePublish: () => void
       isLoading: boolean
       errorMessage?: string
+      setErrorMessage: (err: string) => void
     }
 )
 
 export function DraftBanner({
   text,
+  dialogTitle,
   draft = false,
   isLoading,
   errorMessage = '',
+  setErrorMessage,
   handlePublish,
   showButton,
   disableButton,
@@ -74,11 +80,11 @@ export function DraftBanner({
               </Button>
               <ConfirmationDialogue
                 open={open}
-                title='Delete Release'
+                title={dialogTitle}
                 onConfirm={handlePublish}
-                onCancel={() => setOpen(false)}
+                onCancel={() => [setOpen(false), setErrorMessage('')]}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to publish this release? This is irreversible.'}
+                dialogMessage={'Are you sure you want to publish this? This is irreversible.'}
                 confirmLoading={isLoading}
               />
             </>
