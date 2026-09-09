@@ -25,6 +25,7 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
+import { getRoleEntities } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
@@ -383,13 +384,7 @@ async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInte
 
   const modelDevelopers = models.map((model) => ({
     model,
-    developers: [
-      ...new Set(
-        model.collaborators
-          .filter((collaborator) => collaborator.roles.includes(SystemRoles.Owner))
-          .map((collaborator) => collaborator.entity),
-      ),
-    ],
+    developers: getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner],
   }))
 
   return modelDevelopers
