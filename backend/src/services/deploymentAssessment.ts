@@ -1,5 +1,4 @@
-import { escapeRegExp } from 'lodash-es'
-import { ClientSession, QueryFilter } from 'mongoose'
+import { ClientSession } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction, ModelAction } from '../connectors/authorisation/actions.js'
@@ -15,6 +14,11 @@ import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/M
 import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
+import {
+  findDeploymentAssessments,
+  findLatestDecisionsByAssessmentIds,
+  SearchDeploymentAssessmentsParams,
+} from '../repositories/deploymentAssessment.js'
 import { ReviewKind, SchemaKind } from '../types/enums.js'
 import { DeploymentAssessmentUserPermissions } from '../types/types.js'
 import config from '../utils/config.js'
@@ -29,22 +33,11 @@ import { removeResponsesByParentIds } from './response.js'
 import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
-import { deploymentAssessmentSchema } from './specification.js'
+import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
 
 export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
 
-export interface SearchDeploymentAssessmentsParams {
-  schemaId?: string
-  modelIds?: string[]
-  riskOwner?: string
-  createdBy?: string
-  createdAfter?: string
-  createdBefore?: string
-  draft?: boolean
-  search?: string
-  state?: DeploymentAssessmentStateKeys
-  needsAction?: boolean
-}
+export type { SearchDeploymentAssessmentsParams }
 
 export interface DeploymentAssessmentDetails {
   deploymentAssessment: DeploymentAssessmentDoc
@@ -52,12 +45,9 @@ export interface DeploymentAssessmentDetails {
   state?: DeploymentAssessmentStateKeys
 }
 
-export type DeploymentAssessmentSearchResult = DeploymentAssessmentDoc & {
-  state?: DeploymentAssessmentDetails['state']
-}
-
 export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
 export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
+export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
 
 async function validateRiskOwner(riskOwners: string[]) {
   for (const riskOwner of riskOwners) {
@@ -236,10 +226,14 @@ function deriveDeploymentAssessmentState(
  * A risk owner needs to act on assessments awaiting their review, and a creator needs to act on assessments
  * that are still drafts or that have been sent back to them. Approved assessments need no further action.
  */
-function needsUserAction(deploymentAssessment: DeploymentAssessmentSearchResult, user: UserInterface) {
+function needsUserAction(
+  deploymentAssessment: DeploymentAssessmentInterface,
+  state: DeploymentAssessmentStateKeys,
+  user: UserInterface,
+) {
   if (
     deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
-    deploymentAssessment.state === DeploymentAssessmentState.NeedsReview
+    state === DeploymentAssessmentState.NeedsReview
   ) {
     return true
   }
@@ -250,8 +244,8 @@ function needsUserAction(deploymentAssessment: DeploymentAssessmentSearchResult,
 
   return (
     deploymentAssessment.draft ||
-    deploymentAssessment.state === DeploymentAssessmentState.Rejected ||
-    deploymentAssessment.state === DeploymentAssessmentState.ChangesRequested
+    state === DeploymentAssessmentState.Rejected ||
+    state === DeploymentAssessmentState.ChangesRequested
   )
 }
 
@@ -483,134 +477,47 @@ export async function updateDeploymentAssessment(
 }
 
 export async function searchDeploymentAssessments(user: UserInterface, params: SearchDeploymentAssessmentsParams) {
-  const query: QueryFilter<DeploymentAssessmentInterface> = {}
-
-  if (params.schemaId) {
-    query.schemaId = params.schemaId
-  }
-
-  if (params.modelIds?.length) {
-    query['metadata.overview.modelIds'] = { $all: params.modelIds }
-  }
-
-  if (params.riskOwner) {
-    query['metadata.overview.riskOwner'] = {
-      $elemMatch: { $eq: params.riskOwner },
-    }
-  }
-
-  if (params.createdBy) {
-    query.createdBy = params.createdBy
-  }
-
-  if (params.createdAfter || params.createdBefore) {
-    const beforeDate = params.createdBefore ? new Date(params.createdBefore) : undefined
-    beforeDate?.setUTCDate(beforeDate.getUTCDate() + 1)
-
-    query.createdAt = {
-      ...(params.createdAfter && {
-        $gte: new Date(params.createdAfter),
-      }),
-      ...(beforeDate && {
-        $lt: beforeDate,
-      }),
-    }
-  }
-
-  if (params.draft !== undefined) {
-    query.draft = params.draft
-  }
-
-  if (params.search) {
-    query.name = {
-      $regex: escapeRegExp(params.search),
-      $options: 'i',
-    }
-  }
-
-  const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({
-    draft: -1,
-    updatedAt: -1,
-  })
+  const deploymentAssessments = await findDeploymentAssessments(params)
 
   const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
 
   const authorisedAssessments = deploymentAssessments.filter((_, index) => auths[index].success)
 
   const assessmentIds = authorisedAssessments.filter(({ draft }) => draft === false).map(({ id }) => id)
+  const latestDecisionsByAssessmentId = await findLatestDecisionsByAssessmentIds(assessmentIds)
 
-  const latestDecisions = assessmentIds.length
-    ? await ReviewModel.aggregate<{
-        _id: string
-        decision?: DecisionKeys
-      }>([
-        {
-          $match: {
-            deploymentAssessmentId: { $in: assessmentIds },
-            kind: ReviewKind.DeploymentAssessment,
-          },
-        },
-        {
-          $lookup: {
-            from: 'v2_responses',
-            let: { reviewId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: { $eq: ['$parentId', '$$reviewId'] },
-                  kind: ResponseKind.Review,
-                },
-              },
-              {
-                $sort: { createdAt: -1 },
-              },
-              {
-                $limit: 1,
-              },
-            ],
-            as: 'latestResponse',
-          },
-        },
-        {
-          $unwind: {
-            path: '$latestResponse',
-            preserveNullAndEmptyArrays: false,
-          },
-        },
-        {
-          $sort: {
-            'latestResponse.createdAt': -1,
-          },
-        },
-        {
-          $group: {
-            _id: '$deploymentAssessmentId',
-            decision: { $first: '$latestResponse.decision' },
-          },
-        },
-      ])
-    : []
+  const summaries: DeploymentAssessmentSummary[] = authorisedAssessments.reduce<DeploymentAssessmentSummary[]>(
+    (acc, assessment) => {
+      const state =
+        assessment.draft !== false
+          ? undefined
+          : deriveDeploymentAssessmentState(assessment, latestDecisionsByAssessmentId.get(assessment.id))
 
-  const latestDecisionsByAssessmentId = new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
+      const passesFilter =
+        (params.state === undefined || state === params.state) &&
+        (params.needsAction === undefined ||
+          state === undefined ||
+          needsUserAction(assessment, state, user) === params.needsAction)
 
-  const searchResults: DeploymentAssessmentSearchResult[] = authorisedAssessments.map((assessment) => {
-    if (assessment.draft !== false) {
-      return assessment
-    }
+      if (passesFilter) {
+        const { riskOwner, modelIds } = assessment.metadata?.overview ?? {}
+        acc.push({
+          id: assessment.id,
+          schemaId: assessment.schemaId,
+          name: assessment.name,
+          ...(riskOwner && riskOwner.length > 0 && { owner: riskOwner }),
+          ...(modelIds && { models: modelIds }),
+          ...(state && { state }),
+          draft: assessment.draft,
+          createdBy: assessment.createdBy,
+          createdAt: assessment.createdAt instanceof Date ? assessment.createdAt.toISOString() : assessment.createdAt,
+        })
+      }
 
-    const decision = latestDecisionsByAssessmentId.get(assessment.id)
-    const state = deriveDeploymentAssessmentState(assessment, decision)
-
-    return Object.assign(assessment, { state })
-  })
-
-  if (params.state === undefined && params.needsAction === undefined) {
-    return searchResults
-  }
-
-  return searchResults.filter(
-    (assessment) =>
-      (params.state === undefined || assessment.state === params.state) &&
-      (params.needsAction === undefined || needsUserAction(assessment, user) === params.needsAction),
+      return acc
+    },
+    [],
   )
+
+  return summaries
 }

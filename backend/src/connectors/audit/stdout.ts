@@ -13,6 +13,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
@@ -457,7 +458,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]) {
+  async onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentSummary[]) {
     this.checkEventType(AuditInfo.SearchDeploymentAssessments, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,

@@ -13,6 +13,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 
@@ -596,7 +597,10 @@ export abstract class BaseAuditConnector {
   abstract onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onUpdateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
-  abstract onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]): Promise<void>
+  abstract onSearchDeploymentAssessments(
+    req: Request,
+    deploymentAssessments: DeploymentAssessmentSummary[],
+  ): Promise<void>
   abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onReviewDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
   abstract onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>

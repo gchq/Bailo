@@ -65,7 +65,18 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
         },
       ],
     })
-    expect(audit.onSearchDeploymentAssessments).toHaveBeenCalledWith(expect.anything(), [deploymentAssessment])
+    expect(audit.onSearchDeploymentAssessments).toHaveBeenCalledWith(expect.anything(), [
+      {
+        id: 'assessment-abc123',
+        schemaId: 'deployment-assessment-schema',
+        name: 'Assessment',
+        owner: ['user:risk-owner'],
+        models: ['model-one', 'model-two'],
+        draft: false,
+        createdBy: 'creator',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ])
   })
 
   test('supports a single model filter', async () => {
