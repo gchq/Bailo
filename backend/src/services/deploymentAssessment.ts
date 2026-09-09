@@ -2,13 +2,12 @@ import { escapeRegExp } from 'lodash-es'
 import { ClientSession, QueryFilter } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
-import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
+import { DeploymentAssessmentAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { z } from '../lib/zod.js'
 import DeploymentAssessmentModel, {
   DeploymentAssessmentDoc,
   DeploymentAssessmentInterface,
-  DeploymentAssessmentMetadata,
   DeploymentAssessmentState,
   DeploymentAssessmentStateKeys,
 } from '../models/DeploymentAssessment.js'
@@ -44,6 +43,7 @@ export interface SearchDeploymentAssessmentsParams {
   draft?: boolean
   search?: string
   state?: DeploymentAssessmentStateKeys
+  needsAction?: boolean
 }
 
 export interface DeploymentAssessmentDetails {
@@ -74,16 +74,23 @@ async function validateRiskOwner(riskOwners: string[]) {
   }
 }
 
-async function validateModels(modelIds: string[]) {
+async function validateModels(user: UserInterface, modelIds: string[]) {
   const models = await ModelModel.find({ id: { $in: modelIds } })
   const modelKinds = new Set([EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] as string[])
   const modelsById = new Set(models.map((model) => model.id))
 
   const missingModelIds = modelIds.filter((modelId) => !modelsById.has(modelId))
   const nonModelIds = models.filter((model) => !modelKinds.has(model.kind)).map((model) => model.id)
-
   if (missingModelIds.length > 0 || nonModelIds.length > 0) {
     throw BadReq('One or more models could not be found.', { modelIds: missingModelIds })
+  }
+
+  const auths = await authorisation.models(user, models, ModelAction.View)
+  const unauthorisedModelIds = auths.filter((auth) => !auth.success).map((auth) => auth.id)
+  if (unauthorisedModelIds.length > 0) {
+    throw BadReq('You do not have permission to use one or more of the specified models.', {
+      modelIds: unauthorisedModelIds,
+    })
   }
 
   const privateModelIds = models.filter((model) => model.visibility !== EntryVisibility.Public).map((model) => model.id)
@@ -104,10 +111,11 @@ async function validateModels(modelIds: string[]) {
 }
 
 async function validateDeploymentAssessment(
+  user: UserInterface,
   schemaId: DeploymentAssessmentInterface['schemaId'],
   metadata: DeploymentAssessmentInterface['metadata'],
   draft: DeploymentAssessmentInterface['draft'],
-): Promise<DeploymentAssessmentMetadata> {
+) {
   const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
   if (!valid) {
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
@@ -123,10 +131,8 @@ async function validateDeploymentAssessment(
     await validateRiskOwner(riskOwner)
   }
   if (modelIds?.length) {
-    await validateModels(modelIds)
+    await validateModels(user, modelIds)
   }
-
-  return metadata
 }
 
 async function notifyDeploymentStakeholders(
@@ -223,6 +229,29 @@ function deriveDeploymentAssessmentState(
     default:
       return DeploymentAssessmentState.NeedsReview
   }
+}
+
+/**
+ * A risk owner needs to act on assessments awaiting their review, and a creator needs to act on assessments
+ * that are still drafts or that have been sent back to them. Approved assessments need no further action.
+ */
+function needsUserAction(deploymentAssessment: DeploymentAssessmentSearchResult, user: UserInterface) {
+  if (
+    deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
+    deploymentAssessment.state === DeploymentAssessmentState.NeedsReview
+  ) {
+    return true
+  }
+
+  if (deploymentAssessment.createdBy !== user.dn) {
+    return false
+  }
+
+  return (
+    deploymentAssessment.draft ||
+    deploymentAssessment.state === DeploymentAssessmentState.Rejected ||
+    deploymentAssessment.state === DeploymentAssessmentState.ChangesRequested
+  )
 }
 
 export async function getDeploymentAssessmentDetails(
@@ -323,17 +352,7 @@ export async function createDeploymentAssessment(
   }
 
   if (metadata) {
-    const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
-    if (!valid) {
-      throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
-    }
-
-    if (metadata.overview.riskOwner && metadata.overview.riskOwner.length > 0) {
-      await validateRiskOwner(metadata.overview.riskOwner)
-    }
-    if (metadata.overview.modelIds && metadata.overview.modelIds.length > 0) {
-      await validateModels(metadata.overview.modelIds)
-    }
+    await validateDeploymentAssessment(user, schemaId, metadata, draft)
   }
 
   const deploymentAssessmentId = convertStringToId(name)
@@ -437,7 +456,8 @@ export async function updateDeploymentAssessment(
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
-  const metadata = await validateDeploymentAssessment(
+  await validateDeploymentAssessment(
+    user,
     deploymentAssessment.schemaId,
     diff.metadata ?? deploymentAssessment.metadata,
     diff.draft ?? deploymentAssessment.draft,
@@ -448,7 +468,7 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('name')
   }
   if (diff.metadata !== undefined) {
-    deploymentAssessment.metadata = metadata
+    deploymentAssessment.metadata = diff.metadata
     deploymentAssessment.markModified('metadata')
   }
 
@@ -465,8 +485,8 @@ export async function updateDeploymentAssessment(
 
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      metadata.overview?.riskOwner ?? [],
-      metadata.overview?.modelIds ?? [],
+      deploymentAssessment.metadata?.overview?.riskOwner ?? [],
+      deploymentAssessment.metadata?.overview?.modelIds ?? [],
       deploymentAssessment,
     )
   }
@@ -480,39 +500,62 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   if (params.schemaId) {
     query.schemaId = params.schemaId
   }
+
   if (params.modelIds?.length) {
     query['metadata.overview.modelIds'] = { $all: params.modelIds }
   }
+
   if (params.riskOwner) {
-    query['metadata.overview.riskOwner'] = { $elemMatch: { $eq: params.riskOwner } }
+    query['metadata.overview.riskOwner'] = {
+      $elemMatch: { $eq: params.riskOwner },
+    }
   }
+
   if (params.createdBy) {
     query.createdBy = params.createdBy
   }
+
   if (params.createdAfter || params.createdBefore) {
     const beforeDate = params.createdBefore ? new Date(params.createdBefore) : undefined
     beforeDate?.setUTCDate(beforeDate.getUTCDate() + 1)
 
     query.createdAt = {
-      ...(params.createdAfter && { $gte: new Date(params.createdAfter) }),
-      ...(beforeDate && { $lt: beforeDate }),
+      ...(params.createdAfter && {
+        $gte: new Date(params.createdAfter),
+      }),
+      ...(beforeDate && {
+        $lt: beforeDate,
+      }),
     }
   }
+
   if (params.draft !== undefined) {
     query.draft = params.draft
   }
+
   if (params.search) {
-    const search = { $regex: escapeRegExp(params.search), $options: 'i' }
-    query.$and = [{ $or: [{ name: search }, { 'metadata.overview.justification': search }] }]
+    query.name = {
+      $regex: escapeRegExp(params.search),
+      $options: 'i',
+    }
   }
 
-  const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({ draft: -1, updatedAt: -1 })
+  const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({
+    draft: -1,
+    updatedAt: -1,
+  })
+
   const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
 
-  const authorisedAssessments = deploymentAssessments.filter((_, i) => auths[i].success)
+  const authorisedAssessments = deploymentAssessments.filter((_, index) => auths[index].success)
+
   const assessmentIds = authorisedAssessments.filter(({ draft }) => draft === false).map(({ id }) => id)
+
   const latestDecisions = assessmentIds.length
-    ? await ReviewModel.aggregate<{ _id: string; decision?: DecisionKeys }>([
+    ? await ReviewModel.aggregate<{
+        _id: string
+        decision?: DecisionKeys
+      }>([
         {
           $match: {
             deploymentAssessmentId: { $in: assessmentIds },
@@ -530,27 +573,56 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
                   kind: ResponseKind.Review,
                 },
               },
-              { $sort: { createdAt: -1 } },
+              {
+                $sort: { createdAt: -1 },
+              },
+              {
+                $limit: 1,
+              },
             ],
-            as: 'responses',
+            as: 'latestResponse',
           },
         },
-        { $set: { responses: { $slice: ['$responses', 1] } } },
-        { $unwind: { path: '$responses', preserveNullAndEmptyArrays: false } },
-        { $sort: { 'responses.createdAt': -1 } },
-        { $group: { _id: '$deploymentAssessmentId', decision: { $first: '$responses.decision' } } },
+        {
+          $unwind: {
+            path: '$latestResponse',
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $sort: {
+            'latestResponse.createdAt': -1,
+          },
+        },
+        {
+          $group: {
+            _id: '$deploymentAssessmentId',
+            decision: { $first: '$latestResponse.decision' },
+          },
+        },
       ])
     : []
-  const decisionsByAssessmentId = new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
+
+  const latestDecisionsByAssessmentId = new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
 
   const searchResults: DeploymentAssessmentSearchResult[] = authorisedAssessments.map((assessment) => {
     if (assessment.draft !== false) {
       return assessment
     }
 
-    const state = deriveDeploymentAssessmentState(assessment, decisionsByAssessmentId.get(assessment.id))
+    const decision = latestDecisionsByAssessmentId.get(assessment.id)
+    const state = deriveDeploymentAssessmentState(assessment, decision)
+
     return Object.assign(assessment, { state })
   })
 
-  return searchResults.filter(({ state }) => !params.state || state === params.state)
+  if (params.state === undefined && params.needsAction === undefined) {
+    return searchResults
+  }
+
+  return searchResults.filter(
+    (assessment) =>
+      (params.state === undefined || assessment.state === params.state) &&
+      (params.needsAction === undefined || needsUserAction(assessment, user) === params.needsAction),
+  )
 }

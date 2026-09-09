@@ -65,17 +65,74 @@ export default function DeploymentAssessmentSummaryCard({
               onSelectedStateChange={onSelectedStateChange}
             />
           </Stack>
-          <Stack direction='row' spacing={0.5}>
-            <Typography variant='caption'>Created by</Typography>
-            <UserDisplay dn={assessment.createdBy} />
-            <Typography>on</Typography>
-            <Typography
-              variant='caption'
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >
-              {`${formatDateString(assessment.createdAt)} `}
+          <AssessmentStateChip
+            assessment={assessment}
+            selectedState={selectedState}
+            onSelectedStateChange={onSelectedStateChange}
+          />
+        </Stack>
+        <Stack direction='row' spacing={0.5}>
+          <Typography variant='caption'>Created by</Typography>
+          <UserDisplay dn={assessment.createdBy} />
+          <Typography>on</Typography>
+          <Typography
+            variant='caption'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            {`${formatDateString(assessment.createdAt)} `}
+          </Typography>
+        </Stack>
+        <Card variant='outlined' sx={{ height: '100%', p: 2 }}>
+          <Typography component='h3' variant='subtitle2' sx={{ mb: 1 }}>
+            <Box component='span' sx={{ fontWeight: 'bold' }}>
+              Models:
+            </Box>{' '}
+            {assessment.models?.length ? (
+              canSelectModels ? (
+                <ChipSelector
+                  chipTooltipTitle='Filter by model'
+                  options={assessment.models}
+                  multiple
+                  selectedChips={selectedModelIds}
+                  onChange={onSelectedModelIdsChange}
+                  size='small'
+                  variant='outlined'
+                  ariaLabel='add model to deployment assessment filters'
+                  style={{ maxWidth: '400px' }}
+                />
+              ) : (
+                <Typography component='span' variant='body2'>
+                  {assessment.models.join(', ')}
+                </Typography>
+              )
+            ) : (
+              <Typography variant='body2' component='em'>
+                No models specified
+              </Typography>
+            )}
+          </Typography>
+          <Stack spacing={1}>
+            <Typography variant='body2'>
+              <Box component='span' sx={{ fontWeight: 'bold' }}>
+                Schema:
+              </Box>{' '}
+              {schema?.name ?? assessment.schemaId}
+            </Typography>
+            <Typography variant='body2' component='div'>
+              <Box component='span' sx={{ fontWeight: 'bold' }}>
+                Risk owner:
+              </Box>{' '}
+              {owners.length ? (
+                <Stack component='span' direction='row' spacing={1} sx={{ display: 'inline-flex', flexWrap: 'wrap' }}>
+                  {owners.map((owner) => (
+                    <UserDisplay key={owner} dn={owner} />
+                  ))}
+                </Stack>
+              ) : (
+                <em>Not specified</em>
+              )}
             </Typography>
           </Stack>
           <Card variant='outlined' sx={{ height: '100%', p: 2 }}>
@@ -128,15 +185,9 @@ export default function DeploymentAssessmentSummaryCard({
                   <em>Not specified</em>
                 )}
               </Typography>
-              <Typography variant='body2'>
-                <Box component='span' sx={{ fontWeight: 'bold' }}>
-                  Justification:
-                </Box>{' '}
-                {assessment.justification}
-              </Typography>
             </Stack>
           </Card>
-        </Stack>
+        </Card>
       </Box>
     </>
   )

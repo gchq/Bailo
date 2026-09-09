@@ -32,7 +32,7 @@ export type ReviewBannerProps =
     }
 
 type OptionalReviewBannerProps = {
-  onReviewButtonClicked: () => void | undefined
+  onReviewButtonClicked?: () => void | undefined
 }
 
 export default function ReviewBanner({

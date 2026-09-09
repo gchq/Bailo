@@ -12,7 +12,6 @@ const deploymentAssessment = {
   metadata: {
     overview: {
       riskOwner: ['user:risk-owner'],
-      justification: 'Owns the deployment risk.',
       modelIds: ['model-one'],
     },
   },
@@ -53,29 +52,28 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
     expect(audit.onCreateDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), deploymentAssessment)
   })
 
-  test.each([
-    { riskOwner: ['user:risk-owner'], modelIds: [] },
-    { justification: 'Owns the deployment risk.', modelIds: ['model-one'] },
-    {},
-  ])('creates a draft with overview fields set to %j', async (overview) => {
-    const draftAssessment = {
-      ...deploymentAssessment,
-      metadata: { overview },
-      draft: true,
-    }
-    serviceMock.createDeploymentAssessment.mockResolvedValueOnce(draftAssessment)
-    const body = {
-      name: 'Assessment',
-      schemaId: 'deployment-assessment-schema',
-      metadata: { overview },
-      draft: true,
-    }
+  test.each([{ riskOwner: ['user:risk-owner'], modelIds: [] }, {}])(
+    'creates a draft with overview fields set to %j',
+    async (overview) => {
+      const draftAssessment = {
+        ...deploymentAssessment,
+        metadata: { overview },
+        draft: true,
+      }
+      serviceMock.createDeploymentAssessment.mockResolvedValueOnce(draftAssessment)
+      const body = {
+        name: 'Assessment',
+        schemaId: 'deployment-assessment-schema',
+        metadata: { overview },
+        draft: true,
+      }
 
-    const res = await testPost('/api/v3/deployment-assessments', { body })
+      const res = await testPost('/api/v3/deployment-assessments', { body })
 
-    expect(res.statusCode).toBe(201)
-    expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
-  })
+      expect(res.statusCode).toBe(201)
+      expect(serviceMock.createDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), body)
+    },
+  )
 
   test('creates a draft by default when draft is not specified', async () => {
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce({ ...deploymentAssessment, draft: true })

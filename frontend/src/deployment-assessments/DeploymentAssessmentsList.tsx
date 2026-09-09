@@ -35,11 +35,11 @@ import { DeploymentAssessmentState, DeploymentAssessmentSummary, SchemaKind } fr
 import DeploymentAssessmentSummaryCard from './DeploymentAssessmentSummaryCard'
 
 const statusLabels: Record<DeploymentAssessmentStatusKeys, string> = {
-  [DeploymentAssessmentStatus.DRAFT]: 'Draft',
-  [DeploymentAssessmentState.NEEDS_REVIEW]: 'Needs review',
-  [DeploymentAssessmentState.CHANGES_REQUESTED]: 'Changes requested',
-  [DeploymentAssessmentState.APPROVED]: 'Approved',
-  [DeploymentAssessmentState.REJECTED]: 'Rejected',
+  [DeploymentAssessmentStatus.Draft]: 'Draft',
+  [DeploymentAssessmentState.NeedsReview]: 'Needs review',
+  [DeploymentAssessmentState.ChangesRequested]: 'Changes requested',
+  [DeploymentAssessmentState.Approved]: 'Approved',
+  [DeploymentAssessmentState.Rejected]: 'Rejected',
 }
 
 export default function DeploymentAssessmentsList() {

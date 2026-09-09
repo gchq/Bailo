@@ -1,8 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
-import ReviewIcon from '@mui/icons-material/Comment'
 import { Box, Button, Container, Divider, IconButton, Paper, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
 import { useRouter } from 'next/router'
@@ -13,8 +12,10 @@ import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
+import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ReviewComments from 'src/reviews/ReviewComments'
@@ -30,12 +31,14 @@ export default function DeploymentAssessment() {
       ? returnTo
       : '/deployment-assessments?tab=all-assessments'
 
-  const theme = useTheme()
+  const sendNotification = useNotification()
 
   const [isEdit, setIsEdit] = useState(false)
   const [isReviewPanelShown, setIsReviewPanelShown] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [patchErrorMessage, setPatchErrorMessage] = useState('')
 
   const {
     deploymentAssessment,
@@ -79,6 +82,20 @@ export default function DeploymentAssessment() {
     return error
   }
 
+  async function handlePublish() {
+    if (deploymentAssessment) {
+      setIsLoading(true)
+      const response = await patchDeploymentAssessment(deploymentAssessment.id, undefined, false)
+      if (!response.ok) {
+        setPatchErrorMessage(await getErrorMessage(response))
+      } else {
+        mutateDeploymentAssessment()
+        sendNotification({ msg: 'Deployment Assessment successfully published.', variant: 'success' })
+      }
+      setIsLoading(false)
+    }
+  }
+
   const isLoadingDeploymentAssessment =
     !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment || isReviewsLoading
 
@@ -94,43 +111,17 @@ export default function DeploymentAssessment() {
                 deploymentAssessment={deploymentAssessment}
                 onReviewButtonClicked={() => setIsReviewPanelShown(true)}
               />
-              {deploymentAssessment.draft && (
-                <Paper
-                  color='primary'
-                  sx={{
-                    backgroundColor: theme.palette.mode === 'light' ? theme.palette.info.light : 'unset',
-                    py: 1,
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Stack
-                    direction='row'
-                    spacing={2}
-                    sx={{
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      px: 2,
-                      width: '100%',
-                    }}
-                  >
-                    <Stack direction='row' spacing={1}>
-                      <ReviewIcon color='primary' />
-                      <Typography>Draft</Typography>
-                    </Stack>
-                    <Button
-                      variant='outlined'
-                      color='inherit'
-                      size='small'
-                      onClick={() => {}}
-                      data-test='publishButton'
-                    >
-                      Publish
-                    </Button>
-                  </Stack>
-                </Paper>
-              )}
+              <DraftBanner
+                errorMessage={patchErrorMessage}
+                setErrorMessage={setPatchErrorMessage}
+                disableButton={isEdit}
+                isLoading={isLoading}
+                handlePublish={handlePublish}
+                draft={deploymentAssessment.draft}
+                text='This is a draft deployment assessment'
+                dialogTitle='Confirm publish'
+                showButton
+              />
               <Stack spacing={2} sx={{ p: 4 }}>
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}
@@ -165,6 +156,7 @@ export default function DeploymentAssessment() {
                     <Box sx={{ width: '100%' }}>
                       <EditableDeploymentAssessmentForm
                         deploymentAssessment={deploymentAssessment}
+                        mutate={mutateDeploymentAssessment}
                         isEdit={isEdit}
                         onIsEditChange={setIsEdit}
                       />
