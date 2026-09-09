@@ -14,7 +14,6 @@ const deploymentAssessment = {
   metadata: {
     overview: {
       riskOwner: ['user:risk-owner'],
-      justification: 'Owns the deployment risk.',
       modelIds: ['model-one', 'model-two'],
     },
     deletedInformation: 'must not be returned',
@@ -36,7 +35,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessment])
 
     const res = await testGet(
-      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=deployment%20justification&state=approved&needsAction=true',
+      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=Assessment&state=approved&needsAction=true',
     )
 
     expect(res.statusCode).toBe(200)
@@ -48,8 +47,8 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
       createdAfter: '2026-01-01',
       createdBefore: '2026-01-31',
       draft: false,
-      search: 'deployment justification',
       state: 'approved',
+      search: 'Assessment',
       needsAction: true,
     })
     expect(res.body).toEqual({
@@ -60,7 +59,6 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
           name: 'Assessment',
           owner: ['user:risk-owner'],
           models: ['model-one', 'model-two'],
-          justification: 'Owns the deployment risk.',
           draft: false,
           createdBy: 'creator',
           createdAt: '2026-01-01T00:00:00.000Z',

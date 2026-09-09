@@ -522,16 +522,10 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   }
 
   if (params.search) {
-    const search = {
+    query.name = {
       $regex: escapeRegExp(params.search),
       $options: 'i',
     }
-
-    query.$and = [
-      {
-        $or: [{ name: search }, { 'metadata.overview.justification': search }],
-      },
-    ]
   }
 
   const deploymentAssessments = await DeploymentAssessmentModel.find(query).sort({
