@@ -1,4 +1,4 @@
-import MinimizeIcon from '@mui/icons-material/Minimize'
+import RemoveIcon from '@mui/icons-material/Remove'
 import { Box, IconButton, Tooltip, Typography } from '@mui/material'
 import EmptyBlob from 'src/common/EmptyBlob'
 import {
@@ -42,7 +42,7 @@ export function SwimLaneColumn({ title, color, assessments, isLoading, onHide }:
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Tooltip title={`Hide ${title} column`}>
             <IconButton size='small' onClick={onHide} sx={{ p: 0.25 }} aria-label={`Hide ${title} column`}>
-              <MinimizeIcon sx={{ fontSize: 16 }} />
+              <RemoveIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         </Box>

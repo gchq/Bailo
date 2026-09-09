@@ -63,7 +63,7 @@ export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardPro
         <Link
           href={{
             pathname: `/deployment-assessments/${assessment.id}`,
-            query: returnTo ? { returnTo } : undefined,
+            query: { returnTo },
           }}
           sx={{ overflow: 'hidden' }}
         >

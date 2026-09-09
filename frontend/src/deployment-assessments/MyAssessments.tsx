@@ -1,8 +1,9 @@
 import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
-import { alpha, Theme, useTheme } from '@mui/material/styles'
+import { Theme, useTheme } from '@mui/material/styles'
 import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
+import CurrentUserContext from 'src/contexts/currentUserContext'
 import { SwimLaneColumn } from 'src/deployment-assessments/components/SwimLaneColumn'
 import {
   getHiddenDeploymentAssessmentColumns,
@@ -10,23 +11,23 @@ import {
 } from 'src/storage/userPreferences'
 import { DeploymentAssessmentState, DeploymentAssessmentSummary } from 'types/types'
 
-interface SwimLaneColumn {
+interface SwimLaneColumnConfig {
   key: string
   label: string
   color: string
 }
 
-function getColumnConfig(theme: Theme): SwimLaneColumn[] {
+function getColumnConfig(theme: Theme): SwimLaneColumnConfig[] {
   return [
     { key: 'in_draft', label: 'In Draft', color: theme.palette.grey[200] },
-    { key: DeploymentAssessmentState.NeedsReview, label: 'Needs Review', color: alpha(theme.palette.info.main, 0.2) },
+    { key: DeploymentAssessmentState.NeedsReview, label: 'Needs Review', color: theme.palette.grey[200] },
     {
       key: DeploymentAssessmentState.ChangesRequested,
       label: 'Changes Requested',
-      color: alpha(theme.palette.warning.main, 0.2),
+      color: theme.palette.grey[200],
     },
-    { key: DeploymentAssessmentState.Rejected, label: 'Rejected', color: alpha(theme.palette.error.main, 0.2) },
-    { key: DeploymentAssessmentState.Approved, label: 'Approved', color: alpha(theme.palette.success.main, 0.2) },
+    { key: DeploymentAssessmentState.Rejected, label: 'Rejected', color: theme.palette.grey[200] },
+    { key: DeploymentAssessmentState.Approved, label: 'Approved', color: theme.palette.grey[200] },
   ]
 }
 
@@ -36,8 +37,9 @@ function getColumnKey(assessment: DeploymentAssessmentSummary): string {
 
 export default function MyAssessments() {
   const theme = useTheme()
+  const currentUser = useContext(CurrentUserContext)
   const { deploymentAssessments, isDeploymentAssessmentsLoading, isDeploymentAssessmentsError } =
-    useGetDeploymentAssessments()
+    useGetDeploymentAssessments({ createdBy: currentUser.dn })
 
   const [hiddenColumnKeys, setHiddenColumnKeys] = useState(getHiddenDeploymentAssessmentColumns)
 
