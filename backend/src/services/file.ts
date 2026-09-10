@@ -190,6 +190,20 @@ export async function finishUploadMultipartFile(
   return ret
 }
 
+export async function authoriseFileDownloads(
+  user: UserInterface,
+  modelId: string,
+  files: FileWithScanResultsAggregate[],
+) {
+  const model = await getModelById(user, modelId)
+  const auths = await authorisation.files(user, model, files, FileAction.Download)
+  const denied = auths.find((auth) => !auth.success)
+
+  if (denied) {
+    throw Forbidden(denied.info, { userDn: user.dn, fileId: denied.id, modelId })
+  }
+}
+
 export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {
   const file = await getFileById(user, fileId)
   const model = await getModelById(user, file.modelId)

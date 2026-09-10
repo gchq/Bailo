@@ -1,5 +1,6 @@
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Stack, Typography } from '@mui/material'
+import Download from '@mui/icons-material/Download'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Stack, Typography } from '@mui/material'
 import { memoize } from 'lodash-es'
 import { useContext, useState } from 'react'
 import Paginate from 'src/common/Paginate'
@@ -7,6 +8,7 @@ import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContex
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
+import Link from 'src/Link'
 import { ArtefactKind, EntryInterface, ReleaseInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
@@ -65,29 +67,39 @@ export default function ReleaseAssetsAccordion({
           </AccordionSummary>
           <AccordionDetails>
             {expanded === 'files' && (
-              <Paginate
-                list={release.files}
-                defaultSortProperty='createdAt'
-                searchFilterProperty='name'
-                searchPlaceholderText='Search by filename'
-                emptyListText='No files found'
-                sortingProperties={[
-                  { value: 'name', title: 'Name', iconKind: 'text' },
-                  { value: 'size', title: 'Size', iconKind: 'size' },
-                  {
-                    value: 'createdAt',
-                    title: 'Date uploaded',
-                    iconKind: 'date',
-                  },
-                  {
-                    value: 'updatedAt',
-                    title: 'Date updated',
-                    iconKind: 'date',
-                  },
-                ]}
-              >
-                {FileRowItem}
-              </Paginate>
+              <Stack spacing={2}>
+                <Button
+                  component={Link}
+                  href={`/api/v2/model/${model.id}/release/${release.semver}/files/download`}
+                  startIcon={<Download />}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  Download all files
+                </Button>
+                <Paginate
+                  list={release.files}
+                  defaultSortProperty='createdAt'
+                  searchFilterProperty='name'
+                  searchPlaceholderText='Search by filename'
+                  emptyListText='No files found'
+                  sortingProperties={[
+                    { value: 'name', title: 'Name', iconKind: 'text' },
+                    { value: 'size', title: 'Size', iconKind: 'size' },
+                    {
+                      value: 'createdAt',
+                      title: 'Date uploaded',
+                      iconKind: 'date',
+                    },
+                    {
+                      value: 'updatedAt',
+                      title: 'Date updated',
+                      iconKind: 'date',
+                    },
+                  ]}
+                >
+                  {FileRowItem}
+                </Paginate>
+              </Stack>
             )}
           </AccordionDetails>
         </Accordion>

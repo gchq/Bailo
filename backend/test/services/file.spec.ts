@@ -7,6 +7,7 @@ import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
 import {
+  authoriseFileDownloads,
   downloadFile,
   finishUploadMultipartFile,
   getFilesByIds,
@@ -687,6 +688,26 @@ describe('services > file', () => {
 
     const files = await getFilesByIds(user, modelId, fileIds)
     expect(files).toStrictEqual([])
+  })
+
+  test('authoriseFileDownloads > success', async () => {
+    const user = { dn: 'testUser' } as any
+    const modelId = 'testModelId'
+    const files = [{ id: testFileId, _id: { toString: vi.fn(() => testFileId) } }] as any
+    vi.mocked(authorisation.files).mockResolvedValueOnce([{ success: true, id: testFileId }])
+
+    await authoriseFileDownloads(user, modelId, files)
+
+    expect(authorisation.files).toHaveBeenCalledWith(user, expect.anything(), files, FileAction.Download)
+  })
+
+  test('authoriseFileDownloads > rejects when any file cannot be downloaded', async () => {
+    const user = { dn: 'testUser' } as any
+    const modelId = 'testModelId'
+    const files = [{ id: testFileId, _id: { toString: vi.fn(() => testFileId) } }] as any
+    vi.mocked(authorisation.files).mockResolvedValueOnce([{ success: false, info: 'Download denied.', id: testFileId }])
+
+    await expect(authoriseFileDownloads(user, modelId, files)).rejects.toThrow(/^Download denied\./)
   })
 
   test('downloadFile > success', async () => {
