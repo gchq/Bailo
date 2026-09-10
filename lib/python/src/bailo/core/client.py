@@ -3,6 +3,7 @@ from __future__ import annotations
 from io import BytesIO
 from json import JSONDecodeError
 from typing import Any
+from urllib.parse import quote
 
 import requests
 
@@ -527,6 +528,7 @@ class Client:
         :param filename: The filename trying to download from
         :return: Response object
         """
+        filename = quote(filename, safe="")
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
                 f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{filename}/download",
