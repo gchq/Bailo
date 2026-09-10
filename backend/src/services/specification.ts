@@ -194,6 +194,7 @@ export const fileWithScanInterfaceSchema = z.object({
   path: z.string().openapi({ example: '/model/yolo-v4-abcdef/files/abcdef' }),
 
   complete: z.boolean().openapi({ example: true }),
+  ungovernedAccess: z.boolean().optional().openapi({ example: false }),
 
   scanResults: z
     .array(

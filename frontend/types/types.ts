@@ -105,6 +105,7 @@ export interface FileInterface {
   path: string
 
   complete: boolean
+  ungovernedAccess?: boolean
 
   // Older files may not have scans run against them
   scanResults?: AvScanResult[]

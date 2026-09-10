@@ -803,6 +803,60 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
+  describe('file download access overrides', () => {
+    const publicModel = { id: 'model', visibility: 'public', settings: { ungovernedAccess: false } } as ModelDoc
+
+    test.each([true, false, undefined])(
+      'only an explicit opt-in bypasses the access request (%s)',
+      async (ungovernedAccess) => {
+        const connector = new BasicAuthorisationConnector()
+        mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+        mockResponseService.checkAccessRequestsApproved.mockResolvedValue(false)
+        mockModelService.getModelSystemRoles.mockResolvedValue([])
+        ReviewRoleModelMock.find.mockResolvedValue([])
+        const file = { _id: { toString: () => 'image' }, ungovernedAccess } as any
+        const result = await connector.file(user, publicModel, file, FileAction.Download)
+        expect(result.success).toBe(ungovernedAccess === true)
+      },
+    )
+
+    test('does not bypass a token restriction', async () => {
+      mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+      mockTokenService.validateTokenForModel.mockResolvedValueOnce({
+        success: false,
+        info: 'Token cannot read files',
+      } as any)
+      const file = { _id: { toString: () => 'image' }, ungovernedAccess: true } as any
+      const result = await new BasicAuthorisationConnector().file(user, publicModel, file, FileAction.Download)
+      expect(result.success).toBe(false)
+      expect(mockTokenService.validateTokenForModel).toHaveBeenCalledWith(user.token, 'model', 'file:read')
+    })
+
+    test.each([FileAction.Update, FileAction.Delete, FileAction.Upload])(
+      'does not grant write action %s',
+      async (action) => {
+        mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+        mockModelService.getModelSystemRoles.mockResolvedValue([])
+        ReviewRoleModelMock.find.mockResolvedValue([])
+        const file = { _id: { toString: () => 'image' }, ungovernedAccess: true } as any
+        const result = await new BasicAuthorisationConnector().file(user, publicModel, file, action)
+        expect(result.success).toBe(false)
+      },
+    )
+
+    test('turning off the file override retains model-wide ungoverned access', async () => {
+      mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+      const file = { _id: { toString: () => 'image' }, ungovernedAccess: false } as any
+      const result = await new BasicAuthorisationConnector().file(
+        user,
+        { ...publicModel, settings: { ungovernedAccess: true } } as ModelDoc,
+        file,
+        FileAction.Download,
+      )
+      expect(result.success).toBe(true)
+    })
+  })
+
   test('files > update when missing roles', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
