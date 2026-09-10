@@ -34,13 +34,13 @@ export const saveDisplayFormStats = (newValue: boolean) => {
   saveUserPreferences(preferences)
 }
 
-export const getHiddenDeploymentAssessmentColumns = (): string[] => {
+export const getHiddenDeploymentAssessmentColumns = (userPreferencesKey: string): string[] => {
   const preferences: UserPreferences = getUserPreferences()
-  return preferences?.hiddenDeploymentAssessmentColumns ?? []
+  return preferences?.[userPreferencesKey] ?? []
 }
 
-export const saveHiddenDeploymentAssessmentColumns = (columnKeys: string[]) => {
+export const saveHiddenDeploymentAssessmentColumns = (userPreferencesKey: string, columnKeys: string[]) => {
   const preferences: UserPreferences = getUserPreferences() ?? defaultPreferences
-  preferences.hiddenDeploymentAssessmentColumns = columnKeys
+  preferences[userPreferencesKey] = columnKeys
   saveUserPreferences(preferences)
 }
