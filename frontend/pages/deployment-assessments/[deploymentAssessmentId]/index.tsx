@@ -1,6 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, Button, Container, Divider, IconButton, Paper, Stack } from '@mui/material'
+import { Box, Button, Container, Divider, IconButton, Paper, Popper, Stack } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
@@ -31,6 +32,7 @@ export default function DeploymentAssessment() {
       : '/deployment-assessments?tab=all-assessments'
 
   const sendNotification = useNotification()
+  const theme = useTheme()
 
   const [isEdit, setIsEdit] = useState(false)
   const [isReviewPanelShown, setIsReviewPanelShown] = useState(false)
@@ -38,6 +40,8 @@ export default function DeploymentAssessment() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [patchErrorMessage, setPatchErrorMessage] = useState('')
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const reviewPopoverOpen = Boolean(anchorEl)
 
   const {
     deploymentAssessment,
@@ -101,91 +105,97 @@ export default function DeploymentAssessment() {
   return (
     <>
       <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading....'} />
-      <Container maxWidth={isReviewPanelShown ? 'xl' : 'lg'} sx={{ my: 2 }} data-test='deploymentAssessmentContainer'>
-        <Paper>
-          {isLoadingDeploymentAssessment && <Loading />}
-          {deploymentAssessment && (
-            <>
-              <DraftBanner
-                errorMessage={patchErrorMessage}
-                setErrorMessage={setPatchErrorMessage}
-                disableButton={isEdit}
-                isLoading={isLoading}
-                handlePublish={handlePublish}
-                draft={deploymentAssessment.draft}
-                text='This is a draft deployment assessment'
-                dialogTitle='Confirm publish'
-                showButton
-              />
-              <Stack spacing={2} sx={{ p: 4 }}>
-                <Stack
-                  direction={{ sm: 'row', xs: 'column' }}
-                  spacing={2}
-                  sx={{ alignItems: 'center', justifyContent: 'space-between' }}
-                >
-                  <Link href={backHref}>
-                    <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                      Back to deployments
-                    </Button>
-                  </Link>
-                  <Stack
-                    direction='row'
-                    spacing={2}
-                    sx={{ alignItems: 'center' }}
-                    divider={<Divider flexItem orientation='vertical' />}
-                  >
-                    <ReviewBanner
-                      deploymentAssessment={deploymentAssessment}
-                      onReviewButtonClicked={() => setIsReviewPanelShown(true)}
-                      slimView
-                    />
-                    <AssessmentStateChip assessment={deploymentAssessment} />
-                  </Stack>
-                </Stack>
-                <Divider flexItem />
-                <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
-                  {deploymentAssessment && (
-                    <Box sx={{ width: '100%' }}>
-                      <EditableDeploymentAssessmentForm
-                        deploymentAssessment={deploymentAssessment}
-                        mutate={mutateDeploymentAssessment}
-                        isEdit={isEdit}
-                        onIsEditChange={setIsEdit}
-                      />
-                    </Box>
-                  )}
-                  {isReviewPanelShown && (
-                    <Stack direction='row'>
-                      <Stack spacing={2} sx={{ width: '350px' }}>
-                        <ReviewWithComment
-                          onSubmit={handleSubmit}
-                          reviews={reviews}
-                          loading={isReviewButtonLoading}
-                          deploymentAssessmentReview
-                        />
-                        <MessageAlert message={errorMessage} severity='error' />
-                      </Stack>
-                      <IconButton
-                        onClick={() => setIsReviewPanelShown(!isReviewPanelShown)}
-                        sx={{ height: 'fit-content' }}
-                      >
-                        <CloseIcon fontSize='small' />
-                      </IconButton>
-                    </Stack>
-                  )}
-                </Stack>
-                <ReviewComments
-                  identifier={deploymentAssessment.id}
-                  parentId={deploymentAssessment._id}
-                  kind={ReviewKind.DEPLOYMENTS}
-                  isEdit={isEdit}
-                  mutator={mutateDeploymentAssessment}
-                  entryId=''
+      <Container maxWidth='lg' sx={{ my: 2 }} data-test='deploymentAssessmentContainer'>
+        <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
+          <Paper sx={{ width: '100%' }}>
+            {isLoadingDeploymentAssessment && <Loading />}
+            {deploymentAssessment && (
+              <>
+                <DraftBanner
+                  errorMessage={patchErrorMessage}
+                  setErrorMessage={setPatchErrorMessage}
+                  disableButton={isEdit}
+                  isLoading={isLoading}
+                  handlePublish={handlePublish}
+                  draft={deploymentAssessment.draft}
+                  text='This is a draft deployment assessment'
+                  dialogTitle='Confirm publish'
+                  showButton
                 />
-              </Stack>
-            </>
+                <Stack spacing={2} sx={{ p: 4 }}>
+                  <Stack
+                    direction={{ sm: 'row', xs: 'column' }}
+                    spacing={2}
+                    sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+                  >
+                    <Link href={backHref}>
+                      <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                        Back to deployments
+                      </Button>
+                    </Link>
+                    <Stack
+                      direction='row'
+                      spacing={2}
+                      sx={{ alignItems: 'center' }}
+                      divider={<Divider flexItem orientation='vertical' />}
+                    >
+                      <ReviewBanner
+                        deploymentAssessment={deploymentAssessment}
+                        onReviewButtonClicked={(anchor) => {
+                          setAnchorEl(anchor)
+                          setIsReviewPanelShown(true)
+                        }}
+                        slimView
+                      />
+                      <AssessmentStateChip assessment={deploymentAssessment} />
+                    </Stack>
+                  </Stack>
+                  <Divider flexItem />
+                  <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
+                    {deploymentAssessment && (
+                      <Box sx={{ width: '100%' }}>
+                        <EditableDeploymentAssessmentForm
+                          deploymentAssessment={deploymentAssessment}
+                          mutate={mutateDeploymentAssessment}
+                          isEdit={isEdit}
+                          onIsEditChange={setIsEdit}
+                        />
+                      </Box>
+                    )}
+                  </Stack>
+                  <ReviewComments
+                    identifier={deploymentAssessment.id}
+                    parentId={deploymentAssessment._id}
+                    kind={ReviewKind.DEPLOYMENTS}
+                    isEdit={isEdit}
+                    mutator={mutateDeploymentAssessment}
+                    entryId=''
+                  />
+                </Stack>
+              </>
+            )}
+          </Paper>
+          {isReviewPanelShown && (
+            <Popper open={reviewPopoverOpen} anchorEl={anchorEl}>
+              <Paper sx={{ border: 'solid', borderWidth: 1, borderColor: theme.palette.divider }}>
+                <Stack direction='row' sx={{ p: 2 }}>
+                  <Stack spacing={2} sx={{ width: '450px' }}>
+                    <ReviewWithComment
+                      onSubmit={handleSubmit}
+                      reviews={reviews}
+                      loading={isReviewButtonLoading}
+                      deploymentAssessmentReview
+                    />
+                    <MessageAlert message={errorMessage} severity='error' />
+                  </Stack>
+                  <IconButton onClick={() => setAnchorEl(null)} sx={{ height: 'fit-content' }}>
+                    <CloseIcon fontSize='small' />
+                  </IconButton>
+                </Stack>
+              </Paper>
+            </Popper>
           )}
-        </Paper>
+        </Stack>
       </Container>
     </>
   )

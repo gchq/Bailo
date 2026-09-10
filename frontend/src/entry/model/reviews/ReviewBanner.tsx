@@ -5,6 +5,7 @@ import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
 import { useHeadReviewRequests } from 'actions/review'
 import { useRouter } from 'next/router'
+import { MouseEvent } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
 import {
   AccessRequestInterface,
@@ -32,8 +33,9 @@ export type ReviewBannerProps =
     }
 
 type OptionalReviewBannerProps = {
-  onReviewButtonClicked?: () => void | undefined
+  onReviewButtonClicked?: (anchor: HTMLElement | null) => void | undefined
   slimView?: boolean
+  isReviewButtonDisabled?: boolean
 }
 
 export default function ReviewBanner({
@@ -41,6 +43,7 @@ export default function ReviewBanner({
   accessRequest,
   deploymentAssessment,
   onReviewButtonClicked,
+  isReviewButtonDisabled = false,
   slimView = false,
 }: ReviewBannerProps & OptionalReviewBannerProps) {
   const theme = useTheme()
@@ -52,9 +55,9 @@ export default function ReviewBanner({
     ...(deploymentAssessment && { deploymentAssessmentId: deploymentAssessment.id, kind: ReviewKind.DEPLOYMENTS }),
   })
 
-  const handleReviewOnClick = () => {
+  const handleReviewOnClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (onReviewButtonClicked !== undefined) {
-      onReviewButtonClicked()
+      onReviewButtonClicked(event.currentTarget)
     } else {
       if (release) {
         router.push(`/model/${release.modelId}/release/${release.semver}/review`)
@@ -90,7 +93,13 @@ export default function ReviewBanner({
           <ReviewIcon color='primary' />
           <Typography color='primary'>Ready for review</Typography>
         </Stack>
-        <Button variant='outlined' size='small' onClick={handleReviewOnClick} data-test='reviewButton'>
+        <Button
+          variant='outlined'
+          size='small'
+          onClick={handleReviewOnClick}
+          data-test='reviewButton'
+          disabled={isReviewButtonDisabled}
+        >
           Review
         </Button>
       </Stack>
@@ -133,6 +142,7 @@ export default function ReviewBanner({
             size='small'
             onClick={handleReviewOnClick}
             data-test='reviewButton'
+            disabled={isReviewButtonDisabled}
           >
             Review
           </Button>
