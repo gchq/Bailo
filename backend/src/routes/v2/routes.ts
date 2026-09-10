@@ -12,11 +12,13 @@ import { getEntityLookup } from './entities/getEntityLookup.js'
 import { deleteAccessRequest } from './model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './model/accessRequest/getAccessRequestCurrentUserPermissions.js'
+import { getAccessRequestGroup } from './model/accessRequest/getAccessRequestGroup.js'
 import { getAccessRequests } from './model/accessRequest/getAccessRequests.js'
 import { getModelAccessRequests } from './model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './model/accessRequest/postAccessRequestComment.js'
+import { postAccessRequestGroup } from './model/accessRequest/postAccessRequestGroup.js'
 import { deleteModel } from './model/deleteModel.js'
 import { deleteFile } from './model/file/deleteFile.js'
 import { getDownloadFile } from './model/file/getDownloadFile.js'
@@ -129,6 +131,8 @@ router.delete('/model/:modelId/release/:semver', ...deleteRelease)
 router.post('/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
 router.post('/model/:modelId/access-requests', ...postAccessRequest)
+router.post('/access-request-groups', ...postAccessRequestGroup)
+router.get('/model/:modelId/access-request/:accessRequestId/group', ...getAccessRequestGroup)
 router.get('/model/:modelId/access-requests', getModelAccessRequests)
 router.get('/access-requests/search', getAccessRequests)
 router.get('/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
