@@ -31,7 +31,7 @@ We love pull requests and we want to make it as easy as possible to contribute c
 - Submit a [pull request](https://github.com/gchq/Bailo/pulls).
 - We'll look at it pretty soon after it's submitted.
 
-## Use of AI agents
+## Use of AI tools or LLMs
 
 - All pull requests must be opened by you personally - they must not be opened autonomously by an AI agent or any other
   automated tool acting on your behalf.
