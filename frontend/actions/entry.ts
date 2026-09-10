@@ -220,6 +220,14 @@ export async function patchEntry(
   })
 }
 
+export async function postEntryTag(entryId: string, tag: string) {
+  return fetch(`/api/v2/model/${entryId}/tags`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tag }),
+  })
+}
+
 export async function deleteEntry(entryId: string) {
   return fetch(`/api/v2/model/${entryId}`, {
     method: 'delete',

@@ -19,6 +19,7 @@ const defaultAccessRequestPermissions: AccessRequestUserPermissions = {
 }
 
 const defaultEntryPermissions: EntryUserPermissions = {
+  addEntryTags: defaultPermissionDetail,
   editEntry: defaultPermissionDetail,
   editEntryCard: defaultPermissionDetail,
   createRelease: defaultPermissionDetail,
@@ -43,7 +44,8 @@ export default function useUserPermissions(): UserPermissionsHook {
 
   const userPermissions = useMemo(
     () => ({
-      ...(entryUserPermissions ? entryUserPermissions : defaultEntryPermissions),
+      ...defaultEntryPermissions,
+      ...entryUserPermissions,
       ...(accessRequestUserPermissions ? accessRequestUserPermissions : defaultAccessRequestPermissions),
     }),
     [accessRequestUserPermissions, entryUserPermissions],

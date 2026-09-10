@@ -51,6 +51,7 @@ import { postRequestExportToS3 } from './model/postRequestExport.js'
 import { postRequestImportFromS3 } from './model/postRequestImport.js'
 import { getModelRoles } from './model/roles/getModelRoles.js'
 import { getPopularTags } from './model/tags/getPopularTags.js'
+import { postModelTag } from './model/tags/postModelTag.js'
 import { deleteWebhook } from './model/webhook/deleteWebhook.js'
 import { getWebhooks } from './model/webhook/getWebhooks.js'
 import { postWebhook } from './model/webhook/postWebhook.js'
@@ -226,5 +227,6 @@ router.post('/review/role', ...postReviewRole)
 router.put('/review/role/:shortName', ...putReviewRole)
 
 router.get('/models/tags', getPopularTags)
+router.post('/model/:modelId/tags', postModelTag)
 
 export default router

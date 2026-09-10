@@ -8,6 +8,7 @@ import getCompareFieldState from 'src/hooks/useCompareField'
 
 interface TagEditorProps {
   editable: boolean
+  allowDelete: boolean
   value: string[]
   newTag: string
   setNewTag: (v: string) => void
@@ -21,6 +22,7 @@ interface TagEditorProps {
 
 function TagEditor({
   editable,
+  allowDelete,
   value,
   newTag,
   setNewTag,
@@ -88,7 +90,7 @@ function TagEditor({
                     label={tag}
                     key={tag}
                     sx={{ width: 'fit-content', m: 0.5, maxWidth: '280px' }}
-                    onDelete={() => onDelete(tag)}
+                    onDelete={allowDelete ? () => onDelete(tag) : undefined}
                   />
                 ))}
               </Box>
@@ -115,6 +117,7 @@ interface TagSelectorProps {
   value: string[]
   label: string
   editable?: boolean
+  allowDelete?: boolean
   required?: boolean
   registry?: Registry
   id: string
@@ -126,6 +129,7 @@ export default function TagSelector({
   value,
   label,
   editable = true,
+  allowDelete = true,
   required,
   registry,
   id,
@@ -178,6 +182,7 @@ export default function TagSelector({
           </Typography>
         )}
         <TagEditor
+          allowDelete={allowDelete}
           editable={editable}
           value={value}
           newTag={newTag}
@@ -210,6 +215,7 @@ export default function TagSelector({
     >
       {compare.editMode ? (
         <TagEditor
+          allowDelete={allowDelete}
           editable
           value={value}
           newTag={newTag}

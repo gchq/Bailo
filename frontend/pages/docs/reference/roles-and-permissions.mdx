@@ -69,6 +69,7 @@ ungoverned access enabled).
 Consumers can:
 
 - View the model and its model card
+- Add discovery tags to entries they can view
 - Download files (with approved access request)
 - Pull container images (with approved access request)
 - Create access requests
@@ -99,6 +100,19 @@ This reference lists every action in Bailo and which roles can perform it.
   ungoverned access
 - **Create access requests** - Owner: Yes, Contributor: Yes, Consumer: Yes, Public (no role): No
 - **Delete model** - Owner: Yes, Contributor: No, Consumer: No, Public (no role): No
+
+## Adding discovery tags
+
+Signed-in users can add tags to entries they can view, including public entries where those users are not collaborators.
+In the entry details, consumers use **Add tags**; users with editing permission retain the existing **Edit tags**
+controls.
+
+Adding a tag does not grant permission to remove tags, change model settings, edit a model card or change collaborators.
+Private-entry visibility checks still apply. Only users with the existing entry-editing permission can remove tags.
+
+The add-only API is `POST /api/v2/model/{modelId}/tags`, with a JSON body such as `{"tag": "computer vision"}`. Tags are
+trimmed, converted to lower case, and limited to 100 characters. Adding an existing tag is safe to repeat. API tokens
+require the `model:read` and `model:write` scopes for the entry. A read-only token cannot add tags.
 
 ## Review roles
 
