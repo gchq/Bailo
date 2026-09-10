@@ -25,7 +25,7 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
-import { getRoleEntities } from './model.js'
+import { getModelsByIdsNoAuth, getRoleEntities } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
@@ -378,9 +378,8 @@ async function notifyDeploymentAssessmentReviewed(
 }
 
 async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
-  const models = await ModelModel.find({
-    id: { $in: deploymentAssessment.metadata.overview?.modelIds ?? [] },
-  }).lean()
+  const modelIds = deploymentAssessment.metadata.overview?.modelIds ?? []
+  const models = await getModelsByIdsNoAuth(modelIds)
 
   const modelDevelopers = models.map((model) => ({
     model,

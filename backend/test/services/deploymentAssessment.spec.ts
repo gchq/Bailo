@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import authentication from '../../src/connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { EntryKind, EntryVisibility, SystemRoles } from '../../src/models/Model.js'
+import { EntryKind, EntryVisibility, ModelDoc, SystemRoles } from '../../src/models/Model.js'
 import { Decision, ResponseKind } from '../../src/models/Response.js'
 import {
   commentOnDeploymentAssessment,
@@ -17,6 +17,7 @@ import {
   searchDeploymentAssessments,
   updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
+import { getModelsByIdsNoAuth } from '../../src/services/model.js'
 import {
   notifyModelOwnersOfDeploymentApproval,
   notifyReviewResponseForDeploymentAssessment,
@@ -46,6 +47,18 @@ const smtpMocks = vi.hoisted(() => ({
   notifyModelOwnersOfDeploymentApproval: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
+const modelServiceMocks = vi.hoisted(() => ({
+  getModelsByIdsNoAuth: vi.fn(),
+}))
+
+vi.mock('../../src/services/model.js', async () => {
+  const actual = await vi.importActual<typeof import('../../src/services/model.js')>('../../src/services/model.js')
+
+  return {
+    ...actual,
+    getModelsByIdsNoAuth: modelServiceMocks.getModelsByIdsNoAuth,
+  }
+})
 
 const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
@@ -293,7 +306,7 @@ describe('services > deploymentAssessment', () => {
       id: 'assessment-id',
       draft: false,
       createdBy: 'creator',
-      metadata: { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } },
+      metadata: { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'], modelIds: ['model-1'] } },
     }
     const review = { _id: 'review-object-id', kind: ReviewKind.DeploymentAssessment, role: 'dro' }
 
@@ -486,20 +499,19 @@ describe('services > deploymentAssessment', () => {
         sort: vi.fn().mockResolvedValue(review),
       })
 
-      ModelModelMock.find.mockReturnValueOnce({
-        lean: vi.fn().mockResolvedValue([
-          {
-            id: 'model-1',
-            name: 'Test Model',
-            collaborators: [
-              {
-                entity: 'user:model-owner',
-                roles: [SystemRoles.Owner],
-              },
-            ],
-          },
-        ]),
-      })
+      vi.mocked(getModelsByIdsNoAuth).mockResolvedValueOnce([
+        {
+          id: 'model-1',
+          name: 'Test Model',
+          kind: 'model',
+          collaborators: [
+            {
+              entity: 'user:model-owner',
+              roles: [SystemRoles.Owner],
+            },
+          ],
+        } as ModelDoc,
+      ])
 
       await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve)
 

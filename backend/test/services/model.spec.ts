@@ -13,6 +13,8 @@ import {
   getModelById,
   getModelByIdNoAuth,
   getModelCardRevision,
+  getModelsByIds,
+  getModelsByIdsNoAuth,
   getModelSystemRoles,
   getRoleEntities,
   isModelCardRevisionDoc,
@@ -181,6 +183,32 @@ describe('services > model', () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(() => getModelById({} as any, {} as any)).rejects.toThrow(/^You do not have permission/)
+  })
+
+  // new tests here
+  test('getModelsByIdsNoAuth > good', async () => {
+    ModelModelMock.find.mockResolvedValueOnce('mocked')
+
+    const model = await getModelsByIdsNoAuth({} as any, {} as any)
+
+    expect(ModelModelMock.find).toHaveBeenCalled()
+    expect(model).toBe('mocked')
+  })
+
+  test('getModelsByIdsNoAuth > no model', async () => {
+    ModelModelMock.find.mockResolvedValueOnce([])
+
+    await expect(() => getModelsByIdsNoAuth({} as any, {} as any)).rejects.toThrow(
+      'The requested entries were not found.',
+    )
+  })
+
+  // TODO
+  test('getModelsByIds > bad authorisation', async () => {
+    ModelModelMock.find.mockResolvedValueOnce([{ id: 'test-model' }])
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+
+    await expect(() => getModelsByIds({} as any, {} as any)).rejects.toThrow(/^You do not have permission/)
   })
 
   describe('removeModel', () => {
