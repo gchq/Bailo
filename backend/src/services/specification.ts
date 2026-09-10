@@ -337,6 +337,7 @@ export const responseInterfaceSchema = z.object({
 export const accessRequestInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'looking-at-pictures-zyxwvu' }),
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+  groupId: z.string().uuid().optional(),
 
   schemaId: z.string().openapi({ example: 'minimal-access-request-v1' }),
   metadata: z.object({
