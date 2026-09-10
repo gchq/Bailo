@@ -81,12 +81,14 @@ export default function Release() {
             <ReviewBanner release={release} />
             <DraftBanner
               text='This is a draft release'
+              dialogTitle='Confirm release publish'
               draft={release.draft}
               handlePublish={handlePublishRelease}
-              showButton={true}
+              showButton
               disableButton={isEdit}
               isLoading={isLoading}
               errorMessage={putErrorMessage}
+              setErrorMessage={setPutErrorMessage}
             />
             <Stack spacing={2} sx={{ px: 4, py: 2 }}>
               <Stack
