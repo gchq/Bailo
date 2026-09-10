@@ -7,6 +7,15 @@ variables:
   AWS_TAG: latest
   OS_TAG: $CI_COMMIT_BRANCH-$CI_COMMIT_SHORT_SHA
 
+# temp debug statement
+debug:
+  stage: git_sync
+  script:
+    - echo "branch=$CI_COMMIT_BRANCH"
+    - echo "source=$CI_PIPELINE_SOURCE"
+  rules:
+    - when: always
+
 opensrc-bailols:
   stage: git_sync
   rules:
@@ -23,7 +32,7 @@ opensrc-bailols:
   script:
     - microdnf install -y git wget
     - git clone --mirror "https://$OPENSRC_TOKEN_NAME:$OPENSRC_TOKEN@$OPENSRC_URL"
-    # opting to download bfg-1.14.0.jar for branch instead of maven.org
+    # opting to download bfg-1.14.0.jar from branch instead of maven.org
     # - wget https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar
     - git fetch origin "$JAR"
     - git show origin/"$JAR":bfg-1.14.0.jar > bfg-1.14.0.jar
