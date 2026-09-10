@@ -33,6 +33,9 @@ We love pull requests and we want to make it as easy as possible to contribute c
 
 ## Use of AI tools or LLMs
 
+Bailo welcomes contributions assisted by AI tools. These tools may support contributors, but they must not replace
+understanding, judgement or responsibility.
+
 - All pull requests must be opened by you personally - they must not be opened autonomously by an AI agent or any other
   automated tool acting on your behalf.
 - You are responsible for every contribution submitted under your account - this includes code, comments, documentation,
