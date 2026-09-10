@@ -5,6 +5,7 @@ import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useContext, useEffect, useState } from 'react'
+import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
@@ -23,6 +24,7 @@ type ReviewWithCommentProps = {
   includeDueDate?: boolean
   hideRequestChangesButton?: boolean
   deploymentAssessmentReview?: boolean
+  onCancel?: () => void
 }
 
 export default function ReviewWithComment({
@@ -33,6 +35,7 @@ export default function ReviewWithComment({
   includeDueDate = false,
   hideRequestChangesButton = false,
   deploymentAssessmentReview = false,
+  onCancel,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
@@ -135,18 +138,15 @@ export default function ReviewWithComment({
                 renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
               />
             )}
-            <TextField
-              size='small'
-              minRows={4}
-              maxRows={8}
-              multiline
-              placeholder='Leave a comment'
+            <RichTextEditor
               data-test='reviewWithCommentTextField'
               value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              error={errorText.length > 0}
-              helperText={errorText}
+              onChange={(newValue) => setReviewComment(newValue)}
+              alwaysShowToolbar
             />
+            <Typography variant='caption' color='error'>
+              {errorText}
+            </Typography>
             {includeDueDate && (
               <Stack spacing={0.5}>
                 <Typography sx={{ fontWeight: 'bold' }}>Next review date</Typography>
@@ -223,6 +223,7 @@ export default function ReviewWithComment({
                   </Button>
                 )}
               </Stack>
+              {onCancel && <Button onClick={onCancel}>Cancel</Button>}
             </Stack>
           </Stack>
         )}

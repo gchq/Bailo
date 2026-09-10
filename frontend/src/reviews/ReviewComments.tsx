@@ -27,6 +27,7 @@ interface ReviewCommentsProps {
   kind: ReviewKindKeys
   mutator: () => void
   showComments?: boolean
+  responseList?: ResponseInterface[]
 }
 
 export default function ReviewComments({
@@ -37,6 +38,7 @@ export default function ReviewComments({
   kind,
   parentId,
   showComments = true,
+  responseList,
 }: ReviewCommentsProps) {
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
@@ -199,7 +201,7 @@ export default function ReviewComments({
         </Stack>
       )}
       <Paginate
-        list={reviewDetails}
+        list={responseList ? responseList : reviewDetails}
         emptyListText='No responses found'
         sortingProperties={[
           { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
