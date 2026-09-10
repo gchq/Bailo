@@ -5,6 +5,7 @@ import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
 import {
   _setModelCard,
+  addModelTag,
   canUserActionModelById,
   createModel,
   createModelCardFromSchema,
@@ -1003,6 +1004,7 @@ describe('services > model', () => {
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
     const mockPermissions: EntryUserPermissions = {
+      addEntryTags: { hasPermission: true },
       editEntry: { hasPermission: true },
       editEntryCard: { hasPermission: true },
       createRelease: { hasPermission: true },
@@ -1016,6 +1018,7 @@ describe('services > model', () => {
 
     ModelModelMock.findOne.mockResolvedValueOnce('mocked')
     vi.mocked(authorisation.model)
+      .mockResolvedValueOnce({ success: true, id: '' })
       .mockResolvedValueOnce({ success: true, id: '' })
       .mockResolvedValueOnce({ success: true, id: '' })
       .mockResolvedValueOnce({ success: true, id: '' })
@@ -1038,6 +1041,7 @@ describe('services > model', () => {
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
     const mockPermissions: EntryUserPermissions = {
+      addEntryTags: { hasPermission: false, info: 'mocked' },
       editEntry: { hasPermission: false, info: 'mocked' },
       editEntryCard: { hasPermission: false, info: 'mocked' },
       createRelease: { hasPermission: false, info: 'mocked' },
@@ -1057,6 +1061,7 @@ describe('services > model', () => {
       .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
       .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
       .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
     vi.mocked(authorisation.release)
       .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
       .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
@@ -1067,6 +1072,63 @@ describe('services > model', () => {
 
     expect(ModelModelMock.findOne).toHaveBeenCalled()
     expect(permissions).toEqual(mockPermissions)
+  })
+
+  describe('addModelTag', () => {
+    const user = { dn: 'consumer' } as any
+    const model = { id: 'model', tags: ['existing'] } as any
+
+    test('adds one normalised tag atomically without replacing existing tags', async () => {
+      const updated = { ...model, tags: ['existing', 'new tag'] }
+      ModelModelMock.findOne.mockResolvedValueOnce(model)
+      ModelModelMock.findOneAndUpdate.mockResolvedValueOnce(updated)
+      vi.mocked(authorisation.model).mockResolvedValue({ id: 'model', success: true })
+      expect(await addModelTag(user, 'model', ' New Tag ')).toEqual(updated)
+      expect(authorisation.model).toHaveBeenCalledWith(user, model, ModelAction.AddTag)
+      expect(ModelModelMock.findOneAndUpdate).toHaveBeenCalledWith(
+        { id: 'model' },
+        { $addToSet: { tags: 'new tag' } },
+        { new: true, runValidators: true },
+      )
+      expect(model.tags).toEqual(['existing'])
+    })
+
+    test('does not write when the entry is not visible', async () => {
+      ModelModelMock.findOne.mockResolvedValueOnce(model)
+      vi.mocked(authorisation.model).mockResolvedValueOnce({ id: 'model', success: false, info: 'private' })
+      await expect(addModelTag(user, 'model', 'new')).rejects.toThrow('private')
+      expect(ModelModelMock.findOneAndUpdate).not.toHaveBeenCalled()
+    })
+
+    test('does not write when tag permission or token scope is refused', async () => {
+      ModelModelMock.findOne.mockResolvedValueOnce(model)
+      vi.mocked(authorisation.model)
+        .mockResolvedValueOnce({ id: 'model', success: true })
+        .mockResolvedValueOnce({ id: 'model', success: false, info: 'read only' })
+      await expect(addModelTag(user, 'model', 'new')).rejects.toThrow('read only')
+      expect(ModelModelMock.findOneAndUpdate).not.toHaveBeenCalled()
+    })
+
+    test('treats an existing tag as an idempotent addition', async () => {
+      ModelModelMock.findOne.mockResolvedValueOnce(model)
+      vi.mocked(authorisation.model).mockResolvedValue({ id: 'model', success: true })
+      expect(await addModelTag(user, 'model', ' EXISTING ')).toBe(model)
+      expect(ModelModelMock.findOneAndUpdate).not.toHaveBeenCalled()
+    })
+
+    test.each([' ', 'x'.repeat(101)])('rejects invalid tags', async (tag) => {
+      ModelModelMock.findOne.mockResolvedValueOnce(model)
+      vi.mocked(authorisation.model).mockResolvedValue({ id: 'model', success: true })
+      await expect(addModelTag(user, 'model', tag)).rejects.toThrow('between 1 and 100')
+      expect(ModelModelMock.findOneAndUpdate).not.toHaveBeenCalled()
+    })
+
+    test('reports an entry deleted between reading and updating', async () => {
+      ModelModelMock.findOne.mockResolvedValueOnce(model)
+      ModelModelMock.findOneAndUpdate.mockResolvedValueOnce(null)
+      vi.mocked(authorisation.model).mockResolvedValue({ id: 'model', success: true })
+      await expect(addModelTag(user, 'model', 'new')).rejects.toThrow('not found')
+    })
   })
 
   test('popularTagsForEntries > returns a list of tags', async () => {

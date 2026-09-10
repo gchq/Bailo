@@ -7,6 +7,7 @@ interface EntryTagSelectorProps {
   setAnchorEl: (anchorEl: HTMLButtonElement | null) => void
   onChange: (newTag: string[]) => void
   tags: string[]
+  allowDelete?: boolean
   errorText?: string
 }
 
@@ -16,6 +17,7 @@ export default function EntryTagSelector({
   onChange,
   tags,
   errorText = '',
+  allowDelete = true,
 }: EntryTagSelectorProps) {
   const theme = useTheme()
 
@@ -30,7 +32,7 @@ export default function EntryTagSelector({
       }}
     >
       <Stack sx={{ p: 2 }}>
-        <TagSelector value={tags} onChange={onChange} label={''} editable id='tag-selector' />
+        <TagSelector allowDelete={allowDelete} value={tags} onChange={onChange} label={''} editable id='tag-selector' />
         <Typography variant='caption' color={theme.palette.error.main}>
           {errorText}
         </Typography>

@@ -685,6 +685,7 @@ export type PermissionDetail =
     }
 
 export type EntryUserPermissions = {
+  addEntryTags: PermissionDetail
   editEntry: PermissionDetail
   editEntryCard: PermissionDetail
   createRelease: PermissionDetail

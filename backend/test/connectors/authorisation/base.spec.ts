@@ -15,6 +15,7 @@ import { BasicAuthorisationConnector, partials } from '../../../src/connectors/a
 import { EntryKind, ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
 import { SchemaDoc } from '../../../src/models/Schema.js'
+import { TokenActions } from '../../../src/models/Token.js'
 import { UserInterface } from '../../../src/models/User.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 import { testReviewerWithOwnerSystemRole, testReviewRole } from '../../testUtils/testModels.js'
@@ -139,6 +140,55 @@ describe('connectors > authorisation > base', () => {
     const result = await connector.responses(user, [{ entity: 'otherEntity' } as any], ResponseAction.Update)
 
     expect(result).toStrictEqual([{ id: 'testUser', info: 'Only the author can update a comment', success: false }])
+  })
+
+  describe('consumer tag permission', () => {
+    test('allows adding tags to visible public entries without owner rights', async () => {
+      const connector = new BasicAuthorisationConnector()
+      const visibleModel = { id: 'testModel', visibility: 'public' } as ModelDoc
+      mockModelService.getModelSystemRoles.mockResolvedValue([])
+      ReviewRoleModelMock.find.mockResolvedValue([])
+      const addition = await connector.model(user, visibleModel, ModelAction.AddTag)
+      const update = await connector.model(user, visibleModel, ModelAction.Update)
+      expect(addition.success).toBe(true)
+      expect(update.success).toBe(false)
+      expect(mockTokenService.validateTokenForModel).toHaveBeenCalledWith(
+        user.token,
+        'testModel',
+        TokenActions.ModelWrite.id,
+      )
+    })
+
+    test('refuses private entries without visibility access', async () => {
+      const connector = new BasicAuthorisationConnector()
+      mockModelService.getModelSystemRoles.mockResolvedValue([])
+      const result = await connector.model(
+        user,
+        { id: 'testModel', visibility: 'private' } as ModelDoc,
+        ModelAction.AddTag,
+      )
+      expect(result.success).toBe(false)
+    })
+
+    test('refuses constrained tokens without model write permission', async () => {
+      mockTokenService.validateTokenForModel.mockResolvedValueOnce({ success: false, info: 'Read-only token' } as any)
+      const result = await new BasicAuthorisationConnector().model(
+        user,
+        { id: 'testModel', visibility: 'public' } as ModelDoc,
+        ModelAction.AddTag,
+      )
+      expect(result).toEqual({ success: false, info: 'Read-only token' })
+    })
+
+    test('retains the restrictions on untrusted models', async () => {
+      mockAuthentication.hasRole.mockResolvedValue(false)
+      const result = await new BasicAuthorisationConnector().model(
+        user,
+        { id: 'testModel', visibility: 'public', kind: EntryKind.UntrustedModel } as ModelDoc,
+        ModelAction.AddTag,
+      )
+      expect(result.success).toBe(false)
+    })
   })
 
   test('model > private model with no roles', async () => {

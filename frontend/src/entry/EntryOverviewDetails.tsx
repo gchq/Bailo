@@ -4,7 +4,7 @@ import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { PickerValue } from '@mui/x-date-pickers/internals'
-import { patchEntry } from 'actions/entry'
+import { patchEntry, postEntryTag } from 'actions/entry'
 import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
@@ -85,7 +85,16 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
     setEntryTagUpdateErrorMessage('')
-    const response = await patchEntry(entry.id, { tags: newTags })
+    let response: Response
+    if (updateEntryPermission.hasPermission) {
+      response = await patchEntry(entry.id, { tags: newTags })
+    } else {
+      const addedTag = newTags.find((tag) => !entry.tags.includes(tag))
+      if (!addedTag) {
+        return
+      }
+      response = await postEntryTag(entry.id, addedTag)
+    }
     if (!response.ok) {
       setEntryTagUpdateErrorMessage(await getErrorMessage(response))
     } else {
@@ -240,17 +249,18 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
             {collaboratorList}
           </Stack>
           <Box>
-            <Restricted action='editEntry' fallback={<></>}>
+            <Restricted action={updateEntryPermission.hasPermission ? 'editEntry' : 'addEntryTags'} fallback={<></>}>
               <Button
                 sx={{ width: 'fit-content' }}
                 size='small'
                 startIcon={<LocalOffer />}
                 onClick={(event) => setAnchorEl(event.currentTarget)}
               >
-                {`Edit ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
+                {`${updateEntryPermission.hasPermission ? 'Edit' : 'Add'} ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
               </Button>
             </Restricted>
             <EntryTagSelector
+              allowDelete={updateEntryPermission.hasPermission}
               anchorEl={anchorEl}
               setAnchorEl={setAnchorEl}
               onChange={handleEntryTagOnChange}

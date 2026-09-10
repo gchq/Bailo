@@ -651,6 +651,34 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   return model
 }
 
+/** Add a discovery tag without granting permission to change other entry properties. */
+export async function addModelTag(user: UserInterface, modelId: string, tag: string): Promise<ModelDoc> {
+  const model = await getModelById(user, modelId)
+  const auth = await authorisation.model(user, model, ModelAction.AddTag)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  const normalisedTag = tag.trim().toLowerCase()
+  if (!normalisedTag || normalisedTag.length > 100) {
+    throw BadReq('Tags must contain between 1 and 100 characters.')
+  }
+  if (model.tags.some((existing) => existing.trim().toLowerCase() === normalisedTag)) {
+    return model
+  }
+
+  // Add atomically so concurrent tag additions cannot overwrite one another.
+  const updated = await ModelModel.findOneAndUpdate(
+    { id: modelId },
+    { $addToSet: { tags: normalisedTag } },
+    { new: true, runValidators: true },
+  )
+  if (!updated) {
+    throw NotFound('The requested entry was not found.', { modelId })
+  }
+  return updated
+}
+
 async function validateCollaborators(
   updatedCollaborators: CollaboratorEntry[],
   previousCollaborators: CollaboratorEntry[] = [],
@@ -889,6 +917,7 @@ export async function getCurrentUserPermissionsByModel(
 ): Promise<EntryUserPermissions> {
   const model = await getModelById(user, modelId)
 
+  const addEntryTagsAuth = await authorisation.model(user, model, ModelAction.AddTag)
   const editEntryAuth = await authorisation.model(user, model, ModelAction.Update)
   const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
   const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
@@ -905,6 +934,7 @@ export async function getCurrentUserPermissionsByModel(
   const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
 
   return {
+    addEntryTags: authResponseToUserPermission(addEntryTagsAuth),
     editEntry: authResponseToUserPermission(editEntryAuth),
     editEntryCard: authResponseToUserPermission(editEntryCardAuth),
 
