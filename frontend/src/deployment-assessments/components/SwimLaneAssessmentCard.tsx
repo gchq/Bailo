@@ -7,13 +7,6 @@ interface SwimLaneAssessmentCardProps {
   assessment: DeploymentAssessmentSummary
 }
 
-function getFirstOwner(owner: string | string[] | undefined): string {
-  if (!owner) {
-    return 'Unknown'
-  }
-  return Array.isArray(owner) ? owner[0] : owner
-}
-
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <Box
@@ -52,7 +45,7 @@ function UserRow({ label, dn }: { label: string; dn: string }) {
 }
 
 export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardProps) {
-  const riskOwner = getFirstOwner(assessment.owner)
+  const riskOwners = assessment.owner?.join(', ') ?? ''
   const deployer = assessment.createdBy
   const models = assessment.models?.join(', ') ?? ''
   const returnTo = '/deployment-assessments?tab=my-assessments'
@@ -73,7 +66,7 @@ export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardPro
         </Link>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
           <TextRow label='Models' value={models} />
-          <UserRow label='Risk Owner' dn={riskOwner} />
+          <UserRow label='Risk Owner' dn={riskOwners} />
           <UserRow label='Deployer' dn={deployer} />
         </Box>
       </CardContent>
