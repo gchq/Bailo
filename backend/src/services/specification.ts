@@ -204,6 +204,7 @@ export const fileWithScanInterfaceSchema = z.object({
         scannerVersion: true,
         state: true,
         summary: true,
+        additionalInfo: true,
         lastRunAt: true,
         _id: true,
         id: true,
