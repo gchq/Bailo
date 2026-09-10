@@ -347,7 +347,9 @@ describe('services > deploymentAssessment', () => {
         responses: reviewResponses,
         state: 'approved',
       })
-      expect(ResponseModelMock.find).toHaveBeenCalledWith({ parentId: review._id })
+      expect(ResponseModelMock.find).toHaveBeenCalledWith({
+        parentId: [review._id, assessment._id],
+      })
     })
 
     test('does not read history when assessment view authorisation fails', async () => {
