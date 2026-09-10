@@ -61,7 +61,7 @@ export default function ReviewBanner({
       } else if (accessRequest) {
         router.push(`/model/${accessRequest.modelId}/access-request/${accessRequest.id}/review`)
       } else if (deploymentAssessment) {
-        router.push(`/deployment-assessments/${deploymentAssessment.id}/review`)
+        router.push(`/deployment-assessments/${deploymentAssessment.id}`)
       }
     }
   }
