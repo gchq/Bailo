@@ -31,6 +31,18 @@ We love pull requests and we want to make it as easy as possible to contribute c
 - Submit a [pull request](https://github.com/gchq/Bailo/pulls).
 - We'll look at it pretty soon after it's submitted.
 
+## Use of AI tools or LLMs
+
+Bailo welcomes contributions assisted by AI tools. These tools may support contributors, but they must not replace
+understanding, judgement or responsibility.
+
+- All pull requests must be opened by you personally - they must not be opened autonomously by an AI agent or any other
+  automated tool acting on your behalf.
+- You are responsible for every contribution submitted under your account - this includes code, comments, documentation,
+  configuration, and any other changes. You must review everything thoroughly before submitting it.
+- This is especially important for contributions produced or assisted by an AI agent, which you must review in full
+  before submitting.
+
 ## Getting it accepted
 
 Here are some things you can do to make this all smoother:
