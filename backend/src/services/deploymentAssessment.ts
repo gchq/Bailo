@@ -26,7 +26,7 @@ import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
-import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
+import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
@@ -208,7 +208,6 @@ export async function getDeploymentAssessmentById(
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
-
   return deploymentAssessment
 }
 
@@ -260,13 +259,26 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  const responses = await getResponses(deploymentAssessment._id)
-  const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
+
+  if (deploymentAssessment.draft === true) {
+    return {
+      deploymentAssessment,
+      responses: [],
+    }
+  }
+
+  // Get the latest review and its corresponding responses to determine the state of this deployment assessment
+  const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+  const responses = await ResponseModel.find({ parentId: [latestReview._id, deploymentAssessment._id] })
+
+  const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
+    DecisionKeys | undefined
+  const state = deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
 
   return {
     deploymentAssessment,
     responses,
-    state: deriveDeploymentAssessmentState(deploymentAssessment, latestDecision),
+    state,
   }
 }
 
@@ -277,7 +289,7 @@ async function getLatestDeploymentAssessmentReview(deploymentAssessmentId: strin
   }).sort({ createdAt: -1 })
 
   if (!review) {
-    throw NotFound('The deployment assessment does not have a review round.', { deploymentAssessmentId })
+    throw NotFound('The deployment assessment does not have a review.', { deploymentAssessmentId })
   }
 
   return review
@@ -461,6 +473,7 @@ export async function updateDeploymentAssessment(
   }
 
   const isBeingSubmitted = deploymentAssessment.draft && diff.draft === false
+
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
       throw BadReq('Cannot convert a submitted deployment assessment back to a draft.')
@@ -469,8 +482,6 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('draft')
   }
 
-  await deploymentAssessment.save()
-
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
       deploymentAssessment.metadata?.overview?.riskOwner ?? [],
@@ -478,6 +489,17 @@ export async function updateDeploymentAssessment(
       deploymentAssessment,
     )
   }
+  const review = isBeingSubmitted
+    ? new ReviewModel({
+        kind: ReviewKind.DeploymentAssessment,
+        deploymentAssessmentId,
+        role: deploymentAssessmentRiskOwnerRole,
+      })
+    : undefined
+  await useTransaction([
+    (session) => deploymentAssessment.save({ session }),
+    ...(review ? [(session) => review.save({ session })] : []),
+  ])
 
   return deploymentAssessment
 }

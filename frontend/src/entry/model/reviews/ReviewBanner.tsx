@@ -3,41 +3,70 @@ import { Stack, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
-import { useHeadReviewRequestsForModel } from 'actions/review'
+import { useHeadReviewRequests } from 'actions/review'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { MouseEvent } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
-import { AccessRequestInterface, ReleaseInterface } from 'types/types'
+import {
+  AccessRequestInterface,
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentSummary,
+  ReleaseInterface,
+  ReviewKind,
+} from 'types/types'
 
 export type ReviewBannerProps =
   | {
       release: ReleaseInterface
       accessRequest?: never
+      deploymentAssessment?: never
     }
   | {
       release?: never
       accessRequest: AccessRequestInterface
+      deploymentAssessment?: never
+    }
+  | {
+      release?: never
+      accessRequest?: never
+      deploymentAssessment: DeploymentAssessmentInterface | DeploymentAssessmentSummary
     }
 
-export default function ReviewBanner({ release, accessRequest }: ReviewBannerProps) {
+type OptionalReviewBannerProps = {
+  onReviewButtonClicked?: (anchor: HTMLElement | null) => void | undefined
+  slimView?: boolean
+  isReviewButtonDisabled?: boolean
+}
+
+export default function ReviewBanner({
+  release,
+  accessRequest,
+  deploymentAssessment,
+  onReviewButtonClicked,
+  isReviewButtonDisabled = false,
+  slimView = false,
+}: ReviewBannerProps & OptionalReviewBannerProps) {
   const theme = useTheme()
   const router = useRouter()
 
-  const [modelId, urlParam, semverOrAccessRequestId] = useMemo(
-    () =>
-      release
-        ? [release.modelId, 'release', release.semver, { release }]
-        : [accessRequest.modelId, 'access-request', accessRequest.id, { accessRequest }],
-    [release, accessRequest],
-  )
-  const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForModel(
-    release
-      ? { modelId: release.modelId, semver: release.semver }
-      : { modelId: accessRequest.modelId, accessRequestId: accessRequest.id },
-  )
+  const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequests({
+    ...(release && { semver: release.semver, modelId: release.modelId }),
+    ...(accessRequest && { accessRequestId: accessRequest.id, modelId: accessRequest.modelId }),
+    ...(deploymentAssessment && { deploymentAssessmentId: deploymentAssessment.id, kind: ReviewKind.DEPLOYMENTS }),
+  })
 
-  const handleReviewOnClick = () => {
-    router.push(`/model/${modelId}/${urlParam}/${semverOrAccessRequestId}/review`)
+  const handleReviewOnClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (onReviewButtonClicked !== undefined) {
+      onReviewButtonClicked(event.currentTarget)
+    } else {
+      if (release) {
+        router.push(`/model/${release.modelId}/release/${release.semver}/review`)
+      } else if (accessRequest) {
+        router.push(`/model/${accessRequest.modelId}/access-request/${accessRequest.id}/review`)
+      } else if (deploymentAssessment) {
+        router.push(`/deployment-assessments/${deploymentAssessment.id}`)
+      }
+    }
   }
 
   const queryState = renderQueryState([isReviewsError], isReviewsLoading)
@@ -47,6 +76,34 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
 
   if (release && release.draft) {
     return <></>
+  }
+
+  if (slimView) {
+    return (
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        <Stack direction='row' spacing={1}>
+          <ReviewIcon color='primary' />
+          <Typography color='primary'>Ready for review</Typography>
+        </Stack>
+        <Button
+          variant='outlined'
+          size='small'
+          onClick={handleReviewOnClick}
+          data-test='reviewButton'
+          disabled={isReviewButtonDisabled}
+        >
+          Review
+        </Button>
+      </Stack>
+    )
   }
 
   return (
@@ -62,7 +119,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
           borderWidth: '1px',
           borderStyle: 'solid',
           borderColor: theme.palette.primary.main,
-          borderRadius: 0,
+          borderRadius: slimView ? 6 : 0,
         }}
       >
         <Stack
@@ -85,6 +142,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
             size='small'
             onClick={handleReviewOnClick}
             data-test='reviewButton'
+            disabled={isReviewButtonDisabled}
           >
             Review
           </Button>

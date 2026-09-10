@@ -2,7 +2,7 @@ import Close from '@mui/icons-material/Close'
 import Create from '@mui/icons-material/Create'
 import Delete from '@mui/icons-material/Delete'
 import Save from '@mui/icons-material/Save'
-import { Button, Stack } from '@mui/material'
+import { Button, IconButton, Stack, Tooltip } from '@mui/material'
 import { ReactNode } from 'react'
 import Restricted from 'src/common/Restricted'
 import MessageAlert from 'src/MessageAlert'
@@ -65,28 +65,19 @@ export default function EditableFormHeading({
             }}
           >
             <Restricted action={editAction} fallback={<Button disabled>{editButtonText}</Button>}>
-              <Button
-                variant='outlined'
-                onClick={onEdit}
-                data-test='editFormButton'
-                disabled={isRegistryError}
-                startIcon={<Create />}
-              >
-                {editButtonText}
-              </Button>
+              <Tooltip title={editButtonText}>
+                <IconButton data-test='editFormButton' onClick={onEdit}>
+                  <Create />
+                </IconButton>
+              </Tooltip>
             </Restricted>
             {deleteAction && deleteButtonText && (
               <Restricted action={deleteAction} fallback={<Button disabled>{deleteButtonText}</Button>}>
-                <Button
-                  variant='contained'
-                  color='error'
-                  onClick={onDelete}
-                  data-test='deleteFormButton'
-                  disabled={isRegistryError}
-                  startIcon={<Delete />}
-                >
-                  {deleteButtonText}
-                </Button>
+                <Tooltip title={deleteButtonText}>
+                  <IconButton color='error' onClick={onDelete}>
+                    <Delete />
+                  </IconButton>
+                </Tooltip>
               </Restricted>
             )}
           </Stack>

@@ -2,7 +2,7 @@ import { Box, Button, Stack } from '@mui/material'
 import { postAccessRequestComment } from 'actions/accessRequest'
 import { postReleaseComment } from 'actions/release'
 import { useGetResponses } from 'actions/response'
-import { useGetReviewRequestsForModel } from 'actions/review'
+import { postDeploymentAssessmentReviewComment, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -27,6 +27,7 @@ interface ReviewCommentsProps {
   kind: ReviewKindKeys
   mutator: () => void
   showComments?: boolean
+  responseList?: ResponseInterface[]
 }
 
 export default function ReviewComments({
@@ -37,6 +38,7 @@ export default function ReviewComments({
   kind,
   parentId,
   showComments = true,
+  responseList,
 }: ReviewCommentsProps) {
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
@@ -59,6 +61,11 @@ export default function ReviewComments({
           return {}
         }
         return { accessRequestId: identifier }
+      case ReviewKind.DEPLOYMENTS:
+        if (!identifier) {
+          return {}
+        }
+        return { deploymentAssessmentId: identifier }
       default:
         return {}
     }
@@ -144,6 +151,15 @@ export default function ReviewComments({
       } else {
         setCommentSubmissionError(await getErrorMessage(res))
       }
+    } else if (kind === ReviewKind.DEPLOYMENTS && identifier) {
+      const res = await postDeploymentAssessmentReviewComment(identifier, newReviewComment)
+      if (res.ok) {
+        mutator()
+        mutateResponses()
+        setNewReviewComment('')
+      } else {
+        setCommentSubmissionError(await getErrorMessage(res))
+      }
     }
     setSubmitButtonLoading(false)
   }
@@ -163,21 +179,8 @@ export default function ReviewComments({
   return (
     <Stack spacing={2} ref={ref}>
       {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
-      <Paginate
-        list={reviewDetails}
-        emptyListText='No responses found'
-        sortingProperties={[
-          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-        ]}
-        defaultSortProperty='createdAt'
-        hideSearchInput
-        searchFilterProperty='createdAt'
-      >
-        {ResponseListItem}
-      </Paginate>
       {!isEdit && showComments && (
-        <Stack spacing={1} sx={{ justifyContent: 'center', alignItems: 'flex-end' }}>
+        <Stack spacing={1} sx={{ justifyContent: 'center', alignItems: 'flex-end', px: 2 }}>
           <Box sx={{ width: '100%' }}>
             <RichTextEditor
               value={newReviewComment}
@@ -197,6 +200,19 @@ export default function ReviewComments({
           <MessageAlert severity='error' message={commentSubmissionError} />
         </Stack>
       )}
+      <Paginate
+        list={responseList ? responseList : reviewDetails}
+        emptyListText='No responses found'
+        sortingProperties={[
+          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+        ]}
+        defaultSortProperty='createdAt'
+        hideSearchInput
+        searchFilterProperty='createdAt'
+      >
+        {ResponseListItem}
+      </Paginate>
     </Stack>
   )
 }

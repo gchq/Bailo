@@ -5,6 +5,7 @@ import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useContext, useEffect, useState } from 'react'
+import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
@@ -19,9 +20,11 @@ type ReviewWithCommentProps = {
   onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate: Dayjs | null) => void
   loading?: boolean
   reviews: ReviewRequestInterface[]
-  modelId: string
+  modelId?: string
   includeDueDate?: boolean
   hideRequestChangesButton?: boolean
+  deploymentAssessmentReview?: boolean
+  onCancel?: () => void
 }
 
 export default function ReviewWithComment({
@@ -31,6 +34,8 @@ export default function ReviewWithComment({
   modelId,
   includeDueDate = false,
   hideRequestChangesButton = false,
+  deploymentAssessmentReview = false,
+  onCancel,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
@@ -42,6 +47,9 @@ export default function ReviewWithComment({
   const uiConfig = useContext(UiConfigContext)
 
   function showUndoButton() {
+    if (deploymentAssessmentReview) {
+      return false
+    }
     if (reviewRequest) {
       const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
         (latestReview) => latestReview.role === reviewRequest.role,
@@ -110,36 +118,35 @@ export default function ReviewWithComment({
         )}
         {entryRoles.length > 0 && (
           <Stack spacing={2}>
-            <Autocomplete
-              sx={{ pt: 1 }}
-              open={selectOpen}
-              onOpen={() => {
-                setSelectOpen(true)
-              }}
-              onClose={() => {
-                setSelectOpen(false)
-              }}
-              isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
-                option.role === value.role
-              }
-              onChange={onChange}
-              value={reviewRequest}
-              getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
-              options={reviews}
-              renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
-            />
-            <TextField
-              size='small'
-              minRows={4}
-              maxRows={8}
-              multiline
-              placeholder='Leave a comment'
+            {!deploymentAssessmentReview && (
+              <Autocomplete
+                sx={{ pt: 1 }}
+                open={selectOpen}
+                onOpen={() => {
+                  setSelectOpen(true)
+                }}
+                onClose={() => {
+                  setSelectOpen(false)
+                }}
+                isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
+                  option.role === value.role
+                }
+                onChange={onChange}
+                value={reviewRequest}
+                getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
+                options={reviews}
+                renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
+              />
+            )}
+            <RichTextEditor
               data-test='reviewWithCommentTextField'
               value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              error={errorText.length > 0}
-              helperText={errorText}
+              onChange={(newValue) => setReviewComment(newValue)}
+              alwaysShowToolbar
             />
+            <Typography variant='caption' color='error'>
+              {errorText}
+            </Typography>
             {includeDueDate && (
               <Stack spacing={0.5}>
                 <Typography sx={{ fontWeight: 'bold' }}>Next review date</Typography>
@@ -202,7 +209,21 @@ export default function ReviewWithComment({
                 >
                   Approve
                 </Button>
+                {deploymentAssessmentReview && (
+                  <Button
+                    variant='contained'
+                    onClick={() => submitForm(Decision.Reject)}
+                    loading={loading}
+                    data-test='approveReviewButton'
+                    size='small'
+                    disabled={includeDueDate && !dueDate}
+                    color='error'
+                  >
+                    Reject
+                  </Button>
+                )}
               </Stack>
+              {onCancel && <Button onClick={onCancel}>Cancel</Button>}
             </Stack>
           </Stack>
         )}

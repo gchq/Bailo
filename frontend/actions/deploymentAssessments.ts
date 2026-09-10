@@ -5,6 +5,7 @@ import {
   DeploymentAssessmentStateKeys,
   DeploymentAssessmentSummary,
   DeploymentAssessmentUserPermissions,
+  ResponseInterface,
 } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
@@ -91,13 +92,15 @@ export function useGetDeploymentAssessment(deploymentId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       deploymentAssessment: DeploymentAssessmentInterface
+      state: DeploymentAssessmentStateKeys
+      responses?: ResponseInterface[]
     },
     ErrorInfo
   >(deploymentId ? `/api/v3/deployment-assessments/${deploymentId}` : null, fetcher)
 
   return {
     mutateDeploymentAssessment: mutate,
-    deploymentAssessment: data?.deploymentAssessment,
+    deploymentAssessment: data && { ...data?.deploymentAssessment, state: data?.state, respones: data?.responses },
     isDeploymentAssessmentLoading: isLoading,
     isDeploymentAssessmentError: error,
   }

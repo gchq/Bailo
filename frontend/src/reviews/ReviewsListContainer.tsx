@@ -13,6 +13,24 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
   const router = useRouter()
   const { category } = router.query
 
+  const cateogories = [
+    { category: ReviewKind.ACCESS, title: 'Access requests' },
+    { category: ReviewKind.RELEASE, title: 'Releases' },
+    { category: ReviewKind.LIFECYCLE, title: 'Model card lifecycle' },
+    { category: ReviewKind.DEPLOYMENTS, title: 'Deployment assessments' },
+  ]
+
+  const categoryList = () =>
+    cateogories.map((listbutton) => (
+      <SimpleListItemButton
+        key={listbutton.category}
+        selected={selectedCategory === listbutton.category}
+        onClick={() => handleListItemClick(listbutton.category)}
+      >
+        {listbutton.title}
+      </SimpleListItemButton>
+    ))
+
   const [selectedCategory, setSelectedCategory] = useState<ReviewKindKeys>(
     isReviewKind(category) ? category : ReviewKind.ACCESS,
   )
@@ -23,32 +41,14 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
       query: { ...router.query, category },
     })
   }
+
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
       spacing={{ sm: 2 }}
       divider={<Divider orientation='vertical' flexItem />}
     >
-      <List sx={{ width: '200px' }}>
-        <SimpleListItemButton
-          selected={selectedCategory === ReviewKind.ACCESS}
-          onClick={() => handleListItemClick(ReviewKind.ACCESS)}
-        >
-          Access Requests
-        </SimpleListItemButton>
-        <SimpleListItemButton
-          selected={selectedCategory === ReviewKind.RELEASE}
-          onClick={() => handleListItemClick(ReviewKind.RELEASE)}
-        >
-          Releases
-        </SimpleListItemButton>
-        <SimpleListItemButton
-          selected={selectedCategory === ReviewKind.LIFECYCLE}
-          onClick={() => handleListItemClick(ReviewKind.LIFECYCLE)}
-        >
-          Model card
-        </SimpleListItemButton>
-      </List>
+      <List sx={{ width: '200px' }}>{categoryList()}</List>
       <Container sx={{ my: 2 }}>
         <ReviewsList kind={selectedCategory} status={status} />
       </Container>
