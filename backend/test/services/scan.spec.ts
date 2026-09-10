@@ -14,6 +14,11 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 vi.mock('../../src/connectors/artefactScanning/index.js')
 vi.mock('../../src/utils/transactions.js')
 
+const webhookMocks = vi.hoisted(() => ({
+  dispatchWebhooks: vi.fn(),
+}))
+vi.mock('../../src/services/webhook.js', () => webhookMocks)
+
 const ScanModelMock = getTypedModelMock('ScanModel')
 
 const configMock = vi.hoisted(
@@ -130,7 +135,7 @@ const registryAuthMocks = vi.hoisted(() => ({
 vi.mock('../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 
 const testFileId = '73859F8D26679D2E52597326'
-const mockFile = { _id: 'file123', name: 'file.txt', size: 1 } as any
+const mockFile = { _id: 'file123', modelId: 'model123', name: 'file.txt', size: 1 } as any
 
 describe('services > scan', () => {
   describe('scanFile', () => {
@@ -157,6 +162,25 @@ describe('services > scan', () => {
           upsert: true,
         },
       })
+    })
+
+    test('dispatches a webhook after all file scans complete', async () => {
+      await runScans({ file: mockFile })
+
+      expect(webhookMocks.dispatchWebhooks).toHaveBeenCalledOnce()
+      expect(webhookMocks.dispatchWebhooks).toHaveBeenCalledWith(
+        'model123',
+        'scanComplete',
+        'Scan completed for file file.txt',
+        {
+          scan: {
+            modelId: 'model123',
+            artefactKind: ArtefactKind.FILE,
+            artefact: { id: 'file123', name: 'file.txt' },
+            results: [expect.objectContaining({ toolName: 'Test', state: ArtefactScanState.Complete })],
+          },
+        },
+      )
     })
 
     test('sets scan state to Error when scanner throws', async () => {
@@ -322,6 +346,39 @@ describe('services > scan', () => {
   })
 
   describe('rerunImageScanNoAuth', () => {
+    test('dispatches one webhook after all image layers complete', async () => {
+      imageMocks.getImageLayers.mockResolvedValueOnce([{ digest: 'sha256:layer1' }, { digest: 'sha256:layer2' }])
+      ScanModelMock.find.mockResolvedValueOnce([])
+      fileScanningMock.startScans.mockReturnValue([
+        {
+          state: ArtefactScanState.Complete,
+          toolName: 'imageScan',
+          lastRunAt: new Date(),
+          artefactKind: ArtefactKind.IMAGE,
+        },
+      ])
+
+      await rerunImageScanNoAuth({ repository: 'model123', name: 'image', tag: 'latest' } as any, 'token')
+
+      await vi.waitFor(() => expect(webhookMocks.dispatchWebhooks).toHaveBeenCalledOnce())
+      expect(webhookMocks.dispatchWebhooks).toHaveBeenCalledWith(
+        'model123',
+        'scanComplete',
+        'Scan completed for image model123/image:latest',
+        {
+          scan: {
+            modelId: 'model123',
+            artefactKind: ArtefactKind.IMAGE,
+            artefact: { repository: 'model123', name: 'image', tag: 'latest' },
+            results: expect.arrayContaining([
+              expect.objectContaining({ layerDigest: 'sha256:layer1', state: ArtefactScanState.Complete }),
+              expect.objectContaining({ layerDigest: 'sha256:layer2', state: ArtefactScanState.Complete }),
+            ]),
+          },
+        },
+      )
+    })
+
     test('success no auth', async () => {
       ScanModelMock.find.mockResolvedValueOnce([])
 

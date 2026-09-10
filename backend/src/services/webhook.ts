@@ -1,11 +1,13 @@
 import fetch, { HeadersInit } from 'node-fetch'
 
+import { ArtefactScanResult } from '../connectors/artefactScanning/Base.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { ModelTransferDoc } from '../models/ModelTransfer.js'
-import { ReleaseDoc } from '../models/Release.js'
+import { ImageRef, ReleaseDoc } from '../models/Release.js'
 import { ReviewInterface } from '../models/Review.js'
+import { ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import WebhookModel, { WebhookEventKeys, WebhookInterface } from '../models/Webhook.js'
 import { Forbidden, NotFound } from '../utils/error.js'
@@ -73,11 +75,23 @@ export async function removeWebhook(user: UserInterface, modelId: string, webhoo
   }
 }
 
+export type ScanWebhookResult = Omit<ArtefactScanResult, 'additionalInfo'> & { layerDigest?: string }
+
+export type ScanCompleteWebhookContent = {
+  scan: {
+    modelId: string
+    artefactKind: ArtefactKindKeys
+    artefact: { id: string; name: string } | ImageRef
+    results: ScanWebhookResult[]
+  }
+}
+
 type WebhookContent =
   | { release: ReleaseDoc }
   | { review: ReviewInterface }
   | { accessRequest: AccessRequestDoc }
   | { transfer: ModelTransferDoc }
+  | ScanCompleteWebhookContent
 
 /**
  * Sends webhooks in an `await`able manner.

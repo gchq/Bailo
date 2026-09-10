@@ -8,6 +8,7 @@ import { FileInterface } from '../models/File.js'
 import { ImageRef } from '../models/Release.js'
 import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
+import { WebhookEvent } from '../models/Webhook.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
@@ -18,6 +19,7 @@ import { getFileById } from './file.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
 import { getModelById } from './model.js'
+import { dispatchWebhooks, ScanWebhookResult } from './webhook.js'
 
 type ArtefactScanIdentifier =
   | {
@@ -69,10 +71,23 @@ export async function updateArtefactScanWithResults(
 }
 
 type RunScansParams = { file: FileInterface; layerRef?: never } | { file?: never; layerRef: LayerRefInterface }
+
+function toWebhookScanResult(result: ArtefactScanResult, layerDigest?: string): ScanWebhookResult {
+  return {
+    toolName: result.toolName,
+    scannerVersion: result.scannerVersion,
+    state: result.state,
+    summary: result.summary,
+    lastRunAt: result.lastRunAt,
+    artefactKind: result.artefactKind,
+    ...(layerDigest ? { layerDigest } : {}),
+  }
+}
+
 /**
  * Only await if you want to wait for the scans to complete.
  */
-export async function runScans({ file, layerRef }: RunScansParams) {
+export async function runScans({ file, layerRef }: RunScansParams): Promise<ArtefactScanResult[]> {
   const requiredScannerType: ArtefactKindKeys = file ? ArtefactKind.FILE : ArtefactKind.IMAGE
   const scannersInfo = scanners.scannersInfo()
   const activeScanners = scannersInfo.filter((scannerInfo) => scannerInfo.artefactKind === requiredScannerType)
@@ -89,7 +104,7 @@ export async function runScans({ file, layerRef }: RunScansParams) {
     }
   }
 
-  await useTransaction([
+  const [scanResults] = await useTransaction([
     async (session) => {
       try {
         const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
@@ -102,6 +117,7 @@ export async function runScans({ file, layerRef }: RunScansParams) {
 
         const resultsArray = await scanners.startScans({ ...(file ? { file } : { layerRef }) })
         await updateArtefactScanWithResults(scanIdentifier, resultsArray, session)
+        return resultsArray
       } catch (error) {
         log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
         const failedResults = activeScanners.map((scannerInfo) => ({
@@ -112,9 +128,23 @@ export async function runScans({ file, layerRef }: RunScansParams) {
 
         // This will always release the lock by setting results to no longer be in progress
         await updateArtefactScanWithResults(scanIdentifier, failedResults, session)
+        return failedResults
       }
     },
   ])
+
+  if (file) {
+    dispatchWebhooks(file.modelId, WebhookEvent.ScanComplete, `Scan completed for file ${file.name}`, {
+      scan: {
+        modelId: file.modelId,
+        artefactKind: ArtefactKind.FILE,
+        artefact: { id: file._id.toString(), name: file.name },
+        results: scanResults.map((result) => toWebhookScanResult(result)),
+      },
+    })
+  }
+
+  return scanResults
 }
 
 async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promise<number> {
@@ -229,15 +259,27 @@ export async function rerunImageScanNoAuth(image: ImageRef, repositoryToken: str
     throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${imageName}`)
   }
 
-  for (const imageLayer of imageLayers) {
-    const layerIdentifier = { artefactKind: ArtefactKind.IMAGE, layerDigest: imageLayer.digest }
-    // Do not await so that the endpoint can return early (fire-and-forget)
-    runScans({ layerRef: { ...image, layerDigest: imageLayer.digest } }).catch((error) => {
-      log.error(
-        { scanIdentifier: layerIdentifier, image, imageName, error },
-        'Unable to set failure state after failing to run image scans. Safely aborted.',
-      )
+  // Do not await so that the endpoint can return early (fire-and-forget).
+  // The completion webhook is sent only after all image layers have finished scanning.
+  Promise.all(
+    imageLayers.map(async (imageLayer) => {
+      const results = await runScans({ layerRef: { ...image, layerDigest: imageLayer.digest } })
+      return results.map((result) => toWebhookScanResult(result, imageLayer.digest))
+    }),
+  )
+    .then((layerResults) => {
+      dispatchWebhooks(image.repository, WebhookEvent.ScanComplete, `Scan completed for image ${imageName}`, {
+        scan: {
+          modelId: image.repository,
+          artefactKind: ArtefactKind.IMAGE,
+          artefact: image,
+          results: layerResults.flat(),
+        },
+      })
     })
-  }
+    .catch((error) => {
+      log.error({ image, imageName, error }, 'Unable to run image scans. Safely aborted.')
+    })
+
   return `Image scan started for ${imageName}`
 }

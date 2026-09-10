@@ -10,6 +10,16 @@ vi.mock('../../../../src/services/webhook.js', () => ({
 }))
 
 describe('routes > webhook > postWebhook', () => {
+  test('schema accepts scan completion events', () => {
+    const fixture = createFixture(postWebhookSchema)
+    const result = postWebhookSchema.safeParse({
+      ...fixture,
+      body: { ...fixture.body, events: ['scanComplete'] },
+    })
+
+    expect(result.success).toBe(true)
+  })
+
   test('200 > ok', async () => {
     const fixture = createFixture(postWebhookSchema)
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/webhooks`, fixture)

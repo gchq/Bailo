@@ -494,7 +494,14 @@ export const webhookInterfaceSchema = z.object({
   token: z.string().openapi({ example: 'abcd' }),
   insecureSSL: z.boolean().openapi({ example: false }),
   events: z.array(z.string()).openapi({
-    example: ['createRelease', 'updateRelease', 'createReviewResponse', 'createAccessRequest', 'importModel'],
+    example: [
+      'createRelease',
+      'updateRelease',
+      'createReviewResponse',
+      'createAccessRequest',
+      'importModel',
+      'scanComplete',
+    ],
   }),
   active: z.boolean().openapi({ example: true }),
 
