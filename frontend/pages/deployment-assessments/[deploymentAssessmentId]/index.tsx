@@ -139,14 +139,16 @@ export default function DeploymentAssessment() {
                       sx={{ alignItems: 'center' }}
                       divider={<Divider flexItem orientation='vertical' />}
                     >
-                      <ReviewBanner
-                        deploymentAssessment={deploymentAssessment}
-                        onReviewButtonClicked={(anchor) => {
-                          setAnchorEl(anchor)
-                          setIsReviewPanelShown(true)
-                        }}
-                        slimView
-                      />
+                      {!deploymentAssessment.draft && (
+                        <ReviewBanner
+                          deploymentAssessment={deploymentAssessment}
+                          onReviewButtonClicked={(anchor) => {
+                            setAnchorEl(anchor)
+                            setIsReviewPanelShown(true)
+                          }}
+                          slimView
+                        />
+                      )}
                       <AssessmentStateChip assessment={deploymentAssessment} />
                     </Stack>
                   </Stack>
