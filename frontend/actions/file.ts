@@ -70,13 +70,17 @@ export async function postFileForModelId(
   }
 }
 
-export async function patchFile(modelId: string, fileId: string, metadata: Pick<FileInterface, 'tags'>) {
+export async function patchFile(
+  modelId: string,
+  fileId: string,
+  metadata: Partial<Pick<FileInterface, 'tags' | 'ungovernedAccess'>>,
+) {
   try {
     const response = await axios({
       method: 'patch',
       url: `/api/v2/model/${modelId}/file/${fileId}`,
       headers: { 'Content-Type': 'application/json' },
-      data: { tags: metadata.tags },
+      data: { tags: metadata.tags, ungovernedAccess: metadata.ungovernedAccess },
     })
     return { status: response.status, data: response.data }
   } catch (error) {
