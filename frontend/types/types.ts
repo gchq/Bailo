@@ -1198,14 +1198,14 @@ interface DeploymentAssessmentSummaryBase {
 
 interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
   draft: true
-  owner?: string | string[]
+  owner?: string[]
   models?: string[]
   state?: never
 }
 
 interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
   draft: false
-  owner: string | string[]
+  owner: string[]
   models: string[]
   state: DeploymentAssessmentStateKeys
 }
