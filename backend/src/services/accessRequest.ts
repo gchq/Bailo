@@ -171,9 +171,14 @@ export async function findAccessRequests(
   }
 
   if (mine) {
-    query['metadata.overview.entities'] = {
-      $in: await authentication.getEntities(user),
-    }
+    query.$or = [
+      { createdBy: user.dn },
+      {
+        'metadata.overview.entities': {
+          $in: await authentication.getEntities(user),
+        },
+      },
+    ]
   }
 
   const stages: PipelineStage[] = [{ $match: query }]
