@@ -178,7 +178,7 @@ export default function ReviewComments({
     <Stack spacing={2} ref={ref}>
       {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
       {!isEdit && showComments && (
-        <Stack spacing={1} sx={{ justifyContent: 'center', alignItems: 'flex-end' }}>
+        <Stack spacing={1} sx={{ justifyContent: 'center', alignItems: 'flex-end', px: 2 }}>
           <Box sx={{ width: '100%' }}>
             <RichTextEditor
               value={newReviewComment}

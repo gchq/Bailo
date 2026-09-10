@@ -1,12 +1,11 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, Button, Container, Divider, IconButton, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, IconButton, Paper, Stack } from '@mui/material'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
@@ -102,15 +101,11 @@ export default function DeploymentAssessment() {
   return (
     <>
       <Title text={deploymentAssessment ? deploymentAssessment.name : 'Loading....'} />
-      <Container maxWidth={isReviewPanelShown ? 'xl' : 'lg'} sx={{ my: 4 }} data-test='deploymentAssessmentContainer'>
+      <Container maxWidth={isReviewPanelShown ? 'xl' : 'lg'} sx={{ my: 2 }} data-test='deploymentAssessmentContainer'>
         <Paper>
           {isLoadingDeploymentAssessment && <Loading />}
           {deploymentAssessment && (
             <>
-              <ReviewBanner
-                deploymentAssessment={deploymentAssessment}
-                onReviewButtonClicked={() => setIsReviewPanelShown(true)}
-              />
               <DraftBanner
                 errorMessage={patchErrorMessage}
                 setErrorMessage={setPatchErrorMessage}
@@ -126,8 +121,7 @@ export default function DeploymentAssessment() {
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}
                   spacing={2}
-                  divider={<Divider flexItem orientation='vertical' />}
-                  sx={{ alignItems: 'center' }}
+                  sx={{ alignItems: 'center', justifyContent: 'space-between' }}
                 >
                   <Link href={backHref}>
                     <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
@@ -136,21 +130,19 @@ export default function DeploymentAssessment() {
                   </Link>
                   <Stack
                     direction='row'
-                    sx={{
-                      alignItems: 'center',
-                    }}
+                    spacing={2}
+                    sx={{ alignItems: 'center' }}
+                    divider={<Divider flexItem orientation='vertical' />}
                   >
-                    <Typography variant='h6' color='primary' component='h1'>
-                      {deploymentAssessment ? deploymentAssessment.name : 'Loading...'}
-                    </Typography>
-                    <CopyToClipboardButton
-                      textToCopy={deploymentAssessment.id}
-                      notificationText='Copied deployment assessment ID to clipboard'
-                      ariaLabel='copy deployment assessment ID to clipboard'
+                    <ReviewBanner
+                      deploymentAssessment={deploymentAssessment}
+                      onReviewButtonClicked={() => setIsReviewPanelShown(true)}
+                      slimView
                     />
+                    <AssessmentStateChip assessment={deploymentAssessment} />
                   </Stack>
-                  <AssessmentStateChip assessment={deploymentAssessment} />
                 </Stack>
+                <Divider flexItem />
                 <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
                   {deploymentAssessment && (
                     <Box sx={{ width: '100%' }}>
