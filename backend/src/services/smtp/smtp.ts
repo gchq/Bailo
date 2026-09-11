@@ -196,8 +196,7 @@ export async function notifyReviewResponseForDeploymentAssessment(
       { title: 'Deployment Assessment ID', data: deployment.id },
       {
         title: 'Reviewed By',
-        data:
-          (await authentication.getUserInformation(toEntity('user', assessmentReviewer))).name || assessmentReviewer,
+        data: (await authentication.getUserInformation(assessmentReviewer)).name || assessmentReviewer,
       },
     ],
     [
