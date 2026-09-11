@@ -324,9 +324,10 @@ export async function reviewDeploymentAssessment(
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
+  const assessmentReviewer = toEntity('user', user.dn)
   const review = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
   const response = new ResponseModel({
-    entity: toEntity('user', user.dn),
+    entity: assessmentReviewer,
     kind: ResponseKind.Review,
     role: review.role,
     parentId: review._id,
@@ -335,7 +336,7 @@ export async function reviewDeploymentAssessment(
   })
   await response.save()
 
-  await notifyDeploymentAssessmentReviewed(deploymentAssessment, decision)
+  await notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer)
 
   return response
 }
@@ -343,9 +344,9 @@ export async function reviewDeploymentAssessment(
 async function notifyDeploymentAssessmentReviewed(
   deploymentAssessment: DeploymentAssessmentInterface,
   decision: Exclude<DecisionKeys, 'undo'>,
+  assessmentReviewer: string,
 ): Promise<void> {
   try {
-    const assessmentReviewer = deploymentAssessment.metadata.overview?.riskOwner?.toString() ?? ''
     switch (decision) {
       case Decision.Reject:
       case Decision.RequestChanges:
