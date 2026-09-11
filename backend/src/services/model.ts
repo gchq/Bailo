@@ -958,3 +958,38 @@ export function getRoleEntities<T extends string>(
     {} as Record<T, string[]>,
   )
 }
+
+export async function getModelsByIds(
+  user: UserInterface,
+  modelIds: string[],
+  kinds?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc[]> {
+  const models = await getModelsByIdsNoAuth(modelIds, kinds)
+
+  for (const model of models) {
+    const auth = await authorisation.model(user, model, ModelAction.View)
+    if (!auth.success) {
+      throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
+    }
+  }
+
+  return models
+}
+
+export async function getModelsByIdsNoAuth(
+  modelIds: string[],
+  kinds?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc[]> {
+  const kindArray = kinds ? (Array.isArray(kinds) ? kinds : [kinds]) : undefined
+
+  const models = await ModelModel.find({
+    id: { $in: modelIds },
+    ...(kindArray && { kind: { $in: kindArray } }),
+  })
+
+  if (models.length === 0) {
+    throw NotFound('The requested entries were not found.', { modelIds })
+  }
+
+  return models
+}
