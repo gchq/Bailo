@@ -1054,6 +1054,7 @@ export interface ModelBreakdown {
   entryName: string
   entryKind: EntryKindKeys
   modelOwners: string[]
+  accessRequestCount: number
 }
 
 export const Roles = {

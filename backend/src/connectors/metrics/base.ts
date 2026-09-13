@@ -1253,10 +1253,20 @@ export class BaseMetricsConnector {
       })
       .lean()
 
+    const accessRequestCounts =
+      models.length > 0
+        ? await AccessRequestModel.aggregate<{ _id: string; count: number }>([
+            { $match: { modelId: { $in: models.map((model) => model.id) } } },
+            { $group: { _id: '$modelId', count: { $sum: 1 } } },
+          ])
+        : []
+    const accessRequestCountByModel = new Map(accessRequestCounts.map(({ _id, count }) => [_id, count]))
+
     return models.map((model) => ({
       entryId: model.id,
       entryName: model.name,
       entryKind: model.kind,
+      accessRequestCount: accessRequestCountByModel.get(model.id) ?? 0,
       collaborators:
         model.collaborators?.map((collaborator) => ({
           entity: collaborator.entity,

@@ -9,6 +9,8 @@ const mockMetricsConnector = vi.hoisted(() => ({
     {
       entryId: 'print-ocr-model-g9yuo2',
       entryName: 'Print OCR model',
+      entryKind: 'model',
+      accessRequestCount: 2,
       collaborators: [
         {
           entity: 'user:user',

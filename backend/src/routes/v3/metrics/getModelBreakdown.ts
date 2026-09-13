@@ -17,6 +17,7 @@ export const GetModelBreakdownResponseSchema = z.array(
     entryId: z.string(),
     entryName: z.string(),
     entryKind: z.string(),
+    accessRequestCount: z.number().int().nonnegative(),
     collaborators: z.array(
       z.object({
         entity: z.string().openapi({ example: 'user:user' }),

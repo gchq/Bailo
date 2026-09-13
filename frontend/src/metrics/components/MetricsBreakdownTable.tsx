@@ -53,6 +53,7 @@ export function MetricsBreakdownTable({ title, headers, data, isLoading = false 
             <em>None</em>
           )}
         </TableCell>
+        <TableCell>{row.accessRequestCount}</TableCell>
       </TableRow>
     ))
   }, [data])
@@ -74,8 +75,8 @@ export function MetricsBreakdownTable({ title, headers, data, isLoading = false 
             </TableRow>
           </TableHead>
           <TableBody>
-            {isLoading && <LoadingRows columnCount={3} />}
-            {!isLoading && data.length === 0 && <EmptyRow colSpan={3} text='No entries found.' />}
+            {isLoading && <LoadingRows columnCount={headers.length} />}
+            {!isLoading && data.length === 0 && <EmptyRow colSpan={headers.length} text='No entries found.' />}
             {!isLoading && tableRows}
           </TableBody>
         </Table>

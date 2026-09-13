@@ -74,6 +74,7 @@ export interface ModelBreakdownResponse {
   entryId: string
   entryName: string
   entryKind: EntryKindKeys
+  accessRequestCount: number
   collaborators: CollaboratorEntry[]
 }
 

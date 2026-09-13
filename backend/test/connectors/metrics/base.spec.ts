@@ -927,16 +927,18 @@ describe('connectors > metrics > simple > calculateModelBreakdown', async () => 
   let connector
 
   beforeEach(async () => {
+    accessRequestMocks.aggregate.mockResolvedValue([])
     const { BaseMetricsConnector } = await loadConnector()
     connector = new BaseMetricsConnector(['b corp'])
   })
 
-  test('returns mapped model breakdown results', async () => {
+  test('returns mapped model breakdown results with access request counts', async () => {
     modelMocks.find.mockReturnValue(
       mockFindQuery([
         {
           id: 'model-1',
           name: 'Model One',
+          kind: 'model',
           collaborators: [
             {
               entity: 'user:test',
@@ -947,12 +949,16 @@ describe('connectors > metrics > simple > calculateModelBreakdown', async () => 
       ]),
     )
 
+    accessRequestMocks.aggregate.mockResolvedValue([{ _id: 'model-1', count: 3 }])
+
     const result = await connector.calculateModelBreakdown(mockUser, {} as any)
 
     expect(result).toEqual([
       {
         entryId: 'model-1',
         entryName: 'Model One',
+        entryKind: 'model',
+        accessRequestCount: 3,
         collaborators: [
           {
             entity: 'user:test',
@@ -963,6 +969,10 @@ describe('connectors > metrics > simple > calculateModelBreakdown', async () => 
     ])
 
     expect(modelMocks.find).toHaveBeenCalledWith({})
+    expect(accessRequestMocks.aggregate).toHaveBeenCalledWith([
+      { $match: { modelId: { $in: ['model-1'] } } },
+      { $group: { _id: '$modelId', count: { $sum: 1 } } },
+    ])
   })
 
   test('queries empty organisation when organisation is none', async () => {

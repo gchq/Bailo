@@ -3,6 +3,7 @@
 exports[`routes > metrics > getModelBreakdown > 200 > ok 1`] = `
 [
   {
+    "accessRequestCount": 2,
     "collaborators": [
       {
         "entity": "user:user",
@@ -12,6 +13,7 @@ exports[`routes > metrics > getModelBreakdown > 200 > ok 1`] = `
       },
     ],
     "entryId": "print-ocr-model-g9yuo2",
+    "entryKind": "model",
     "entryName": "Print OCR model",
   },
 ]
