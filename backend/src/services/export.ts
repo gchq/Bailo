@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs'
+import Handlebars from 'handlebars'
 import { outdent } from 'outdent'
 import { resolve } from 'path'
 import sanitizeHtml from 'sanitize-html'
@@ -141,7 +142,7 @@ export async function renderToHtml(
   const body = converter.makeHtml(markdown)
   const sanitisedBody = sanitizeHtml(body)
 
-  return htmlTemplate({ sanitisedBody })
+  return htmlTemplate({ body: sanitisedBody })
 }
 
 function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
