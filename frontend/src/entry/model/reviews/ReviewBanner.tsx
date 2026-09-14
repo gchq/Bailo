@@ -78,7 +78,7 @@ export default function ReviewBanner({
     return <></>
   }
 
-  if (slimView) {
+  if (reviewCountHeader > 0 && slimView) {
     return (
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
