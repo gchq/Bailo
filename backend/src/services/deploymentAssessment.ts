@@ -228,8 +228,8 @@ function deriveDeploymentAssessmentState(
  */
 function needsUserAction(
   deploymentAssessment: DeploymentAssessmentInterface,
-  state: DeploymentAssessmentStateKeys,
   user: UserInterface,
+  state?: DeploymentAssessmentStateKeys,
 ) {
   if (
     deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
@@ -495,9 +495,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
 
       const passesFilter =
         (params.state === undefined || state === params.state) &&
-        (params.needsAction === undefined ||
-          state === undefined ||
-          needsUserAction(assessment, state, user) === params.needsAction)
+        (params.needsAction === undefined || needsUserAction(assessment, user, state) === params.needsAction)
 
       if (passesFilter) {
         const { riskOwner, modelIds } = assessment.metadata?.overview ?? {}
