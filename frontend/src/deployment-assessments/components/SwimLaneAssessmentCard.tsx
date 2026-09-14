@@ -36,16 +36,17 @@ function TextRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function UserRow({ label, dn }: { label: string; dn: string }) {
+function UserRow({ label, dns }: { label: string; dns: string[] }) {
   return (
     <InfoRow label={label}>
-      <UserDisplay dn={dn} />
+      {dns.map((dn) => (
+        <UserDisplay key={dn} dn={dn} />
+      ))}
     </InfoRow>
   )
 }
 
 export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardProps) {
-  const riskOwners = assessment.owner?.join(', ') ?? ''
   const deployer = assessment.createdBy
   const models = assessment.models?.join(', ') ?? ''
   const returnTo = '/deployment-assessments?tab=my-assessments'
@@ -66,8 +67,8 @@ export function SwimLaneAssessmentCard({ assessment }: SwimLaneAssessmentCardPro
         </Link>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
           <TextRow label='Models' value={models} />
-          <UserRow label='Risk Owner' dn={riskOwners} />
-          <UserRow label='Deployer' dn={deployer} />
+          <UserRow label='Risk Owners' dns={assessment.owner ?? []} />
+          <UserRow label='Deployer' dns={[deployer]} />
         </Box>
       </CardContent>
     </Card>
