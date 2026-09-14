@@ -17,7 +17,7 @@ vi.mock('next/router', () => ({
   useRouter: () => ({ query: {}, isReady: true, replace: vi.fn(), push: vi.fn() }),
 }))
 
-const testUiConfig = { roleDisplayNames: { riskOwner: 'Deployment Risk Owner' } } as UiConfig
+const testUiConfig = { roleDisplayNames: { riskOwners: 'Deployment Risk Owner' } } as UiConfig
 
 const testDeploymentAssessment: DeploymentAssessmentSummary = {
   id: 'assessment-abc123',

@@ -76,7 +76,7 @@ export interface UiConfig {
     owner: string
     contributor: string
     consumer: string
-    riskOwner: string
+    riskOwners: string
   }
 
   untrustedModel: {
@@ -1159,7 +1159,7 @@ export interface BaseLifecycleMetrics {
 
 export interface DeploymentAssessmentMetadata {
   overview: {
-    riskOwner?: string[]
+    riskOwners?: string[]
     modelIds?: string[]
     [key: string]: unknown
   }

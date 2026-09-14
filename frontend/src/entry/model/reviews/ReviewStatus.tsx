@@ -28,8 +28,8 @@ export default function ReviewStatus({ review, modelId, showCurrentUserResponses
     if (review.role === 'owner') {
       return uiConfig.roleDisplayNames.owner
     }
-    if (review.role === 'riskOwner') {
-      return uiConfig.roleDisplayNames.riskOwner
+    if (review.role === 'riskOwners') {
+      return uiConfig.roleDisplayNames.riskOwners
     }
     return dynamicRoles.find((role) => role.shortName === review.role)?.name
   }

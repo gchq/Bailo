@@ -13,7 +13,7 @@ const deploymentAssessment = {
   schemaId: 'deployment-assessment-schema',
   metadata: {
     overview: {
-      riskOwner: ['user:risk-owner'],
+      riskOwners: ['user:risk-owner'],
       modelIds: ['model-one', 'model-two'],
     },
     deletedInformation: 'must not be returned',

@@ -277,7 +277,7 @@ config:
       owner: 'Owner'
       consumer: 'Consumer'
       contributor: 'Contributor'
-      riskOwner: 'Deployment Risk Owner'
+      riskOwners: 'Deployment Risk Owner'
 
     untrustedModel:
       enabled: false

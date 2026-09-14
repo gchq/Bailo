@@ -1063,7 +1063,7 @@ describe('connectors > authorisation > base', () => {
       id: 'da-1',
       createdBy: 'creator',
       draft: false,
-      metadata: { overview: { riskOwner: ['riskOwner'] } },
+      metadata: { overview: { riskOwners: ['riskOwners'] } },
     } as any
 
     test('view non-draft DA as non-named user', async () => {
@@ -1088,7 +1088,7 @@ describe('connectors > authorisation > base', () => {
 
     test('view draft DA as risk owner', async () => {
       const result = await connector.deploymentAssessment(
-        { dn: 'riskOwner' } as UserInterface,
+        { dn: 'riskOwners' } as UserInterface,
         { ...deploymentAssessment, draft: true },
         DeploymentAssessmentAction.View,
       )
@@ -1136,7 +1136,7 @@ describe('connectors > authorisation > base', () => {
 
     test('update DA as risk owner', async () => {
       const result = await connector.deploymentAssessment(
-        { dn: 'riskOwner' } as UserInterface,
+        { dn: 'riskOwners' } as UserInterface,
         deploymentAssessment,
         DeploymentAssessmentAction.Update,
       )
