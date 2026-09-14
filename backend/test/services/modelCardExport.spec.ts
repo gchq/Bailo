@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ModelInterface } from '../../src/models/Model.js'
 import { ModelCardRevisionInterface } from '../../src/models/ModelCardRevision.js'
-import { renderToHtml, renderToMarkdown, ReviewExport } from '../../src/services/htmlExport .js'
+import { renderToHtml, renderToMarkdown, ReviewExport } from '../../src/services/htmlExport.js'
 import { getModelById } from '../../src/services/model.js'
 import { getSchemaById } from '../../src/services/schema.js'
 

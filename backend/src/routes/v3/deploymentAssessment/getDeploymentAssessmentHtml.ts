@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { getDeploymentAssessmentHtml as getDeploymentAssessmentHtmlService } from '../../../services/htmlExport .js'
+import { getDeploymentAssessmentHtml as getDeploymentAssessmentHtmlService } from '../../../services/htmlExport.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 

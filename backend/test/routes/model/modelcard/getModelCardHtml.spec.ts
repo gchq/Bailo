@@ -4,7 +4,7 @@ import audit from '../../../../src/connectors/audit/index.js'
 import { ModelCardInterface } from '../../../../src/models/Model.js'
 import { UserInterface } from '../../../../src/models/User.js'
 import { getModelCardHtmlSchema } from '../../../../src/routes/v2/model/modelcard/getModelCardHtml.js'
-import { getModelCardHtml as getModelCardHtmlService } from '../../../../src/services/htmlExport .js'
+import { getModelCardHtml as getModelCardHtmlService } from '../../../../src/services/htmlExport.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
