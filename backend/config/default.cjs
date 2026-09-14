@@ -295,7 +295,7 @@ module.exports = {
     },
 
     deploymentAssessments: {
-      deployableModelState: 'Production',
+      deployableModelState: null,
     },
 
     lifecycle: {
