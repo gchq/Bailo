@@ -1,4 +1,5 @@
 import { outdent } from 'outdent'
+import sanitizeHtml from 'sanitize-html'
 import showdown from 'showdown'
 
 import { UserInterface } from '../models/User.js'
@@ -17,6 +18,7 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
   const converter = new showdown.Converter()
   converter.setFlavor('github')
   const body = converter.makeHtml(output)
+  const sanitizedBody = sanitizeHtml(body)
 
-  return { html: htmlTemplate({ body }), deploymentAssessment }
+  return { html: htmlTemplate({ body: sanitizedBody }), deploymentAssessment }
 }

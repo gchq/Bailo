@@ -15,25 +15,28 @@ export const getDeploymentAssessmentHtmlSchema = z.object({
   }),
 })
 
-registerPath({
-  method: 'get',
-  path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/html',
-  tags: ['deployment-assessments'],
-  description: 'Get a specific version of a model card as HTML.',
-  schema: getDeploymentAssessmentHtmlSchema,
-  responses: {
-    200: {
-      description: 'Deployment assessment HTML.',
-      content: {
-        'application/html': {
-          schema: {
-            type: 'string',
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/html',
+    tags: ['deployment assessments'],
+    description: 'Get a specific version of a deployment assessment as HTML.',
+    schema: getDeploymentAssessmentHtmlSchema,
+    responses: {
+      200: {
+        description: 'Deployment assessment HTML.',
+        content: {
+          'application/html': {
+            schema: {
+              type: 'string',
+            },
           },
         },
       },
     },
   },
-})
+  'v3',
+)
 
 export const getDeploymentAssessmentHtml = [
   async (req: Request, res: Response): Promise<void> => {

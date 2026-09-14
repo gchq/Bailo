@@ -3,6 +3,8 @@ import Handlebars from 'handlebars'
 import { outdent } from 'outdent'
 import { resolve } from 'path'
 
+import { InternalError } from '../utils/error.js'
+
 export type Common = {
   title: string
   description?: string
@@ -98,9 +100,6 @@ export function recursiveRender(obj: any, schema: Fragment, output = '', depth =
       break
     }
     case 'number':
-      // We can add a description like this, but I felt it overkill:
-      // ${schema.description ? `> ${schema.description}` : ''}
-
       if (!obj) {
         obj = 'No response'
       }
@@ -148,7 +147,7 @@ export function recursiveRender(obj: any, schema: Fragment, output = '', depth =
       }
       break
     default:
-      throw new Error(
+      throw InternalError(
         `One of the types within this schema has not been implemented in the export method.  Received type ${(schema as any).type}`,
       )
   }
