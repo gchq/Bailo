@@ -69,14 +69,10 @@ describe('repositories > deploymentAssessment', () => {
       await findDeploymentAssessments({ search: 'Assessment.*' })
 
       expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-        $and: [
-          {
-            $or: [
-              { name: { $regex: 'Assessment\\.\\*', $options: 'i' } },
-              { 'metadata.overview.justification': { $regex: 'Assessment\\.\\*', $options: 'i' } },
-            ],
-          },
-        ],
+        name: {
+          $options: 'i',
+          $regex: 'Assessment\\.\\*',
+        },
       })
     })
 
@@ -138,14 +134,7 @@ describe('repositories > deploymentAssessment', () => {
           $lt: new Date('2026-02-01T00:00:00.000Z'),
         },
         draft: true,
-        $and: [
-          {
-            $or: [
-              { name: { $regex: 'Assessment\\.\\*', $options: 'i' } },
-              { 'metadata.overview.justification': { $regex: 'Assessment\\.\\*', $options: 'i' } },
-            ],
-          },
-        ],
+        name: { $regex: 'Assessment\\.\\*', $options: 'i' },
       })
     })
   })
