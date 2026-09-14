@@ -14,6 +14,7 @@ const columnConfig: SwimLaneColumnConfig[] = [
     key: DeploymentAssessmentState.ChangesRequested,
     label: 'Changes Requested',
   },
+  { key: DeploymentAssessmentState.Rejected, label: 'Rejected' },
 ]
 
 export default function NeedsAction() {
