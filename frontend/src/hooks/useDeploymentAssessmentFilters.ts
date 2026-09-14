@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react'
 import { DeploymentAssessmentState, DeploymentAssessmentStateKeys } from 'types/types'
 
 export const DeploymentAssessmentStatus = {
-  DRAFT: 'draft',
+  Draft: 'draft',
   ...DeploymentAssessmentState,
 } as const
 
@@ -106,7 +106,7 @@ export function statusToApiFilters(status?: DeploymentAssessmentStatusKeys): {
   draft?: boolean
   state?: DeploymentAssessmentStateKeys
 } {
-  if (status === DeploymentAssessmentStatus.DRAFT) {
+  if (status === DeploymentAssessmentStatus.Draft) {
     return { draft: true }
   }
   if (!status) {

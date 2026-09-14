@@ -7,6 +7,7 @@ import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
+import MyAssessments from 'src/deployment-assessments/MyAssessments'
 import NeedsAction from 'src/deployment-assessments/NeedsAction'
 
 export default function Deployments() {
@@ -22,7 +23,7 @@ export default function Deployments() {
         path: 'needs-action',
         view: <NeedsAction />,
       },
-      { title: 'My assessments', path: 'my-assessments', view: <></> },
+      { title: 'My assessments', path: 'my-assessments', view: <MyAssessments /> },
       { title: 'All assessments', path: 'all-assessments', view: <DeploymentAssessmentsList /> },
     ],
     [deploymentAssessments.length],

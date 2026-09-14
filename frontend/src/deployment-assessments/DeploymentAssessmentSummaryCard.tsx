@@ -10,10 +10,10 @@ import { DeploymentAssessmentState, DeploymentAssessmentStateKeys, DeploymentAss
 import { formatDateString } from 'utils/dateUtils'
 
 const stateLabels: Record<DeploymentAssessmentStateKeys, string> = {
-  [DeploymentAssessmentState.NEEDS_REVIEW]: 'Needs review',
-  [DeploymentAssessmentState.REJECTED]: 'Rejected',
-  [DeploymentAssessmentState.CHANGES_REQUESTED]: 'Changes requested',
-  [DeploymentAssessmentState.APPROVED]: 'Approved',
+  [DeploymentAssessmentState.NeedsReview]: 'Needs review',
+  [DeploymentAssessmentState.Rejected]: 'Rejected',
+  [DeploymentAssessmentState.ChangesRequested]: 'Changes requested',
+  [DeploymentAssessmentState.Approved]: 'Approved',
 }
 
 interface DeploymentAssessmentSummaryCardProps {
@@ -64,13 +64,13 @@ function AssessmentStateChip({ assessment, selectedState, onSelectedStateChange 
   const isSelected = selectable && selectedState === state
 
   const palette = {
-    [DeploymentAssessmentState.NEEDS_REVIEW]: {
+    [DeploymentAssessmentState.NeedsReview]: {
       main: theme.palette.grey[600],
       contrastText: theme.palette.getContrastText(theme.palette.grey[600]),
     },
-    [DeploymentAssessmentState.CHANGES_REQUESTED]: theme.palette.warning,
-    [DeploymentAssessmentState.REJECTED]: theme.palette.error,
-    [DeploymentAssessmentState.APPROVED]: theme.palette.success,
+    [DeploymentAssessmentState.ChangesRequested]: theme.palette.warning,
+    [DeploymentAssessmentState.Rejected]: theme.palette.error,
+    [DeploymentAssessmentState.Approved]: theme.palette.success,
   }[state]
 
   return (
