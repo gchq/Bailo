@@ -750,7 +750,16 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('passes parameters to the repository and returns authorised results', async () => {
-      const deploymentAssessments = [{ id: 'assessment-one' }]
+      const deploymentAssessments = [
+        {
+          id: 'assessment-one',
+          schemaId: 'deployment-assessment-schema',
+          name: 'Assessment One',
+          draft: false,
+          createdBy: 'creator',
+          createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        },
+      ]
       repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce(deploymentAssessments)
       vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: 'assessment-one' }])
 
@@ -762,7 +771,17 @@ describe('services > deploymentAssessment', () => {
         deploymentAssessments,
         'deployment_assessment:view',
       )
-      expect(result).toStrictEqual(deploymentAssessments)
+      expect(result).toStrictEqual([
+        {
+          id: 'assessment-one',
+          schemaId: 'deployment-assessment-schema',
+          name: 'Assessment One',
+          draft: false,
+          createdBy: 'creator',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          state: 'needs_review',
+        },
+      ])
     })
 
     test('passes all filter params through to the repository', async () => {
