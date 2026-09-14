@@ -96,7 +96,7 @@ export default function SwimLaneContainer({
 
   const hasEmptyVisibleColumns = visibleColumns.some((c) => c.items.length === 0)
 
-  const queryState = renderQueryState([isDeploymentAssessmentsError], false)
+  const queryState = renderQueryState([isDeploymentAssessmentsError], isDeploymentAssessmentsLoading)
   if (queryState) {
     return queryState
   }

@@ -1,4 +1,3 @@
-import { Stack } from '@mui/material'
 import SwimLaneContainer from 'src/deployment-assessments/components/SwimLaneContainer'
 import { DeploymentAssessmentState } from 'types/types'
 
@@ -19,12 +18,10 @@ const columnConfig: SwimLaneColumnConfig[] = [
 
 export default function NeedsAction() {
   return (
-    <Stack spacing={1} direction='row'>
-      <SwimLaneContainer
-        deploymentAssessmentsFilters={{ needsAction: true }}
-        columnConfig={columnConfig}
-        userPreferencesKey='hiddenDeploymentAssessmentColumnsNeedsAction'
-      />
-    </Stack>
+    <SwimLaneContainer
+      deploymentAssessmentsFilters={{ needsAction: true }}
+      columnConfig={columnConfig}
+      userPreferencesKey='hiddenDeploymentAssessmentColumnsNeedsAction'
+    />
   )
 }
