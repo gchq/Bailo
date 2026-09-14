@@ -94,6 +94,7 @@ export default function SchemaFormPage({
                           onClick={onSubmit}
                           loading={submitButtonLoading}
                           disabled={draftButtonLoading || actionsDisabled}
+                          data-test='submitDeploymentAssessmentButton'
                         >
                           Submit
                         </Button>
