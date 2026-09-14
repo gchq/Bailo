@@ -66,7 +66,7 @@ export default function EditableFormHeading({
           >
             <Restricted action={editAction} fallback={<Button disabled>{editButtonText}</Button>}>
               <Tooltip title={editButtonText}>
-                <IconButton data-test='editFormButton' onClick={onEdit}>
+                <IconButton data-test='editFormButton' onClick={onEdit} color='primary'>
                   <Create />
                 </IconButton>
               </Tooltip>

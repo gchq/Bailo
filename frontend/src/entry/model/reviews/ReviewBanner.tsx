@@ -81,8 +81,8 @@ export default function ReviewBanner({
   if (slimView) {
     return (
       <Stack
-        direction='row'
-        spacing={2}
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={{ xs: 0, sm: 2 }}
         sx={{
           justifyContent: 'space-between',
           alignItems: 'center',

@@ -59,7 +59,7 @@ export default function DeploymentAssessmentSummaryCard({
               />
             </Stack>
             <Stack
-              direction='row'
+              direction={{ sm: 'column', md: 'row' }}
               spacing={2}
               sx={{ alignItems: 'center' }}
               divider={<Divider flexItem orientation='vertical' />}
