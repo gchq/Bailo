@@ -17,6 +17,7 @@ import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { StroomEventObject } from '../../models/StroomEvent.js'
 import { TokenDoc } from '../../models/Token.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import log from '../../services/log.js'
 import { MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation } from '../../services/mirroredModel/importers/file.js'
@@ -509,7 +510,10 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, deploymentAssessment.id)
   }
 
-  async onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentDoc[]): Promise<void> {
+  async onSearchDeploymentAssessments(
+    req: Request,
+    deploymentAssessments: DeploymentAssessmentSummary[],
+  ): Promise<void> {
     this.auditSearchEvent(
       req,
       deploymentAssessments.map((deploymentAssessment) => ({ Id: deploymentAssessment.id })),
