@@ -3,7 +3,7 @@
 exports[`clients > artefactScan > getCachedArtefactScanInfo > success 1`] = `
 [
   [
-    "undefined://undefined:undefined/info",
+    "http://127.0.0.1:8081/info",
     {
       "headers": {
         "Content-Type": "application/json",
@@ -17,7 +17,7 @@ exports[`clients > artefactScan > getCachedArtefactScanInfo > success 1`] = `
 exports[`clients > artefactScan > scanFileStream > success 1`] = `
 [
   [
-    "undefined://undefined:undefined/scan/file",
+    "http://127.0.0.1:8081/scan/file",
     {
       "body": {
         "append": [MockFunction] {

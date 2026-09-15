@@ -96,6 +96,34 @@ const eslintConfig = [
       'no-restricted-imports': 'off',
     },
   },
+  // Enforce the shared config mock in tests
+  {
+    files: ['test/**/*.ts'],
+    ignores: ['test/testUtils/setupTestConfig.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.object.name='vi'][callee.property.name='mock'][arguments.0.value=/utils\\/config\\.js$/]",
+          message:
+            'Do not mock "utils/config.js" per-file. It is mocked globally from "src/utils/__mocks__/config.ts"; override values with `setTestConfig()` from "test/testUtils/setupTestConfig.ts".',
+        },
+        {
+          selector:
+            "CallExpression[callee.object.name='vi'][callee.property.name='spyOn'][arguments.0.name=/^[Cc]onfig/]",
+          message:
+            'Do not spy on config properties. Use `setTestConfig()` from "test/testUtils/setupTestConfig.ts", which deep-merges overrides and reverts them after each test.',
+        },
+        {
+          selector:
+            "CallExpression[callee.object.name='vi'][callee.property.name='spyOn'][arguments.0.object.name=/^[Cc]onfig/]",
+          message:
+            'Do not spy on config properties. Use `setTestConfig()` from "test/testUtils/setupTestConfig.ts", which deep-merges overrides and reverts them after each test.',
+        },
+      ],
+    },
+  },
 ]
 
 export default eslintConfig
