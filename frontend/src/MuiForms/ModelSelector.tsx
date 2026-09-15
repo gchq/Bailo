@@ -51,7 +51,9 @@ export default function ModelSelector({
     undefined,
     undefined,
     undefined,
-    [uiConfig.deploymentAssessments.deployableModelState],
+    uiConfig.deploymentAssessments.deployableModelState
+      ? [uiConfig.deploymentAssessments.deployableModelState]
+      : undefined,
     undefined,
     undefined,
     undefined,

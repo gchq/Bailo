@@ -91,7 +91,7 @@ export interface UiConfig {
   }
 
   deploymentAssessments: {
-    deployableModelState: string
+    deployableModelState: string | null
   }
 
   lifecycle: {

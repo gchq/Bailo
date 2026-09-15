@@ -17,7 +17,9 @@ export default function DeploymentModelFilter({ selectedModelIds, onChange }: De
     '',
     [],
     [],
-    [uiConfig.deploymentAssessments.deployableModelState],
+    uiConfig.deploymentAssessments.deployableModelState
+      ? [uiConfig.deploymentAssessments.deployableModelState]
+      : undefined,
     [],
     '',
     false,
