@@ -105,14 +105,16 @@ async function validateModels(user: UserInterface, modelIds: string[]) {
   }
 
   const deployableModelState = config.ui.deploymentAssessments.deployableModelState
-  const nonDeployableStateModelIds = models
-    .filter((model) => model.state !== deployableModelState)
-    .map((model) => model.id)
-  if (nonDeployableStateModelIds.length > 0) {
-    throw BadReq(`Deployment assessments can only use models with a ${deployableModelState} state.`, {
-      modelIds: nonDeployableStateModelIds,
-      deployableModelState,
-    })
+  if (deployableModelState !== null) {
+    const nonDeployableStateModelIds = models
+      .filter((model) => model.state !== deployableModelState)
+      .map((model) => model.id)
+    if (nonDeployableStateModelIds.length > 0) {
+      throw BadReq(`Deployment assessments can only use models with a ${deployableModelState} state.`, {
+        modelIds: nonDeployableStateModelIds,
+        deployableModelState,
+      })
+    }
   }
 }
 

@@ -23,6 +23,7 @@ import {
   notifyReviewResponseForDeploymentAssessment,
 } from '../../src/services/smtp/smtp.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
+import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authentication/index.js', () => ({
@@ -88,6 +89,7 @@ const liveModel = {
 
 describe('services > deploymentAssessment', () => {
   beforeEach(() => {
+    config.ui.deploymentAssessments.deployableModelState = 'Production'
     vi.mocked(authentication.getUserInformation).mockResolvedValue({ name: 'Risk Owner' })
     schemaMocks.getSchemaById.mockResolvedValue({
       kind: SchemaKind.DeploymentAssessment,
@@ -277,6 +279,15 @@ describe('services > deploymentAssessment', () => {
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true })).rejects.toThrow(message)
     expect(DeploymentAssessmentModelMock).not.toHaveBeenCalled()
+  })
+
+  test('accepts models in any state when no deployable model state is configured', async () => {
+    config.ui.deploymentAssessments.deployableModelState = null
+    ModelModelMock.find.mockResolvedValueOnce([{ ...liveModel, state: 'Review' }])
+
+    const result = await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true })
+
+    expect(result.save).toHaveBeenCalled()
   })
 
   test('rejects creation when authorisation fails', async () => {
