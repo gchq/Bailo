@@ -966,14 +966,8 @@ export async function getModelsByIds(
 ): Promise<ModelDoc[]> {
   const models = await getModelsByIdsNoAuth(modelIds, kinds)
 
-  for (const model of models) {
-    const auth = await authorisation.model(user, model, ModelAction.View)
-    if (!auth.success) {
-      throw Forbidden(auth.info, { userDn: user.dn, modelId: model.id })
-    }
-  }
-
-  return models
+  const auths = await authorisation.models(user, models, ModelAction.View)
+  return models.filter((_, i) => auths[i].success)
 }
 
 export async function getModelsByIdsNoAuth(
@@ -987,8 +981,13 @@ export async function getModelsByIdsNoAuth(
     ...(kindArray && { kind: { $in: kindArray } }),
   })
 
-  if (models.length === 0) {
-    throw NotFound('The requested entries were not found.', { modelIds })
+  const foundModelIds = new Set(models.map((model) => model.id))
+  const missingModelIds = modelIds.filter((modelId) => !foundModelIds.has(modelId))
+
+  if (missingModelIds.length > 0) {
+    throw NotFound('Some requested entries were not found.', {
+      missingModelIds,
+    })
   }
 
   return models
