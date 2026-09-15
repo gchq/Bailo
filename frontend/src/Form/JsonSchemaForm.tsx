@@ -37,6 +37,7 @@ import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
   getFormStats,
+  getInvalidFields,
   getOverallCompletionStats,
   setFormDataPropertiesToUndefined,
   setStepState,
@@ -141,6 +142,12 @@ export default function JsonSchemaForm({
     [splitSchema, calculateStats, mirroredModel, requiredByModelState],
   )
 
+  const invalidFields = useMemo(
+    () => (displayLabelValidation && currentStep ? getInvalidFields(currentStep) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [displayLabelValidation, currentStep, currentStep?.state],
+  )
+
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
   })
@@ -229,37 +236,41 @@ export default function JsonSchemaForm({
         <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
           <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
             <List sx={{ width: { xs: '100%' } }}>
-              {splitSchema.steps.map((step, index) => (
-                <ListItem
-                  key={step.schema.title}
-                  disablePadding
-                  sx={{
-                    backgroundColor:
-                      canEdit && sectionCompletion[step.schema.title]
-                        ? alpha(theme.palette.error.main, 0.1)
-                        : undefined,
-                  }}
-                >
-                  <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                    <ListItemText sx={{ pr: 1 }}>
-                      <Typography
-                        sx={{
-                          wordBreak: 'break-word',
-                          color: !step.isComplete(step) && displayLabelValidation ? 'error' : 'unset',
-                        }}
-                      >
-                        {step.schema.title}
-                      </Typography>
-                    </ListItemText>
-                    {canEdit && sectionCompletion[step.schema.title] ? (
-                      <ListItemIcon sx={{ minWidth: 'auto', flexShrink: 0, ml: 'auto' }}>
-                        <Error color='error' />
-                      </ListItemIcon>
-                    ) : null}
-                    {displayLabelValidation && <ValidationErrorIcon step={step} />}
-                  </ListItemButton>
-                </ListItem>
-              ))}
+              {splitSchema.steps.map((step, index) => {
+                const isStepComplete = displayLabelValidation ? step.isComplete(step) : true
+
+                return (
+                  <ListItem
+                    key={step.schema.title}
+                    disablePadding
+                    sx={{
+                      backgroundColor:
+                        (canEdit && sectionCompletion[step.schema.title]) || !isStepComplete
+                          ? alpha(theme.palette.error.main, 0.1)
+                          : undefined,
+                    }}
+                  >
+                    <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
+                      <ListItemText sx={{ pr: 1 }}>
+                        <Typography
+                          sx={{
+                            wordBreak: 'break-word',
+                            color: isStepComplete ? 'unset' : theme.palette.error.main,
+                          }}
+                        >
+                          {step.schema.title}
+                        </Typography>
+                      </ListItemText>
+                      {canEdit && sectionCompletion[step.schema.title] ? (
+                        <ListItemIcon sx={{ minWidth: 'auto', flexShrink: 0, ml: 'auto' }}>
+                          <Error color='error' />
+                        </ListItemIcon>
+                      ) : null}
+                      {displayLabelValidation && <ValidationErrorIcon isComplete={isStepComplete} />}
+                    </ListItemButton>
+                  </ListItem>
+                )
+              })}
             </List>
           </Stepper>
         </Grid>
@@ -324,6 +335,7 @@ export default function JsonSchemaForm({
               compareMode,
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
+              invalidFields,
             }}
             templates={
               !canEdit
@@ -332,6 +344,7 @@ export default function JsonSchemaForm({
                     ArrayFieldTemplate,
                     ArrayFieldItemTemplate,
                     ObjectFieldTemplate,
+                    FieldTemplate,
                   }
                 : {
                     DescriptionFieldTemplate,

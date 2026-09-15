@@ -16,7 +16,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { isQuestionAnswered } from 'utils/formUtils'
+import { getPathFromId, isQuestionAnswered } from 'utils/formUtils'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -63,7 +63,7 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+export function FieldTemplate({ children, registry, schema, id, hidden }: FieldTemplateProps) {
   const theme = useTheme()
   const answered = isQuestionAnswered(id, schema, registry.formContext)
   const requiredByState =
@@ -71,39 +71,58 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
     schema.requiredByModelStates &&
     schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
 
-  if (requiredByState) {
-    return (
-      <Stack
-        spacing={0.5}
-        sx={{
-          backgroundColor: alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1),
-          p: 1,
-        }}
-      >
-        <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
-          {answered ? (
-            <Done
-              color='success'
-              fontSize='small'
-              aria-label={`Answered field required for ${registry.formContext.requiredByModelState}`}
-            />
-          ) : (
-            <Error
-              color='error'
-              fontSize='small'
-              aria-label={`Unanswered field required for ${registry.formContext.requiredByModelState}`}
-            />
-          )}
-          <Typography variant='caption' color={answered ? 'success' : 'error'}>
-            {`Required for ${registry.formContext.requiredByModelState}`}
-          </Typography>
-        </Stack>
-        {children}
+  // Objects are skipped so that only the offending leaf is marked
+  const invalidMessage =
+    schema.type === 'object' ? undefined : registry.formContext.invalidFields?.get(getPathFromId(id).join('.'))
+
+  if (hidden) {
+    return <div style={{ display: 'none' }}>{children}</div>
+  }
+
+  // The wrapper renders unmarked too - swapping it out would remount the widget and steal focus
+  let marker: ReactNode = null
+  let backgroundColour: string | undefined
+
+  if (invalidMessage) {
+    backgroundColour = alpha(theme.palette.error.main, 0.1)
+    marker = (
+      <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+        <Error color='error' fontSize='small' aria-label={`${invalidMessage}: ${schema.title ?? id}`} />
+        <Typography variant='caption' color='error'>
+          {invalidMessage}
+        </Typography>
+      </Stack>
+    )
+  } else if (requiredByState) {
+    backgroundColour = alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1)
+    marker = (
+      <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+        {answered ? (
+          <Done
+            color='success'
+            fontSize='small'
+            aria-label={`Answered field required for ${registry.formContext.requiredByModelState}`}
+          />
+        ) : (
+          <Error
+            color='error'
+            fontSize='small'
+            aria-label={`Unanswered field required for ${registry.formContext.requiredByModelState}`}
+          />
+        )}
+        <Typography variant='caption' color={answered ? 'success' : 'error'}>
+          {`Required for ${registry.formContext.requiredByModelState}`}
+        </Typography>
       </Stack>
     )
   }
 
-  return <>{children}</>
+  return (
+    <Stack spacing={0.5} sx={{ backgroundColor: backgroundColour, p: marker ? 1 : 0 }}>
+      {marker}
+      {children}
+    </Stack>
+  )
 }
 
 export function ErrorListTemplate() {

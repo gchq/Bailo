@@ -32,6 +32,7 @@ type EditableDeploymentAssessmentFormProps = {
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
+  showValidationErrors?: boolean
 }
 
 export default function EditableDeploymentAssessmentForm({
@@ -40,6 +41,7 @@ export default function EditableDeploymentAssessmentForm({
   isEdit,
   onIsEditChange,
   readOnly = false,
+  showValidationErrors = false,
 }: EditableDeploymentAssessmentFormProps) {
   const [originalSplitSchema, setOriginalSplitSchema] = useState<SplitSchemaNoRender>({
     reference: '',
@@ -50,6 +52,7 @@ export default function EditableDeploymentAssessmentForm({
   const [open, setOpen] = useState(false)
   const [newName, setNewName] = useState(deploymentAssessment.name)
   const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
+  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
 
@@ -77,6 +80,7 @@ export default function EditableDeploymentAssessmentForm({
   async function handleSubmit() {
     if (schema) {
       setErrorMessage('')
+      setFormValidationErrorState(false)
       setIsLoading(true)
 
       const oldData = getStepsData(originalSplitSchema, true)
@@ -97,7 +101,7 @@ export default function EditableDeploymentAssessmentForm({
           const isValid = validateForm(step)
 
           if (!isValid) {
-            setErrorMessage('Please make sure that all sections have been completed.')
+            setFormValidationErrorState(true)
             setIsLoading(false)
             return
           }
@@ -134,6 +138,7 @@ export default function EditableDeploymentAssessmentForm({
   function handleEdit() {
     onIsEditChange(true)
     setErrorMessage('')
+    setFormValidationErrorState(false)
     setOriginalSplitSchema(cloneDeep(splitSchema))
   }
 
@@ -141,6 +146,7 @@ export default function EditableDeploymentAssessmentForm({
     onIsEditChange(false)
     setNewName(deploymentAssessment.name)
     setErrorMessage('')
+    setFormValidationErrorState(false)
     resetForm()
   }
 
@@ -151,6 +157,11 @@ export default function EditableDeploymentAssessmentForm({
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
+
+  const displayValidationErrors = showValidationErrors || formValidationErrorState
+
+  const displayedErrorMessage =
+    errorMessage || (displayValidationErrors ? 'Please make sure that all required sections have been completed.' : '')
 
   const formHeading = useMemo(
     () => (
@@ -233,10 +244,15 @@ export default function EditableDeploymentAssessmentForm({
           onCancel={handleCancel}
           onSubmit={handleSubmit}
           onDelete={handleDelete}
-          errorMessage={errorMessage}
+          errorMessage={displayedErrorMessage}
           readOnly={readOnly}
         />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          canEdit={isEdit}
+          displayLabelValidation={displayValidationErrors}
+        />
         <DeletionConfirmationDialogue
           open={open}
           title='Delete Deployment Assessment'

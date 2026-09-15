@@ -90,7 +90,7 @@ export default function NewDeploymentAssessment() {
       const isValid = validateForm(step)
 
       if (!isValid) {
-        setErrorText('Please make sure that all sections have been completed.')
+        setErrorText('Please make sure that all required sections have been completed.')
         setSubmitButtonLoading(false)
         setFormValidationErrorState(true)
         return

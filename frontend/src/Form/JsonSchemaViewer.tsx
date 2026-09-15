@@ -96,7 +96,7 @@ export default function JsonSchemaViewer({
                   >
                     {step.schema.title}
                   </Typography>
-                  {displayLabelValidation && <ValidationErrorIcon step={step} />}
+                  {displayLabelValidation && <ValidationErrorIcon isComplete={step.isComplete(step)} />}
                 </ListItemButton>
               </ListItem>
             ))}

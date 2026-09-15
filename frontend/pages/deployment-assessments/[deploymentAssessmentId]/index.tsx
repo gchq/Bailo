@@ -2,8 +2,9 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack } from '@mui/material'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
+import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
@@ -12,6 +13,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import { getErrorMessage } from 'utils/fetcher'
+import { getStepsFromSchema, validateForm } from 'utils/formUtils'
 
 export default function DeploymentAssessment() {
   const router = useRouter()
@@ -27,6 +29,7 @@ export default function DeploymentAssessment() {
   const [isEdit, setIsEdit] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [patchErrorMessage, setPatchErrorMessage] = useState('')
+  const [showValidationErrors, setShowValidationErrors] = useState(false)
 
   const {
     deploymentAssessment,
@@ -35,11 +38,39 @@ export default function DeploymentAssessment() {
     mutateDeploymentAssessment,
   } = useGetDeploymentAssessment(deploymentAssessmentId as string)
 
+  const { schema, isSchemaError } = useGetSchema(deploymentAssessment?.schemaId ?? '')
+
+  const isPublishable = useMemo(() => {
+    if (!schema) {
+      return false
+    }
+
+    return getStepsFromSchema(schema, {}, [], deploymentAssessment?.metadata).every(validateForm)
+  }, [schema, deploymentAssessment?.metadata])
+
+  useEffect(() => {
+    if (isPublishable) {
+      setShowValidationErrors(false)
+    }
+  }, [isPublishable])
+
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
+    isSchemaError,
   })
   if (error) {
     return error
+  }
+
+  function handleBeforePublish() {
+    if (!isPublishable) {
+      setShowValidationErrors(true)
+      sendNotification({ msg: 'Unable to publish incomplete Deployment Assessment.', variant: 'error' })
+      return false
+    }
+
+    setShowValidationErrors(false)
+    return true
   }
 
   async function handlePublish() {
@@ -74,7 +105,9 @@ export default function DeploymentAssessment() {
                 handlePublish={handlePublish}
                 draft={deploymentAssessment.draft}
                 text='This is a draft deployment assessment'
-                dialogTitle='Confirm publish'
+                dialogTitle='Publish Deployment Assessment'
+                dialogMessage='Are you sure you want to publish this Deployment Assessment? This decision is irreversible.'
+                onBeforePublish={handleBeforePublish}
                 showButton
               />
               <Stack spacing={2} sx={{ p: 4 }}>
@@ -95,6 +128,7 @@ export default function DeploymentAssessment() {
                     mutate={mutateDeploymentAssessment}
                     isEdit={isEdit}
                     onIsEditChange={setIsEdit}
+                    showValidationErrors={showValidationErrors}
                   />
                 )}
               </Stack>

@@ -205,29 +205,65 @@ export function setStepsData(
   setSplitSchema({ ...splitSchema, steps: newSteps })
 }
 
-export function validateForm(step: StepNoRender) {
-  const validator = new Validator()
-  const sectionErrors = validator.validate(step.state, step.schema)
+/**
+ * Strips cleared answers so they validate as unanswered. Unlike `removeEmptyValues`, empty objects
+ * are kept so that nested errors still resolve to the offending leaf rather than to its parent.
+ */
+function withoutClearedAnswers(value: any): any {
+  if (value === '') {
+    return undefined
+  }
 
-  return sectionErrors.errors.length === 0
+  if (Array.isArray(value)) {
+    return value.length === 0 ? undefined : value.map(withoutClearedAnswers).filter((item) => item !== undefined)
+  }
+
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value)
+        .map(([key, item]) => [key, withoutClearedAnswers(item)])
+        .filter(([, item]) => item !== undefined),
+    )
+  }
+
+  return value
+}
+
+function validateStep(step: StepNoRender) {
+  const validator = new Validator()
+
+  return validator.validate(withoutClearedAnswers(step.state) ?? {}, step.schema)
+}
+
+export function validateForm(step: StepNoRender) {
+  return validateStep(step).errors.length === 0
+}
+
+/** Maps the dotted path of each field failing validation, e.g. `overview.name`, to its message. */
+export function getInvalidFields(step: StepNoRender): Map<string, string> {
+  return new Map(
+    validateStep(step).errors.map(({ path, name, argument }) => [
+      (name === 'required' ? [...path, argument] : path).join('.'),
+      name === 'required' ? 'This field is required' : 'This field is incomplete',
+    ]),
+  )
+}
+
+/** Converts an RJSF field id such as `root_overview_name` into `['overview', 'name']`. */
+export function getPathFromId(id: string): Array<string> {
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((segment) => segment !== '')
 }
 
 export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
-  return id
-    .replaceAll('root_', '')
-    .replaceAll('_', '.')
-    .split('.')
-    .filter((t) => t !== '')
-    .reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
+  return getPathFromId(id).reduce((prev, cur) => prev && prev[cur], formContext.mirroredState)
 }
 
 export const getState = (id: string, formContext: Registry['formContext']) => {
-  return id
-    .replaceAll('root_', '')
-    .replaceAll('_', '.')
-    .split('.')
-    .filter((t) => t !== '')
-    .reduce((prev, cur) => prev && prev[cur], formContext.state)
+  return getPathFromId(id).reduce((prev, cur) => prev && prev[cur], formContext.state)
 }
 
 // Mirrors backend `deepMergePreferFirst`
@@ -271,12 +307,7 @@ export const getCompareFromState = (id: string, formContext: Registry['formConte
   if (formContext.compareFromState === undefined) {
     return undefined
   }
-  return id
-    .replaceAll('root_', '')
-    .replaceAll('_', '.')
-    .split('.')
-    .filter((t) => t !== '')
-    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromState)
+  return getPathFromId(id).reduce((prev, cur) => prev && prev[cur], formContext.compareFromState)
 }
 
 /**
@@ -286,12 +317,7 @@ export const getCompareFromMirroredState = (id: string, formContext: Registry['f
   if (formContext.compareFromMirroredState === undefined) {
     return undefined
   }
-  return id
-    .replaceAll('root_', '')
-    .replaceAll('_', '.')
-    .split('.')
-    .filter((t) => t !== '')
-    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromMirroredState)
+  return getPathFromId(id).reduce((prev, cur) => prev && prev[cur], formContext.compareFromMirroredState)
 }
 
 function isMetricsKey(key: string): boolean {
