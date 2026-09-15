@@ -2,8 +2,11 @@ import { StepNoRender } from 'types/types'
 import {
   deepMergePreferFirst,
   getFormStats,
+  getInvalidFields,
+  getPathFromId,
   isQuestionAnswered,
   setFormDataPropertiesToUndefined,
+  validateForm,
 } from 'utils/formUtils'
 import { describe, expect, it } from 'vitest'
 
@@ -134,6 +137,118 @@ describe('Form utils', () => {
     it('returns false when both local and mirrored arrays are empty', () => {
       const context = makeFormContext({ dataCards: [] }, { dataCards: [] }, true)
       expect(isQuestionAnswered('root_dataCards', { type: 'array', items: { type: 'string' } }, context)).toBe(false)
+    })
+  })
+
+  describe('getPathFromId', () => {
+    it('strips the root prefix', () => {
+      expect(getPathFromId('root_name')).toEqual(['name'])
+    })
+
+    it('splits nested fields', () => {
+      expect(getPathFromId('root_deployment_status')).toEqual(['deployment', 'status'])
+    })
+
+    it('keeps array indices as segments', () => {
+      expect(getPathFromId('root_entities_0_name')).toEqual(['entities', '0', 'name'])
+    })
+
+    it('returns an empty path for the root itself', () => {
+      expect(getPathFromId('root')).toEqual(['root'])
+      expect(getPathFromId('root_')).toEqual([])
+    })
+  })
+
+  describe('getInvalidFields', () => {
+    const schema = {
+      type: 'object',
+      required: ['name', 'deployment'],
+      properties: {
+        name: { type: 'string' },
+        deployment: {
+          type: 'object',
+          required: ['status'],
+          properties: { status: { type: 'string' } },
+        },
+        tags: { type: 'array', maxItems: 2, items: { type: 'string' } },
+      },
+    }
+
+    const makeStep = (state: unknown): StepNoRender =>
+      ({
+        schema,
+        state,
+        index: 0,
+        type: 'Form',
+        section: 'overview',
+        schemaRef: 'test-schema',
+        shouldValidate: false,
+        isComplete: () => false,
+      }) as StepNoRender
+
+    it('returns the path of a missing top level required field', () => {
+      const fields = getInvalidFields(makeStep({ deployment: { status: 'Live' } }))
+      expect(fields.get('name')).toBe('This field is required')
+    })
+
+    it('returns the path of a missing nested required field', () => {
+      const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: {} }))
+      expect(fields.get('deployment.status')).toBe('This field is required')
+    })
+
+    it('treats an empty string as an unanswered required field', () => {
+      const fields = getInvalidFields(makeStep({ name: '', deployment: { status: 'Live' }, tags: ['a'] }))
+      expect(fields.get('name')).toBe('This field is required')
+    })
+
+    it('marks the offending leaf rather than its parent when a nested answer is cleared', () => {
+      const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: { status: '' } }))
+      expect(fields.get('deployment.status')).toBe('This field is required')
+      expect(fields.has('deployment')).toBe(false)
+    })
+
+    it('uses a distinct message for a field that fails a non-required constraint', () => {
+      const fields = getInvalidFields(
+        makeStep({ name: 'A deployment', deployment: { status: 'Live' }, tags: ['a', 'b', 'c', 'd'] }),
+      )
+      expect(fields.get('tags')).toBe('This field is incomplete')
+    })
+
+    it('returns no fields when the step is complete', () => {
+      const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: { status: 'Live' }, tags: ['a'] }))
+      expect(fields.size).toBe(0)
+    })
+  })
+
+  describe('validateForm', () => {
+    const schema = {
+      type: 'object',
+      required: ['name'],
+      properties: { name: { type: 'string' } },
+    }
+
+    const makeStep = (state: unknown): StepNoRender =>
+      ({
+        schema,
+        state,
+        index: 0,
+        type: 'Form',
+        section: 'overview',
+        schemaRef: 'test-schema',
+        shouldValidate: false,
+        isComplete: () => false,
+      }) as StepNoRender
+
+    it('accepts a completed step', () => {
+      expect(validateForm(makeStep({ name: 'A deployment' }))).toBe(true)
+    })
+
+    it('rejects a required field cleared back to an empty string', () => {
+      expect(validateForm(makeStep({ name: '' }))).toBe(false)
+    })
+
+    it('rejects a missing required field', () => {
+      expect(validateForm(makeStep({}))).toBe(false)
     })
   })
 })
