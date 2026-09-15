@@ -357,14 +357,16 @@ async function notifyDeploymentAssessmentReviewed(
 
       case Decision.Approve: {
         const modelDevelopers = await getModelDevelopers(deploymentAssessment)
-        for (const { model, developers } of modelDevelopers) {
-          await notifyModelOwnersOfDeploymentApproval(
-            developers,
-            deploymentAssessment,
-            model,
-            deploymentAssessment.createdBy,
-          )
-        }
+        await Promise.all(
+          modelDevelopers.map(({ model, developers }) =>
+            notifyModelOwnersOfDeploymentApproval(
+              developers,
+              deploymentAssessment,
+              model,
+              deploymentAssessment.createdBy,
+            ),
+          ),
+        )
         break
       }
     }
