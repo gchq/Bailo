@@ -136,6 +136,12 @@ Coverage is only needed for the full CI run.
   `backend/test/testUtils/setupMongooseModelMocks.ts` for Mongoose model mocks.
 - Snapshot testing with `expect(res.body).matchSnapshot()`.
 - Verify audit connector calls in route tests (e.g. `expect(audit.onDeleteModel).toHaveBeenCalled()`).
+- `config` is mocked globally for every spec from `backend/src/utils/__mocks__/config.ts`. Override individual values
+  with `setTestConfig()` from `backend/test/testUtils/setupTestConfig.ts` - it deep-merges the partial you give it and
+  is reverted automatically after each test. Use a `beforeEach` for file-wide values. To unset a value, assign directly
+  (`config.oauth = {} as Config['oauth']`), as the merge ignores `undefined`. Do not add a per-file
+  `vi.mock('.../utils/config.js', ...)` factory; if a value is shared by several specs, add it to the default mock
+  instead.
 
 ### Frontend (Vitest + Cypress)
 
