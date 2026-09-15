@@ -76,7 +76,7 @@ export interface UiConfig {
     owner: string
     contributor: string
     consumer: string
-    riskOwners: string
+    riskOwner: string
   }
 
   untrustedModel: {

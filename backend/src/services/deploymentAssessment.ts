@@ -31,7 +31,7 @@ import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
 import { deploymentAssessmentSchema } from './specification.js'
 
-export const deploymentAssessmentRiskOwnerRole = 'riskOwners'
+export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string

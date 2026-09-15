@@ -142,7 +142,7 @@ describe('services > deploymentAssessment', () => {
     expect(ReviewModelMock).toHaveBeenCalledWith({
       kind: ReviewKind.DeploymentAssessment,
       deploymentAssessmentId: 'assessment-abc123',
-      role: 'riskOwners',
+      role: 'riskOwner',
     })
     expect(ReviewModelMock.save).toHaveBeenCalled()
   })
