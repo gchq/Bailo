@@ -351,7 +351,7 @@ export class BasicAuthorisationConnector {
       deploymentAssessments.map(async (deploymentAssessment) => {
         const isNamedUser =
           deploymentAssessment.createdBy === user.dn ||
-          (deploymentAssessment.metadata.overview?.riskOwner ?? []).includes(user.dn)
+          (deploymentAssessment.metadata.overview?.riskOwners ?? []).includes(user.dn)
 
         let errorInfo: string | undefined
         switch (action) {

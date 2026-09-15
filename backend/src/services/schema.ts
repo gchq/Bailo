@@ -70,7 +70,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         title: 'Details',
         type: 'object',
         properties: {
-          riskOwner: {
+          riskOwners: {
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'array',
             items: {
@@ -95,7 +95,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             widget: 'modelSelector',
           },
         },
-        required: ['riskOwner', 'modelIds'],
+        required: ['riskOwners', 'modelIds'],
         additionalProperties: false,
       },
       ...jsonSchema.properties,
