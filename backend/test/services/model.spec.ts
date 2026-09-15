@@ -185,30 +185,35 @@ describe('services > model', () => {
     await expect(() => getModelById({} as any, {} as any)).rejects.toThrow(/^You do not have permission/)
   })
 
-  // new tests here
   test('getModelsByIdsNoAuth > good', async () => {
-    ModelModelMock.find.mockResolvedValueOnce('mocked')
+    ModelModelMock.find.mockResolvedValueOnce([{ id: 'model-1' }])
 
-    const model = await getModelsByIdsNoAuth({} as any, {} as any)
+    const models = await getModelsByIdsNoAuth(['model-1'])
 
     expect(ModelModelMock.find).toHaveBeenCalled()
-    expect(model).toBe('mocked')
+    expect(models).toEqual([{ id: 'model-1' }])
   })
 
   test('getModelsByIdsNoAuth > no model', async () => {
     ModelModelMock.find.mockResolvedValueOnce([])
 
-    await expect(() => getModelsByIdsNoAuth({} as any, {} as any)).rejects.toThrow(
-      'The requested entries were not found.',
-    )
+    await expect(getModelsByIdsNoAuth(['model-1'])).rejects.toThrow('Some requested entries were not found.')
   })
 
-  // TODO
-  test('getModelsByIds > bad authorisation', async () => {
-    ModelModelMock.find.mockResolvedValueOnce([{ id: 'test-model' }])
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+  test('getModelsByIds > filters out unauthorised models', async () => {
+    ModelModelMock.find.mockResolvedValueOnce([{ id: 'model-1' }])
 
-    await expect(() => getModelsByIds({} as any, {} as any)).rejects.toThrow(/^You do not have permission/)
+    vi.mocked(authorisation.models).mockResolvedValueOnce([
+      {
+        id: 'model-1',
+        success: false,
+        info: 'You do not have permission',
+      },
+    ])
+
+    const models = await getModelsByIds({} as any, ['model-1'])
+
+    expect(models).toEqual([])
   })
 
   describe('removeModel', () => {
