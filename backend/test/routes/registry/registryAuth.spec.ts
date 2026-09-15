@@ -9,6 +9,7 @@ import {
   parseResourceScope,
   softDeletePrefix,
 } from '../../../src/routes/v1/registryAuth.js'
+import config from '../../../src/utils/config.js'
 
 // **NOTICE: All functions tested in this file are located in routes/registryAuth.ts. It is assumed these will be moved to the services layer in the future, thus these tests should move too.**
 
@@ -82,7 +83,7 @@ vi.mock('../../../src/services/log.js', () => ({
 
 function mockReqRes(query: any = {}) {
   const req = {
-    query,
+    query: { service: config.registry.service, ...query },
     get: vi.fn().mockReturnValue('Bearer token'),
     log: {
       trace: vi.fn(),
