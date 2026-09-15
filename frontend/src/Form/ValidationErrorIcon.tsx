@@ -1,15 +1,14 @@
-import ErrorIcon from '@mui/icons-material/ErrorOutlined'
+import ErrorIcon from '@mui/icons-material/ErrorOutlineOutlined'
 import { Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { StepNoRender } from 'types/types'
 
 interface ValidationErrorIconProps {
-  step: StepNoRender
+  isComplete: boolean
 }
-export default function ValidationErrorIcon({ step }: ValidationErrorIconProps) {
+export default function ValidationErrorIcon({ isComplete }: ValidationErrorIconProps) {
   const theme = useTheme()
 
-  return !step.isComplete(step) ? (
+  return !isComplete ? (
     <Tooltip title='This step is unfinished' data-test='formStepValidationWarning'>
       <ErrorIcon sx={{ color: theme.palette.error.main }} />
     </Tooltip>

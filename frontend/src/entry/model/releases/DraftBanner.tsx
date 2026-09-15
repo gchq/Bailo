@@ -19,6 +19,8 @@ type DraftBannerProps = {
       isLoading?: never
       errorMessage?: never
       setErrorMessage?: never
+      dialogMessage?: never
+      onBeforePublish?: never
     }
   | {
       showButton: true
@@ -28,6 +30,9 @@ type DraftBannerProps = {
       isLoading: boolean
       errorMessage?: string
       setErrorMessage: (err: string) => void
+      dialogMessage?: string
+      /** Return `false` to stop the confirmation dialogue from opening. */
+      onBeforePublish?: () => boolean
     }
 )
 
@@ -41,6 +46,8 @@ export function DraftBanner({
   handlePublish,
   showButton,
   disableButton,
+  dialogMessage = 'Are you sure you want to publish this? This is irreversible.',
+  onBeforePublish,
 }: DraftBannerProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
@@ -71,6 +78,9 @@ export function DraftBanner({
                 variant='outlined'
                 sx={{ borderColor: 'white', color: theme.palette.common.white }}
                 onClick={() => {
+                  if (onBeforePublish && !onBeforePublish()) {
+                    return
+                  }
                   setOpen(true)
                 }}
                 disabled={disableButton}
@@ -84,7 +94,7 @@ export function DraftBanner({
                 onConfirm={handlePublish}
                 onCancel={() => [setOpen(false), setErrorMessage('')]}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to publish this? This is irreversible.'}
+                dialogMessage={dialogMessage}
                 confirmLoading={isLoading}
               />
             </>
