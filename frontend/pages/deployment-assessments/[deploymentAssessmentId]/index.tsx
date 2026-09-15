@@ -181,10 +181,23 @@ export default function DeploymentAssessment() {
               open={reviewPopoverOpen}
               anchorEl={anchorEl}
               sx={{ boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)' }}
+              modifiers={[
+                {
+                  name: 'preventOverflow',
+                  enabled: true,
+                  options: {
+                    altAxis: true,
+                    altBoundary: true,
+                    tether: true,
+                    rootBoundary: 'document',
+                    padding: 24,
+                  },
+                },
+              ]}
             >
               <Paper sx={{ border: 'solid', borderWidth: 1, borderColor: theme.palette.divider }}>
                 <Stack direction='row' sx={{ p: 2 }}>
-                  <Stack spacing={2} sx={{ width: '450px' }}>
+                  <Stack spacing={2} sx={{ maxWidth: '450px' }}>
                     <ReviewWithComment
                       onSubmit={handleSubmit}
                       reviews={reviews}

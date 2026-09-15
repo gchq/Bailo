@@ -81,6 +81,16 @@ export default function ReviewComments({
     ...reviews.map((review) => review._id),
   ])
 
+  const triggerResponsesRefresh = useMemo(() => {
+    return () => {
+      if (responseList) {
+        mutator()
+      } else {
+        mutateResponses()
+      }
+    }
+  }, [mutator, mutateResponses, responseList])
+
   useEffect(() => {
     if (!isResponsesLoading && ref && asPath.split('#')[1] === 'responses') {
       ref.current?.scrollIntoView()
@@ -113,7 +123,7 @@ export default function ReviewComments({
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
           showReplyButton={showComments}
           currentUser={currentUser}
-          mutateResponses={mutateResponses}
+          mutateResponses={triggerResponsesRefresh}
         />
       )
     } else {
@@ -124,7 +134,7 @@ export default function ReviewComments({
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
           showReplyButton={showComments}
           currentUser={currentUser}
-          mutateResponses={mutateResponses}
+          mutateResponses={triggerResponsesRefresh}
         />
       )
     }
