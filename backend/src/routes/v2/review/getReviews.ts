@@ -14,6 +14,7 @@ export const getReviewsSchema = z.object({
     modelId: z.string().optional(),
     semver: z.string().optional(),
     accessRequestId: z.string().optional(),
+    deploymentAssessmentId: z.string().optional(),
     reviewId: z.string().optional(),
     kind: z.nativeEnum(ReviewKind).optional(),
     mine: strictCoerceBoolean(z.boolean().optional().default(true)),
@@ -49,10 +50,20 @@ export const getReviews = [
   async (req: Request, res: Response<GetReviewResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchReviews
     const {
-      query: { mine, open, modelId, semver, accessRequestId, reviewId, kind },
+      query: { mine, open, modelId, semver, accessRequestId, deploymentAssessmentId, reviewId, kind },
     } = parse(req, getReviewsSchema)
 
-    const reviews = await findReviews(req.user, mine, open, modelId, semver, reviewId, accessRequestId, kind)
+    const reviews = await findReviews(
+      req.user,
+      mine,
+      open,
+      modelId,
+      semver,
+      reviewId,
+      accessRequestId,
+      deploymentAssessmentId,
+      kind,
+    )
     await audit.onSearchReviews(req, reviews)
 
     res.setHeader('x-count', reviews.length)

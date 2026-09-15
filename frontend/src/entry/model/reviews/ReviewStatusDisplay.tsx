@@ -1,26 +1,29 @@
-import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import Refresh from '@mui/icons-material/Refresh'
 import { Button, Stack, Typography } from '@mui/material'
 import { postNotifyReviewer } from 'actions/review'
-import { useState } from 'react'
+import { ReactElement, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import useNotification from 'src/hooks/useNotification'
-import { ReviewRequestInterface } from 'types/types'
+import { Decision, DecisionKeys, ReviewRequestInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
-interface ChangesRequestedDisplayProps {
+interface ReviewStatusDisplayProps {
   review: ReviewRequestInterface
   roleNameDisplay: () => string | undefined
   setErrorMessage: (errorMessage: string) => void
   showCurrentUserResponses: boolean
+  icon: ReactElement
+  decision: DecisionKeys
 }
 
-export function ChangesRequestedDisplay({
+export function ReviewStatusDisplay({
   review,
   roleNameDisplay,
   setErrorMessage,
   showCurrentUserResponses,
-}: ChangesRequestedDisplayProps) {
+  decision,
+  icon,
+}: ReviewStatusDisplayProps) {
   const [isNotifyButtonLoading, setIsNotifyButtonLoading] = useState(false)
   const sendNotification = useNotification()
 
@@ -44,13 +47,31 @@ export function ChangesRequestedDisplay({
     setIsNotifyButtonLoading(false)
   }
 
+  const currentUserDisplayDecision = () => {
+    switch (decision) {
+      case Decision.RequestChanges:
+        return 'requested changes'
+      case Decision.Reject:
+        return 'rejected'
+    }
+  }
+
+  const otherUserDisplayDecision = () => {
+    switch (decision) {
+      case Decision.RequestChanges:
+        return 'Changes requested'
+      case Decision.Reject:
+        return 'Rejected'
+    }
+  }
+
   return (
     <Stack direction='row' key={review._id} sx={{ alignItems: 'center' }} spacing={1}>
-      <HourglassEmpty color='warning' fontSize='small' />
+      {icon}
       <Typography variant='caption'>
         {showCurrentUserResponses
-          ? `You have requested changes as a ${roleNameDisplay()}`
-          : `Changes requested by  ${roleNameDisplay()}`}
+          ? `You have ${currentUserDisplayDecision()} as a ${roleNameDisplay()}`
+          : `${otherUserDisplayDecision()} by  ${roleNameDisplay()}`}
       </Typography>
       <Restricted action='editRelease' fallback={<></>}>
         <>
