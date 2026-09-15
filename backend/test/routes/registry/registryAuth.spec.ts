@@ -466,6 +466,14 @@ describe('registryAuth', () => {
       await expect(result).rejects.toThrow(/^Received registry auth request from unexpected service/)
     })
 
+    test('reject > missing service', async () => {
+      const { req, res } = mockReqRes({ scope: 'repository:model/image:push', service: undefined })
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrow(/^Received registry auth request from unexpected service/)
+    })
+
     test('reject > unauthorised push', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({ kind: EntryKind.Model })
       vi.mocked(authorisation.image).mockResolvedValueOnce({
