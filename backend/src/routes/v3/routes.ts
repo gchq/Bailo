@@ -5,6 +5,7 @@ import { getImageByDigest } from '../v3/model/images/getImage.js'
 import { deleteDeploymentAssessment } from './deploymentAssessment/deleteDeploymentAssessment.js'
 import { getDeploymentAssessment } from './deploymentAssessment/getDeploymentAssessment.js'
 import { getDeploymentAssessmentCurrentUserPermissions } from './deploymentAssessment/getDeploymentAssessmentCurrentUserPermissions.js'
+import { getDeploymentAssessmentHtml } from './deploymentAssessment/getDeploymentAssessmentHtml.js'
 import { getDeploymentAssessments } from './deploymentAssessment/getDeploymentAssessments.js'
 import { patchDeploymentAssessment } from './deploymentAssessment/patchDeploymentAssessment.js'
 import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
@@ -40,6 +41,7 @@ router.get(
   ...getDeploymentAssessmentCurrentUserPermissions,
 )
 router.patch('/deployment-assessments/:deploymentAssessmentId', ...patchDeploymentAssessment)
+router.get('/deployment-assessments/:deploymentAssessmentId/html', ...getDeploymentAssessmentHtml)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)
