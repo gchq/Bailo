@@ -9,6 +9,7 @@ import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
+import AccessRequestGroupLinks from 'src/entry/model/accessRequests/AccessRequestGroupLinks'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -107,6 +108,7 @@ export default function AccessRequestReview() {
               </Typography>
               <Button onClick={() => setIsOpenAccessRequestDialogOpen(true)}>View access request</Button>
             </Stack>
+            <AccessRequestGroupLinks accessRequest={accessRequest} />
             <ReviewWithComment
               onSubmit={handleSubmit}
               reviews={reviews}
