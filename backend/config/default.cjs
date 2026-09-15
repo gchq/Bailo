@@ -278,7 +278,7 @@ module.exports = {
       owner: 'Owner',
       contributor: 'Contributor',
       consumer: 'Consumer',
-      riskOwners: 'Deployment Risk Owner',
+      riskOwner: 'Deployment Risk Owner',
     },
 
     untrustedModel: {
