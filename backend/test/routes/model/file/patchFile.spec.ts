@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { patchFileSchema } from '../../../../src/routes/v2/model/file/patchFile.js'
+import { updateFile } from '../../../../src/services/file.js'
 import { createFixture, testPatch } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
@@ -19,6 +20,22 @@ describe('routes > file > patchFile', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
+  })
+
+  test.each([true, false])(
+    'passes an explicit boolean access change (%s) to the service and audits it',
+    async (ungovernedAccess) => {
+      const response = await testPatch('/api/v2/model/model/file/file', { body: { ungovernedAccess } })
+      expect(response.statusCode).toBe(200)
+      expect(updateFile).toHaveBeenCalledWith(expect.anything(), 'model', 'file', { ungovernedAccess })
+      expect(audit.onUpdateFile).toHaveBeenCalled()
+    },
+  )
+
+  test.each(['true', 'false', 1, null])('rejects a non-boolean access flag %j', async (ungovernedAccess) => {
+    const response = await testPatch('/api/v2/model/model/file/file', { body: { ungovernedAccess } })
+    expect(response.statusCode).toBe(400)
+    expect(updateFile).not.toHaveBeenCalled()
   })
 
   test('audit > expected call', async () => {
