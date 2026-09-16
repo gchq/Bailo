@@ -3,8 +3,7 @@ import { Request, Response } from 'express'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { DeploymentAssessmentDoc } from '../../../models/DeploymentAssessment.js'
-import { searchDeploymentAssessments } from '../../../services/deploymentAssessment.js'
+import { DeploymentAssessmentSummary, searchDeploymentAssessments } from '../../../services/deploymentAssessment.js'
 import {
   deploymentAssessmentStateSchema,
   deploymentAssessmentSummarySchema,
@@ -36,26 +35,6 @@ export const getDeploymentAssessmentsSchema = z.object({
       },
     ),
 })
-
-export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
-
-function toDeploymentAssessmentSummary(
-  deploymentAssessment: DeploymentAssessmentDoc & { state?: DeploymentAssessmentSummary['state'] },
-): DeploymentAssessmentSummary {
-  const { riskOwner, modelIds } = deploymentAssessment.metadata.overview ?? {}
-
-  return {
-    id: deploymentAssessment.id,
-    schemaId: deploymentAssessment.schemaId,
-    name: deploymentAssessment.name,
-    ...(riskOwner && riskOwner.length > 0 && { owner: riskOwner }),
-    ...(modelIds && { models: modelIds }),
-    ...(deploymentAssessment.state && { state: deploymentAssessment.state }),
-    draft: deploymentAssessment.draft,
-    createdBy: deploymentAssessment.createdBy,
-    createdAt: deploymentAssessment.createdAt.toISOString(),
-  }
-}
 
 registerPath(
   {
@@ -90,6 +69,6 @@ export const getDeploymentAssessments = [
     const deploymentAssessments = await searchDeploymentAssessments(req.user, query)
     await audit.onSearchDeploymentAssessments(req, deploymentAssessments)
 
-    res.json({ deploymentAssessments: deploymentAssessments.map(toDeploymentAssessmentSummary) })
+    res.json({ deploymentAssessments })
   },
 ]
