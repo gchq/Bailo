@@ -37,6 +37,7 @@ export default function DeploymentAssessmentSummaryCard({
 
   return (
     <>
+      <ReviewBanner deploymentAssessment={assessment} />
       <Box sx={{ p: 2 }}>
         <Stack spacing={2}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ justifyContent: 'space-between' }}>
@@ -64,7 +65,6 @@ export default function DeploymentAssessmentSummaryCard({
               sx={{ alignItems: 'center' }}
               divider={<Divider flexItem orientation='vertical' />}
             >
-              <ReviewBanner deploymentAssessment={assessment} slimView />
               <AssessmentStateChip
                 assessment={assessment}
                 selectedState={selectedState}
