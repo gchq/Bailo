@@ -2,6 +2,7 @@ import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
 import { outdent } from 'outdent'
 import { resolve } from 'path'
+import sanitizeHtml from 'sanitize-html'
 import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
@@ -11,42 +12,14 @@ import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
+import { Fragment, recursiveRender } from '../utils/export.js'
+import { getDeploymentAssessmentById } from './deploymentAssessment.js'
 import { getModelById, getModelCard, getRoleEntities } from './model.js'
 import { getSchemaById } from './schema.js'
 
-const modelCardTemplate = Handlebars.compile(
-  readFileSync(resolve(import.meta.dirname, 'templates', 'modelCardExport.hbs'), 'utf-8'),
+export const htmlTemplate = Handlebars.compile(
+  readFileSync(resolve(import.meta.dirname, 'templates', 'htmlExport.hbs'), 'utf-8'),
 )
-
-type Common = {
-  title: string
-  description?: string
-  widget?: string
-}
-
-type Fragment = (
-  | {
-      type: 'object'
-      properties: {
-        [x: string]: Fragment
-      }
-    }
-  | {
-      type: 'array'
-      items: Fragment
-    }
-  | {
-      type: 'string'
-      maxLength: number
-    }
-  | {
-      type: 'number'
-    }
-  | {
-      type: 'boolean'
-    }
-) &
-  Common
 
 export type ReviewExport = {
   semver?: string
@@ -167,8 +140,9 @@ export async function renderToHtml(
   const converter = new showdown.Converter()
   converter.setFlavor('github')
   const body = converter.makeHtml(markdown)
+  const sanitisedBody = sanitizeHtml(body)
 
-  return modelCardTemplate({ body })
+  return htmlTemplate({ body: sanitisedBody })
 }
 
 function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
@@ -196,121 +170,18 @@ function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
   return reviewTable
 }
 
-function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
-  switch (schema.widget) {
-    case 'tagSelector':
-      if (obj === undefined || obj.length === 0) {
-        output += outdent`\n\n
-          ${'#'.repeat(depth)} ${schema.title}
+export async function getDeploymentAssessmentHtml(user: UserInterface, deploymentAssessmentId: string) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const schema = await getSchemaById(deploymentAssessment.schemaId)
 
-          No entries
-        `
-        return output
-      }
+  let output = outdent`
+      # ${deploymentAssessment.name}\n
+    `
+  output = recursiveRender(deploymentAssessment.metadata, schema.jsonSchema as Fragment, output)
+  const converter = new showdown.Converter()
+  converter.setFlavor('github')
+  const body = converter.makeHtml(output)
+  const sanitisedBody = sanitizeHtml(body)
 
-      output += outdent`\n\n
-            ${'#'.repeat(depth)} ${schema.title}
-
-            ${obj.map((item: string) => `- ${item}`).join('\n')}
-        `
-
-      return output
-    default:
-    // go to normal rendering
-  }
-
-  switch (schema.type) {
-    case 'object':
-      if (schema.title) {
-        output += outdent`\n\n
-            ${'#'.repeat(depth)} ${schema.title}
-        `
-      }
-
-      for (const property in schema.properties) {
-        // Render sub properties
-        output = recursiveRender((obj || {})[property], schema.properties[property], output, depth + 1)
-      }
-
-      break
-    case 'array': {
-      if (schema.title) {
-        output += outdent`\n\n
-              ${'#'.repeat(depth)} ${schema.title}
-          `
-      }
-
-      const count = 0
-      if (obj === undefined || obj.length === 0) {
-        output += outdent`\n\n
-          No entries
-        `
-        break
-      }
-
-      for (const value of obj) {
-        output += outdent`\n\n
-          ${'#'.repeat(depth + 1)} Entry #${count + 1}
-        `
-        output = recursiveRender(value, schema.items, output, depth + 1)
-      }
-      break
-    }
-    case 'number':
-      // We can add a description like this, but I felt it overkill:
-      // ${schema.description ? `> ${schema.description}` : ''}
-
-      if (!obj) {
-        obj = 'No response'
-      }
-
-      output += outdent`\n\n
-            ${'#'.repeat(depth)} ${schema.title}
-
-            ${obj}
-        `
-      break
-    case 'string':
-      if (obj === undefined || obj === '') {
-        obj = 'No response'
-      }
-
-      if (schema.title) {
-        output += outdent`\n\n
-            ${'#'.repeat(depth)} ${schema.title}
-
-            ${obj}
-        `
-      } else {
-        output += outdent`\n\n
-            ${obj}
-        `
-      }
-      break
-    case 'boolean':
-      if (obj === undefined) {
-        obj = 'No response'
-      } else {
-        obj = obj ? 'Yes' : 'No'
-      }
-
-      if (schema.title) {
-        output += outdent`\n\n
-            ${'#'.repeat(depth)} ${schema.title}
-
-            ${obj}
-        `
-      } else {
-        output += outdent`\n\n
-            ${obj}
-        `
-      }
-      break
-    default:
-      throw new Error(
-        `One of the types within this schema has not been implemented in the export method.  Received type ${(schema as any).type}`,
-      )
-  }
-
-  return output
+  return { html: htmlTemplate({ body: sanitisedBody }), deploymentAssessment }
 }
