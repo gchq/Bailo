@@ -207,11 +207,16 @@ describe('Form utils', () => {
       expect(fields.has('deployment')).toBe(false)
     })
 
-    it('uses a distinct message for a field that fails a non-required constraint', () => {
+    it('reports an answered field breaching a constraint as invalid rather than missing', () => {
       const fields = getInvalidFields(
         makeStep({ name: 'A deployment', deployment: { status: 'Live' }, tags: ['a', 'b', 'c', 'd'] }),
       )
-      expect(fields.get('tags')).toBe('This field is incomplete')
+      expect(fields.get('tags')).toBe('This field has an invalid value')
+    })
+
+    it('reports a wrong-typed answer as invalid rather than missing', () => {
+      const fields = getInvalidFields(makeStep({ name: 42, deployment: { status: 'Live' } }))
+      expect(fields.get('name')).toBe('This field has an invalid value')
     })
 
     it('returns no fields when the step is complete', () => {

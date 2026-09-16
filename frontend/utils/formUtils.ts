@@ -244,7 +244,7 @@ export function getInvalidFields(step: StepNoRender): Map<string, string> {
   return new Map(
     validateStep(step).errors.map(({ path, name, argument }) => [
       (name === 'required' ? [...path, argument] : path).join('.'),
-      name === 'required' ? 'This field is required' : 'This field is incomplete',
+      name === 'required' ? 'This field is required' : 'This field has an invalid value',
     ]),
   )
 }

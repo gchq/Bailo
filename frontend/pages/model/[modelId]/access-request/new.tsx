@@ -69,7 +69,7 @@ export default function NewAccessRequest() {
       const isValid = validateForm(step)
 
       if (!isValid) {
-        setSubmissionErrorText('Please make sure that all sections have been completed.')
+        setSubmissionErrorText('Please resolve the errors highlighted in each section.')
         setSubmitButtonLoading(false)
         setFormValidationErrorState(true)
         return

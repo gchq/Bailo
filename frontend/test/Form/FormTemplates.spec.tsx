@@ -52,10 +52,10 @@ describe('FieldTemplate', () => {
     renderFieldTemplate(
       'root_deployment_status',
       { type: 'string', title: 'Status' },
-      new Map([['deployment.status', 'This field is incomplete']]),
+      new Map([['deployment.status', 'This field has an invalid value']]),
     )
 
-    expect(await screen.findByText('This field is incomplete')).toBeDefined()
+    expect(await screen.findByText('This field has an invalid value')).toBeDefined()
     expect(screen.queryByText('This field is required')).toBeNull()
   })
 

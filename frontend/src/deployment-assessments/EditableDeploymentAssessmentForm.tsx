@@ -161,7 +161,7 @@ export default function EditableDeploymentAssessmentForm({
   const displayValidationErrors = showValidationErrors || formValidationErrorState
 
   const displayedErrorMessage =
-    errorMessage || (displayValidationErrors ? 'Please make sure that all required sections have been completed.' : '')
+    errorMessage || (displayValidationErrors ? 'Please resolve the errors highlighted in each section.' : '')
 
   const formHeading = useMemo(
     () => (
