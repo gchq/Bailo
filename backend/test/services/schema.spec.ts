@@ -132,10 +132,11 @@ describe('services > schema', () => {
 
     expect(result[0].jsonSchema.properties).toEqual({
       overview: expect.objectContaining({
+        additionalProperties: false,
         title: 'Details',
-        required: ['riskOwner', 'modelIds'],
+        required: ['riskOwners', 'modelIds'],
         properties: expect.objectContaining({
-          riskOwner: expect.objectContaining({
+          riskOwners: expect.objectContaining({
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'array',
             minItems: 1,

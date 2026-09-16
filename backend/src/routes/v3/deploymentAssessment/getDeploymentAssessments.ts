@@ -42,13 +42,13 @@ export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSum
 function toDeploymentAssessmentSummary(
   deploymentAssessment: DeploymentAssessmentDoc & { state?: DeploymentAssessmentSummary['state'] },
 ): DeploymentAssessmentSummary {
-  const { riskOwner, modelIds } = deploymentAssessment.metadata.overview ?? {}
+  const { riskOwners, modelIds } = deploymentAssessment.metadata.overview ?? {}
 
   return {
     id: deploymentAssessment.id,
     schemaId: deploymentAssessment.schemaId,
     name: deploymentAssessment.name,
-    ...(riskOwner && riskOwner.length > 0 && { owner: riskOwner }),
+    ...(riskOwners && riskOwners.length > 0 && { owner: riskOwners }),
     ...(modelIds && { models: modelIds }),
     ...(deploymentAssessment.state && { state: deploymentAssessment.state }),
     draft: deploymentAssessment.draft,

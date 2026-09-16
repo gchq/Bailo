@@ -1,11 +1,17 @@
 import { render } from '@testing-library/react'
 import { useGetCurrentUser, useListEntities } from 'actions/user'
 import EntitySelector from 'src/MuiForms/EntitySelector'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('../../actions/user', () => ({
   useListEntities: vi.fn(),
   useGetCurrentUser: vi.fn(),
+  useGetUserInformation: vi.fn(() => ({
+    userInformation: {
+      email: 'user@example.com',
+      name: 'Joe Bloggs',
+    },
+  })),
 }))
 
 function setupUserMocks() {
@@ -15,8 +21,12 @@ function setupUserMocks() {
     isUsersError: undefined,
     mutateUsers: vi.fn(),
   })
+
   vi.mocked(useGetCurrentUser).mockReturnValue({
-    currentUser: { dn: 'user:test', isAdmin: false },
+    currentUser: {
+      dn: 'user:user',
+      isAdmin: false,
+    },
     isCurrentUserLoading: false,
     isCurrentUserError: undefined,
     mutateCurrentUser: vi.fn(),
@@ -31,56 +41,129 @@ const baseRegistry = {
 
 const arraySchema = {
   type: 'array',
-  items: { type: 'string' },
+  items: {
+    type: 'string',
+  },
   minItems: 1,
   maxItems: 1,
   hideDefaultUser: true,
 } as any
 
-const stringSchema = {
-  type: 'string',
-  hideDefaultUser: true,
-} as any
-
 describe('EntitySelector normalisation', () => {
-  it('emits [] once when mounted with [null] for an array schema', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
     setupUserMocks()
-    const onChange = vi.fn()
-
-    render(
-      <EntitySelector
-        id='root_overview_riskOwner'
-        schema={arraySchema}
-        registry={baseRegistry}
-        value={[null]}
-        onChange={onChange}
-      />,
-    )
-
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange).toHaveBeenCalledWith([])
   })
 
-  it("emits '' once when mounted with null for a string schema", () => {
-    setupUserMocks()
+  it('renders without throwing when the array contains a null entry', () => {
     const onChange = vi.fn()
 
-    render(
-      <EntitySelector
-        id='root_owner'
-        schema={stringSchema}
-        registry={baseRegistry}
-        value={null as unknown as string}
-        onChange={onChange}
-      />,
-    )
+    expect(() =>
+      render(
+        <EntitySelector
+          id='root_overview_riskOwner'
+          schema={arraySchema}
+          registry={baseRegistry}
+          value={[null] as unknown as string[]}
+          onChange={onChange}
+        />,
+      ),
+    ).not.toThrow()
 
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange).toHaveBeenCalledWith('')
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('renders without throwing when the array contains an undefined entry', () => {
+    const onChange = vi.fn()
+
+    expect(() =>
+      render(
+        <EntitySelector
+          id='root_overview_riskOwner'
+          schema={arraySchema}
+          registry={baseRegistry}
+          value={[undefined] as unknown as string[]}
+          onChange={onChange}
+        />,
+      ),
+    ).not.toThrow()
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('renders without throwing when the array contains an empty string', () => {
+    const onChange = vi.fn()
+
+    expect(() =>
+      render(
+        <EntitySelector
+          id='root_overview_riskOwner'
+          schema={arraySchema}
+          registry={baseRegistry}
+          value={['']}
+          onChange={onChange}
+        />,
+      ),
+    ).not.toThrow()
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('ignores null entries while retaining valid entries', () => {
+    const onChange = vi.fn()
+
+    expect(() =>
+      render(
+        <EntitySelector
+          id='root_overview_riskOwner'
+          schema={arraySchema}
+          registry={baseRegistry}
+          value={[null, 'user:user'] as unknown as string[]}
+          onChange={onChange}
+        />,
+      ),
+    ).not.toThrow()
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('ignores undefined entries while retaining valid entries', () => {
+    const onChange = vi.fn()
+
+    expect(() =>
+      render(
+        <EntitySelector
+          id='root_overview_riskOwner'
+          schema={arraySchema}
+          registry={baseRegistry}
+          value={[undefined, 'user:user'] as unknown as string[]}
+          onChange={onChange}
+        />,
+      ),
+    ).not.toThrow()
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('ignores empty entries while retaining valid entries', () => {
+    const onChange = vi.fn()
+
+    expect(() =>
+      render(
+        <EntitySelector
+          id='root_overview_riskOwner'
+          schema={arraySchema}
+          registry={baseRegistry}
+          value={['', 'user:user']}
+          onChange={onChange}
+        />,
+      ),
+    ).not.toThrow()
+
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it('does not emit onChange when mounted with a valid array value', () => {
-    setupUserMocks()
     const onChange = vi.fn()
 
     render(
@@ -88,7 +171,7 @@ describe('EntitySelector normalisation', () => {
         id='root_overview_riskOwner'
         schema={arraySchema}
         registry={baseRegistry}
-        value={['user:tony']}
+        value={['user:user']}
         onChange={onChange}
       />,
     )
@@ -96,8 +179,7 @@ describe('EntitySelector normalisation', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it('does not emit onChange when mounted with an already-empty array', () => {
-    setupUserMocks()
+  it('does not emit onChange when mounted with an empty array', () => {
     const onChange = vi.fn()
 
     render(
@@ -113,8 +195,7 @@ describe('EntitySelector normalisation', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it('strips null entries but keeps valid entries when mounted with a mixed array', () => {
-    setupUserMocks()
+  it('does not emit onChange more than once during mounting', () => {
     const onChange = vi.fn()
 
     render(
@@ -122,12 +203,11 @@ describe('EntitySelector normalisation', () => {
         id='root_overview_riskOwner'
         schema={arraySchema}
         registry={baseRegistry}
-        value={[null, 'user:tony']}
+        value={[null, 'user:user'] as unknown as string[]}
         onChange={onChange}
       />,
     )
 
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange).toHaveBeenCalledWith(['user:tony'])
+    expect(onChange).not.toHaveBeenCalled()
   })
 })

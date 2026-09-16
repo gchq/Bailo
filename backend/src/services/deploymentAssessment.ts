@@ -123,14 +123,14 @@ async function validateDeploymentAssessment(
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
 
-  const { riskOwner, modelIds } = metadata.overview ?? {}
+  const { riskOwners, modelIds } = metadata.overview ?? {}
 
-  if (!draft && (!riskOwner || riskOwner.length === 0)) {
+  if (!draft && (!riskOwners || riskOwners.length === 0)) {
     throw BadReq('Deployment risk owner is required')
   }
 
-  if (riskOwner && riskOwner.length > 0) {
-    await validateRiskOwner(riskOwner)
+  if (riskOwners && riskOwners.length > 0) {
+    await validateRiskOwner(riskOwners)
   }
   if (modelIds?.length) {
     await validateModels(user, modelIds)
@@ -240,7 +240,7 @@ function deriveDeploymentAssessmentState(
  */
 function needsUserAction(deploymentAssessment: DeploymentAssessmentSearchResult, user: UserInterface) {
   if (
-    deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
+    deploymentAssessment.metadata.overview?.riskOwners?.includes(toEntity('user', user.dn)) &&
     deploymentAssessment.state === DeploymentAssessmentState.NeedsReview
   ) {
     return true
@@ -384,7 +384,7 @@ export async function createDeploymentAssessment(
 
   if (!draft) {
     await notifyDeploymentStakeholders(
-      metadata.overview.riskOwner,
+      metadata.overview.riskOwners,
       metadata.overview.modelIds ?? [],
       deploymentAssessment,
     )
@@ -475,7 +475,7 @@ export async function updateDeploymentAssessment(
 
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      deploymentAssessment.metadata?.overview?.riskOwner ?? [],
+      deploymentAssessment.metadata?.overview?.riskOwners ?? [],
       deploymentAssessment.metadata?.overview?.modelIds ?? [],
       deploymentAssessment,
     )
@@ -496,7 +496,7 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
   }
 
   if (params.riskOwner) {
-    query['metadata.overview.riskOwner'] = {
+    query['metadata.overview.riskOwners'] = {
       $elemMatch: { $eq: params.riskOwner },
     }
   }
