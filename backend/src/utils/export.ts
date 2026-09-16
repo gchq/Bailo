@@ -32,7 +32,7 @@ export type Fragment = (
 ) &
   Common
 
-export function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
+export function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1, definitions?: any) {
   switch (schema.widget) {
     case 'tagSelector':
       if (obj === undefined || obj.length === 0) {
@@ -55,6 +55,12 @@ export function recursiveRender(obj: any, schema: Fragment, output = '', depth =
     // go to normal rendering
   }
 
+  if (schema['$ref']) {
+    // The "type" property of the schema object is stored as part of the definitions, so we need to fetch it first
+    const schemaType = definitions[schema['$ref'].split('/')[2]].type
+    schema.type = schemaType
+  }
+
   switch (schema.type) {
     case 'object':
       if (schema.title) {
@@ -65,7 +71,13 @@ export function recursiveRender(obj: any, schema: Fragment, output = '', depth =
 
       for (const property in schema.properties) {
         // Render sub properties
-        output = recursiveRender((obj || {})[property], schema.properties[property], output, depth + 1)
+        output = recursiveRender(
+          (obj || {})[property],
+          schema.properties[property],
+          output,
+          depth + 1,
+          schema['definitions'] ?? definitions,
+        )
       }
 
       break
