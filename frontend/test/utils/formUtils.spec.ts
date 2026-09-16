@@ -211,17 +211,64 @@ describe('Form utils', () => {
       const fields = getInvalidFields(
         makeStep({ name: 'A deployment', deployment: { status: 'Live' }, tags: ['a', 'b', 'c', 'd'] }),
       )
-      expect(fields.get('tags')).toBe('This field has an invalid value')
+      expect(fields.get('tags')).toBe('This field must have 2 items or fewer')
     })
 
     it('reports a wrong-typed answer as invalid rather than missing', () => {
       const fields = getInvalidFields(makeStep({ name: 42, deployment: { status: 'Live' } }))
-      expect(fields.get('name')).toBe('This field has an invalid value')
+      expect(fields.get('name')).toBe('This field must be of type string')
+    })
+
+    it('keeps the first failure when a field breaches several constraints', () => {
+      const constrainedStep = {
+        ...makeStep({ name: 'a' }),
+        schema: {
+          type: 'object',
+          properties: { name: { type: 'string', minLength: 3, pattern: '^[A-Z]' } },
+        },
+      } as StepNoRender
+
+      expect(getInvalidFields(constrainedStep).get('name')).toBe('This field must be at least 3 characters long')
     })
 
     it('returns no fields when the step is complete', () => {
       const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: { status: 'Live' }, tags: ['a'] }))
       expect(fields.size).toBe(0)
+    })
+  })
+
+  describe('getInvalidFields messages', () => {
+    const makeStep = (schema: unknown, state: unknown): StepNoRender =>
+      ({
+        schema: { type: 'object', properties: { field: schema } },
+        state: { field: state },
+        index: 0,
+        type: 'Form',
+        section: 'overview',
+        schemaRef: 'test-schema',
+        shouldValidate: false,
+        isComplete: () => false,
+      }) as StepNoRender
+
+    it.each([
+      [{ type: 'string', minLength: 3 }, 'ab', 'This field must be at least 3 characters long'],
+      [{ type: 'string', maxLength: 2 }, 'abcd', 'This field must be 2 characters or fewer'],
+      [{ type: 'string', maxLength: 1 }, 'ab', 'This field must be 1 character or fewer'],
+      [{ type: 'array', maxItems: 1 }, ['a', 'b'], 'This field must have 1 item or fewer'],
+      [{ type: 'string', pattern: '^[A-Z]' }, 'ab', 'This field is not in the expected format'],
+      [{ type: 'string', format: 'email' }, 'nope', 'This field must be a valid email'],
+      [{ type: 'string', enum: ['a', 'b'] }, 'z', 'This field must be one of: a, b'],
+      [{ const: 'a' }, 'z', 'This field must be a'],
+      [{ type: 'number', minimum: 5 }, 1, 'This field must be 5 or more'],
+      [{ type: 'number', maximum: 5 }, 9, 'This field must be 5 or less'],
+      [{ type: 'number', exclusiveMinimum: 5 }, 5, 'This field must be greater than 5'],
+      [{ type: 'number', exclusiveMaximum: 5 }, 5, 'This field must be less than 5'],
+      [{ type: 'number', multipleOf: 5 }, 7, 'This field must be a multiple of 5'],
+      [{ type: 'array', minItems: 2 }, ['a'], 'This field must have at least 2 items'],
+      [{ type: 'array', uniqueItems: true }, ['a', 'a'], 'This field must not contain duplicate items'],
+      [{ anyOf: [{ type: 'number' }, { type: 'boolean' }] }, 'x', 'This field has an invalid value'],
+    ])('describes %j failing with %j', (schema, state, expected) => {
+      expect(getInvalidFields(makeStep(schema, state)).get('field')).toBe(expected)
     })
   })
 

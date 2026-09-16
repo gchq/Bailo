@@ -1,5 +1,5 @@
 import { Registry, RegistryWidgetsType } from '@rjsf/utils'
-import { Validator } from 'jsonschema'
+import { ValidationError, Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
@@ -16,6 +16,7 @@ import RichTextInput from 'src/MuiForms/RichTextInput'
 import TagSelector from 'src/MuiForms/TagSelector'
 
 import { FormStats, ModelFormStats, SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
+import { plural } from './stringUtils'
 import { createUiSchema } from './uiSchemaUtils'
 
 export const widgets: RegistryWidgetsType = {
@@ -239,14 +240,65 @@ export function validateForm(step: StepNoRender) {
   return validateStep(step).errors.length === 0
 }
 
+function getInvalidFieldMessage({ name, argument }: ValidationError): string {
+  switch (name) {
+    case 'required':
+      return 'This field is required'
+    case 'type':
+      return `This field must be of type ${[argument].flat().join(' or ')}`
+    case 'format':
+      return `This field must be a valid ${argument}`
+    case 'pattern':
+      return 'This field is not in the expected format'
+    case 'enum':
+      return `This field must be one of: ${[argument].flat().join(', ')}`
+    case 'const':
+      return `This field must be ${argument}`
+    case 'minLength':
+      return `This field must be at least ${plural(argument, 'character')} long`
+    case 'maxLength':
+      return `This field must be ${plural(argument, 'character')} or fewer`
+    case 'minimum':
+      return `This field must be ${argument} or more`
+    case 'maximum':
+      return `This field must be ${argument} or less`
+    case 'exclusiveMinimum':
+      return `This field must be greater than ${argument}`
+    case 'exclusiveMaximum':
+      return `This field must be less than ${argument}`
+    case 'multipleOf':
+      return `This field must be a multiple of ${argument}`
+    case 'minItems':
+      return `This field must have at least ${plural(argument, 'item')}`
+    case 'maxItems':
+      return `This field must have ${plural(argument, 'item')} or fewer`
+    case 'uniqueItems':
+      return 'This field must not contain duplicate items'
+    case 'minProperties':
+      return `This field must have at least ${plural(argument, 'field')}`
+    case 'maxProperties':
+      return `This field must have ${plural(argument, 'field')} or fewer`
+    case 'additionalProperties':
+      return `This field does not allow "${argument}"`
+    default:
+      return 'This field has an invalid value'
+  }
+}
+
 /** Maps the dotted path of each field failing validation, e.g. `overview.name`, to its message. */
 export function getInvalidFields(step: StepNoRender): Map<string, string> {
-  return new Map(
-    validateStep(step).errors.map(({ path, name, argument }) => [
-      (name === 'required' ? [...path, argument] : path).join('.'),
-      name === 'required' ? 'This field is required' : 'This field has an invalid value',
-    ]),
-  )
+  const invalidFields = new Map<string, string>()
+
+  for (const error of validateStep(step).errors) {
+    const path = (error.name === 'required' ? [...error.path, error.argument] : error.path).join('.')
+
+    // A field can breach several constraints at once - schema order reads better than last one wins
+    if (!invalidFields.has(path)) {
+      invalidFields.set(path, getInvalidFieldMessage(error))
+    }
+  }
+
+  return invalidFields
 }
 
 /** Converts an RJSF field id such as `root_overview_name` into `['overview', 'name']`. */
