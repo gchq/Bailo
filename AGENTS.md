@@ -133,8 +133,8 @@ cases and invalid input.
 - Verify audit connector calls in route tests (e.g. `expect(audit.onDeleteModel).toHaveBeenCalled()`).
 - Repository tests live in `backend/test/repositories/**/*.spec.ts`, mirroring `src/repositories/`. Use
   `getTypedModelMock()` to mock Mongoose models and assert the exact query arguments passed (e.g. the filter object
-  given to `find` or the pipeline given to `aggregate`). This is what distinguishes them from service tests, which
-  mock at the repository function boundary rather than the model boundary.
+  given to `find` or the pipeline given to `aggregate`). This is what distinguishes them from service tests, which mock
+  at the repository function boundary rather than the model boundary.
 
 ### Frontend (Vitest + Cypress)
 
