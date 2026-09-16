@@ -123,7 +123,7 @@ async function validateDeploymentAssessment(
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
 
-  const { riskOwner, modelIds } = metadata.overview ?? {}
+  const { riskOwner, modelIds } = metadata.details ?? {}
 
   if (!draft && (!riskOwner || riskOwner.length === 0)) {
     throw BadReq('Deployment risk owner is required')
@@ -239,7 +239,7 @@ function deriveDeploymentAssessmentState(
  */
 function needsUserAction(deploymentAssessment: DeploymentAssessmentSearchResult, user: UserInterface) {
   if (
-    deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
+    deploymentAssessment.metadata.details?.riskOwner?.includes(toEntity('user', user.dn)) &&
     deploymentAssessment.state === DeploymentAssessmentState.NeedsReview
   ) {
     return true
@@ -396,8 +396,8 @@ export async function createDeploymentAssessment(
 
   if (!draft) {
     await notifyDeploymentStakeholders(
-      metadata.overview.riskOwner,
-      metadata.overview.modelIds ?? [],
+      metadata.details.riskOwner,
+      metadata.details.modelIds ?? [],
       deploymentAssessment,
     )
   }
@@ -486,8 +486,8 @@ export async function updateDeploymentAssessment(
 
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      deploymentAssessment.metadata?.overview?.riskOwner ?? [],
-      deploymentAssessment.metadata?.overview?.modelIds ?? [],
+      deploymentAssessment.metadata?.details?.riskOwner ?? [],
+      deploymentAssessment.metadata?.details?.modelIds ?? [],
       deploymentAssessment,
     )
   }

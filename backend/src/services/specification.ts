@@ -82,7 +82,7 @@ export const deploymentAssessmentStateSchema = z
 
 export const deploymentAssessmentMetadataSchema = z
   .object({
-    overview: z
+    details: z
       .object({
         riskOwner: deploymentAssessmentRiskOwnerSchema.optional(),
         modelIds: deploymentAssessmentModelIdsSchema.optional(),
@@ -94,7 +94,7 @@ export const deploymentAssessmentMetadataSchema = z
 
 export const deploymentAssessmentMetadataRequiredSchema = z
   .object({
-    overview: z
+    details: z
       .object({
         riskOwner: deploymentAssessmentRiskOwnerSchema,
         modelIds: deploymentAssessmentModelIdsSchema,
@@ -480,7 +480,7 @@ const deploymentAssessmentOverview = z
 export const deploymentAssessmentInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
   schemaId: schemaId.openapi({ example: 'stark-deployment-assessment-schema-v1' }),
-  metadata: z.object({ overview: deploymentAssessmentOverview }).passthrough(),
+  metadata: z.object({ details: deploymentAssessmentOverview }).passthrough(),
   draft: draft.optional().default(true).openapi({ example: true }),
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),

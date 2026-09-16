@@ -61,12 +61,21 @@ export async function searchSchemas(
  * @returns
  */
 function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
-  const requiredProperties = Array.isArray(jsonSchema.required) ? jsonSchema.required : []
+  const requiredProperties = Array.isArray((jsonSchema as any).required)
+    ? ((jsonSchema as any).required as string[])
+    : []
+
+  const existingDetailsRequired: string[] = Array.isArray((jsonSchema as any).properties?.details?.required)
+    ? (((jsonSchema as any).properties!.details as any).required as string[])
+    : []
+
+  const mergedDetailsRequired = Array.from(new Set<string>(['riskOwner', 'modelIds', ...existingDetailsRequired]))
 
   return {
     ...structuredClone(jsonSchema),
     properties: {
-      overview: {
+      ...((jsonSchema as any).properties ?? {}),
+      details: {
         title: 'Details',
         type: 'object',
         properties: {
@@ -94,13 +103,13 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             uniqueItems: true,
             widget: 'modelSelector',
           },
+          ...(((jsonSchema as any).properties?.details?.properties as object) ?? {}),
         },
-        required: ['riskOwner', 'modelIds'],
+        required: mergedDetailsRequired,
         additionalProperties: false,
       },
-      ...jsonSchema.properties,
     },
-    required: ['overview', ...requiredProperties.filter((property) => property !== 'overview')],
+    required: ['details', ...requiredProperties.filter((property) => property !== 'details')],
   }
 }
 

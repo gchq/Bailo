@@ -10,7 +10,7 @@ const deploymentAssessment = {
   name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
   metadata: {
-    overview: {
+    details: {
       riskOwner: ['user:risk-owner'],
       modelIds: ['model-one'],
     },
