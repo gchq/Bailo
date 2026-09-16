@@ -11,10 +11,11 @@ Core principles for changes:
 - Always use British English for spellings and terms (e.g. "colour", "organisation", "authorise", "centre", "licence").
 - Prefer clear, readable code over clever or compact solutions. Keep functions focused on a single responsibility.
 - Avoid new external dependencies unless absolutely necessary. Reuse existing project utilities first.
-- Backend follows a layered architecture: routes -> services -> models -> connectors. Respect this separation.
-  Connectors use a strategy pattern: a base class in `Base.ts`, concrete implementations (e.g. `clamAv.ts`, `oauth.ts`),
-  and an `index.ts` that selects the implementation via `config.connectors.<name>.kind`. Categories: authentication,
-  authorisation, audit, artefactScanning, metrics, peer.
+- Backend follows a layered architecture: routes -> services -> repositories -> models -> connectors. Respect this
+  separation. The repositories layer encapsulates all Mongoose query construction (`find`, `aggregate`, etc.), keeping
+  services free of raw query logic. Connectors use a strategy pattern: a base class in `Base.ts`, concrete
+  implementations (e.g. `clamAv.ts`, `oauth.ts`), and an `index.ts` that selects the implementation via
+  `config.connectors.<name>.kind`. Categories: authentication, authorisation, audit, artefactScanning, metrics, peer.
 
 ## Structure
 
@@ -130,6 +131,10 @@ cases and invalid input.
   `backend/test/testUtils/setupMongooseModelMocks.ts` for Mongoose model mocks.
 - Snapshot testing with `expect(res.body).matchSnapshot()`.
 - Verify audit connector calls in route tests (e.g. `expect(audit.onDeleteModel).toHaveBeenCalled()`).
+- Repository tests live in `backend/test/repositories/**/*.spec.ts`, mirroring `src/repositories/`. Use
+  `getTypedModelMock()` to mock Mongoose models and assert the exact query arguments passed (e.g. the filter object
+  given to `find` or the pipeline given to `aggregate`). This is what distinguishes them from service tests, which
+  mock at the repository function boundary rather than the model boundary.
 
 ### Frontend (Vitest + Cypress)
 
