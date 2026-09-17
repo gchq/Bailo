@@ -2,8 +2,11 @@ import { StepNoRender } from 'types/types'
 import {
   deepMergePreferFirst,
   getFormStats,
+  getInvalidFields,
+  getPathFromId,
   isQuestionAnswered,
   setFormDataPropertiesToUndefined,
+  validateForm,
 } from 'utils/formUtils'
 import { describe, expect, it } from 'vitest'
 
@@ -134,6 +137,207 @@ describe('Form utils', () => {
     it('returns false when both local and mirrored arrays are empty', () => {
       const context = makeFormContext({ dataCards: [] }, { dataCards: [] }, true)
       expect(isQuestionAnswered('root_dataCards', { type: 'array', items: { type: 'string' } }, context)).toBe(false)
+    })
+  })
+
+  describe('getPathFromId', () => {
+    it('strips the root prefix', () => {
+      expect(getPathFromId('root_name')).toEqual(['name'])
+    })
+
+    it('splits nested fields', () => {
+      expect(getPathFromId('root_deployment_status')).toEqual(['deployment', 'status'])
+    })
+
+    it('keeps array indices as segments', () => {
+      expect(getPathFromId('root_entities_0_name')).toEqual(['entities', '0', 'name'])
+    })
+
+    it('returns an empty path for the root itself', () => {
+      expect(getPathFromId('root')).toEqual(['root'])
+      expect(getPathFromId('root_')).toEqual([])
+    })
+  })
+
+  describe('getInvalidFields', () => {
+    const schema = {
+      type: 'object',
+      required: ['name', 'deployment'],
+      properties: {
+        name: { type: 'string' },
+        deployment: {
+          type: 'object',
+          required: ['status'],
+          properties: { status: { type: 'string' } },
+        },
+        tags: { type: 'array', maxItems: 2, items: { type: 'string' } },
+      },
+    }
+
+    const makeStep = (state: unknown): StepNoRender =>
+      ({
+        schema,
+        state,
+        index: 0,
+        type: 'Form',
+        section: 'overview',
+        schemaRef: 'test-schema',
+        shouldValidate: false,
+        isComplete: () => false,
+      }) as StepNoRender
+
+    it('returns the path of a missing top level required field', () => {
+      const fields = getInvalidFields(makeStep({ deployment: { status: 'Live' } }))
+      expect(fields.get('name')).toBe('This field is required')
+    })
+
+    it('returns the path of a missing nested required field', () => {
+      const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: {} }))
+      expect(fields.get('deployment.status')).toBe('This field is required')
+    })
+
+    it('treats an empty string as an unanswered required field', () => {
+      const fields = getInvalidFields(makeStep({ name: '', deployment: { status: 'Live' }, tags: ['a'] }))
+      expect(fields.get('name')).toBe('This field is required')
+    })
+
+    it('treats a required array whose items have all been cleared as unanswered', () => {
+      const stepWithTags = (tags: unknown) =>
+        ({
+          ...makeStep({ tags }),
+          schema: {
+            type: 'object',
+            required: ['tags'],
+            properties: { tags: { type: 'array', items: { type: 'string' } } },
+          },
+        }) as StepNoRender
+
+      expect(getInvalidFields(stepWithTags([])).get('tags')).toBe('This field is required')
+      expect(getInvalidFields(stepWithTags([''])).get('tags')).toBe('This field is required')
+      expect(getInvalidFields(stepWithTags(['', ''])).get('tags')).toBe('This field is required')
+      expect(getInvalidFields(stepWithTags(['a'])).size).toBe(0)
+    })
+
+    it('marks the cleared leaf of an array item rather than the array itself', () => {
+      const stepWithOwners = {
+        ...makeStep({ owners: [{ name: '' }] }),
+        schema: {
+          type: 'object',
+          required: ['owners'],
+          properties: {
+            owners: {
+              type: 'array',
+              items: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } },
+            },
+          },
+        },
+      } as StepNoRender
+
+      const fields = getInvalidFields(stepWithOwners)
+      expect(fields.get('owners.0.name')).toBe('This field is required')
+      expect(fields.has('owners')).toBe(false)
+    })
+
+    it('marks the offending leaf rather than its parent when a nested answer is cleared', () => {
+      const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: { status: '' } }))
+      expect(fields.get('deployment.status')).toBe('This field is required')
+      expect(fields.has('deployment')).toBe(false)
+    })
+
+    it('reports an answered field breaching a constraint as invalid rather than missing', () => {
+      const fields = getInvalidFields(
+        makeStep({ name: 'A deployment', deployment: { status: 'Live' }, tags: ['a', 'b', 'c', 'd'] }),
+      )
+      expect(fields.get('tags')).toBe('This field must have 2 items or fewer')
+    })
+
+    it('reports a wrong-typed answer as invalid rather than missing', () => {
+      const fields = getInvalidFields(makeStep({ name: 42, deployment: { status: 'Live' } }))
+      expect(fields.get('name')).toBe('This field must be of type string')
+    })
+
+    it('keeps the first failure when a field breaches several constraints', () => {
+      const constrainedStep = {
+        ...makeStep({ name: 'a' }),
+        schema: {
+          type: 'object',
+          properties: { name: { type: 'string', minLength: 3, pattern: '^[A-Z]' } },
+        },
+      } as StepNoRender
+
+      expect(getInvalidFields(constrainedStep).get('name')).toBe('This field must be at least 3 characters long')
+    })
+
+    it('returns no fields when the step is complete', () => {
+      const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: { status: 'Live' }, tags: ['a'] }))
+      expect(fields.size).toBe(0)
+    })
+  })
+
+  describe('getInvalidFields messages', () => {
+    const makeStep = (schema: unknown, state: unknown): StepNoRender =>
+      ({
+        schema: { type: 'object', properties: { field: schema } },
+        state: { field: state },
+        index: 0,
+        type: 'Form',
+        section: 'overview',
+        schemaRef: 'test-schema',
+        shouldValidate: false,
+        isComplete: () => false,
+      }) as StepNoRender
+
+    it.each([
+      [{ type: 'string', minLength: 3 }, 'ab', 'This field must be at least 3 characters long'],
+      [{ type: 'string', maxLength: 2 }, 'abcd', 'This field must be 2 characters or fewer'],
+      [{ type: 'string', maxLength: 1 }, 'ab', 'This field must be 1 character or fewer'],
+      [{ type: 'array', maxItems: 1 }, ['a', 'b'], 'This field must have 1 item or fewer'],
+      [{ type: 'string', pattern: '^[A-Z]' }, 'ab', 'This field is not in the expected format'],
+      [{ type: 'string', format: 'email' }, 'nope', 'This field must be a valid email'],
+      [{ type: 'string', enum: ['a', 'b'] }, 'z', 'This field must be one of: a, b'],
+      [{ const: 'a' }, 'z', 'This field must be a'],
+      [{ type: 'number', minimum: 5 }, 1, 'This field must be 5 or more'],
+      [{ type: 'number', maximum: 5 }, 9, 'This field must be 5 or less'],
+      [{ type: 'number', exclusiveMinimum: 5 }, 5, 'This field must be greater than 5'],
+      [{ type: 'number', exclusiveMaximum: 5 }, 5, 'This field must be less than 5'],
+      [{ type: 'number', multipleOf: 5 }, 7, 'This field must be a multiple of 5'],
+      [{ type: 'array', minItems: 2 }, ['a'], 'This field must have at least 2 items'],
+      [{ type: 'array', uniqueItems: true }, ['a', 'a'], 'This field must not contain duplicate items'],
+      [{ anyOf: [{ type: 'number' }, { type: 'boolean' }] }, 'x', 'This field has an invalid value'],
+    ])('describes %j failing with %j', (schema, state, expected) => {
+      expect(getInvalidFields(makeStep(schema, state)).get('field')).toBe(expected)
+    })
+  })
+
+  describe('validateForm', () => {
+    const schema = {
+      type: 'object',
+      required: ['name'],
+      properties: { name: { type: 'string' } },
+    }
+
+    const makeStep = (state: unknown): StepNoRender =>
+      ({
+        schema,
+        state,
+        index: 0,
+        type: 'Form',
+        section: 'overview',
+        schemaRef: 'test-schema',
+        shouldValidate: false,
+        isComplete: () => false,
+      }) as StepNoRender
+
+    it('accepts a completed step', () => {
+      expect(validateForm(makeStep({ name: 'A deployment' }))).toBe(true)
+    })
+
+    it('rejects a required field cleared back to an empty string', () => {
+      expect(validateForm(makeStep({ name: '' }))).toBe(false)
+    })
+
+    it('rejects a missing required field', () => {
+      expect(validateForm(makeStep({}))).toBe(false)
     })
   })
 })
