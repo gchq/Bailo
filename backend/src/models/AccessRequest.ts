@@ -20,6 +20,7 @@ export interface AccessRequestMetadata {
 export interface AccessRequestInterface {
   id: string
   modelId: string
+  groupId?: string
 
   schemaId: string
   metadata: AccessRequestMetadata
@@ -41,6 +42,7 @@ const AccessRequestSchema = new Schema<AccessRequestDoc>(
   {
     id: { type: String, unique: true, required: true },
     modelId: { type: String, required: true },
+    groupId: { type: String },
 
     schemaId: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, required: true },
@@ -55,6 +57,7 @@ const AccessRequestSchema = new Schema<AccessRequestDoc>(
 
 AccessRequestSchema.plugin(softDeletionPlugin)
 AccessRequestSchema.index({ modelId: 1 })
+AccessRequestSchema.index({ groupId: 1 }, { sparse: true })
 
 const AccessRequestModel = model<AccessRequestDoc>('v2_Access_Request', AccessRequestSchema)
 

@@ -118,3 +118,29 @@ export function postAccessRequestComment(modelId: string, accessRequestId: strin
     body: JSON.stringify({ comment }),
   })
 }
+
+export interface AccessRequestGroupResult {
+  groupId: string
+  accessRequests: AccessRequestInterface[]
+  failedModelIds: string[]
+}
+
+export function postAccessRequestGroup(modelIds: string[], schemaId: string, form: Record<string, unknown>) {
+  return fetch('/api/v2/access-request-groups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ modelIds, schemaId, metadata: form }),
+  })
+}
+
+export function useGetAccessRequestGroup(accessRequest: AccessRequestInterface) {
+  const { data, isLoading, error } = useSWR<{ accessRequests: AccessRequestInterface[] }, ErrorInfo>(
+    accessRequest.groupId ? `/api/v2/model/${accessRequest.modelId}/access-request/${accessRequest.id}/group` : null,
+    fetcher,
+  )
+  return {
+    accessRequests: data?.accessRequests ?? emptyAccessRequestList,
+    isLoading,
+    error,
+  }
+}
