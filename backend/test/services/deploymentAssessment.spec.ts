@@ -57,9 +57,11 @@ const params = {
   name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
   metadata: {
-    overview: {
-      riskOwner: ['user:risk-owner'],
+    modelOverview: {
       modelIds: ['model-one'],
+    },
+    signOff: {
+      riskOwner: ['user:risk-owner'],
     },
     assessment: { summary: 'Summary' },
   },
@@ -183,7 +185,7 @@ describe('services > deploymentAssessment', () => {
         { dn: 'creator' },
         {
           ...params,
-          metadata: { ...params.metadata, overview: { ...params.metadata.overview, riskOwner: ['group:risk'] } },
+          metadata: { ...params.metadata, signOff: { ...params.metadata.signOff, riskOwner: ['group:risk'] } },
         },
       ),
     ).rejects.toThrow('The risk owner must be a valid user entity.')
@@ -591,8 +593,8 @@ describe('services > deploymentAssessment', () => {
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.metadata = {
         ...params.metadata,
-        overview: {
-          ...params.metadata.overview,
+        signOff: {
+          ...params.metadata.signOff,
           riskOwner: ['user:risk-owner', 'user:other-owner', 'user:risk-owner'],
         },
       }
