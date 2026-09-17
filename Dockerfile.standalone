@@ -14,7 +14,7 @@
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 #       Access UI at http://localhost:4318/
 
-FROM chrislusf/seaweedfs:4.46@sha256:08d516132314207d10c8e37cbffc1f32b147d870169688734cc61c6231625b62 AS seaweedfs-bin
+FROM chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882 AS seaweedfs-bin
 FROM distribution/distribution@sha256:bca24727f4002e51f959c18c42e816e4d1078198081a9837e16b8b7d7e43ebf8 AS registry-bin
 FROM marlonb/mailcrab:v1.9.0@sha256:fbe35c063cb4c8c169e32f4d91e09ee44459843a005a567cfd3dc9876779e194 AS mailcrab-bin
 
@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r req
 COPY backend/docs .
 RUN make html
 
-FROM node:26.8.1-alpine@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS backend
+FROM node:26.8.2-alpine@sha256:ef24c5053d50fdc3e4e56eb4e7ddb7861874ab0fdc797046ba897581deb8e868 AS backend
 RUN apk add --no-cache libc6-compat ca-certificates
 WORKDIR /app
 COPY backend/package*.json ./
@@ -39,7 +39,7 @@ RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY backend .
 RUN npm run build
 
-FROM node:26.8.1-alpine@sha256:2d984a15c9b54fd0aeb608b8e0d0d83529eb34d2966db27a1fb4f1edc3d298a3 AS frontend
+FROM node:26.8.2-alpine@sha256:ef24c5053d50fdc3e4e56eb4e7ddb7861874ab0fdc797046ba897581deb8e868 AS frontend
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache libc6-compat ca-certificates
 WORKDIR /app
@@ -48,7 +48,7 @@ RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY frontend .
 RUN npm run build
 
-FROM ubuntu:noble@sha256:33ceb71981b602c1a7443a53469e4dba065f7503eab3078a2d7a57a2ab987517
+FROM ubuntu:noble@sha256:224a1869083a311ef3f13648a154ba79832fbef6364d31493642ca03082da254
 ENV DEBIAN_FRONTEND=noninteractive
 # Cache packages with run cache, update system packages, install packages
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \

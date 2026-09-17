@@ -24,7 +24,7 @@ dynamic = ["version"]
 dependencies = [
     "requests==2.34.2",
     "semantic-version==2.10.0",
-    "tqdm==4.70.0"
+    "tqdm==4.70.1"
 ]
 
 [project.optional-dependencies]
@@ -40,7 +40,7 @@ test = [
     "pytest==9.1.1",
     "pytest-github-actions-annotate-failures==0.4.2",
     "requests_mock==1.12.1",
-    "ruff==0.16.6",
+    "ruff==0.16.7",
     "shellcheck-py==0.11.0.1",
     "bailo[mlflow]"
 ]
