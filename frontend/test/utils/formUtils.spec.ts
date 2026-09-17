@@ -201,6 +201,43 @@ describe('Form utils', () => {
       expect(fields.get('name')).toBe('This field is required')
     })
 
+    it('treats a required array whose items have all been cleared as unanswered', () => {
+      const stepWithTags = (tags: unknown) =>
+        ({
+          ...makeStep({ tags }),
+          schema: {
+            type: 'object',
+            required: ['tags'],
+            properties: { tags: { type: 'array', items: { type: 'string' } } },
+          },
+        }) as StepNoRender
+
+      expect(getInvalidFields(stepWithTags([])).get('tags')).toBe('This field is required')
+      expect(getInvalidFields(stepWithTags([''])).get('tags')).toBe('This field is required')
+      expect(getInvalidFields(stepWithTags(['', ''])).get('tags')).toBe('This field is required')
+      expect(getInvalidFields(stepWithTags(['a'])).size).toBe(0)
+    })
+
+    it('marks the cleared leaf of an array item rather than the array itself', () => {
+      const stepWithOwners = {
+        ...makeStep({ owners: [{ name: '' }] }),
+        schema: {
+          type: 'object',
+          required: ['owners'],
+          properties: {
+            owners: {
+              type: 'array',
+              items: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } },
+            },
+          },
+        },
+      } as StepNoRender
+
+      const fields = getInvalidFields(stepWithOwners)
+      expect(fields.get('owners.0.name')).toBe('This field is required')
+      expect(fields.has('owners')).toBe(false)
+    })
+
     it('marks the offending leaf rather than its parent when a nested answer is cleared', () => {
       const fields = getInvalidFields(makeStep({ name: 'A deployment', deployment: { status: '' } }))
       expect(fields.get('deployment.status')).toBe('This field is required')

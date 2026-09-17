@@ -216,7 +216,9 @@ function withoutClearedAnswers(value: any): any {
   }
 
   if (Array.isArray(value)) {
-    return value.length === 0 ? undefined : value.map(withoutClearedAnswers).filter((item) => item !== undefined)
+    // Collapse once the items have been stripped too, so `['']` is as absent as `[]`
+    const items = value.map(withoutClearedAnswers).filter((item) => item !== undefined)
+    return items.length === 0 ? undefined : items
   }
 
   if (value !== null && typeof value === 'object') {
