@@ -107,7 +107,7 @@ const eslintConfig = [
           selector:
             "CallExpression[callee.object.name='vi'][callee.property.name='mock'][arguments.0.value=/utils\\/config\\.js$/]",
           message:
-            'Do not mock "utils/config.js" per-file. It is mocked globally from "src/utils/__mocks__/config.ts"; override values with `setTestConfig()` from "test/testUtils/setupTestConfig.ts".',
+            'Do not mock "utils/config.js" per-file. It is mocked globally from "test/testUtils/setupTestConfig.ts"; override values with `setTestConfig()` from the same file.',
         },
         {
           selector:
