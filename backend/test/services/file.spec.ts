@@ -3,7 +3,7 @@ import { Readable } from 'node:stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
-import { FileAction } from '../../src/connectors/authorisation/actions.js'
+import { FileAction, ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
 import {
@@ -734,15 +734,66 @@ describe('services > file', () => {
     expect(size).toBe(42)
   })
 
+  describe('individual file access', () => {
+    const user = { dn: 'testUser' } as any
+    const file = { modelId: 'testModelId', _id: { toString: () => testFileId } }
+
+    test.each([true, false])('checks model-edit permission when changing access to %s', async (ungovernedAccess) => {
+      FileModelMock.aggregate.mockResolvedValue([file])
+      await updateFile(user, file.modelId, testFileId, { ungovernedAccess })
+      expect(authorisation.model).toHaveBeenCalledWith(user, expect.anything(), ModelAction.Update)
+      expect(FileModelMock.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: testFileId, modelId: file.modelId },
+        { ungovernedAccess },
+        { new: true },
+      )
+    })
+
+    test.each([true, false])('refuses a contributor changing access to %s', async (ungovernedAccess) => {
+      FileModelMock.aggregate.mockResolvedValue([file])
+      vi.mocked(authorisation.model).mockResolvedValue({
+        success: false,
+        id: 'testModelId',
+        info: 'Owner permission required',
+      })
+      await expect(updateFile(user, file.modelId, testFileId, { tags: ['image'], ungovernedAccess })).rejects.toThrow(
+        'Owner permission required',
+      )
+      expect(FileModelMock.findOneAndUpdate).not.toHaveBeenCalled()
+    })
+
+    test('does not change normal tag-editing permissions', async () => {
+      FileModelMock.aggregate.mockResolvedValue([file])
+      await updateFile(user, file.modelId, testFileId, { tags: ['image'] })
+      expect(authorisation.model).not.toHaveBeenCalledWith(user, expect.anything(), ModelAction.Update)
+      expect(authorisation.file).toHaveBeenCalledWith(user, expect.anything(), file, FileAction.Update)
+    })
+
+    test('cannot use ownership of a different model to change file access', async () => {
+      FileModelMock.aggregate.mockResolvedValue([file])
+      await expect(updateFile(user, 'other-model', testFileId, { ungovernedAccess: true })).rejects.toThrow(
+        'not found in this model',
+      )
+      expect(FileModelMock.findOneAndUpdate).not.toHaveBeenCalled()
+    })
+
+    test('sharing does not bypass model visibility when downloading', async () => {
+      FileModelMock.aggregate.mockResolvedValue([{ ...file, ungovernedAccess: true }])
+      modelMocks.getModelById.mockRejectedValueOnce(new Error('Private model'))
+      await expect(downloadFile(user, testFileId)).rejects.toThrow('Private model')
+      expect(s3Mocks.getObjectStream).not.toHaveBeenCalled()
+    })
+  })
+
   test('updateFile > success', async () => {
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
 
-    FileModelMock.aggregate.mockResolvedValue([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
+    FileModelMock.aggregate.mockResolvedValue([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } }])
 
     const result = await updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
-    expect(result.modelId).toBe('testModel')
+    expect(result.modelId).toBe('testModelId')
     expect(result.id).toBeUndefined()
     expect(FileModelMock.findOneAndUpdate).toHaveBeenCalledOnce()
   })
@@ -751,7 +802,7 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
 
-    FileModelMock.aggregate.mockResolvedValue([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
+    FileModelMock.aggregate.mockResolvedValue([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } }])
 
     const result = await updateFile(user, modelId, testFileId, {
       tags: ['test1'],
@@ -759,10 +810,10 @@ describe('services > file', () => {
       mime: 'text/plain',
     })
 
-    expect(result.modelId).toBe('testModel')
+    expect(result.modelId).toBe('testModelId')
     expect(result.id).toBeUndefined()
     expect(FileModelMock.findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: testFileId },
+      { _id: testFileId, modelId },
       {
         tags: ['test1'],
         name: 'my-file-renamed.txt',
@@ -790,7 +841,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+      { modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } },
     ])
     modelMocks.getModelById.mockResolvedValueOnce(modelMocks.getModelById()).mockRejectedValueOnce('Error')
 
@@ -805,7 +856,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+      { modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } },
     ])
     vi.mocked(authorisation.file).mockResolvedValueOnce({ success: true, id: '' }).mockResolvedValue({
       info: 'You do not have permission to upload a file to this model.',
@@ -824,7 +875,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+      { modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } },
     ])
     FileModelMock.findOneAndUpdate.mockResolvedValueOnce(null)
 

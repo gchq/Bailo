@@ -39,6 +39,7 @@ import {
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Restricted from 'src/common/Restricted'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import FileAccessSetting from 'src/entry/model/files/FileAccessSetting'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
@@ -433,6 +434,13 @@ export default function FileDisplay({
               </>
             )}
           </Stack>
+          <FileAccessSetting
+            file={file}
+            onChange={() => {
+              mutateModelFiles()
+              mutator?.()
+            }}
+          />
         </Stack>
       )}
       <AssociatedReleasesDialog
