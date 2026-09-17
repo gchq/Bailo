@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > deploymentAssessment > getDeploymentAssessments > 200 > ok 1`] = `
+{
+  "deploymentAssessments": [
+    {
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "createdBy": "creator",
+      "draft": false,
+      "id": "assessment-abc123",
+      "models": [
+        "model-one",
+        "model-two",
+      ],
+      "name": "Assessment",
+      "owner": [
+        "user:risk-owner",
+      ],
+      "schemaId": "deployment-assessment-schema",
+    },
+  ],
+}
+`;
+
+exports[`routes > deploymentAssessment > getDeploymentAssessments > audit > expected call 1`] = `
+[
+  {
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "createdBy": "creator",
+    "draft": false,
+    "id": "assessment-abc123",
+    "models": [
+      "model-one",
+      "model-two",
+    ],
+    "name": "Assessment",
+    "owner": [
+      "user:risk-owner",
+    ],
+    "schemaId": "deployment-assessment-schema",
+  },
+]
+`;
