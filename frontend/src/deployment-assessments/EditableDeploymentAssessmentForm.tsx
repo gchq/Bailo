@@ -170,6 +170,7 @@ export default function EditableDeploymentAssessmentForm({
                     fullWidth
                     onChange={(event) => setNewName(event.target.value)}
                     size='small'
+                    data-test='editNameInput'
                   />
                 ) : (
                   <>

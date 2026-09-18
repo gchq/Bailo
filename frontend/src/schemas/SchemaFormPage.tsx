@@ -80,6 +80,7 @@ export default function SchemaFormPage({
                             onClick={onSaveDraft}
                             loading={draftButtonLoading}
                             disabled={submitButtonLoading || actionsDisabled}
+                            data-test='draftDeploymentAssessmentButton'
                           >
                             Save draft
                           </Button>
@@ -94,6 +95,7 @@ export default function SchemaFormPage({
                           onClick={onSubmit}
                           loading={submitButtonLoading}
                           disabled={draftButtonLoading || actionsDisabled}
+                          data-test='submitDeploymentAssessmentButton'
                         >
                           Submit
                         </Button>

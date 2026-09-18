@@ -78,6 +78,7 @@ export default function EntityAutocomplete({
           <TextField
             {...params}
             id={id}
+            data-test='entityTextInput'
             label={label}
             placeholder='Username or group name'
             error={error}
