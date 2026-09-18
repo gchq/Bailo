@@ -86,7 +86,7 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[data-test=submitDeploymentAssessmentButton]').click()
 
     cy.wait('@postDA').then((intercept) => {
-      DAid = intercept.response.body.deploymentAssessment.id
+      DAid = intercept.response?.body.deploymentAssessment.id
     })
     cy.url().should('contain', `deployment-assessments/${DAid}`)
   })
@@ -156,7 +156,7 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[data-test=draftDeploymentAssessmentButton]').click()
     cy.wait('@postDA').then((intercept) => {
       expect(intercept.response?.statusCode).to.eq(201)
-      draftDAid = intercept.response.body.deploymentAssessment.id
+      draftDAid = intercept.response?.body.deploymentAssessment.id
       expect(intercept.response?.body.deploymentAssessment.draft).to.eq(true)
     })
 
