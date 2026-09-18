@@ -1,5 +1,5 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
+import { DeploymentAssessmentDoc, DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
 import { FileInterface } from '../../models/File.js'
 import { EntryKind, EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
@@ -344,7 +344,7 @@ export class BasicAuthorisationConnector {
 
   async deploymentAssessments(
     user: UserInterface,
-    deploymentAssessments: Array<DeploymentAssessmentDoc>,
+    deploymentAssessments: Array<DeploymentAssessmentInterface>,
     action: DeploymentAssessmentActionKeys,
   ): Promise<Array<Response>> {
     return Promise.all(

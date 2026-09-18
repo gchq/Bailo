@@ -1,28 +1,21 @@
+import qs from 'qs'
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
-import { testGet } from '../../../testUtils/routes.js'
+import { getDeploymentAssessmentsSchema } from '../../../../src/routes/v3/deploymentAssessment/getDeploymentAssessments.js'
+import { createFixture, testGet } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
-const deploymentAssessment = {
-  _id: 'mongo-object-id',
-  __v: 1,
+const deploymentAssessmentSummary = {
   id: 'assessment-abc123',
-  name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
-  metadata: {
-    overview: {
-      riskOwner: ['user:risk-owner'],
-      modelIds: ['model-one', 'model-two'],
-    },
-    deletedInformation: 'must not be returned',
-  },
+  name: 'Assessment',
+  owner: ['user:risk-owner'],
+  models: ['model-one', 'model-two'],
   draft: false,
   createdBy: 'creator',
-  createdAt: new Date('2026-01-01T00:00:00.000Z'),
-  updatedAt: new Date('2026-01-02T00:00:00.000Z'),
-  deletedAt: new Date('2026-01-03T00:00:00.000Z'),
+  createdAt: '2026-01-01T00:00:00.000Z',
 }
 
 const serviceMock = vi.hoisted(() => ({
@@ -31,41 +24,27 @@ const serviceMock = vi.hoisted(() => ({
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
 describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
-  test('searches deployment assessments using all filters', async () => {
-    serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessment])
-
+  test('200 > ok', async () => {
+    serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessmentSummary])
+    const fixture = createFixture(getDeploymentAssessmentsSchema)
     const res = await testGet(
-      '/api/v3/deployment-assessments?schemaId=deployment-assessment-schema&modelIds=model-one&modelIds=model-two&riskOwner=user%3Arisk-owner&createdBy=creator&createdAfter=2026-01-01&createdBefore=2026-01-31&draft=false&search=Assessment&state=approved&needsAction=true',
+      `/api/v3/deployment-assessments?${qs.stringify(fixture.query, { arrayFormat: 'repeat' })}`,
     )
 
     expect(res.statusCode).toBe(200)
-    expect(serviceMock.searchDeploymentAssessments).toHaveBeenCalledWith(expect.anything(), {
-      schemaId: 'deployment-assessment-schema',
-      modelIds: ['model-one', 'model-two'],
-      riskOwner: 'user:risk-owner',
-      createdBy: 'creator',
-      createdAfter: '2026-01-01',
-      createdBefore: '2026-01-31',
-      draft: false,
-      state: 'approved',
-      search: 'Assessment',
-      needsAction: true,
-    })
-    expect(res.body).toEqual({
-      deploymentAssessments: [
-        {
-          id: 'assessment-abc123',
-          schemaId: 'deployment-assessment-schema',
-          name: 'Assessment',
-          owner: ['user:risk-owner'],
-          models: ['model-one', 'model-two'],
-          draft: false,
-          createdBy: 'creator',
-          createdAt: '2026-01-01T00:00:00.000Z',
-        },
-      ],
-    })
-    expect(audit.onSearchDeploymentAssessments).toHaveBeenCalledWith(expect.anything(), [deploymentAssessment])
+    expect(res.body).matchSnapshot()
+  })
+
+  test('audit > expected call', async () => {
+    serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessmentSummary])
+    const fixture = createFixture(getDeploymentAssessmentsSchema)
+    const res = await testGet(
+      `/api/v3/deployment-assessments?${qs.stringify(fixture.query, { arrayFormat: 'repeat' })}`,
+    )
+
+    expect(res.statusCode).toBe(200)
+    expect(audit.onSearchDeploymentAssessments).toHaveBeenCalled()
+    expect(audit.onSearchDeploymentAssessments.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('supports a single model filter', async () => {
