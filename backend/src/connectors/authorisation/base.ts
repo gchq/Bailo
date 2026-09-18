@@ -183,7 +183,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === SchemaAction.Create || action === SchemaAction.Delete) {
+        if (action === SchemaAction.Create || action === SchemaAction.Delete || action === SchemaAction.Update) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
@@ -508,7 +508,11 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === ReviewRoleAction.Create || action === ReviewRoleAction.Delete) {
+        if (
+          action === ReviewRoleAction.Create ||
+          action === ReviewRoleAction.Delete ||
+          action === ReviewRoleAction.Update
+        ) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {

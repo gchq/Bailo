@@ -669,6 +669,35 @@ describe('services > file', () => {
     await expect(files).rejects.toThrow(/^The requested files were not found./)
   })
 
+  test('getFilesByIds > partially found files reports the missing ids', async () => {
+    FileModelMock.aggregate.mockResolvedValueOnce([{ example: 'file', id: testFileId, scanResults: [] }])
+
+    const user = { dn: 'testUser' } as any
+    const modelId = 'testModelId'
+    const fileIds = [testFileId, testFileIdReversed]
+
+    const error = await getFilesByIds(user, modelId, fileIds).catch((err) => err)
+
+    expect(error.message).toBe('The requested files were not found.')
+    expect(error.context).toStrictEqual({ fileIds: [testFileIdReversed] })
+    expect(authorisation.files).not.toHaveBeenCalled()
+  })
+
+  test('getFilesByIds > more files returned than requested', async () => {
+    FileModelMock.aggregate.mockResolvedValueOnce([
+      { example: 'file', id: testFileId, scanResults: [] },
+      { example: 'file', id: testFileIdReversed, scanResults: [] },
+    ])
+
+    const user = { dn: 'testUser' } as any
+    const modelId = 'testModelId'
+
+    const error = await getFilesByIds(user, modelId, [testFileId]).catch((err) => err)
+
+    expect(error.message).toBe('The requested files were not found.')
+    expect(error.context).toStrictEqual({ fileIds: [] })
+  })
+
   test('getFilesByIds > no permission', async () => {
     vi.mocked(authorisation.files).mockResolvedValueOnce([
       {
