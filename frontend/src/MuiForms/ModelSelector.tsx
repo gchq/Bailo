@@ -167,6 +167,7 @@ export default function ModelSelector({
                   event.stopPropagation()
                 }
               }}
+              data-test='modelSelectorInput'
             />
           )}
         />

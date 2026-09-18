@@ -63,6 +63,7 @@ export default function DateSelector({ onChange, value, label, registry, require
           onChange={handleChange}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
+          data-test='dateSelectorInput'
         />
       ) : compare.inMirroredCompare && value ? (
         <InlineDiff from={formatDate(compare.compareFromState)} to={formatDate(value)} />
