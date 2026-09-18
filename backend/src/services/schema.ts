@@ -66,13 +66,13 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
     : []
 
   const existingModelOverviewRequired: string[] = Array.isArray((jsonSchema as any).properties?.modelOverview?.required)
-    ? (((jsonSchema as any).properties!.details as any).required as string[])
+    ? (((jsonSchema as any).properties!.modelOverview as any).required as string[])
     : []
 
   const mergedModelOverviewRequired = Array.from(new Set<string>(['modelIds', ...existingModelOverviewRequired]))
 
   const existingSignOffRequired: string[] = Array.isArray((jsonSchema as any).properties?.signOff?.required)
-    ? (((jsonSchema as any).properties!.details as any).required as string[])
+    ? (((jsonSchema as any).properties!.signOff as any).required as string[])
     : []
 
   const mergedSignOffRequired = Array.from(new Set<string>(['riskOwner', ...existingSignOffRequired]))
