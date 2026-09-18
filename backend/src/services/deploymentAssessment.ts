@@ -51,7 +51,12 @@ export interface DeploymentAssessmentDetails {
   state?: DeploymentAssessmentStateKeys
 }
 
-export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
+// Allow partial metadata when updating to support draft updates where sections may be missing
+export type UpdateDeploymentAssessmentParams = {
+  metadata?: Partial<DeploymentAssessmentInterface['metadata']>
+  draft?: DeploymentAssessmentInterface['draft']
+  name?: DeploymentAssessmentInterface['name']
+}
 export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
 export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
 
@@ -111,7 +116,7 @@ async function validateModels(user: UserInterface, modelIds: string[]) {
 async function validateDeploymentAssessment(
   user: UserInterface,
   schemaId: DeploymentAssessmentInterface['schemaId'],
-  metadata: DeploymentAssessmentInterface['metadata'],
+  metadata: Partial<DeploymentAssessmentInterface['metadata']>,
   draft: DeploymentAssessmentInterface['draft'],
 ) {
   const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
@@ -119,7 +124,8 @@ async function validateDeploymentAssessment(
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
 
-  const { riskOwner, modelIds } = metadata.overview ?? {}
+  const { riskOwner } = metadata.signOff ?? {}
+  const { modelIds } = metadata.modelOverview ?? {}
 
   if (!draft && (!riskOwner || riskOwner.length === 0)) {
     throw BadReq('Deployment risk owner is required')
@@ -244,7 +250,7 @@ function needsUserAction(
   state?: DeploymentAssessmentStateKeys,
 ) {
   if (
-    deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
+    deploymentAssessment.metadata.signOff?.riskOwner?.includes(toEntity('user', user.dn)) &&
     state === DeploymentAssessmentState.NeedsReview
   ) {
     return true
@@ -377,7 +383,7 @@ async function notifyDeploymentAssessmentReviewed(
 }
 
 async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
-  const modelIds = deploymentAssessment.metadata.overview?.modelIds ?? []
+  const modelIds = deploymentAssessment.metadata.modelOverview?.modelIds ?? []
   const models = await getModelsByIdsNoAuth(modelIds)
 
   const modelDevelopers = models.map((model) => ({
@@ -443,8 +449,8 @@ export async function createDeploymentAssessment(
 
   if (!draft) {
     await notifyDeploymentStakeholders(
-      metadata.overview.riskOwner,
-      metadata.overview.modelIds ?? [],
+      metadata.signOff.riskOwner,
+      metadata.modelOverview.modelIds ?? [],
       deploymentAssessment,
     )
   }
@@ -517,7 +523,20 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('name')
   }
   if (diff.metadata !== undefined) {
-    deploymentAssessment.metadata = diff.metadata
+    const current = deploymentAssessment.metadata ?? ({} as DeploymentAssessmentInterface['metadata'])
+    const next: DeploymentAssessmentInterface['metadata'] = {
+      ...current,
+      ...diff.metadata,
+      modelOverview: {
+        ...(current.modelOverview ?? {}),
+        ...(diff.metadata as any).modelOverview,
+      },
+      signOff: {
+        ...(current.signOff ?? {}),
+        ...(diff.metadata as any).signOff,
+      },
+    }
+    deploymentAssessment.metadata = next
     deploymentAssessment.markModified('metadata')
   }
 
@@ -534,8 +553,8 @@ export async function updateDeploymentAssessment(
 
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      deploymentAssessment.metadata?.overview?.riskOwner ?? [],
-      deploymentAssessment.metadata?.overview?.modelIds ?? [],
+      deploymentAssessment.metadata?.signOff?.riskOwner ?? [],
+      deploymentAssessment.metadata?.modelOverview?.modelIds ?? [],
       deploymentAssessment,
     )
   }
@@ -565,7 +584,8 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
         (params.needsAction === undefined || needsUserAction(assessment, user, state) === params.needsAction)
 
       if (passesFilter) {
-        const { riskOwner, modelIds } = assessment.metadata?.overview ?? {}
+        const { riskOwner } = assessment.metadata?.signOff ?? {}
+        const { modelIds } = assessment.metadata?.modelOverview ?? {}
         acc.push({
           id: assessment.id,
           schemaId: assessment.schemaId,

@@ -3,9 +3,12 @@ import { HydratedDocument, model, Schema } from 'mongoose'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export interface DeploymentAssessmentMetadata {
-  overview?: {
-    riskOwner?: string[]
+  modelOverview: {
     modelIds?: string[]
+    [key: string]: unknown
+  }
+  signOff?: {
+    riskOwner?: string[]
     [key: string]: unknown
   }
   [key: string]: unknown

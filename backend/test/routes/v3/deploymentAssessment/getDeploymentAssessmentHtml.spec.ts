@@ -16,7 +16,14 @@ const deploymentAssessment: DeploymentAssessmentInterface = {
   draft: true,
   schemaId: 'schema123',
   createdBy: 'Joe Bloggs',
-  metadata: {},
+  metadata: {
+    modelOverview: {
+      modelIds: ['test-123'],
+    },
+    signOff: {
+      riskOwner: ['user:user'],
+    },
+  },
 }
 const mockUser: UserInterface = { dn: 'user' }
 const mockHtmlService = vi.hoisted(() => {

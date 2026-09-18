@@ -61,13 +61,48 @@ export async function searchSchemas(
  * @returns
  */
 function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
-  const requiredProperties = Array.isArray(jsonSchema.required) ? jsonSchema.required : []
+  const requiredProperties = Array.isArray((jsonSchema as any).required)
+    ? ((jsonSchema as any).required as string[])
+    : []
+
+  const existingModelOverviewRequired: string[] = Array.isArray((jsonSchema as any).properties?.modelOverview?.required)
+    ? (((jsonSchema as any).properties!.modelOverview as any).required as string[])
+    : []
+
+  const mergedModelOverviewRequired = Array.from(new Set<string>(['modelIds', ...existingModelOverviewRequired]))
+
+  const existingSignOffRequired: string[] = Array.isArray((jsonSchema as any).properties?.signOff?.required)
+    ? (((jsonSchema as any).properties!.signOff as any).required as string[])
+    : []
+
+  const mergedSignOffRequired = Array.from(new Set<string>(['riskOwner', ...existingSignOffRequired]))
 
   return {
     ...structuredClone(jsonSchema),
     properties: {
-      overview: {
-        title: 'Details',
+      ...((jsonSchema as any).properties ?? {}),
+      modelOverview: {
+        title: 'Model Overview',
+        type: 'object',
+        properties: {
+          modelIds: {
+            title: 'List all models assigned to this deployment assessment',
+            type: 'array',
+            items: {
+              type: 'string',
+              minLength: 1,
+            },
+            minItems: 1,
+            uniqueItems: true,
+            widget: 'modelSelector',
+          },
+          ...(((jsonSchema as any).properties?.modelOverview?.properties as object) ?? {}),
+        },
+        required: mergedModelOverviewRequired,
+        additionalProperties: false,
+      },
+      signOff: {
+        title: 'Deployment Sign-Off',
         type: 'object',
         properties: {
           riskOwner: {
@@ -83,24 +118,17 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             widget: 'entitySelector',
             hideDefaultUser: true,
           },
-          modelIds: {
-            title: 'List all models assigned to this deployment assessment',
-            type: 'array',
-            items: {
-              type: 'string',
-              minLength: 1,
-            },
-            minItems: 1,
-            uniqueItems: true,
-            widget: 'modelSelector',
-          },
+          ...(((jsonSchema as any).properties?.signOff?.properties as object) ?? {}),
         },
-        required: ['riskOwner', 'modelIds'],
+        required: mergedSignOffRequired,
         additionalProperties: false,
       },
-      ...jsonSchema.properties,
     },
-    required: ['overview', ...requiredProperties.filter((property) => property !== 'overview')],
+    required: [
+      'signOff',
+      'modelOverview',
+      ...requiredProperties.filter((property) => !['signOff', 'modelOverview'].includes(property)),
+    ],
   }
 }
 
