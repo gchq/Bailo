@@ -383,7 +383,7 @@ async function notifyDeploymentAssessmentReviewed(
 }
 
 async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
-  const modelIds = deploymentAssessment.metadata.overview?.modelIds ?? []
+  const modelIds = deploymentAssessment.metadata.modelOverview?.modelIds ?? []
   const models = await getModelsByIdsNoAuth(modelIds)
 
   const modelDevelopers = models.map((model) => ({
