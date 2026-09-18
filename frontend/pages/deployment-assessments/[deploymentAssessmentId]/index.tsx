@@ -170,7 +170,7 @@ export default function DeploymentAssessment() {
                     isEdit={isEdit}
                     mutator={mutateDeploymentAssessment}
                     entryId=''
-                    responseList={deploymentAssessment.respones}
+                    responseList={deploymentAssessment.responses}
                   />
                 </Stack>
               </>

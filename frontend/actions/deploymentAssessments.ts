@@ -100,7 +100,7 @@ export function useGetDeploymentAssessment(deploymentId?: string) {
 
   return {
     mutateDeploymentAssessment: mutate,
-    deploymentAssessment: data && { ...data?.deploymentAssessment, state: data?.state, respones: data?.responses },
+    deploymentAssessment: data && { ...data?.deploymentAssessment, state: data?.state, responses: data?.responses },
     isDeploymentAssessmentLoading: isLoading,
     isDeploymentAssessmentError: error,
   }
