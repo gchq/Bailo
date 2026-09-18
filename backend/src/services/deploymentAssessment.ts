@@ -29,10 +29,16 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
+import { getModelsByIdsNoAuth, getRoleEntities } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
-import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
+import {
+  notifyModelOwnersOfDeploymentApproval,
+  notifyModelOwnersOfDeploymentAssessment,
+  notifyReviewResponseForDeploymentAssessment,
+  notifyRiskOwnerOfDeploymentAssessment,
+} from './smtp/smtp.js'
 import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
 
 export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
@@ -152,7 +158,9 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...uniqueRiskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
+      ...uniqueRiskOwners.map((riskOwner) =>
+        notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
+      ),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -162,7 +170,9 @@ async function notifyDeploymentStakeholders(
           ),
         ]
 
-        return owners.length ? [notifyDeploymentModelOwners(owners, deploymentAssessment, model, creatorName)] : []
+        return owners.length
+          ? [notifyModelOwnersOfDeploymentAssessment(owners, deploymentAssessment, model, creatorName)]
+          : []
       }),
     ]
 
@@ -316,9 +326,10 @@ export async function reviewDeploymentAssessment(
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
+  const assessmentReviewer = toEntity('user', user.dn)
   const review = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
   const response = new ResponseModel({
-    entity: toEntity('user', user.dn),
+    entity: assessmentReviewer,
     kind: ResponseKind.Review,
     role: review.role,
     parentId: review._id,
@@ -326,7 +337,61 @@ export async function reviewDeploymentAssessment(
     ...(comment && { comment }),
   })
   await response.save()
+
+  await notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer)
+
   return response
+}
+
+async function notifyDeploymentAssessmentReviewed(
+  deploymentAssessment: DeploymentAssessmentInterface,
+  decision: Exclude<DecisionKeys, 'undo'>,
+  assessmentReviewer: string,
+): Promise<void> {
+  try {
+    switch (decision) {
+      case Decision.Reject:
+      case Decision.RequestChanges:
+        await notifyReviewResponseForDeploymentAssessment(deploymentAssessment, decision, assessmentReviewer)
+        break
+
+      case Decision.Approve: {
+        const modelDevelopers = await getModelDevelopers(deploymentAssessment)
+        await Promise.all(
+          modelDevelopers.map(({ model, developers }) =>
+            notifyModelOwnersOfDeploymentApproval(
+              developers,
+              deploymentAssessment,
+              model,
+              deploymentAssessment.createdBy,
+            ),
+          ),
+        )
+        break
+      }
+    }
+  } catch (error) {
+    log.warn(
+      {
+        error,
+        deploymentAssessmentId: deploymentAssessment.id,
+        decision,
+      },
+      'Failed to send deployment assessment review notification',
+    )
+  }
+}
+
+async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
+  const modelIds = deploymentAssessment.metadata.overview?.modelIds ?? []
+  const models = await getModelsByIdsNoAuth(modelIds)
+
+  const modelDevelopers = models.map((model) => ({
+    model,
+    developers: getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner],
+  }))
+
+  return modelDevelopers
 }
 
 export async function createDeploymentAssessment(
