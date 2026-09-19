@@ -7,19 +7,6 @@ import { ArtefactKind } from '../../../src/models/Scan.js'
 vi.mock('../../../src/services/log.js')
 vi.mock('bytes')
 
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    artefactScanners: {
-      scanTimeoutMs: 60_000,
-    },
-  },
-}))
-
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 class TestConnector extends BaseArtefactScanningConnector {
   toolName = 'TestScanner'
   version = '1.2.3'

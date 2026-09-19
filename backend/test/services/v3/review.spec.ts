@@ -8,6 +8,7 @@ import {
 } from '../../../src/services/v3/review.js'
 import { ReviewKind } from '../../../src/types/enums.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 const ReviewModel = getTypedModelMock('ReviewModel')
 
@@ -39,15 +40,6 @@ const smtpMock = vi.hoisted(() => ({
   notifyReviewRoleOfAdditionalReview: vi.fn(),
 }))
 vi.mock('../../../src/services/smtp/smtp.js', () => smtpMock)
-
-const mockLifecycleConfig = vi.hoisted(() => ({ maxReviewInterval: '1 year' }))
-vi.mock('../../../src/utils/config.js', async () => {
-  const base = (await vi.importActual('../../../src/utils/__mocks__/config.js')) as any
-  return {
-    __esModule: true,
-    default: { ...base.default, ui: { ...base.default.ui, lifecycle: mockLifecycleConfig } },
-  }
-})
 
 const FIXED_DATE = new Date('2026-01-01T00:00:00.000Z')
 
@@ -199,12 +191,11 @@ describe('isLifecycleReviewDateValid > config variants', () => {
   })
 
   afterEach(() => {
-    mockLifecycleConfig.maxReviewInterval = '1 year'
     vi.useRealTimers()
   })
 
   test('allows any date when maxReviewInterval is empty string', async () => {
-    mockLifecycleConfig.maxReviewInterval = ''
+    setTestConfig({ ui: { lifecycle: { maxReviewInterval: '' } } })
     const mod = await import('../../../src/services/v3/review.js')
     vi.setSystemTime(FIXED_DATE)
 
@@ -213,7 +204,7 @@ describe('isLifecycleReviewDateValid > config variants', () => {
   })
 
   test('restricts dates with 1 month interval', async () => {
-    mockLifecycleConfig.maxReviewInterval = '1 month'
+    setTestConfig({ ui: { lifecycle: { maxReviewInterval: '1 month' } } })
     const mod = await import('../../../src/services/v3/review.js')
     vi.setSystemTime(FIXED_DATE)
 
