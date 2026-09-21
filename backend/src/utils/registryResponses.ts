@@ -1,10 +1,13 @@
 import type { ZodSchema } from 'zod'
 
+import { z } from '../lib/zod.js'
 import { InternalError } from './error.js'
 import {
   ImageManifestV2,
+  ImageManifestV2Schema,
   ManifestListMediaTypeSchema,
   ManifestListV2,
+  ManifestListV2Schema,
   RegistryErrorResponseBody,
   RegistryErrorResponseBodySchema,
 } from './registryResponseTypes.js'
@@ -29,6 +32,7 @@ export function parseRegistryResponse<T>(
   throw InternalError('Response did not match expected schema or RegistryErrorResponse.', { schema, body })
 }
 
+export const ManifestResponseBodySchema = z.union([ImageManifestV2Schema, ManifestListV2Schema])
 export function isManifestList(manifest: ImageManifestV2 | ManifestListV2): manifest is ManifestListV2 {
   if ('mediaType' in manifest && ManifestListMediaTypeSchema.safeParse(manifest.mediaType).success) {
     return true
