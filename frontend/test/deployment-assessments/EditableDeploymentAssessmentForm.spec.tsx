@@ -6,7 +6,14 @@ import { useGetSchema } from 'actions/schema'
 import { ReactElement, useState } from 'react'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import { lightTheme } from 'src/theme'
-import { DeploymentAssessmentInterface, SchemaInterface } from 'types/types'
+import { KeyedMutator } from 'swr'
+import {
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentState,
+  DeploymentAssessmentStateKeys,
+  SchemaInterface,
+  SchemaKind,
+} from 'types/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('actions/deploymentAssessment', () => ({
@@ -29,9 +36,18 @@ vi.mock('src/common/Restricted', () => ({
   default: ({ children }: { children: ReactElement }) => children,
 }))
 
-const testSchema = {
+const testSchema: SchemaInterface = {
   id: 'deployment-assessment-schema',
   name: 'Deployment assessment schema',
+  description: '',
+  active: true,
+  hidden: false,
+  kind: SchemaKind.DEPLOYMENT_ASSESSMENT,
+  meta: {},
+  uiSchema: {},
+  reviewRoles: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
   jsonSchema: {
     type: 'object',
     properties: {
@@ -43,16 +59,22 @@ const testSchema = {
       },
     },
   },
-} as unknown as SchemaInterface
+}
 
-const testDeploymentAssessment = {
+const testDeploymentAssessment: DeploymentAssessmentInterface = {
+  _id: 'abc123',
   id: 'assessment-abc123',
   schemaId: 'deployment-assessment-schema',
   name: 'A published assessment',
   draft: false,
+  state: DeploymentAssessmentState.NeedsReview,
+  justification: '',
+  owner: ['user:user'],
   createdBy: 'user',
+  createdAt: new Date(),
+  updatedAt: new Date(),
   metadata: { overview: {} },
-} as unknown as DeploymentAssessmentInterface
+}
 
 /**
  * Mirrors the detail page: owns `isEdit` and swaps in fresh data when `mutate` resolves. `mutate`
@@ -62,16 +84,20 @@ function TestHarness({ updated }: { updated: DeploymentAssessmentInterface }) {
   const [isEdit, setIsEdit] = useState(false)
   const [deploymentAssessment, setDeploymentAssessment] = useState(testDeploymentAssessment)
 
+  const mutate: KeyedMutator<{
+    deploymentAssessment: DeploymentAssessmentInterface
+    state: DeploymentAssessmentStateKeys
+  }> = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 250))
+    setDeploymentAssessment(updated)
+    return undefined
+  }
+
   return (
     <ThemeProvider theme={lightTheme}>
       <EditableDeploymentAssessmentForm
         deploymentAssessment={deploymentAssessment}
-        mutate={
-          (async () => {
-            await new Promise((resolve) => setTimeout(resolve, 250))
-            setDeploymentAssessment(updated)
-          }) as never
-        }
+        mutate={mutate}
         isEdit={isEdit}
         onIsEditChange={setIsEdit}
       />
@@ -108,7 +134,7 @@ describe('EditableDeploymentAssessmentForm', () => {
 
     render(<TestHarness updated={updated} />)
 
-    await user.click(await screen.findByRole('button', { name: /Edit Deployment Assessment/ }))
+    await user.click(await screen.findByRole('button', { name: /Edit deployment assessment/ }))
     await user.type(answerField(), 'A')
 
     // Clearing the answer again blocks the save and marks the missing field
@@ -135,7 +161,7 @@ describe('EditableDeploymentAssessmentForm', () => {
 
     render(<TestHarness updated={testDeploymentAssessment} />)
 
-    await user.click(await screen.findByRole('button', { name: /Edit Deployment Assessment/ }))
+    await user.click(await screen.findByRole('button', { name: /Edit deployment assessment/ }))
     await user.click(screen.getAllByRole('button', { name: 'Save' })[0])
 
     expect(await screen.findByText('This field is required')).toBeDefined()

@@ -135,7 +135,7 @@ export function FieldErrorTemplate({ errors = [], fieldPathId }: FieldErrorProps
   )
 }
 
-export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
+export function ErrorListTemplate({ errors, schema }: Pick<ErrorListProps, 'errors' | 'schema'>) {
   return (
     <Stack spacing={0.5} sx={{ mb: 2 }}>
       <Typography color='error' sx={{ fontWeight: 'bold' }}>

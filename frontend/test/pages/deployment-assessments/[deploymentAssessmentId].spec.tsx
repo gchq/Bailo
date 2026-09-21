@@ -3,7 +3,14 @@ import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useGetSchema } from 'actions/schema'
 import DeploymentAssessment from 'pages/deployment-assessments/[deploymentAssessmentId]/index'
-import { DeploymentAssessmentInterface, SchemaInterface } from 'types/types'
+import {
+  DeploymentAssessmentInterface,
+  DeploymentAssessmentMetadata,
+  DeploymentAssessmentState,
+  ResponseInterface,
+  SchemaInterface,
+  SchemaKind,
+} from 'types/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const sendNotification = vi.fn()
@@ -22,6 +29,24 @@ vi.mock('actions/schema', () => ({
   useGetSchema: vi.fn(),
 }))
 
+vi.mock('actions/review', () => ({
+  postDeploymentAssessmentReviewResponse: vi.fn(),
+  useGetReviewsForDeploymentAssessment: () => ({
+    reviews: [],
+    isReviewsLoading: false,
+    isReviewsError: undefined,
+    mutateReviews: vi.fn(),
+  }),
+}))
+
+vi.mock('src/reviews/ReviewComments', () => ({ default: () => <div data-test='reviewComments' /> }))
+
+vi.mock('src/entry/model/reviews/ReviewBanner', () => ({ default: () => <div data-test='reviewBanner' /> }))
+
+vi.mock('src/deployment-assessments/AssessmentStateChip', () => ({
+  default: () => <div data-test='assessmentStateChip' />,
+}))
+
 vi.mock('src/deployment-assessments/EditableDeploymentAssessmentForm', () => ({
   default: ({ showValidationErrors }: { showValidationErrors: boolean }) => (
     <div data-test='deploymentAssessmentForm'>{showValidationErrors ? 'marking required fields' : 'no marking'}</div>
@@ -36,8 +61,18 @@ vi.mock('next/router', () => ({
   useRouter: () => ({ query: { deploymentAssessmentId: 'assessment-abc123' }, isReady: true }),
 }))
 
-const testSchema = {
+const testSchema: SchemaInterface = {
   id: 'deployment-assessment-schema',
+  name: 'Deployment assessment schema',
+  description: '',
+  active: true,
+  hidden: false,
+  kind: SchemaKind.DEPLOYMENT_ASSESSMENT,
+  meta: {},
+  uiSchema: {},
+  reviewRoles: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
   jsonSchema: {
     type: 'object',
     properties: {
@@ -52,18 +87,26 @@ const testSchema = {
     },
     required: ['overview'],
   },
-} as SchemaInterface
+}
 
-const testDeploymentAssessment = {
+// `useGetDeploymentAssessment` flattens the response's `state` and `responses` onto the assessment
+const testDeploymentAssessment: DeploymentAssessmentInterface & { responses: ResponseInterface[] } = {
+  _id: 'abc123',
   id: 'assessment-abc123',
   schemaId: 'deployment-assessment-schema',
   name: 'A draft assessment',
   draft: true,
+  state: DeploymentAssessmentState.NeedsReview,
+  justification: '',
+  owner: ['user:user'],
   createdBy: 'user',
-  metadata: {},
-} as DeploymentAssessmentInterface
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  metadata: { overview: {} },
+  responses: [],
+}
 
-function renderPage(metadata: Record<string, unknown>) {
+function renderPage(metadata: DeploymentAssessmentMetadata) {
   vi.mocked(useGetSchema).mockReturnValue({
     schema: testSchema,
     isSchemaLoading: false,
@@ -71,7 +114,7 @@ function renderPage(metadata: Record<string, unknown>) {
     mutateSchema: vi.fn(),
   })
   vi.mocked(useGetDeploymentAssessment).mockReturnValue({
-    deploymentAssessment: { ...testDeploymentAssessment, metadata } as DeploymentAssessmentInterface,
+    deploymentAssessment: { ...testDeploymentAssessment, metadata },
     isDeploymentAssessmentLoading: false,
     isDeploymentAssessmentError: undefined,
     mutateDeploymentAssessment: vi.fn(),
@@ -86,7 +129,7 @@ describe('DeploymentAssessment', () => {
   })
 
   it('does not publish an incomplete deployment assessment', async () => {
-    renderPage({})
+    renderPage({ overview: {} })
 
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
 
@@ -114,9 +157,12 @@ describe('DeploymentAssessment', () => {
     vi.mocked(useGetSchema).mockReturnValue({
       schema: undefined,
       isSchemaLoading: false,
-      isSchemaError: { info: { message: 'Unable to load schema' } },
+      isSchemaError: Object.assign(new Error('Unable to load schema'), {
+        info: { message: 'Unable to load schema' },
+        status: 500,
+      }),
       mutateSchema: vi.fn(),
-    } as unknown as ReturnType<typeof useGetSchema>)
+    })
     vi.mocked(useGetDeploymentAssessment).mockReturnValue({
       deploymentAssessment: testDeploymentAssessment,
       isDeploymentAssessmentLoading: false,

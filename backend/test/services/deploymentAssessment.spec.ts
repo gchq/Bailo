@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import authentication from '../../src/connectors/authentication/index.js'
 import { DeploymentAssessmentAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
+import { EntryKind, EntryVisibility, ModelDoc, SystemRoles } from '../../src/models/Model.js'
 import { Decision, ResponseKind } from '../../src/models/Response.js'
 import {
   commentOnDeploymentAssessment,
@@ -17,6 +17,11 @@ import {
   searchDeploymentAssessments,
   updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
+import { getModelsByIdsNoAuth } from '../../src/services/model.js'
+import {
+  notifyModelOwnersOfDeploymentApproval,
+  notifyReviewResponseForDeploymentAssessment,
+} from '../../src/services/smtp/smtp.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
@@ -43,10 +48,24 @@ const schemaMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/schema.js', () => schemaMocks)
 
 const smtpMocks = vi.hoisted(() => ({
-  notifyDeploymentRiskOwner: vi.fn(),
-  notifyDeploymentModelOwners: vi.fn(),
+  notifyRiskOwnerOfDeploymentAssessment: vi.fn(),
+  notifyModelOwnersOfDeploymentAssessment: vi.fn(),
+  notifyReviewResponseForDeploymentAssessment: vi.fn(),
+  notifyModelOwnersOfDeploymentApproval: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
+const modelServiceMocks = vi.hoisted(() => ({
+  getModelsByIdsNoAuth: vi.fn(),
+}))
+
+vi.mock('../../src/services/model.js', async () => {
+  const actual = await vi.importActual<typeof import('../../src/services/model.js')>('../../src/services/model.js')
+
+  return {
+    ...actual,
+    getModelsByIdsNoAuth: modelServiceMocks.getModelsByIdsNoAuth,
+  }
+})
 
 const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
@@ -57,9 +76,11 @@ const params = {
   name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
   metadata: {
-    overview: {
-      riskOwner: ['user:risk-owner'],
+    modelOverview: {
       modelIds: ['model-one'],
+    },
+    signOff: {
+      riskOwner: ['user:risk-owner'],
     },
     assessment: { summary: 'Summary' },
   },
@@ -92,7 +113,7 @@ describe('services > deploymentAssessment', () => {
     test('gets an existing DA by its ID', async () => {
       const mockDA = {
         createdBy: 'creator',
-        metadata: { overview: { riskOwner: ['user'] } },
+        metadata: { signOff: { riskOwner: ['user'] } },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
 
@@ -113,7 +134,7 @@ describe('services > deploymentAssessment', () => {
     test('forbidden when authorisation fails', async () => {
       const mockDA = {
         createdBy: 'creator',
-        metadata: { overview: { riskOwner: ['user'] } },
+        metadata: { signOff: { riskOwner: ['user'] } },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
       vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
@@ -183,7 +204,7 @@ describe('services > deploymentAssessment', () => {
         { dn: 'creator' },
         {
           ...params,
-          metadata: { ...params.metadata, overview: { ...params.metadata.overview, riskOwner: ['group:risk'] } },
+          metadata: { ...params.metadata, signOff: { ...params.metadata.signOff, riskOwner: ['group:risk'] } },
         },
       ),
     ).rejects.toThrow('The risk owner must be a valid user entity.')
@@ -245,10 +266,13 @@ describe('services > deploymentAssessment', () => {
 
   test.each([
     ['only a name', { overview: { name: 'Assessment' } }],
-    ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
-    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
-    ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
-    ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+    ['an empty model ID list', { overview: { name: 'Assessment' }, modelOverview: { modelIds: [] } }],
+    ['a risk owner but no models', { overview: { name: 'Assessment' }, signOff: { riskOwner: ['user:risk-owner'] } }],
+    ['models but no risk owner', { overview: { name: 'Assessment' }, modelOverview: { modelIds: ['model-one'] } }],
+    [
+      'repeated model IDs',
+      { overview: { name: 'Assessment', modelOverview: { modelIds: ['model-one', 'model-one'] } } },
+    ],
   ])('accepts metadata with %s', async (_description, metadata) => {
     const result = await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
@@ -304,9 +328,14 @@ describe('services > deploymentAssessment', () => {
       id: 'assessment-id',
       draft: false,
       createdBy: 'creator',
-      metadata: { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } },
+      metadata: { overview: { name: 'Assessment' }, signOff: { riskOwner: ['user:risk-owner'] } },
     }
-    const review = { _id: 'review-object-id', kind: ReviewKind.DeploymentAssessment, role: 'dro' }
+    const review = {
+      _id: 'review-object-id',
+      kind: ReviewKind.DeploymentAssessment,
+      role: 'dro',
+      createdAt: new Date('10/10/2026'),
+    }
 
     test.each([false, true])('allows an authorised viewer to comment when draft is %s', async (draft) => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce({ ...assessment, draft })
@@ -342,32 +371,25 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('returns authorised comments and review history', async () => {
-      const comments = [{ kind: ResponseKind.Comment, comment: 'A question' }]
-      const reviews = [
+      const reviewResponses = [
         {
-          review,
-          responses: [
-            {
-              _id: { toString: () => 'response-id' },
-              kind: ResponseKind.Review,
-              decision: Decision.Approve,
-              createdAt: '2026-01-02T00:00:00.000Z',
-            },
-          ],
+          _id: { toString: () => 'response-id' },
+          kind: ResponseKind.Review,
+          decision: Decision.Approve,
+          createdAt: '2026-01-02T00:00:00.000Z',
         },
       ]
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
-      ResponseModelMock.find.mockResolvedValueOnce(comments)
-      ReviewModelMock.aggregate.mockResolvedValueOnce(reviews)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.find.mockResolvedValueOnce(reviewResponses)
 
       await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, assessment.id)).resolves.toEqual({
         deploymentAssessment: assessment,
-        responses: [comments[0], reviews[0].responses[0]],
+        responses: reviewResponses,
         state: 'approved',
       })
       expect(ResponseModelMock.find).toHaveBeenCalledWith({
-        parentId: assessment._id,
-        kind: ResponseKind.Comment,
+        parentId: [review._id, assessment._id],
       })
     })
 
@@ -458,6 +480,86 @@ describe('services > deploymentAssessment', () => {
       ).resolves.toBeDefined()
       expect(ResponseModelMock).toHaveBeenCalledWith(expect.objectContaining({ decision: Decision.Approve }))
     })
+
+    test('notifies deployment assessment creator when changes are requested', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue({ decision: Decision.RequestChanges }),
+      })
+
+      await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.RequestChanges)
+
+      expect(notifyReviewResponseForDeploymentAssessment).toHaveBeenCalledWith(
+        assessment,
+        Decision.RequestChanges,
+        expect.any(String),
+      )
+    })
+
+    test('notifies deployment assessment creator when rejected', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue({ decision: Decision.Reject }),
+      })
+
+      await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Reject)
+
+      expect(notifyReviewResponseForDeploymentAssessment).toHaveBeenCalledWith(
+        assessment,
+        Decision.Reject,
+        expect.any(String),
+      )
+    })
+
+    test('notifies model developers when deployment assessment containing their models is approved', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue(review),
+      })
+
+      vi.mocked(getModelsByIdsNoAuth).mockResolvedValueOnce([
+        {
+          id: 'model-1',
+          name: 'Test Model',
+          kind: 'model',
+          collaborators: [
+            {
+              entity: 'user:model-owner',
+              roles: [SystemRoles.Owner],
+            },
+          ],
+        } as ModelDoc,
+      ])
+
+      await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve)
+
+      expect(notifyModelOwnersOfDeploymentApproval).toHaveBeenCalledWith(
+        ['user:model-owner'],
+        assessment,
+        expect.objectContaining({
+          id: 'model-1',
+        }),
+        assessment.createdBy,
+      )
+    })
+
+    test('no review failure when notification fails', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue({ decision: Decision.Reject }),
+      })
+
+      vi.mocked(notifyReviewResponseForDeploymentAssessment).mockRejectedValueOnce(new Error('SMTP example failure'))
+
+      await expect(
+        reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Reject),
+      ).resolves.toBeDefined()
+
+      expect(ResponseModelMock).toHaveBeenCalled()
+    })
   })
 
   describe('updateDeploymentAssessment', () => {
@@ -474,7 +576,11 @@ describe('services > deploymentAssessment', () => {
     test('stores the validated metadata', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-      const metadata = { overview: { name: 'Updated assessment', riskOwner: ['user:risk-owner'] } }
+      const metadata = {
+        assessment: { summary: 'Summary' },
+        modelOverview: { modelIds: ['model-one'] },
+        signOff: { riskOwner: ['user:risk-owner'] },
+      }
 
       const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata, draft: false })
 
@@ -543,13 +649,41 @@ describe('services > deploymentAssessment', () => {
     })
 
     test.each([
-      ['only a name', { overview: { name: 'Assessment' } }],
-      ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
-      ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
-      ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
-      ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+      [
+        'only a name',
+        { overview: { name: 'Assessment' }, modelOverview: { modelIds: [] }, signOff: { riskOwner: [] } },
+      ],
+      [
+        'an empty model ID list',
+        { overview: { name: 'Assessment' }, modelOverview: { modelIds: [] }, signOff: { riskOwner: [] } },
+      ],
+      [
+        'a risk owner but no models',
+        {
+          assessment: { summary: 'Summary' },
+          signOff: { riskOwner: ['user:risk-owner'] },
+          modelOverview: { modelIds: [] },
+        },
+      ],
+      [
+        'models but no risk owner',
+        {
+          assessment: { summary: 'Summary' },
+          modelOverview: { modelIds: ['model-one'] },
+          signOff: { riskOwner: [] },
+        },
+      ],
+      [
+        'repeated model IDs',
+        {
+          assessment: { summary: 'Summary' },
+          modelOverview: { modelIds: ['model-one', 'model-one'] },
+          signOff: { riskOwner: ['user:risk-owner'] },
+        },
+      ],
     ])('accepts a draft update with metadata with %s', async (_description, metadata) => {
       const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.metadata = metadata as any
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
 
       const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata })
@@ -579,20 +713,20 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:risk-owner',
         deploymentAssessment,
         'Risk Owner',
       )
-      expect(smtpMocks.notifyDeploymentModelOwners).toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
     })
 
     test('notifies each risk owner once when a draft with several is submitted', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.metadata = {
         ...params.metadata,
-        overview: {
-          ...params.metadata.overview,
+        signOff: {
+          ...params.metadata.signOff,
           riskOwner: ['user:risk-owner', 'user:other-owner', 'user:risk-owner'],
         },
       }
@@ -602,13 +736,13 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledTimes(2)
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledTimes(2)
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:risk-owner',
         deploymentAssessment,
         'Risk Owner',
       )
-      expect(smtpMocks.notifyDeploymentRiskOwner).toHaveBeenCalledWith(
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:other-owner',
         deploymentAssessment,
         'Risk Owner',
@@ -621,8 +755,8 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
-      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
     })
 
     test('does not re-notify stakeholders when an already submitted assessment is edited', async () => {
@@ -632,8 +766,8 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyDeploymentRiskOwner).not.toHaveBeenCalled()
-      expect(smtpMocks.notifyDeploymentModelOwners).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
     })
   })
 
@@ -851,7 +985,7 @@ describe('services > deploymentAssessment', () => {
           draft: false,
           createdBy: 'user',
           metadata: {
-            overview: {
+            signOff: {
               riskOwner: ['user:user'],
             },
           },
@@ -877,7 +1011,7 @@ describe('services > deploymentAssessment', () => {
           id: 'approved',
           draft: false,
           createdBy: 'someone-else',
-          metadata: { overview: { riskOwner: ['user:user'] } },
+          metadata: { signOff: { riskOwner: ['user:user'] } },
         }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([assessment])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
@@ -930,7 +1064,7 @@ describe('services > deploymentAssessment', () => {
           id: 'unrelated',
           draft: false,
           createdBy: 'someone-else',
-          metadata: { overview: { riskOwner: ['user:another'] } },
+          metadata: { signOff: { riskOwner: ['user:another'] } },
         }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([assessment])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
@@ -945,7 +1079,7 @@ describe('services > deploymentAssessment', () => {
           id: 'mine-and-reviewed-by-me',
           draft: false,
           createdBy: 'user',
-          metadata: { overview: { riskOwner: ['user:user'] } },
+          metadata: { signOff: { riskOwner: ['user:user'] } },
         }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([assessment])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])

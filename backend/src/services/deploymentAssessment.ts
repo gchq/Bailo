@@ -29,10 +29,16 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
+import { getModelsByIdsNoAuth, getRoleEntities } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
-import { getResponses, removeDeploymentAssessmentReviews } from './review.js'
+import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
-import { notifyDeploymentModelOwners, notifyDeploymentRiskOwner } from './smtp/smtp.js'
+import {
+  notifyModelOwnersOfDeploymentApproval,
+  notifyModelOwnersOfDeploymentAssessment,
+  notifyReviewResponseForDeploymentAssessment,
+  notifyRiskOwnerOfDeploymentAssessment,
+} from './smtp/smtp.js'
 import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
 
 export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
@@ -45,7 +51,12 @@ export interface DeploymentAssessmentDetails {
   state?: DeploymentAssessmentStateKeys
 }
 
-export type UpdateDeploymentAssessmentParams = Pick<DeploymentAssessmentInterface, 'metadata' | 'draft' | 'name'>
+// Allow partial metadata when updating to support draft updates where sections may be missing
+export type UpdateDeploymentAssessmentParams = {
+  metadata?: Partial<DeploymentAssessmentInterface['metadata']>
+  draft?: DeploymentAssessmentInterface['draft']
+  name?: DeploymentAssessmentInterface['name']
+}
 export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
 export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
 
@@ -105,7 +116,7 @@ async function validateModels(user: UserInterface, modelIds: string[]) {
 async function validateDeploymentAssessment(
   user: UserInterface,
   schemaId: DeploymentAssessmentInterface['schemaId'],
-  metadata: DeploymentAssessmentInterface['metadata'],
+  metadata: Partial<DeploymentAssessmentInterface['metadata']>,
   draft: DeploymentAssessmentInterface['draft'],
 ) {
   const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
@@ -113,7 +124,8 @@ async function validateDeploymentAssessment(
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
 
-  const { riskOwner, modelIds } = metadata.overview ?? {}
+  const { riskOwner } = metadata.signOff ?? {}
+  const { modelIds } = metadata.modelOverview ?? {}
 
   if (!draft && (!riskOwner || riskOwner.length === 0)) {
     throw BadReq('Deployment risk owner is required')
@@ -146,7 +158,9 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...uniqueRiskOwners.map((riskOwner) => notifyDeploymentRiskOwner(riskOwner, deploymentAssessment, creatorName)),
+      ...uniqueRiskOwners.map((riskOwner) =>
+        notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
+      ),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -156,7 +170,9 @@ async function notifyDeploymentStakeholders(
           ),
         ]
 
-        return owners.length ? [notifyDeploymentModelOwners(owners, deploymentAssessment, model, creatorName)] : []
+        return owners.length
+          ? [notifyModelOwnersOfDeploymentAssessment(owners, deploymentAssessment, model, creatorName)]
+          : []
       }),
     ]
 
@@ -200,7 +216,6 @@ export async function getDeploymentAssessmentById(
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
-
   return deploymentAssessment
 }
 
@@ -234,7 +249,7 @@ function needsUserAction(
   state?: DeploymentAssessmentStateKeys,
 ) {
   if (
-    deploymentAssessment.metadata.overview?.riskOwner?.includes(toEntity('user', user.dn)) &&
+    deploymentAssessment.metadata.signOff?.riskOwner?.includes(toEntity('user', user.dn)) &&
     state === DeploymentAssessmentState.NeedsReview
   ) {
     return true
@@ -256,13 +271,26 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  const responses = await getResponses(deploymentAssessment._id)
-  const latestDecision = responses.findLast(({ kind }) => kind === ResponseKind.Review)?.decision
+
+  if (deploymentAssessment.draft === true) {
+    return {
+      deploymentAssessment,
+      responses: [],
+    }
+  }
+
+  // Get the latest review and its corresponding responses to determine the state of this deployment assessment
+  const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+  const responses = await ResponseModel.find({ parentId: [latestReview._id, deploymentAssessment._id] })
+
+  const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
+    DecisionKeys | undefined
+  const state = deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
 
   return {
     deploymentAssessment,
     responses,
-    state: deriveDeploymentAssessmentState(deploymentAssessment, latestDecision),
+    state,
   }
 }
 
@@ -273,7 +301,7 @@ async function getLatestDeploymentAssessmentReview(deploymentAssessmentId: strin
   }).sort({ createdAt: -1 })
 
   if (!review) {
-    throw NotFound('The deployment assessment does not have a review round.', { deploymentAssessmentId })
+    throw NotFound('The deployment assessment does not have a review.', { deploymentAssessmentId })
   }
 
   return review
@@ -310,9 +338,10 @@ export async function reviewDeploymentAssessment(
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
+  const assessmentReviewer = toEntity('user', user.dn)
   const review = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
   const response = new ResponseModel({
-    entity: toEntity('user', user.dn),
+    entity: assessmentReviewer,
     kind: ResponseKind.Review,
     role: review.role,
     parentId: review._id,
@@ -320,7 +349,61 @@ export async function reviewDeploymentAssessment(
     ...(comment && { comment }),
   })
   await response.save()
+
+  await notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer)
+
   return response
+}
+
+async function notifyDeploymentAssessmentReviewed(
+  deploymentAssessment: DeploymentAssessmentInterface,
+  decision: Exclude<DecisionKeys, 'undo'>,
+  assessmentReviewer: string,
+): Promise<void> {
+  try {
+    switch (decision) {
+      case Decision.Reject:
+      case Decision.RequestChanges:
+        await notifyReviewResponseForDeploymentAssessment(deploymentAssessment, decision, assessmentReviewer)
+        break
+
+      case Decision.Approve: {
+        const modelDevelopers = await getModelDevelopers(deploymentAssessment)
+        await Promise.all(
+          modelDevelopers.map(({ model, developers }) =>
+            notifyModelOwnersOfDeploymentApproval(
+              developers,
+              deploymentAssessment,
+              model,
+              deploymentAssessment.createdBy,
+            ),
+          ),
+        )
+        break
+      }
+    }
+  } catch (error) {
+    log.warn(
+      {
+        error,
+        deploymentAssessmentId: deploymentAssessment.id,
+        decision,
+      },
+      'Failed to send deployment assessment review notification',
+    )
+  }
+}
+
+async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
+  const modelIds = deploymentAssessment.metadata.modelOverview?.modelIds ?? []
+  const models = await getModelsByIdsNoAuth(modelIds)
+
+  const modelDevelopers = models.map((model) => ({
+    model,
+    developers: getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner],
+  }))
+
+  return modelDevelopers
 }
 
 export async function createDeploymentAssessment(
@@ -378,8 +461,8 @@ export async function createDeploymentAssessment(
 
   if (!draft) {
     await notifyDeploymentStakeholders(
-      metadata.overview.riskOwner,
-      metadata.overview.modelIds ?? [],
+      metadata.signOff.riskOwner,
+      metadata.modelOverview.modelIds ?? [],
       deploymentAssessment,
     )
   }
@@ -452,11 +535,25 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('name')
   }
   if (diff.metadata !== undefined) {
-    deploymentAssessment.metadata = diff.metadata
+    const current = deploymentAssessment.metadata ?? ({} as DeploymentAssessmentInterface['metadata'])
+    const next: DeploymentAssessmentInterface['metadata'] = {
+      ...current,
+      ...diff.metadata,
+      modelOverview: {
+        ...(current.modelOverview ?? {}),
+        ...(diff.metadata as any).modelOverview,
+      },
+      signOff: {
+        ...(current.signOff ?? {}),
+        ...(diff.metadata as any).signOff,
+      },
+    }
+    deploymentAssessment.metadata = next
     deploymentAssessment.markModified('metadata')
   }
 
   const isBeingSubmitted = deploymentAssessment.draft && diff.draft === false
+
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
       throw BadReq('Cannot convert a submitted deployment assessment back to a draft.')
@@ -465,15 +562,24 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('draft')
   }
 
-  await deploymentAssessment.save()
-
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      deploymentAssessment.metadata?.overview?.riskOwner ?? [],
-      deploymentAssessment.metadata?.overview?.modelIds ?? [],
+      deploymentAssessment.metadata?.signOff?.riskOwner ?? [],
+      deploymentAssessment.metadata?.modelOverview?.modelIds ?? [],
       deploymentAssessment,
     )
   }
+  const review = isBeingSubmitted
+    ? new ReviewModel({
+        kind: ReviewKind.DeploymentAssessment,
+        deploymentAssessmentId,
+        role: deploymentAssessmentRiskOwnerRole,
+      })
+    : undefined
+  await useTransaction([
+    (session) => deploymentAssessment.save({ session }),
+    ...(review ? [(session) => review.save({ session })] : []),
+  ])
 
   return deploymentAssessment
 }
@@ -500,7 +606,8 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
         (params.needsAction === undefined || needsUserAction(assessment, user, state) === params.needsAction)
 
       if (passesFilter) {
-        const { riskOwner, modelIds } = assessment.metadata?.overview ?? {}
+        const { riskOwner } = assessment.metadata?.signOff ?? {}
+        const { modelIds } = assessment.metadata?.modelOverview ?? {}
         acc.push({
           id: assessment.id,
           schemaId: assessment.schemaId,

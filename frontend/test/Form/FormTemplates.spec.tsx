@@ -1,5 +1,5 @@
 import { ThemeProvider } from '@mui/material/styles'
-import { ErrorListProps, FieldErrorProps, FieldTemplateProps, RJSFValidationError } from '@rjsf/utils'
+import { FieldErrorProps, FieldTemplateProps, RJSFSchema, RJSFValidationError } from '@rjsf/utils'
 import { render, screen } from '@testing-library/react'
 import { ErrorListTemplate, FieldErrorTemplate, FieldTemplate } from 'src/Form/FormTemplates'
 import { lightTheme } from 'src/theme'
@@ -18,7 +18,7 @@ function buildFieldTemplate(
     rawErrors,
     errors: rawErrors.length ? <span>{rawErrors.join(', ')}</span> : undefined,
     registry: { formContext: { state: {} } },
-  } as unknown as FieldTemplateProps
+  } as FieldTemplateProps
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -97,7 +97,7 @@ describe('FieldErrorTemplate', () => {
 })
 
 describe('ErrorListTemplate', () => {
-  const schema = {
+  const schema: RJSFSchema = {
     type: 'object',
     properties: {
       name: { title: 'Name of Deployment', type: 'string' },
@@ -113,7 +113,7 @@ describe('ErrorListTemplate', () => {
   const renderErrorList = (errors: RJSFValidationError[]) =>
     render(
       <ThemeProvider theme={lightTheme}>
-        <ErrorListTemplate {...({ errors, schema } as unknown as ErrorListProps)} />
+        <ErrorListTemplate errors={errors} schema={schema} />
       </ThemeProvider>,
     )
 
