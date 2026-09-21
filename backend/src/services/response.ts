@@ -17,7 +17,7 @@ import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
-import { findReviewForResponse, findReviews, findReviewsForAccessRequests } from './review.js'
+import { findReviewForResponse, findReviews } from './review.js'
 import { notifyReleaseOnApproval, notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
 import { dispatchWebhooks } from './webhook.js'
 
@@ -196,13 +196,46 @@ export async function sendReviewResponseNotification(
   }
 }
 
+/** Approved only when every review's _latest_ decision is `Approve`, as with `checkReleaseApproved`. */
 export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
-  const reviews = await findReviewsForAccessRequests(accessRequestIds)
-  const approvals = await ResponseModel.find({
-    parentId: reviews.map((review) => review._id),
-    decision: Decision.Approve,
-  })
-  return approvals.length > 0
+  const approvedAccessRequests = await ReviewModel.aggregate([
+    { $match: { accessRequestId: { $in: accessRequestIds } } },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        let: { reviewId: '$_id' },
+        // Only review responses carry a decision; a comment would sort in as a decision-less `latestResponse`
+        pipeline: [{ $match: { $expr: { $eq: ['$parentId', '$$reviewId'] }, kind: ResponseKind.Review } }],
+        as: 'responses',
+      },
+    },
+    {
+      $addFields: {
+        latestResponse: {
+          $arrayElemAt: [
+            {
+              $sortArray: {
+                input: '$responses',
+                sortBy: { createdAt: -1 },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      // Only groups access requests that have at least one review
+      $group: {
+        _id: '$accessRequestId',
+        approvedReviews: { $sum: { $cond: [{ $eq: ['$latestResponse.decision', Decision.Approve] }, 1, 0] } },
+        totalReviews: { $sum: 1 },
+      },
+    },
+    { $match: { $expr: { $eq: ['$approvedReviews', '$totalReviews'] } } },
+  ])
+
+  return approvedAccessRequests.length > 0
 }
 
 export async function checkReleaseApproved(modelId: string, semver: string) {
@@ -211,8 +244,9 @@ export async function checkReleaseApproved(modelId: string, semver: string) {
     {
       $lookup: {
         from: 'v2_responses',
-        localField: '_id',
-        foreignField: 'parentId',
+        let: { reviewId: '$_id' },
+        // Only review responses carry a decision; a comment would sort in as a decision-less `latestResponse`
+        pipeline: [{ $match: { $expr: { $eq: ['$parentId', '$$reviewId'] }, kind: ResponseKind.Review } }],
         as: 'responses',
       },
     },

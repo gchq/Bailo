@@ -697,7 +697,20 @@ describe('connectors > authorisation > base', () => {
 
     expect(result).toStrictEqual({
       id: 'schemaMigration',
-      info: 'You cannot upload a schema migration if you are not an admin.',
+      info: 'You cannot upload or modify a schema migration if you are not an admin.',
+      success: false,
+    })
+  })
+
+  test('schemaMigration > update without admin role', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.hasRole.mockResolvedValue(false)
+
+    const result = await connector.schemaMigration(user, { id: 'schemaMigration' } as any, SchemaMigrationAction.Update)
+
+    expect(result).toStrictEqual({
+      id: 'schemaMigration',
+      info: 'You cannot upload or modify a schema migration if you are not an admin.',
       success: false,
     })
   })

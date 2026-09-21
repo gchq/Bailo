@@ -1,10 +1,15 @@
+import { isEqual } from 'lodash-es'
 import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
-import { AccessRequestAction } from '../connectors/authorisation/actions.js'
+import { AccessRequestAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
+import AccessRequestModel, {
+  AccessRequestDoc,
+  AccessRequestInterface,
+  AccessRequestMetadata,
+} from '../models/AccessRequest.js'
 import { EntryKind, ModelDoc } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
@@ -212,6 +217,12 @@ export async function findAccessRequests(
   return accessRequests
 }
 
+// Raw strings: `getModelAccessRequestsForUser` matches exactly, so a change of case is a change of identity.
+function sortedEntities(metadata: AccessRequestMetadata | undefined) {
+  const entities = metadata?.overview?.entities
+  return Array.isArray(entities) ? [...entities].sort() : []
+}
+
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
 export async function updateAccessRequest(
   user: UserInterface,
@@ -226,15 +237,24 @@ export async function updateAccessRequest(
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
-  // Ensure that the AR meets the schema
-  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
-  if (!valid) {
-    throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      errors,
-    })
-  }
-
   if (diff.metadata) {
+    // Validate the incoming content, not what is already stored
+    const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
+    if (!valid) {
+      throw BadReq('Access Request Metadata could not be validated against the schema.', {
+        errors,
+      })
+    }
+
+    // The named entities inherit this request's approvals, so only an owner may change them
+    const entitiesChanged = !isEqual(sortedEntities(accessRequest.metadata), sortedEntities(diff.metadata))
+    if (entitiesChanged && !(await authorisation.model(user, model, ModelAction.Update)).success) {
+      throw Forbidden('You cannot change the entities named on an access request that you do not own.', {
+        userDn: user.dn,
+        accessRequestId,
+      })
+    }
+
     accessRequest.metadata = diff.metadata
     accessRequest.markModified('metadata')
   }

@@ -387,22 +387,57 @@ describe('services > response', () => {
   })
 
   test('checkAccessRequestsApproved > approved access request exists', async () => {
-    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([{ role: 'msro' }, { role: 'random' }] as any)
-    ResponseModelMock.find.mockReturnValueOnce(['approved'])
+    // Only returns access requests whose reviews are all latest-approved
+    ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: 'access-1', approvedReviews: 2, totalReviews: 2 }])
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
 
     expect(result).toBe(true)
-    expect(reviewMock.findReviewsForAccessRequests.mock.calls).toMatchSnapshot()
+    expect(ReviewModelMock.aggregate.mock.calls).toMatchSnapshot()
   })
 
-  test('checkAccessRequestsApproved > no approved access requests with a required role', async () => {
-    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([{ role: 'random' }] as any)
+  test('checkAccessRequestsApproved > no approved access requests', async () => {
+    ReviewModelMock.aggregate.mockResolvedValueOnce([])
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
 
     expect(result).toBe(false)
-    expect(reviewMock.findReviewsForAccessRequests.mock.calls).toMatchSnapshot()
+  })
+
+  test('checkAccessRequestsApproved > a rejection after an approval revokes the access request', async () => {
+    ReviewModelMock.aggregate.mockImplementationOnce(async (pipeline: any) => {
+      const reviews = [
+        { accessRequestId: 'access-1', latestResponse: { decision: Decision.Approve } },
+        // Approved earlier, but the latest decision is a rejection
+        { accessRequestId: 'access-1', latestResponse: { decision: Decision.RequestChanges } },
+      ]
+      expect(JSON.stringify(pipeline)).toContain('latestResponse')
+
+      const approvedReviews = reviews.filter((review) => review.latestResponse.decision === Decision.Approve).length
+      return approvedReviews === reviews.length ? [{ _id: 'access-1' }] : []
+    })
+
+    const result = await checkAccessRequestsApproved(['access-1'])
+
+    expect(result).toBe(false)
+  })
+
+  test('checkAccessRequestsApproved > one approval does not satisfy several required reviews', async () => {
+    ReviewModelMock.aggregate.mockImplementationOnce(async (pipeline: any) => {
+      const reviews = [
+        { accessRequestId: 'access-1', latestResponse: { decision: Decision.Approve } },
+        // A second required role with no response yet
+        { accessRequestId: 'access-1', latestResponse: undefined },
+      ]
+      expect(JSON.stringify(pipeline)).toContain('$group')
+
+      const approvedReviews = reviews.filter((review) => review.latestResponse?.decision === Decision.Approve).length
+      return approvedReviews === reviews.length ? [{ _id: 'access-1' }] : []
+    })
+
+    const result = await checkAccessRequestsApproved(['access-1'])
+
+    expect(result).toBe(false)
   })
 
   describe('checkReleaseApproved', () => {

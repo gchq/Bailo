@@ -4,19 +4,87 @@ exports[`services > response > checkAccessRequestsApproved > approved access req
 [
   [
     [
-      "access-1",
-      "access-2",
-    ],
-  ],
-]
-`;
-
-exports[`services > response > checkAccessRequestsApproved > no approved access requests with a required role 1`] = `
-[
-  [
-    [
-      "access-1",
-      "access-2",
+      {
+        "$match": {
+          "accessRequestId": {
+            "$in": [
+              "access-1",
+              "access-2",
+            ],
+          },
+        },
+      },
+      {
+        "$lookup": {
+          "as": "responses",
+          "from": "v2_responses",
+          "let": {
+            "reviewId": "$_id",
+          },
+          "pipeline": [
+            {
+              "$match": {
+                "$expr": {
+                  "$eq": [
+                    "$parentId",
+                    "$$reviewId",
+                  ],
+                },
+                "kind": "review",
+              },
+            },
+          ],
+        },
+      },
+      {
+        "$addFields": {
+          "latestResponse": {
+            "$arrayElemAt": [
+              {
+                "$sortArray": {
+                  "input": "$responses",
+                  "sortBy": {
+                    "createdAt": -1,
+                  },
+                },
+              },
+              0,
+            ],
+          },
+        },
+      },
+      {
+        "$group": {
+          "_id": "$accessRequestId",
+          "approvedReviews": {
+            "$sum": {
+              "$cond": [
+                {
+                  "$eq": [
+                    "$latestResponse.decision",
+                    "approve",
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          "totalReviews": {
+            "$sum": 1,
+          },
+        },
+      },
+      {
+        "$match": {
+          "$expr": {
+            "$eq": [
+              "$approvedReviews",
+              "$totalReviews",
+            ],
+          },
+        },
+      },
     ],
   ],
 ]
