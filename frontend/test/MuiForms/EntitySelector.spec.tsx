@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { useGetCurrentUser, useListEntities } from 'actions/user'
 import EntitySelector from 'src/MuiForms/EntitySelector'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -88,6 +88,7 @@ describe('EntitySelector normalisation', () => {
       ),
     ).not.toThrow()
 
+    expect(screen.getByText('Unanswered')).toBeDefined()
     expect(onChange).not.toHaveBeenCalled()
   })
 
@@ -136,6 +137,29 @@ describe('EntitySelector normalisation', () => {
           id='root_overview_riskOwner'
           schema={arraySchema}
           registry={baseRegistry}
+          value={[undefined, 'user:user'] as unknown as string[]}
+          onChange={onChange}
+        />,
+      ),
+    ).not.toThrow()
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('filters undefined entries before rendering UserDisplay in view mode', () => {
+    const onChange = vi.fn()
+    const viewRegistry = {
+      formContext: {
+        editMode: false,
+      },
+    } as any
+
+    expect(() =>
+      render(
+        <EntitySelector
+          id='root_overview_riskOwner'
+          schema={arraySchema}
+          registry={viewRegistry}
           value={[undefined, 'user:user'] as unknown as string[]}
           onChange={onChange}
         />,

@@ -114,6 +114,7 @@ export default function EntitySelector({
   }
 
   const currentValueString = formatEntityValue(currentValue)
+  const filteredCurrentValue = currentValue.filter(Boolean)
 
   return (
     <CompareField
@@ -180,16 +181,18 @@ export default function EntitySelector({
         </>
       ) : compare.inMirroredCompare && currentValue.length ? (
         <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
+      ) : filteredCurrentValue.length > 0 ? (
+        <Box sx={{ overflowX: 'auto', p: 1 }}>
+          <Stack spacing={1} direction='row'>
+            {filteredCurrentValue.map((entity) => (
+              <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+            ))}
+          </Stack>
+        </Box>
       ) : (
-        currentValue.length > 0 && (
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {currentValue.map((entity) => (
-                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
-              ))}
-            </Stack>
-          </Box>
-        )
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
       )}
     </CompareField>
   )
