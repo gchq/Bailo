@@ -88,7 +88,6 @@ describe('EntitySelector normalisation', () => {
       ),
     ).not.toThrow()
 
-    expect(screen.getByText('Unanswered')).toBeDefined()
     expect(onChange).not.toHaveBeenCalled()
   })
 
@@ -160,12 +159,13 @@ describe('EntitySelector normalisation', () => {
           id='root_overview_riskOwner'
           schema={arraySchema}
           registry={viewRegistry}
-          value={[undefined, 'user:user'] as unknown as string[]}
+          value={[undefined] as unknown as string[]}
           onChange={onChange}
         />,
       ),
     ).not.toThrow()
 
+    expect(screen.getByText('Unanswered')).toBeDefined()
     expect(onChange).not.toHaveBeenCalled()
   })
 

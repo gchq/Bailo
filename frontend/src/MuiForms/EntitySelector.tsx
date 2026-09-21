@@ -190,7 +190,12 @@ export default function EntitySelector({
           </Stack>
         </Box>
       ) : (
-        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+        <Typography
+          sx={{
+            fontStyle: 'italic',
+            color: theme.palette.customTextInput.main,
+          }}
+        >
           Unanswered
         </Typography>
       )}
