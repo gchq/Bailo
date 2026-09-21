@@ -9,7 +9,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const sendNotification = vi.fn()
 
 vi.mock('actions/deploymentAssessment', () => ({
-  patchDeploymentAssessment: vi.fn(() => Promise.resolve({ ok: true })),
+  patchDeploymentAssessment: vi.fn(() =>
+    Promise.resolve({ ok: true, json: async () => ({ deploymentAssessment: { draft: false } }) }),
+  ),
 }))
 
 vi.mock('actions/deploymentAssessments', () => ({
