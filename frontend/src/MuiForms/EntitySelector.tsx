@@ -193,7 +193,7 @@ export default function EntitySelector({
         <Typography
           sx={{
             fontStyle: 'italic',
-            color: theme.palette.customTextInput.main,
+            color: theme.palette.customTextInput?.main ?? theme.palette.text.secondary,
           }}
         >
           Unanswered
