@@ -234,12 +234,21 @@ function addClearedAnswerErrors(schema: any, formData: any, errors: FormValidati
   }
 }
 
-/** AJV counts a cleared answer as present, so report those as missing instead. */
+// Cached per schema so repeated validation reuses one validator
+const customValidateCache = new WeakMap<object, CustomValidator>()
+
+/** AJV counts a cleared answer as present; report it as missing instead. */
 export function createCustomValidate(schema: any): CustomValidator {
-  return (formData, errors) => {
+  const customValidate: CustomValidator = (formData, errors) => {
     addClearedAnswerErrors(schema, formData, errors)
     return errors
   }
+
+  if (!schema || typeof schema !== 'object') {
+    return customValidate
+  }
+
+  return customValidateCache.get(schema) ?? (customValidateCache.set(schema, customValidate), customValidate)
 }
 
 function findSchemaAtPath(schema: any, path: Array<string>): any {
@@ -252,7 +261,7 @@ function findSchemaAtPath(schema: any, path: Array<string>): any {
 
     if (current.type === 'array') {
       current = current.items
-      // A numeric segment is the array index, which `items` has already stepped into
+      // A numeric segment is the array index, already stepped into by `items`
       if (/^\d+$/.test(segment)) {
         continue
       }
@@ -264,7 +273,7 @@ function findSchemaAtPath(schema: any, path: Array<string>): any {
   return current
 }
 
-/** The question an error belongs to. `customValidate` errors have no title, so fall back to schema. */
+/** The question an error belongs to. `customValidate` errors have no title, so use the schema. */
 export function getErrorLabel({ title, property }: RJSFValidationError, schema?: any): string {
   if (title) {
     return title
@@ -280,11 +289,7 @@ export function getErrorLabel({ title, property }: RJSFValidationError, schema?:
 
 /** Only `required` is reworded; other keywords keep AJV's wording. */
 export const transformErrors: ErrorTransformer = (errors) =>
-  errors.map((error) =>
-    error.name === 'required'
-      ? { ...error, message: REQUIRED_FIELD_MESSAGE, stack: `${getErrorLabel(error)} ${REQUIRED_FIELD_MESSAGE}` }
-      : error,
-  )
+  errors.map((error) => (error.name === 'required' ? { ...error, message: REQUIRED_FIELD_MESSAGE } : error))
 
 export function validateStep(step: StepNoRender) {
   return validator.validateFormData(step.state, step.schema, createCustomValidate(step.schema), transformErrors)
@@ -294,7 +299,7 @@ export function validateForm(step: StepNoRender) {
   return validateStep(step).errors.length === 0
 }
 
-/** Index of the first step failing validation, or `-1` when every step is valid. */
+/** Index of the first failing step, or `-1` when all are valid. */
 export function getFirstInvalidStepIndex(splitSchema: SplitSchemaNoRender) {
   return splitSchema.steps.findIndex((step) => !validateForm(step))
 }

@@ -2,6 +2,7 @@ import { RJSFValidationError } from '@rjsf/utils'
 import { StepNoRender } from 'types/types'
 import {
   deepMergePreferFirst,
+  getErrorLabel,
   getFormStats,
   getPathFromId,
   getStepsFromSchema,
@@ -193,7 +194,7 @@ describe('Form utils', () => {
       new Map(validateStep(step).errors.map((error) => [error.property, error.message]))
 
     it('attaches a missing top level required field to the field itself', () => {
-      // RJSF omits the leading dot when the missing property sits at the root of the step
+      // RJSF omits the leading dot for a property at the root of the step
       expect(errorsByProperty(makeStep({ deployment: { status: 'Live' } })).get('name')).toBe(REQUIRED_FIELD_MESSAGE)
     })
 
@@ -312,17 +313,10 @@ describe('Form utils', () => {
         ...overrides,
       }) as RJSFValidationError
 
-    it('rewrites both the message and the stack of a missing field', () => {
+    it('rewrites the message of a missing field', () => {
       const [transformed] = transformErrors([error({ title: 'Name of Deployment' })])
 
       expect(transformed.message).toBe(REQUIRED_FIELD_MESSAGE)
-      expect(transformed.stack).toBe(`Name of Deployment ${REQUIRED_FIELD_MESSAGE}`)
-    })
-
-    it('falls back to the field name when the schema has no title', () => {
-      const [transformed] = transformErrors([error({ property: '.overview.modelIds' })])
-
-      expect(transformed.stack).toBe(`Model Ids ${REQUIRED_FIELD_MESSAGE}`)
     })
 
     it('leaves other keywords untouched', () => {
@@ -330,6 +324,31 @@ describe('Form utils', () => {
       const [transformed] = transformErrors([constraint])
 
       expect(transformed).toEqual(constraint)
+    })
+  })
+
+  describe('getErrorLabel', () => {
+    const schema = {
+      type: 'object',
+      properties: { overview: { type: 'object', properties: { modelIds: { title: 'Related models' } } } },
+    }
+
+    it('prefers the title RJSF resolved', () => {
+      expect(getErrorLabel({ title: 'Name of Deployment', property: '.overview.name' } as RJSFValidationError)).toBe(
+        'Name of Deployment',
+      )
+    })
+
+    it('falls back to the question in the schema', () => {
+      expect(getErrorLabel({ property: '.overview.modelIds' } as RJSFValidationError, schema)).toBe('Related models')
+    })
+
+    it('falls back to the field name when the schema has no question', () => {
+      expect(getErrorLabel({ property: '.overview.modelIds' } as RJSFValidationError)).toBe('Model Ids')
+    })
+
+    it('handles an error with no property', () => {
+      expect(getErrorLabel({} as RJSFValidationError)).toBe('This field')
     })
   })
 })
