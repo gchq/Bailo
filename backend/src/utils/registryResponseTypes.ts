@@ -162,6 +162,7 @@ export const ManifestListV2Schema = z.object({
   manifests: z.array(ManifestListDescriptorSchema),
 })
 export type ManifestListV2 = z.infer<typeof ManifestListV2Schema>
+export const ManifestResponseBodySchema = z.union([ImageManifestV2Schema, ManifestListV2Schema])
 
 export const ManifestResponseHeadersSchema = CommonRegistryHeadersSchema.extend({
   'docker-content-digest': HeaderValueSchema,
