@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import {
   addDefaultReviewRoles,
+  addReviewsForNewRole,
   createAccessRequestReviews,
   createReleaseReviews,
   createReviewRole,
@@ -18,6 +19,8 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
 
 const ReviewModelMock = getTypedModelMock('ReviewModel')
+const ReleaseModelMock = getTypedModelMock('ReleaseModel')
+const AccessRequestModelMock = getTypedModelMock('AccessRequestModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ResponseModelMock = getTypedModelMock('ResponseModel')
@@ -148,6 +151,17 @@ describe('services > review', () => {
 
     expect(ReviewModelMock.save).toHaveBeenCalled()
     expect(smtpMock.requestReviewForRelease).toHaveBeenCalled()
+  })
+
+  test('addReviewsForNewRole > does not duplicate an existing release review', async () => {
+    const existingReview = { role: 'mtr', modelId: 'model-id', semver: '1.0.0' }
+    ReleaseModelMock.find.mockResolvedValueOnce([{ modelId: 'model-id', semver: '1.0.0' }] as any)
+    AccessRequestModelMock.find.mockResolvedValueOnce([])
+    ReviewModelMock.find.mockResolvedValueOnce([existingReview] as any)
+
+    await addReviewsForNewRole(user, { shortName: 'mtr' } as any, { id: 'model-id' } as any)
+
+    expect(ReviewModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createAccessRequestReviews > successful', async () => {
