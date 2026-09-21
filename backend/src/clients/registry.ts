@@ -9,6 +9,7 @@ import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
+import { ManifestResponseBodySchema } from '../utils/registryResponses.js'
 import {
   AcceptManifestListMediaTypeHeaderValue,
   AcceptManifestMediaTypeHeaderValue,
@@ -21,12 +22,11 @@ import {
   CommonRegistryHeaders,
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
-  ManifestResponseBodySchema,
   ManifestResponseHeadersSchema,
   RegistryErrorResponseBodySchema,
   TagsListResponseBodySchema,
   TagsListResponseHeadersSchema,
-} from '../utils/registryResponses.js'
+} from '../utils/registryResponseTypes.js'
 
 const registry = config.registry.connection.internal
 
