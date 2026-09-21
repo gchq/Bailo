@@ -76,9 +76,11 @@ const params = {
   name: 'Assessment',
   schemaId: 'deployment-assessment-schema',
   metadata: {
-    overview: {
-      riskOwner: ['user:risk-owner'],
+    modelOverview: {
       modelIds: ['model-one'],
+    },
+    signOff: {
+      riskOwner: ['user:risk-owner'],
     },
     assessment: { summary: 'Summary' },
   },
@@ -111,7 +113,7 @@ describe('services > deploymentAssessment', () => {
     test('gets an existing DA by its ID', async () => {
       const mockDA = {
         createdBy: 'creator',
-        metadata: { overview: { riskOwner: ['user'] } },
+        metadata: { signOff: { riskOwner: ['user'] } },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
 
@@ -132,7 +134,7 @@ describe('services > deploymentAssessment', () => {
     test('forbidden when authorisation fails', async () => {
       const mockDA = {
         createdBy: 'creator',
-        metadata: { overview: { riskOwner: ['user'] } },
+        metadata: { signOff: { riskOwner: ['user'] } },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(mockDA)
       vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
@@ -202,7 +204,7 @@ describe('services > deploymentAssessment', () => {
         { dn: 'creator' },
         {
           ...params,
-          metadata: { ...params.metadata, overview: { ...params.metadata.overview, riskOwner: ['group:risk'] } },
+          metadata: { ...params.metadata, signOff: { ...params.metadata.signOff, riskOwner: ['group:risk'] } },
         },
       ),
     ).rejects.toThrow('The risk owner must be a valid user entity.')
@@ -264,10 +266,13 @@ describe('services > deploymentAssessment', () => {
 
   test.each([
     ['only a name', { overview: { name: 'Assessment' } }],
-    ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
-    ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
-    ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
-    ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+    ['an empty model ID list', { overview: { name: 'Assessment' }, modelOverview: { modelIds: [] } }],
+    ['a risk owner but no models', { overview: { name: 'Assessment' }, signOff: { riskOwner: ['user:risk-owner'] } }],
+    ['models but no risk owner', { overview: { name: 'Assessment' }, modelOverview: { modelIds: ['model-one'] } }],
+    [
+      'repeated model IDs',
+      { overview: { name: 'Assessment', modelOverview: { modelIds: ['model-one', 'model-one'] } } },
+    ],
   ])('accepts metadata with %s', async (_description, metadata) => {
     const result = await createDeploymentAssessment({ dn: 'creator' }, { ...params, draft: true, metadata })
 
@@ -323,7 +328,7 @@ describe('services > deploymentAssessment', () => {
       id: 'assessment-id',
       draft: false,
       createdBy: 'creator',
-      metadata: { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'], modelIds: ['model-1'] } },
+      metadata: { overview: { name: 'Assessment' }, signOff: { riskOwner: ['user:risk-owner'] } },
     }
     const review = { _id: 'review-object-id', kind: ReviewKind.DeploymentAssessment, role: 'dro' }
 
@@ -573,7 +578,11 @@ describe('services > deploymentAssessment', () => {
     test('stores the validated metadata', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-      const metadata = { overview: { name: 'Updated assessment', riskOwner: ['user:risk-owner'] } }
+      const metadata = {
+        assessment: { summary: 'Summary' },
+        modelOverview: { modelIds: ['model-one'] },
+        signOff: { riskOwner: ['user:risk-owner'] },
+      }
 
       const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata, draft: false })
 
@@ -642,13 +651,41 @@ describe('services > deploymentAssessment', () => {
     })
 
     test.each([
-      ['only a name', { overview: { name: 'Assessment' } }],
-      ['an empty model ID list', { overview: { name: 'Assessment', modelIds: [] } }],
-      ['a risk owner but no models', { overview: { name: 'Assessment', riskOwner: ['user:risk-owner'] } }],
-      ['models but no risk owner', { overview: { name: 'Assessment', modelIds: ['model-one'] } }],
-      ['repeated model IDs', { overview: { name: 'Assessment', modelIds: ['model-one', 'model-one'] } }],
+      [
+        'only a name',
+        { overview: { name: 'Assessment' }, modelOverview: { modelIds: [] }, signOff: { riskOwner: [] } },
+      ],
+      [
+        'an empty model ID list',
+        { overview: { name: 'Assessment' }, modelOverview: { modelIds: [] }, signOff: { riskOwner: [] } },
+      ],
+      [
+        'a risk owner but no models',
+        {
+          assessment: { summary: 'Summary' },
+          signOff: { riskOwner: ['user:risk-owner'] },
+          modelOverview: { modelIds: [] },
+        },
+      ],
+      [
+        'models but no risk owner',
+        {
+          assessment: { summary: 'Summary' },
+          modelOverview: { modelIds: ['model-one'] },
+          signOff: { riskOwner: [] },
+        },
+      ],
+      [
+        'repeated model IDs',
+        {
+          assessment: { summary: 'Summary' },
+          modelOverview: { modelIds: ['model-one', 'model-one'] },
+          signOff: { riskOwner: ['user:risk-owner'] },
+        },
+      ],
     ])('accepts a draft update with metadata with %s', async (_description, metadata) => {
       const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.metadata = metadata as any
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
 
       const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata })
@@ -690,8 +727,8 @@ describe('services > deploymentAssessment', () => {
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.metadata = {
         ...params.metadata,
-        overview: {
-          ...params.metadata.overview,
+        signOff: {
+          ...params.metadata.signOff,
           riskOwner: ['user:risk-owner', 'user:other-owner', 'user:risk-owner'],
         },
       }
@@ -950,7 +987,7 @@ describe('services > deploymentAssessment', () => {
           draft: false,
           createdBy: 'user',
           metadata: {
-            overview: {
+            signOff: {
               riskOwner: ['user:user'],
             },
           },
@@ -976,7 +1013,7 @@ describe('services > deploymentAssessment', () => {
           id: 'approved',
           draft: false,
           createdBy: 'someone-else',
-          metadata: { overview: { riskOwner: ['user:user'] } },
+          metadata: { signOff: { riskOwner: ['user:user'] } },
         }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([assessment])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
@@ -1029,7 +1066,7 @@ describe('services > deploymentAssessment', () => {
           id: 'unrelated',
           draft: false,
           createdBy: 'someone-else',
-          metadata: { overview: { riskOwner: ['user:another'] } },
+          metadata: { signOff: { riskOwner: ['user:another'] } },
         }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([assessment])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
@@ -1044,7 +1081,7 @@ describe('services > deploymentAssessment', () => {
           id: 'mine-and-reviewed-by-me',
           draft: false,
           createdBy: 'user',
-          metadata: { overview: { riskOwner: ['user:user'] } },
+          metadata: { signOff: { riskOwner: ['user:user'] } },
         }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([assessment])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
