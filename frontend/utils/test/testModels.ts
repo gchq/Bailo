@@ -196,7 +196,6 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
   type: 'Form',
   section: 'First Page',
   schemaRef: testAccessRequestSchema.id,
-  shouldValidate: false,
   isComplete: () => false,
 }
 

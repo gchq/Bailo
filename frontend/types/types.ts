@@ -410,7 +410,6 @@ export interface Step {
   renderBasic: (RenderInterface) => JSX.Element | null
   renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
-  shouldValidate: boolean
   isComplete: (step: Step) => boolean
 }
 
@@ -430,7 +429,6 @@ export interface StepNoRender {
   section: string
   schemaRef: string
 
-  shouldValidate: boolean
   isComplete: (step: StepNoRender) => boolean
 }
 

@@ -1,5 +1,12 @@
-import { Registry, RegistryWidgetsType } from '@rjsf/utils'
-import { ValidationError, Validator } from 'jsonschema'
+import {
+  CustomValidator,
+  ErrorTransformer,
+  FormValidation,
+  Registry,
+  RegistryWidgetsType,
+  RJSFValidationError,
+} from '@rjsf/utils'
+import validator from '@rjsf/validator-ajv8'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
@@ -16,7 +23,7 @@ import RichTextInput from 'src/MuiForms/RichTextInput'
 import TagSelector from 'src/MuiForms/TagSelector'
 
 import { FormStats, ModelFormStats, SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
-import { plural } from './stringUtils'
+import { camelCaseToSentenceCase } from './stringUtils'
 import { createUiSchema } from './uiSchemaUtils'
 
 export const widgets: RegistryWidgetsType = {
@@ -70,7 +77,6 @@ export function createStep({
     index,
     section,
     schemaRef,
-    shouldValidate: false,
     isComplete,
   }
 }
@@ -96,24 +102,6 @@ export function setStepState(
 
     return { ...oldSchema, steps: duplicatedSteps }
   })
-}
-
-export function setStepValidate(
-  splitSchema: SplitSchemaNoRender,
-  setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>,
-  step: StepNoRender,
-  validate: boolean,
-) {
-  const index = splitSchema.steps.findIndex((iStep) => step.section === iStep.section)
-
-  const duplicatedSteps = [...splitSchema.steps]
-  duplicatedSteps[index].shouldValidate = validate
-
-  for (const duplicatedStep of duplicatedSteps) {
-    duplicatedStep.steps = duplicatedSteps
-  }
-
-  setSplitSchema({ ...splitSchema, steps: duplicatedSteps })
 }
 
 export function getStepsFromSchema(
@@ -206,101 +194,109 @@ export function setStepsData(
   setSplitSchema({ ...splitSchema, steps: newSteps })
 }
 
-/**
- * Strips cleared answers so they validate as unanswered. Unlike `removeEmptyValues`, empty objects
- * are kept so that nested errors still resolve to the offending leaf rather than to its parent.
- */
-function withoutClearedAnswers(value: any): any {
+export const REQUIRED_FIELD_MESSAGE = 'This field is required'
+
+/** True for a cleared answer: `''`, `[]` or `['']`. */
+function isClearedAnswer(value: unknown): boolean {
   if (value === '') {
-    return undefined
+    return true
   }
 
   if (Array.isArray(value)) {
-    // Collapse once the items have been stripped too, so `['']` is as absent as `[]`
-    const items = value.map(withoutClearedAnswers).filter((item) => item !== undefined)
-    return items.length === 0 ? undefined : items
+    return value.every((item) => item === undefined || item === null || isClearedAnswer(item))
   }
 
-  if (value !== null && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value)
-        .map(([key, item]) => [key, withoutClearedAnswers(item)])
-        .filter(([, item]) => item !== undefined),
-    )
-  }
-
-  return value
+  return false
 }
 
-function validateStep(step: StepNoRender) {
-  const validator = new Validator()
+function addClearedAnswerErrors(schema: any, formData: any, errors: FormValidation | undefined) {
+  if (!schema || typeof schema !== 'object' || !errors) {
+    return
+  }
 
-  return validator.validate(withoutClearedAnswers(step.state) ?? {}, step.schema)
+  if (schema.type === 'array' && schema.items && Array.isArray(formData)) {
+    formData.forEach((item, index) => addClearedAnswerErrors(schema.items, item, errors[index]))
+    return
+  }
+
+  if (!schema.properties) {
+    return
+  }
+
+  for (const key of schema.required ?? []) {
+    if (isClearedAnswer(formData?.[key])) {
+      errors[key]?.addError(REQUIRED_FIELD_MESSAGE)
+    }
+  }
+
+  for (const [key, childSchema] of Object.entries(schema.properties)) {
+    addClearedAnswerErrors(childSchema, formData?.[key], errors[key])
+  }
+}
+
+/** AJV counts a cleared answer as present, so report those as missing instead. */
+export function createCustomValidate(schema: any): CustomValidator {
+  return (formData, errors) => {
+    addClearedAnswerErrors(schema, formData, errors)
+    return errors
+  }
+}
+
+function findSchemaAtPath(schema: any, path: Array<string>): any {
+  let current = schema
+
+  for (const segment of path) {
+    if (!current || typeof current !== 'object') {
+      return undefined
+    }
+
+    if (current.type === 'array') {
+      current = current.items
+      // A numeric segment is the array index, which `items` has already stepped into
+      if (/^\d+$/.test(segment)) {
+        continue
+      }
+    }
+
+    current = current?.properties?.[segment]
+  }
+
+  return current
+}
+
+/** The question an error belongs to. `customValidate` errors have no title, so fall back to schema. */
+export function getErrorLabel({ title, property }: RJSFValidationError, schema?: any): string {
+  if (title) {
+    return title
+  }
+
+  const path = (property ?? '').split('.').filter(Boolean)
+  if (path.length === 0) {
+    return 'This field'
+  }
+
+  return findSchemaAtPath(schema, path)?.title ?? camelCaseToSentenceCase(path[path.length - 1])
+}
+
+/** Only `required` is reworded; other keywords keep AJV's wording. */
+export const transformErrors: ErrorTransformer = (errors) =>
+  errors.map((error) =>
+    error.name === 'required'
+      ? { ...error, message: REQUIRED_FIELD_MESSAGE, stack: `${getErrorLabel(error)} ${REQUIRED_FIELD_MESSAGE}` }
+      : error,
+  )
+
+export function validateStep(step: StepNoRender) {
+  return validator.validateFormData(step.state, step.schema, createCustomValidate(step.schema), transformErrors)
 }
 
 export function validateForm(step: StepNoRender) {
   return validateStep(step).errors.length === 0
 }
 
-function getInvalidFieldMessage({ name, argument }: ValidationError): string {
-  switch (name) {
-    case 'required':
-      return 'This field is required'
-    case 'type':
-      return `This field must be of type ${[argument].flat().join(' or ')}`
-    case 'format':
-      return `This field must be a valid ${argument}`
-    case 'pattern':
-      return 'This field is not in the expected format'
-    case 'enum':
-      return `This field must be one of: ${[argument].flat().join(', ')}`
-    case 'const':
-      return `This field must be ${argument}`
-    case 'minLength':
-      return `This field must be at least ${plural(argument, 'character')} long`
-    case 'maxLength':
-      return `This field must be ${plural(argument, 'character')} or fewer`
-    case 'minimum':
-      return `This field must be ${argument} or more`
-    case 'maximum':
-      return `This field must be ${argument} or less`
-    case 'exclusiveMinimum':
-      return `This field must be greater than ${argument}`
-    case 'exclusiveMaximum':
-      return `This field must be less than ${argument}`
-    case 'multipleOf':
-      return `This field must be a multiple of ${argument}`
-    case 'minItems':
-      return `This field must have at least ${plural(argument, 'item')}`
-    case 'maxItems':
-      return `This field must have ${plural(argument, 'item')} or fewer`
-    case 'uniqueItems':
-      return 'This field must not contain duplicate items'
-    case 'minProperties':
-      return `This field must have at least ${plural(argument, 'field')}`
-    case 'maxProperties':
-      return `This field must have ${plural(argument, 'field')} or fewer`
-    case 'additionalProperties':
-      return `This field does not allow "${argument}"`
-    default:
-      return 'This field has an invalid value'
-  }
-}
-
-/** Maps the dotted path of each field failing validation, e.g. `overview.name`, to its message. */
-export function getInvalidFields(step: StepNoRender): Map<string, string> {
-  const invalidFields = new Map<string, string>()
-
-  for (const error of validateStep(step).errors) {
-    const path = (error.name === 'required' ? [...error.path, error.argument] : error.path).join('.')
-
-    // A field can breach several constraints at once - schema order reads better than last one wins
-    if (!invalidFields.has(path)) {
-      invalidFields.set(path, getInvalidFieldMessage(error))
-    }
-  }
-
-  return invalidFields
+/** Index of the first step failing validation, or `-1` when every step is valid. */
+export function getFirstInvalidStepIndex(splitSchema: SplitSchemaNoRender) {
+  return splitSchema.steps.findIndex((step) => !validateForm(step))
 }
 
 /** Converts an RJSF field id such as `root_overview_name` into `['overview', 'name']`. */

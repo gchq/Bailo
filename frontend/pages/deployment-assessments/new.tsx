@@ -12,7 +12,7 @@ import SchemaFormPage from 'src/schemas/SchemaFormPage'
 import SchemaSelect from 'src/schemas/SchemaSelect'
 import { SchemaKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema, removeEmptyValues, setStepValidate, validateForm } from 'utils/formUtils'
+import { getFirstInvalidStepIndex, getStepsData, getStepsFromSchema, removeEmptyValues } from 'utils/formUtils'
 
 export default function NewDeploymentAssessment() {
   const router = useRouter()
@@ -82,19 +82,14 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    for (const step of splitSchema.steps) {
-      setStepValidate(splitSchema, setSplitSchema, step, true)
-    }
+    const firstInvalidStep = getFirstInvalidStepIndex(splitSchema)
 
-    for (const step of splitSchema.steps) {
-      const isValid = validateForm(step)
-
-      if (!isValid) {
-        setErrorText('Please resolve the errors highlighted in each section.')
-        setSubmitButtonLoading(false)
-        setFormValidationErrorState(true)
-        return
-      }
+    if (firstInvalidStep !== -1) {
+      setSubmitButtonLoading(false)
+      setFormValidationErrorState(true)
+      // Errors are listed per section, so open the first section that has them
+      router.replace({ query: { ...router.query, page: firstInvalidStep } })
+      return
     }
 
     const data = getStepsData(splitSchema, true)

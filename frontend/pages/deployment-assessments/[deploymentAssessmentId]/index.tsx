@@ -80,7 +80,7 @@ export default function DeploymentAssessment() {
       if (!response.ok) {
         setPatchErrorMessage(await getErrorMessage(response))
       } else {
-        mutateDeploymentAssessment()
+        await mutateDeploymentAssessment(await response.json(), { revalidate: false })
         sendNotification({ msg: 'Deployment Assessment successfully published.', variant: 'success' })
       }
       setIsLoading(false)

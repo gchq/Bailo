@@ -22,7 +22,7 @@ import InformationDialog from 'src/schemas/InformationDialog'
 import { KeyedMutator } from 'swr'
 import { DeploymentAssessmentInterface, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
+import { getFirstInvalidStepIndex, getStepsData, getStepsFromSchema, removeEmptyValues } from 'utils/formUtils'
 
 type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
@@ -96,16 +96,10 @@ export default function EditableDeploymentAssessmentForm({
         return
       }
 
-      if (!deploymentAssessment.draft) {
-        for (const step of splitSchema.steps) {
-          const isValid = validateForm(step)
-
-          if (!isValid) {
-            setFormValidationErrorState(true)
-            setIsLoading(false)
-            return
-          }
-        }
+      if (!deploymentAssessment.draft && getFirstInvalidStepIndex(splitSchema) !== -1) {
+        setFormValidationErrorState(true)
+        setIsLoading(false)
+        return
       }
 
       const response = await patchDeploymentAssessment(
@@ -118,7 +112,8 @@ export default function EditableDeploymentAssessmentForm({
       if (!response.ok) {
         setErrorMessage(await getErrorMessage(response))
       } else {
-        mutate()
+        // Seed the cache before leaving edit mode, else the form rebuilds from the pre-save answers
+        await mutate(await response.json(), { revalidate: false })
         onIsEditChange(false)
       }
     }
@@ -159,9 +154,6 @@ export default function EditableDeploymentAssessmentForm({
   }, [isEdit, setUnsavedChanges])
 
   const displayValidationErrors = showValidationErrors || formValidationErrorState
-
-  const displayedErrorMessage =
-    errorMessage || (displayValidationErrors ? 'Please resolve the errors highlighted in each section.' : '')
 
   const formHeading = useMemo(
     () => (
@@ -244,7 +236,7 @@ export default function EditableDeploymentAssessmentForm({
           onCancel={handleCancel}
           onSubmit={handleSubmit}
           onDelete={handleDelete}
-          errorMessage={displayedErrorMessage}
+          errorMessage={errorMessage}
           readOnly={readOnly}
         />
         <JsonSchemaForm

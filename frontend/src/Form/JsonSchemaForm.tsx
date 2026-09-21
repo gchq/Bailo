@@ -14,18 +14,30 @@ import {
   Typography,
 } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
-import Form from '@rjsf/mui'
+import CoreForm, { FormProps } from '@rjsf/core'
+import MuiForm from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import {
+  Dispatch,
+  ForwardRefExoticComponent,
+  RefAttributes,
+  SetStateAction,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { RouterQueryParams } from 'src/entry/overview/FormEditPage'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
   DescriptionFieldTemplate,
   ErrorListTemplate,
+  FieldErrorTemplate,
   FieldTemplate,
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
@@ -36,14 +48,18 @@ import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
+  createCustomValidate,
   getFormStats,
-  getInvalidFields,
   getOverallCompletionStats,
   setFormDataPropertiesToUndefined,
   setStepState,
+  transformErrors,
   widgets,
 } from 'utils/formUtils'
 import { parseNat, toSentenceCase } from 'utils/stringUtils'
+
+// `withTheme` forwards refs at runtime but types the result as a plain `ComponentType`
+const Form = MuiForm as unknown as ForwardRefExoticComponent<FormProps & RefAttributes<CoreForm>>
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -118,6 +134,7 @@ export default function JsonSchemaForm({
   const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
 
   const ref = useRef<HTMLDivElement | null>(null)
+  const formRef = useRef<CoreForm | null>(null)
 
   const copyToClipboard = useCopyToClipboard()
 
@@ -142,11 +159,14 @@ export default function JsonSchemaForm({
     [splitSchema, calculateStats, mirroredModel, requiredByModelState],
   )
 
-  const invalidFields = useMemo(
-    () => (displayLabelValidation && currentStep ? getInvalidFields(currentStep) : undefined),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [displayLabelValidation, currentStep, currentStep?.state],
-  )
+  const customValidate = useMemo(() => createCustomValidate(currentStep?.schema), [currentStep?.schema])
+
+  // `liveValidate` only recalculates on change, so validate up front
+  useEffect(() => {
+    if (displayLabelValidation) {
+      formRef.current?.validateForm()
+    }
+  }, [displayLabelValidation, activeStep])
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
@@ -316,10 +336,17 @@ export default function JsonSchemaForm({
             </Stack>
           )}
           <Form
+            // Remount per section, else `validateForm` runs against the previous section's state
+            key={currentStep.section}
+            ref={formRef}
             schema={currentStep.schema}
             formData={updatedMirroredState}
             onChange={onFormChange}
             validator={validator}
+            customValidate={customValidate}
+            transformErrors={transformErrors}
+            liveValidate={displayLabelValidation ? 'onChange' : false}
+            showErrorList={displayLabelValidation ? 'top' : false}
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
@@ -335,26 +362,16 @@ export default function JsonSchemaForm({
               compareMode,
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
-              invalidFields,
             }}
-            templates={
-              !canEdit
-                ? {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                    FieldTemplate,
-                  }
-                : {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                    ErrorListTemplate,
-                    FieldTemplate,
-                  }
-            }
+            templates={{
+              DescriptionFieldTemplate,
+              ArrayFieldTemplate,
+              ArrayFieldItemTemplate,
+              ObjectFieldTemplate,
+              ErrorListTemplate,
+              FieldErrorTemplate,
+              FieldTemplate,
+            }}
           >
             <></>
           </Form>

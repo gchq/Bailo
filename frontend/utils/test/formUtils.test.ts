@@ -10,7 +10,6 @@ const stepExample: StepNoRender = {
   type: 'Form',
   section: 'First Page',
   schemaRef: 'abc',
-  shouldValidate: false,
   isComplete: () => false,
   uiSchema: {},
 }

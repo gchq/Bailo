@@ -8,6 +8,8 @@ import { alpha, useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
+  ErrorListProps,
+  FieldErrorProps,
   FieldTemplateProps,
   ObjectFieldTemplateProps,
   RJSFSchema,
@@ -16,7 +18,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { getPathFromId, isQuestionAnswered } from 'utils/formUtils'
+import { getErrorLabel, isQuestionAnswered } from 'utils/formUtils'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -63,7 +65,7 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function FieldTemplate({ children, registry, schema, id, hidden }: FieldTemplateProps) {
+export function FieldTemplate({ children, registry, schema, id, hidden, rawErrors, errors }: FieldTemplateProps) {
   const theme = useTheme()
   const answered = isQuestionAnswered(id, schema, registry.formContext)
   const requiredByState =
@@ -71,28 +73,17 @@ export function FieldTemplate({ children, registry, schema, id, hidden }: FieldT
     schema.requiredByModelStates &&
     schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
 
-  // Objects are skipped so that only the offending leaf is marked
-  const invalidMessage =
-    schema.type === 'object' ? undefined : registry.formContext.invalidFields?.get(getPathFromId(id).join('.'))
-
   if (hidden) {
     return <div style={{ display: 'none' }}>{children}</div>
   }
 
-  // The wrapper renders unmarked too - swapping it out would remount the widget and steal focus
+  // The wrapper renders unmarked too - swapping it out remounts the widget and steals focus
   let marker: ReactNode = null
   let backgroundColour: string | undefined
 
-  if (invalidMessage) {
+  if (rawErrors?.length) {
     backgroundColour = alpha(theme.palette.error.main, 0.1)
-    marker = (
-      <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
-        <Error color='error' fontSize='small' aria-label={`${invalidMessage}: ${schema.title ?? id}`} />
-        <Typography variant='caption' color='error'>
-          {invalidMessage}
-        </Typography>
-      </Stack>
-    )
+    marker = errors
   } else if (requiredByState) {
     backgroundColour = alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1)
     marker = (
@@ -125,11 +116,40 @@ export function FieldTemplate({ children, registry, schema, id, hidden }: FieldT
   )
 }
 
-export function ErrorListTemplate() {
+export function FieldErrorTemplate({ errors = [], fieldPathId }: FieldErrorProps) {
+  if (errors.length === 0) {
+    return null
+  }
+
   return (
-    <Typography color='error' sx={{ mb: 2 }}>
-      Please make sure that all errors listed below have been resolved.
-    </Typography>
+    <Stack spacing={0.5}>
+      {errors.map((error, index) => (
+        <Stack key={index} direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+          <Error color='error' fontSize='small' aria-label={`Error for ${fieldPathId.$id}`} />
+          <Typography variant='caption' color='error'>
+            {error}
+          </Typography>
+        </Stack>
+      ))}
+    </Stack>
+  )
+}
+
+export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
+  return (
+    <Stack spacing={0.5} sx={{ mb: 2 }}>
+      <Typography color='error' sx={{ fontWeight: 'bold' }}>
+        Please resolve the following errors
+      </Typography>
+      {errors.map((error, index) => (
+        <Stack key={index} direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+          <Error color='error' fontSize='small' />
+          <Typography variant='caption' color='error'>
+            {`${getErrorLabel(error, schema)}: ${error.message}`}
+          </Typography>
+        </Stack>
+      ))}
+    </Stack>
   )
 }
 
