@@ -126,7 +126,7 @@ describe('ErrorListTemplate', () => {
   })
 
   it('falls back to the question in the schema when the error has no title', async () => {
-    // `customValidate` errors arrive without a title, so they must resolve the question themselves
+    // `customValidate` errors arrive without a title
     renderErrorList([{ property: '.tags', message: 'This field is required' }] as RJSFValidationError[])
 
     expect(await screen.findByText('Applicable tags: This field is required')).toBeDefined()

@@ -77,13 +77,14 @@ export function FieldTemplate({ children, registry, schema, id, hidden, rawError
     return <div style={{ display: 'none' }}>{children}</div>
   }
 
-  // The wrapper renders unmarked too - swapping it out remounts the widget and steals focus
+  // Wrapper renders unmarked too - swapping it out remounts the widget and steals focus
   let marker: ReactNode = null
   let backgroundColour: string | undefined
 
   if (rawErrors?.length) {
     backgroundColour = alpha(theme.palette.error.main, 0.1)
-    marker = errors
+    // RJSF omits `errors` for `anyOf`/`oneOf` fields and when `hideError` is set
+    marker = errors ?? <FieldErrorMarker errors={rawErrors} id={id} />
   } else if (requiredByState) {
     backgroundColour = alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1)
     marker = (
@@ -116,7 +117,7 @@ export function FieldTemplate({ children, registry, schema, id, hidden, rawError
   )
 }
 
-export function FieldErrorTemplate({ errors = [], fieldPathId }: FieldErrorProps) {
+function FieldErrorMarker({ errors = [], id }: { errors?: FieldErrorProps['errors']; id: string }) {
   if (errors.length === 0) {
     return null
   }
@@ -125,7 +126,7 @@ export function FieldErrorTemplate({ errors = [], fieldPathId }: FieldErrorProps
     <Stack spacing={0.5}>
       {errors.map((error, index) => (
         <Stack key={index} direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
-          <Error color='error' fontSize='small' aria-label={`Error for ${fieldPathId.$id}`} />
+          <Error color='error' fontSize='small' aria-label={`Error for ${id}`} />
           <Typography variant='caption' color='error'>
             {error}
           </Typography>
@@ -133,6 +134,10 @@ export function FieldErrorTemplate({ errors = [], fieldPathId }: FieldErrorProps
       ))}
     </Stack>
   )
+}
+
+export function FieldErrorTemplate({ errors, fieldPathId }: Pick<FieldErrorProps, 'errors' | 'fieldPathId'>) {
+  return <FieldErrorMarker errors={errors} id={fieldPathId.$id} />
 }
 
 export function ErrorListTemplate({ errors, schema }: Pick<ErrorListProps, 'errors' | 'schema'>) {

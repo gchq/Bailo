@@ -87,7 +87,7 @@ export default function NewDeploymentAssessment() {
     if (firstInvalidStep !== -1) {
       setSubmitButtonLoading(false)
       setFormValidationErrorState(true)
-      // Errors are listed per section, so open the first section that has them
+      // Errors are listed per section, so open the first failing one
       router.replace({ query: { ...router.query, page: firstInvalidStep } })
       return
     }
