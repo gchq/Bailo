@@ -16,7 +16,9 @@ import {
 } from 'types/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('actions/deploymentAssessment', () => ({
+// `mutateWithPatchedAssessment` stays real so its cache merge is under test
+vi.mock('actions/deploymentAssessment', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('actions/deploymentAssessment')>()),
   patchDeploymentAssessment: vi.fn(),
 }))
 
@@ -55,7 +57,10 @@ const testSchema: SchemaInterface = {
         title: 'About the Deployment',
         type: 'object',
         required: ['name'],
-        properties: { name: { title: 'Name of Deployment', type: 'string' } },
+        properties: {
+          name: { title: 'Name of Deployment', type: 'string' },
+          notes: { title: 'Notes', type: 'string' },
+        },
       },
     },
   },
@@ -76,18 +81,24 @@ const testDeploymentAssessment: DeploymentAssessmentInterface = {
   metadata: { overview: {} },
 }
 
-/**
- * Mirrors the detail page: owns `isEdit` and swaps in fresh data when `mutate` resolves. `mutate`
- * revalidates over the network, so the fresh data only lands a tick after `handleSubmit` returns.
- */
-function TestHarness({ updated }: { updated: DeploymentAssessmentInterface }) {
+/** Mirrors the detail page, with `mutate` resolving a tick late as a revalidation would. */
+function TestHarness({
+  updated,
+  onMutate,
+  assessment = testDeploymentAssessment,
+}: {
+  updated: DeploymentAssessmentInterface
+  onMutate?: (updater: unknown) => void
+  assessment?: DeploymentAssessmentInterface
+}) {
   const [isEdit, setIsEdit] = useState(false)
-  const [deploymentAssessment, setDeploymentAssessment] = useState(testDeploymentAssessment)
+  const [deploymentAssessment, setDeploymentAssessment] = useState(assessment)
 
   const mutate: KeyedMutator<{
     deploymentAssessment: DeploymentAssessmentInterface
     state: DeploymentAssessmentStateKeys
-  }> = async () => {
+  }> = async (updater) => {
+    onMutate?.(updater)
     await new Promise((resolve) => setTimeout(resolve, 250))
     setDeploymentAssessment(updated)
     return undefined
@@ -137,22 +148,76 @@ describe('EditableDeploymentAssessmentForm', () => {
     await user.click(await screen.findByRole('button', { name: /Edit deployment assessment/ }))
     await user.type(answerField(), 'A')
 
-    // Clearing the answer again blocks the save and marks the missing field
+    // Clearing the answer blocks the save and marks the field
     await user.clear(answerField())
-    // The heading and the footer both render a Save button
+    // Heading and footer both render a Save button
     await user.click(screen.getAllByRole('button', { name: 'Save' })[0])
     expect(await screen.findByText('This field is required')).toBeDefined()
     expect(patchDeploymentAssessment).not.toHaveBeenCalled()
 
     await user.type(answerField(), 'A deployment')
+    // `JsonSchemaForm` debounces `onChange`, so let the answer reach the split schema
+    await new Promise((resolve) => setTimeout(resolve, 150))
     await user.click(screen.getAllByRole('button', { name: 'Save' })[0])
 
     await waitFor(() => expect(patchDeploymentAssessment).toHaveBeenCalled())
 
-    // No stale flash: the saved answer is in place as soon as edit mode ends
+    // No stale flash once edit mode ends
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Save' })).toBeNull())
     expect(answerField()).toHaveProperty('value', 'A deployment')
     expect(screen.queryByText('This field is required')).toBeNull()
+  })
+
+  it('merges the saved assessment into the cache, keeping the rest of the payload', async () => {
+    const user = userEvent.setup()
+    const updated = {
+      ...testDeploymentAssessment,
+      metadata: { overview: { name: 'A deployment' } },
+    } as DeploymentAssessmentInterface
+    mockPatchResponse(updated)
+
+    const onMutate = vi.fn()
+    render(<TestHarness updated={updated} onMutate={onMutate} />)
+
+    await user.click(await screen.findByRole('button', { name: /Edit deployment assessment/ }))
+    await user.type(answerField(), 'A deployment')
+    // `JsonSchemaForm` debounces `onChange`, so let the answer reach the split schema
+    await new Promise((resolve) => setTimeout(resolve, 150))
+    await user.click(screen.getAllByRole('button', { name: 'Save' })[0])
+
+    await waitFor(() => expect(onMutate).toHaveBeenCalled())
+
+    const applyUpdate = onMutate.mock.calls[0][0]
+    const cached = {
+      deploymentAssessment: testDeploymentAssessment,
+      state: DeploymentAssessmentState.NeedsReview,
+      responses: ['a response'],
+    }
+
+    expect(applyUpdate(cached)).toEqual({ ...cached, deploymentAssessment: updated })
+    expect(applyUpdate(undefined)).toBeUndefined()
+  })
+
+  it('saves an answer the user has cleared', async () => {
+    const user = userEvent.setup()
+    const answered = {
+      ...testDeploymentAssessment,
+      metadata: { overview: { name: 'A deployment', notes: 'Some notes' } },
+    } as DeploymentAssessmentInterface
+    mockPatchResponse(answered)
+
+    render(<TestHarness assessment={answered} updated={answered} />)
+
+    await user.click(await screen.findByRole('button', { name: /Edit deployment assessment/ }))
+    await user.clear(screen.getByLabelText('text input field for Notes'))
+    // `JsonSchemaForm` debounces `onChange`, so let the answer reach the split schema
+    await new Promise((resolve) => setTimeout(resolve, 150))
+    await user.click(screen.getAllByRole('button', { name: 'Save' })[0])
+
+    await waitFor(() => expect(patchDeploymentAssessment).toHaveBeenCalled())
+
+    const [, metadata] = vi.mocked(patchDeploymentAssessment).mock.calls[0]
+    expect(metadata).toEqual({ overview: { name: 'A deployment' } })
   })
 
   it('blocks saving an unchanged assessment that is already incomplete', async () => {

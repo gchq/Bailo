@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Box, Button, Container, Divider, Paper, Popper, Stack } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
+import { mutateWithPatchedAssessment, patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
@@ -79,15 +79,17 @@ export default function DeploymentAssessment() {
     }
   }
 
-  const { schema, isSchemaError } = useGetSchema(deploymentAssessment?.schemaId ?? '')
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment?.schemaId ?? '')
 
-  const isPublishable = useMemo(() => {
-    if (!schema) {
-      return false
-    }
+  // Built once per schema, so the validator can cache against stable step schemas
+  const steps = useMemo(() => (schema ? getStepsFromSchema(schema) : []), [schema])
 
-    return getStepsFromSchema(schema, {}, [], deploymentAssessment?.metadata).every(validateForm)
-  }, [schema, deploymentAssessment?.metadata])
+  const isPublishable = useMemo(
+    () =>
+      steps.length > 0 &&
+      steps.every((step) => validateForm({ ...step, state: deploymentAssessment?.metadata?.[step.section] ?? {} })),
+    [steps, deploymentAssessment?.metadata],
+  )
 
   useEffect(() => {
     if (isPublishable) {
@@ -105,6 +107,11 @@ export default function DeploymentAssessment() {
   }
 
   function handleBeforePublish() {
+    // Completeness is unknown until the schema arrives
+    if (isSchemaLoading) {
+      return false
+    }
+
     if (!isPublishable) {
       setShowValidationErrors(true)
       sendNotification({ msg: 'Unable to publish incomplete Deployment Assessment.', variant: 'error' })
@@ -122,10 +129,7 @@ export default function DeploymentAssessment() {
       if (!response.ok) {
         setPatchErrorMessage(await getErrorMessage(response))
       } else {
-        const { deploymentAssessment: published } = await response.json()
-        await mutateDeploymentAssessment((current) =>
-          current ? { ...current, deploymentAssessment: published } : current,
-        )
+        await mutateWithPatchedAssessment(mutateDeploymentAssessment, response)
         sendNotification({ msg: 'Deployment Assessment successfully published.', variant: 'success' })
       }
       setIsLoading(false)
@@ -147,7 +151,7 @@ export default function DeploymentAssessment() {
                 <DraftBanner
                   errorMessage={patchErrorMessage}
                   setErrorMessage={setPatchErrorMessage}
-                  disableButton={isEdit}
+                  disableButton={isEdit || isSchemaLoading}
                   isLoading={isLoading}
                   handlePublish={handlePublish}
                   draft={deploymentAssessment.draft}

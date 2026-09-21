@@ -2,7 +2,7 @@ import Close from '@mui/icons-material/Close'
 import Save from '@mui/icons-material/Save'
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
-import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
+import { mutateWithPatchedAssessment, patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { deleteDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useGetSchema } from 'actions/schema'
 import cloneDeep from 'lodash-es/cloneDeep'
@@ -109,10 +109,8 @@ export default function EditableDeploymentAssessmentForm({
       if (!response.ok) {
         setErrorMessage(await getErrorMessage(response))
       } else {
-        // Merge into the cache before leaving edit mode, else the form rebuilds from the pre-save
-        // answers. The PATCH only returns the assessment, so revalidate for `state` and `responses`
-        const { deploymentAssessment: updated } = await response.json()
-        await mutate((current) => (current ? { ...current, deploymentAssessment: updated } : current))
+        // Update the cache first, else the form rebuilds from the pre-save answers
+        await mutateWithPatchedAssessment(mutate, response)
         onIsEditChange(false)
       }
     }

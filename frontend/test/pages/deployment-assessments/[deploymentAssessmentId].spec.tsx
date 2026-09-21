@@ -15,7 +15,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const sendNotification = vi.fn()
 
-vi.mock('actions/deploymentAssessment', () => ({
+vi.mock('actions/deploymentAssessment', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('actions/deploymentAssessment')>()),
   patchDeploymentAssessment: vi.fn(() =>
     Promise.resolve({ ok: true, json: async () => ({ deploymentAssessment: { draft: false } }) }),
   ),
@@ -89,7 +90,7 @@ const testSchema: SchemaInterface = {
   },
 }
 
-// `useGetDeploymentAssessment` flattens the response's `state` and `responses` onto the assessment
+// `useGetDeploymentAssessment` flattens `state` and `responses` onto the assessment
 const testDeploymentAssessment: DeploymentAssessmentInterface & { responses: ResponseInterface[] } = {
   _id: 'abc123',
   id: 'assessment-abc123',
