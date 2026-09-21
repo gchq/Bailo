@@ -128,4 +128,18 @@ describe('EditableDeploymentAssessmentForm', () => {
     expect(answerField()).toHaveProperty('value', 'A deployment')
     expect(screen.queryByText('This field is required')).toBeNull()
   })
+
+  it('blocks saving an unchanged assessment that is already incomplete', async () => {
+    const user = userEvent.setup()
+    mockPatchResponse(testDeploymentAssessment)
+
+    render(<TestHarness updated={testDeploymentAssessment} />)
+
+    await user.click(await screen.findByRole('button', { name: /Edit Deployment Assessment/ }))
+    await user.click(screen.getAllByRole('button', { name: 'Save' })[0])
+
+    expect(await screen.findByText('This field is required')).toBeDefined()
+    expect(patchDeploymentAssessment).not.toHaveBeenCalled()
+    expect(screen.getAllByRole('button', { name: 'Save' })[0]).toBeDefined()
+  })
 })

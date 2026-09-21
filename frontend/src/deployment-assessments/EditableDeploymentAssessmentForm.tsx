@@ -90,15 +90,15 @@ export default function EditableDeploymentAssessmentForm({
       const nameChanged = deploymentAssessment.name !== newName
       const nothingChanged = !answersChanged && !nameChanged
 
-      if (nothingChanged) {
-        setIsLoading(false)
-        onIsEditChange(false)
-        return
-      }
-
       if (!deploymentAssessment.draft && getFirstInvalidStepIndex(splitSchema) !== -1) {
         setFormValidationErrorState(true)
         setIsLoading(false)
+        return
+      }
+
+      if (nothingChanged) {
+        setIsLoading(false)
+        onIsEditChange(false)
         return
       }
 
