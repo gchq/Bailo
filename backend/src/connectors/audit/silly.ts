@@ -13,6 +13,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { BailoError } from '../../types/error.js'
 import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
@@ -90,7 +91,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onCreateDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc) {}
   async onUpdateDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc) {}
   async onDeleteDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
-  async onSearchDeploymentAssessments(_req: Request, _deploymentAssessments: DeploymentAssessmentDoc[]) {}
+  async onSearchDeploymentAssessments(_req: Request, _deploymentAssessments: DeploymentAssessmentSummary[]) {}
   async onViewDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
   async onReviewDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
   async onCommentOnDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
