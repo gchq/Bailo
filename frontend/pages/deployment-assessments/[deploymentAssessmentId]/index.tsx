@@ -182,7 +182,9 @@ export default function DeploymentAssessment() {
               anchorEl={anchorEl}
               sx={{
                 maxWidth: '450px',
-                width: '100%',
+                '&:has(.w-md-editor-fullscreen)': {
+                  transform: 'none !important',
+                },
                 boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
               }}
               modifiers={[
