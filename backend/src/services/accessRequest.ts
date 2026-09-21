@@ -218,7 +218,7 @@ export async function findAccessRequests(
 }
 
 // Raw strings: `getModelAccessRequestsForUser` matches exactly, so a change of case is a change of identity.
-function sortedEntities(metadata: AccessRequestMetadata | undefined) {
+function sortedEntities(metadata: AccessRequestMetadata | undefined): string[] {
   const entities = metadata?.overview?.entities
   return Array.isArray(entities) ? [...entities].sort() : []
 }
