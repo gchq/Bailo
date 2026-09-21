@@ -535,20 +535,8 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('name')
   }
   if (diff.metadata !== undefined) {
-    const current = deploymentAssessment.metadata ?? ({} as DeploymentAssessmentInterface['metadata'])
-    const next: DeploymentAssessmentInterface['metadata'] = {
-      ...current,
-      ...diff.metadata,
-      modelOverview: {
-        ...(current.modelOverview ?? {}),
-        ...(diff.metadata as any).modelOverview,
-      },
-      signOff: {
-        ...(current.signOff ?? {}),
-        ...(diff.metadata as any).signOff,
-      },
-    }
-    deploymentAssessment.metadata = next
+    // Replaced, not merged: the caller sends the whole card, so a merge would resurrect cleared answers
+    deploymentAssessment.metadata = { ...diff.metadata, modelOverview: diff.metadata.modelOverview ?? {} }
     deploymentAssessment.markModified('metadata')
   }
 

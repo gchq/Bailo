@@ -1,4 +1,5 @@
-import { DeploymentAssessmentMetadata } from 'types/types'
+import { KeyedMutator } from 'swr'
+import { DeploymentAssessmentInterface, DeploymentAssessmentMetadata } from 'types/types'
 
 export function postDeploymentAssessment(
   name: string,
@@ -33,4 +34,13 @@ export function patchDeploymentAssessment(
       draft,
     }),
   })
+}
+
+/** Merged rather than replaced: the PATCH response omits the cached `state` and `responses`. */
+export async function mutateWithPatchedAssessment<T extends { deploymentAssessment: DeploymentAssessmentInterface }>(
+  mutate: KeyedMutator<T>,
+  response: Response,
+) {
+  const { deploymentAssessment } = await response.json()
+  await mutate((current) => (current ? { ...current, deploymentAssessment } : current))
 }

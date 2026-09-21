@@ -592,6 +592,20 @@ describe('services > deploymentAssessment', () => {
       expect(deploymentAssessment.save).toHaveBeenCalled()
     })
 
+    test('removes answers the diff omits rather than merging them', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      const metadata = {
+        assessment: { summary: 'Summary' },
+        modelOverview: { modelIds: ['model-one'] },
+        signOff: {},
+      }
+
+      const result = await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata })
+
+      expect(result.metadata).toStrictEqual(metadata)
+    })
+
     test('leaves the draft status unchanged when the diff omits it', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)

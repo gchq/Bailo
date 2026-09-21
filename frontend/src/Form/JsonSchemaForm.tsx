@@ -336,7 +336,7 @@ export default function JsonSchemaForm({
             </Stack>
           )}
           <Form
-            // Remount per section, else `validateForm` runs against the previous section's state
+            // Remount per section, else `validateForm` runs against the previous section
             key={currentStep.section}
             ref={formRef}
             schema={currentStep.schema}
