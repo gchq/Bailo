@@ -22,6 +22,7 @@ export type RichTextEditorProps = {
   textareaProps?: MDEditorProps['textareaProps']
   dataTest?: string
   errors?: string[]
+  alwaysShowToolbar?: boolean
 }
 
 export default function RichTextEditor({
@@ -31,6 +32,7 @@ export default function RichTextEditor({
   label = <></>,
   dataTest = 'richTextEditor',
   errors,
+  alwaysShowToolbar = false,
 }: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
   const theme = useTheme()
@@ -61,16 +63,18 @@ export default function RichTextEditor({
         }}
       >
         {label}
-        <Button size='small' onClick={toggleToolbar} sx={{ ml: 'auto' }}>
-          {`${hideToolbar ? 'Show' : 'Hide'} Toolbar`}
-        </Button>
+        {!alwaysShowToolbar && (
+          <Button size='small' onClick={toggleToolbar} sx={{ ml: 'auto' }}>
+            {`${hideToolbar ? 'Show' : 'Hide'} Toolbar`}
+          </Button>
+        )}
       </Box>
       <MDEditor
         defaultTabEnable
         value={value}
         style={styling}
         preview='edit'
-        hideToolbar={hideToolbar}
+        hideToolbar={alwaysShowToolbar ? false : hideToolbar}
         height={150}
         textareaProps={{ ...richTextareaProps, 'aria-label': 'rich-text-input' }}
         onChange={handleChange}
