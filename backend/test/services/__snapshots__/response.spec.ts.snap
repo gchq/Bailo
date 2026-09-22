@@ -16,7 +16,7 @@ exports[`services > response > checkAccessRequestsApproved > approved access req
       },
       {
         "$lookup": {
-          "as": "responses",
+          "as": "latestDecisions",
           "from": "v2_responses",
           "let": {
             "reviewId": "$_id",
@@ -33,22 +33,41 @@ exports[`services > response > checkAccessRequestsApproved > approved access req
                 "kind": "review",
               },
             },
+            {
+              "$sort": {
+                "createdAt": -1,
+              },
+            },
+            {
+              "$group": {
+                "_id": "$entity",
+                "decision": {
+                  "$first": "$decision",
+                },
+              },
+            },
+            {
+              "$group": {
+                "_id": null,
+                "decisions": {
+                  "$addToSet": "$decision",
+                },
+              },
+            },
           ],
         },
       },
       {
         "$addFields": {
-          "latestResponse": {
-            "$arrayElemAt": [
+          "reviewerDecisions": {
+            "$ifNull": [
               {
-                "$sortArray": {
-                  "input": "$responses",
-                  "sortBy": {
-                    "createdAt": -1,
-                  },
-                },
+                "$arrayElemAt": [
+                  "$latestDecisions.decisions",
+                  0,
+                ],
               },
-              0,
+              [],
             ],
           },
         },
@@ -60,9 +79,23 @@ exports[`services > response > checkAccessRequestsApproved > approved access req
             "$sum": {
               "$cond": [
                 {
-                  "$eq": [
-                    "$latestResponse.decision",
-                    "approve",
+                  "$and": [
+                    {
+                      "$in": [
+                        "approve",
+                        "$reviewerDecisions",
+                      ],
+                    },
+                    {
+                      "$not": [
+                        {
+                          "$in": [
+                            "request_changes",
+                            "$reviewerDecisions",
+                          ],
+                        },
+                      ],
+                    },
                   ],
                 },
                 1,

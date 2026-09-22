@@ -386,8 +386,18 @@ describe('services > response', () => {
     expect(ResponseModelMock.save).not.toHaveBeenCalled()
   })
 
+  /** Captures the pipeline `checkAccessRequestsApproved` builds. */
+  async function getApprovalAggregatePipeline(): Promise<any[]> {
+    let pipeline: any[] = []
+    ReviewModelMock.aggregate.mockImplementationOnce(async (stages: any) => {
+      pipeline = stages
+      return []
+    })
+    await checkAccessRequestsApproved(['access-1'])
+    return pipeline
+  }
+
   test('checkAccessRequestsApproved > approved access request exists', async () => {
-    // Only returns access requests whose reviews are all latest-approved
     ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: 'access-1', approvedReviews: 2, totalReviews: 2 }])
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
@@ -404,18 +414,38 @@ describe('services > response', () => {
     expect(result).toBe(false)
   })
 
-  test('checkAccessRequestsApproved > a rejection after an approval revokes the access request', async () => {
-    ReviewModelMock.aggregate.mockImplementationOnce(async (pipeline: any) => {
-      const reviews = [
-        { accessRequestId: 'access-1', latestResponse: { decision: Decision.Approve } },
-        // Approved earlier, but the latest decision is a rejection
-        { accessRequestId: 'access-1', latestResponse: { decision: Decision.RequestChanges } },
-      ]
-      expect(JSON.stringify(pipeline)).toContain('latestResponse')
+  /** Applies the aggregate's approval rules to reviews described as each reviewer's latest decision. */
+  function resolveApprovalAggregate(reviewerDecisionsPerReview: (string | undefined)[][]) {
+    return async () => {
+      const approvedReviews = reviewerDecisionsPerReview.filter(
+        (reviewerDecisions) =>
+          reviewerDecisions.includes(Decision.Approve) && !reviewerDecisions.includes(Decision.RequestChanges),
+      ).length
+      return approvedReviews === reviewerDecisionsPerReview.length ? [{ _id: 'access-1' }] : []
+    }
+  }
 
-      const approvedReviews = reviews.filter((review) => review.latestResponse.decision === Decision.Approve).length
-      return approvedReviews === reviews.length ? [{ _id: 'access-1' }] : []
-    })
+  test('checkAccessRequestsApproved > groups responses by reviewer before taking the latest decision', async () => {
+    const [{ $lookup }] = (await getApprovalAggregatePipeline()).filter((stage) => stage.$lookup)
+
+    // Grouping by entity first is what stops one reviewer's approval masking another's change request
+    expect($lookup.pipeline).toContainEqual({ $group: { _id: '$entity', decision: { $first: '$decision' } } })
+    expect($lookup.pipeline).toContainEqual({ $sort: { createdAt: -1 } })
+  })
+
+  test('checkAccessRequestsApproved > a rejection after an approval revokes the access request', async () => {
+    ReviewModelMock.aggregate.mockImplementationOnce(resolveApprovalAggregate([[Decision.RequestChanges]]))
+
+    const result = await checkAccessRequestsApproved(['access-1'])
+
+    expect(result).toBe(false)
+  })
+
+  test('checkAccessRequestsApproved > one reviewer approving does not clear another reviewer s change request', async () => {
+    // Reviewer A requested changes, reviewer B then approved the same review
+    ReviewModelMock.aggregate.mockImplementationOnce(
+      resolveApprovalAggregate([[Decision.RequestChanges, Decision.Approve]]),
+    )
 
     const result = await checkAccessRequestsApproved(['access-1'])
 
@@ -423,21 +453,22 @@ describe('services > response', () => {
   })
 
   test('checkAccessRequestsApproved > one approval does not satisfy several required reviews', async () => {
-    ReviewModelMock.aggregate.mockImplementationOnce(async (pipeline: any) => {
-      const reviews = [
-        { accessRequestId: 'access-1', latestResponse: { decision: Decision.Approve } },
-        // A second required role with no response yet
-        { accessRequestId: 'access-1', latestResponse: undefined },
-      ]
-      expect(JSON.stringify(pipeline)).toContain('$group')
-
-      const approvedReviews = reviews.filter((review) => review.latestResponse?.decision === Decision.Approve).length
-      return approvedReviews === reviews.length ? [{ _id: 'access-1' }] : []
-    })
+    // Second required role has no response yet
+    ReviewModelMock.aggregate.mockImplementationOnce(resolveApprovalAggregate([[Decision.Approve], []]))
 
     const result = await checkAccessRequestsApproved(['access-1'])
 
     expect(result).toBe(false)
+  })
+
+  test('checkAccessRequestsApproved > every review approved by every reviewer', async () => {
+    ReviewModelMock.aggregate.mockImplementationOnce(
+      resolveApprovalAggregate([[Decision.Approve], [Decision.Approve, Decision.Approve]]),
+    )
+
+    const result = await checkAccessRequestsApproved(['access-1'])
+
+    expect(result).toBe(true)
   })
 
   describe('checkReleaseApproved', () => {
