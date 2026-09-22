@@ -420,7 +420,7 @@ export async function matchUserToDro(user: UserInterface) {
       $gt: [
         {
           $size: {
-            $setIntersection: [{ $ifNull: ['$deploymentAssessment.metadata.overview.riskOwner', []] }, entities],
+            $setIntersection: [{ $ifNull: ['$deploymentAssessment.metadata.signOff.riskOwners', []] }, entities],
           },
         },
         0,

@@ -27,7 +27,7 @@ const configMock = vi.hoisted(
           owner: 'Owner',
           contributor: 'Contributor',
           consumer: 'Consumer',
-          riskOwner: 'Deployment Risk Owner',
+          riskOwners: 'Deployment Risk Owner',
         },
       },
       log: {
@@ -140,7 +140,7 @@ describe('services > schema', () => {
       }),
       signOff: expect.objectContaining({
         title: 'Deployment Sign-Off',
-        required: ['riskOwner'],
+        required: ['riskOwners'],
         properties: expect.objectContaining({
           riskOwners: expect.objectContaining({
             title: 'Who is the risk owner attached to this deployment assessment?',

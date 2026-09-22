@@ -157,10 +157,10 @@ export default function ReviewDecisionDisplay({
                 <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
                 <span>{response.decision === Decision.Reject && <Close color='error' fontSize='small' />}</span>
               </Stack>
-              {response.role && response.role !== 'riskOwner' && (
+              {response.role && response.role !== 'riskOwners' && (
                 <Typography variant='caption'>as {getRoleDisplayName(response.role, entryRoles)}</Typography>
               )}
-              {response.role && response.role === 'riskOwner' && (
+              {response.role && response.role === 'riskOwners' && (
                 <Typography variant='caption'>as Risk Owner</Typography>
               )}
               <span>
