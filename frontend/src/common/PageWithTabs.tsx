@@ -193,7 +193,7 @@ export default function PageWithTabs({
               variant='contained'
               onClick={actionButtonOnClick}
               startIcon={actionButtonIcon ? actionButtonIcon : <></>}
-              data-test='createButton'
+              data-test='actionButton'
             >
               {actionButtonTitle}
             </Button>
