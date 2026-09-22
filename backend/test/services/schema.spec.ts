@@ -131,11 +131,18 @@ describe('services > schema', () => {
     const result = await searchSchemas(SchemaKind.DeploymentAssessment)
 
     expect(result[0].jsonSchema.properties).toEqual({
-      overview: expect.objectContaining({
-        title: 'Details',
-        required: ['riskOwner', 'modelIds'],
+      modelOverview: expect.objectContaining({
+        title: 'Model Overview',
+        required: ['modelIds'],
         properties: expect.objectContaining({
-          riskOwner: expect.objectContaining({
+          modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
+        }),
+      }),
+      signOff: expect.objectContaining({
+        title: 'Deployment Sign-Off',
+        required: ['riskOwner'],
+        properties: expect.objectContaining({
+          riskOwners: expect.objectContaining({
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'array',
             minItems: 1,
@@ -144,14 +151,13 @@ describe('services > schema', () => {
             hideDefaultUser: true,
             widget: 'entitySelector',
           }),
-          modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),
       }),
       assessment: {
         type: 'object',
       },
     })
-    expect(result[0].jsonSchema.required).toEqual(['overview'])
+    expect(result[0].jsonSchema.required).toEqual(['signOff', 'modelOverview'])
   })
 
   test('that non-deployment assessment schemas are unchanged when searched', async () => {

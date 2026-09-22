@@ -236,7 +236,7 @@ data:
           owner: '{{ .Values.config.ui.roleDisplayNames.owner }}',
           consumer: '{{ .Values.config.ui.roleDisplayNames.consumer }}',
           contributor: '{{ .Values.config.ui.roleDisplayNames.contributor }}',
-          riskOwner: '{{ .Values.config.ui.roleDisplayNames.riskOwner }}',
+          riskOwner: '{{ .Values.config.ui.roleDisplayNames.riskOwner}}',
         },
 
         untrustedModel: {
@@ -247,7 +247,7 @@ data:
         },
 
         deploymentAssessments: {
-          deployableModelState: '{{ .Values.config.ui.deploymentAssessments.deployableModelState }}',
+          deployableModelState: {{ toJson .Values.config.ui.deploymentAssessments.deployableModelState }},
         },
 
         lifecycle: {

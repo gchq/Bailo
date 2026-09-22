@@ -64,11 +64,14 @@ export default function Model() {
               datatest: 'deploymentAssessmentsTab',
               disabled:
                 entry.visibility === EntryVisibility.Private ||
-                entry.state !== uiConfig.deploymentAssessments.deployableModelState,
+                (uiConfig.deploymentAssessments.deployableModelState !== null &&
+                  entry.state !== uiConfig.deploymentAssessments.deployableModelState),
               disabledText:
                 entry.visibility === EntryVisibility.Private
                   ? 'Deployment assessments are not available for private models.'
-                  : `This model's state must be set to ${uiConfig.deploymentAssessments.deployableModelState} in order for it to be included in deployment assessments.`,
+                  : uiConfig.deploymentAssessments.deployableModelState !== null
+                    ? `This model's state must be set to ${uiConfig.deploymentAssessments.deployableModelState} in order for it to be included in deployment assessments.`
+                    : undefined,
             },
             {
               title: 'Registry',

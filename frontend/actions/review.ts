@@ -6,18 +6,15 @@ import {
   DecisionKeys,
   EntryInterface,
   ReleaseInterface,
+  ReviewKind,
   ReviewKindKeys,
   ReviewRequestInterface,
 } from 'types/types'
+import { toSafePathId } from 'utils/stringUtils'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
-
-const REVIEW_ID_PATTERN = /^[A-Za-z0-9_-]+$/
-function isValidReviewId(reviewId: string) {
-  return REVIEW_ID_PATTERN.test(reviewId)
-}
 
 export function useHeadReviewRequestsForUser(open?: boolean, kind?: ReviewKindKeys) {
   const queryParams = { ...(open !== undefined && { open }), ...(kind !== undefined && { kind }) }
@@ -37,8 +34,8 @@ export function useHeadReviewRequestsForUser(open?: boolean, kind?: ReviewKindKe
   }
 }
 
-export function useGetReviewRequestsForUser(open?: boolean) {
-  const queryParams = { ...(open !== undefined && { open }) }
+export function useGetReviewRequestsForUser(open?: boolean, kind?: ReviewKindKeys) {
+  const queryParams = { ...(open !== undefined && { open }), ...(kind !== undefined && { kind }) }
   const { data, isLoading, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
@@ -49,6 +46,46 @@ export function useGetReviewRequestsForUser(open?: boolean) {
   return {
     mutateReviews: mutate,
     reviews: data ? data.reviews : emptyReviewList,
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+  }
+}
+
+type HeadReviewRequestsForModelQuery = {
+  modelId?: EntryInterface['id']
+  kind?: ReviewKindKeys
+  open?: boolean
+  semver?: string
+  accessRequestId?: string
+  deploymentAssessmentId?: string
+}
+
+export function useHeadReviewRequests({
+  modelId,
+  kind,
+  open,
+  semver,
+  accessRequestId,
+  deploymentAssessmentId,
+}: HeadReviewRequestsForModelQuery) {
+  const queryParams = {
+    ...(modelId && { modelId }),
+    ...(semver && { semver }),
+    ...(accessRequestId && { accessRequestId }),
+    ...(deploymentAssessmentId && { deploymentAssessmentId }),
+    ...(kind && { kind }),
+    ...(open && { open }),
+  }
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      headers: Record<string, string>
+    },
+    ErrorInfo
+  >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcher(url, true))
+
+  return {
+    mutateReviews: mutate,
+    reviewCountHeader: data?.headers['x-count'] ? parseInt(data.headers['x-count']) : 0,
     isReviewsLoading: isLoading,
     isReviewsError: error,
   }
@@ -76,27 +113,6 @@ type GetReviewRequestsForModelQuery = {
   kind?: ReviewKindKeys
   open?: boolean
 } & additionalParameters
-
-export function useHeadReviewRequestsForModel({ modelId, semver, accessRequestId }: GetReviewRequestsForModelQuery) {
-  const queryParams = {
-    modelId,
-    ...(semver && { semver }),
-    ...(accessRequestId && { accessRequestId }),
-  }
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      headers: Record<string, string>
-    },
-    ErrorInfo
-  >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcher(url, true))
-
-  return {
-    mutateReviews: mutate,
-    reviewCountHeader: data?.headers['x-count'] ? parseInt(data.headers['x-count']) : 0,
-    isReviewsLoading: isLoading,
-    isReviewsError: error,
-  }
-}
 
 export function useGetReviewRequestsForModel({
   modelId,
@@ -171,11 +187,8 @@ export async function postGenericReviewResponse({
   decision,
   dueDate,
 }: PostGenericReviewResponseParams) {
-  if (!isValidReviewId(reviewId)) {
-    throw new Error('Invalid review ID')
-  }
-
-  return fetch(`/api/v3/review/${reviewId}/response`, {
+  const safeReviewId = toSafePathId(reviewId)
+  return fetch(`/api/v3/review/${safeReviewId}/response`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment, decision, dueDate, kind }),
@@ -201,5 +214,53 @@ export async function postNotifyReviewer(reviewId: string) {
   return fetch(`/api/v3/review/${reviewId}/notify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+export function useGetReviewsForDeploymentAssessment(deploymentAssessmentId?: string) {
+  const queryParams = deploymentAssessmentId
+    ? {
+        deploymentAssessmentId,
+        kind: ReviewKind.DEPLOYMENTS,
+      }
+    : undefined
+
+  const { data, isLoading, error, mutate } = useSWR<{ reviews: ReviewRequestInterface[] }, ErrorInfo>(
+    queryParams ? `/api/v2/reviews?${qs.stringify(queryParams)}` : null,
+    fetcher,
+  )
+
+  return {
+    mutateReviews: mutate,
+    reviews: data?.reviews ?? emptyReviewList,
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+  }
+}
+
+type postDeploymentAssessmentReviewResponseParams = {
+  deploymentAssessmentId: string
+  decision: DecisionKeys
+  comment: string
+}
+export async function postDeploymentAssessmentReviewResponse({
+  deploymentAssessmentId,
+  comment,
+  decision,
+}: postDeploymentAssessmentReviewResponseParams) {
+  const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
+  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/review`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment, decision }),
+  })
+}
+
+export async function postDeploymentAssessmentReviewComment(deploymentAssessmentId: string, comment: string) {
+  const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
+  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/comments`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
   })
 }
