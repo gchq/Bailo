@@ -14,6 +14,7 @@ import {
   updateReviewRole,
 } from '../../src/services/review.js'
 import { RoleKind } from '../../src/types/types.js'
+import config from '../../src/utils/config.js'
 import { NotFound } from '../../src/utils/error.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
@@ -71,35 +72,6 @@ const arrayUtilMock = vi.hoisted(() => ({
   asyncFilter: vi.fn(),
 }))
 vi.mock('../../src/utils/array.js', async () => arrayUtilMock)
-
-const configMock = vi.hoisted(() => ({
-  defaultReviewRoles: [
-    {
-      name: 'Reviewer',
-      shortName: 'reviewer',
-      kind: 'schema',
-      description: 'Reviewer',
-    },
-  ],
-  connectors: {
-    artefactScanners: {
-      kinds: [],
-    },
-    audit: {
-      kind: 'silly',
-    },
-  },
-  registry: {
-    connection: {
-      internal: '',
-    },
-  },
-}))
-
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }
@@ -231,7 +203,7 @@ describe('services > review', () => {
   test('addDefaultReviewRoles > successfully added default review roles', async () => {
     ReviewRoleModelMock.lean.mockResolvedValue([])
     await addDefaultReviewRoles()
-    expect(ReviewRoleModelMock.insertMany).toHaveBeenCalledWith(configMock.defaultReviewRoles)
+    expect(ReviewRoleModelMock.insertMany).toHaveBeenCalledWith(config.defaultReviewRoles)
   })
 
   test('removeReviewRole > successful', async () => {

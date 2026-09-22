@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
   ArtefactScanState,
@@ -8,21 +8,9 @@ import {
 import { ArtefactScanningWrapper } from '../../../src/connectors/artefactScanning/wrapper.js'
 import { FileInterface } from '../../../src/models/File.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 vi.mock('../../../src/services/log.js')
-
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    artefactScanners: {
-      maxInitRetries: 2,
-      initRetryDelay: 0,
-    },
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
 
 class TestFileScanner extends BaseArtefactScanningConnector {
   toolName = 'FileScanner'
@@ -57,6 +45,11 @@ class TestImageScanner extends BaseArtefactScanningConnector {
 }
 
 describe('connectors > artefactScanning > wrapper', () => {
+  beforeEach(() => {
+    // Keep the retry tests fast
+    setTestConfig({ connectors: { artefactScanners: { maxInitRetries: 2, initRetryDelay: 0 } } })
+  })
+
   test('initialiseScanners() initialises all scanners', async () => {
     const scanner = new TestFileScanner()
     const wrapper = new ArtefactScanningWrapper(new Set([scanner]))
