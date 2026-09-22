@@ -419,7 +419,7 @@ export const deploymentAssessmentResponseSchema = z.object({
   _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   entity: z.string().openapi({ example: 'user:joe.bloggs' }),
   kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
-  role: z.string().optional().openapi({ example: 'riskOwner' }),
+  role: z.string().optional().openapi({ example: 'riskOwners' }),
   decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
   parentId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),

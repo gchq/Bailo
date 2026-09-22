@@ -177,7 +177,7 @@ describe('services > deploymentAssessment', () => {
   })
 
   test('creates an incomplete draft without requiring optional fields', async () => {
-    const metadata = { overview: {} }
+    const metadata = { modelOverview: {}, signOff: {} }
 
     await createDeploymentAssessment({ dn: 'creator' }, { ...params, name: 'Draft assessment', draft: true, metadata })
 
@@ -1029,7 +1029,7 @@ describe('services > deploymentAssessment', () => {
         ['rejections', Decision.Reject, false],
         ['change requests', Decision.RequestChanges, false],
       ])('returns the creator their %s', async (_label, decision, draft) => {
-        const assessment = { id: 'mine', draft, createdBy: 'user', metadata: { overview: {} } }
+        const assessment = { id: 'mine', draft, createdBy: 'user', metadata: { modelOverview: {}, signOff: {} } }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([assessment])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([{ success: true, id: assessment.id }])
         repositoryMocks.findLatestDecisionsByAssessmentIds.mockResolvedValueOnce(
@@ -1043,8 +1043,18 @@ describe('services > deploymentAssessment', () => {
       })
 
       test('does not return the creator their approved or awaiting review assessments', async () => {
-        const approved = { id: 'approved', draft: false, createdBy: 'user', metadata: { overview: {} } }
-        const awaitingReview = { id: 'awaiting-review', draft: false, createdBy: 'user', metadata: { overview: {} } }
+        const approved = {
+          id: 'approved',
+          draft: false,
+          createdBy: 'user',
+          metadata: { modelOverview: {}, signOff: {} },
+        }
+        const awaitingReview = {
+          id: 'awaiting-review',
+          draft: false,
+          createdBy: 'user',
+          metadata: { modelOverview: {}, signOff: {} },
+        }
         repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([approved, awaitingReview])
         vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([
           { success: true, id: approved.id },
