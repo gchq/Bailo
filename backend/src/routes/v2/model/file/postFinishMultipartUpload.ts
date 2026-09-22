@@ -25,7 +25,7 @@ export const postFinishMultipartUploadSchema = z.object({
         )
         .min(1),
     ),
-    tags: coerceArray(z.array(z.string()).optional()),
+    tags: coerceArray(z.array(z.string())).optional(),
   }),
 })
 
