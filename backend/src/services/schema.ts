@@ -75,7 +75,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
     ? (((jsonSchema as any).properties!.signOff as any).required as string[])
     : []
 
-  const mergedSignOffRequired = Array.from(new Set<string>(['riskOwner', ...existingSignOffRequired]))
+  const mergedSignOffRequired = Array.from(new Set<string>(['riskOwners', ...existingSignOffRequired]))
 
   return {
     ...structuredClone(jsonSchema),

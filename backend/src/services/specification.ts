@@ -84,7 +84,7 @@ export const deploymentAssessmentMetadataSchema = z
   .object({
     signOff: z
       .object({
-        riskOwner: deploymentAssessmentRiskOwnerSchema.optional(),
+        riskOwners: deploymentAssessmentRiskOwnerSchema.optional(),
       })
       .passthrough()
       .optional(),
@@ -99,7 +99,7 @@ export const deploymentAssessmentMetadataRequiredSchema = z
         modelIds: deploymentAssessmentModelIdsSchema,
       })
       .passthrough(),
-    signOff: z.object({ riskOwner: deploymentAssessmentRiskOwnerSchema }).passthrough(),
+    signOff: z.object({ riskOwners: deploymentAssessmentRiskOwnerSchema }).passthrough(),
   })
   .passthrough()
 
@@ -469,7 +469,7 @@ const deploymentAssessmentModelOverview = z
 
 const deploymentAssessmentSignOff = z
   .object({
-    riskOwner: z
+    riskOwners: z
       .array(z.string().min(1))
       .min(1)
       .max(1)
