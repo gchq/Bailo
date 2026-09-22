@@ -105,7 +105,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         title: 'Deployment Sign-Off',
         type: 'object',
         properties: {
-          riskOwner: {
+          riskOwners: {
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'array',
             items: {
