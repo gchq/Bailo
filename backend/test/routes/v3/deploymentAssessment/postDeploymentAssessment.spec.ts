@@ -11,7 +11,7 @@ const deploymentAssessment = {
   schemaId: 'deployment-assessment-schema',
   metadata: {
     signOff: {
-      riskOwner: ['user:risk-owner'],
+      riskOwners: ['user:risk-owner'],
     },
     modelOverview: {
       modelIds: ['model-one'],
