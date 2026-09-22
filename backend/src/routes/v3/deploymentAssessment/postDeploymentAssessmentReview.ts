@@ -11,7 +11,7 @@ import { parse } from '../../../utils/validate.js'
 export const postDeploymentAssessmentReviewSchema = z.object({
   params: z.object({ deploymentAssessmentId: z.string().min(1) }),
   body: z.discriminatedUnion('decision', [
-    z.object({ decision: z.literal(Decision.Approve), comment: z.string().trim().min(1).optional() }).strict(),
+    z.object({ decision: z.literal(Decision.Approve), comment: z.string().optional() }).strict(),
     z
       .object({
         decision: z.enum([Decision.Reject, Decision.RequestChanges]),

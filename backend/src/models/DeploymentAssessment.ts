@@ -8,7 +8,7 @@ export interface DeploymentAssessmentMetadata {
     [key: string]: unknown
   }
   signOff?: {
-    riskOwner?: string[]
+    riskOwners?: string[]
     [key: string]: unknown
   }
   [key: string]: unknown
