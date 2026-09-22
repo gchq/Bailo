@@ -48,7 +48,6 @@ const overrides: PartialDeep<Config> = {
       // Read at import time by `services/v3/review.ts`
       maxReviewInterval: '1 year',
     },
-
     deploymentAssessments: {
       // Required a stricter value than default `null`
       deployableModelState: 'Production',
