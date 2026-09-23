@@ -12,7 +12,7 @@ import {
   putObjectStream,
   startMultipartUpload,
 } from '../clients/s3.js'
-import { FileAction } from '../connectors/authorisation/actions.js'
+import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import FileModel, {
   FileInterface,
@@ -411,7 +411,7 @@ export async function updateFile(
   user: UserInterface,
   modelId: string,
   fileId: string,
-  patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime'>>,
+  patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime' | 'ungovernedAccess'>>,
 ) {
   let file: FileWithScanResultsAggregate
   try {
@@ -427,12 +427,24 @@ export async function updateFile(
     throw BadReq('Cannot find requested model', { modelId: modelId })
   }
 
+  if (file.modelId !== modelId) {
+    throw NotFound('The requested file was not found in this model.', { modelId, fileId })
+  }
+
+  // Changing download access requires the same permission as changing model access.
+  if (patchFileParams.ungovernedAccess !== undefined) {
+    const accessAuth = await authorisation.model(user, model, ModelAction.Update)
+    if (!accessAuth.success) {
+      throw Forbidden(accessAuth.info, { userDn: user.dn, modelId, fileId })
+    }
+  }
+
   const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
   if (!patchFileAuth.success) {
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
   }
 
-  const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, patchFileParams, { new: true })
+  const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId, modelId }, patchFileParams, { new: true })
   if (!updatedFile) {
     throw BadReq('There was a problem updating the file', { modelId, fileId, patchFileParams })
   }

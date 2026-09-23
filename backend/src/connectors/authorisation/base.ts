@@ -376,6 +376,7 @@ export class BasicAuthorisationConnector {
         if (
           ([FileAction.Download] as FileActionKeys[]).includes(action) &&
           !model.settings.ungovernedAccess &&
+          file.ungovernedAccess !== true &&
           !hasApprovedAccessRequest &&
           (await missingRequiredRole(user, model, ['owner', 'contributor', 'consumer']))
         ) {
