@@ -17,6 +17,7 @@ export interface FileInterface {
   path: string
 
   complete: boolean
+  ungovernedAccess?: boolean
 
   tags: string[]
 
@@ -48,6 +49,7 @@ const FileSchema = new Schema<FileInterfaceDoc>(
     tags: [{ type: String }],
 
     complete: { type: Boolean, default: false },
+    ungovernedAccess: { type: Boolean, default: false },
   },
   {
     timestamps: true,
