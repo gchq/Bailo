@@ -18,6 +18,7 @@ import {
   transferCompleteNotification,
 } from '../../../src/services/smtp/smtp.js'
 import { fromEntity } from '../../../src/utils/entity.js'
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 import {
   testDeploymentAssessment,
   testModel,
@@ -25,33 +26,6 @@ import {
   testReleaseReview,
   testReviewResponse,
 } from '../../testUtils/testModels.js'
-
-const configMock = vi.hoisted(() => ({
-  app: { protocol: 'http', host: 'example.com', port: 80 },
-  ui: {
-    issues: {
-      contactHref: 'mailto:hello@example.com?subject=Bailo%20Contact',
-    },
-  },
-  smtp: {
-    enabled: true,
-    transporter: 'smtp',
-    connection: {
-      host: 'localhost',
-      port: 1025,
-      secure: false,
-      auth: { user: '', pass: '' },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    },
-    from: '"Bailo 📝" <bailo@example.org>',
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -173,42 +147,42 @@ describe('services > smtp > smtp', () => {
   } as any
 
   test('that a Release Review email is not sent when disabled in config', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await requestReviewForRelease(['user:user'], review, release)
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an Access Request Review email is not sent when disabled in config', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await requestReviewForAccessRequest(['user:user'], review, access)
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent after a response for a release review if disabled in config', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await notifyReviewResponseForRelease(testReviewResponse as any, release)
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent after a response for a an access request review if disabled in config', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await notifyReviewResponseForAccess(testReviewResponse as any, access)
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent to a DRO after a deployment assessment is created if disabled in config', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await notifyRiskOwnerOfDeploymentAssessment('user:test', testDeploymentAssessment, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is not sent to model owners after a deployment assessment is created if disabled in config', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
@@ -286,7 +260,7 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that a lifecycle review email is not sent when smtp is disabled', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await notifyLifeCycleReview('modelId', 'review-1', '1 hour')
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
@@ -363,7 +337,7 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is not sent to the DA creator when it is reviewed by a DRO when smtp is disabled', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await notifyReviewResponseForDeploymentAssessment(testDeploymentAssessment, 'reject', 'user:user')
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
@@ -379,7 +353,7 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is not sent to all model developers when a DRO approves a DA that contains their models when smtp is disabled', async () => {
-    vi.spyOn(configMock.smtp, 'enabled', 'get').mockReturnValueOnce(false)
+    setTestConfig({ smtp: { enabled: false } })
     await notifyModelOwnersOfDeploymentApproval(
       ['user:user1', 'user:user2'],
       testDeploymentAssessment,

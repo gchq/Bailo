@@ -16,7 +16,7 @@ export const getModelCardSchema = z.object({
     }),
     version: z.nativeEnum(GetModelCardVersionOptions).or(z.coerce.number()),
   }),
-  query: z.object({ mirrored: strictCoerceBoolean(z.boolean().optional().openapi({ example: false })) }),
+  query: z.object({ mirrored: strictCoerceBoolean(z.boolean()).optional().openapi({ example: false }) }),
 })
 
 registerPath({

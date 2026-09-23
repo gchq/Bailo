@@ -20,30 +20,6 @@ const mockReviewService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/review.js', () => mockReviewService)
 
-const configMock = vi.hoisted(
-  () =>
-    ({
-      ui: {
-        roleDisplayNames: {
-          owner: 'Owner',
-          contributor: 'Contributor',
-          consumer: 'Consumer',
-          riskOwner: 'Deployment Risk Owner',
-        },
-      },
-      log: {
-        level: 'info',
-      },
-      instrumentation: {
-        enabled: true,
-      },
-    }) as any,
-)
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 describe('services > review', () => {
   test('getAllEntryRoles > gets default entry roles', async () => {
     const roles = await getAllEntryRoles({} as any)

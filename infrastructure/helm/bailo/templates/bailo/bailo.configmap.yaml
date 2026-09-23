@@ -46,7 +46,7 @@ data:
       registry: {
         connection:{
           // This is explicitly NOT using connection.protocol, as this should always be
-          // the internal registry address which is guarenteed to be https.
+          // the internal registry address which is guaranteed to be https.
           internal: 'https://{{ include "bailo.registry.host" . }}:{{ .Values.registry.port }}',
           host: '{{ include "bailo.registry.host" . }}:{{ .Values.registry.port }}',
           port: '{{ .Values.registry.port }}',
