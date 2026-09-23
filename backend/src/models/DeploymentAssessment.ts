@@ -8,7 +8,7 @@ export interface DeploymentAssessmentMetadata {
     [key: string]: unknown
   }
   signOff?: {
-    riskOwner?: string[]
+    riskOwners?: string[]
     [key: string]: unknown
   }
   [key: string]: unknown
@@ -51,8 +51,8 @@ const DeploymentAssessmentSchema = new Schema<DeploymentAssessmentDoc>(
 )
 
 DeploymentAssessmentSchema.plugin(softDeletionPlugin)
-DeploymentAssessmentSchema.index({ 'metadata.overview.modelIds': 1 })
-DeploymentAssessmentSchema.index({ 'metadata.overview.riskOwner': 1 })
+DeploymentAssessmentSchema.index({ 'metadata.modelOverview.modelIds': 1 })
+DeploymentAssessmentSchema.index({ 'metadata.signOff.riskOwner': 1 })
 DeploymentAssessmentSchema.index({ createdBy: 1 })
 
 const DeploymentAssessmentModel = model<DeploymentAssessmentDoc>('v3_Deployment_Assessment', DeploymentAssessmentSchema)

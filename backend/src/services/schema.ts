@@ -75,7 +75,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
     ? (((jsonSchema as any).properties!.signOff as any).required as string[])
     : []
 
-  const mergedSignOffRequired = Array.from(new Set<string>(['riskOwner', ...existingSignOffRequired]))
+  const mergedSignOffRequired = Array.from(new Set<string>(['riskOwners', ...existingSignOffRequired]))
 
   return {
     ...structuredClone(jsonSchema),
@@ -105,7 +105,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         title: 'Deployment Sign-Off',
         type: 'object',
         properties: {
-          riskOwner: {
+          riskOwners: {
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'array',
             items: {

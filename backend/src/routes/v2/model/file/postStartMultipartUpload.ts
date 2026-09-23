@@ -15,7 +15,7 @@ export const postStartMultipartUploadSchema = z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
     size: z.number().positive(),
-    tags: coerceArray(z.array(z.string()).optional()),
+    tags: coerceArray(z.array(z.string())).optional(),
   }),
 })
 

@@ -17,8 +17,8 @@ export const getReviewsSchema = z.object({
     deploymentAssessmentId: z.string().optional(),
     reviewId: z.string().optional(),
     kind: z.nativeEnum(ReviewKind).optional(),
-    mine: strictCoerceBoolean(z.boolean().optional().default(true)),
-    open: strictCoerceBoolean(z.boolean().optional()),
+    mine: strictCoerceBoolean(z.boolean()).optional().default(true),
+    open: strictCoerceBoolean(z.boolean()).optional(),
   }),
 })
 

@@ -29,11 +29,11 @@ export async function findDeploymentAssessments(
   }
 
   if (params.modelIds?.length) {
-    query['metadata.overview.modelIds'] = { $all: params.modelIds }
+    query['metadata.modelOverview.modelIds'] = { $all: params.modelIds }
   }
 
   if (params.riskOwner) {
-    query['metadata.overview.riskOwner'] = {
+    query['metadata.signOff.riskOwner'] = {
       $elemMatch: { $eq: params.riskOwner },
     }
   }

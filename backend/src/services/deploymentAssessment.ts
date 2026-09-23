@@ -41,7 +41,7 @@ import {
 } from './smtp/smtp.js'
 import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
 
-export const deploymentAssessmentRiskOwnerRole = 'riskOwner'
+export const deploymentAssessmentRiskOwnerRole = 'riskOwners'
 
 export type { SearchDeploymentAssessmentsParams }
 
@@ -124,15 +124,15 @@ async function validateDeploymentAssessment(
     throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
   }
 
-  const { riskOwner } = metadata.signOff ?? {}
+  const { riskOwners } = metadata.signOff ?? {}
   const { modelIds } = metadata.modelOverview ?? {}
 
-  if (!draft && (!riskOwner || riskOwner.length === 0)) {
+  if (!draft && (!riskOwners || riskOwners.length === 0)) {
     throw BadReq('Deployment risk owner is required')
   }
 
-  if (riskOwner && riskOwner.length > 0) {
-    await validateRiskOwner(riskOwner)
+  if (riskOwners && riskOwners.length > 0) {
+    await validateRiskOwner(riskOwners)
   }
   if (modelIds?.length) {
     await validateModels(user, modelIds)
@@ -249,7 +249,7 @@ function needsUserAction(
   state?: DeploymentAssessmentStateKeys,
 ) {
   if (
-    deploymentAssessment.metadata.signOff?.riskOwner?.includes(toEntity('user', user.dn)) &&
+    deploymentAssessment.metadata.signOff?.riskOwners?.includes(toEntity('user', user.dn)) &&
     state === DeploymentAssessmentState.NeedsReview
   ) {
     return true
@@ -461,7 +461,7 @@ export async function createDeploymentAssessment(
 
   if (!draft) {
     await notifyDeploymentStakeholders(
-      metadata.signOff.riskOwner,
+      metadata.signOff.riskOwners,
       metadata.modelOverview.modelIds ?? [],
       deploymentAssessment,
     )
@@ -552,7 +552,7 @@ export async function updateDeploymentAssessment(
 
   if (isBeingSubmitted) {
     await notifyDeploymentStakeholders(
-      deploymentAssessment.metadata?.signOff?.riskOwner ?? [],
+      deploymentAssessment.metadata?.signOff?.riskOwners ?? [],
       deploymentAssessment.metadata?.modelOverview?.modelIds ?? [],
       deploymentAssessment,
     )
@@ -594,13 +594,13 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
         (params.needsAction === undefined || needsUserAction(assessment, user, state) === params.needsAction)
 
       if (passesFilter) {
-        const { riskOwner } = assessment.metadata?.signOff ?? {}
+        const { riskOwners } = assessment.metadata?.signOff ?? {}
         const { modelIds } = assessment.metadata?.modelOverview ?? {}
         acc.push({
           id: assessment.id,
           schemaId: assessment.schemaId,
           name: assessment.name,
-          ...(riskOwner && riskOwner.length > 0 && { owner: riskOwner }),
+          ...(riskOwners && riskOwners.length > 0 && { owner: riskOwners }),
           ...(modelIds && { models: modelIds }),
           ...(state && { state }),
           draft: assessment.draft,

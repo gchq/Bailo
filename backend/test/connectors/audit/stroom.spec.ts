@@ -18,31 +18,6 @@ import { FileMirrorInformation } from '../../../src/services/mirroredModel/impor
 import { ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
 import { InternalError } from '../../../src/utils/error.js'
 
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    audit: {
-      kind: 'stroom',
-    },
-  },
-  stroom: {
-    sendEvents: true,
-    url: 'https://url',
-    environment: 'local',
-    interval: 1000 * 50,
-    generator: 'Generator',
-  },
-  s3: {
-    buckets: {
-      uploads: 'uploads',
-      registry: 'registry',
-    },
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   debug: vi.fn(),

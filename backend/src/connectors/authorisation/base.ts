@@ -194,7 +194,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === SchemaAction.Create || action === SchemaAction.Delete) {
+        if (action === SchemaAction.Create || action === SchemaAction.Delete || action === SchemaAction.Update) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
@@ -351,7 +351,7 @@ export class BasicAuthorisationConnector {
       deploymentAssessments.map(async (deploymentAssessment) => {
         const isNamedUser =
           deploymentAssessment.createdBy === user.dn ||
-          (deploymentAssessment.metadata.signOff?.riskOwner ?? []).includes(`user:${user.dn}`)
+          (deploymentAssessment.metadata.signOff?.riskOwners ?? []).includes(`user:${user.dn}`)
 
         let errorInfo: string | undefined
         switch (action) {
@@ -567,7 +567,11 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === ReviewRoleAction.Create || action === ReviewRoleAction.Delete) {
+        if (
+          action === ReviewRoleAction.Create ||
+          action === ReviewRoleAction.Delete ||
+          action === ReviewRoleAction.Update
+        ) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {

@@ -11,7 +11,7 @@ const deploymentAssessment = {
   schemaId: 'deployment-assessment-schema',
   metadata: {
     signOff: {
-      riskOwner: ['user:risk-owner'],
+      riskOwners: ['user:risk-owner'],
     },
     modelOverview: {
       modelIds: ['model-one'],
@@ -54,7 +54,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
     expect(audit.onCreateDeploymentAssessment).toHaveBeenCalledWith(expect.anything(), deploymentAssessment)
   })
 
-  test.each([{ riskOwner: ['user:risk-owner'], modelIds: [] }, {}])(
+  test.each([{ riskOwners: ['user:risk-owner'], modelIds: [] }, {}])(
     'creates a draft with overview fields set to %j',
     async (overview) => {
       const draftAssessment = {
