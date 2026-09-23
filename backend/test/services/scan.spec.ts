@@ -9,64 +9,13 @@ import {
   runScans,
   updateArtefactScanWithResults,
 } from '../../src/services/scan.js'
+import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
 vi.mock('../../src/utils/transactions.js')
 
 const ScanModelMock = getTypedModelMock('ScanModel')
-
-const configMock = vi.hoisted(
-  () =>
-    ({
-      artefactScanning: {
-        clamdscan: {
-          host: 'test',
-          port: 8080,
-        },
-      },
-      s3: {
-        multipartChunkSize: 5 * 1024 * 1024,
-        buckets: {
-          uploads: 'uploads',
-          registry: 'registry',
-        },
-      },
-      connectors: {
-        authentication: {
-          kind: 'silly',
-        },
-        audit: {
-          kind: 'silly',
-        },
-        authorisation: {
-          kind: 'basic',
-        },
-        artefactScanners: {
-          kinds: ['clamAV'],
-          retryDelayInMinutes: 5,
-          maxInitRetries: 5,
-          initRetryDelay: 5000,
-        },
-      },
-      registry: {
-        connection: {
-          internal: 'https://localhost:5000',
-          insecure: true,
-        },
-      },
-      log: {
-        level: 'debug',
-      },
-      instrumentation: {
-        enabled: false,
-      },
-    }) as any,
-)
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -129,6 +78,7 @@ const registryAuthMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 
+const { retryDelayInMinutes } = config.connectors.artefactScanners
 const testFileId = '73859F8D26679D2E52597326'
 const mockFile = { _id: 'file123', name: 'file.txt', size: 1 } as any
 
@@ -190,7 +140,7 @@ describe('services > scan', () => {
 
   describe('rerunFileScan', () => {
     test('successfully reruns a file scan', async () => {
-      const createdAtTimeInMilliseconds = new Date().getTime() - 2000000
+      const createdAtTimeInMilliseconds = new Date().getTime() - (retryDelayInMinutes + 1) * 60_000
       ScanModelMock.find.mockResolvedValueOnce([
         {
           state: ArtefactScanState.Complete,
@@ -237,7 +187,7 @@ describe('services > scan', () => {
       ScanModelMock.find.mockResolvedValueOnce([{ state: ArtefactScanState.Complete, lastRunAt: new Date() }])
 
       await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrow(
-        /^Please wait 5 minutes before attempting a rescan file.txt/,
+        new RegExp(`^Please wait ${retryDelayInMinutes} minutes before attempting a rescan file.txt`),
       )
     })
 
@@ -307,7 +257,9 @@ describe('services > scan', () => {
 
       await expect(
         rerunImageScan({} as any, 'model123', { repository: 'repo', name: 'image', tag: 'latest' } as any),
-      ).rejects.toThrow(/^Please wait 5 minutes before attempting a rescan repo\/image:latest/)
+      ).rejects.toThrow(
+        new RegExp(`^Please wait ${retryDelayInMinutes} minutes before attempting a rescan repo/image:latest`),
+      )
     })
 
     test('throws service unavailable when no image scanners are enabled', async () => {

@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import {
   addDefaultReviewRoles,
+  addReviewsForNewRole,
   createAccessRequestReviews,
   createReleaseReviews,
   createReviewRole,
@@ -14,11 +15,14 @@ import {
   updateReviewRole,
 } from '../../src/services/review.js'
 import { RoleKind } from '../../src/types/types.js'
+import config from '../../src/utils/config.js'
 import { NotFound } from '../../src/utils/error.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
 
 const ReviewModelMock = getTypedModelMock('ReviewModel')
+const ReleaseModelMock = getTypedModelMock('ReleaseModel')
+const AccessRequestModelMock = getTypedModelMock('AccessRequestModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ResponseModelMock = getTypedModelMock('ResponseModel')
@@ -70,35 +74,6 @@ const arrayUtilMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/utils/array.js', async () => arrayUtilMock)
 
-const configMock = vi.hoisted(() => ({
-  defaultReviewRoles: [
-    {
-      name: 'Reviewer',
-      shortName: 'reviewer',
-      kind: 'schema',
-      description: 'Reviewer',
-    },
-  ],
-  connectors: {
-    artefactScanners: {
-      kinds: [],
-    },
-    audit: {
-      kind: 'silly',
-    },
-  },
-  registry: {
-    connection: {
-      internal: '',
-    },
-  },
-}))
-
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
@@ -149,6 +124,17 @@ describe('services > review', () => {
 
     expect(ReviewModelMock.save).toHaveBeenCalled()
     expect(smtpMock.requestReviewForRelease).toHaveBeenCalled()
+  })
+
+  test('addReviewsForNewRole > does not duplicate an existing release review', async () => {
+    const existingReview = { role: 'mtr', modelId: 'model-id', semver: '1.0.0' }
+    ReleaseModelMock.find.mockResolvedValueOnce([{ modelId: 'model-id', semver: '1.0.0' }] as any)
+    AccessRequestModelMock.find.mockResolvedValueOnce([])
+    ReviewModelMock.find.mockResolvedValueOnce([existingReview] as any)
+
+    await addReviewsForNewRole(user, { shortName: 'mtr' } as any, { id: 'model-id' } as any)
+
+    expect(ReviewModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createAccessRequestReviews > successful', async () => {
@@ -258,7 +244,7 @@ describe('services > review', () => {
   test('addDefaultReviewRoles > successfully added default review roles', async () => {
     ReviewRoleModelMock.lean.mockResolvedValue([])
     await addDefaultReviewRoles()
-    expect(ReviewRoleModelMock.insertMany).toHaveBeenCalledWith(configMock.defaultReviewRoles)
+    expect(ReviewRoleModelMock.insertMany).toHaveBeenCalledWith(config.defaultReviewRoles)
   })
 
   test('removeReviewRole > successful', async () => {
