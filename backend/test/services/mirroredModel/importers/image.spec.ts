@@ -4,7 +4,7 @@ import { Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
-import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
+import { DockerManifestMediaType } from '../../../../src/utils/registryResponseTypes.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
