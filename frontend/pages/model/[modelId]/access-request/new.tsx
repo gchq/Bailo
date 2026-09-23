@@ -1,7 +1,7 @@
 import dayjs from '@dayjs'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper, Stack, Typography } from '@mui/material'
-import { postAccessRequest } from 'actions/accessRequest'
+import { AccessRequestGroupResult, postAccessRequest, postAccessRequestGroup } from 'actions/accessRequest'
 import { useGetModel } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
@@ -9,6 +9,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import AccessRequestModels from 'src/entry/model/accessRequests/AccessRequestModels'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
@@ -27,8 +28,15 @@ export default function NewAccessRequest() {
 
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [submissionErrorText, setSubmissionErrorText] = useState('')
+  const [additionalModelIds, setAdditionalModelIds] = useState<string[]>([])
+  const [groupResult, setGroupResult] = useState<AccessRequestGroupResult>()
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
   const [formValidationErrorState, setFormValidationErrorState] = useState(false)
+
+  useEffect(() => {
+    setAdditionalModelIds([])
+    setGroupResult(undefined)
+  }, [modelId, schemaId])
 
   const isLoading = useMemo(
     () => isSchemaLoading || isModelLoading || isCurrentUserLoading,
@@ -55,6 +63,9 @@ export default function NewAccessRequest() {
   }, [schema, model, currentUser])
 
   async function onSubmit() {
+    if (submitButtonLoading || groupResult) {
+      return
+    }
     setSubmissionErrorText('')
     setSubmitButtonLoading(true)
     setFormValidationErrorState(false)
@@ -88,16 +99,27 @@ export default function NewAccessRequest() {
       setSubmitButtonLoading(false)
       return
     }
-    const res = await postAccessRequest(modelId, schemaId, data)
-
-    if (!res.ok) {
-      setSubmissionErrorText(await getErrorMessage(res))
+    try {
+      const res = additionalModelIds.length
+        ? await postAccessRequestGroup([modelId, ...additionalModelIds], schemaId, data)
+        : await postAccessRequest(modelId, schemaId, data)
+      if (!res.ok) {
+        setSubmissionErrorText(await getErrorMessage(res))
+        return
+      }
+      const body = await res.json()
+      if (additionalModelIds.length) {
+        setGroupResult(body)
+      } else {
+        router.push(`/model/${modelId}/access-request/${body.accessRequest.id}`)
+      }
+    } catch {
+      setSubmissionErrorText(
+        'The request status could not be confirmed. Check your existing access requests before submitting again.',
+      )
+    } finally {
       setSubmitButtonLoading(false)
-      return
     }
-
-    const body = await res.json()
-    router.push(`/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
 
   const error = MultipleErrorWrapper(`Unable to load access request page`, {
@@ -126,6 +148,12 @@ export default function NewAccessRequest() {
                     Select a different schema
                   </Button>
                 </Link>
+                <AccessRequestModels
+                  modelId={model.id}
+                  selectedIds={additionalModelIds}
+                  onChange={setAdditionalModelIds}
+                  disabled={submitButtonLoading || !!groupResult}
+                />
                 <JsonSchemaForm
                   splitSchema={splitSchema}
                   setSplitSchema={setSplitSchema}
@@ -143,11 +171,33 @@ export default function NewAccessRequest() {
                     variant='contained'
                     onClick={onSubmit}
                     loading={submitButtonLoading}
+                    disabled={!!groupResult}
                     data-test='createAccessRequestButton'
                   >
                     Submit
                   </Button>
                   <MessageAlert message={submissionErrorText} severity='error' />
+                  {groupResult && (
+                    <Stack spacing={1} sx={{ width: '100%' }}>
+                      <Typography component='h2' variant='h6'>
+                        Access request results
+                      </Typography>
+                      <Typography>
+                        {groupResult.accessRequests.length} requests created. Each request requires its own review.
+                      </Typography>
+                      {groupResult.accessRequests.map((request) => (
+                        <Link key={request.id} href={`/model/${request.modelId}/access-request/${request.id}`}>
+                          View request for {request.modelId}
+                        </Link>
+                      ))}
+                      {groupResult.failedModelIds.length > 0 && (
+                        <MessageAlert
+                          message={`No request was created for: ${groupResult.failedModelIds.join(', ')}. Successful requests remain saved. Start a new request for the unsuccessful models only.`}
+                          severity='warning'
+                        />
+                      )}
+                    </Stack>
+                  )}
                 </Stack>
               </Stack>
             )}
