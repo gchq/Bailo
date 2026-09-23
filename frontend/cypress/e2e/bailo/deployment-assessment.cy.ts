@@ -91,7 +91,7 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[data-test=modelOverviewButton]').click()
     cy.get('[data-test=modelSelectorInput]').type(modelName).wait(500)
     cy.get('[role=presentation] ul li:first').click()
-    cy.screenshot()
+
     cy.get('[data-test=signOffButton]').click()
     cy.get('[data-test=entitySelector] input').type('user').wait(500)
     cy.get('[role=presentation] ul li:first').click().wait(100)
