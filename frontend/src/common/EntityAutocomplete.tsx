@@ -64,7 +64,6 @@ export default function EntityAutocomplete({
         value={multiple ? selected : (selected[0] ?? null)}
         filterOptions={(options) => options}
         onChange={(_event, newValue) => {
-          setTimeout(() => {}, 5000)
           const normalisedValue = Array.isArray(newValue) ? newValue : newValue ? [newValue] : []
           onChange(multiple ? normalisedValue : normalisedValue[0])
           if (maxItems !== undefined && normalisedValue.length >= maxItems) {
