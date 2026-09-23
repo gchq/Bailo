@@ -11,6 +11,7 @@ import createAccessRequest from 'public/docs/bailo_create_access_request.png'
 > **Common questions this page answers:**
 >
 > - How do I request access to a model?
+> - Can I use one form to request access to several models?
 > - What is an access request?
 > - What happens after I submit an access request?
 
@@ -50,6 +51,25 @@ The screenshot above shows the access request schema selection dialog.
 </Box>
 
 The screenshot above shows the access request form with fields to fill in.
+
+## Requesting access to several models
+
+Use **Also request access to** on the form to select additional models you can view in the current Bailo instance. You
+can include up to 20 models in one submission, including the model you started from. The same schema and form answers
+are used to create a separate access request for each model, with its own reviewers and approval decision.
+
+The result page links to the requests that were created. A failure for one model does not remove the successful
+requests. When some models fail, start a new request for only those models; do not resubmit the entire group. If the
+connection is interrupted, check your existing requests before submitting again because some requests may already be
+saved.
+
+Request and review pages show a **Grouped request** section with links to other requests from that submission. Group
+membership does not grant access to another model or request: only requests you are allowed to view are shown. Editing,
+approving or deleting one request does not change the others. Bulk review decisions are not supported.
+
+The API equivalent is `POST /api/v2/access-request-groups` with `modelIds`, `schemaId` and `metadata`. Always check both
+`accessRequests` and `failedModelIds` in its response, even when the HTTP status is 200. Group identifiers are generated
+by the server.
 
 ## Review process
 
