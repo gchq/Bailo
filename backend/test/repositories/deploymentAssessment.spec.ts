@@ -45,11 +45,11 @@ describe('repositories > deploymentAssessment', () => {
       expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({})
     })
 
-    test('filters by riskOwner using $elemMatch', async () => {
+    test('filters by riskOwner', async () => {
       await findDeploymentAssessments({ riskOwner: 'user:risk-owner' })
 
       expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
-        'metadata.signOff.riskOwner': { $elemMatch: { $eq: 'user:risk-owner' } },
+        'metadata.signOff.riskOwners': { $in: ['user:risk-owner'] },
       })
     })
 
@@ -127,7 +127,7 @@ describe('repositories > deploymentAssessment', () => {
       expect(DeploymentAssessmentModelMock.find).toHaveBeenCalledWith({
         schemaId: 'deployment-assessment-schema',
         'metadata.modelOverview.modelIds': { $all: ['model-one', 'model-two'] },
-        'metadata.signOff.riskOwner': { $elemMatch: { $eq: 'user:risk-owner' } },
+        'metadata.signOff.riskOwners': { $in: ['user:risk-owner'] },
         createdBy: 'creator',
         createdAt: {
           $gte: new Date('2026-01-01T00:00:00.000Z'),

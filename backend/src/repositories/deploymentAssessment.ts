@@ -33,9 +33,7 @@ export async function findDeploymentAssessments(
   }
 
   if (params.riskOwner) {
-    query['metadata.signOff.riskOwner'] = {
-      $elemMatch: { $eq: params.riskOwner },
-    }
+    query['metadata.signOff.riskOwners'] = { $in: [params.riskOwner] }
   }
 
   if (params.createdBy) {
