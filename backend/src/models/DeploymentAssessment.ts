@@ -52,7 +52,7 @@ const DeploymentAssessmentSchema = new Schema<DeploymentAssessmentDoc>(
 
 DeploymentAssessmentSchema.plugin(softDeletionPlugin)
 DeploymentAssessmentSchema.index({ 'metadata.modelOverview.modelIds': 1 })
-DeploymentAssessmentSchema.index({ 'metadata.signOff.riskOwner': 1 })
+DeploymentAssessmentSchema.index({ 'metadata.signOff.riskOwners': 1 })
 DeploymentAssessmentSchema.index({ createdBy: 1 })
 
 const DeploymentAssessmentModel = model<DeploymentAssessmentDoc>('v3_Deployment_Assessment', DeploymentAssessmentSchema)
