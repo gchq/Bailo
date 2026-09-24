@@ -92,6 +92,15 @@ exports[`services > review > findReviews > active reviews for a specific model 1
                       {
                         "case": {
                           "$in": [
+                            "reject",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "reject",
+                      },
+                      {
+                        "case": {
+                          "$in": [
                             "request_changes",
                             "$decisions",
                           ],
@@ -279,6 +288,15 @@ exports[`services > review > findReviews > all open reviews for user 1`] = `
                       {
                         "case": {
                           "$in": [
+                            "reject",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "reject",
+                      },
+                      {
+                        "case": {
+                          "$in": [
                             "request_changes",
                             "$decisions",
                           ],
@@ -461,6 +479,15 @@ exports[`services > review > findReviews > all reviews for user 1`] = `
                 "decision": {
                   "$switch": {
                     "branches": [
+                      {
+                        "case": {
+                          "$in": [
+                            "reject",
+                            "$decisions",
+                          ],
+                        },
+                        "then": "reject",
+                      },
                       {
                         "case": {
                           "$in": [

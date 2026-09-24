@@ -21,7 +21,7 @@ COPY docs .
 
 RUN make html
 
-FROM node:26.7.0-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS node-base
+FROM node:26.9.0-alpine@sha256:dbaa92e5758cbbcf85d65d5403fdb530fe3442cbe8c6dbfb7ef23365450d5070 AS node-base
 
 RUN apk add --no-cache libc6-compat ca-certificates
 

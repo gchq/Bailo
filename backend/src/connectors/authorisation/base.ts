@@ -1,5 +1,5 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
+import { DeploymentAssessmentDoc, DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
 import { FileInterface } from '../../models/File.js'
 import { EntryKind, EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
@@ -194,7 +194,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === SchemaAction.Create || action === SchemaAction.Delete) {
+        if (action === SchemaAction.Create || action === SchemaAction.Delete || action === SchemaAction.Update) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
@@ -344,14 +344,14 @@ export class BasicAuthorisationConnector {
 
   async deploymentAssessments(
     user: UserInterface,
-    deploymentAssessments: Array<DeploymentAssessmentDoc>,
+    deploymentAssessments: Array<DeploymentAssessmentInterface>,
     action: DeploymentAssessmentActionKeys,
   ): Promise<Array<Response>> {
     return Promise.all(
       deploymentAssessments.map(async (deploymentAssessment) => {
         const isNamedUser =
           deploymentAssessment.createdBy === user.dn ||
-          (deploymentAssessment.metadata.overview?.riskOwner ?? []).includes(user.dn)
+          (deploymentAssessment.metadata.signOff?.riskOwners ?? []).includes(`user:${user.dn}`)
 
         let errorInfo: string | undefined
         switch (action) {
@@ -567,7 +567,11 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === ReviewRoleAction.Create || action === ReviewRoleAction.Delete) {
+        if (
+          action === ReviewRoleAction.Create ||
+          action === ReviewRoleAction.Delete ||
+          action === ReviewRoleAction.Update
+        ) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {

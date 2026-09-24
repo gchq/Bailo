@@ -12,36 +12,10 @@ import {
 } from '../../src/services/schema.js'
 import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
-const configMock = vi.hoisted(
-  () =>
-    ({
-      ui: {
-        modelDetails: {
-          organisations: ['Example Organisation'],
-          states: ['Development', 'Review', 'Production'],
-        },
-        roleDisplayNames: {
-          owner: 'Owner',
-          contributor: 'Contributor',
-          consumer: 'Consumer',
-          riskOwner: 'Deployment Risk Owner',
-        },
-      },
-      log: {
-        level: 'info',
-      },
-      instrumentation: {
-        enabled: true,
-      },
-    }) as any,
-)
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
 
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
@@ -92,6 +66,7 @@ vi.mock('node-cache', () => ({
 
 // Back the cache mock with an in-memory store so that invalidation can be asserted end to end.
 beforeEach(() => {
+  setTestConfig({ instrumentation: { enabled: true } })
   cacheMock.store.clear()
   cacheMock.get.mockImplementation((key: string) => cacheMock.store.get(key))
   cacheMock.set.mockImplementation((key: string, value: unknown) => {
@@ -131,11 +106,18 @@ describe('services > schema', () => {
     const result = await searchSchemas(SchemaKind.DeploymentAssessment)
 
     expect(result[0].jsonSchema.properties).toEqual({
-      overview: expect.objectContaining({
-        title: 'Details',
-        required: ['riskOwner', 'modelIds'],
+      modelOverview: expect.objectContaining({
+        title: 'Model Overview',
+        required: ['modelIds'],
         properties: expect.objectContaining({
-          riskOwner: expect.objectContaining({
+          modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
+        }),
+      }),
+      signOff: expect.objectContaining({
+        title: 'Deployment Sign-Off',
+        required: ['riskOwners'],
+        properties: expect.objectContaining({
+          riskOwners: expect.objectContaining({
             title: 'Who is the risk owner attached to this deployment assessment?',
             type: 'array',
             minItems: 1,
@@ -144,14 +126,13 @@ describe('services > schema', () => {
             hideDefaultUser: true,
             widget: 'entitySelector',
           }),
-          modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
         }),
       }),
       assessment: {
         type: 'object',
       },
     })
-    expect(result[0].jsonSchema.required).toEqual(['overview'])
+    expect(result[0].jsonSchema.required).toEqual(['signOff', 'modelOverview'])
   })
 
   test('that non-deployment assessment schemas are unchanged when searched', async () => {

@@ -86,12 +86,12 @@ export default function ReviewCommentDisplay({
     <>
       <Stack
         direction='row'
-        spacing={2}
+        spacing={0.5}
         sx={{
           alignItems: 'flex-start',
         }}
       >
-        <Box sx={{ pt: 2, pl: 2 }}>
+        <Box sx={{ pt: 2.5, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
         <Box
@@ -132,7 +132,7 @@ export default function ReviewCommentDisplay({
               </IconButton>
             </Stack>
           </Stack>
-          <Divider sx={{ mt: 1, mb: 2 }} />
+          <Divider sx={{ mb: 1 }} />
           <EditableReviewComment
             comment={comment}
             onCommentChange={setComment}

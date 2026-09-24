@@ -82,24 +82,24 @@ export const deploymentAssessmentStateSchema = z
 
 export const deploymentAssessmentMetadataSchema = z
   .object({
-    overview: z
+    signOff: z
       .object({
-        riskOwner: deploymentAssessmentRiskOwnerSchema.optional(),
-        modelIds: deploymentAssessmentModelIdsSchema.optional(),
+        riskOwners: deploymentAssessmentRiskOwnerSchema.optional(),
       })
       .passthrough()
       .optional(),
+    modelOverview: z.object({ modelIds: deploymentAssessmentModelIdsSchema.optional() }).passthrough().optional(),
   })
   .passthrough()
 
 export const deploymentAssessmentMetadataRequiredSchema = z
   .object({
-    overview: z
+    modelOverview: z
       .object({
-        riskOwner: deploymentAssessmentRiskOwnerSchema,
         modelIds: deploymentAssessmentModelIdsSchema,
       })
       .passthrough(),
+    signOff: z.object({ riskOwners: deploymentAssessmentRiskOwnerSchema }).passthrough(),
   })
   .passthrough()
 
@@ -419,7 +419,7 @@ export const deploymentAssessmentResponseSchema = z.object({
   _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   entity: z.string().openapi({ example: 'user:joe.bloggs' }),
   kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
-  role: z.string().optional().openapi({ example: 'riskOwner' }),
+  role: z.string().optional().openapi({ example: 'riskOwners' }),
   decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
   parentId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
@@ -458,18 +458,8 @@ export const accessRequestInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
-const deploymentAssessmentOverview = z
+const deploymentAssessmentModelOverview = z
   .object({
-    name: z
-      .string()
-      .min(1, 'You must provide a deployment assessment name')
-      .openapi({ example: 'Just A Rather Very Intelligent System' }),
-    riskOwner: z
-      .array(z.string().min(1))
-      .min(1)
-      .max(1)
-      .openapi({ example: ['user:tony'] })
-      .optional(),
     modelIds: z
       .array(z.string())
       .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
@@ -477,10 +467,30 @@ const deploymentAssessmentOverview = z
   })
   .passthrough()
 
+const deploymentAssessmentSignOff = z
+  .object({
+    riskOwners: z
+      .array(z.string().min(1))
+      .min(1)
+      .max(1)
+      .openapi({ example: ['user:tony'] })
+      .optional(),
+  })
+  .passthrough()
+
 export const deploymentAssessmentInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
   schemaId: schemaId.openapi({ example: 'stark-deployment-assessment-schema-v1' }),
-  metadata: z.object({ overview: deploymentAssessmentOverview }).passthrough(),
+  metadata: z
+    .object({
+      name: z
+        .string()
+        .min(1, 'You must provide a deployment assessment name')
+        .openapi({ example: 'Just A Rather Very Intelligent System' }),
+      modelOverview: deploymentAssessmentModelOverview,
+      signOff: deploymentAssessmentSignOff,
+    })
+    .passthrough(),
   draft: draft.optional().default(true).openapi({ example: true }),
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),

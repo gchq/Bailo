@@ -57,7 +57,7 @@ describe('Create and review a model release', () => {
     cy.contains(`Reviewing release ${releaseVersion} for model ${modelNameForRelease}`)
     cy.log('Creating a "requesting changes" review')
     cy.get('[data-test=reviewWithCommentContent]').should('be.visible')
-    cy.get('[data-test=reviewWithCommentTextField]').type('This is a comment')
+    cy.get('[data-test=richTextEditor]').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton]').click()
     cy.log('Approving a release')
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)

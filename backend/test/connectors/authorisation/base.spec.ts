@@ -621,6 +621,75 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
+  test.each([SchemaAction.Create, SchemaAction.Delete, SchemaAction.Update])(
+    'schemas > %s without admin role',
+    async (action) => {
+      const connector = new BasicAuthorisationConnector()
+      mockAuthentication.hasRole.mockResolvedValue(false)
+
+      const result = await connector.schemas(user, [{ id: 'testSchema' } as SchemaDoc], action)
+
+      expect(mockAuthentication.hasRole).toHaveBeenCalledWith(user, Roles.Admin)
+      expect(result).toStrictEqual([
+        {
+          id: 'testSchema',
+          info: 'You cannot upload or modify a schema if you are not an admin.',
+          success: false,
+        },
+      ])
+    },
+  )
+
+  test.each([SchemaAction.Create, SchemaAction.Delete, SchemaAction.Update])(
+    'schemas > %s as admin',
+    async (action) => {
+      const connector = new BasicAuthorisationConnector()
+      mockAuthentication.hasRole.mockResolvedValue(true)
+
+      const result = await connector.schemas(user, [{ id: 'testSchema' } as SchemaDoc], action)
+
+      expect(result).toStrictEqual([{ id: 'testSchema', success: true }])
+    },
+  )
+
+  test('schemas > constrained user token', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.hasRole.mockResolvedValue(true)
+    mockTokenService.validateTokenForUse.mockResolvedValueOnce({
+      success: false,
+      info: 'Token invalid',
+      id: 'testSchema',
+    } as any)
+
+    const result = await connector.schemas(user, [{ id: 'testSchema' } as SchemaDoc], SchemaAction.Create)
+
+    expect(result).toStrictEqual([{ success: false, info: 'Token invalid', id: 'testSchema' }])
+  })
+
+  test('schemas > returns a response for every schema', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.hasRole.mockResolvedValue(false)
+
+    const result = await connector.schemas(
+      user,
+      [{ id: 'schemaOne' } as SchemaDoc, { id: 'schemaTwo' } as SchemaDoc],
+      SchemaAction.Update,
+    )
+
+    expect(result).toStrictEqual([
+      { id: 'schemaOne', info: 'You cannot upload or modify a schema if you are not an admin.', success: false },
+      { id: 'schemaTwo', info: 'You cannot upload or modify a schema if you are not an admin.', success: false },
+    ])
+  })
+
+  test('schemas > empty list', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    const result = await connector.schemas(user, [], SchemaAction.Create)
+
+    expect(result).toStrictEqual([])
+  })
+
   test('schemaMigration > create without admin role', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.hasRole.mockResolvedValue(false)
@@ -1043,18 +1112,21 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('reviewRoles > create without admin role', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAuthentication.hasRole.mockResolvedValue(false)
+  test.each([ReviewRoleAction.Create, ReviewRoleAction.Delete, ReviewRoleAction.Update])(
+    'reviewRoles > $0 without admin role',
+    async (action) => {
+      const connector = new BasicAuthorisationConnector()
+      mockAuthentication.hasRole.mockResolvedValue(false)
 
-    const result = await connector.reviewRole(user as any, 'role1', ReviewRoleAction.Create)
+      const result = await connector.reviewRole(user as any, 'role1', action)
 
-    expect(result).toStrictEqual({
-      id: 'role1',
-      success: false,
-      info: 'You cannot upload or modify a review role if you are not an admin.',
-    })
-  })
+      expect(result).toStrictEqual({
+        id: 'role1',
+        success: false,
+        info: 'You cannot upload or modify a review role if you are not an admin.',
+      })
+    },
+  )
 
   describe('Deployment assessments', () => {
     const connector = new BasicAuthorisationConnector()
@@ -1063,7 +1135,7 @@ describe('connectors > authorisation > base', () => {
       id: 'da-1',
       createdBy: 'creator',
       draft: false,
-      metadata: { overview: { riskOwner: ['riskOwner'] } },
+      metadata: { signOff: { riskOwners: ['user:riskOwner'] } },
     } as any
 
     test('view non-draft DA as non-named user', async () => {

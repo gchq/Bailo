@@ -1,28 +1,8 @@
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { getGroupMembership, listUsers } from '../../src/clients/cognito.js'
-
-const configMock = vi.hoisted(
-  () =>
-    ({
-      oauth: {
-        cognito: {
-          userIdAttribute: 'email',
-          userPoolId: 'email',
-          identityProviderClient: {
-            credentials: {
-              accessKeyId: '',
-              secretAccessKey: '',
-            },
-          },
-        },
-      },
-    }) as any,
-)
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
+import config, { Config } from '../../src/utils/config.js'
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
 const cognitoMock = vi.hoisted(() => {
   const send = vi.fn()
@@ -43,6 +23,10 @@ const cognitoMock = vi.hoisted(() => {
 vi.mock('@aws-sdk/client-cognito-identity-provider', () => cognitoMock)
 
 describe('clients > cognito', () => {
+  beforeEach(() => {
+    setTestConfig({ oauth: { cognito: { userIdAttribute: 'email', userPoolId: 'email' } } })
+  })
+
   test('listUsers > success', async () => {
     cognitoMock.send.mockResolvedValueOnce({ Users: [{ Attributes: [{ Name: 'email', Value: 'email@test.com' }] }] })
 
@@ -57,7 +41,7 @@ describe('clients > cognito', () => {
   })
 
   test('listUsers > missing configuration', async () => {
-    vi.spyOn(configMock, 'oauth', 'get').mockReturnValueOnce({})
+    config.oauth = {} as Config['oauth']
     const response = listUsers('dn')
 
     await expect(response).rejects.toThrow('Cannot find userIdAttribute in oauth configuration')

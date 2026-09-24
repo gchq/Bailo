@@ -31,7 +31,7 @@ export default function EditableReviewComment({
   return (
     <>
       {!isEditMode && (
-        <Stack spacing={2}>
+        <Stack spacing={1}>
           <MarkdownDisplay>{comment}</MarkdownDisplay>
           <ReactionButtons response={response} mutateResponses={mutateResponses} onError={onReactionsError} />
           {response.commentEditedAt && (
