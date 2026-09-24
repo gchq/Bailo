@@ -85,6 +85,7 @@ export default function DeploymentAssessmentsList() {
       <Stack spacing={2}>
         <Stack direction='row' spacing={1} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <TextField
+            data-test='deploymentAssessmentSearchFilter'
             label='Search assessments'
             size='small'
             value={search}
@@ -92,6 +93,7 @@ export default function DeploymentAssessmentsList() {
             sx={{ width: { xs: '100%', sm: 320 } }}
           />
           <TextField
+            data-test='deploymentAssessmentStatusFilter'
             select
             size='small'
             label='Status'
@@ -120,9 +122,11 @@ export default function DeploymentAssessmentsList() {
               label='Risk owner'
               value={filters.riskOwner}
               onChange={(riskOwner) => setFilters({ riskOwner })}
+              dataTest='deploymentAssessmentRiskOwnerFilter'
             />
           </Box>
           <Button
+            data-test='deploymentAssessmentResetFilters'
             onClick={resetFilters}
             startIcon={<RestartAlt />}
             disabled={activeFilterCount === 0}
@@ -138,6 +142,7 @@ export default function DeploymentAssessmentsList() {
           <AccordionDetails sx={{ px: 0, pt: 0 }}>
             <Stack direction='row' spacing={2} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <TextField
+                data-test='deploymentAssessmentSchemaFilter'
                 select
                 label='Schema'
                 size='small'
@@ -162,6 +167,7 @@ export default function DeploymentAssessmentsList() {
                   value={filters.createdBy && `user:${filters.createdBy}`}
 
                   onChange={(createdBy) => setFilters({ createdBy: createdBy && dnToEntity(createdBy).id })}
+                  dataTest='deploymentAssessmentCreatedByFilter'
                 />
               </Box>
               <CreatedDateRangeFilter
