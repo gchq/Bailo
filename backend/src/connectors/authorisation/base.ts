@@ -33,13 +33,17 @@ import {
   ResponseActionKeys,
   ReviewRoleAction,
   ReviewRoleActionKeys,
-  SchemaAction,
   SchemaActionKeys,
   SchemaMigrationAction,
   SchemaMigrationActionKeys,
 } from './actions.js'
 
 export type Response = { id: string; success: true } | { id: string; success: false; info: string }
+
+// Admin is required for every action except these so a newly added action is admin-only until deliberately exempt
+const NON_ADMIN_SCHEMA_ACTIONS: SchemaActionKeys[] = []
+const NON_ADMIN_SCHEMA_MIGRATION_ACTIONS: SchemaMigrationActionKeys[] = [SchemaMigrationAction.View]
+const NON_ADMIN_REVIEW_ROLE_ACTIONS: ReviewRoleActionKeys[] = [ReviewRoleAction.View]
 
 export class BasicAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
@@ -183,7 +187,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === SchemaAction.Create || action === SchemaAction.Delete || action === SchemaAction.Update) {
+        if (!NON_ADMIN_SCHEMA_ACTIONS.includes(action)) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
@@ -216,14 +220,14 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === SchemaMigrationAction.Create) {
+        if (!NON_ADMIN_SCHEMA_MIGRATION_ACTIONS.includes(action)) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
             return {
               id: schema.id,
               success: false,
-              info: 'You cannot upload a schema migration if you are not an admin.',
+              info: 'You cannot upload or modify a schema migration if you are not an admin.',
             }
           }
         }
@@ -508,11 +512,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (
-          action === ReviewRoleAction.Create ||
-          action === ReviewRoleAction.Delete ||
-          action === ReviewRoleAction.Update
-        ) {
+        if (!NON_ADMIN_REVIEW_ROLE_ACTIONS.includes(action)) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
