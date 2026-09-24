@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+
 import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
@@ -10,6 +12,7 @@ import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { isBailoError } from '../types/error.js'
 import { AccessRequestUserPermissions } from '../types/types.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -27,6 +30,7 @@ export async function createAccessRequest(
   user: UserInterface,
   modelId: string,
   accessRequestInfo: CreateAccessRequestParams,
+  groupId?: string,
 ) {
   // Check the model exists and the user can view it before creating an access request
   const model = await getModelById(user, modelId)
@@ -55,6 +59,7 @@ export async function createAccessRequest(
     modelId,
     comments: [],
     ...accessRequestInfo,
+    ...(groupId && { groupId }),
   })
 
   const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Create)
@@ -79,6 +84,62 @@ export async function createAccessRequest(
   )
 
   return accessRequest
+}
+
+export interface AccessRequestGroupResult {
+  groupId: string
+  accessRequests: AccessRequestDoc[]
+  failedModelIds: string[]
+}
+
+/** Each target is authorised and reviewed separately; report partial successes explicitly. */
+export async function createAccessRequestGroup(
+  user: UserInterface,
+  modelIds: string[],
+  accessRequestInfo: CreateAccessRequestParams,
+): Promise<AccessRequestGroupResult> {
+  if (modelIds.length < 2 || modelIds.length > 20 || new Set(modelIds).size !== modelIds.length) {
+    throw BadReq('Select between 2 and 20 different models.')
+  }
+  const groupId = randomUUID()
+  const accessRequests: AccessRequestDoc[] = []
+  const failedModelIds: string[] = []
+  for (const modelId of modelIds) {
+    try {
+      accessRequests.push(await createAccessRequest(user, modelId, accessRequestInfo, groupId))
+    } catch (error) {
+      log.warn({ error, modelId, groupId }, 'Could not create one of the grouped access requests')
+      failedModelIds.push(modelId)
+    }
+  }
+  return { groupId, accessRequests, failedModelIds }
+}
+
+/** Group membership does not grant visibility of another model or access request. */
+export async function getAccessRequestGroup(user: UserInterface, modelId: string, accessRequestId: string) {
+  const anchor = await getAccessRequestById(user, accessRequestId)
+  if (anchor.modelId !== modelId) {
+    throw NotFound('The requested access request was not found.', { accessRequestId })
+  }
+  if (!anchor.groupId) {
+    return []
+  }
+  const related = await AccessRequestModel.find({ groupId: anchor.groupId })
+  const visible: AccessRequestDoc[] = []
+  for (const request of related) {
+    try {
+      const model = await getModelById(user, request.modelId)
+      const auth = await authorisation.accessRequest(user, model, request, AccessRequestAction.View)
+      if (auth.success) {
+        visible.push(request)
+      }
+    } catch (error) {
+      if (!isBailoError(error) || ![403, 404].includes(error.code)) {
+        throw error
+      }
+    }
+  }
+  return visible
 }
 
 export async function removeAccessRequests(user: UserInterface, accessRequestIds: string[], session?: ClientSession) {
