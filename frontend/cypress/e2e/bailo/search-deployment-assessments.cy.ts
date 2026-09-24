@@ -40,7 +40,8 @@ function createDeploymentAssessment(name: string, linkedModelIds: string[], draf
       name,
       schemaId: deploymentAssessmentSchemaId,
       metadata: {
-        overview: { riskOwner: [riskOwner], modelIds: linkedModelIds },
+        modelOverview: { modelIds: linkedModelIds },
+        signOff: { riskOwners: [riskOwner] },
         about: {
           deploymentSummary: 'A deployment created through the API to test search filters.',
           deploymentDate: new Date().toLocaleDateString('en-CA'),
