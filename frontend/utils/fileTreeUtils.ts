@@ -269,3 +269,28 @@ export function detectFileConflicts(
 
   return { conflicts, nonConflicting }
 }
+
+// An empty path is valid and means the root of the model.
+export function validateFolderPath(path: string): string | null {
+  if (!path) {
+    return null
+  }
+  if (!path.trim()) {
+    return 'Path cannot be empty'
+  }
+  if (path.startsWith('/') || path.endsWith('/')) {
+    return 'Path should not start or end with a slash'
+  }
+  if (path.includes('//')) {
+    return 'Path should not contain double slashes'
+  }
+  const segments = path.split('/')
+  if (segments.some((segment) => !segment.trim())) {
+    return 'Path contains empty segments'
+  }
+  return null
+}
+
+export function joinUploadPath(destinationPath: string, relativePath: string): string {
+  return destinationPath ? `${destinationPath}/${relativePath}` : relativePath
+}
