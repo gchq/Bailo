@@ -1,7 +1,7 @@
 import Delete from '@mui/icons-material/Delete'
 import Folder from '@mui/icons-material/Folder'
 import MoreVert from '@mui/icons-material/MoreVert'
-import { Box, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Box, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
 import { deleteEntryFiles, useGetModelFiles } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
@@ -150,11 +150,15 @@ function FolderRow({
         <Stack
           direction='row'
           spacing={2}
-          sx={{ alignItems: 'center', cursor: 'pointer', flex: 1 }}
+          sx={{ alignItems: 'center', cursor: 'pointer', flex: 1, minWidth: 0, wordBreak: 'break-word' }}
           onClick={() => onNavigate(node.fullPath)}
         >
-          <Folder color='action' />
-          <Typography variant='h6'>{node.name}</Typography>
+          <Folder color='action' sx={{ flexShrink: 0 }} />
+          <Tooltip title={node.fullPath}>
+            <Typography variant='h6' sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+              {node.name}
+            </Typography>
+          </Tooltip>
           <Typography variant='caption' sx={{ width: 'max-content' }}>
             {searchQuery && matchingCount !== totalCount
               ? `${matchingCount} of ${plural(totalCount, 'file')} match`

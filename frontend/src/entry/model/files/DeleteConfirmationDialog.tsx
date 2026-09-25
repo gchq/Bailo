@@ -69,9 +69,9 @@ export default function DeleteConfirmationDialog({
         {itemType === 'folder' && filesToDelete.length > 0 && (
           <>
             <Typography variant='caption'>Files to be deleted:</Typography>
-            <Box sx={{ maxHeight: 200, overflow: 'auto', pl: 2 }}>
+            <Box sx={{ maxHeight: 200, overflowY: 'auto', pl: 2 }}>
               {filesToDelete.map((file) => (
-                <Typography key={file._id} variant='body2'>
+                <Typography key={file._id} variant='body2' sx={{ wordBreak: 'break-word' }}>
                   {file.name}
                 </Typography>
               ))}
