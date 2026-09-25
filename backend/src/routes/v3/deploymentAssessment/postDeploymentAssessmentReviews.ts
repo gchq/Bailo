@@ -24,7 +24,7 @@ export const postDeploymentAssessmentReviewSchema = z.object({
 registerPath(
   {
     method: 'post',
-    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/review',
+    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/reviews',
     tags: ['deployment assessments'],
     description: 'Create a formal deployment risk owner decision',
     schema: postDeploymentAssessmentReviewSchema,
@@ -38,7 +38,7 @@ registerPath(
   'v3',
 )
 
-export const postDeploymentAssessmentReview = [
+export const postDeploymentAssessmentReviews = [
   async (req: Request, res: Response): Promise<void> => {
     req.audit = AuditInfo.ReviewDeploymentAssessment
     const { params, body } = parse(req, postDeploymentAssessmentReviewSchema)

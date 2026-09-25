@@ -11,7 +11,7 @@ const serviceMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
-describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReview', () => {
+describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReviews', () => {
   test.each([
     [Decision.Approve, undefined],
     [Decision.Reject, 'The deployment risk is unacceptable.'],
@@ -20,7 +20,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReview', 
     const response = { _id: 'response-id', kind: ResponseKind.Review, decision, comment }
     serviceMock.reviewDeploymentAssessment.mockResolvedValueOnce(response)
 
-    const res = await testPost('/api/v3/deployment-assessments/assessment-id/review', {
+    const res = await testPost('/api/v3/deployment-assessments/assessment-id/reviews', {
       body: { decision, ...(comment && { comment }) },
     })
 
@@ -40,7 +40,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReview', 
     { decision: Decision.Undo },
     { decision: 'invalid' },
   ])('rejects an invalid formal response: %j', async (body) => {
-    const res = await testPost('/api/v3/deployment-assessments/assessment-id/review', { body })
+    const res = await testPost('/api/v3/deployment-assessments/assessment-id/reviews', { body })
 
     expect(res.statusCode).toBe(400)
     expect(serviceMock.reviewDeploymentAssessment).not.toHaveBeenCalled()
