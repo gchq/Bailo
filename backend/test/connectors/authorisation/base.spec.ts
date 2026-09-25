@@ -97,6 +97,36 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
+  test('files > rejects a file belonging to a different model', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getEntities.mockResolvedValue(['entity1'])
+    mockModelService.getModelSystemRoles.mockReturnValue(['owner'])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+    const foreignFile = { _id: 'file1', modelId: 'otherModel' } as any
+
+    const result = await connector.file(user, model, foreignFile, FileAction.Delete)
+
+    expect(result).toStrictEqual({
+      id: 'file1',
+      success: false,
+      info: 'The requested file does not belong to this model.',
+    })
+  })
+
+  test('files > allows a file belonging to the supplied model', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getEntities.mockResolvedValue(['entity1'])
+    mockModelService.getModelSystemRoles.mockReturnValue(['owner'])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+    const ownFile = { _id: 'file1', modelId: 'testModel' } as any
+
+    const result = await connector.file(user, model, ownFile, FileAction.Delete)
+
+    expect(result).toStrictEqual({ id: 'file1', success: true })
+  })
+
   test('hasModelVisibilityAccess > public model', async () => {
     const connector = new BasicAuthorisationConnector()
 
@@ -726,7 +756,7 @@ describe('connectors > authorisation > base', () => {
     mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
     mockModelService.getModelSystemRoles.mockResolvedValue([])
     ReviewRoleModelMock.find.mockResolvedValue([])
-    const file = { _id: { toString: () => 'file1' } }
+    const file = { _id: { toString: () => 'file1' }, modelId: 'testModel' }
 
     const result = await connector.file(user as any, model as any, file as any, FileAction.Upload)
 
@@ -743,7 +773,7 @@ describe('connectors > authorisation > base', () => {
     mockResponseService.checkAccessRequestsApproved.mockResolvedValue(false)
     mockModelService.getModelSystemRoles.mockResolvedValue([])
     ReviewRoleModelMock.find.mockResolvedValue([])
-    const file = { _id: { toString: () => 'file1' } }
+    const file = { _id: { toString: () => 'file1' }, modelId: 'testModel' }
     const mockModel = { ...model, settings: { ungovernedAccess: false } }
 
     const result = await connector.file(user as any, mockModel as any, file as any, FileAction.Download)
@@ -760,7 +790,7 @@ describe('connectors > authorisation > base', () => {
     mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
     mockModelService.getModelSystemRoles.mockResolvedValue([])
     ReviewRoleModelMock.find.mockResolvedValue([])
-    const file = { _id: { toString: () => 'file1' } }
+    const file = { _id: { toString: () => 'file1' }, modelId: 'testModel' }
 
     const result = await connector.file(user as any, model as any, file as any, FileAction.Update)
 

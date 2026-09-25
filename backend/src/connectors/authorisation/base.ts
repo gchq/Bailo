@@ -319,6 +319,17 @@ export class BasicAuthorisationConnector {
     const hasApprovedAccessRequest = await this.hasApprovedAccessRequest(user, model)
     return Promise.all(
       files.map(async (file) => {
+        // Bind the file to the model it was requested against. Without this a caller can pair a
+        // model they have roles on with a file belonging to another model, and have the action
+        // authorised by the wrong model's roles.
+        if (file.modelId !== model.id) {
+          return {
+            success: false,
+            info: 'The requested file does not belong to this model.',
+            id: file._id.toString(),
+          }
+        }
+
         // Is this a constrained user token.
         const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
         if (!tokenAuth.success) {
