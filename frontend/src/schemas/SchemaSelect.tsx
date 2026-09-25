@@ -85,7 +85,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
       return async (newSchema: SchemaInterface) => {
         setLoadingSchemaId(newSchema.id)
-        router.push(`/deployment-assessments/new?schemaId=${newSchema.id}`)
+        const { modelId } = router.query
+        const modelIdParam = modelId ? `&modelId=${modelId}` : ''
+        router.push(`/deployment-assessments/new?schemaId=${newSchema.id}${modelIdParam}`)
       }
     }
     return async (newSchema: SchemaInterface) => {
@@ -140,13 +142,14 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
 
   const link = useMemo(() => {
     if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
-      return '/deployment-assessments'
+      const { modelId } = router.query
+      return modelId ? `/model/${modelId}?tab=deployments` : '/deployment-assessments'
     }
     if (schemaKind === SchemaKind.ACCESS_REQUEST) {
       return `/model/${entry.id}`
     }
     return `/${entryKindForRedirect(entry.kind)}/${entry.id}`
-  }, [schemaKind, entry])
+  }, [schemaKind, entry, router.query])
 
   const backLabel = useMemo(() => {
     if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
