@@ -16,7 +16,7 @@ import { getStepsData, getStepsFromSchema, removeEmptyValues, setStepValidate, v
 
 export default function NewDeploymentAssessment() {
   const router = useRouter()
-  const { schemaId }: { schemaId?: string } = router.query
+  const { schemaId, modelId }: { schemaId?: string; modelId?: string } = router.query
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
@@ -36,13 +36,14 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    const steps = getStepsFromSchema(schema)
+    const defaultState = modelId ? { modelOverview: { modelIds: [modelId] } } : {}
+    const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
       step.steps = steps
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, currentUser])
+  }, [schema, currentUser, modelId])
 
   async function onSaveDraft() {
     setErrorText('')
@@ -139,7 +140,7 @@ export default function NewDeploymentAssessment() {
       isLoading={isFormLoading}
       splitSchema={splitSchema}
       setSplitSchema={setSplitSchema}
-      backHref='/deployment-assessments/new'
+      backHref={modelId ? `/deployment-assessments/new?modelId=${modelId}` : '/deployment-assessments/new'}
       backLabel='Select a different schema'
       onSubmit={onSubmit}
       submitButtonLoading={submitButtonLoading}
