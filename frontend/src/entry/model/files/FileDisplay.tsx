@@ -378,7 +378,7 @@ export default function FileDisplay({
                           }}
                         >
                           <ListItemIcon>
-                            <Delete color='primary' fontSize='small' />
+                            <Delete color='error' fontSize='small' />
                           </ListItemIcon>
                           <ListItemText>Delete file</ListItemText>
                         </MenuItem>
