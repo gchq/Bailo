@@ -99,6 +99,7 @@ export default function DeploymentAssessment() {
       return true
     }
     setShowValidation(true)
+    sendNotification({ msg: 'Unable to publish incomplete Deployment Assessment.', variant: 'error' })
     return false
   }
 
