@@ -132,7 +132,7 @@ export default function MessageAlert({
             </Typography>
           )}
           <Stack>
-            <Typography>{message}</Typography>
+            <Typography sx={{ whiteSpace: 'pre-line' }}>{message}</Typography>
             <Typography
               variant='caption'
               sx={{
