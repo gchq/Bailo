@@ -306,6 +306,11 @@ export function createBlankValueValidator(schema: any) {
   }
 }
 
+/** Converts an error's property path into the field id RJSF renders, e.g. `.list.0.name` gives `root_list_0_name`. */
+export function getFieldId(property = ''): string {
+  return ['root', ...property.split('.').filter(Boolean)].join('_')
+}
+
 /** Finds the question title for an error's property path, e.g. `.details.name` gives `Name`. */
 export function getQuestionTitle(schema: any, property = ''): string | undefined {
   const properties = property.split('.').filter((part) => part !== '' && !/^\d+$/.test(part))

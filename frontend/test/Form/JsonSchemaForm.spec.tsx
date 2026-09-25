@@ -165,6 +165,15 @@ describe('JsonSchemaForm', () => {
     expect(screen.getByText('This field is required')).toBeDefined()
   })
 
+  it('focuses the field when its error is clicked in the list at the top of the page', async () => {
+    renderWithTheme(<JsonSchemaForm splitSchema={buildSplitSchema()} setSplitSchema={vi.fn()} canEdit showValidation />)
+
+    await waitFor(() => expect(screen.getByText('Please resolve the following errors')).toBeDefined())
+    await userEvent.click(screen.getByText('Name: This field is required'))
+
+    expect(document.activeElement).toBe(screen.getByLabelText('text input field for Name'))
+  })
+
   it('keeps the focus on a field that is being typed into while it has an error', async () => {
     renderWithTheme(<JsonSchemaForm splitSchema={buildSplitSchema()} setSplitSchema={vi.fn()} canEdit showValidation />)
 

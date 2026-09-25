@@ -3,7 +3,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import Error from '@mui/icons-material/ErrorOutlineOutlined'
 import Share from '@mui/icons-material/Share'
-import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, ButtonBase, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
@@ -18,7 +18,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { getQuestionTitle, isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
+import { getFieldId, getQuestionTitle, isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
 
 function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
   if (!rawErrors || rawErrors.length === 0) {
@@ -98,7 +98,14 @@ export function FieldTemplate({ children, registry, schema, id, rawErrors }: Fie
 
   // Always render the wrapper so that showing/hiding an error does not lose focus while typing
   const content = (
-    <Stack spacing={0.5} sx={hasErrors ? { backgroundColor: alpha(theme.palette.error.main, 0.1), p: 1 } : undefined}>
+    <Stack
+      spacing={0.5}
+      data-field-anchor={id}
+      sx={{
+        scrollMarginTop: 100,
+        ...(hasErrors ? { backgroundColor: alpha(theme.palette.error.main, 0.1), p: 1 } : {}),
+      }}
+    >
       <FieldErrors rawErrors={rawErrors} />
       {children}
     </Stack>
@@ -146,6 +153,15 @@ function formatErrorListItem(error: RJSFValidationError, schema: RJSFSchema) {
   return title ? `${title}: ${error.message}` : error.message
 }
 
+function scrollToField(property?: string) {
+  const fieldId = getFieldId(property)
+  const anchor = document.querySelector(`[data-field-anchor="${fieldId}"]`)
+
+  anchor?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+  // Widgets render the field id on their input, so the question can be focused
+  document.getElementById(fieldId)?.focus({ preventScroll: true })
+}
+
 export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
   return (
     <Stack spacing={0.5} sx={{ mb: 2 }}>
@@ -153,18 +169,19 @@ export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
         Please resolve the following errors
       </Typography>
       {sortFormErrors(errors, schema).map((error, index) => (
-        <Stack
+        <ButtonBase
           key={`${error.stack}-${index}`}
-          direction='row'
-          spacing={0.5}
-          sx={{ alignItems: 'center' }}
+          onClick={() => scrollToField(error.property)}
+          sx={{ justifyContent: 'flex-start', textAlign: 'left', width: 'fit-content' }}
           data-test='formErrorListItem'
         >
-          <Error color='error' fontSize='small' />
-          <Typography color='error' variant='body2'>
-            {formatErrorListItem(error, schema)}
-          </Typography>
-        </Stack>
+          <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+            <Error color='error' fontSize='small' />
+            <Typography color='error' variant='body2' sx={{ textDecoration: 'underline' }}>
+              {formatErrorListItem(error, schema)}
+            </Typography>
+          </Stack>
+        </ButtonBase>
       ))}
     </Stack>
   )
