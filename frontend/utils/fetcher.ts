@@ -96,7 +96,7 @@ const getSchemaValidationDetails = (error: ErrorResponse['error']) => {
     .filter((validationError) => validationError.message)
     .map((validationError) => {
       const question = validationError.schema?.title || (validationError.path || []).join('.')
-      return question ? `${question}: ${validationError.message}` : `${validationError.message}`
+      return question ? `${question}: ${validationError.message}` : validationError.message
     })
 }
 
