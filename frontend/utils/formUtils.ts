@@ -1,4 +1,4 @@
-import { Registry, RegistryWidgetsType } from '@rjsf/utils'
+import { Registry, RegistryWidgetsType, RJSFValidationError } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
@@ -203,6 +203,50 @@ export function setStepsData(
   }
 
   setSplitSchema({ ...splitSchema, steps: newSteps })
+}
+
+/** Replaces the default AJV wording for missing required properties with a friendlier message. */
+export function transformFormErrors(errors: RJSFValidationError[]): RJSFValidationError[] {
+  return errors.map((error) => (error.name === 'required' ? { ...error, message: 'This field is required' } : error))
+}
+
+/** Lists the property paths of a schema in the order the questions are asked, e.g. `['.details', '.details.name']`. */
+function getSchemaPropertyPaths(schema: any, path = ''): string[] {
+  if (!schema || typeof schema !== 'object' || schema.type !== 'object' || !schema.properties) {
+    return []
+  }
+
+  return Object.entries(schema.properties).flatMap(([property, value]) => {
+    const propertyPath = `${path}.${property}`
+    return [propertyPath, ...getSchemaPropertyPaths(value, propertyPath)]
+  })
+}
+
+/**
+ * Orders errors by the position of their question in the schema, then by message so that a field with several errors
+ * always lists them the same way round.
+ */
+export function sortFormErrors(errors: RJSFValidationError[], schema: any): RJSFValidationError[] {
+  const propertyPaths = getSchemaPropertyPaths(schema)
+
+  const questionIndex = (error: RJSFValidationError) => {
+    // Array items report against an index, e.g. `.riskOwners.0`, but belong to their parent question
+    const index = propertyPaths.indexOf((error.property || '').replaceAll(/\.\d+/g, ''))
+    return index === -1 ? propertyPaths.length : index
+  }
+
+  return [...errors].sort(
+    (a, b) => questionIndex(a) - questionIndex(b) || (a.message || '').localeCompare(b.message || ''),
+  )
+}
+
+/**
+ * Arrays of primitives are rendered by a single widget (e.g. the entity selector), so padding them out to `minItems`
+ * with blank entries only produces errors against items the user cannot see.
+ */
+export function skipPopulatingPrimitiveArrays(_validator: unknown, schema: any): boolean {
+  const items = schema.items
+  return !!items && typeof items === 'object' && !Array.isArray(items) && items.type !== 'object'
 }
 
 export function validateForm(step: StepNoRender) {

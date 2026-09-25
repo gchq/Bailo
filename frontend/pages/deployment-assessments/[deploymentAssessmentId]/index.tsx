@@ -40,6 +40,8 @@ export default function DeploymentAssessment() {
   const [isLoading, setIsLoading] = useState(false)
   const [patchErrorMessage, setPatchErrorMessage] = useState('')
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [isFormValid, setIsFormValid] = useState(true)
+  const [showValidation, setShowValidation] = useState(false)
   const reviewPopoverOpen = Boolean(anchorEl)
 
   const {
@@ -84,6 +86,14 @@ export default function DeploymentAssessment() {
     return error
   }
 
+  function validateBeforePublish() {
+    if (isFormValid) {
+      return true
+    }
+    setShowValidation(true)
+    return false
+  }
+
   async function handlePublish() {
     if (deploymentAssessment) {
       setIsLoading(true)
@@ -116,6 +126,7 @@ export default function DeploymentAssessment() {
                   disableButton={isEdit}
                   isLoading={isLoading}
                   handlePublish={handlePublish}
+                  validateBeforePublish={validateBeforePublish}
                   draft={deploymentAssessment.draft}
                   text='This is a draft deployment assessment'
                   dialogTitle='Confirm publish'
@@ -159,6 +170,8 @@ export default function DeploymentAssessment() {
                           mutate={mutateDeploymentAssessment}
                           isEdit={isEdit}
                           onIsEditChange={setIsEdit}
+                          showValidation={showValidation}
+                          onValidityChange={setIsFormValid}
                         />
                       </Box>
                     )}

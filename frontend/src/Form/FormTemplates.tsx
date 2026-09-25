@@ -8,6 +8,7 @@ import { alpha, useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
+  ErrorListProps,
   FieldTemplateProps,
   ObjectFieldTemplateProps,
   RJSFSchema,
@@ -16,7 +17,29 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { isQuestionAnswered } from 'utils/formUtils'
+import { isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
+
+function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
+  if (!rawErrors || rawErrors.length === 0) {
+    return null
+  }
+
+  // Ensure multiple errors are always in the same order
+  const sortedErrors = [...rawErrors].sort((a, b) => a.localeCompare(b))
+
+  return (
+    <Stack spacing={0.5}>
+      {sortedErrors.map((error) => (
+        <Stack key={error} direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+          <Error color='error' fontSize='small' />
+          <Typography color='error' variant='body2'>
+            {error}
+          </Typography>
+        </Stack>
+      ))}
+    </Stack>
+  )
+}
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -63,13 +86,22 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+export function FieldTemplate({ children, registry, schema, id, rawErrors }: FieldTemplateProps) {
   const theme = useTheme()
   const answered = isQuestionAnswered(id, schema, registry.formContext)
   const requiredByState =
     registry.formContext.requiredByModelState &&
     schema.requiredByModelStates &&
     schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
+  const hasErrors = !!rawErrors && rawErrors.length > 0
+
+  // Always render the wrapper so that showing/hiding an error does not lose focus while typing
+  const content = (
+    <Stack spacing={0.5} sx={hasErrors ? { backgroundColor: alpha(theme.palette.error.main, 0.1), p: 1 } : undefined}>
+      <FieldErrors rawErrors={rawErrors} />
+      {children}
+    </Stack>
+  )
 
   if (requiredByState) {
     return (
@@ -98,19 +130,35 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
             {`Required for ${registry.formContext.requiredByModelState}`}
           </Typography>
         </Stack>
-        {children}
+        {content}
       </Stack>
     )
   }
 
-  return <>{children}</>
+  return <>{content}</>
 }
 
-export function ErrorListTemplate() {
+export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
   return (
-    <Typography color='error' sx={{ mb: 2 }}>
-      Please make sure that all errors listed below have been resolved.
-    </Typography>
+    <Stack spacing={0.5} sx={{ mb: 2 }}>
+      <Typography color='error' sx={{ fontWeight: 'bold' }}>
+        Please resolve the following errors
+      </Typography>
+      {sortFormErrors(errors, schema).map((error, index) => (
+        <Stack
+          key={`${error.stack}-${index}`}
+          direction='row'
+          spacing={0.5}
+          sx={{ alignItems: 'center' }}
+          data-test='formErrorListItem'
+        >
+          <Error color='error' fontSize='small' />
+          <Typography color='error' variant='body2'>
+            {error.title ? `${error.title}: ${error.message}` : error.message}
+          </Typography>
+        </Stack>
+      ))}
+    </Stack>
   )
 }
 
