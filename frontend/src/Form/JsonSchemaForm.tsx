@@ -40,10 +40,10 @@ import {
   createBlankValueValidator,
   getFormStats,
   getOverallCompletionStats,
+  rewordRJSFErrors,
   setFormDataPropertiesToUndefined,
   setStepState,
   skipPopulatingPrimitiveArrays,
-  transformFormErrors,
   widgets,
 } from 'utils/formUtils'
 import { parseNat, toSentenceCase } from 'utils/stringUtils'
@@ -338,7 +338,7 @@ export default function JsonSchemaForm({
             liveOmit
             liveValidate={showValidation ? 'onChange' : undefined}
             showErrorList={showValidation ? 'top' : false}
-            transformErrors={transformFormErrors}
+            transformErrors={rewordRJSFErrors}
             customValidate={blankValueValidator}
             experimental_defaultFormStateBehavior={defaultFormStateBehavior}
             formContext={{

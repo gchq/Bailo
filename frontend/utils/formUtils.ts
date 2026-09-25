@@ -206,7 +206,7 @@ export function setStepsData(
 }
 
 /** Replaces the default AJV wording for missing required properties with a friendlier message. */
-export function transformFormErrors(errors: RJSFValidationError[]): RJSFValidationError[] {
+export function rewordRJSFErrors(errors: RJSFValidationError[]): RJSFValidationError[] {
   return errors.map((error) => (error.name === 'required' ? { ...error, message: 'This field is required' } : error))
 }
 
