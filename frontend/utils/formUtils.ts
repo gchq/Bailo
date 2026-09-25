@@ -1,4 +1,4 @@
-import { Registry, RegistryWidgetsType } from '@rjsf/utils'
+import { Registry, RegistryWidgetsType, RJSFValidationError } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
@@ -205,11 +205,121 @@ export function setStepsData(
   setSplitSchema({ ...splitSchema, steps: newSteps })
 }
 
+/** Replaces the default AJV wording for missing required properties with a friendlier message. */
+export function rewordRJSFErrors(errors: RJSFValidationError[]): RJSFValidationError[] {
+  return errors.map((error) => (error.name === 'required' ? { ...error, message: 'This field is required' } : error))
+}
+
+/** Lists the property paths of a schema in the order the questions are asked, e.g. `['.details', '.details.name']`. */
+function getSchemaPropertyPaths(schema: any, path = ''): string[] {
+  if (!schema || typeof schema !== 'object') {
+    return []
+  }
+
+  if (schema.type === 'array') {
+    // Array items report against their parent question, e.g. `.list.0.name` belongs to `.list.name`
+    return getSchemaPropertyPaths(schema.items, path)
+  }
+
+  if (!schema.properties) {
+    return []
+  }
+
+  return Object.entries(schema.properties).flatMap(([property, value]) => {
+    const propertyPath = `${path}.${property}`
+    return [propertyPath, ...getSchemaPropertyPaths(value, propertyPath)]
+  })
+}
+
+/**
+ * Orders errors by the position of their question in the schema, then by message so that a field with several errors
+ * always lists them the same way round.
+ */
+export function sortFormErrors(errors: RJSFValidationError[], schema: any): RJSFValidationError[] {
+  const propertyPaths = getSchemaPropertyPaths(schema)
+
+  const questionIndex = (error: RJSFValidationError) => {
+    // Array items report against an index, e.g. `.riskOwners.0`, but belong to their parent question
+    const index = propertyPaths.indexOf((error.property || '').replaceAll(/\.\d+/g, ''))
+    return index === -1 ? propertyPaths.length : index
+  }
+
+  return [...errors].sort(
+    (a, b) => questionIndex(a) - questionIndex(b) || (a.message || '').localeCompare(b.message || ''),
+  )
+}
+
+/**
+ * Arrays of primitives are rendered by a single widget (e.g. the entity selector), so padding them out to `minItems`
+ * with blank entries only produces errors against items the user cannot see.
+ */
+export function skipPopulatingPrimitiveArrays(_validator: unknown, schema: any): boolean {
+  const items = schema.items
+  return !!items && typeof items === 'object' && !Array.isArray(items) && items.type !== 'object'
+}
+
 export function validateForm(step: StepNoRender) {
   const validator = new Validator()
-  const sectionErrors = validator.validate(step.state, step.schema)
+  // Blank answers (e.g. `''` or `['']`) are stripped so that clearing an answer cannot satisfy a required field
+  const sectionErrors = validator.validate(removeEmptyValues(step.state) || {}, step.schema)
 
   return sectionErrors.errors.length === 0
+}
+
+function isBlank(value: unknown): boolean {
+  return removeEmptyValues(value) === undefined
+}
+
+/** Builds a validator that reports blank answers (`''`, `['']`) as missing, which AJV counts as answered. */
+export function createBlankValueValidator(schema: any) {
+  const validateProperties = (currentSchema: any, formData: any, errors: any) => {
+    if (!currentSchema || typeof currentSchema !== 'object' || !currentSchema.properties || !errors) {
+      return
+    }
+
+    for (const [property, propertySchema] of Object.entries<any>(currentSchema.properties)) {
+      const value = formData?.[property]
+      const propertyErrors = errors[property]
+      if (!propertyErrors) {
+        continue
+      }
+
+      if (value !== undefined && isBlank(value) && (currentSchema.required || []).includes(property)) {
+        propertyErrors.addError('This field is required')
+      }
+
+      const { minItems } = propertySchema
+      if (minItems >= 1 && Array.isArray(value) && value.length >= minItems) {
+        // AJV only counts the items, so it does not raise this when the items are present but blank
+        if (value.filter((item) => !isBlank(item)).length < minItems) {
+          propertyErrors.addError(`must NOT have fewer than ${minItems} items`)
+        }
+      }
+
+      validateProperties(propertySchema, value, propertyErrors)
+    }
+  }
+
+  return (formData: any, errors: any) => {
+    validateProperties(schema, formData, errors)
+    return errors
+  }
+}
+
+/** Converts an error's property path into the field id RJSF renders, e.g. `.list.0.name` gives `root_list_0_name`. */
+export function getFieldId(property = ''): string {
+  return ['root', ...property.split('.').filter(Boolean)].join('_')
+}
+
+/** Finds the question title for an error's property path, e.g. `.details.name` gives `Name`. */
+export function getQuestionTitle(schema: any, property = ''): string | undefined {
+  const properties = property.split('.').filter((part) => part !== '' && !/^\d+$/.test(part))
+
+  return properties.reduce(
+    (currentSchema, currentProperty) =>
+      currentSchema?.properties?.[currentProperty] || currentSchema?.items?.properties?.[currentProperty],
+    schema,
+  )?.title
 }
 
 export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
@@ -538,10 +648,10 @@ export function removeEmptyValues(value) {
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return undefined
-    }
-    return value.map(removeEmptyValues).filter((item) => item !== undefined)
+    const cleaned = value.map(removeEmptyValues).filter((item) => item !== undefined)
+
+    // An array of blank values, e.g. `['']`, is as empty as `[]`
+    return cleaned.length > 0 ? cleaned : undefined
   }
 
   if (value !== null && typeof value === 'object') {

@@ -5,7 +5,7 @@ import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
@@ -40,7 +40,17 @@ export default function DeploymentAssessment() {
   const [isLoading, setIsLoading] = useState(false)
   const [patchErrorMessage, setPatchErrorMessage] = useState('')
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [isFormValid, setIsFormValid] = useState<boolean | undefined>(undefined)
+  const [showValidation, setShowValidation] = useState(false)
   const reviewPopoverOpen = Boolean(anchorEl)
+
+  const handleValidityChange = useCallback((isValid: boolean) => {
+    setIsFormValid(isValid)
+    // Once the form is valid there is nothing left to highlight
+    if (isValid) {
+      setShowValidation(false)
+    }
+  }, [])
 
   const {
     deploymentAssessment,
@@ -84,6 +94,15 @@ export default function DeploymentAssessment() {
     return error
   }
 
+  function validateBeforePublish() {
+    if (isFormValid) {
+      return true
+    }
+    setShowValidation(true)
+    sendNotification({ msg: 'Unable to publish incomplete Deployment Assessment.', variant: 'error' })
+    return false
+  }
+
   async function handlePublish() {
     if (deploymentAssessment) {
       setIsLoading(true)
@@ -113,9 +132,10 @@ export default function DeploymentAssessment() {
                 <DraftBanner
                   errorMessage={patchErrorMessage}
                   setErrorMessage={setPatchErrorMessage}
-                  disableButton={isEdit}
+                  disableButton={isEdit || isFormValid === undefined}
                   isLoading={isLoading}
                   handlePublish={handlePublish}
+                  validateBeforePublish={validateBeforePublish}
                   draft={deploymentAssessment.draft}
                   text='This is a draft deployment assessment'
                   dialogTitle='Confirm publish'
@@ -159,6 +179,8 @@ export default function DeploymentAssessment() {
                           mutate={mutateDeploymentAssessment}
                           isEdit={isEdit}
                           onIsEditChange={setIsEdit}
+                          showValidation={showValidation}
+                          onValidityChange={handleValidityChange}
                         />
                       </Box>
                     )}

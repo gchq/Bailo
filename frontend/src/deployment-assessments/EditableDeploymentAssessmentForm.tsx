@@ -30,6 +30,8 @@ type EditableDeploymentAssessmentFormProps = {
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
+  showValidation?: boolean
+  onValidityChange?: (isValid: boolean) => void
 }
 
 export default function EditableDeploymentAssessmentForm({
@@ -38,6 +40,8 @@ export default function EditableDeploymentAssessmentForm({
   isEdit,
   onIsEditChange,
   readOnly = false,
+  showValidation = false,
+  onValidityChange,
 }: EditableDeploymentAssessmentFormProps) {
   const [originalSplitSchema, setOriginalSplitSchema] = useState<SplitSchemaNoRender>({
     reference: '',
@@ -47,6 +51,7 @@ export default function EditableDeploymentAssessmentForm({
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [newName, setNewName] = useState(deploymentAssessment.name)
+  const [showSaveValidation, setShowSaveValidation] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
 
@@ -74,6 +79,7 @@ export default function EditableDeploymentAssessmentForm({
   async function handleSubmit() {
     if (schema) {
       setErrorMessage('')
+      setShowSaveValidation(false)
       setIsLoading(true)
 
       const oldData = getStepsData(originalSplitSchema, true)
@@ -95,6 +101,7 @@ export default function EditableDeploymentAssessmentForm({
 
           if (!isValid) {
             setErrorMessage('Please make sure that all sections have been completed.')
+            setShowSaveValidation(true)
             setIsLoading(false)
             return
           }
@@ -138,6 +145,7 @@ export default function EditableDeploymentAssessmentForm({
     onIsEditChange(false)
     setNewName(deploymentAssessment.name)
     setErrorMessage('')
+    setShowSaveValidation(false)
     resetForm()
   }
 
@@ -148,6 +156,13 @@ export default function EditableDeploymentAssessmentForm({
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
+
+  useEffect(() => {
+    if (!onValidityChange || splitSchema.steps.length === 0) {
+      return
+    }
+    onValidityChange(splitSchema.steps.every((step) => validateForm(step)))
+  }, [splitSchema, onValidityChange])
 
   const formHeading = useMemo(
     () => (
@@ -210,7 +225,13 @@ export default function EditableDeploymentAssessmentForm({
           errorMessage={errorMessage}
           readOnly={readOnly}
         />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          canEdit={isEdit}
+          showValidation={showValidation || showSaveValidation}
+          displayLabelValidation={showValidation || showSaveValidation}
+        />
         <DeletionConfirmationDialogue
           open={open}
           title='Delete Deployment Assessment'

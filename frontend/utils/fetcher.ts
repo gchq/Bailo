@@ -10,8 +10,18 @@ export type ErrorInfo = Error & {
   status: number
 }
 
+type SchemaValidationError = {
+  message?: string
+  path?: Array<string | number>
+  schema?: { title?: string }
+}
+
 type ErrorResponse = {
-  error: Error
+  error: Error & {
+    context?: {
+      errors?: SchemaValidationError[]
+    }
+  }
 }
 
 export const fetcher = async <THead extends boolean>(
@@ -80,10 +90,20 @@ const isErrorResponse = (value: unknown): value is ErrorResponse => {
   return !!(value && (value as ErrorResponse).error && (value as ErrorResponse).error.message)
 }
 
+/** Lists the schema validation failures the backend reports */
+const getSchemaValidationDetails = (error: ErrorResponse['error']) => {
+  return (error.context?.errors || [])
+    .filter((validationError) => validationError.message)
+    .map((validationError) => {
+      const question = validationError.schema?.title || (validationError.path || []).join('.')
+      return question ? `${question}: ${validationError.message}` : validationError.message
+    })
+}
+
 const getErrorMessageFromBody = (body: unknown, status: number) => {
   const reasonPhrase = getReasonPhrase(status)
   if (isErrorResponse(body)) {
-    return `${reasonPhrase}: ${body.error.message}`
+    return [`${reasonPhrase}: ${body.error.message}`, ...getSchemaValidationDetails(body.error)].join('\n')
   }
 
   // unable to identify error message, possibly a network failure

@@ -3,20 +3,44 @@ import CloseIcon from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import Error from '@mui/icons-material/ErrorOutlineOutlined'
 import Share from '@mui/icons-material/Share'
-import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, ButtonBase, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
+  ErrorListProps,
   FieldTemplateProps,
   ObjectFieldTemplateProps,
   RJSFSchema,
+  RJSFValidationError,
   TitleFieldProps,
 } from '@rjsf/utils'
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { isQuestionAnswered } from 'utils/formUtils'
+import { getFieldId, getQuestionTitle, isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
+
+function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
+  if (!rawErrors || rawErrors.length === 0) {
+    return null
+  }
+
+  // Ensure multiple errors are always in the same order
+  const sortedErrors = [...rawErrors].sort((a, b) => a.localeCompare(b))
+
+  return (
+    <Stack spacing={0.5}>
+      {sortedErrors.map((error, index) => (
+        <Stack key={`${error}-${index}`} direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+          <Error color='error' fontSize='small' />
+          <Typography color='error' variant='body2'>
+            {error}
+          </Typography>
+        </Stack>
+      ))}
+    </Stack>
+  )
+}
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -63,13 +87,29 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+export function FieldTemplate({ children, registry, schema, id, rawErrors }: FieldTemplateProps) {
   const theme = useTheme()
   const answered = isQuestionAnswered(id, schema, registry.formContext)
   const requiredByState =
     registry.formContext.requiredByModelState &&
     schema.requiredByModelStates &&
     schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
+  const hasErrors = !!rawErrors && rawErrors.length > 0
+
+  // Always render the wrapper so that showing/hiding an error does not lose focus while typing
+  const content = (
+    <Stack
+      spacing={0.5}
+      data-field-anchor={id}
+      sx={{
+        scrollMarginTop: 100,
+        ...(hasErrors ? { backgroundColor: alpha(theme.palette.error.main, 0.1), p: 1 } : {}),
+      }}
+    >
+      <FieldErrors rawErrors={rawErrors} />
+      {children}
+    </Stack>
+  )
 
   if (requiredByState) {
     return (
@@ -98,19 +138,52 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
             {`Required for ${registry.formContext.requiredByModelState}`}
           </Typography>
         </Stack>
-        {children}
+        {content}
       </Stack>
     )
   }
 
-  return <>{children}</>
+  return <>{content}</>
 }
 
-export function ErrorListTemplate() {
+function formatErrorListItem(error: RJSFValidationError, schema: RJSFSchema) {
+  // Errors raised by a custom validator have no title of their own, so it is looked up from the schema
+  const title = error.title || getQuestionTitle(schema, error.property)
+
+  return title ? `${title}: ${error.message}` : error.message
+}
+
+function scrollToField(property?: string) {
+  const fieldId = getFieldId(property)
+  const anchor = document.querySelector(`[data-field-anchor="${fieldId}"]`)
+
+  anchor?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+  // Widgets render the field id on their input, so the question can be focused
+  document.getElementById(fieldId)?.focus({ preventScroll: true })
+}
+
+export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
   return (
-    <Typography color='error' sx={{ mb: 2 }}>
-      Please make sure that all errors listed below have been resolved.
-    </Typography>
+    <Stack spacing={0.5} sx={{ mb: 2 }}>
+      <Typography color='error' sx={{ fontWeight: 'bold' }}>
+        Please resolve the following errors
+      </Typography>
+      {sortFormErrors(errors, schema).map((error, index) => (
+        <ButtonBase
+          key={`${error.stack}-${index}`}
+          onClick={() => scrollToField(error.property)}
+          sx={{ justifyContent: 'flex-start', textAlign: 'left', width: 'fit-content' }}
+          data-test='formErrorListItem'
+        >
+          <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+            <Error color='error' fontSize='small' />
+            <Typography color='error' variant='body2' sx={{ textDecoration: 'underline' }}>
+              {formatErrorListItem(error, schema)}
+            </Typography>
+          </Stack>
+        </ButtonBase>
+      ))}
+    </Stack>
   )
 }
 
