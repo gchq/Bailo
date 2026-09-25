@@ -312,12 +312,12 @@ export default function FileUploadDialog({
           />
           <Stack direction='row' spacing={2} sx={{ justifyContent: 'center' }}>
             <label htmlFor='add-files-button'>
-              <Button loading={isFilesUploading} endIcon={<FileUpload />} component='span' variant='outlined'>
+              <Button disabled={isFilesUploading} endIcon={<FileUpload />} component='span' variant='outlined'>
                 Select files
               </Button>
             </label>
             <Button
-              loading={isFilesUploading}
+              disabled={isFilesUploading}
               endIcon={<FolderOpen />}
               variant='outlined'
               onClick={() => folderInputRef.current?.click()}
@@ -334,7 +334,14 @@ export default function FileUploadDialog({
               />
             </Box>
           )}
-          <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
+          <Input
+            multiple
+            id='add-files-button'
+            type='file'
+            onChange={handleAddNewFiles}
+            disabled={isFilesUploading}
+            data-test='uploadFileButton'
+          />
           <input
             ref={(el) => {
               folderInputRef.current = el
@@ -345,6 +352,7 @@ export default function FileUploadDialog({
             type='file'
             style={{ display: 'none' }}
             onChange={handleAddNewFiles}
+            disabled={isFilesUploading}
             data-test='uploadFolderButton'
           />
           {showConflictStep ? (

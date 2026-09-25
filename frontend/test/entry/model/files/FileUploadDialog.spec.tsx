@@ -98,4 +98,21 @@ describe('FileUploadDialog', () => {
       expect(uploadButton?.disabled).toBe(true)
     })
   })
+
+  it('prevents further file selection while an upload is in progress', async () => {
+    let resolveUpload: (value: unknown) => void = () => undefined
+    vi.mocked(postFileForModelId).mockImplementation(() => new Promise((resolve) => (resolveUpload = resolve)) as never)
+    renderDialog('')
+
+    selectFile('example.txt')
+    fireEvent.click(await screen.findByText('Upload files'))
+
+    await waitFor(() => {
+      expect((screen.getByTestId('uploadFileButton') as HTMLInputElement).disabled).toBe(true)
+      expect((screen.getByTestId('uploadFolderButton') as HTMLInputElement).disabled).toBe(true)
+      expect(screen.getByText('Select folder').closest('button')?.disabled).toBe(true)
+    })
+
+    resolveUpload({ data: { file: { _id: 'abc' } } })
+  })
 })
