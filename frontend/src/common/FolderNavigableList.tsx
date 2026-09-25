@@ -1,6 +1,6 @@
 import Home from '@mui/icons-material/Home'
 import { Breadcrumbs, Link, Stack, Typography } from '@mui/material'
-import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import Paginate, { SortingProperty } from 'src/common/Paginate'
 import { FileInterface } from 'types/types'
 import {
@@ -25,7 +25,6 @@ export type BrowseListItem = {
 interface FolderNavigableListProps {
   files: FileInterface[]
   children: (props: { data: BrowseListItem; onNavigate: (path: string) => void; searchQuery: string }) => ReactElement
-  toolbarActions?: (props: { currentPath: string }) => ReactNode
   onPathChange?: (path: string) => void
   emptyListText?: string
   searchPlaceholderText?: string
@@ -43,7 +42,6 @@ const DEFAULT_SORT_PROPERTIES: SortingProperty<BrowseListItem>[] = [
 export default function FolderNavigableList({
   files,
   children,
-  toolbarActions,
   onPathChange,
   emptyListText = 'No files in this folder',
   searchPlaceholderText = 'Search files and folders',
@@ -138,11 +136,6 @@ export default function FolderNavigableList({
             )
           })}
         </Breadcrumbs>
-        {toolbarActions && (
-          <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
-            {toolbarActions({ currentPath })}
-          </Stack>
-        )}
       </Stack>
       <Paginate
         list={browseItems}

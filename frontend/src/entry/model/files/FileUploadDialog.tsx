@@ -1,11 +1,22 @@
 import styled from '@emotion/styled'
 import FileUpload from '@mui/icons-material/FileUpload'
 import FolderOpen from '@mui/icons-material/FolderOpen'
-import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  Divider,
+  LinearProgress,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { deleteEntryFile } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
-import { ChangeEvent, useCallback, useContext, useMemo, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -20,7 +31,13 @@ import {
   FileUploadWithMetadata,
   ReleaseInterface,
 } from 'types/types'
-import { detectFileConflicts, FileConflict } from 'utils/fileTreeUtils'
+import {
+  detectFileConflicts,
+  FileConflict,
+  getFileUploadName,
+  joinUploadPath,
+  validateFolderPath,
+} from 'utils/fileTreeUtils'
 import { plural } from 'utils/stringUtils'
 
 interface FileUploadDialogProps {
@@ -28,10 +45,18 @@ interface FileUploadDialogProps {
   open: boolean
   onDialogClose: () => void
   mutateModelFiles: () => void
-  uploadPath?: string
+  initialUploadPath?: string
   existingFiles?: FileInterface[]
   releases?: ReleaseInterface[]
   onFilesUploaded?: (files: FileInterface[]) => void
+}
+
+// Files are staged by their path relative to the chosen destination, so that changing the
+// destination after selecting files still moves them.
+type StagedFileUpload = {
+  file: File
+  metadata?: FileUploadMetadata
+  relativePath: string
 }
 
 const Input = styled('input')({
@@ -43,7 +68,7 @@ export default function FileUploadDialog({
   onDialogClose,
   model,
   mutateModelFiles,
-  uploadPath = '',
+  initialUploadPath = '',
   existingFiles = [],
   releases = [],
   onFilesUploaded,
@@ -51,64 +76,72 @@ export default function FileUploadDialog({
   const uiConfig = useContext(UiConfigContext)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [isFilesUploading, setIsFilesUploading] = useState(false)
-  const [filesToBeUploaded, setFilesToBeUpload] = useState<FileUploadWithMetadata[]>([])
+  const [stagedFiles, setStagedFiles] = useState<StagedFileUpload[]>([])
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
+  const [destinationPath, setDestinationPath] = useState(initialUploadPath)
   const folderInputRef = useRef<HTMLInputElement>(null)
 
   const [showConflictStep, setShowConflictStep] = useState(false)
   const [detectedConflicts, setDetectedConflicts] = useState<FileConflict[]>([])
   const [conflictResolutions, setConflictResolutions] = useState<Map<string, ConflictAction>>(new Map())
 
+  // Re-seed the destination from the browsing path each time the dialog is opened, so that
+  // navigating elsewhere and reopening does not leave a stale destination behind.
+  useEffect(() => {
+    if (open) {
+      setDestinationPath(initialUploadPath)
+    }
+  }, [open, initialUploadPath])
+
+  const destinationPathError = useMemo(() => validateFolderPath(destinationPath), [destinationPath])
+
+  const filesToBeUploaded: FileUploadWithMetadata[] = useMemo(
+    () =>
+      stagedFiles.map(({ file, metadata, relativePath }) => ({
+        file,
+        metadata,
+        uploadPath: destinationPath ? joinUploadPath(destinationPath, relativePath) : undefined,
+      })),
+    [stagedFiles, destinationPath],
+  )
+
   const handleAddNewFiles = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
-      const newFiles = event.target.files
-        ? Array.from(event.target.files).map((newFile) => {
-            // For folder uploads, webkitRelativePath contains the path relative to the selected folder.
-            // For individual files, prepend the current browsing path if set.
-            const fileUploadPath = newFile.webkitRelativePath
-              ? uploadPath
-                ? `${uploadPath}/${newFile.webkitRelativePath}`
-                : newFile.webkitRelativePath
-              : uploadPath
-                ? `${uploadPath}/${newFile.name}`
-                : undefined
-            const dedupeKey = fileUploadPath || newFile.name
-            return { file: newFile, uploadPath: fileUploadPath, _dedupeKey: dedupeKey }
-          })
+      // For folder uploads, webkitRelativePath contains the path relative to the selected folder.
+      const newFiles: StagedFileUpload[] = event.target.files
+        ? Array.from(event.target.files).map((newFile) => ({
+            file: newFile,
+            relativePath: getFileUploadName(newFile),
+          }))
         : []
       const filteredNewFiles = newFiles.filter(
         (newFile) =>
-          filesToBeUploaded.find(
-            (existingFile) => (existingFile.uploadPath || existingFile.file.name) === newFile._dedupeKey,
-          ) === undefined,
+          stagedFiles.find((existingFile) => existingFile.relativePath === newFile.relativePath) === undefined,
       )
 
-      setFilesToBeUpload([...filteredNewFiles.map(({ _dedupeKey: _, ...rest }) => rest), ...filesToBeUploaded])
+      setStagedFiles([...filteredNewFiles, ...stagedFiles])
       // Reset input value so re-selecting the same folder works
       event.target.value = ''
     },
-    [filesToBeUploaded, uploadPath],
+    [stagedFiles],
   )
 
-  const handleFileMetadataOnChange = useCallback(
-    (metadata: FileUploadMetadata, fileName: string) => {
-      setFilesToBeUpload(
-        filesToBeUploaded.map((fileWithMetadata) =>
-          fileWithMetadata.file.name === fileName
-            ? {
-                ...fileWithMetadata,
-                metadata: {
-                  text: metadata.text,
-                  tags: metadata.tags,
-                },
-              }
-            : fileWithMetadata,
-        ),
-      )
-    },
-    [filesToBeUploaded, setFilesToBeUpload],
-  )
+  const handleFileMetadataOnChange = useCallback((metadata: FileUploadMetadata, fileName: string) => {
+    setStagedFiles((prev) =>
+      prev.map((stagedFile) =>
+        stagedFile.file.name === fileName
+          ? {
+              ...stagedFile,
+              metadata: {
+                text: metadata.text,
+                tags: metadata.tags,
+              },
+            }
+          : stagedFile,
+      ),
+    )
+  }, [])
 
   const handleFileUpload = useCallback(
     async (filesToProcess: FileUploadWithMetadata[]) => {
@@ -169,7 +202,7 @@ export default function FileUploadDialog({
           if (fileUploadResponse) {
             successfulFiles.push(fileUploadResponse.data.file)
             setUploadedFiles((prev) => [...prev, fileItem.file.name])
-            setFilesToBeUpload((prev) => prev.filter((f) => f.file.name !== fileItem.file.name))
+            setStagedFiles((prev) => prev.filter((f) => f.file.name !== fileItem.file.name))
             mutateModelFiles()
           } else {
             setCurrentFileUploadProgress(undefined)
@@ -190,7 +223,7 @@ export default function FileUploadDialog({
       setIsFilesUploading(false)
       if (failedFiles.length === 0) {
         onDialogClose()
-        setFilesToBeUpload([])
+        setStagedFiles([])
       }
     },
     [model.id, mutateModelFiles, detectedConflicts, conflictResolutions, onDialogClose, onFilesUploaded],
@@ -224,17 +257,14 @@ export default function FileUploadDialog({
     handleFileUpload([...nonConflicting, ...overwriteFiles])
   }, [filesToBeUploaded, existingFiles, detectedConflicts, conflictResolutions, handleFileUpload])
 
-  const handleDeleteFileFromUploadList = useCallback(
-    (fileName: string) => {
-      setFilesToBeUpload(filesToBeUploaded.filter((file) => file.file.name !== fileName))
-    },
-    [filesToBeUploaded],
-  )
+  const handleDeleteFileFromUploadList = useCallback((fileName: string) => {
+    setStagedFiles((prev) => prev.filter((file) => file.file.name !== fileName))
+  }, [])
 
   const fileListToUpload = useMemo(() => {
     return filesToBeUploaded.map((fileWithMetadata) => (
       <FileToBeUploaded
-        key={fileWithMetadata.file.name}
+        key={fileWithMetadata.uploadPath || fileWithMetadata.file.name}
         fileWithMetadata={fileWithMetadata}
         onFileMetadataChange={handleFileMetadataOnChange}
         onDelete={handleDeleteFileFromUploadList}
@@ -264,11 +294,22 @@ export default function FileUploadDialog({
     <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
-          {uploadPath && (
-            <Alert severity='info'>
-              Uploading to: <strong>{uploadPath}/</strong>
-            </Alert>
-          )}
+          <TextField
+            fullWidth
+            size='small'
+            label='Destination folder'
+            placeholder='e.g. models/v2/weights'
+            value={destinationPath}
+            onChange={(e) => setDestinationPath(e.target.value)}
+            error={!!destinationPathError}
+            helperText={
+              destinationPathError ||
+              (destinationPath ? `Files will be uploaded to ${destinationPath}/` : 'Files will be uploaded to the root')
+            }
+            disabled={isFilesUploading}
+            slotProps={{ inputLabel: { shrink: true } }}
+            data-test='destinationPathInput'
+          />
           <Stack direction='row' spacing={2} sx={{ justifyContent: 'center' }}>
             <label htmlFor='add-files-button'>
               <Button loading={isFilesUploading} endIcon={<FileUpload />} component='span' variant='outlined'>
@@ -363,7 +404,7 @@ export default function FileUploadDialog({
               )}
               <Box sx={{ width: '100%' }}>
                 <Button
-                  disabled={filesToBeUploaded.length === 0}
+                  disabled={filesToBeUploaded.length === 0 || !!destinationPathError}
                   loading={isFilesUploading}
                   onClick={handleUploadClick}
                   variant='contained'

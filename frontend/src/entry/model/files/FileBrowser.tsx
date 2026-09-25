@@ -1,8 +1,7 @@
-import CreateNewFolder from '@mui/icons-material/CreateNewFolder'
 import Delete from '@mui/icons-material/Delete'
 import Folder from '@mui/icons-material/Folder'
 import MoreVert from '@mui/icons-material/MoreVert'
-import { Box, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { deleteEntryFiles, useGetModelFiles } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
@@ -22,7 +21,6 @@ interface FileBrowserProps {
   releases: ReleaseInterface[]
   mutator?: MutateFiles | MutateReleases
   readOnly?: boolean
-  onCreatePath?: (currentPath: string) => void
   onPathChange?: (currentPath: string) => void
 }
 
@@ -33,23 +31,10 @@ export default function FileBrowser({
   releases,
   mutator,
   readOnly = false,
-  onCreatePath,
   onPathChange,
 }: FileBrowserProps) {
   return (
-    <FolderNavigableList
-      files={files}
-      onPathChange={onPathChange}
-      toolbarActions={({ currentPath }) =>
-        onCreatePath && !readOnly ? (
-          <Tooltip title='Create folder path'>
-            <IconButton size='small' onClick={() => onCreatePath(currentPath)} data-test='createPathButton'>
-              <CreateNewFolder fontSize='small' />
-            </IconButton>
-          </Tooltip>
-        ) : null
-      }
-    >
+    <FolderNavigableList files={files} onPathChange={onPathChange}>
       {({ data, onNavigate, searchQuery }) => {
         if (data.kind === 'folder') {
           return (
