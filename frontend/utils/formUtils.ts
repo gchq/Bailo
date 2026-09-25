@@ -212,7 +212,16 @@ export function transformFormErrors(errors: RJSFValidationError[]): RJSFValidati
 
 /** Lists the property paths of a schema in the order the questions are asked, e.g. `['.details', '.details.name']`. */
 function getSchemaPropertyPaths(schema: any, path = ''): string[] {
-  if (!schema || typeof schema !== 'object' || schema.type !== 'object' || !schema.properties) {
+  if (!schema || typeof schema !== 'object') {
+    return []
+  }
+
+  if (schema.type === 'array') {
+    // Array items report against their parent question, e.g. `.list.0.name` belongs to `.list.name`
+    return getSchemaPropertyPaths(schema.items, path)
+  }
+
+  if (!schema.properties) {
     return []
   }
 
@@ -280,11 +289,11 @@ export function createBlankValueValidator(schema: any) {
       }
 
       const { minItems } = propertySchema
-      const blankItemsOnly =
-        Array.isArray(value) && value.length >= minItems && value.filter((item) => !isBlank(item)).length < minItems
-      if (minItems >= 1 && blankItemsOnly) {
+      if (minItems >= 1 && Array.isArray(value) && value.length >= minItems) {
         // AJV only counts the items, so it does not raise this when the items are present but blank
-        propertyErrors.addError(`must NOT have fewer than ${minItems} items`)
+        if (value.filter((item) => !isBlank(item)).length < minItems) {
+          propertyErrors.addError(`must NOT have fewer than ${minItems} items`)
+        }
       }
 
       validateProperties(propertySchema, value, propertyErrors)
@@ -301,10 +310,11 @@ export function createBlankValueValidator(schema: any) {
 export function getQuestionTitle(schema: any, property = ''): string | undefined {
   const properties = property.split('.').filter((part) => part !== '' && !/^\d+$/.test(part))
 
-  return properties.reduce((currentSchema, currentProperty) => {
-    const propertySchema = currentSchema?.properties?.[currentProperty] || currentSchema?.items?.[currentProperty]
-    return propertySchema
-  }, schema)?.title
+  return properties.reduce(
+    (currentSchema, currentProperty) =>
+      currentSchema?.properties?.[currentProperty] || currentSchema?.items?.properties?.[currentProperty],
+    schema,
+  )?.title
 }
 
 export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
