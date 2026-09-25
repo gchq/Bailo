@@ -162,12 +162,12 @@ export default function JsonSchemaForm({
     }
   }, [router])
 
-  // Force RJSF validation when showing errors or the user changing page
+  // Force RJSF validation when showing errors, or when the form is remounted by the key below
   useEffect(() => {
     if (showValidation) {
       formRef.current?.validateForm()
     }
-  }, [showValidation, activeStep])
+  }, [showValidation, activeStep, splitSchema.reference])
 
   useEffect(() => {
     if (ref && sharedSection) {
@@ -329,6 +329,7 @@ export default function JsonSchemaForm({
             schema={currentStep.schema}
             formData={updatedMirroredState}
             onChange={onFormChange}
+            // Errors are rendered by the templates below, so RJSF does not need to log them
             onError={() => undefined}
             validator={validator}
             widgets={widgets}

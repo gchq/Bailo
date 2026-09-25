@@ -30,8 +30,8 @@ function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
 
   return (
     <Stack spacing={0.5}>
-      {sortedErrors.map((error) => (
-        <Stack key={error} direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+      {sortedErrors.map((error, index) => (
+        <Stack key={`${error}-${index}`} direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
           <Error color='error' fontSize='small' />
           <Typography color='error' variant='body2'>
             {error}
