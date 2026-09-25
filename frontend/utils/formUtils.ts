@@ -251,9 +251,60 @@ export function skipPopulatingPrimitiveArrays(_validator: unknown, schema: any):
 
 export function validateForm(step: StepNoRender) {
   const validator = new Validator()
-  const sectionErrors = validator.validate(step.state, step.schema)
+  // Blank answers (e.g. `''` or `['']`) are stripped so that clearing an answer cannot satisfy a required field
+  const sectionErrors = validator.validate(removeEmptyValues(step.state) || {}, step.schema)
 
   return sectionErrors.errors.length === 0
+}
+
+function isBlank(value: unknown): boolean {
+  return removeEmptyValues(value) === undefined
+}
+
+/** Builds a validator that reports blank answers (`''`, `['']`) as missing, which AJV counts as answered. */
+export function createBlankValueValidator(schema: any) {
+  const validateProperties = (currentSchema: any, formData: any, errors: any) => {
+    if (!currentSchema || typeof currentSchema !== 'object' || !currentSchema.properties || !errors) {
+      return
+    }
+
+    for (const [property, propertySchema] of Object.entries<any>(currentSchema.properties)) {
+      const value = formData?.[property]
+      const propertyErrors = errors[property]
+      if (!propertyErrors) {
+        continue
+      }
+
+      if (value !== undefined && isBlank(value) && (currentSchema.required || []).includes(property)) {
+        propertyErrors.addError('This field is required')
+      }
+
+      const { minItems } = propertySchema
+      const blankItemsOnly =
+        Array.isArray(value) && value.length >= minItems && value.filter((item) => !isBlank(item)).length < minItems
+      if (minItems >= 1 && blankItemsOnly) {
+        // AJV only counts the items, so it does not raise this when the items are present but blank
+        propertyErrors.addError(`must NOT have fewer than ${minItems} items`)
+      }
+
+      validateProperties(propertySchema, value, propertyErrors)
+    }
+  }
+
+  return (formData: any, errors: any) => {
+    validateProperties(schema, formData, errors)
+    return errors
+  }
+}
+
+/** Finds the question title for an error's property path, e.g. `.details.name` gives `Name`. */
+export function getQuestionTitle(schema: any, property = ''): string | undefined {
+  const properties = property.split('.').filter((part) => part !== '' && !/^\d+$/.test(part))
+
+  return properties.reduce((currentSchema, currentProperty) => {
+    const propertySchema = currentSchema?.properties?.[currentProperty] || currentSchema?.items?.[currentProperty]
+    return propertySchema
+  }, schema)?.title
 }
 
 export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
@@ -582,10 +633,10 @@ export function removeEmptyValues(value) {
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return undefined
-    }
-    return value.map(removeEmptyValues).filter((item) => item !== undefined)
+    const cleaned = value.map(removeEmptyValues).filter((item) => item !== undefined)
+
+    // An array of blank values, e.g. `['']`, is as empty as `[]`
+    return cleaned.length > 0 ? cleaned : undefined
   }
 
   if (value !== null && typeof value === 'object') {

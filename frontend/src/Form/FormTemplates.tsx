@@ -12,12 +12,13 @@ import {
   FieldTemplateProps,
   ObjectFieldTemplateProps,
   RJSFSchema,
+  RJSFValidationError,
   TitleFieldProps,
 } from '@rjsf/utils'
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
+import { getQuestionTitle, isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
 
 function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
   if (!rawErrors || rawErrors.length === 0) {
@@ -138,6 +139,13 @@ export function FieldTemplate({ children, registry, schema, id, rawErrors }: Fie
   return <>{content}</>
 }
 
+function formatErrorListItem(error: RJSFValidationError, schema: RJSFSchema) {
+  // Errors raised by a custom validator have no title of their own, so it is looked up from the schema
+  const title = error.title || getQuestionTitle(schema, error.property)
+
+  return title ? `${title}: ${error.message}` : error.message
+}
+
 export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
   return (
     <Stack spacing={0.5} sx={{ mb: 2 }}>
@@ -154,7 +162,7 @@ export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
         >
           <Error color='error' fontSize='small' />
           <Typography color='error' variant='body2'>
-            {error.title ? `${error.title}: ${error.message}` : error.message}
+            {formatErrorListItem(error, schema)}
           </Typography>
         </Stack>
       ))}

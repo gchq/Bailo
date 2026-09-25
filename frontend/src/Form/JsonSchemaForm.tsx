@@ -37,6 +37,7 @@ import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
+  createBlankValueValidator,
   getFormStats,
   getOverallCompletionStats,
   setFormDataPropertiesToUndefined,
@@ -148,6 +149,8 @@ export default function JsonSchemaForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [splitSchema, calculateStats, mirroredModel, requiredByModelState],
   )
+
+  const blankValueValidator = useMemo(() => createBlankValueValidator(currentStep?.schema), [currentStep?.schema])
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
@@ -335,6 +338,7 @@ export default function JsonSchemaForm({
             liveValidate={showValidation ? 'onChange' : undefined}
             showErrorList={showValidation ? 'top' : false}
             transformErrors={transformFormErrors}
+            customValidate={blankValueValidator}
             experimental_defaultFormStateBehavior={defaultFormStateBehavior}
             formContext={{
               editMode: canEdit,
