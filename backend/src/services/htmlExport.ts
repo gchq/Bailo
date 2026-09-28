@@ -7,14 +7,14 @@ import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
-import ResponseModel, { ResponseInterface, ResponseKind } from '../models/Response.js'
+import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys, ReviewKind } from '../types/enums.js'
 import { fromEntity } from '../utils/entity.js'
 import { Fragment, recursiveRender } from '../utils/export.js'
-import { deriveDeploymentAssessmentState, getDeploymentAssessmentById } from './deploymentAssessment.js'
+import { getDeploymentAssessmentById } from './deploymentAssessment.js'
 import { getModelById, getModelCard, getRoleEntities } from './model.js'
 import { getSchemaById } from './schema.js'
 
@@ -26,6 +26,19 @@ export type ReviewExport = {
   semver?: string
   collaborator: string
 } & Pick<ResponseInterface, 'role' | 'decision' | 'comment' | 'updatedAt'>
+
+function decisionDisplay(decision: DecisionKeys | undefined) {
+  switch (decision) {
+    case Decision.Approve:
+      return 'Approved'
+    case Decision.Reject:
+      return 'Rejected'
+    case Decision.RequestChanges:
+      return 'Changes requested'
+    default:
+      return 'Needs review'
+  }
+}
 
 export async function getModelCardHtml(
   user: UserInterface,
@@ -186,23 +199,20 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
       # ${deploymentAssessment.name}\n
       ### Created by
       ${user.dn}\n
-      ### Status
-      ${deploymentAssessment.draft ? 'Draft' : 'Published'}\n
   `
   if (latestResponse) {
     output += outdent`
-      ### Approval status
-      ${deriveDeploymentAssessmentState(
-        deploymentAssessment,
-        latestResponse.decision,
-      )} by ${fromEntity(latestResponse?.entity).value} at ${latestResponse.createdAt}
+      ### Status
+      ${decisionDisplay(latestResponse.decision)} by ${fromEntity(latestResponse?.entity).value} at ${latestResponse.createdAt}
     `
   } else {
     output += outdent`
-      ### Approval status
-      Pending
+      ### Status
+      ${deploymentAssessment.draft ? 'Draft' : 'Published'}\n
     `
   }
+
+  output += '\n\n---\n'
 
   output = recursiveRender(deploymentAssessment.metadata, schema.jsonSchema as Fragment, output)
   const converter = new showdown.Converter()
