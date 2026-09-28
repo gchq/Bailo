@@ -181,7 +181,7 @@ export default function DeploymentAssessment() {
               open={reviewPopoverOpen}
               anchorEl={anchorEl}
               sx={{
-                maxWidth: '450px',
+                maxWidth: '650px',
                 '&:has(.w-md-editor-fullscreen)': {
                   transform: 'none !important',
                 },

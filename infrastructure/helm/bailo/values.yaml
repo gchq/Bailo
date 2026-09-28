@@ -254,6 +254,7 @@ config:
   ui:
     deploymentAssessments:
       deployableModelState: 'Production'
+      signOffDeclaration: 'I agree to take on responsibility as the Deployment Risk Owner.'
 
     banner:
       enabled: false
