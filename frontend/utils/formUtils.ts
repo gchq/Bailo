@@ -231,9 +231,32 @@ function getSchemaPropertyPaths(schema: any, path = ''): string[] {
   })
 }
 
+/** Lists the item numbers in an error's property path, e.g. `.groups.1.owners.0` gives `[1, 0]`. */
+export function getItemIndices(property = ''): number[] {
+  return property
+    .split('.')
+    .filter((part) => /^\d+$/.test(part))
+    .map(Number)
+}
+
+/** Orders errors reported against the same question by the array items they belong to, outermost item first. */
+function compareItemIndices(a: RJSFValidationError, b: RJSFValidationError): number {
+  const [indicesA, indicesB] = [getItemIndices(a.property), getItemIndices(b.property)]
+
+  for (let depth = 0; depth < Math.max(indicesA.length, indicesB.length); depth++) {
+    // An error against the array itself has no item number at this depth, so it is listed before its items
+    const difference = (indicesA[depth] ?? -1) - (indicesB[depth] ?? -1)
+    if (difference !== 0) {
+      return difference
+    }
+  }
+
+  return 0
+}
+
 /**
- * Orders errors by the position of their question in the schema, then by message so that a field with several errors
- * always lists them the same way round.
+ * Orders errors by the position of their question in the schema, then by array item, then by message, so that a
+ * question with several errors always lists them the same way round.
  */
 export function sortFormErrors(errors: RJSFValidationError[], schema: any): RJSFValidationError[] {
   const propertyPaths = getSchemaPropertyPaths(schema)
@@ -245,7 +268,10 @@ export function sortFormErrors(errors: RJSFValidationError[], schema: any): RJSF
   }
 
   return [...errors].sort(
-    (a, b) => questionIndex(a) - questionIndex(b) || (a.message || '').localeCompare(b.message || ''),
+    (a, b) =>
+      questionIndex(a) - questionIndex(b) ||
+      compareItemIndices(a, b) ||
+      (a.message || '').localeCompare(b.message || ''),
   )
 }
 

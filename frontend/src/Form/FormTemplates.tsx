@@ -18,7 +18,14 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { getFieldId, getQuestionAnchorId, getQuestionTitle, isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
+import {
+  getFieldId,
+  getItemIndices,
+  getQuestionAnchorId,
+  getQuestionTitle,
+  isQuestionAnswered,
+  sortFormErrors,
+} from 'utils/formUtils'
 
 function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
   if (!rawErrors || rawErrors.length === 0) {
@@ -149,8 +156,11 @@ export function FieldTemplate({ children, registry, schema, id, rawErrors }: Fie
 function formatErrorListItem(error: RJSFValidationError, schema: RJSFSchema) {
   // Errors raised by a custom validator have no title of their own, so it is looked up from the schema
   const title = error.title || getQuestionTitle(schema, error.property)
+  // Several items of the same question would otherwise read identically, e.g. two entries of a list of risk owners
+  const itemNumbers = getItemIndices(error.property).map((index) => index + 1)
+  const question = itemNumbers.length > 0 ? `${title} (${itemNumbers.join('.')})` : title
 
-  return title ? `${title}: ${error.message}` : error.message
+  return title ? `${question}: ${error.message}` : error.message
 }
 
 export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
