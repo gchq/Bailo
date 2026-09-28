@@ -12,7 +12,6 @@ import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys, ReviewKind } from '../types/enums.js'
-import { fromEntity } from '../utils/entity.js'
 import { Fragment, recursiveRender } from '../utils/export.js'
 import { getDeploymentAssessmentById } from './deploymentAssessment.js'
 import { getModelById, getModelCard, getRoleEntities } from './model.js'
@@ -25,7 +24,8 @@ export const htmlTemplate = Handlebars.compile(
 export type ReviewExport = {
   semver?: string
   collaborator: string
-} & Pick<ResponseInterface, 'role' | 'decision' | 'comment' | 'updatedAt'>
+  decision: string | DecisionKeys
+} & Pick<ResponseInterface, 'role' | 'comment' | 'updatedAt'>
 
 function decisionDisplay(decision: DecisionKeys | undefined) {
   switch (decision) {
@@ -36,7 +36,7 @@ function decisionDisplay(decision: DecisionKeys | undefined) {
     case Decision.RequestChanges:
       return 'Changes requested'
     default:
-      return 'Needs review'
+      return 'Awaiting review'
   }
 }
 
@@ -200,10 +200,20 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
       ### Created by
       ${user.dn}\n
   `
-  if (latestResponse) {
+  if (latestResponse && latestReview) {
+    const reviewTable = renderMarkdownReviewTable([
+      {
+        semver: 'n/a',
+        collaborator: latestResponse.entity,
+        role: 'Risk owner',
+        decision: decisionDisplay(latestResponse.decision),
+        comment: latestResponse.comment ?? 'No comment',
+        updatedAt: latestResponse.updatedAt,
+      },
+    ])
     output += outdent`
       ### Status
-      ${decisionDisplay(latestResponse.decision)} by ${fromEntity(latestResponse?.entity).value} at ${latestResponse.createdAt}
+      ${reviewTable}
     `
   } else {
     output += outdent`
