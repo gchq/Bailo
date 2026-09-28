@@ -208,7 +208,7 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
   } else {
     output += outdent`
       ### Status
-      ${deploymentAssessment.draft ? 'Draft' : 'Published'}\n
+      ${deploymentAssessment.draft ? 'Draft' : 'Awaiting review'}\n
     `
   }
 
