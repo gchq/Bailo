@@ -380,7 +380,7 @@ describe('services > accessRequest', () => {
       id: '',
     })
 
-    const diff = { metadata: { overview: { name: 'stored', entities: ['user:testUser', 'user:attacker'] } } }
+    const diff = { metadata: { overview: { name: 'stored', entities: ['user:testUser', 'user:additionalUser'] } } }
 
     await expect(() => updateAccessRequest({} as any, 'test', diff as any)).rejects.toThrow(
       /^You cannot change the entities named on an access request that you do not own./,
@@ -390,7 +390,7 @@ describe('services > accessRequest', () => {
   test('updateAccessRequest > re-casing an entity counts as a change', async () => {
     AccessRequestModelMock.findOne.mockResolvedValue({
       schemaId: 'example-schema',
-      metadata: { overview: { name: 'stored', entities: ['user:Victim'] } },
+      metadata: { overview: { name: 'stored', entities: ['user:USER'] } },
       markModified: vi.fn(),
       save: vi.fn(),
     } as any)
@@ -400,7 +400,7 @@ describe('services > accessRequest', () => {
       id: '',
     })
 
-    const diff = { metadata: { overview: { name: 'stored', entities: ['user:victim'] } } }
+    const diff = { metadata: { overview: { name: 'stored', entities: ['user:user'] } } }
 
     await expect(() => updateAccessRequest({} as any, 'test', diff as any)).rejects.toThrow(
       /^You cannot change the entities named on an access request that you do not own./,
