@@ -18,7 +18,7 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { getFieldId, getQuestionTitle, isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
+import { getFieldId, getQuestionAnchorId, getQuestionTitle, isQuestionAnswered, sortFormErrors } from 'utils/formUtils'
 
 function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
   if (!rawErrors || rawErrors.length === 0) {
@@ -100,7 +100,7 @@ export function FieldTemplate({ children, registry, schema, id, rawErrors }: Fie
   const content = (
     <Stack
       spacing={0.5}
-      data-field-anchor={id}
+      id={getQuestionAnchorId(id)}
       sx={{
         scrollMarginTop: 100,
         ...(hasErrors ? { backgroundColor: alpha(theme.palette.error.main, 0.1), p: 1 } : {}),
@@ -153,36 +153,32 @@ function formatErrorListItem(error: RJSFValidationError, schema: RJSFSchema) {
   return title ? `${title}: ${error.message}` : error.message
 }
 
-function scrollToField(property?: string) {
-  const fieldId = getFieldId(property)
-  const anchor = document.querySelector(`[data-field-anchor="${fieldId}"]`)
-
-  anchor?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
-  // Widgets render the field id on their input, so the question can be focused
-  document.getElementById(fieldId)?.focus({ preventScroll: true })
-}
-
 export function ErrorListTemplate({ errors, schema }: ErrorListProps) {
   return (
     <Stack spacing={0.5} sx={{ mb: 2 }}>
       <Typography color='error' sx={{ fontWeight: 'bold' }}>
         Please resolve the following errors
       </Typography>
-      {sortFormErrors(errors, schema).map((error, index) => (
-        <ButtonBase
-          key={`${error.stack}-${index}`}
-          onClick={() => scrollToField(error.property)}
-          sx={{ justifyContent: 'flex-start', textAlign: 'left', width: 'fit-content' }}
-          data-test='formErrorListItem'
-        >
-          <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
-            <Error color='error' fontSize='small' />
-            <Typography color='error' variant='body2' sx={{ textDecoration: 'underline' }}>
-              {formatErrorListItem(error, schema)}
-            </Typography>
-          </Stack>
-        </ButtonBase>
-      ))}
+      {sortFormErrors(errors, schema).map((error, index) => {
+        const anchorId = getQuestionAnchorId(getFieldId(error.property))
+        return (
+          <ButtonBase
+            // Anchor rather than a router link so the browser handles scrolling natively
+            key={`${error.stack}-${index}`}
+            component='a'
+            href={`#${anchorId}`}
+            sx={{ justifyContent: 'flex-start', textAlign: 'left', width: 'fit-content' }}
+            data-test='formErrorListItem'
+          >
+            <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+              <Error color='error' fontSize='small' />
+              <Typography color='error' variant='body2' sx={{ textDecoration: 'underline' }}>
+                {formatErrorListItem(error, schema)}
+              </Typography>
+            </Stack>
+          </ButtonBase>
+        )
+      })}
     </Stack>
   )
 }

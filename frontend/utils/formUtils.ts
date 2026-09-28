@@ -311,6 +311,14 @@ export function getFieldId(property = ''): string {
   return ['root', ...property.split('.').filter(Boolean)].join('_')
 }
 
+/**
+ * The id of the wrapper rendered around each question. Widgets only put the field id on their input when the form is
+ * editable, so errors link to this instead.
+ */
+export function getQuestionAnchorId(fieldId: string): string {
+  return `${fieldId}-question`
+}
+
 /** Finds the question title for an error's property path, e.g. `.details.name` gives `Name`. */
 export function getQuestionTitle(schema: any, property = ''): string | undefined {
   const properties = property.split('.').filter((part) => part !== '' && !/^\d+$/.test(part))

@@ -33,6 +33,7 @@ import {
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
+import useScrollToHash from 'src/hooks/useScrollToHash'
 import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
@@ -122,7 +123,8 @@ export default function JsonSchemaForm({
       return unchanged ? prev : nextCompletion
     })
   }, [splitSchema, mirroredModel, requiredByModelState, canEdit])
-  const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
+
+  useScrollToHash()
 
   const ref = useRef<HTMLDivElement | null>(null)
   const formRef = useRef<CoreForm | null>(null)
@@ -168,16 +170,6 @@ export default function JsonSchemaForm({
       formRef.current?.validateForm()
     }
   }, [showValidation, activeStep, splitSchema.reference])
-
-  useEffect(() => {
-    if (ref && sharedSection) {
-      const section = document.getElementById(sharedSection) as HTMLElement
-      if (!section) {
-        return
-      }
-      section.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [ref, sharedSection])
 
   if (!currentStep) {
     return null
