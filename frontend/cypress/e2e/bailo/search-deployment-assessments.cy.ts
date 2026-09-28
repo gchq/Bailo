@@ -15,6 +15,7 @@ const schemaName = 'Minimal Deployment Assessment Schema v1'
 const deploymentAssessmentSchemaId = 'minimal-deployment-assessment-schema-v1'
 const searchTerm = `Deployment Search ${runId}`
 const riskOwner = 'user:user'
+const alternateRiskOwner = 'user:user2'
 let createdDate = ''
 
 function createModel(name: string) {
@@ -34,14 +35,19 @@ function createModel(name: string) {
     })
 }
 
-function createDeploymentAssessment(name: string, linkedModelIds: string[], draft: boolean) {
+function createDeploymentAssessment(
+  name: string,
+  linkedModelIds: string[],
+  draft: boolean,
+  assessmentRiskOwner = riskOwner,
+) {
   return cy
     .request('POST', '/api/v3/deployment-assessments', {
       name,
       schemaId: deploymentAssessmentSchemaId,
       metadata: {
         modelOverview: { modelIds: linkedModelIds },
-        signOff: { riskOwners: [riskOwner] },
+        signOff: { riskOwners: [assessmentRiskOwner] },
         about: {
           deploymentSummary: 'A deployment created through the API to test search filters.',
           deploymentDate: new Date().toLocaleDateString('en-CA'),
@@ -71,7 +77,7 @@ function resetFilters() {
   cy.location('search').should('equal', '?tab=all-assessments')
   cy.get('[data-test=deploymentAssessmentSearchFilter]').find('input').should('have.value', '')
   cy.get('[data-test=deploymentAssessmentStatusFilter]').should('not.contain.text', 'Draft')
-  cy.get('[data-test=deploymentAssessmentModelFilter]').find('[data-testid=CancelIcon]').should('not.exist')
+  cy.get('[data-test=deploymentAssessmentModelFilter]').find('[role=button]').should('have.length', 0)
   cy.contains(/assessments? found/)
 
   cy.visit(`/deployment-assessments?tab=all-assessments&search=${encodeURIComponent(searchTerm)}`)
@@ -118,15 +124,18 @@ describe('Search deployment assessments', () => {
           createdDate = draftAssessment.createdAt.slice(0, 10)
         })
         createDeploymentAssessment(assessmentNames.needsReview, [betaModelId], false)
-        createDeploymentAssessment(assessmentNames.approved, [alphaModelId, betaModelId], false).then(
-          (approvedAssessment) => {
-            cy.request('POST', `/api/v3/deployment-assessments/${approvedAssessment.id}/review`, {
-              decision: 'approve',
-            })
-              .its('status')
-              .should('equal', 201)
-          },
-        )
+        createDeploymentAssessment(
+          assessmentNames.approved,
+          [alphaModelId, betaModelId],
+          false,
+          alternateRiskOwner,
+        ).then((approvedAssessment) => {
+          cy.request('POST', `/api/v3/deployment-assessments/${approvedAssessment.id}/review`, {
+            decision: 'approve',
+          })
+            .its('status')
+            .should('equal', 201)
+        })
       })
     })
 
@@ -161,7 +170,7 @@ describe('Search deployment assessments', () => {
           id: assessmentIds[2],
           schemaId: deploymentAssessmentSchemaId,
           name: assessmentNames.approved,
-          owner: [riskOwner],
+          owner: [alternateRiskOwner],
           models: [modelIds[0], modelIds[1]],
           state: 'approved',
           draft: false,
@@ -213,7 +222,10 @@ describe('Search deployment assessments', () => {
     resetFilters()
 
     selectEntity('[data-test=deploymentAssessmentRiskOwnerFilter]')
-    cy.contains('3 assessments found')
+    cy.contains('2 assessments found')
+    cy.contains(assessmentNames.draft).should('be.visible')
+    cy.contains(assessmentNames.needsReview).should('be.visible')
+    cy.contains(assessmentNames.approved).should('not.exist')
     resetFilters()
 
     openAdvancedFilters()
