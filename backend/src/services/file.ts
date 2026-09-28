@@ -325,7 +325,7 @@ export async function getFilesByIds(
   ])
 
   if (files.length !== fileIds.length) {
-    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file.id === id))
+    const notFoundFileIds = fileIds.filter((id) => !files.some((file) => file.id === id))
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 

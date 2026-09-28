@@ -5,6 +5,7 @@ import grant from 'grant'
 
 import { getGroupMembership, listUsers } from '../../clients/cognito.js'
 import { UserInterface } from '../../models/User.js'
+import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { getConnectionURI } from '../../utils/database.js'
 import { fromEntity, toEntity } from '../../utils/entity.js'
@@ -122,6 +123,10 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   private async hasGroupMembership(user: UserInterface, groupName: string): Promise<boolean> {
+    if (!groupName) {
+      log.warn({ groupName }, 'Group name not configured, returning false for group check.')
+      return false
+    }
     const members = await this.getEntityMembers(toEntity(OauthEntityKind.Group, groupName))
     return members.includes(user.dn)
   }

@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { sign } from '../../src/clients/kms.js'
+import config from '../../src/utils/config.js'
 
 const kmsMocks = vi.hoisted(() => {
   const send = vi.fn()
@@ -20,30 +21,6 @@ const kmsMocks = vi.hoisted(() => {
 })
 vi.mock('@aws-sdk/client-kms', () => kmsMocks)
 
-const configMock = vi.hoisted(function () {
-  return {
-    modelMirror: {
-      export: {
-        maxSize: 100,
-        kmsSignature: {
-          keyId: '123-456',
-          KMSClient: {
-            region: 'eu-west-2',
-            credentials: {
-              accessKeyId: 'access',
-              secretAccessKey: 'secret',
-            },
-          },
-        },
-      },
-    },
-  } as any
-})
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 describe('clients > s3', () => {
   // value from https://docs.yubico.com/yesdk/users-manual/application-piv/ecdsa-signatures.html
   const exampleSignatureString =
@@ -62,7 +39,7 @@ describe('clients > s3', () => {
     await sign('hash123')
 
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
-      KeyId: configMock.modelMirror.export.kmsSignature.keyId,
+      KeyId: config.modelMirror.export.kmsSignature.keyId,
     })
     expect(kmsMocks.send).toHaveBeenCalled()
   })
@@ -131,7 +108,7 @@ describe('clients > s3', () => {
     const response = sign('hash123')
 
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
-      KeyId: configMock.modelMirror.export.kmsSignature.keyId,
+      KeyId: config.modelMirror.export.kmsSignature.keyId,
     })
     await expect(response).rejects.toThrow(/^Cannot get key information./)
   })
@@ -154,7 +131,7 @@ describe('clients > s3', () => {
     const response = sign('hash123')
 
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
-      KeyId: configMock.modelMirror.export.kmsSignature.keyId,
+      KeyId: config.modelMirror.export.kmsSignature.keyId,
     })
     await expect(response).rejects.toThrow(/^Cannot get signature./)
   })

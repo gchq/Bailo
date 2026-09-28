@@ -394,7 +394,7 @@ The following tables describe selected configuration options available in `value
 | Name | Description | Value |
 | ---- | ----------- | ----- |
 | `nginxAuth.repository` | Runs Nginx as non-root unprivileged user | `nginxinc/nginx-unprivileged` |
-| `mongodb.enabled` | Using bitnami chart 15.1.4. <https://artifacthub.io/packages/helm/bitnami/mongodb/15.1.4>. Also refer to Mongo host defination and Create the mongo connection URI in template/_helper.tpl | `true` |
+| `mongodb.enabled` | Using bitnami chart 15.1.4. <https://artifacthub.io/packages/helm/bitnami/mongodb/15.1.4>. Also refer to Mongo host definition and Create the mongo connection URI in template/_helper.tpl | `true` |
 | `minio.enabled` | Using bitnami chart 14.2.0. <https://artifacthub.io/packages/helm/bitnami/minio/14.2.0> | `true` |
 | `mail.enabled` | Using image marlonb/mailcrab:latest | `true` |
 | `registry.enabled` | Using image registry:3.0.0. Must use registry:3.0.0 if registry.serviceAccount is defined | `true` |

@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.3.7-ubi9@sha256:6d7269c212290db27531690e9ee1d711108ccd4483e41e6cc8894706bf3ad171
+    image: mongodb/mongodb-community-server:8.3.11-ubi9@sha256:bc6d54e492f6b2bc03f6b27fd3645a7da77c89c0a3d8ba5dbf07f1e0af7f6d2a
     networks:
       internal:
     environment:
@@ -35,7 +35,7 @@ services:
       start_period: 30s
 
   seaweedfs:
-    image: chrislusf/seaweedfs:4.44@sha256:e67e8c385484120b78bff47ba5f4debbca47fbd27ed1a39f016f47e8baea615b
+    image: chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
     networks:
       - internal
     command:

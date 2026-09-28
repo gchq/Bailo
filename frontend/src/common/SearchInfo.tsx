@@ -2,13 +2,13 @@ import { List, ListItem, Typography } from '@mui/material'
 import { EntryKind, EntryKindLabel } from 'types/types'
 
 export default function SearchInfo() {
-  function listEntryKinds(delimeter: string, plurality: boolean): string {
+  function listEntryKinds(delimiter: string, plurality: boolean): string {
     let kinds: string = ''
     const ess = plurality ? 's' : ''
     for (const [_key, value] of Object.entries(EntryKind)) {
       let suffix = ''
       if (kinds !== '') {
-        suffix += delimeter + EntryKindLabel[value] + ess
+        suffix += delimiter + EntryKindLabel[value] + ess
       } else {
         suffix += EntryKindLabel[value] + ess
       }

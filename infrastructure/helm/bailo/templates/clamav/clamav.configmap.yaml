@@ -490,7 +490,7 @@ data:
     #PhishingSignatures no
 
     # With this option enabled ClamAV will try to detect phishing attempts by
-    # analyzing URLs found in emails using WDB and PDB signature databases.
+    # analysing URLs found in emails using WDB and PDB signature databases.
     # Default: yes
     #PhishingScanURLs no
 
@@ -631,8 +631,8 @@ data:
     # Default: 20M
     #MaxScriptNormalize 50M
 
-    # Maximum size of a ZIP file to reanalyze type recognition. ZIP files larger
-    # than this value will skip the step to potentially reanalyze as PE.
+    # Maximum size of a ZIP file to reanalyse type recognition. ZIP files larger
+    # than this value will skip the step to potentially reanalyse as PE.
     # Note: disabling this limit or setting it too high may result in severe damage
     # to the system.
     # Default: 1M
@@ -764,7 +764,7 @@ data:
 
     # Set the  mount point to be scanned. The mount point specified, or the mount
     # point containing the specified directory will be watched. If any directories
-    # are specified, this option will preempt (disable and ignore all options
+    # are specified, this option will pre-empt (disable and ignore all options
     # related to) the DDD system. This option will result in verdicts only.
     # Note that prevention is explicitly disallowed to prevent common, fatal
     # misconfigurations. (e.g. watching "/" with prevention on and no exclusions

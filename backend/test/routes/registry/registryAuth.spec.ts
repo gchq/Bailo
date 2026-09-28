@@ -9,6 +9,7 @@ import {
   parseResourceScope,
   softDeletePrefix,
 } from '../../../src/routes/v1/registryAuth.js'
+import config from '../../../src/utils/config.js'
 
 // **NOTICE: All functions tested in this file are located in routes/registryAuth.ts. It is assumed these will be moved to the services layer in the future, thus these tests should move too.**
 
@@ -82,7 +83,7 @@ vi.mock('../../../src/services/log.js', () => ({
 
 function mockReqRes(query: any = {}) {
   const req = {
-    query,
+    query: { service: config.registry.service, ...query },
     get: vi.fn().mockReturnValue('Bearer token'),
     log: {
       trace: vi.fn(),
@@ -459,6 +460,14 @@ describe('registryAuth', () => {
     test('reject > broken service', async () => {
       const { req, res } = mockReqRes({ scope: 'repository:model/image:push' })
       req.query.service = 'broken'
+
+      const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
+
+      await expect(result).rejects.toThrow(/^Received registry auth request from unexpected service/)
+    })
+
+    test('reject > missing service', async () => {
+      const { req, res } = mockReqRes({ scope: 'repository:model/image:push', service: undefined })
 
       const result = getDockerRegistryAuth[1](req, res, undefined as any, undefined as any)
 

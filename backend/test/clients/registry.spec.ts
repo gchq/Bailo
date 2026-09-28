@@ -15,7 +15,11 @@ import {
   putManifest,
   uploadLayerMonolithic,
 } from '../../src/clients/registry.js'
-import { DockerManifestMediaType, OCIEmptyMediaType, OCIManifestMediaType } from '../../src/utils/registryResponses.js'
+import {
+  DockerManifestMediaType,
+  OCIEmptyMediaType,
+  OCIManifestMediaType,
+} from '../../src/utils/registryResponseTypes.js'
 
 const mockHttpService = vi.hoisted(() => {
   return {

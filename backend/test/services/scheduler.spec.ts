@@ -8,6 +8,7 @@ import {
   scheduleLifeCycleReviewEmails,
   startScheduler,
 } from '../../src/services/schedule/scheduler.js'
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
 const agendaMethods = vi.hoisted(() => ({
   start: vi.fn(),
@@ -52,19 +53,6 @@ vi.mock('../../src/services/log.js', () => ({
 
 vi.mock('../../src/services/smtp/smtp.js', () => ({
   notifyLifeCycleReview: vi.fn(),
-}))
-
-const configMock = vi.hoisted(() => ({
-  smtp: {
-    lifecycle: {
-      preReminderIntervals: ['1 day', '2 weeks', '10 weeks'],
-      postReminderInterval: '1 day',
-    },
-  },
-}))
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
 }))
 
 describe('scheduler', () => {
@@ -125,7 +113,7 @@ describe('scheduler > lifecycle jobs', () => {
   })
 
   test('scheduleLifeCycleReviewEmails logs a warning for an unrecognised pre-reminder interval', async () => {
-    vi.spyOn(configMock.smtp.lifecycle, 'preReminderIntervals', 'get').mockReturnValue(['1 lustrum', '1 nundine'])
+    setTestConfig({ smtp: { lifecycle: { preReminderIntervals: ['1 lustrum', '1 nundine'] } } })
     await scheduleLifeCycleReviewEmails('model-1', 'review-1', dueDate)
 
     expect(agendaMethods.schedule).not.toHaveBeenCalled()
@@ -133,7 +121,7 @@ describe('scheduler > lifecycle jobs', () => {
   })
 
   test('scheduleLifeCycleReviewEmails logs a warning for an unrecognised post-reminder interval', async () => {
-    vi.spyOn(configMock.smtp.lifecycle, 'postReminderInterval', 'get').mockReturnValue('10 ghurries')
+    setTestConfig({ smtp: { lifecycle: { postReminderInterval: '10 ghurries' } } })
     await scheduleLifeCycleReviewEmails('model-1', 'review-1', dueDate)
 
     expect(agendaMethods.every).not.toHaveBeenCalled()
