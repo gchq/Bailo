@@ -161,7 +161,7 @@ export async function renderToHtml(
 
 function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
   let reviewTable =
-    '## Release Reviews\n\n' +
+    '### Review status\n\n' +
     '| Version | Collaborator | Role | Decision | Comment | Last Updated |\n' +
     '| :-----: | :----------: | :--: | :------: | :-----: | :----------: |\n'
 
@@ -212,12 +212,11 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
       },
     ])
     output += outdent`
-      ### Status
       ${reviewTable}
     `
   } else {
     output += outdent`
-      ### Status
+      ### Review status
       ${deploymentAssessment.draft ? 'Draft' : 'Awaiting review'}\n
     `
   }
