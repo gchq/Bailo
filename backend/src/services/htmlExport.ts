@@ -27,6 +27,14 @@ export type ReviewExport = {
   decision: string | DecisionKeys
 } & Pick<ResponseInterface, 'role' | 'comment' | 'updatedAt'>
 
+type MarkdownTableDefinition<T> = {
+  title: string
+  columns: Array<{
+    heading: string
+    value: (row: T) => unknown
+  }>
+}
+
 function decisionDisplay(decision: DecisionKeys | undefined) {
   switch (decision) {
     case Decision.Approve:
@@ -77,7 +85,17 @@ export async function renderToMarkdown(
     throw new Error('Trying to export model with no corresponding card')
   }
 
-  const reviewTable = renderMarkdownReviewTable(reviewExports)
+  const reviewTable = renderMarkdownTable(reviewExports, {
+    title: 'Review status',
+    columns: [
+      { heading: 'Version', value: (review) => review.semver },
+      { heading: 'Collaborator', value: (review) => review.collaborator },
+      { heading: 'Role', value: (review) => review.role },
+      { heading: 'Decision', value: (review) => review.decision },
+      { heading: 'Comment', value: (review) => review.comment?.replace(/(\r\n|\n|\r)/gm, ' ') },
+      { heading: 'Last Updated', value: (review) => review.updatedAt },
+    ],
+  })
 
   let output = outdent`
     # ${model.name}\n
@@ -159,29 +177,16 @@ export async function renderToHtml(
   return htmlTemplate({ body: sanitisedBody })
 }
 
-function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
-  let reviewTable =
-    '### Review status\n\n' +
-    '| Version | Collaborator | Role | Decision | Comment | Last Updated |\n' +
-    '| :-----: | :----------: | :--: | :------: | :-----: | :----------: |\n'
-
-  if (!reviewExports || reviewExports.length === 0) {
+function renderMarkdownTable<T>(rows: T[], definition: MarkdownTableDefinition<T>) {
+  if (!rows || rows.length === 0) {
     return null
   }
 
-  for (const reviewExport of reviewExports) {
-    reviewTable =
-      reviewTable +
-      `|${reviewExport.semver}` +
-      `|${reviewExport.collaborator}` +
-      `|${reviewExport.role}` +
-      `|${reviewExport.decision}` +
-      // Linebreaks breaks the markdown-to-html conversion within a table
-      `|${reviewExport.comment?.replace(/(\r\n|\n|\r)/gm, ' ')}` +
-      `|${reviewExport.updatedAt}|\n`
-  }
+  const headings = definition.columns.map(({ heading }) => heading).join(' | ')
+  const alignment = definition.columns.map(() => ':-----:').join(' | ')
+  const tableRows = rows.map((row) => `|${definition.columns.map(({ value }) => value(row)).join('|')}|`).join('\n')
 
-  return reviewTable
+  return `### ${definition.title}\n\n| ${headings} |\n| ${alignment} |\n${tableRows}\n`
 }
 
 export async function getDeploymentAssessmentHtml(user: UserInterface, deploymentAssessmentId: string) {
@@ -201,16 +206,30 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
       ${user.dn}\n
   `
   if (latestResponse && latestReview) {
-    const reviewTable = renderMarkdownReviewTable([
+    const reviewTable = renderMarkdownTable(
+      [
+        {
+          collaborator: latestResponse.entity,
+          role: 'Risk owner',
+          decision: decisionDisplay(latestResponse.decision),
+          comment: latestResponse.comment ?? 'No comment',
+          updatedAt: latestResponse.updatedAt,
+        },
+      ],
       {
-        semver: 'n/a',
-        collaborator: latestResponse.entity,
-        role: 'Risk owner',
-        decision: decisionDisplay(latestResponse.decision),
-        comment: latestResponse.comment ?? 'No comment',
-        updatedAt: latestResponse.updatedAt,
+        title: 'Review status',
+        columns: [
+          { heading: 'Collaborator', value: (review) => review.collaborator },
+          { heading: 'Role', value: (review) => review.role },
+          { heading: 'Decision', value: (review) => review.decision },
+          {
+            heading: 'Comment',
+            value: (review) => review.comment?.replace(/(\r\n|\n|\r)/gm, ' '),
+          },
+          { heading: 'Last Updated', value: (review) => review.updatedAt },
+        ],
       },
-    ])
+    )
     output += outdent`
       ${reviewTable}
     `
