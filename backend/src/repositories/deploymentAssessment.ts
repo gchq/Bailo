@@ -2,7 +2,7 @@ import { escapeRegExp } from 'lodash-es'
 import { QueryFilter } from 'mongoose'
 
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
-import { DecisionKeys, ResponseKind } from '../models/Response.js'
+import ResponseModel, { DecisionKeys, ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { ReviewKind } from '../types/enums.js'
 
@@ -141,4 +141,16 @@ export async function findLatestDecisionsByAssessmentIds(
   ])
 
   return new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
+}
+
+// Initial Pass of creating DB function to find comments: todo - add typing, verify need for if statement
+export async function findCommentsByDeploymentAssessmentId(deploymentAssessmentId: string) {
+  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
+
+  // temporary if to make the typing ("might be null") happy
+  if (deploymentAssessment && deploymentAssessment._id) {
+    const responses = await ResponseModel.find({ parentId: [deploymentAssessment._id] })
+    return responses
+  }
+  return null
 }
