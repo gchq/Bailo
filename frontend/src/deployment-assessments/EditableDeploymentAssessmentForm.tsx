@@ -118,7 +118,8 @@ export default function EditableDeploymentAssessmentForm({
       if (!response.ok) {
         setErrorMessage(await getErrorMessage(response))
       } else {
-        mutate()
+        // Wait for the saved answers before leaving edit mode, otherwise the form is rebuilt from the stale ones
+        await mutate()
         onIsEditChange(false)
       }
     }
