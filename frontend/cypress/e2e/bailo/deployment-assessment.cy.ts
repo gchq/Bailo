@@ -88,13 +88,14 @@ describe('Deployment Assessment Suite', () => {
     cy.get('#root_deploymentSummary').type('This is a deployment')
     cy.get('[data-test=dateSelectorInput]').type('30062099').wait(500)
 
+    cy.get('[data-test=signOffButton]').click()
+    cy.contains('Who is the risk owner attached to this deployment assessment?')
+    cy.get('[data-test=entitySelector] input').type('user').wait(500)
+    cy.get('[role=presentation] ul li:first').click().wait(100)
+
     cy.get('[data-test=modelOverviewButton]').click()
     cy.get('[data-test=modelSelectorInput]').type(modelName).wait(500)
     cy.get('[role=presentation] ul li:first').click()
-
-    cy.get('[data-test=signOffButton]').click().wait(500)
-    cy.get('[data-test=entitySelector] input').type('user').wait(500)
-    cy.get('[role=presentation] ul li:first').click().wait(100)
 
     cy.get('[data-test=submitDeploymentAssessmentButton]').click()
 
@@ -187,13 +188,13 @@ describe('Deployment Assessment Suite', () => {
     cy.get('#root_deploymentSummary').type(newDeploymentAssessmentValuesObject.metadata.about.deploymentSummary)
     cy.get('[data-test=dateSelectorInput]').type('01052098').wait(500)
 
-    cy.get('[data-test=modelOverviewButton]').click()
-    cy.get('[data-test=modelSelectorInput]').type(modelName).wait(500)
-    cy.get('[role=presentation] ul li:first').click()
-
     cy.get('[data-test=signOffButton]').click().wait(500)
     cy.get('[data-test=entitySelector] input').type('user').wait(500)
     cy.get('[role=presentation] ul li:nth-child(2)').click().wait(100)
+
+    cy.get('[data-test=modelOverviewButton]').click()
+    cy.get('[data-test=modelSelectorInput]').type(modelName).wait(500)
+    cy.get('[role=presentation] ul li:first').click()
 
     cy.get('[data-test=saveEditFormButton]').click()
     cy.wait('@patchDraftDA').then((intercept) => {
