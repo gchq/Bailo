@@ -149,8 +149,18 @@ export async function findCommentsByDeploymentAssessmentId(deploymentAssessmentI
 
   // temporary if to make the typing ("might be null") happy
   if (deploymentAssessment && deploymentAssessment._id) {
-    const responses = await ResponseModel.find({ parentId: [deploymentAssessment._id] })
-    return responses
+    const comments = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Comment })
+    return comments
+  }
+  return null
+}
+
+export async function findReviewsByDeploymentAssessmentId(deploymentAssessmentId: string) {
+  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
+
+  if (deploymentAssessment && deploymentAssessment._id) {
+    const reviews = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Review })
+    return reviews
   }
   return null
 }
