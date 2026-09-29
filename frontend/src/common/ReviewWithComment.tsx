@@ -1,10 +1,20 @@
 import { Dayjs } from '@dayjs'
-import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mui/material'
+import {
+  Autocomplete,
+  Button,
+  Divider,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useContext, useEffect, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useContext, useEffect, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
@@ -43,6 +53,7 @@ export default function ReviewWithComment({
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
+  const [decision, setDecision] = useState<DecisionKeys | undefined>(undefined)
 
   const uiConfig = useContext(UiConfigContext)
 
@@ -82,17 +93,31 @@ export default function ReviewWithComment({
     }
   }, [router, reviewRequest])
 
-  function submitForm(decision: DecisionKeys) {
-    setErrorText('')
+  function handleSubmitOnClick() {
+    submitForm(decision)
+  }
 
-    if (invalidComment() && decision === Decision.RequestChanges) {
+  function submitForm(selectedDecision: DecisionKeys | undefined) {
+    setErrorText('')
+    if (!selectedDecision) {
+      setErrorText('Unknown decision')
+      return
+    }
+
+    if (invalidComment() && selectedDecision === Decision.RequestChanges) {
       setErrorText('You must submit a comment when requesting changes.')
+    } else if (invalidComment() && selectedDecision === Decision.Reject) {
+      setErrorText('You must submit a comment when rejecting.')
     } else if (!reviewRequest || !reviewRequest.role) {
       setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')
-      onSubmit(decision, reviewComment, reviewRequest.role, dueDate)
+      onSubmit(selectedDecision, reviewComment, reviewRequest.role, dueDate)
     }
+  }
+
+  const handleRadioChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDecision(event.target.value as DecisionKeys)
   }
 
   function onChange(_event: SyntheticEvent<Element, Event>, newValue: ReviewRequestInterface | null) {
@@ -164,66 +189,84 @@ export default function ReviewWithComment({
                 />
               </Stack>
             )}
+            <RadioGroup sx={{ mt: 0 }} defaultValue={undefined} value={decision} onChange={handleRadioChange}>
+              {!hideRequestChangesButton && (
+                <>
+                  <FormControlLabel
+                    value={Decision.RequestChanges}
+                    label='Request changes'
+                    control={<Radio size='small' sx={{ py: 0 }} data-test='requestChangesReviewButton' />}
+                    slotProps={{
+                      typography: { sx: { fontWeight: 'bold' } },
+                    }}
+                  />
+                  <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
+                    Needs some updates
+                  </Typography>
+                </>
+              )}
+              {deploymentAssessmentReview && (
+                <>
+                  <FormControlLabel
+                    value={Decision.Reject}
+                    label='Reject'
+                    control={<Radio size='small' sx={{ py: 0 }} />}
+                    slotProps={{
+                      typography: { sx: { fontWeight: 'bold' } },
+                    }}
+                  />
+                  <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
+                    Not acceptable
+                  </Typography>
+                </>
+              )}
+              <FormControlLabel
+                value={Decision.Approve}
+                label='Approve'
+                slotProps={{
+                  typography: { sx: { fontWeight: 'bold' } },
+                }}
+                control={<Radio size='small' sx={{ py: 0 }} />}
+                data-test='approveReviewButton'
+              />
+              <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption' color={theme.palette.customTextInput.main}>
+                {deploymentAssessmentReview ? uiConfig.deploymentAssessments.signOffDeclaration : 'Looks good to me'}
+              </Typography>
+            </RadioGroup>
+            <Divider />
             <Stack
               spacing={2}
               direction={{ sm: 'row', xs: 'column' }}
               sx={{
-                justifyContent: 'space-between',
                 alignItems: 'center',
               }}
+              divider={<Divider flexItem orientation='vertical' />}
             >
-              <Stack spacing={1} direction={{ sm: 'row', xs: 'column' }}>
-                {showUndoButton() && (
-                  <>
-                    <Button
-                      onClick={() => submitForm(Decision.Undo)}
-                      loading={loading}
-                      variant='contained'
-                      color='warning'
-                      data-test='undoReviewButton'
-                      size='small'
-                    >
-                      Undo review
-                    </Button>
-                    <Divider flexItem orientation='vertical' />
-                  </>
-                )}
-                {!hideRequestChangesButton && (
+              {showUndoButton() && (
+                <>
                   <Button
-                    variant='outlined'
-                    onClick={() => submitForm(Decision.RequestChanges)}
+                    onClick={() => submitForm(Decision.Undo)}
                     loading={loading}
-                    data-test='requestChangesReviewButton'
-                    size='small'
-                  >
-                    Request changes
-                  </Button>
-                )}
-                <Button
-                  variant='contained'
-                  onClick={() => submitForm(Decision.Approve)}
-                  loading={loading}
-                  data-test='approveReviewButton'
-                  size='small'
-                  disabled={includeDueDate && !dueDate}
-                >
-                  Approve
-                </Button>
-                {deploymentAssessmentReview && (
-                  <Button
                     variant='contained'
-                    onClick={() => submitForm(Decision.Reject)}
-                    loading={loading}
-                    data-test='approveReviewButton'
+                    color='warning'
+                    data-test='undoReviewButton'
                     size='small'
-                    disabled={includeDueDate && !dueDate}
-                    color='error'
                   >
-                    Reject
+                    Undo review
                   </Button>
-                )}
+                </>
+              )}
+              <Stack direction='row' spacing={1}>
+                <Button
+                  disabled={decision === undefined}
+                  onClick={handleSubmitOnClick}
+                  variant='contained'
+                  data-test='submitReviewButton'
+                >
+                  Submit
+                </Button>
+                {onCancel && <Button onClick={onCancel}>Cancel</Button>}
               </Stack>
-              {onCancel && <Button onClick={onCancel}>Cancel</Button>}
             </Stack>
           </Stack>
         )}

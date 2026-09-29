@@ -219,6 +219,7 @@ export const testManagerRoleInterface: ReviewRoleInterface = {
 export const testUiConfig: UiConfig = {
   deploymentAssessments: {
     deployableModelState: 'Production',
+    signOffDeclaration: 'I agree',
   },
 
   banner: {
