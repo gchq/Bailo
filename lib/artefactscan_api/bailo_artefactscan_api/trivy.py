@@ -46,24 +46,49 @@ def get_trivy_version() -> str:
     return "unknown"
 
 
-def safe_extract(tar: tarfile.TarFile, path: str) -> None:
+def safe_extract(
+    tar: tarfile.TarFile,
+    path: str,
+    max_bytes: int | None = None,
+    max_entries: int | None = None,
+) -> None:
     """tar.extractall is vulnerable to relative path relative.
 
     See [here](https://docs.python.org/3/library/tarfile.html#tarfile-extraction-filter)
 
+    Extraction is also bound by a total uncompressed size and entry count so that a small
+    compressed archive cannot expand into a disproportionately large filesystem (a tar bomb).
+
     :param tar: tarfile to extract
     :param path: the target to extract to
+    :param max_bytes: total uncompressed bytes allowed, defaults to the configured limit
+    :param max_entries: number of archive members allowed, defaults to the configured limit
     """
-    base = Path(path).resolve()
+    settings = get_settings()
+    max_bytes = settings.MAX_EXTRACT_BYTES if max_bytes is None else max_bytes
+    max_entries = settings.MAX_EXTRACT_ENTRIES if max_entries is None else max_entries
 
-    for member in tar.getmembers():
+    base = Path(path).resolve()
+    total_bytes = 0
+
+    # Iterate so an oversized archive is rejected at the offending member instead of after every
+    # header has been read into memory
+    for entries, member in enumerate(tar, start=1):
+        if entries > max_entries:
+            raise HTTPException(400, "Invalid tar contents: too many entries")
+
+        # Check size in the header before extracting
+        total_bytes += member.size
+        if total_bytes > max_bytes:
+            raise HTTPException(400, "Invalid tar contents: extracted size exceeds limit")
+
         # Create a PurePath where relative links `..` are resolved
         member_path = (base / member.name).resolve()
 
         if not member_path.is_relative_to(base):
             raise HTTPException(400, "Invalid tar contents")
 
-    return tar.extractall(path)
+        tar.extract(member, path)
 
 
 class Settings(BaseSettings):
@@ -93,6 +118,10 @@ class Settings(BaseSettings):
     CREATE_TIMEOUT_SECONDS: int = 900
 
     SCAN_TIMEOUT_SECONDS: int = 60
+
+    # Trivy DB is ~1GB decompressed with only a few files so these limits don't affect normal use
+    MAX_EXTRACT_BYTES: int = 8 * 1024**3
+    MAX_EXTRACT_ENTRIES: int = 100_000
 
 
 @lru_cache
@@ -375,13 +404,18 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
             if tarfile.is_tarfile(file):
                 with tarfile.open(fileobj=file, bufsize=block_size) as tarf:
                     safe_extract(tarf, path=working_dir)
+            create_sbom(working_dir, blob_digest)
         except tarfile.ReadError as exception:
+            # Remove any partial extraction so rejected uploads cannot accumulate on disk.
+            shutil.rmtree(working_dir, ignore_errors=True)
             logger.exception("Failed to extract blob %s", blob_digest)
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                 detail=f"An error occurred while extracting image layer: {exception}",
             ) from exception
-        create_sbom(working_dir, blob_digest)
+        except Exception:
+            shutil.rmtree(working_dir, ignore_errors=True)
+            raise
         logger.info(
             "Cleaning up unpacked filesystem %s SHA256:%s",
             working_dir,
