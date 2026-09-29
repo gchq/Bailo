@@ -191,29 +191,35 @@ export default function ReviewWithComment({
             )}
             <RadioGroup sx={{ mt: 0 }} defaultValue={undefined} value={decision} onChange={handleRadioChange}>
               {!hideRequestChangesButton && (
-                <FormControlLabel
-                  value={Decision.RequestChanges}
-                  label='Request changes'
-                  control={<Radio size='small' sx={{ py: 0 }} />}
-                  slotProps={{
-                    typography: { sx: { fontWeight: 'bold' } },
-                  }}
-                />
+                <>
+                  <FormControlLabel
+                    value={Decision.RequestChanges}
+                    label='Request changes'
+                    control={<Radio size='small' sx={{ py: 0 }} data-test='requestChangesReviewButton' />}
+                    slotProps={{
+                      typography: { sx: { fontWeight: 'bold' } },
+                    }}
+                  />
+                  <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
+                    Needs some updates
+                  </Typography>
+                </>
               )}
-              <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
-                Needs some updates
-              </Typography>
-              <FormControlLabel
-                value={Decision.Reject}
-                label='Reject'
-                control={<Radio size='small' sx={{ py: 0 }} />}
-                slotProps={{
-                  typography: { sx: { fontWeight: 'bold' } },
-                }}
-              />
-              <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
-                Not acceptable
-              </Typography>
+              {deploymentAssessmentReview && (
+                <>
+                  <FormControlLabel
+                    value={Decision.Reject}
+                    label='Reject'
+                    control={<Radio size='small' sx={{ py: 0 }} />}
+                    slotProps={{
+                      typography: { sx: { fontWeight: 'bold' } },
+                    }}
+                  />
+                  <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
+                    Not acceptable
+                  </Typography>
+                </>
+              )}
               <FormControlLabel
                 value={Decision.Approve}
                 label='Approve'
@@ -221,6 +227,7 @@ export default function ReviewWithComment({
                   typography: { sx: { fontWeight: 'bold' } },
                 }}
                 control={<Radio size='small' sx={{ py: 0 }} />}
+                data-test='approveReviewButton'
               />
               <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption' color={theme.palette.customTextInput.main}>
                 {deploymentAssessmentReview ? uiConfig.deploymentAssessments.signOffDeclaration : 'Looks good to me'}
@@ -250,7 +257,12 @@ export default function ReviewWithComment({
                 </>
               )}
               <Stack direction='row' spacing={1}>
-                <Button disabled={decision === undefined} onClick={handleSubmitOnClick} variant='contained'>
+                <Button
+                  disabled={decision === undefined}
+                  onClick={handleSubmitOnClick}
+                  variant='contained'
+                  data-test='submitReviewButton'
+                >
                   Submit
                 </Button>
                 {onCancel && <Button onClick={onCancel}>Cancel</Button>}
