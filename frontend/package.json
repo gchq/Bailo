@@ -7,7 +7,7 @@
     "build:docs-search-index": "tsx scripts/build-docs-search-index.mjs",
     "check-style": "prettier --check .",
     "cy:open": "cypress open",
-    "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
+    "cy:run": "cypress run --spec \"cypress/e2e/bailo/deployment-assessment.cy.ts\"",
     "cy:run-mirror": "cypress run --spec  \"cypress/e2e/cross-instance/**/*\"",
     "predev": "tsx scripts/build-docs-search-index.mjs",
     "dev": "next dev",

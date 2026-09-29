@@ -137,10 +137,12 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[data-test=deleteInputVerification]').type(newDeploymentAssessmentValuesObject.name)
     cy.get('[data-test=deleteConfirmButton]').click()
     cy.location('pathname').should('eq', '/deployment-assessments')
+    cy.contains('Deployment assessment deleted')
+    cy.visit(`/deployment-assessments/${deploymentAssessmentId}`)
+    cy.contains('The requested deployment assessment was not found.')
   })
 
   it('Create a draft deployment assessment', () => {
-    // Creates draft DA
     cy.visit('/deployment-assessments')
     cy.get('[data-test=actionButton]').click()
     cy.url().should('contain', '/deployment-assessments/new')
@@ -156,15 +158,12 @@ describe('Deployment Assessment Suite', () => {
 
     cy.url().should('contain', `deployment-assessments/${draftDeploymentAssessmentId}`)
 
-    // Erroneously attempts to publish with unfinished
     cy.get('[data-test=draftBanner] [data-test=publishDraftButton]').click()
     cy.get('[data-test=confirmButton]').click()
     cy.contains('Bad Request')
 
-    // Check draft banner still exists
     cy.get('[data-test=draftBanner]').should('exist')
 
-    // Edit form and publish
     cy.press(Cypress.Keyboard.Keys.ESC)
     cy.get('[data-test=editFormButton]').click()
 
@@ -184,7 +183,6 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[data-test=draftBanner] [data-test=publishDraftButton]').click()
     cy.get('[data-test=confirmButton]').click()
 
-    // Draft banner should no longer exist
     cy.contains('Needs review')
     cy.get('[data-test=draftBanner]').should('not.exist')
   })
