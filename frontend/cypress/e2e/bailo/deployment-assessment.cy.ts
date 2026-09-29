@@ -3,11 +3,13 @@ import getUuidFromUrl from '../../utils/getUuidFromUrl'
 const schemaId = 'minimal-deployment-assessment-schema-v1'
 const modelName = 'DATestModel'
 const deploymentAssessmentName = 'TestDAName'
+const newDeploymentAssessmentName = 'newTestDAName'
 let deploymentAssessmentId = ''
 let draftDeploymentAssessmentId = ''
+let daToDeleteUuid = ''
 
 const newDeploymentAssessmentValuesObject = {
-  name: 'newTestDAName',
+  name: newDeploymentAssessmentName,
   metadata: {
     modelOverview: {
       modelIds: [] as string[],
@@ -126,20 +128,34 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[role=presentation] ul li:nth-child(2)').click({ force: true }).wait(500)
 
     cy.get('[data-test=saveEditFormButton]').click()
+    cy.contains(newDeploymentAssessmentName)
     cy.get('[data-test=aboutButton]').click()
     cy.contains(newDeploymentAssessmentValuesObject.metadata.about.deploymentSummary)
+    // In the UI the date is formatted to DD/MM/YYYY
+    cy.contains('01-05-2098')
+    cy.get('[data-test=signOffButton]').click()
+    cy.contains('Joe Bloggs')
   })
 
-  it('delete new deployment assessment', () => {
-    cy.visit(`/deployment-assessments/${deploymentAssessmentId}`)
-    cy.get('[data-test=deleteFormButton]').click()
+  it('delete new draft deployment assessment', () => {
+    cy.request('POST', '/api/v3/deployment-assessments', {
+      name: 'DA - Delete Me',
+      schemaId: 'minimal-deployment-assessment-schema-v1',
+      metadata: {},
+      draft: true,
+    }).then((response) => {
+      expect(response.status).to.eq(201)
+      daToDeleteUuid = response.body.deploymentAssessment.id
+      cy.visit(`/deployment-assessments/${daToDeleteUuid}`)
+      cy.get('[data-test=deleteFormButton]').click()
 
-    cy.get('[data-test=deleteInputVerification]').type(newDeploymentAssessmentValuesObject.name)
-    cy.get('[data-test=deleteConfirmButton]').click()
-    cy.location('pathname').should('eq', '/deployment-assessments')
-    cy.contains('Deployment assessment deleted')
-    cy.visit(`/deployment-assessments/${deploymentAssessmentId}`)
-    cy.contains('The requested deployment assessment was not found.')
+      cy.get('[data-test=deleteInputVerification]').type('DA - Delete Me')
+      cy.get('[data-test=deleteConfirmButton]').click()
+      cy.location('pathname').should('eq', '/deployment-assessments')
+      cy.contains('Deployment assessment deleted')
+      cy.visit(`/deployment-assessments/${daToDeleteUuid}`)
+      cy.contains('The requested deployment assessment was not found.')
+    })
   })
 
   it('Create a draft deployment assessment', () => {
@@ -160,7 +176,7 @@ describe('Deployment Assessment Suite', () => {
 
     cy.get('[data-test=draftBanner] [data-test=publishDraftButton]').click()
     cy.get('[data-test=confirmButton]').click()
-    cy.contains('Bad Request')
+    cy.contains('Bad Request: Deployment assessment metadata could not be validated against the schema.')
 
     cy.get('[data-test=draftBanner]').should('exist')
 
