@@ -402,6 +402,8 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
         working_dir = mkdtemp()
         try:
             if tarfile.is_tarfile(file):
+                # `is_tarfile` does not restore the stream position on Python < 3.11
+                file.seek(0)
                 with tarfile.open(fileobj=file, bufsize=block_size) as tarf:
                     safe_extract(tarf, path=working_dir)
             create_sbom(working_dir, blob_digest)
