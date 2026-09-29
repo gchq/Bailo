@@ -277,7 +277,7 @@ def test_safe_extract_allows_archive_within_limits(tmp_path: Path) -> None:
 
 
 def test_scan_rejects_zip_bomb_and_cleans_up(tmp_path: Path) -> None:
-    """An uploaded tar bomb is rejected and its scratch directory is removed."""
+    """An uploaded tar bomb is rejected and its tmp directory is removed."""
     archive = build_tar_bomb_bytes()
     digest = hashlib.sha256(archive).hexdigest()
     working_dir = tmp_path / "working"
@@ -293,4 +293,4 @@ def test_scan_rejects_zip_bomb_and_cleans_up(tmp_path: Path) -> None:
 
     assert exception.value.status_code == HTTPStatus.BAD_REQUEST.value
     assert exception.value.detail == "Invalid tar contents: extracted size exceeds limit"
-    assert not working_dir.exists(), "Scratch directory should be cleaned up when extraction fails"
+    assert not working_dir.exists(), "Tmp directory should be cleaned up when extraction fails"
