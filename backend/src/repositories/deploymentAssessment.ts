@@ -1,10 +1,14 @@
 import { escapeRegExp } from 'lodash-es'
 import { QueryFilter } from 'mongoose'
 
+import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
+import authorisation from '../connectors/authorisation/index.js'
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
 import ResponseModel, { DecisionKeys, ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
+import { UserInterface } from '../models/User.js'
 import { ReviewKind } from '../types/enums.js'
+import { Forbidden, NotFound } from '../utils/error.js'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string
@@ -143,24 +147,33 @@ export async function findLatestDecisionsByAssessmentIds(
   return new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
 }
 
-// Initial Pass of creating DB function to find comments: todo - add typing, verify need for if statement
-export async function findCommentsByDeploymentAssessmentId(deploymentAssessmentId: string) {
+// ~2nd Pass of creating DB function to find comments: todo - add typing?
+export async function findCommentsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
   const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
-
-  // temporary if to make the typing ("might be null") happy
-  if (deploymentAssessment && deploymentAssessment._id) {
-    const comments = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Comment })
-    return comments
+  if (!deploymentAssessment) {
+    throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
   }
-  return null
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  const comments = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Comment })
+  return comments
 }
 
-export async function findReviewsByDeploymentAssessmentId(deploymentAssessmentId: string) {
+export async function findReviewsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
   const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
-
-  if (deploymentAssessment && deploymentAssessment._id) {
-    const reviews = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Review })
-    return reviews
+  if (!deploymentAssessment) {
+    throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
   }
-  return null
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  const reviews = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Review })
+  return reviews
 }

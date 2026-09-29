@@ -15,8 +15,10 @@ import ResponseModel, { Decision, DecisionKeys, ResponseKind } from '../models/R
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import {
+  findCommentsByDeploymentAssessmentId,
   findDeploymentAssessments,
   findLatestDecisionsByAssessmentIds,
+  findReviewsByDeploymentAssessmentId,
   SearchDeploymentAssessmentsParams,
 } from '../repositories/deploymentAssessment.js'
 import { ReviewKind, SchemaKind } from '../types/enums.js'
@@ -305,6 +307,18 @@ async function getLatestDeploymentAssessmentReview(deploymentAssessmentId: strin
   }
 
   return review
+}
+
+// wrapper functions around repository functions
+// TODO: user checks should _probably_ be here, but need to make sure that actually works since they rely on fetching the DA in the first place, that might not work?
+export async function getDeploymentAssessmentComments(user: UserInterface, deploymentAssessmentId: string) {
+  const comments = findCommentsByDeploymentAssessmentId(user, deploymentAssessmentId)
+  return comments
+}
+
+export async function getDeploymentAssessmentReviews(user: UserInterface, deploymentAssessmentId: string) {
+  const reviews = findReviewsByDeploymentAssessmentId(user, deploymentAssessmentId)
+  return reviews
 }
 
 export async function commentOnDeploymentAssessment(
