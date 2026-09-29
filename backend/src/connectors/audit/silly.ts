@@ -93,6 +93,14 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onDeleteDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
   async onSearchDeploymentAssessments(_req: Request, _deploymentAssessments: DeploymentAssessmentSummary[]) {}
   async onViewDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
+  async onViewDeploymentAssessmentReviews(
+    _req: Request,
+    _deploymentAssessment: DeploymentAssessmentDoc,
+  ): Promise<void> {}
+  async onViewDeploymentAssessmentComments(
+    _req: Request,
+    _deploymentAssessment: DeploymentAssessmentDoc,
+  ): Promise<void> {}
   async onReviewDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
   async onCommentOnDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
   async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
