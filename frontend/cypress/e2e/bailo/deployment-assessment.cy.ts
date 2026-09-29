@@ -21,6 +21,60 @@ const newDeploymentAssessmentValuesObject = {
 }
 
 describe('Deployment Assessment Suite', () => {
+  before(() => {
+    cy.request('POST', 'http://localhost:8080/api/v2/models', {
+      name: modelName,
+      kind: 'model',
+      description: 'This is a test',
+      visibility: 'public',
+    }).then((response) => {
+      expect(response.status).to.eq(200)
+      expect(response.body.model).to.have.property('name', modelName)
+      newDeploymentAssessmentValuesObject.metadata.modelOverview.modelIds = [response.body.model.id]
+      cy.request(
+        'POST',
+        `/api/v2/model/${newDeploymentAssessmentValuesObject.metadata.modelOverview.modelIds[0]}/setup/from-schema`,
+        {
+          schemaId: 'minimal-general-v10',
+        },
+      ).then((response) => {
+        expect(response.status).to.eq(200)
+        cy.request(
+          'put',
+          `api/v2/model/${newDeploymentAssessmentValuesObject.metadata.modelOverview.modelIds[0]}/model-cards`,
+          {
+            metadata: {
+              overview: {
+                modelSummary: 'Description of model',
+              },
+              anotherPage: {
+                sectionOne: {
+                  q3: '2099-06-30',
+                },
+              },
+            },
+          },
+        ).then((response) => {
+          expect(response.status).to.eq(200)
+          expect(response.body.card).to.have.property(
+            'modelId',
+            newDeploymentAssessmentValuesObject.metadata.modelOverview.modelIds[0],
+          )
+          cy.request(
+            'patch',
+            `/api/v2/model/${newDeploymentAssessmentValuesObject.metadata.modelOverview.modelIds[0]}`,
+            {
+              collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+              state: 'Production',
+            },
+          ).then((response) => {
+            expect(response.status).to.eq(200)
+          })
+        })
+      })
+    })
+  })
+
   it('create new deployment assessment', () => {
     cy.visit('/deployment-assessments')
     cy.get('[data-test=actionButton]').click()
@@ -119,11 +173,11 @@ describe('Deployment Assessment Suite', () => {
 
     cy.get('[data-test=signOffButton]').click().wait(500)
     cy.get('[data-test=entitySelector] input').type('user').wait(500)
-    cy.get('[role=presentation] ul li:nth-child(2)').click({ force: true }).wait(100)
+    cy.get('[role=presentation] ul li:nth-child(2)').click({ force: true }).wait(500)
 
     cy.get('[data-test=modelOverviewButton]').click()
     cy.get('[data-test=modelSelectorInput]').type(modelName).wait(500)
-    cy.get('[role=presentation] ul li:first').click({ force: true })
+    cy.get('[role=presentation] ul li:first').click({ force: true }).wait(500)
 
     cy.get('[data-test=saveEditFormButton]').click()
 
