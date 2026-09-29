@@ -218,7 +218,7 @@ export async function getDeploymentAssessmentById(
   return deploymentAssessment
 }
 
-function deriveDeploymentAssessmentState(
+export function deriveDeploymentAssessmentState(
   deploymentAssessment: Pick<DeploymentAssessmentInterface, 'draft'>,
   latestDecision?: DecisionKeys,
 ): DeploymentAssessmentStateKeys | undefined {
