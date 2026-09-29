@@ -78,7 +78,7 @@ services:
 
   registry:
     # https://github.com/distribution/distribution/pull/4898
-    image: distribution/distribution@sha256:1eda63c5b5ba2c53b8b7e7071d7e67ca42e93c4ea5d9015c2b8160eb09a95d61
+    image: distribution/distribution@sha256:d106962e6fe3fa69c178cec77eeeee5edb626b8df6535b7bd6b95e658a0a5ca9
     networks:
       internal:
     environment:
