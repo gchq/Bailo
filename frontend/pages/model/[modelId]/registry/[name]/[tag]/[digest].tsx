@@ -106,7 +106,7 @@ export default function ImageTagInformation() {
     ))
   }, [filterList, handleFilterListChipOnClick])
 
-  const formattedData = useCallback(() => {
+  const formattedData = useMemo(() => {
     let resultList: VulnerabilityResultItem[] = []
 
     if (!modelImage) {
@@ -168,33 +168,31 @@ export default function ImageTagInformation() {
   }
 
   const tableRows = useCallback(() => {
-    return formattedData()
-      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-      .map((row, index) => (
-        <TableRow key={row.cve + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-          <TableCell component='th' scope='row'>
-            {row.cve}
-          </TableCell>
-          <TableCell>{row.severity.toUpperCase()}</TableCell>
-          <TableCell>
-            <List dense>
-              {row.packageList.map((packageId) => (
-                <ListItem key={packageId} sx={{ pl: 0 }}>
-                  {packageId}
-                </ListItem>
-              ))}
-            </List>
-          </TableCell>
-          <TableCell>
-            <Stack spacing={2}>
-              <MarkdownDisplay>{displayDescriptionSummary(row.description)}</MarkdownDisplay>
-              {(row.description.startsWith('Issue summary') || row.description.length > 250) && (
-                <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
-              )}
-            </Stack>
-          </TableCell>
-        </TableRow>
-      ))
+    return formattedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+      <TableRow key={row.cve + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+        <TableCell component='th' scope='row'>
+          {row.cve}
+        </TableCell>
+        <TableCell>{row.severity.toUpperCase()}</TableCell>
+        <TableCell>
+          <List dense>
+            {row.packageList.map((packageId) => (
+              <ListItem key={packageId} sx={{ pl: 0 }}>
+                {packageId}
+              </ListItem>
+            ))}
+          </List>
+        </TableCell>
+        <TableCell>
+          <Stack spacing={2}>
+            <MarkdownDisplay>{displayDescriptionSummary(row.description)}</MarkdownDisplay>
+            {(row.description.startsWith('Issue summary') || row.description.length > 250) && (
+              <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
+            )}
+          </Stack>
+        </TableCell>
+      </TableRow>
+    ))
   }, [formattedData, page, rowsPerPage, handleModalOpen])
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
