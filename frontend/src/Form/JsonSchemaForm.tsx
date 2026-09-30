@@ -240,7 +240,11 @@ export default function JsonSchemaForm({
                         : undefined,
                   }}
                 >
-                  <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
+                  <ListItemButton
+                    data-test={`${step.section}Button`}
+                    selected={activeStep === index}
+                    onClick={() => handleListItemClick(index)}
+                  >
                     <ListItemText sx={{ pr: 1 }}>
                       <Typography
                         sx={{

@@ -59,6 +59,7 @@ export function DraftBanner({
           borderRadius: 0,
           width: '100%',
         }}
+        data-test='draftBanner'
       >
         <Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Stack direction={'row'} spacing={1}>
@@ -75,6 +76,7 @@ export function DraftBanner({
                 }}
                 disabled={disableButton}
                 loading={isLoading}
+                data-test='publishDraftButton'
               >
                 <Typography>Publish</Typography>
               </Button>
