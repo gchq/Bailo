@@ -546,6 +546,7 @@ export interface AccessRequestInterface {
   _id: string
   id: string
   modelId: string
+  groupId?: string
   schemaId: string
   deleted: boolean
   metadata: AccessRequestMetadata
