@@ -311,12 +311,12 @@ async function getLatestDeploymentAssessmentReview(deploymentAssessmentId: strin
 
 // wrapper functions around repository functions
 // TODO: user checks should _probably_ be here, but need to make sure that actually works since they rely on fetching the DA in the first place, that might not work?
-export async function getDeploymentAssessmentComments(user: UserInterface, deploymentAssessmentId: string) {
+export async function getCommentsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
   const comments = findCommentsByDeploymentAssessmentId(user, deploymentAssessmentId)
   return comments
 }
 
-export async function getDeploymentAssessmentReviews(user: UserInterface, deploymentAssessmentId: string) {
+export async function getReviewsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
   const reviews = findReviewsByDeploymentAssessmentId(user, deploymentAssessmentId)
   return reviews
 }

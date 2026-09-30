@@ -4,8 +4,10 @@ import { generateV3SwaggerSpec } from '../../services/specification.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
 import { deleteDeploymentAssessment } from './deploymentAssessment/deleteDeploymentAssessment.js'
 import { getDeploymentAssessment } from './deploymentAssessment/getDeploymentAssessment.js'
+import { getDeploymentAssessmentComments } from './deploymentAssessment/getDeploymentAssessmentComments.js'
 import { getDeploymentAssessmentCurrentUserPermissions } from './deploymentAssessment/getDeploymentAssessmentCurrentUserPermissions.js'
 import { getDeploymentAssessmentHtml } from './deploymentAssessment/getDeploymentAssessmentHtml.js'
+import { getDeploymentAssessmentReviews } from './deploymentAssessment/getDeploymentAssessmentReviews.js'
 import { getDeploymentAssessments } from './deploymentAssessment/getDeploymentAssessments.js'
 import { patchDeploymentAssessment } from './deploymentAssessment/patchDeploymentAssessment.js'
 import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
@@ -34,7 +36,9 @@ router.get('/deployment-assessments', ...getDeploymentAssessments)
 router.post('/deployment-assessments', ...postDeploymentAssessment)
 router.get('/deployment-assessments/:deploymentAssessmentId', ...getDeploymentAssessment)
 router.delete('/deployment-assessments/:deploymentAssessmentId', ...deleteDeploymentAssessment)
+router.get('/deployment-assessments/:deploymentAssessmentId/comments', ...getDeploymentAssessmentComments)
 router.post('/deployment-assessments/:deploymentAssessmentId/comments', ...postDeploymentAssessmentComment)
+router.get('/deployment-assessments/:deploymentAssessmentId/reviews', ...getDeploymentAssessmentReviews)
 router.post('/deployment-assessments/:deploymentAssessmentId/reviews', ...postDeploymentAssessmentReviews)
 router.get(
   '/deployment-assessments/:deploymentAssessmentId/permissions/mine',

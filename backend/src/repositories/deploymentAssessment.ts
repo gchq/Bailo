@@ -174,6 +174,7 @@ export async function findReviewsByDeploymentAssessmentId(user: UserInterface, d
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
-  const reviews = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Review })
+  const reviews = await ReviewModel.find({ deploymentAssessmentId })
+
   return reviews
 }
