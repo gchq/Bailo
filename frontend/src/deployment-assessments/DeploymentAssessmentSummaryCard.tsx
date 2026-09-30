@@ -38,7 +38,7 @@ export default function DeploymentAssessmentSummaryCard({
   return (
     <>
       <ReviewBanner deploymentAssessment={assessment} />
-      <Box sx={{ p: 2 }}>
+      <Box data-test='deploymentAssessmentSummaryCard' sx={{ p: 2 }}>
         <Stack spacing={2}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ justifyContent: 'space-between' }}>
             <Stack direction='row' spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>

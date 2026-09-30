@@ -55,6 +55,7 @@ export default function DeploymentModelFilter({ selectedModelIds, onChange }: De
     <>
       <Autocomplete<EntrySearchResult, true>
         multiple
+        data-test='deploymentAssessmentModelFilter'
         size='small'
         options={options}
         loading={isEntriesLoading}
