@@ -77,8 +77,7 @@ services:
       - backend
 
   registry:
-    # https://github.com/distribution/distribution/pull/4898
-    image: distribution/distribution@sha256:1eda63c5b5ba2c53b8b7e7071d7e67ca42e93c4ea5d9015c2b8160eb09a95d61
+    image: registry:3.1.2@sha256:21078ecfcba8a0cd7e1a384f75b3509899661dd21823bf1da21b5a4674aaceb9
     networks:
       internal:
     environment:
