@@ -42,6 +42,7 @@ import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -78,6 +79,14 @@ export default function ImageTagInformation() {
   const [filterList, setFilterList] = useState<string[]>([])
 
   const toolName = modelImage && modelImage.scanResults ? modelImage.scanResults[0].toolName : ''
+  const scanErrors = Object.fromEntries(
+    modelImage?.scanResults?.flatMap(
+      (scan) =>
+        scan.summary
+          ?.filter((summary): summary is string => typeof summary === 'string')
+          .map((summary) => [scan.toolName, { message: summary }]) ?? [],
+    ) ?? [],
+  )
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -278,6 +287,7 @@ export default function ImageTagInformation() {
                 />
               </Stack>
             </Stack>
+            {MultipleErrorWrapper('Image scan failed', scanErrors)}
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={4}>
               <Stack direction='column'>
                 <Typography
