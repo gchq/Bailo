@@ -89,7 +89,7 @@
     "@typescript-eslint/parser": "^8.62.1",
     "@vitejs/plugin-react": "^6.1.1",
     "axe-core": "^4.13.0",
-    "cypress": "^16.1.0",
+    "cypress": "^15.21.1",
     "cypress-axe": "^1.7.0",
     "eslint": "10.9.1",
     "eslint-config-next": "16.3.3",
