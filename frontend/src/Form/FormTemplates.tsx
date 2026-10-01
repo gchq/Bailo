@@ -32,7 +32,6 @@ function FieldErrors({ rawErrors }: { rawErrors?: string[] }) {
     return null
   }
 
-  // Ensure multiple errors are always in the same order
   const sortedErrors = [...rawErrors].sort((a, b) => a.localeCompare(b))
 
   return (

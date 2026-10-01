@@ -46,7 +46,6 @@ export default function DeploymentAssessment() {
 
   const handleValidityChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid)
-    // Once the form is valid there is nothing left to highlight
     if (isValid) {
       setShowValidation(false)
     }
@@ -99,7 +98,10 @@ export default function DeploymentAssessment() {
       return true
     }
     setShowValidation(true)
-    sendNotification({ msg: 'Unable to publish incomplete Deployment Assessment.', variant: 'error' })
+    sendNotification({
+      msg: 'Please make sure that all required fields are appropriately filled out before publishing.',
+      variant: 'error',
+    })
     return false
   }
 
