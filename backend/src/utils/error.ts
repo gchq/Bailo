@@ -1,10 +1,10 @@
-import Logger from 'bunyan'
+import pino from 'pino'
 
 import { BailoError, isBailoError } from '../types/error.js'
 import { RegistryError } from '../types/RegistryError.js'
 import { RegistryErrorResponseBody } from './registryResponseTypes.js'
 
-export function GenericError(code: number, message: string, context?: BailoError['context'], logger?: Logger) {
+export function GenericError(code: number, message: string, context?: BailoError['context'], logger?: pino.Logger) {
   const err = Error(message) as BailoError
 
   err.name = 'Bailo Error'
@@ -33,51 +33,51 @@ export function GenericError(code: number, message: string, context?: BailoError
   return err
 }
 
-export function BadReq(message: string, context?: BailoError['context'], logger?: Logger) {
+export function BadReq(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(400, message, context, logger)
 }
 
-export function Unauthorized(message: string, context?: BailoError['context'], logger?: Logger) {
+export function Unauthorized(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(401, message, context, logger)
 }
 
-export function Forbidden(message: string, context?: BailoError['context'], logger?: Logger) {
+export function Forbidden(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(403, message, context, logger)
 }
 
-export function NotFound(message: string, context?: BailoError['context'], logger?: Logger) {
+export function NotFound(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(404, message, context, logger)
 }
 
-export function Conflict(message: string, context?: BailoError['context'], logger?: Logger) {
+export function Conflict(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(409, message, context, logger)
 }
 
-export function ContentTooLarge(message: string, context?: BailoError['context'], logger?: Logger) {
+export function ContentTooLarge(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(413, message, context, logger)
 }
 
-export function UnsatisfiableRange(message: string, context?: BailoError['context'], logger?: Logger) {
+export function UnsatisfiableRange(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(416, message, context, logger)
 }
 
-export function InternalError(message: string, context?: BailoError['context'], logger?: Logger) {
+export function InternalError(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(500, message, context, logger)
 }
 
-export function NotImplemented(message: string, context?: BailoError['context'], logger?: Logger) {
+export function NotImplemented(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(501, message, context, logger)
 }
 
-export function UnprocessableContent(message: string, context?: BailoError['context'], logger?: Logger) {
+export function UnprocessableContent(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(422, message, context, logger)
 }
 
-export function ConfigurationError(message: string, context?: BailoError['context'], logger?: Logger) {
+export function ConfigurationError(message: string, context?: BailoError['context'], logger?: pino.Logger) {
   return GenericError(503, `BAILO configuration error: ${message}`, context, logger)
 }
 
-export function RegistryError(error: RegistryErrorResponseBody, context?: BailoError['context'], logger?: Logger) {
+export function RegistryError(error: RegistryErrorResponseBody, context?: BailoError['context'], logger?: pino.Logger) {
   const registryError = GenericError(500, `Error response received from registry.`, context, logger) as RegistryError
   registryError.name = 'Registry Error'
   registryError.errors = error.errors
