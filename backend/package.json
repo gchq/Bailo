@@ -81,7 +81,7 @@
     "showdown": "^2.1.0",
     "swagger-ui-express": "^5.0.1",
     "tar-stream": "^3.2.1",
-    "tsx": "^4.23.12",
+    "tsx": "^4.23.15",
     "undici": "^8.11.2",
     "utility-types": "^3.11.0",
     "uuid": "^14.0.2",
