@@ -34,6 +34,7 @@ export default function AssessmentStateChip({
 
     return (
       <Chip
+        data-test='deploymentAssessmentStateChip'
         label='Draft'
         size='small'
         clickable={selectable}
@@ -67,6 +68,7 @@ export default function AssessmentStateChip({
 
   return (
     <Chip
+      data-test='deploymentAssessmentStateChip'
       label={stateLabels[state]}
       size='small'
       clickable={selectable}
