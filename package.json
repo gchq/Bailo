@@ -22,7 +22,7 @@
     "@cspell/dict-la": "^1.1.2",
     "@cspell/dict-lorem-ipsum": "^4.0.5",
     "@cspell/dict-markdown": "^2.0.17",
-    "@cspell/dict-python": "^4.2.29",
+    "@cspell/dict-python": "^4.5.2",
     "@cspell/dict-scientific-terms-gb": "^1.0.6",
     "@cspell/dict-typescript": "^3.2.3",
     "cspell": "^10.0.1",
