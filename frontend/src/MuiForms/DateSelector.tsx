@@ -18,10 +18,20 @@ interface DateSelectorProps {
   onChange: (newValue: string | undefined) => void
   InputProps?: any
   id: string
+  rawErrors?: string[]
   schema: RJSFSchema
 }
 
-export default function DateSelector({ onChange, value, label, registry, required, id, schema }: DateSelectorProps) {
+export default function DateSelector({
+  onChange,
+  value,
+  label,
+  registry,
+  required,
+  id,
+  rawErrors,
+  schema,
+}: DateSelectorProps) {
   const theme = useTheme()
 
   const handleChange = (dateInput: Dayjs | null) => {
@@ -62,6 +72,7 @@ export default function DateSelector({ onChange, value, label, registry, require
           aria-label={`date input field for ${label}`}
           onChange={handleChange}
           format='DD-MM-YYYY'
+          slotProps={{ textField: { error: !!rawErrors && rawErrors.length > 0 } }}
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
         />
       ) : compare.inMirroredCompare && value ? (

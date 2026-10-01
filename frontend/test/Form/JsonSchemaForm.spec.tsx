@@ -185,4 +185,44 @@ describe('JsonSchemaForm', () => {
 
     expect(document.activeElement).toBe(nameInput)
   })
+
+  it('marks every widget with an error as invalid for screen readers', async () => {
+    const widgetSchema = {
+      id: 'widget-schema',
+      reference: 'widget-schema',
+      jsonSchema: {
+        type: 'object',
+        properties: {
+          details: {
+            type: 'object',
+            title: 'Details',
+            properties: {
+              name: { type: 'string', title: 'Name' },
+              agreed: { type: 'boolean', title: 'Agreed' },
+              tags: { type: 'array', title: 'Tags', items: { type: 'string' }, widget: 'tagSelector' },
+            },
+            required: ['name', 'agreed', 'tags'],
+          },
+        },
+      },
+    }
+    const steps = getStepsFromSchema(widgetSchema, {}, [], {})
+    for (const step of steps) {
+      step.steps = steps
+    }
+
+    renderWithTheme(
+      <JsonSchemaForm
+        splitSchema={{ reference: widgetSchema.id, steps }}
+        setSplitSchema={vi.fn()}
+        canEdit
+        showValidation
+      />,
+    )
+
+    await waitFor(() => expect(screen.getByText('Please resolve the following errors')).toBeDefined())
+    expect(screen.getByLabelText('text input field for Name').getAttribute('aria-invalid')).toBe('true')
+    expect(screen.getByLabelText('radio input field for Agreed').getAttribute('aria-invalid')).toBe('true')
+    expect(document.getElementById('root_tags')?.getAttribute('aria-invalid')).toBe('true')
+  })
 })
