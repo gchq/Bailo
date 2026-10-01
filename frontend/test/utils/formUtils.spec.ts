@@ -181,6 +181,12 @@ describe('Form utils', () => {
       expect(sortFormErrors(errors, schema).map(({ property }) => property)).toEqual(['.riskOwners', '.name'])
     })
 
+    it('orders a missing property, which AJV reports without a leading dot, by its question', () => {
+      const errors = [error('.contacts', 'is invalid'), error('name', 'This field is required')]
+
+      expect(sortFormErrors(errors, schema).map(({ property }) => property)).toEqual(['name', '.contacts'])
+    })
+
     it('orders several errors for the same question by message', () => {
       const errors = [
         error('.riskOwners', 'This field is required'),

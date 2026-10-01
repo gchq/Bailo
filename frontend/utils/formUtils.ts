@@ -231,6 +231,16 @@ function getSchemaPropertyPaths(schema: any, path = ''): string[] {
   })
 }
 
+/**
+ * The path of the question an error belongs to, e.g. `.groups.1.owners.0` gives `.groups.owners`. AJV reports a
+ * missing property as `version` rather than `.version`, so the leading dot cannot be relied upon either.
+ */
+function getQuestionPath(property = ''): string {
+  const questions = property.split('.').filter((part) => part !== '' && !/^\d+$/.test(part))
+
+  return questions.length > 0 ? `.${questions.join('.')}` : ''
+}
+
 /** Lists the item numbers in an error's property path, e.g. `.groups.1.owners.0` gives `[1, 0]`. */
 export function getItemIndices(property = ''): number[] {
   return property
@@ -262,8 +272,7 @@ export function sortFormErrors(errors: RJSFValidationError[], schema: any): RJSF
   const propertyPaths = getSchemaPropertyPaths(schema)
 
   const questionIndex = (error: RJSFValidationError) => {
-    // Array items report against an index, e.g. `.riskOwners.0`, but belong to their parent question
-    const index = propertyPaths.indexOf((error.property || '').replaceAll(/\.\d+/g, ''))
+    const index = propertyPaths.indexOf(getQuestionPath(error.property))
     return index === -1 ? propertyPaths.length : index
   }
 

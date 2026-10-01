@@ -1,4 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ReactNode } from 'react'
@@ -50,7 +52,13 @@ function buildSplitSchema(state: any = {}): SplitSchemaNoRender {
 }
 
 function renderWithTheme(children: ReactNode) {
-  return render(<ThemeProvider theme={lightTheme}>{children}</ThemeProvider>)
+  return render(
+    <ThemeProvider theme={lightTheme}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
+        {children}
+      </LocalizationProvider>
+    </ThemeProvider>,
+  )
 }
 
 function errorListText() {
@@ -184,6 +192,57 @@ describe('JsonSchemaForm', () => {
     await userEvent.type(nameInput, 'A name')
 
     expect(document.activeElement).toBe(nameInput)
+  })
+
+  it('lists the errors for missing answers in question order', async () => {
+    const orderedSchema = {
+      id: 'ordered-schema',
+      reference: 'ordered-schema',
+      jsonSchema: {
+        type: 'object',
+        properties: {
+          section: {
+            type: 'object',
+            title: 'Section',
+            properties: {
+              firstQuestion: { type: 'string', title: 'First question' },
+              secondQuestion: { type: 'string', title: 'Second question', format: 'date' },
+              thirdQuestion: {
+                type: 'array',
+                title: 'Third question',
+                widget: 'multiSelector',
+                items: { type: 'string', enum: ['First option', 'Second option'] },
+                minItems: 1,
+              },
+              fourthQuestion: { type: 'string', title: 'Fourth question' },
+            },
+            required: ['firstQuestion', 'secondQuestion', 'thirdQuestion', 'fourthQuestion'],
+          },
+        },
+      },
+    }
+    const steps = getStepsFromSchema(orderedSchema, {}, [], {})
+    for (const step of steps) {
+      step.steps = steps
+    }
+
+    renderWithTheme(
+      <JsonSchemaForm
+        splitSchema={{ reference: orderedSchema.id, steps }}
+        setSplitSchema={vi.fn()}
+        canEdit
+        showValidation
+      />,
+    )
+
+    await waitFor(() => expect(screen.getByText('Please resolve the following errors')).toBeDefined())
+    expect(errorListText()).toEqual([
+      'First question: This field is required',
+      'Second question: This field is required',
+      'Third question: must NOT have fewer than 1 items',
+      'Third question: This field is required',
+      'Fourth question: This field is required',
+    ])
   })
 
   it('marks every widget with an error as invalid for screen readers', async () => {
