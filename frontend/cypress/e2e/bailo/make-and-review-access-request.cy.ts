@@ -71,6 +71,7 @@ describe.skip('Make and approve an access request', () => {
     cy.contains(`Reviewing access request ${accessRequestName} for model ${modelName}`)
     cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
+    cy.get('[data-test=submitReviewButton]').click()
 
     cy.visit(`/model/${modelUuid}/access-request/${accessRequestUuid}`)
     cy.get('[data-test=accessRequestContainer').contains('requested changes')

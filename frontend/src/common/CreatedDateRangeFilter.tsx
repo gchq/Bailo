@@ -1,5 +1,5 @@
 import dayjs from '@dayjs'
-import { Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 
 interface CreatedDateRangeFilterProps {
@@ -21,23 +21,27 @@ export default function CreatedDateRangeFilter({
   return (
     <Stack spacing={0.5}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { sm: 'center' } }}>
-        <DatePicker
-          label='From'
-          value={createdAfter ? dayjs(createdAfter) : null}
-          onChange={(date) => onCreatedAfterChange(date?.format('YYYY-MM-DD') || undefined)}
-          maxDate={createdBefore ? dayjs(createdBefore) : undefined}
-          slotProps={{ textField: { size: 'small', error: hasError } }}
-          sx={pickerSx}
-        />
+        <Box data-test='createdAfterFilter'>
+          <DatePicker
+            label='From'
+            value={createdAfter ? dayjs(createdAfter) : null}
+            onChange={(date) => onCreatedAfterChange(date?.format('YYYY-MM-DD') || undefined)}
+            maxDate={createdBefore ? dayjs(createdBefore) : undefined}
+            slotProps={{ textField: { size: 'small', error: hasError } }}
+            sx={pickerSx}
+          />
+        </Box>
         <Typography aria-hidden='true'>-</Typography>
-        <DatePicker
-          label='To'
-          value={createdBefore ? dayjs(createdBefore) : null}
-          onChange={(date) => onCreatedBeforeChange(date?.format('YYYY-MM-DD') || undefined)}
-          minDate={createdAfter ? dayjs(createdAfter) : undefined}
-          slotProps={{ textField: { size: 'small', error: hasError } }}
-          sx={pickerSx}
-        />
+        <Box data-test='createdBeforeFilter'>
+          <DatePicker
+            label='To'
+            value={createdBefore ? dayjs(createdBefore) : null}
+            onChange={(date) => onCreatedBeforeChange(date?.format('YYYY-MM-DD') || undefined)}
+            minDate={createdAfter ? dayjs(createdAfter) : undefined}
+            slotProps={{ textField: { size: 'small', error: hasError } }}
+            sx={pickerSx}
+          />
+        </Box>
       </Stack>
       {hasError && (
         <Typography variant='caption' color='error'>
