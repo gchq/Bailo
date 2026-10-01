@@ -1,3 +1,5 @@
+export {}
+
 const uniqueId = Date.now()
 const modelName = `Deployment assessment model ${uniqueId}`
 const publishedAssessmentName = `Published deployment assessment ${uniqueId}`

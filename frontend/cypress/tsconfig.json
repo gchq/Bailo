@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": ["es6", "dom"],
-    "moduleDetection": "force",
     "types": ["cypress", "cypress-axe", "node"]
   },
   "include": ["**/*.ts"]
