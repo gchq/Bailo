@@ -25,7 +25,7 @@
     "@cspell/dict-python": "^4.2.29",
     "@cspell/dict-scientific-terms-gb": "^1.0.6",
     "@cspell/dict-typescript": "^3.2.3",
-    "cspell": "^10.0.1",
+    "cspell": "^10.3.5",
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.9"
