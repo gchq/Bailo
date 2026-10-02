@@ -9,11 +9,11 @@ import log from '../services/log.js'
 import config from '../utils/config.js'
 import { GenericError, toBailoError } from '../utils/error.js'
 
-export async function sendEvents(events: string) {
+export async function sendEvents(events: Readable) {
   const controller = new AbortController()
   const passThrough = new PassThrough()
   let pipelineError: unknown
-  const pipelinePromise = pipeline(Readable.from(events), zlib.createGzip(), passThrough).catch((err) => {
+  const pipelinePromise = pipeline(events, zlib.createGzip(), passThrough).catch((err) => {
     pipelineError = err
     log.error({ err }, 'Failed to compress events for STROOM.')
     // abort safely causes `fetch` to reject
