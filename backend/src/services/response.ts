@@ -1,4 +1,4 @@
-import { ClientSession, Types } from 'mongoose'
+import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import ResponseModel, {
   Decision,
@@ -17,7 +17,7 @@ import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
-import { findReviewForResponse, findReviews, findReviewsForAccessRequests } from './review.js'
+import { findReviewForResponse, findReviews } from './review.js'
 import { notifyReleaseOnApproval, notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
 import { dispatchWebhooks } from './webhook.js'
 
@@ -196,46 +196,68 @@ export async function sendReviewResponseNotification(
   }
 }
 
+/**
+ * Adds `reviewerDecisions`, each reviewer's latest decision on a review. Grouping per reviewer stops a later
+ * approval masking another reviewer's outstanding `request_changes`, as in `findReviews`.
+ */
+function latestDecisionPerReviewerStages(): PipelineStage[] {
+  return [
+    {
+      $lookup: {
+        from: 'v2_responses',
+        let: { reviewId: '$_id' },
+        pipeline: [
+          // Only review responses carry a decision
+          { $match: { $expr: { $eq: ['$parentId', '$$reviewId'] }, kind: ResponseKind.Review } },
+          { $sort: { createdAt: -1 } },
+          { $group: { _id: '$entity', decision: { $first: '$decision' } } },
+          { $group: { _id: null, decisions: { $addToSet: '$decision' } } },
+        ],
+        as: 'latestDecisions',
+      },
+    },
+    {
+      $addFields: {
+        reviewerDecisions: { $ifNull: [{ $arrayElemAt: ['$latestDecisions.decisions', 0] }, []] },
+      },
+    },
+  ]
+}
+
+/** Approved only if a reviewer approved and no reviewer is currently requesting changes. */
+function isReviewApproved() {
+  return {
+    $and: [
+      { $in: [Decision.Approve, '$reviewerDecisions'] },
+      { $not: [{ $in: [Decision.RequestChanges, '$reviewerDecisions'] }] },
+    ],
+  }
+}
+
+/** Approved only when every one of its reviews is approved. */
 export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
-  const reviews = await findReviewsForAccessRequests(accessRequestIds)
-  const approvals = await ResponseModel.find({
-    parentId: reviews.map((review) => review._id),
-    decision: Decision.Approve,
-  })
-  return approvals.length > 0
+  const approvedAccessRequests = await ReviewModel.aggregate([
+    { $match: { accessRequestId: { $in: accessRequestIds } } },
+    ...latestDecisionPerReviewerStages(),
+    {
+      // Only groups access requests with at least one review
+      $group: {
+        _id: '$accessRequestId',
+        approvedReviews: { $sum: { $cond: [isReviewApproved(), 1, 0] } },
+        totalReviews: { $sum: 1 },
+      },
+    },
+    { $match: { $expr: { $eq: ['$approvedReviews', '$totalReviews'] } } },
+  ])
+
+  return approvedAccessRequests.length > 0
 }
 
 export async function checkReleaseApproved(modelId: string, semver: string) {
   const reviewsWithoutApproval = await ReviewModel.aggregate([
     { $match: { semver, modelId } },
-    {
-      $lookup: {
-        from: 'v2_responses',
-        localField: '_id',
-        foreignField: 'parentId',
-        as: 'responses',
-      },
-    },
-    {
-      $addFields: {
-        latestResponse: {
-          $arrayElemAt: [
-            {
-              $sortArray: {
-                input: '$responses',
-                sortBy: { createdAt: -1 },
-              },
-            },
-            0,
-          ],
-        },
-      },
-    },
-    {
-      $match: {
-        $or: [{ latestResponse: { $exists: false } }, { 'latestResponse.decision': { $ne: Decision.Approve } }],
-      },
-    },
+    ...latestDecisionPerReviewerStages(),
+    { $match: { $expr: { $not: [isReviewApproved()] } } },
   ])
 
   const totalReviews = await ReviewModel.countDocuments({ semver })
