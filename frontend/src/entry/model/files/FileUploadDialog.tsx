@@ -101,7 +101,7 @@ export default function FileUploadDialog({
       stagedFiles.map(({ file, metadata, relativePath }) => ({
         file,
         metadata,
-        uploadPath: destinationPath ? joinUploadPath(destinationPath, relativePath) : undefined,
+        uploadPath: joinUploadPath(destinationPath, relativePath),
       })),
     [stagedFiles, destinationPath],
   )

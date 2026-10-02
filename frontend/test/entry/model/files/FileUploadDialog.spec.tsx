@@ -21,6 +21,17 @@ function selectFile(fileName: string) {
   })
 }
 
+// Mirrors what the browser does for a folder upload: each File carries its path relative to the
+// selected folder in webkitRelativePath, which is read-only and so has to be defined explicitly.
+function selectFolder(relativePaths: string[]) {
+  const files = relativePaths.map((relativePath) => {
+    const file = new File(['test contents'], relativePath.split('/').pop() as string, { type: 'text/plain' })
+    Object.defineProperty(file, 'webkitRelativePath', { value: relativePath })
+    return file
+  })
+  fireEvent.change(screen.getByTestId('uploadFolderButton'), { target: { files } })
+}
+
 function renderDialog(initialUploadPath: string) {
   return render(
     <FileUploadDialog
@@ -83,8 +94,24 @@ describe('FileUploadDialog', () => {
     fireEvent.click(await screen.findByText('Upload files'))
 
     await waitFor(() => {
-      expect(vi.mocked(postFileForModelId).mock.calls[0][4]).toBe(undefined)
+      // Uploaded at the root, under its own name and with no destination prefixed.
+      expect(vi.mocked(postFileForModelId).mock.calls[0][4]).toBe('example.txt')
     })
+  })
+
+  it('keeps the folder structure when a folder is uploaded to the root', async () => {
+    vi.mocked(postFileForModelId).mockResolvedValue({ data: { file: { _id: 'abc' } } } as never)
+    renderDialog('')
+
+    selectFolder(['weights/b/model.bin', 'weights/c/config.json'])
+    fireEvent.click(await screen.findByText('Upload files'))
+
+    await waitFor(() => {
+      expect(vi.mocked(postFileForModelId)).toHaveBeenCalledTimes(2)
+    })
+    const uploadedNames = vi.mocked(postFileForModelId).mock.calls.map((call) => call[4])
+    expect(uploadedNames).toContain('weights/b/model.bin')
+    expect(uploadedNames).toContain('weights/c/config.json')
   })
 
   it('blocks uploading while the destination path is invalid', async () => {
