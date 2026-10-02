@@ -287,6 +287,7 @@ describe('utils > fileTreeUtils', () => {
       return {
         file: new File(['content'], name),
         uploadPath,
+        relativePath: uploadPath || name,
       }
     }
 

@@ -1,9 +1,13 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { ThemeProvider } from '@mui/material/styles'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { deleteEntryFile } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
+import { defaultUserPermissions } from 'src/hooks/UserPermissionsHook'
+import { lightTheme } from 'src/theme'
 import { FileInterface } from 'types/types'
-import { testV2Model } from 'utils/test/testModels'
+import { testUiConfig, testV2Model } from 'utils/test/testModels'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('actions/file', () => ({
@@ -12,6 +16,15 @@ vi.mock('actions/file', () => ({
 
 vi.mock('actions/entry', () => ({
   deleteEntryFile: vi.fn(),
+}))
+
+// The tag editor renders AdditionalInformation, which fetches the UI config.
+vi.mock('actions/uiConfig', () => ({
+  useGetUiConfig: vi.fn(() => ({
+    uiConfig: testUiConfig,
+    isUiConfigLoading: false,
+    isUiConfigError: undefined,
+  })),
 }))
 
 function selectFile(fileName: string) {
@@ -44,9 +57,81 @@ function renderDialog(initialUploadPath: string) {
   )
 }
 
+// The file tag editor sits behind a Restricted check, so it only renders with editEntry granted.
+function renderDialogAsEditor() {
+  return render(
+    // TagSelector reads custom palette entries, so it needs the application theme.
+    <ThemeProvider theme={lightTheme}>
+      <UserPermissionsContext.Provider
+        value={{
+          userPermissions: { ...defaultUserPermissions, editEntry: { hasPermission: true } },
+        }}
+      >
+        <FileUploadDialog
+          model={testV2Model}
+          open
+          onDialogClose={vi.fn()}
+          mutateModelFiles={vi.fn()}
+          initialUploadPath=''
+        />
+      </UserPermissionsContext.Provider>
+    </ThemeProvider>,
+  )
+}
+
+function uploadedMetadataFor(uploadPath: string) {
+  const call = vi.mocked(postFileForModelId).mock.calls.find((c) => c[4] === uploadPath)
+  return call?.[3]
+}
+
 describe('FileUploadDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  describe('files sharing a base name in different folders', () => {
+    const siblings = ['weights/b/config.json', 'weights/c/config.json']
+
+    it('removes only the file whose row was deleted', async () => {
+      renderDialog('')
+
+      selectFolder(siblings)
+      await screen.findByText(siblings[0])
+
+      // Each row renders its path as a deletable Chip.
+      const rowToDelete = screen.getByText(siblings[0]).closest('.MuiChip-root') as HTMLElement
+      fireEvent.click(rowToDelete.querySelector('.MuiChip-deleteIcon') as HTMLElement)
+
+      await waitFor(() => {
+        expect(screen.queryByText(siblings[0])).toBeNull()
+      })
+      expect(screen.queryByText(siblings[1])).not.toBeNull()
+    })
+
+    it('applies a tag only to the file it was entered against', async () => {
+      vi.mocked(postFileForModelId).mockResolvedValue({ data: { file: { _id: 'abc' } } } as never)
+      renderDialogAsEditor()
+
+      selectFolder(siblings)
+      await screen.findByText(siblings[0])
+
+      // Open the tag editor belonging to the first file's row.
+      const firstRow = screen.getByText(siblings[0]).closest('.MuiGrid-container') as HTMLElement
+      fireEvent.click(within(firstRow).getByText(/Edit file tags/))
+
+      const addTagButton = await screen.findByText('Add tag')
+      const tagEditor = addTagButton.closest('.MuiPaper-root') as HTMLElement
+      fireEvent.change(within(tagEditor).getByRole('textbox'), { target: { value: 'alpha' } })
+      fireEvent.click(addTagButton)
+
+      fireEvent.click(await screen.findByText('Upload files'))
+
+      await waitFor(() => {
+        expect(vi.mocked(postFileForModelId)).toHaveBeenCalledTimes(2)
+      })
+      expect(uploadedMetadataFor(siblings[0])?.tags).toEqual(['alpha'])
+      expect(uploadedMetadataFor(siblings[1])?.tags ?? []).toEqual([])
+    })
   })
 
   it('defaults the destination to the path the user has navigated to in the file browser', async () => {

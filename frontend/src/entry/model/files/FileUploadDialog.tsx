@@ -101,6 +101,7 @@ export default function FileUploadDialog({
       stagedFiles.map(({ file, metadata, relativePath }) => ({
         file,
         metadata,
+        relativePath,
         uploadPath: joinUploadPath(destinationPath, relativePath),
       })),
     [stagedFiles, destinationPath],
@@ -127,10 +128,10 @@ export default function FileUploadDialog({
     [stagedFiles],
   )
 
-  const handleFileMetadataOnChange = useCallback((metadata: FileUploadMetadata, fileName: string) => {
+  const handleFileMetadataOnChange = useCallback((metadata: FileUploadMetadata, relativePath: string) => {
     setStagedFiles((prev) =>
       prev.map((stagedFile) =>
-        stagedFile.file.name === fileName
+        stagedFile.relativePath === relativePath
           ? {
               ...stagedFile,
               metadata: {
@@ -207,7 +208,7 @@ export default function FileUploadDialog({
             }
             successfulFiles.push(fileUploadResponse.data.file)
             setUploadedFiles((prev) => [...prev, fileItem.file.name])
-            setStagedFiles((prev) => prev.filter((f) => f.file.name !== fileItem.file.name))
+            setStagedFiles((prev) => prev.filter((f) => f.relativePath !== fileItem.relativePath))
             mutateModelFiles()
           } else {
             setCurrentFileUploadProgress(undefined)
@@ -270,8 +271,8 @@ export default function FileUploadDialog({
     handleFileUpload([...nonConflicting, ...overwriteFiles])
   }, [filesToBeUploaded, existingFiles, detectedConflicts, conflictResolutions, handleFileUpload])
 
-  const handleDeleteFileFromUploadList = useCallback((fileName: string) => {
-    setStagedFiles((prev) => prev.filter((file) => file.file.name !== fileName))
+  const handleDeleteFileFromUploadList = useCallback((relativePath: string) => {
+    setStagedFiles((prev) => prev.filter((file) => file.relativePath !== relativePath))
   }, [])
 
   const fileListToUpload = useMemo(() => {

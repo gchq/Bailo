@@ -688,6 +688,9 @@ export type FileUploadWithMetadata = {
   file: File
   metadata?: FileUploadMetadata
   uploadPath?: string
+  // Path relative to the selected folder, unique across staged files and used to identify them.
+  // The file name alone is not enough: a folder can hold the same name in several subfolders.
+  relativePath: string
 }
 
 export type FileUploadMetadata = {
