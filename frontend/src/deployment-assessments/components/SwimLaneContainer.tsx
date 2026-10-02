@@ -156,6 +156,7 @@ export default function SwimLaneContainer({
           {visibleColumns.map((column) => (
             <SwimLaneColumn
               key={column.key}
+              columnKey={column.key}
               title={column.label}
               color={theme.palette.grey[200]}
               assessments={column.items}
