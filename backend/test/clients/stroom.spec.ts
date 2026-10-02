@@ -1,9 +1,11 @@
+import { PassThrough, Readable } from 'node:stream'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import { sendEvents } from '../../src/clients/stroom.js'
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({})),
+  default: vi.fn(),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
@@ -17,33 +19,70 @@ const httpService = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/http.js', async () => httpService)
 
+const zlibMock = vi.hoisted(() => ({
+  createGzip: vi.fn(() => new PassThrough()),
+}))
+vi.mock('node:zlib', () => ({ default: zlibMock }))
+
+let requestBody: Readable
+// Stub the next `fetch` call and capture the request body
+function mockFetchResponse(ok: boolean, body: string) {
+  fetchMock.default.mockImplementationOnce((_url: string, init: { body: Readable }) => {
+    requestBody = init.body
+    return { ok, text: async () => body }
+  })
+}
+
+// Read the captured request body back into the text that was sent
+async function readRequestBody() {
+  let body = ''
+  for await (const chunk of requestBody) {
+    body += chunk
+  }
+  return body
+}
+
 describe('clients > stroom', () => {
-  // string generator to be configged
   const events =
-    '<?xml version="1.0"?><Events xmlns="file://xml/schema/accounting/events" xmlns:stroom="stroom" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="file://xml/schema/accounting/events file://events-v3.5.0.xsd" Version="3.5.0"><Event><EventTime><TimeCreated>2024-02-06T14:15:08.048Z</TimeCreated></EventTime><EventSource><System><Name>bailo</Name><Environment>local</Environment></System><Generator>Generator</Generator><Device><IPAddress>172.26.0.7</IPAddress></Device><Client><IPAddress>172.26.0.1</IPAdress></Client><User><Id>dn=Joe Bloggs</Id></User></EventSource><EventDetail><TypeId>ViewUserToken</TypeId><View><Object><Id>tjbu90c78o</Id><Name>token</Name><Description>Token Viewed</Description></Object></View></EventDetail></Event></Events>'
+    '<?xml version="1.0"?><Events><Event><EventDetail><TypeId>ViewUserToken</TypeId></EventDetail></Event></Events>'
+
   test('sendEvents > success', async () => {
-    const body = 'success'
-    fetchMock.default.mockReturnValueOnce({
-      ok: true,
-      body,
-    })
+    mockFetchResponse(true, 'success')
 
-    const resp = await sendEvents(events)
+    const resp = await sendEvents(Readable.from(events))
 
-    expect(fetchMock.default).toHaveBeenCalled()
-    expect(resp).toBe(body)
+    expect(resp).toBe('success')
+    expect(await readRequestBody()).toBe(events)
+    expect(zlibMock.createGzip).toHaveBeenCalled()
+    expect(fetchMock.default.mock.lastCall?.[1].headers).toEqual({ 'Content-Encoding': 'gzip' })
+  })
+
+  test('sendEvents > sends every chunk of a multi-chunk stream', async () => {
+    mockFetchResponse(true, 'success')
+
+    await sendEvents(Readable.from(['<Events>', '<Event/>', '</Events>']))
+
+    expect(await readRequestBody()).toBe('<Events><Event/></Events>')
   })
 
   test('sendEvents > bad 200 response', async () => {
-    const body = 'bad'
-    fetchMock.default.mockReturnValueOnce({
-      ok: false,
-      body,
+    mockFetchResponse(false, 'bad')
+
+    const resp = sendEvents(Readable.from(events))
+
+    await expect(resp).rejects.toThrow('Failed to send logs to STROOM - Non-200 response')
+  })
+
+  test('sendEvents > rejects with the original error when the source stream fails', async () => {
+    mockFetchResponse(true, 'success')
+    const failingStream = new Readable({
+      read() {
+        this.destroy(new Error('stream exploded'))
+      },
     })
 
-    const resp = sendEvents(events)
+    const resp = sendEvents(failingStream)
 
-    await expect(resp).rejects.toThrow(`Failed to send logs to STROOM - Non-200 response`)
-    expect(fetchMock.default).toHaveBeenCalled()
+    await expect(resp).rejects.toThrow('stream exploded')
   })
 })
