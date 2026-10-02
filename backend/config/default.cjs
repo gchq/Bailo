@@ -359,7 +359,7 @@ module.exports = {
       'Content-Encoding': 'gzip',
     },
     batchSizeLimit: 50,
-    staleBatchTimeout: 1000 * 60 * 10,
+    staleBatchTimeoutMs: 1000 * 60 * 10,
   },
 
   modelMirror: {
