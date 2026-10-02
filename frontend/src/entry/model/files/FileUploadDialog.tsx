@@ -143,6 +143,21 @@ export default function FileUploadDialog({
     )
   }, [])
 
+  // Returns an error message if the replaced file could not be removed, otherwise undefined. The
+  // replacement is already uploaded by this point, so a failure here leaves both files in place
+  // rather than losing anything.
+  const deleteOverwrittenFile = useCallback(
+    async (existingFile: FileInterface): Promise<string | undefined> => {
+      try {
+        const deleteRes = await deleteEntryFile(model.id, existingFile._id)
+        return deleteRes.ok ? undefined : 'Uploaded, but could not remove the existing file it replaces'
+      } catch (e) {
+        return e instanceof Error ? e.message : 'Uploaded, but could not remove the existing file it replaces'
+      }
+    },
+    [model.id],
+  )
+
   const handleFileUpload = useCallback(
     async (filesToProcess: FileUploadWithMetadata[]) => {
       const failedFiles: FailedFileUpload[] = []
@@ -163,26 +178,6 @@ export default function FileUploadDialog({
         const uploadName = fileItem.uploadPath || fileItem.file.name
         const existingFile = overwriteMap.get(uploadName)
 
-        // Delete the existing file before uploading the replacement
-        if (existingFile) {
-          try {
-            const deleteRes = await deleteEntryFile(model.id, existingFile._id)
-            if (!deleteRes.ok) {
-              failedFiles.push({ fileName: fileItem.file.name, error: 'Failed to delete existing file for overwrite' })
-              setFailedFileUploads((prev) => [
-                ...prev,
-                { fileName: fileItem.file.name, error: 'Failed to delete existing file for overwrite' },
-              ])
-              continue
-            }
-          } catch (e) {
-            const message = e instanceof Error ? e.message : 'Failed to delete existing file'
-            failedFiles.push({ fileName: fileItem.file.name, error: message })
-            setFailedFileUploads((prev) => [...prev, { fileName: fileItem.file.name, error: message }])
-            continue
-          }
-        }
-
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -200,6 +195,16 @@ export default function FileUploadDialog({
           )
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
+            // Remove the file being replaced only once its replacement is safely uploaded. Deleting
+            // first means a failed upload destroys the original with nothing to put in its place.
+            if (existingFile) {
+              const deleteError = await deleteOverwrittenFile(existingFile)
+              if (deleteError) {
+                const failed = { fileName: fileItem.file.name, error: deleteError }
+                failedFiles.push(failed)
+                setFailedFileUploads((prev) => [...prev, failed])
+              }
+            }
             successfulFiles.push(fileUploadResponse.data.file)
             setUploadedFiles((prev) => [...prev, fileItem.file.name])
             setStagedFiles((prev) => prev.filter((f) => f.file.name !== fileItem.file.name))
@@ -226,7 +231,15 @@ export default function FileUploadDialog({
         setStagedFiles([])
       }
     },
-    [model.id, mutateModelFiles, detectedConflicts, conflictResolutions, onDialogClose, onFilesUploaded],
+    [
+      model.id,
+      mutateModelFiles,
+      detectedConflicts,
+      conflictResolutions,
+      onDialogClose,
+      onFilesUploaded,
+      deleteOverwrittenFile,
+    ],
   )
 
   const handleUploadClick = useCallback(() => {

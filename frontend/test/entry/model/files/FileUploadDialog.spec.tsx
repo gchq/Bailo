@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { deleteEntryFile } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
+import { FileInterface } from 'types/types'
 import { testV2Model } from 'utils/test/testModels'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -114,5 +116,58 @@ describe('FileUploadDialog', () => {
     })
 
     resolveUpload({ data: { file: { _id: 'abc' } } })
+  })
+
+  describe('overwriting an existing file', () => {
+    const existingFile = {
+      _id: 'existing-file-id',
+      name: 'example.txt',
+      size: 1234,
+      createdAt: new Date('2026-01-01'),
+    } as unknown as FileInterface
+
+    async function overwriteExistingFile() {
+      render(
+        <FileUploadDialog
+          model={testV2Model}
+          open
+          onDialogClose={vi.fn()}
+          mutateModelFiles={vi.fn()}
+          initialUploadPath=''
+          existingFiles={[existingFile]}
+        />,
+      )
+
+      selectFile('example.txt')
+      fireEvent.click(await screen.findByText('Upload files'))
+      fireEvent.click(await screen.findByText('Overwrite'))
+      fireEvent.click(await screen.findByText('Continue Upload'))
+    }
+
+    it('keeps the existing file when the replacement upload fails', async () => {
+      vi.mocked(deleteEntryFile).mockResolvedValue({ ok: true } as Response)
+      vi.mocked(postFileForModelId).mockRejectedValue(new Error('network died mid-transfer'))
+
+      await overwriteExistingFile()
+
+      await waitFor(() => {
+        expect(vi.mocked(postFileForModelId)).toHaveBeenCalled()
+      })
+      expect(vi.mocked(deleteEntryFile)).not.toHaveBeenCalled()
+    })
+
+    it('deletes the existing file only after the replacement has uploaded', async () => {
+      vi.mocked(deleteEntryFile).mockResolvedValue({ ok: true } as Response)
+      vi.mocked(postFileForModelId).mockResolvedValue({ data: { file: { _id: 'new-file-id' } } } as never)
+
+      await overwriteExistingFile()
+
+      await waitFor(() => {
+        expect(vi.mocked(deleteEntryFile)).toHaveBeenCalledWith(testV2Model.id, 'existing-file-id')
+      })
+      expect(vi.mocked(postFileForModelId).mock.invocationCallOrder[0]).toBeLessThan(
+        vi.mocked(deleteEntryFile).mock.invocationCallOrder[0],
+      )
+    })
   })
 })
