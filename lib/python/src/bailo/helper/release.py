@@ -258,8 +258,12 @@ class Release:
             {self.model_id},
         )
         os.makedirs(path, exist_ok=True)
+        target_dir = os.path.realpath(path)
         for file in file_names:
-            file_path = os.path.join(path, file)
+            # File names come from the server, so reject any that would escape the target directory.
+            file_path = os.path.realpath(os.path.join(target_dir, file))
+            if os.path.commonpath([target_dir, file_path]) != target_dir or file_path == target_dir:
+                raise BailoException(f"File name {file!r} would be written outside of the target directory {path!r}.")
             # Create intermediate directories for path-like filenames (e.g. "weights/model.bin")
             file_dir = os.path.dirname(file_path)
             if file_dir:
