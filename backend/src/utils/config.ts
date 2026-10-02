@@ -195,6 +195,7 @@ export interface Config {
     version: string
     headers: Record<string, string>
     batchSizeLimit: number
+    staleBatchTimeoutMs: number
   }
 
   artefactScanning: {

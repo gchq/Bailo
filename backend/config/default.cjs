@@ -359,6 +359,8 @@ module.exports = {
       'Content-Encoding': 'gzip',
     },
     batchSizeLimit: 50,
+    // How long a batch may stay claimed before another run is allowed to reclaim it.
+    staleBatchTimeout: 1000 * 60 * 10,
   },
 
   modelMirror: {
