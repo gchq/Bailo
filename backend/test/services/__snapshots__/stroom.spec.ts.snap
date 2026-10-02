@@ -1,11 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > stroom > processBatch > cannot send logs 1`] = `[]`;
+exports[`services > stroom > processBatch > skips and quarantines an event that is not valid JSON 1`] = `"<?xml version="1.0"?><Events xmlns="default-namespace" xmlns:stroom="stroom" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="default-namespace file://schema-location.xsd" Version="1.0.0"><Event><EventDetail><TypeId>ViewUserToken</TypeId></EventDetail></Event></Events>"`;
 
-exports[`services > stroom > processBatch > log on failed events 1`] = `
-[
-  [
-    "Audit events have failed to send after maximum number of attempts. Please take action.",
-  ],
-]
-`;
+exports[`services > stroom > processBatch > streams the claimed batch as XML 1`] = `"<?xml version="1.0"?><Events xmlns="default-namespace" xmlns:stroom="stroom" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="default-namespace file://schema-location.xsd" Version="1.0.0"><Event><EventDetail><TypeId>ViewUserToken</TypeId></EventDetail></Event></Events>"`;

@@ -16,6 +16,7 @@ import { TokenDoc } from '../../../src/models/Token.js'
 import { MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
 import { ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
+import config from '../../../src/utils/config.js'
 import { InternalError } from '../../../src/utils/error.js'
 
 const logMock = vi.hoisted(() => ({
@@ -30,6 +31,7 @@ vi.mock('../../../src/services/log.js', async () => ({
 
 const mockStroomService = vi.hoisted(() => ({
   saveEvent: vi.fn(),
+  processBatch: vi.fn(async () => {}),
 }))
 vi.mock('../../../src/services/stroom.js', () => mockStroomService)
 
@@ -462,5 +464,13 @@ describe('connectors > audit > stroom', () => {
   test('onError > save expected event for Search error', async () => {
     await connector.onError(searchEventRequest, InternalError('Error'))
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('scheduled batch > logs a failure instead of rejecting unhandled', async () => {
+    mockStroomService.processBatch.mockRejectedValueOnce(new Error('batch failed'))
+
+    await vi.advanceTimersByTimeAsync(config.stroom.interval)
+
+    expect(logMock.error).toHaveBeenCalledWith({ err: expect.any(Error) }, 'Failed to process batch of STROOM events.')
   })
 })

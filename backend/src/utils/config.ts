@@ -194,6 +194,8 @@ export interface Config {
     schemaLocation: string
     version: string
     headers: Record<string, string>
+    batchSizeLimit: number
+    staleBatchTimeoutMs: number
   }
 
   artefactScanning: {
