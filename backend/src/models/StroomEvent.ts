@@ -24,7 +24,7 @@ export interface StroomEventObject {
 }
 
 export interface StroomEventInterface {
-  event: StroomEventObject
+  event: string
   batchId: string
   inFlight: boolean
   attempts: number
@@ -56,7 +56,7 @@ function getSchema(schema: string) {
   return JSON.parse(schema)
 }
 
-function setSchema(schema: unknown) {
+function setSchema(schema: StroomEventObject) {
   return JSON.stringify(schema)
 }
 

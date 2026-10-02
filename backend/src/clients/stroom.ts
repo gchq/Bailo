@@ -13,8 +13,9 @@ export async function sendEvents(events: string) {
   const controller = new AbortController()
   const passThrough = new PassThrough()
   const pipelinePromise = pipeline(Readable.from(events), zlib.createGzip(), passThrough).catch((err) => {
+    log.error({ err }, 'Failed to send events to STROOM.')
+    // abort safely causes `fetch` to reject
     controller.abort()
-    throw err
   })
   const res = await fetch(config.stroom.url, {
     method: 'POST',
@@ -33,11 +34,11 @@ export async function sendEvents(events: string) {
   if (!res.ok) {
     throw GenericError(res.status, 'Failed to send logs to STROOM - Non-200 response', {
       res,
-      body: res.body,
+      body: await res.text(),
     })
   }
 
-  const responseBody = res.body
+  const responseBody = await res.text()
   log.info({ url: config.stroom.url, body: responseBody }, 'Successfully sent batch of events to STROOM.')
   return responseBody
 }
