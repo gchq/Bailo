@@ -23,7 +23,7 @@ const mockStroomClient = vi.hoisted(() => ({
 }))
 vi.mock('../../src/clients/stroom.js', () => mockStroomClient)
 
-/** Stub of a Mongoose query chain that is both awaitable (like a query) and iterable (like a cursor). */
+// Stub a Mongoose query chain that is awaitable (like a query) and iterable (like a cursor)
 function mockQuery(docs: Array<unknown>) {
   const chain = {
     sort: () => chain,
@@ -43,8 +43,7 @@ function mockEvent(id: string, typeId: string) {
 }
 
 describe('services > stroom', () => {
-  // The XML that `processBatch` streamed to the client. The stream is lazy, so the mocked client has to
-  // consume it just as the real one does.
+  // Lazy XML stream that `processBatch` sends to the client, so mocked client has to consume
   let sentXml: string
 
   beforeEach(() => {
@@ -138,13 +137,18 @@ describe('services > stroom', () => {
   })
 
   test('processBatch > reclaims batches left in flight by a dead process', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T12:00:00.000Z'))
+
     await processBatch()
 
     expect(StroomEventModelMock.updateMany.mock.calls.at(0)).toEqual([
-      { inFlight: true, updatedAt: { $lt: expect.any(Date) } },
+      { inFlight: true, updatedAt: { $lt: new Date('2026-01-01T11:50:00.000Z') } },
       { batchId: '', inFlight: false, $inc: { attempts: 1 } },
     ])
     expect(logMock.warn.mock.calls.at(0)?.at(1)).toBe('Reclaimed stale STROOM batches. Incrementing attempts.')
+
+    vi.useRealTimers()
   })
 
   test('processBatch > logs events that have exhausted their attempts', async () => {

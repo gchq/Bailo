@@ -42,6 +42,7 @@ export async function processBatch() {
 
 async function doProcessBatch() {
   await reclaimStaleBatches()
+  await logStuckEvents()
 
   const batchId = longId()
   const claimedCount = await claimBatch(batchId)
@@ -60,8 +61,6 @@ async function doProcessBatch() {
   }
   await quarantineCorruptEvents(corruptIds)
   await StroomEvent.deleteMany({ batchId })
-
-  await logStuckEvents()
 }
 
 /**
