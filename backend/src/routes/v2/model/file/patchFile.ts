@@ -22,6 +22,7 @@ export const patchFileSchema = z.object({
     metadata: z.object({}).optional(),
     name: z.string().optional(),
     mime: z.string().optional(),
+    ungovernedAccess: z.boolean().optional(),
   }),
 })
 
