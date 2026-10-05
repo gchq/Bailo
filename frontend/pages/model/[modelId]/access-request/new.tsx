@@ -49,6 +49,11 @@ export default function NewAccessRequest() {
     setSplitSchema({ reference: schema.id, steps })
   }, [schema, model, currentUser])
 
+  // Picking a different schema starts a new form, so stop highlighting errors until it is submitted
+  useEffect(() => {
+    setFormValidationErrorState(false)
+  }, [schemaId])
+
   async function onSubmit() {
     setSubmissionErrorText('')
     setSubmitButtonLoading(true)

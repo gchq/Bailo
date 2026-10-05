@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
+import CoreForm from '@rjsf/core'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -32,17 +33,23 @@ import {
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
+import useScrollToHash from 'src/hooks/useScrollToHash'
 import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import {
+  createBlankValueValidator,
   getFormStats,
   getOverallCompletionStats,
+  rewordRJSFErrors,
   setFormDataPropertiesToUndefined,
   setStepState,
+  skipPopulatingPrimitiveArrays,
   widgets,
 } from 'utils/formUtils'
 import { parseNat, toSentenceCase } from 'utils/stringUtils'
+
+const defaultFormStateBehavior = { arrayMinItems: { computeSkipPopulate: skipPopulatingPrimitiveArrays } }
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -55,6 +62,7 @@ export default function JsonSchemaForm({
   compareMode = false,
   stateList,
   currentState,
+  showValidation = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -66,6 +74,7 @@ export default function JsonSchemaForm({
   compareMode?: boolean
   stateList?: string[]
   currentState?: string
+  showValidation?: boolean
 }) {
   const theme = useTheme()
   const router = useRouter()
@@ -114,9 +123,11 @@ export default function JsonSchemaForm({
       return unchanged ? prev : nextCompletion
     })
   }, [splitSchema, mirroredModel, requiredByModelState, canEdit])
-  const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
+
+  useScrollToHash()
 
   const ref = useRef<HTMLDivElement | null>(null)
+  const formRef = useRef<CoreForm | null>(null)
 
   const copyToClipboard = useCopyToClipboard()
 
@@ -141,6 +152,8 @@ export default function JsonSchemaForm({
     [splitSchema, calculateStats, mirroredModel, requiredByModelState],
   )
 
+  const blankValueValidator = useMemo(() => createBlankValueValidator(currentStep?.schema), [currentStep?.schema])
+
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
   })
@@ -151,15 +164,12 @@ export default function JsonSchemaForm({
     }
   }, [router])
 
+  // Force RJSF validation when showing errors, or when the form is remounted by the key below
   useEffect(() => {
-    if (ref && sharedSection) {
-      const section = document.getElementById(sharedSection) as HTMLElement
-      if (!section) {
-        return
-      }
-      section.scrollIntoView({ behavior: 'smooth' })
+    if (showValidation) {
+      formRef.current?.validateForm()
     }
-  }, [ref, sharedSection])
+  }, [showValidation, activeStep, splitSchema.reference])
 
   if (!currentStep) {
     return null
@@ -305,14 +315,24 @@ export default function JsonSchemaForm({
             </Stack>
           )}
           <Form
+            // Page change resets error state so force rerender above; otherwise RJSF keeps the old page's error list and drops inline errors
+            key={`${splitSchema.reference}-${activeStep}-${showValidation}`}
+            ref={formRef}
             schema={currentStep.schema}
             formData={updatedMirroredState}
             onChange={onFormChange}
+            // Errors are rendered by the templates below, so RJSF does not need to log them
+            onError={() => undefined}
             validator={validator}
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
             liveOmit
+            liveValidate={showValidation ? 'onChange' : undefined}
+            showErrorList={showValidation ? 'top' : false}
+            transformErrors={rewordRJSFErrors}
+            customValidate={blankValueValidator}
+            experimental_defaultFormStateBehavior={defaultFormStateBehavior}
             formContext={{
               editMode: canEdit,
               formSchema: currentStep.schema,
@@ -326,7 +346,7 @@ export default function JsonSchemaForm({
               requiredByModelState: requiredByModelState,
             }}
             templates={
-              !canEdit
+              !canEdit && !showValidation
                 ? {
                     DescriptionFieldTemplate,
                     ArrayFieldTemplate,

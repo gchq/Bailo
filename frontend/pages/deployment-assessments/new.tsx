@@ -45,6 +45,11 @@ export default function NewDeploymentAssessment() {
     setSplitSchema({ reference: schema.id, steps })
   }, [schema, currentUser, modelId])
 
+  // Picking a different schema starts a new form, so stop highlighting errors until it is submitted
+  useEffect(() => {
+    setFormValidationErrorState(false)
+  }, [schemaId])
+
   async function onSaveDraft() {
     setErrorText('')
     setDraftButtonLoading(true)
