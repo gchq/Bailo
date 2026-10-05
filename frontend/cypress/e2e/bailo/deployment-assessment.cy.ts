@@ -13,21 +13,29 @@ let daToDeleteUuid = ''
 const deploymentAssessmentIds: string[] = []
 let modelId = ''
 
-function enterDate(selector: string, date: Date) {
-  const values = [
+function getDateSegmentValues(date: Date) {
+  return [
     [date.getUTCDate().toString().padStart(2, '0'), 0],
     [(date.getUTCMonth() + 1).toString().padStart(2, '0'), 1],
     [date.getUTCFullYear().toString(), 2],
   ] as const
+}
+
+function assertDate(selector: string, date: Date) {
+  getDateSegmentValues(date).forEach(([value, index]) => {
+    cy.get(selector).find('[role=spinbutton]').eq(index).should('have.text', value)
+  })
+}
+
+function enterDate(selector: string, date: Date) {
+  const values = getDateSegmentValues(date)
 
   values.forEach(([value, index]) => {
     cy.get(selector).find('[role=spinbutton]').eq(index).click().type(`{selectall}${value}`).should('have.text', value)
   })
 
-  cy.get(selector).find('[role=spinbutton]').eq(2)
-  values.forEach(([value, index]) => {
-    cy.get(selector).find('[role=spinbutton]').eq(index).should('have.text', value)
-  })
+  cy.get(selector).find('[role=spinbutton]').eq(2).blur()
+  assertDate(selector, date)
 }
 
 const newDeploymentAssessmentValuesObject = {
@@ -150,6 +158,13 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[role=option]').contains(modelName).should('be.visible').click()
     cy.get('[data-test=modelSelector] .MuiChip-root').should('contain.text', modelName)
 
+    cy.get('[data-test=aboutButton]').click()
+    assertDate('[data-test=dateSelectorInput]', new Date('2099-06-30T00:00:00.000Z'))
+    cy.get('[data-test=signOffButton]').click()
+    cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
+    cy.get('[data-test=modelOverviewButton]').click()
+    cy.get('[data-test=modelSelector] .MuiChip-root').should('contain.text', modelName)
+
     cy.intercept('POST', '**/api/v3/deployment-assessments').as('submitDeploymentAssessment')
     cy.get('[data-test=submitDeploymentAssessmentButton]').should('be.enabled').click()
     cy.contains('Please make sure that all sections have been completed.').should('not.exist')
@@ -185,6 +200,13 @@ describe('Deployment Assessment Suite', () => {
       .contains(/^user2$/)
       .should('be.visible')
       .click()
+    cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
+
+    cy.get('[data-test=aboutButton]').click()
+    assertDate('[data-test=dateSelectorInput]', new Date('2098-05-01T00:00:00.000Z'))
+    cy.get('[data-test=modelOverviewButton]').click()
+    cy.get('[data-test=modelSelector] .MuiChip-root').should('contain.text', modelName)
+    cy.get('[data-test=signOffButton]').click()
     cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
 
     cy.intercept('PATCH', '**/api/v3/deployment-assessments/*').as('saveDeploymentAssessment')
@@ -253,6 +275,13 @@ describe('Deployment Assessment Suite', () => {
     cy.get('[data-test=modelOverviewButton]').click()
     cy.get('[data-test=modelSelectorInput]').type(modelName)
     cy.get('[role=option]').contains(modelName).should('be.visible').click()
+    cy.get('[data-test=modelSelector] .MuiChip-root').should('contain.text', modelName)
+
+    cy.get('[data-test=aboutButton]').click()
+    assertDate('[data-test=dateSelectorInput]', new Date('2098-05-01T00:00:00.000Z'))
+    cy.get('[data-test=signOffButton]').click()
+    cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
+    cy.get('[data-test=modelOverviewButton]').click()
     cy.get('[data-test=modelSelector] .MuiChip-root').should('contain.text', modelName)
 
     cy.intercept('PATCH', '**/api/v3/deployment-assessments/*').as('saveDraftDeploymentAssessment')
