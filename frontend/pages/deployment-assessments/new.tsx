@@ -1,5 +1,6 @@
 import { TextField } from '@mui/material'
 import { postDeploymentAssessment } from 'actions/deploymentAssessment'
+import { useGetModel } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -20,6 +21,7 @@ export default function NewDeploymentAssessment() {
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [name, setName] = useState('')
   const [errorText, setErrorText] = useState('')
@@ -27,7 +29,10 @@ export default function NewDeploymentAssessment() {
   const [draftButtonLoading, setDraftButtonLoading] = useState(false)
   const [formValidationErrorState, setFormValidationErrorState] = useState(false)
 
-  const isFormLoading = useMemo(() => isSchemaLoading || isCurrentUserLoading, [isSchemaLoading, isCurrentUserLoading])
+  const isFormLoading = useMemo(
+    () => isSchemaLoading || isCurrentUserLoading || isModelLoading,
+    [isSchemaLoading, isCurrentUserLoading, isModelLoading],
+  )
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -123,6 +128,7 @@ export default function NewDeploymentAssessment() {
   }, [schemaId, setUnsavedChanges])
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment page', {
+    isModelError,
     isSchemaError,
     isCurrentUserError,
   })
