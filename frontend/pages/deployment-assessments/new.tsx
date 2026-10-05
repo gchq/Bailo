@@ -1,4 +1,4 @@
-import { TextField } from '@mui/material'
+import { Alert, TextField } from '@mui/material'
 import { postDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetModel } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
@@ -21,7 +21,7 @@ export default function NewDeploymentAssessment() {
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [name, setName] = useState('')
   const [errorText, setErrorText] = useState('')
@@ -161,6 +161,11 @@ export default function NewDeploymentAssessment() {
       draftButtonLoading={draftButtonLoading}
       disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
     >
+      {model && (
+        <Alert severity='info' sx={{ mb: 2 }}>
+          This assessment will be linked to <strong>{model.name}</strong>. The model has been pre-filled in the form.
+        </Alert>
+      )}
       <LabelledInput fullWidth label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
         <TextField
           fullWidth

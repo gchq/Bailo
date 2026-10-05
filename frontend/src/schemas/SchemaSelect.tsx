@@ -5,6 +5,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Box,
   Button,
   Container,
@@ -13,7 +14,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
+import { useGetEntry, useGetModel } from 'actions/entry'
 import { postFromSchema } from 'actions/modelCard'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
@@ -59,6 +60,12 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     entry?.kind && (MODEL_ENTRY_KINDS as EntryKindKeys[]).includes(entry.kind) ? MODEL_ENTRY_KINDS : entry?.kind
   // `useGetEntry(entry.id, MODEL_ENTRY_KINDS)` === `useGetModel(entry.id)`
   const { mutateEntry } = useGetEntry(entry?.id, entryKind)
+
+  // Only relevant for DEPLOYMENT_ASSESSMENT - fetches the model pre-selected via the modelId query param
+  const { modelId: queryModelId } = router.query
+  const { entry: preselectedModel } = useGetModel(
+    schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT ? (queryModelId as string | undefined) : null,
+  )
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,
@@ -153,10 +160,10 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
 
   const backLabel = useMemo(() => {
     if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
-      return 'Back to Deployment Assessments'
+      return preselectedModel ? `Back to ${preselectedModel.name}` : 'Back to Deployment Assessments'
     }
     return `Back to ${EntryKindLabel[entry.kind]}`
-  }, [schemaKind, entry])
+  }, [schemaKind, entry, preselectedModel])
 
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isSchemasError,
@@ -177,6 +184,12 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                 {backLabel}
               </Button>
             </Link>
+            {preselectedModel && (
+              <Alert severity='info' sx={{ mb: 2 }}>
+                You are creating a deployment assessment for <strong>{preselectedModel.name}</strong>. The model will be
+                pre-filled in the form.
+              </Alert>
+            )}
             <Stack
               spacing={2}
               sx={{
