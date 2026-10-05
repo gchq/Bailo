@@ -1,7 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > stroom > processBatch > cannot send logs 1`] = `[]`;
-
 exports[`services > stroom > processBatch > error sending events 1`] = `
 [
   [
