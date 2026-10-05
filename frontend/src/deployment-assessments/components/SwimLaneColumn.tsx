@@ -8,6 +8,7 @@ import {
 import { DeploymentAssessmentSummary } from 'types/types'
 
 interface SwimLaneColumnProps {
+  columnKey: string
   title: string
   color: string
   assessments: DeploymentAssessmentSummary[]
@@ -15,10 +16,11 @@ interface SwimLaneColumnProps {
   onHide: () => void
 }
 
-export function SwimLaneColumn({ title, color, assessments, isLoading, onHide }: SwimLaneColumnProps) {
+export function SwimLaneColumn({ columnKey, title, color, assessments, isLoading, onHide }: SwimLaneColumnProps) {
   const skeletonCount = 1
   return (
     <Box
+      data-test={`deploymentAssessmentColumn-${columnKey}`}
       sx={{
         flex: '1 1 220px',
         minWidth: 220,

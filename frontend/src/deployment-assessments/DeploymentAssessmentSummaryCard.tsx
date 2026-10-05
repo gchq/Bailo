@@ -36,7 +36,7 @@ export default function DeploymentAssessmentSummaryCard({
   const owners = assessment.owner ? (Array.isArray(assessment.owner) ? assessment.owner : [assessment.owner]) : []
 
   return (
-    <>
+    <Box data-test={`deploymentAssessmentSummary-${assessment.id}`}>
       <ReviewBanner deploymentAssessment={assessment} />
       <Box data-test='deploymentAssessmentSummaryCard' sx={{ p: 2 }}>
         <Stack spacing={2}>
@@ -141,6 +141,6 @@ export default function DeploymentAssessmentSummaryCard({
           </Stack>
         </Card>
       </Box>
-    </>
+    </Box>
   )
 }
