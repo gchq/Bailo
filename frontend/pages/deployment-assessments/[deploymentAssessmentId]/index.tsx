@@ -146,6 +146,7 @@ export default function DeploymentAssessment() {
                 {!deploymentAssessment.draft && (
                   <ReviewBanner
                     deploymentAssessment={deploymentAssessment}
+                    isReviewButtonDisabled={isReviewsLoading}
                     onReviewButtonClicked={(anchor) => {
                       setAnchorEl(anchor)
                       setIsReviewPanelShown(true)

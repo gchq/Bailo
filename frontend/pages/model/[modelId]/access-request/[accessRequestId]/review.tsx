@@ -33,13 +33,16 @@ export default function AccessRequestReview() {
     accessRequestId: `${accessRequestId}`,
   })
 
-  async function handleSubmit(decision: DecisionKeys, comment: string, role: string) {
+  async function handleSubmit(decision: DecisionKeys, comment: string, role: string | undefined) {
     setErrorMessage('')
     if (!modelId) {
       return setErrorMessage('Could not find model ID')
     }
     if (!accessRequestId) {
       return setErrorMessage('Could not find access request ID')
+    }
+    if (!role) {
+      return setErrorMessage('Could not find review role')
     }
 
     setIsReviewButtonLoading(true)

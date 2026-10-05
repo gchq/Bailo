@@ -27,7 +27,7 @@ import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
 
 type ReviewWithCommentProps = {
-  onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate: Dayjs | null) => void
+  onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string | undefined, dueDate: Dayjs | null) => void
   loading?: boolean
   reviews: ReviewRequestInterface[]
   modelId?: string
@@ -77,7 +77,7 @@ export default function ReviewWithComment({
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
 
-  const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
+  const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface | undefined>(
     reviews.find((review) => review.role === router.query.role) || reviews[0],
   )
 
@@ -85,13 +85,26 @@ export default function ReviewWithComment({
     return reviewComment.trim() === '' ? true : false
   }
 
+  // Reviews are fetched asynchronously so initial state can be undefined. Resync whenever the current selection is missing
   useEffect(() => {
-    if (reviewRequest && !router.query.role) {
+    if (reviews.length === 0) {
+      return
+    }
+    setReviewRequest((currentReviewRequest) => {
+      if (currentReviewRequest && reviews.some((review) => review.role === currentReviewRequest.role)) {
+        return currentReviewRequest
+      }
+      return reviews.find((review) => review.role === router.query.role) || reviews[0]
+    })
+  }, [reviews, router.query.role])
+
+  useEffect(() => {
+    if (!deploymentAssessmentReview && reviewRequest && !router.query.role) {
       router.replace({
         query: { ...router.query, role: reviewRequest.role },
       })
     }
-  }, [router, reviewRequest])
+  }, [router, reviewRequest, deploymentAssessmentReview])
 
   function handleSubmitOnClick() {
     submitForm(decision)
@@ -108,7 +121,11 @@ export default function ReviewWithComment({
       setErrorText('You must submit a comment when requesting changes.')
     } else if (invalidComment() && selectedDecision === Decision.Reject) {
       setErrorText('You must submit a comment when rejecting.')
-    } else if (!reviewRequest || !reviewRequest.role) {
+    } else if (deploymentAssessmentReview) {
+      // Deployment assessment reviews have no role selector and the role is not sent to the API.
+      setReviewComment('')
+      onSubmit(selectedDecision, reviewComment, undefined, dueDate)
+    } else if (!reviewRequest?.role) {
       setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')

@@ -58,7 +58,12 @@ export default function LifecycleReview() {
     onSplitSchemaChange({ reference: schema.id, steps })
   }, [schema, model])
 
-  async function handleSubmit(decision: DecisionKeys, comment: string, _role: string, dueDate: Dayjs | null) {
+  async function handleSubmit(
+    decision: DecisionKeys,
+    comment: string,
+    _role: string | undefined,
+    dueDate: Dayjs | null,
+  ) {
     setErrorMessage('')
     if (!modelId) {
       return setErrorMessage('Could not find model ID')

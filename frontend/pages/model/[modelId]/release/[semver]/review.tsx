@@ -50,13 +50,16 @@ export default function ReleaseReview() {
     semver: `${semver}`,
   })
 
-  async function handleSubmit(decision: DecisionKeys, comment: string, role: string) {
+  async function handleSubmit(decision: DecisionKeys, comment: string, role: string | undefined) {
     setErrorMessage('')
     if (!modelId) {
       return setErrorMessage('Could not find model ID')
     }
     if (!semver) {
       return setErrorMessage('Could not find release semver')
+    }
+    if (!role) {
+      return setErrorMessage('Could not find review role')
     }
 
     setIsReviewButtonLoading(true)
