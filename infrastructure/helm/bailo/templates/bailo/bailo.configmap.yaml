@@ -256,6 +256,11 @@ data:
         },
       },
 
+      {{- if .Values.config.deploymentAssessments }}
+      // Titles and JSON schema constraints injected into every deployment assessment schema
+      deploymentAssessments: {{ toJson .Values.config.deploymentAssessments }},
+      {{- end }}
+
       connectors: {
         authentication: {
           kind: '{{ .Values.connectors.authentication.kind }}',
