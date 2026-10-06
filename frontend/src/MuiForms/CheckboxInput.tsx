@@ -29,6 +29,7 @@ export default function CheckboxInput({
   registry,
   id,
   required,
+  rawErrors,
   schema,
 }: CustomTextInputProps) {
   const theme = useTheme()
@@ -91,7 +92,13 @@ export default function CheckboxInput({
       fallbackMirroredContent={fallbackMirrored}
     >
       {compare.editMode ? (
-        <RadioGroup onChange={handleChange} value={value} aria-label={`radio input field for ${label}`} id={id}>
+        <RadioGroup
+          onChange={handleChange}
+          value={value}
+          aria-label={`radio input field for ${label}`}
+          aria-invalid={!!rawErrors && rawErrors.length > 0}
+          id={id}
+        >
           <FormControlLabel value={true} control={<Radio data-test={`${id}-yes-option`} />} label='Yes' />
           <FormControlLabel value={false} control={<Radio data-test={`${id}-no-option`} />} label='No' />
         </RadioGroup>

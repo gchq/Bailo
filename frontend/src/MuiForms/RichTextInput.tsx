@@ -64,7 +64,7 @@ export default function RichTextInput({
         <RichTextEditor
           value={value}
           onChange={onChange}
-          textareaProps={{ disabled, id }}
+          textareaProps={{ disabled, id, 'aria-invalid': !!rawErrors && rawErrors.length > 0 }}
           errors={rawErrors}
           key={label}
         />

@@ -203,7 +203,7 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
   let output = outdent`
       # ${deploymentAssessment.name}\n
       ### Created by
-      ${user.dn}\n
+      ${deploymentAssessment.createdBy}\n
   `
   if (latestResponse && latestReview) {
     const reviewTable = renderMarkdownTable(

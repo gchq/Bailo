@@ -1,3 +1,5 @@
+export {}
+
 let modelUuid = ''
 let accessRequestUuid = ''
 const modelName = 'Test Model'

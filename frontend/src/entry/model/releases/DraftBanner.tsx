@@ -19,6 +19,7 @@ type DraftBannerProps = {
       isLoading?: never
       errorMessage?: never
       setErrorMessage?: never
+      validateBeforePublish?: never
     }
   | {
       showButton: true
@@ -28,6 +29,8 @@ type DraftBannerProps = {
       isLoading: boolean
       errorMessage?: string
       setErrorMessage: (err: string) => void
+      /** Runs when publish is clicked. Returning false stops the confirmation dialogue from opening. */
+      validateBeforePublish?: () => boolean
     }
 )
 
@@ -41,11 +44,19 @@ export function DraftBanner({
   handlePublish,
   showButton,
   disableButton,
+  validateBeforePublish,
 }: DraftBannerProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   if (!draft) {
     return <></>
+  }
+
+  function handlePublishClick() {
+    if (validateBeforePublish && !validateBeforePublish()) {
+      return
+    }
+    setOpen(true)
   }
   return (
     <>
@@ -59,6 +70,7 @@ export function DraftBanner({
           borderRadius: 0,
           width: '100%',
         }}
+        data-test='draftBanner'
       >
         <Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Stack direction={'row'} spacing={1}>
@@ -70,11 +82,10 @@ export function DraftBanner({
               <Button
                 variant='outlined'
                 sx={{ borderColor: 'white', color: theme.palette.common.white }}
-                onClick={() => {
-                  setOpen(true)
-                }}
+                onClick={handlePublishClick}
                 disabled={disableButton}
                 loading={isLoading}
+                data-test='publishDraftButton'
               >
                 <Typography>Publish</Typography>
               </Button>

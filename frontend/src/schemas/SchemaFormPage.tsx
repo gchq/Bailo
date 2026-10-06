@@ -68,6 +68,7 @@ export default function SchemaFormPage({
                   setSplitSchema={setSplitSchema}
                   canEdit
                   displayLabelValidation={formValidationErrorState}
+                  showValidation={formValidationErrorState}
                 />
                 <Stack spacing={1} sx={{ alignItems: 'flex-end' }}>
                   <Stack direction='row' spacing={2} sx={{ justifyContent: 'flex-end' }}>
@@ -80,6 +81,7 @@ export default function SchemaFormPage({
                             onClick={onSaveDraft}
                             loading={draftButtonLoading}
                             disabled={submitButtonLoading || actionsDisabled}
+                            data-test='saveDraftButton'
                           >
                             Save draft
                           </Button>
@@ -94,6 +96,7 @@ export default function SchemaFormPage({
                           onClick={onSubmit}
                           loading={submitButtonLoading}
                           disabled={draftButtonLoading || actionsDisabled}
+                          data-test='submitDeploymentAssessmentButton'
                         >
                           Submit
                         </Button>
