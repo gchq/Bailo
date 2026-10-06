@@ -83,4 +83,12 @@ async function doProcessBatch() {
   }
 
   await StroomEvent.deleteMany({ batchId })
+
+  const pendingEvents = await StroomEvent.countDocuments({ batchId: '', attempts: { $lte: MAX_ATTEMPTS } })
+  if (pendingEvents === 0) {
+    // still include `pendingEvents` as the key may be useful to filter logs on
+    log.info({ pendingEvents }, 'No events pending STROOM batch send.')
+  } else {
+    log.info({ pendingEvents }, 'Events pending STROOM batch send.')
+  }
 }

@@ -50,7 +50,7 @@ describe('services > stroom', () => {
   })
 
   test('processBatch > success', async () => {
-    StroomEventModelMock.countDocuments.mockReturnValueOnce(0)
+    StroomEventModelMock.countDocuments.mockReturnValueOnce(0).mockReturnValueOnce(0)
     StroomEventModelMock.lean.mockReturnValueOnce(candidateEvents)
     StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 1 })
 
@@ -59,6 +59,7 @@ describe('services > stroom', () => {
     expect(StroomEventModelMock.deleteMany).toHaveBeenCalledWith({ batchId: 'mock-batch-id' })
     expect(logMock.error).not.toHaveBeenCalled()
     expect(logMock.warn).not.toHaveBeenCalled()
+    expect(logMock.info).toHaveBeenLastCalledWith({ pendingEvents: 0 }, 'No events pending STROOM batch send.')
   })
 
   test('processBatch > claims the candidate events before sending', async () => {
@@ -104,6 +105,23 @@ describe('services > stroom', () => {
     expect(mockStroomClient.sendEvents).toHaveBeenCalled()
     expect(StroomEventModelMock.deleteMany).toHaveBeenCalled()
     expect(logMock.warn).not.toHaveBeenCalled()
+  })
+
+  test('processBatch > log on remaining unbatched events', async () => {
+    const remainingEvents = 2
+    StroomEventModelMock.countDocuments.mockReturnValueOnce(0).mockReturnValueOnce(remainingEvents)
+    StroomEventModelMock.lean.mockReturnValueOnce(candidateEvents)
+    StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 1 })
+
+    await processBatch()
+
+    expect(StroomEventModelMock.deleteMany).toHaveBeenCalledWith({ batchId: 'mock-batch-id' })
+    expect(logMock.error).not.toHaveBeenCalled()
+    expect(logMock.warn).not.toHaveBeenCalled()
+    expect(logMock.info).toHaveBeenLastCalledWith(
+      { pendingEvents: remainingEvents },
+      'Events pending STROOM batch send.',
+    )
   })
 
   test('processBatch > no events', async () => {
