@@ -108,7 +108,7 @@ export default function ReviewWithComment({
       setErrorText('You must submit a comment when requesting changes.')
     } else if (invalidComment() && selectedDecision === Decision.Reject) {
       setErrorText('You must submit a comment when rejecting.')
-    } else if (!reviewRequest || !reviewRequest.role) {
+    } else if (!reviewRequest?.role && !deploymentAssessmentReview) {
       setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')
