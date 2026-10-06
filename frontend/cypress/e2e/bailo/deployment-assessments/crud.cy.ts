@@ -52,7 +52,7 @@ const newDeploymentAssessmentValuesObject = {
   },
 }
 
-describe('Deployment Assessment Suite', () => {
+describe('Create, read, update and delete deployment assessments', () => {
   before(() => {
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
       name: modelName,
