@@ -20,7 +20,7 @@ export function postDeploymentAssessment(
 
 export function patchDeploymentAssessment(
   deploymentAssessmentId: string,
-  metadata?: DeploymentAssessmentMetadata,
+  metadata?: Partial<DeploymentAssessmentMetadata>,
   draft?: boolean,
   name?: string,
 ) {
@@ -29,7 +29,7 @@ export function patchDeploymentAssessment(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name,
-      ...(metadata && { metadata }),
+      ...(metadata !== undefined && { metadata }),
       draft,
     }),
   })

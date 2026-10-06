@@ -110,7 +110,7 @@ export default function EditableDeploymentAssessmentForm({
 
       const response = await patchDeploymentAssessment(
         deploymentAssessment.id,
-        answersChanged ? removeEmptyValues(data) : undefined,
+        answersChanged ? (removeEmptyValues(data) ?? {}) : undefined,
         undefined,
         nameChanged ? newName : undefined,
       )
