@@ -63,7 +63,7 @@ async function doProcessBatch() {
   }
 
   try {
-    const batchEvents = candidateEvents.map((stroomEvent) => stroomEvent.event)
+    const batchEvents = candidateEvents.map((stroomEvent) => JSON.parse(stroomEvent.event))
     const xml = create({
       Events: {
         '@xmlns': config.stroom.xmlns,

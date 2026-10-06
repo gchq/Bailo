@@ -34,7 +34,8 @@ vi.mock('../../src/utils/id.js', () => idMock)
 
 describe('services > stroom', () => {
   const event = { EventDetail: { TypeId: 'ViewUserToken' } } as StroomEventObject
-  const candidateEvents = [{ _id: 'event-1', event }]
+  const eventString = JSON.stringify(event)
+  const candidateEvents = [{ _id: 'event-1', event: eventString }]
 
   beforeEach(() => {
     mockStroomClient.sendEvents.mockResolvedValue(undefined)
@@ -75,7 +76,7 @@ describe('services > stroom', () => {
 
   test('processBatch > builds the XML payload from the batched events', async () => {
     StroomEventModelMock.countDocuments.mockReturnValueOnce(0)
-    StroomEventModelMock.lean.mockReturnValueOnce([...candidateEvents, { _id: 'event-2', event }])
+    StroomEventModelMock.lean.mockReturnValueOnce([...candidateEvents, { _id: 'event-2', event: eventString }])
     StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 1 })
 
     await processBatch()
@@ -94,7 +95,7 @@ describe('services > stroom', () => {
 
   test('processBatch > log on failed events', async () => {
     StroomEventModelMock.countDocuments.mockReturnValueOnce(1)
-    StroomEventModelMock.lean.mockReturnValueOnce([...candidateEvents, { _id: 'event-2', event }])
+    StroomEventModelMock.lean.mockReturnValueOnce([...candidateEvents, { _id: 'event-2', event: eventString }])
     StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 1 })
 
     await processBatch()
@@ -184,7 +185,7 @@ describe('services > stroom', () => {
     await expect(processBatch()).rejects.toThrow('Database unavailable')
 
     StroomEventModelMock.countDocuments.mockReturnValueOnce(0)
-    StroomEventModelMock.lean.mockReturnValueOnce([...candidateEvents, { _id: 'event-2', event }])
+    StroomEventModelMock.lean.mockReturnValueOnce([...candidateEvents, { _id: 'event-2', event: eventString }])
     StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 1 })
 
     await processBatch()
