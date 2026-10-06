@@ -14,7 +14,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetEntry, useGetModel } from 'actions/entry'
+import { useGetEntry, useGetModels } from 'actions/entry'
 import { postFromSchema } from 'actions/modelCard'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
@@ -61,11 +61,19 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   // `useGetEntry(entry.id, MODEL_ENTRY_KINDS)` === `useGetModel(entry.id)`
   const { mutateEntry } = useGetEntry(entry?.id, entryKind)
 
-  // Only relevant for DEPLOYMENT_ASSESSMENT - fetches the model pre-selected via the modelId query param
-  const { modelId: queryModelId } = router.query
-  const { entry: preselectedModel } = useGetModel(
-    schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT ? (queryModelId as string | undefined) : null,
-  )
+  // Only relevant for DEPLOYMENT_ASSESSMENT - fetches the model(s) pre-selected via the modelId query param
+  const { preselectedModelId: rawModelId } = router.query
+  const queryModelIds = useMemo(() => {
+    if (schemaKind !== SchemaKind.DEPLOYMENT_ASSESSMENT || !rawModelId) {
+      return []
+    }
+    return Array.isArray(rawModelId) ? rawModelId : [rawModelId]
+  }, [schemaKind, rawModelId])
+  const {
+    models: preselectedModels,
+    failedModelIds: failedPreselectedModelIds,
+    isModelsError: isPreselectedModelsError,
+  } = useGetModels(queryModelIds)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,
@@ -92,9 +100,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
       return async (newSchema: SchemaInterface) => {
         setLoadingSchemaId(newSchema.id)
-        const { modelId } = router.query
-        const modelIdParam = modelId ? `&modelId=${modelId}` : ''
-        router.push(`/deployment-assessments/new?schemaId=${newSchema.id}${modelIdParam}`)
+        const params = new URLSearchParams({ schemaId: newSchema.id })
+        queryModelIds.forEach((id) => params.append('preselectedModelId', id))
+        router.push(`/deployment-assessments/new?${params.toString()}`)
       }
     }
     return async (newSchema: SchemaInterface) => {
@@ -111,7 +119,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
         }
       }
     }
-  }, [schemaKind, entry, currentUser, mutateEntry, router])
+  }, [schemaKind, router, entry, queryModelIds, currentUser, mutateEntry])
 
   const activeSchemaButtons = useMemo(
     () =>
@@ -149,21 +157,23 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
 
   const link = useMemo(() => {
     if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
-      const { modelId } = router.query
-      return modelId ? `/model/${modelId}?tab=deployments` : '/deployment-assessments'
+      return queryModelIds.length === 1 ? `/model/${queryModelIds[0]}?tab=deployments` : '/deployment-assessments'
     }
     if (schemaKind === SchemaKind.ACCESS_REQUEST) {
       return `/model/${entry.id}`
     }
     return `/${entryKindForRedirect(entry.kind)}/${entry.id}`
-  }, [schemaKind, entry, router.query])
+  }, [schemaKind, entry, queryModelIds])
 
   const backLabel = useMemo(() => {
     if (schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT) {
-      return preselectedModel ? `Back to ${preselectedModel.name}` : 'Back to Deployment Assessments'
+      if (preselectedModels.length === 1) {
+        return `Back to ${preselectedModels[0].name}`
+      }
+      return 'Back to Deployment Assessments'
     }
     return `Back to ${EntryKindLabel[entry.kind]}`
-  }, [schemaKind, entry, preselectedModel])
+  }, [schemaKind, entry, preselectedModels])
 
   const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isSchemasError,
@@ -184,10 +194,19 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                 {backLabel}
               </Button>
             </Link>
-            {preselectedModel && (
+            {isPreselectedModelsError && (
+              <Alert severity='error' sx={{ mb: 2 }}>
+                The following model ID(s) supplied in the URL could not be loaded:{' '}
+                <strong>{failedPreselectedModelIds.join(', ')}</strong>. The model(s) may not exist or you may not have
+                permission to access them. You can still select a schema below - any valid models will be pre-filled in
+                the form.
+              </Alert>
+            )}
+            {!isPreselectedModelsError && preselectedModels.length > 0 && (
               <Alert severity='info' sx={{ mb: 2 }}>
-                You are creating a deployment assessment for <strong>{preselectedModel.name}</strong>. The model will be
-                pre-filled in the form.
+                You are creating a deployment assessment for{' '}
+                <strong>{preselectedModels.map((m) => m.name).join(', ')}</strong>. The{' '}
+                {preselectedModels.length === 1 ? 'model' : 'models'} will be pre-filled in the form.
               </Alert>
             )}
             <Stack

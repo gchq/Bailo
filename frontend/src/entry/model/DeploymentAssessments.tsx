@@ -31,7 +31,7 @@ export default function DeploymentAssessments({ model }: DeploymentAssessmentsPr
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
-          <Link href={`/deployment-assessments/new?modelId=${model.id}`}>
+          <Link href={`/deployment-assessments/new?preselectedModelId=${model.id}`}>
             <Button variant='outlined' data-test='createDeploymentAssessmentButton' startIcon={<Create />}>
               Create deployment assessment
             </Button>
