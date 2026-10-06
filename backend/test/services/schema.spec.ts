@@ -133,6 +133,67 @@ describe('services > schema', () => {
       },
     })
     expect(result[0].jsonSchema.required).toEqual(['signOff', 'modelOverview'])
+    // The default config sets no upper bound on the number of models
+    expect(result[0].jsonSchema.properties?.modelOverview.properties?.modelIds).not.toHaveProperty('maxItems')
+  })
+
+  test('that deployment assessment summary properties use the configured titles and constraints', async () => {
+    setTestConfig({
+      deploymentAssessments: {
+        signOff: {
+          title: 'Custom Sign-Off',
+          riskOwners: {
+            title: 'Custom risk owner question',
+            arrayConstraints: { minItems: 1, maxItems: 3, uniqueItems: true },
+            itemConstraints: { minLength: 2 },
+          },
+        },
+      },
+    })
+    SchemaModelModelMock.sort.mockResolvedValueOnce([
+      { kind: SchemaKind.DeploymentAssessment, jsonSchema: { properties: {} } },
+    ])
+
+    const result = await searchSchemas(SchemaKind.DeploymentAssessment)
+
+    expect(result[0].jsonSchema.properties?.signOff).toEqual(
+      expect.objectContaining({
+        title: 'Custom Sign-Off',
+        properties: expect.objectContaining({
+          riskOwners: expect.objectContaining({
+            title: 'Custom risk owner question',
+            items: { type: 'string', minLength: 2 },
+            minItems: 1,
+            maxItems: 3,
+            uniqueItems: true,
+          }),
+        }),
+      }),
+    )
+  })
+
+  test('that deployment assessment summary properties omit constraints that are not configured', async () => {
+    setTestConfig({
+      deploymentAssessments: {
+        signOff: {
+          riskOwners: {
+            arrayConstraints: undefined,
+            itemConstraints: undefined,
+          },
+        },
+      },
+    })
+    SchemaModelModelMock.sort.mockResolvedValueOnce([
+      { kind: SchemaKind.DeploymentAssessment, jsonSchema: { properties: {} } },
+    ])
+
+    const result = await searchSchemas(SchemaKind.DeploymentAssessment)
+
+    const riskOwners = result[0].jsonSchema.properties?.signOff.properties?.riskOwners
+    expect(riskOwners?.items).toEqual({ type: 'string' })
+    expect(riskOwners).not.toHaveProperty('minItems')
+    expect(riskOwners).not.toHaveProperty('maxItems')
+    expect(riskOwners).not.toHaveProperty('uniqueItems')
   })
 
   test('that non-deployment assessment schemas are unchanged when searched', async () => {

@@ -124,6 +124,27 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
       body: { name: 'Assessment', schemaId: 'deployment-assessment-schema', draft: false },
       description: 'missing metadata when draft is false',
     },
+    {
+      body: {
+        name: 'Assessment',
+        schemaId: 'deployment-assessment-schema',
+        metadata: {
+          ...deploymentAssessment.metadata,
+          signOff: { riskOwners: ['user:risk-owner', 'user:second-risk-owner'] },
+        },
+        draft: false,
+      },
+      description: 'more risk owners than the configured maximum',
+    },
+    {
+      body: {
+        name: 'Assessment',
+        schemaId: 'deployment-assessment-schema',
+        metadata: { ...deploymentAssessment.metadata, modelOverview: { modelIds: [] } },
+        draft: false,
+      },
+      description: 'fewer model IDs than the configured minimum',
+    },
   ])('rejects malformed input: $description', async ({ body }) => {
     const res = await testPost('/api/v3/deployment-assessments', { body })
 
