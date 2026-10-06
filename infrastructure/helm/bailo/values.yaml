@@ -202,7 +202,7 @@ minio:
 # Registry Dependencies
 registry:
   repository: registry
-  tag: 3.1.1@sha256:1be55279f18a2fe1a74edf2664cac61c1bea305b7b4642dab412e7affdcb3e33
+  tag: 3.1.2@sha256:21078ecfcba8a0cd7e1a384f75b3509899661dd21823bf1da21b5a4674aaceb9
   enabled: true
   protocol: "https"
   #host: "bailo-registry" # service name

@@ -1,4 +1,5 @@
 import * as _ from 'lodash-es'
+import { ProjectionType } from 'mongoose'
 import { Optional } from 'utility-types'
 
 import { Roles } from '../connectors/authentication/constants.js'
@@ -421,7 +422,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  const projection = {
+  const projection: ProjectionType<ModelDoc> = {
     settings: false,
     card: false,
     deleted: false,
@@ -433,7 +434,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   // Always do a partial match on the model name
   const escapedSearch = opts.search ? opts.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
-  let results = await ModelModel.find(
+  let results = await ModelModel.find<ModelDoc>(
     escapedSearch ? { ...query, name: { $regex: escapedSearch, $options: 'i' } } : query,
     projection,
   ).sort({
@@ -442,7 +443,10 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   //Include all full text matches
   if (opts.search && !opts.titleOnly) {
-    let fullTextOnlyResults = await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
+    let fullTextOnlyResults = await ModelModel.find<ModelDoc>(
+      { ...query, $text: { $search: opts.search } },
+      projection,
+    ).sort({
       score: { $meta: 'textScore' },
     })
     // Remove duplicate items
