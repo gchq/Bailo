@@ -29,7 +29,7 @@ type DraftBannerProps = {
       isLoading: boolean
       errorMessage?: string
       setErrorMessage: (err: string) => void
-      /** Runs when publish is clicked. Returning false stops the confirmation dialogue from opening. */
+      /** Runs when submission for review is clicked. Returning false stops the confirmation dialogue from opening. */
       validateBeforePublish?: () => boolean
     }
 )
@@ -85,7 +85,7 @@ export function DraftBanner({
                 disabled={disableButton}
                 loading={isLoading}
               >
-                <Typography>Publish</Typography>
+                <Typography>Submit for Review</Typography>
               </Button>
               <ConfirmationDialogue
                 open={open}
@@ -93,7 +93,7 @@ export function DraftBanner({
                 onConfirm={handlePublish}
                 onCancel={() => [setOpen(false), setErrorMessage('')]}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to publish this? This is irreversible.'}
+                dialogMessage={'Are you sure you want to submit this for review? This is irreversible.'}
                 confirmLoading={isLoading}
               />
             </>

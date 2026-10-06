@@ -99,7 +99,7 @@ export default function DeploymentAssessment() {
     }
     setShowValidation(true)
     sendNotification({
-      msg: 'Please make sure that all required fields are appropriately filled out before publishing.',
+      msg: 'Please make sure that all required fields are appropriately filled out before submitting for review.',
       variant: 'error',
     })
     return false
@@ -113,7 +113,7 @@ export default function DeploymentAssessment() {
         setPatchErrorMessage(await getErrorMessage(response))
       } else {
         mutateDeploymentAssessment()
-        sendNotification({ msg: 'Deployment Assessment successfully published.', variant: 'success' })
+        sendNotification({ msg: 'Deployment Assessment successfully submitted for review.', variant: 'success' })
       }
       setIsLoading(false)
     }
@@ -140,7 +140,7 @@ export default function DeploymentAssessment() {
                   validateBeforePublish={validateBeforePublish}
                   draft={deploymentAssessment.draft}
                   text='This is a draft deployment assessment'
-                  dialogTitle='Confirm publish'
+                  dialogTitle='Confirm submission for review'
                   showButton
                 />
                 {!deploymentAssessment.draft && (

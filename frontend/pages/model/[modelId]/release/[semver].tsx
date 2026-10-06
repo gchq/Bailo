@@ -66,7 +66,7 @@ export default function Release() {
       setPutErrorMessage(await getErrorMessage(response))
     } else {
       mutateRelease()
-      sendNotification({ msg: 'Release successfully published.', variant: 'success' })
+      sendNotification({ msg: 'Release successfully submitted for review.', variant: 'success' })
     }
 
     setIsLoading(false)
@@ -81,7 +81,7 @@ export default function Release() {
             <ReviewBanner release={release} />
             <DraftBanner
               text='This is a draft release'
-              dialogTitle='Confirm release publish'
+              dialogTitle='Confirm release submission for review'
               draft={release.draft}
               handlePublish={handlePublishRelease}
               showButton

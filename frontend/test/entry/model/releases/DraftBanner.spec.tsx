@@ -11,7 +11,7 @@ function renderDraftBanner(validateBeforePublish: () => boolean) {
       text='This is a draft'
       draft
       showButton
-      dialogTitle='Confirm publish'
+      dialogTitle='Confirm submission for review'
       disableButton={false}
       isLoading={false}
       setErrorMessage={vi.fn()}
@@ -26,17 +26,17 @@ describe('DraftBanner', () => {
   it('validates before opening the confirmation dialogue', async () => {
     const handlePublish = renderDraftBanner(() => false)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Submit for Review' }))
 
-    expect(screen.queryByText('Confirm publish')).toBe(null)
+    expect(screen.queryByText('Confirm submission for review')).toBe(null)
     expect(handlePublish).not.toHaveBeenCalled()
   })
 
   it('opens the confirmation dialogue when validation passes', async () => {
     renderDraftBanner(() => true)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Submit for Review' }))
 
-    expect(screen.getByText('Confirm publish')).toBeDefined()
+    expect(screen.getByText('Confirm submission for review')).toBeDefined()
   })
 })
