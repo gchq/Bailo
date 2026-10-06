@@ -383,7 +383,7 @@ describe('services > accessRequest', () => {
     const diff = { metadata: { overview: { name: 'stored', entities: ['user:testUser', 'user:additionalUser'] } } }
 
     await expect(() => updateAccessRequest({} as any, 'test', diff as any)).rejects.toThrow(
-      /^You cannot change the entities named on an access request that you do not own./,
+      /^You do not have permission to change the entities named on an access request./,
     )
   })
 
@@ -403,7 +403,7 @@ describe('services > accessRequest', () => {
     const diff = { metadata: { overview: { name: 'stored', entities: ['user:user'] } } }
 
     await expect(() => updateAccessRequest({} as any, 'test', diff as any)).rejects.toThrow(
-      /^You cannot change the entities named on an access request that you do not own./,
+      /^You do not have permission to change the entities named on an access request./,
     )
   })
 

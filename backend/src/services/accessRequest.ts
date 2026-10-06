@@ -246,10 +246,10 @@ export async function updateAccessRequest(
       })
     }
 
-    // The named entities inherit this request's approvals, so only an owner may change them
+    // The named entities inherit this request's approvals, so only a model owner or an admin may change them
     const entitiesChanged = !isEqual(sortedEntities(accessRequest.metadata), sortedEntities(diff.metadata))
     if (entitiesChanged && !(await authorisation.model(user, model, ModelAction.Update)).success) {
-      throw Forbidden('You cannot change the entities named on an access request that you do not own.', {
+      throw Forbidden('You do not have permission to change the entities named on an access request.', {
         userDn: user.dn,
         accessRequestId,
       })
