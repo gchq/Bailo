@@ -416,7 +416,16 @@ The following tables describe selected configuration options available in `value
 | `config.helpPopoverText.manualEntryAccess` | Help text for manually adding a user to a model | `null` |
 | `config.modelDetails.organisations` | Organisation options for models | `[]` |
 | `config.modelDetails.states` | States options for models | `[]` |
-| `config.deploymentAssessments.deployableModelState` | Model state required for deployment assessments | `Production` |
+| `config.ui.deploymentAssessments.deployableModelState` | Model state required for deployment assessments | `Production` |
+| `config.ui.deploymentAssessments.signOffDeclaration` | Declaration the risk owner agrees to when signing off a deployment assessment | `I agree to take on responsibility as the Deployment Risk Owner.` |
+| `config.deploymentAssessments.modelOverview.title` | Section title for the model overview questions injected into every deployment assessment schema | `Model Overview` |
+| `config.deploymentAssessments.modelOverview.modelIds.title` | Question title for the list of models assigned to the assessment | `List all models assigned to this deployment assessment` |
+| `config.deploymentAssessments.modelOverview.modelIds.arrayConstraints` | JSON Schema constraints applied to the list of model IDs. Supports `minItems`, `maxItems` and `uniqueItems`. Also enforced on incoming API requests | `{minItems: 1, uniqueItems: true}` |
+| `config.deploymentAssessments.modelOverview.modelIds.itemConstraints` | JSON Schema constraints applied to each model ID. Supports `minLength`, `maxLength`, `pattern` and `format` | `{minLength: 1}` |
+| `config.deploymentAssessments.signOff.title` | Section title for the sign-off questions injected into every deployment assessment schema | `Deployment Sign-Off` |
+| `config.deploymentAssessments.signOff.riskOwners.title` | Question title for the deployment risk owner | `Who is the risk owner attached to this deployment assessment?` |
+| `config.deploymentAssessments.signOff.riskOwners.arrayConstraints` | JSON Schema constraints applied to the list of risk owners. Supports `minItems`, `maxItems` and `uniqueItems`. Also enforced on incoming API requests | `{minItems: 1, maxItems: 1, uniqueItems: true}` |
+| `config.deploymentAssessments.signOff.riskOwners.itemConstraints` | JSON Schema constraints applied to each risk owner entity. Supports `minLength`, `maxLength`, `pattern` and `format` | `{minLength: 1}` |
 | `config.smtp.port` | Backend connection port to mail server <https://nodemailer.com/smtp> | `1025` |
 | `config.smtp.secure` | Enable to use TLS | `false` |
 | `config.smtp.rejectUnauthorized` | TLS option | `false` |
@@ -458,6 +467,10 @@ The following tables describe selected configuration options available in `value
 | `modelMirror.export.kmsSignature.KMSClient.region` | AWS region for the KMS client | `eu-west-1` |
 | `modelMirror.export.kmsSignature.KMSClient.` | Access key credential for the KMS client | `accessKey` |
 | `modelMirror.export.kmsSignature.KMSClient.` | Secret key credential for the KMS client | `secretKey` |
+
+> **Note:** `config.deploymentAssessments` is a backend-only block (it has no `ui.` prefix), and every key in it is
+> optional. Omit the block entirely to use the backend defaults in `backend/config/default.cjs`. Constraints set here
+> are applied both to the JSON schema served to the UI and to API request validation, so the two cannot drift apart.
 
 ### Inferencing Cluster Reference Configurations
 
