@@ -44,7 +44,7 @@ export default function Release() {
     return <Loading />
   }
 
-  async function handlePublishRelease() {
+  async function handleSubmitReleaseForReview() {
     if (!model || !release || !semver) {
       return
     }
@@ -83,7 +83,7 @@ export default function Release() {
               text='This is a draft release'
               dialogTitle='Confirm release submission for review'
               draft={release.draft}
-              handlePublish={handlePublishRelease}
+              handleSubmitForReview={handleSubmitReleaseForReview}
               showButton
               disableButton={isEdit}
               isLoading={isLoading}

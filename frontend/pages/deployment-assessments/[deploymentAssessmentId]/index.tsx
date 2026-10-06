@@ -93,7 +93,7 @@ export default function DeploymentAssessment() {
     return error
   }
 
-  function validateBeforePublish() {
+  function validateBeforeSubmitForReview() {
     if (isFormValid) {
       return true
     }
@@ -105,7 +105,7 @@ export default function DeploymentAssessment() {
     return false
   }
 
-  async function handlePublish() {
+  async function handleSubmitForReview() {
     if (deploymentAssessment) {
       setIsLoading(true)
       const response = await patchDeploymentAssessment(deploymentAssessment.id, undefined, false)
@@ -136,8 +136,8 @@ export default function DeploymentAssessment() {
                   setErrorMessage={setPatchErrorMessage}
                   disableButton={isEdit || isFormValid === undefined}
                   isLoading={isLoading}
-                  handlePublish={handlePublish}
-                  validateBeforePublish={validateBeforePublish}
+                  handleSubmitForReview={handleSubmitForReview}
+                  validateBeforeSubmitForReview={validateBeforeSubmitForReview}
                   draft={deploymentAssessment.draft}
                   text='This is a draft deployment assessment'
                   dialogTitle='Confirm submission for review'

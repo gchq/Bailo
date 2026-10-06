@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { DraftBanner } from '../../../../src/entry/model/releases/DraftBanner'
 
-function renderDraftBanner(validateBeforePublish: () => boolean) {
-  const handlePublish = vi.fn()
+function renderDraftBanner(validateBeforeSubmitForReview: () => boolean) {
+  const handleSubmitForReview = vi.fn()
   render(
     <DraftBanner
       text='This is a draft'
@@ -15,21 +15,21 @@ function renderDraftBanner(validateBeforePublish: () => boolean) {
       disableButton={false}
       isLoading={false}
       setErrorMessage={vi.fn()}
-      handlePublish={handlePublish}
-      validateBeforePublish={validateBeforePublish}
+      handleSubmitForReview={handleSubmitForReview}
+      validateBeforeSubmitForReview={validateBeforeSubmitForReview}
     />,
   )
-  return handlePublish
+  return handleSubmitForReview
 }
 
 describe('DraftBanner', () => {
   it('validates before opening the confirmation dialogue', async () => {
-    const handlePublish = renderDraftBanner(() => false)
+    const handleSubmitForReview = renderDraftBanner(() => false)
 
     await userEvent.click(screen.getByRole('button', { name: 'Submit for Review' }))
 
     expect(screen.queryByText('Confirm submission for review')).toBe(null)
-    expect(handlePublish).not.toHaveBeenCalled()
+    expect(handleSubmitForReview).not.toHaveBeenCalled()
   })
 
   it('opens the confirmation dialogue when validation passes', async () => {
