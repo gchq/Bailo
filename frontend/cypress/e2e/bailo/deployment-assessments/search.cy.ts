@@ -15,6 +15,7 @@ const schemaName = 'Minimal Deployment Assessment Schema v1'
 const deploymentAssessmentSchemaId = 'minimal-deployment-assessment-schema-v1'
 const searchTerm = `Deployment Search ${runId}`
 const riskOwner = 'user:user'
+const searchInputSelector = '[data-test=deploymentAssessmentSearchFilter] input'
 const alternateRiskOwner = 'user:user2'
 let createdDate = ''
 
@@ -75,7 +76,7 @@ function assertOnlyAssessment(name: string) {
 function resetFilters() {
   cy.get('[data-test=deploymentAssessmentResetFilters]').click()
   cy.location('search').should('equal', '?tab=all-assessments')
-  cy.get('[data-test=deploymentAssessmentSearchFilter]').find('input').should('have.value', '')
+  cy.get(searchInputSelector).should('have.value', '')
   cy.get('[data-test=deploymentAssessmentStatusFilter]').should('not.contain.text', 'Draft')
   cy.get('[data-test=deploymentAssessmentModelFilter]').find('[role=button]').should('have.length', 0)
   cy.contains(/assessments? found/)
@@ -196,10 +197,7 @@ describe('Search deployment assessments', () => {
   })
 
   it('filters assessments by name', () => {
-    cy.get('[data-test=deploymentAssessmentSearchFilter]')
-      .find('input')
-      .clear()
-      .type(assessmentNames.draft, { delay: 0 })
+    cy.get(searchInputSelector).clear().type(assessmentNames.draft, { delay: 0 })
     assertOnlyAssessment(assessmentNames.draft)
   })
 

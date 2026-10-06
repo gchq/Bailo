@@ -74,7 +74,7 @@ export default function EditableFormHeading({
             {deleteAction && deleteButtonText && (
               <Restricted action={deleteAction} fallback={<Button disabled>{deleteButtonText}</Button>}>
                 <Tooltip title={deleteButtonText}>
-                  <IconButton color='error' onClick={onDelete}>
+                  <IconButton color='error' onClick={onDelete} data-test='deleteFormButton'>
                     <Delete />
                   </IconButton>
                 </Tooltip>

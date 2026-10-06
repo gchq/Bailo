@@ -74,6 +74,7 @@ export default function DateSelector({
           format='DD-MM-YYYY'
           slotProps={{ textField: { error: !!rawErrors && rawErrors.length > 0 } }}
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
+          data-test='dateSelectorInput'
         />
       ) : compare.inMirroredCompare && value ? (
         <InlineDiff from={formatDate(compare.compareFromState)} to={formatDate(value)} />
