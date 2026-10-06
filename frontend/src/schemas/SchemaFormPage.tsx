@@ -96,7 +96,7 @@ export default function SchemaFormPage({
                           loading={submitButtonLoading}
                           disabled={draftButtonLoading || actionsDisabled}
                         >
-                          Submit
+                          Submit for review
                         </Button>
                       </span>
                     </Tooltip>
