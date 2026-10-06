@@ -12,7 +12,7 @@ import { ArtefactKind, SeverityLevel, SeverityLevelKeys } from '../models/Scan.j
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState, MirrorKind } from '../types/types.js'
-import config from '../utils/config.js'
+import config, { DeploymentAssessmentQuestion } from '../utils/config.js'
 
 export const registryv2 = new OpenAPIRegistry()
 export const registryv3 = new OpenAPIRegistry()
@@ -68,13 +68,35 @@ export const deploymentAssessmentNameSchema = z
   .min(1, 'You must provide a deployment assessment name')
   .trim()
   .openapi({ example: 'Just A Rather Very Intelligent System' })
-const deploymentAssessmentRiskOwnerSchema = z
-  .array(z.string().min(1))
-  .min(1, 'You must provide a risk owner')
-  .openapi({ example: ['user:tony'] })
-const deploymentAssessmentModelIdsSchema = z
-  .array(z.string())
-  .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
+/** Builds a string array schema from a configured question. `uniqueItems`, `pattern` and `format` are JSON-schema-only and ignored here. */
+function constrainedStringArray(question: DeploymentAssessmentQuestion, requiredMessage?: string) {
+  const { arrayConstraints = {}, itemConstraints = {} } = question
+
+  let items = z.string()
+  if (itemConstraints.minLength !== undefined) {
+    items = items.min(itemConstraints.minLength)
+  }
+  if (itemConstraints.maxLength !== undefined) {
+    items = items.max(itemConstraints.maxLength)
+  }
+
+  let array = z.array(items)
+  if (arrayConstraints.minItems !== undefined) {
+    array = array.min(arrayConstraints.minItems, requiredMessage)
+  }
+  if (arrayConstraints.maxItems !== undefined) {
+    array = array.max(arrayConstraints.maxItems)
+  }
+  return array
+}
+
+const deploymentAssessmentRiskOwnerSchema = constrainedStringArray(
+  config.deploymentAssessments.signOff.riskOwners,
+  'You must provide a risk owner',
+).openapi({ example: ['user:tony'] })
+const deploymentAssessmentModelIdsSchema = constrainedStringArray(
+  config.deploymentAssessments.modelOverview.modelIds,
+).openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
 export const deploymentAssessmentDraftSchema = z.boolean().openapi({ example: true })
 export const deploymentAssessmentStateSchema = z
   .nativeEnum(DeploymentAssessmentState)
@@ -460,21 +482,13 @@ export const accessRequestInterfaceSchema = z.object({
 
 const deploymentAssessmentModelOverview = z
   .object({
-    modelIds: z
-      .array(z.string())
-      .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
-      .optional(),
+    modelIds: deploymentAssessmentModelIdsSchema.optional(),
   })
   .passthrough()
 
 const deploymentAssessmentSignOff = z
   .object({
-    riskOwners: z
-      .array(z.string().min(1))
-      .min(1)
-      .max(1)
-      .openapi({ example: ['user:tony'] })
-      .optional(),
+    riskOwners: deploymentAssessmentRiskOwnerSchema.optional(),
   })
   .passthrough()
 

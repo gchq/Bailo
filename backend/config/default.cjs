@@ -160,6 +160,25 @@ module.exports = {
     ],
   },
 
+  deploymentAssessments: {
+    modelOverview: {
+      title: 'Model Overview',
+      modelIds: {
+        title: 'List all models assigned to this deployment assessment',
+        arrayConstraints: { minItems: 1, uniqueItems: true },
+        itemConstraints: { minLength: 1 },
+      },
+    },
+    signOff: {
+      title: 'Deployment Sign-Off',
+      riskOwners: {
+        title: 'Who is the risk owner attached to this deployment assessment?',
+        arrayConstraints: { minItems: 1, maxItems: 1, uniqueItems: true },
+        itemConstraints: { minLength: 1 },
+      },
+    },
+  },
+
   session: {
     secret: '',
   },

@@ -4,6 +4,7 @@ import { ResponseChecksumValidation } from '@aws-sdk/middleware-flexible-checksu
 import { Provider } from '@aws-sdk/types'
 import _config from 'config'
 import grant from 'grant'
+import { Schema as JsonSchema } from 'jsonschema'
 import { LevelWithSilentOrString } from 'pino'
 
 import { ArtefactScanKindKeys } from '../connectors/artefactScanning/index.js'
@@ -17,6 +18,15 @@ import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/
 import { deepFreeze } from './object.js'
 
 export type TransportOption = 'smtp' | 'aws'
+
+export type ArrayConstraints = Pick<JsonSchema, 'minItems' | 'maxItems' | 'uniqueItems'>
+export type ItemConstraints = Pick<JsonSchema, 'minLength' | 'maxLength' | 'pattern' | 'format'>
+
+export interface DeploymentAssessmentQuestion {
+  title?: string
+  arrayConstraints?: ArrayConstraints
+  itemConstraints?: ItemConstraints
+}
 
 export interface Config {
   api: {
@@ -172,6 +182,17 @@ export interface Config {
     accessRequests: Array<DefaultSchema>
     dataCards: Array<DefaultSchema>
     deploymentAssessments: Array<DefaultSchema>
+  }
+
+  deploymentAssessments: {
+    modelOverview: {
+      title?: string
+      modelIds: DeploymentAssessmentQuestion
+    }
+    signOff: {
+      title?: string
+      riskOwners: DeploymentAssessmentQuestion
+    }
   }
 
   defaultReviewRoles: Array<DefaultReviewRole>

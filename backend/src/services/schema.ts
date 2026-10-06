@@ -77,23 +77,27 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
 
   const mergedSignOffRequired = Array.from(new Set<string>(['riskOwners', ...existingSignOffRequired]))
 
+  const modelOverviewConfig = config.deploymentAssessments.modelOverview
+  const modelIdsConfig = modelOverviewConfig.modelIds
+  const signOffConfig = config.deploymentAssessments.signOff
+  const riskOwnersConfig = signOffConfig.riskOwners
+
   return {
     ...structuredClone(jsonSchema),
     properties: {
       ...((jsonSchema as any).properties ?? {}),
       modelOverview: {
-        title: 'Model Overview',
+        title: modelOverviewConfig.title,
         type: 'object',
         properties: {
           modelIds: {
-            title: 'List all models assigned to this deployment assessment',
+            title: modelIdsConfig.title,
             type: 'array',
             items: {
               type: 'string',
-              minLength: 1,
+              ...(modelIdsConfig.itemConstraints ?? {}),
             },
-            minItems: 1,
-            uniqueItems: true,
+            ...(modelIdsConfig.arrayConstraints ?? {}),
             widget: 'modelSelector',
           },
           ...(((jsonSchema as any).properties?.modelOverview?.properties as object) ?? {}),
@@ -102,19 +106,17 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         additionalProperties: false,
       },
       signOff: {
-        title: 'Deployment Sign-Off',
+        title: signOffConfig.title,
         type: 'object',
         properties: {
           riskOwners: {
-            title: 'Who is the risk owner attached to this deployment assessment?',
+            title: riskOwnersConfig.title,
             type: 'array',
             items: {
               type: 'string',
-              minLength: 1,
+              ...(riskOwnersConfig.itemConstraints ?? {}),
             },
-            minItems: 1,
-            maxItems: 1,
-            uniqueItems: true,
+            ...(riskOwnersConfig.arrayConstraints ?? {}),
             widget: 'entitySelector',
             hideDefaultUser: true,
           },
