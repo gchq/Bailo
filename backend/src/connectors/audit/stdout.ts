@@ -474,13 +474,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
 
   async onViewDeploymentAssessmentReviews(req: Request, deploymentAssessmentId: string): Promise<void> {
-    this.checkEventType(AuditInfo.ViewDeploymentAssessment, req)
+    this.checkEventType(AuditInfo.ViewDeploymentAssessmentReviews, req)
     const event = this.generateEvent(req, { id: deploymentAssessmentId })
     req.log.info(event, req.audit.description)
   }
 
   async onViewDeploymentAssessmentComments(req: Request, deploymentAssessmentId: string): Promise<void> {
-    this.checkEventType(AuditInfo.ViewDeploymentAssessment, req)
+    this.checkEventType(AuditInfo.ViewDeploymentAssessmentComments, req)
     const event = this.generateEvent(req, { id: deploymentAssessmentId })
     req.log.info(event, req.audit.description)
   }
