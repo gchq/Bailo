@@ -4,11 +4,7 @@ import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { getReviewsByDeploymentAssessmentId } from '../../../services/deploymentAssessment.js'
-import {
-  deploymentAssessmentInterfaceSchema,
-  deploymentAssessmentStateSchema,
-  registerPath,
-} from '../../../services/specification.js'
+import { getDeploymentAssessmentReviewsResponseSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getDeploymentAssessmentReviewsSchema = z.object({
@@ -29,11 +25,7 @@ registerPath(
         description: 'All reviews on a deployment assessment.',
         content: {
           'application/json': {
-            // TODO - update to use proper schema formatting
-            schema: z.object({
-              deploymentAssessment: deploymentAssessmentInterfaceSchema,
-              state: deploymentAssessmentStateSchema.optional(),
-            }),
+            schema: getDeploymentAssessmentReviewsResponseSchema,
           },
         },
       },

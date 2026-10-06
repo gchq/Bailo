@@ -1,14 +1,10 @@
 import { escapeRegExp } from 'lodash-es'
 import { QueryFilter } from 'mongoose'
 
-import { DeploymentAssessmentAction } from '../connectors/authorisation/actions.js'
-import authorisation from '../connectors/authorisation/index.js'
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
-import ResponseModel, { DecisionKeys, ResponseKind } from '../models/Response.js'
+import { DecisionKeys, ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
-import { UserInterface } from '../models/User.js'
 import { ReviewKind } from '../types/enums.js'
-import { Forbidden, NotFound } from '../utils/error.js'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string
@@ -147,34 +143,160 @@ export async function findLatestDecisionsByAssessmentIds(
   return new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
 }
 
-// ~2nd Pass of creating DB function to find comments: todo - add typing?
-export async function findCommentsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
-  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
-  if (!deploymentAssessment) {
-    throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
-  }
-
-  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.View)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
-  }
-
-  const comments = await ResponseModel.find({ parentId: [deploymentAssessment._id], kind: ResponseKind.Comment })
-  return comments
+export interface DeploymentAssessmentCommentRecord {
+  entity: string
+  comment?: string
+  createdAt: string
 }
 
-export async function findReviewsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
-  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId })
-  if (!deploymentAssessment) {
-    throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
-  }
+export interface DeploymentAssessmentCommentsRecord {
+  id: string
+  name: string
+  comments: DeploymentAssessmentCommentRecord[]
+}
 
-  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.View)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
-  }
+export interface DeploymentAssessmentReviewResponseRecord {
+  entity: string
+  decision?: DecisionKeys
+  comment?: string
+  createdAt: string
+}
 
-  const reviews = await ReviewModel.find({ deploymentAssessmentId })
+export interface DeploymentAssessmentReviewRecord {
+  role: string
+  responses: DeploymentAssessmentReviewResponseRecord[]
+}
 
-  return reviews
+export interface DeploymentAssessmentReviewsRecord {
+  id: string
+  name: string
+  reviews: DeploymentAssessmentReviewRecord[]
+}
+
+export async function findDeploymentAssessmentComments(
+  deploymentAssessmentId: string,
+): Promise<DeploymentAssessmentCommentsRecord | undefined> {
+  const [deploymentAssessment] = await DeploymentAssessmentModel.aggregate<DeploymentAssessmentCommentsRecord>([
+    {
+      $match: {
+        id: deploymentAssessmentId,
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        let: { deploymentAssessmentObjectId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$parentId', '$$deploymentAssessmentObjectId'] },
+                  { $eq: ['$kind', ResponseKind.Comment] },
+                ],
+              },
+            },
+          },
+          {
+            $sort: { createdAt: 1 },
+          },
+          {
+            $project: {
+              _id: 0,
+              entity: 1,
+              comment: 1,
+              createdAt: 1,
+            },
+          },
+        ],
+        as: 'comments',
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id: 1,
+        name: 1,
+        comments: 1,
+      },
+    },
+  ])
+
+  return deploymentAssessment
+}
+
+export async function findDeploymentAssessmentReviews(
+  deploymentAssessmentId: string,
+): Promise<DeploymentAssessmentReviewsRecord | undefined> {
+  const [deploymentAssessment] = await DeploymentAssessmentModel.aggregate<DeploymentAssessmentReviewsRecord>([
+    {
+      $match: {
+        id: deploymentAssessmentId,
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_reviews',
+        let: { deploymentAssessmentId: '$id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$deploymentAssessmentId', '$$deploymentAssessmentId'] },
+                  { $eq: ['$kind', ReviewKind.DeploymentAssessment] },
+                ],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: 'v2_responses',
+              let: { reviewId: '$_id' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', ResponseKind.Review] }],
+                    },
+                  },
+                },
+                {
+                  $sort: { createdAt: 1 },
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    entity: 1,
+                    decision: 1,
+                    comment: 1,
+                    createdAt: 1,
+                  },
+                },
+              ],
+              as: 'responses',
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              role: 1,
+              responses: 1,
+            },
+          },
+        ],
+        as: 'reviews',
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id: 1,
+        name: 1,
+        reviews: 1,
+      },
+    },
+  ])
+
+  return deploymentAssessment
 }

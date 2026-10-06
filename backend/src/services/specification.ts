@@ -427,6 +427,48 @@ export const deploymentAssessmentResponseSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+const deploymentAssessmentReviewDecisionSchema = z
+  .enum([Decision.Approve, Decision.Reject, Decision.RequestChanges])
+  .openapi({ example: Decision.Approve })
+
+export const deploymentAssessmentCommentSchema = z.object({
+  author: z.string().openapi({ example: 'charlie' }),
+  text: z.string().openapi({ example: 'Have you considered approach X?' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const deploymentAssessmentReviewStatusSchema = z.object({
+  role: z.string().openapi({ example: 'riskOwners' }),
+  status: deploymentAssessmentReviewDecisionSchema,
+})
+
+export const deploymentAssessmentReviewSchema = z.object({
+  reviewer: z.string().openapi({ example: 'alice' }),
+  role: z.string().openapi({ example: 'riskOwners' }),
+  decision: deploymentAssessmentReviewDecisionSchema,
+  comment: z.string().optional().openapi({ example: 'Looks good.' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const getDeploymentAssessmentCommentsResponseSchema = z.object({
+  id: deploymentAssessmentIdSchema,
+  title: deploymentAssessmentNameSchema,
+  comments: z.array(deploymentAssessmentCommentSchema),
+})
+
+export const getDeploymentAssessmentReviewsResponseSchema = z.object({
+  id: deploymentAssessmentIdSchema,
+  title: deploymentAssessmentNameSchema,
+  statuses: z.array(deploymentAssessmentReviewStatusSchema),
+  reviews: z.array(deploymentAssessmentReviewSchema),
+})
+
+export type DeploymentAssessmentComment = z.infer<typeof deploymentAssessmentCommentSchema>
+export type DeploymentAssessmentReviewStatus = z.infer<typeof deploymentAssessmentReviewStatusSchema>
+export type DeploymentAssessmentReview = z.infer<typeof deploymentAssessmentReviewSchema>
+export type GetDeploymentAssessmentCommentsResponse = z.infer<typeof getDeploymentAssessmentCommentsResponseSchema>
+export type GetDeploymentAssessmentReviewsResponse = z.infer<typeof getDeploymentAssessmentReviewsResponseSchema>
+
 export const accessRequestInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'looking-at-pictures-zyxwvu' }),
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
