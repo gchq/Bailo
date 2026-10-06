@@ -5,7 +5,11 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { Decision } from '../../../models/Response.js'
 import { reviewDeploymentAssessment } from '../../../services/deploymentAssessment.js'
-import { deploymentAssessmentResponseSchema, registerPath } from '../../../services/specification.js'
+import {
+  DeploymentAssessmentReview,
+  deploymentAssessmentReviewSchema,
+  registerPath,
+} from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postDeploymentAssessmentReviewSchema = z.object({
@@ -31,7 +35,7 @@ registerPath(
     responses: {
       201: {
         description: 'The created formal review response.',
-        content: { 'application/json': { schema: z.object({ response: deploymentAssessmentResponseSchema }) } },
+        content: { 'application/json': { schema: deploymentAssessmentReviewSchema } },
       },
     },
   },
@@ -39,7 +43,7 @@ registerPath(
 )
 
 export const postDeploymentAssessmentReviews = [
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: Request, res: Response<DeploymentAssessmentReview>): Promise<void> => {
     req.audit = AuditInfo.ReviewDeploymentAssessment
     const { params, body } = parse(req, postDeploymentAssessmentReviewSchema)
     const response = await reviewDeploymentAssessment(
@@ -49,6 +53,12 @@ export const postDeploymentAssessmentReviews = [
       body.comment,
     )
     await audit.onReviewDeploymentAssessment(req, response)
-    res.status(201).json({ response })
+    res.status(201).json({
+      reviewer: req.user.dn,
+      role: response.role ?? 'riskOwners',
+      decision: body.decision,
+      ...(body.comment && { comment: body.comment }),
+      createdAt: response.createdAt,
+    })
   },
 ]
