@@ -1,6 +1,6 @@
 import { PassThrough } from 'node:stream'
 
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 
 import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'
@@ -41,7 +41,7 @@ export class FileImporter extends BaseImporter {
     this.updatedPath = createFilePath(this.metadata.mirroredModelId, this.metadata.filePath)
   }
 
-  async processEntry(entry: Headers, stream: PassThrough) {
+  async processEntry(entry: Header, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
       if (this.extractedFile) {

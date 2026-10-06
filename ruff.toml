@@ -1,0 +1,56 @@
+target-version = "py310"
+line-length = 120
+
+[lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "UP",     # pyupgrade
+    "N",      # pep8-naming
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "LOG",    # flake8-logging
+    "PLC",    # pylint convention
+    "PLE",    # pylint error
+    "PLR",    # pylint refactor
+    "PLW",    # pylint warning
+]
+# ruff format handles code line length; E501 only fires on strings/comments
+# which are often intentionally long (URLs, docstrings, log messages)
+ignore = ["E501"]
+
+[lint.per-file-ignores]
+"backend/docs/**" = ["UP"]
+# Demo notebooks intentionally interleave imports with code for readability
+"backend/docs/notebooks/**" = ["E402", "F821", "I001", "N803"]
+# Generated OpenAPI response examples
+"lib/artefactscan_api/bailo_artefactscan_api/openapi/**" = ["E501"]
+# Pydantic model fields use camelCase to match the REST API contract
+"lib/artefactscan_api/bailo_artefactscan_api/schemas.py" = ["N815"]
+# Public API re-exports
+"lib/python/src/bailo/__init__.py" = ["F401"]
+"lib/python/src/bailo/helper/__init__.py" = ["F401"]
+# API parameters use camelCase to match the REST API field names;
+# exception class names are part of the published API (can't rename)
+"lib/python/src/bailo/**" = ["N803", "N818", "N999"]
+# Tests: magic values (status codes), naming conventions, variable reuse, and file handling
+"**/tests/**" = ["PLR2004", "SIM115", "N802", "N803", "N806", "PLR1704"]
+
+[lint.isort]
+required-imports = ["from __future__ import annotations"]
+
+[lint.pylint]
+max-args = 12
+max-returns = 6
+max-branches = 12
+max-locals = 15
+max-statements = 50
+max-nested-blocks = 5
+max-bool-expr = 5
+max-public-methods = 20
+max-positional-args = 12
+
+[format]
+docstring-code-format = true

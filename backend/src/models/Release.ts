@@ -66,12 +66,8 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
       set: function (semver: string) {
         return semverStringToObject(semver)
       },
-      get: function (semver: SemverObject | string) {
-        if (typeof semver === 'string') {
-          return semver
-        } else {
-          return semverObjectToString(semver)
-        }
+      get: function (semver: SemverObject) {
+        return semverObjectToString(semver)
       },
     },
 
@@ -113,6 +109,39 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
 ReleaseSchema.plugin(softDeletionPlugin)
 ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })
 ReleaseSchema.index({ modelId: 1 })
+
+function convertSemverInFilter(filter: Record<string, any>) {
+  if (filter.semver === undefined) {
+    return
+  }
+  if (typeof filter.semver === 'string') {
+    filter.semver = semverStringToObject(filter.semver)
+  } else if (filter.semver !== null && typeof filter.semver === 'object' && '$in' in filter.semver) {
+    filter.semver.$in = (filter.semver.$in as Array<string | SemverObject>).map((s) =>
+      typeof s === 'string' ? semverStringToObject(s) : s,
+    )
+  }
+}
+
+// Querying by semver can be performed either with a string or a semver object this resolves the type to an object for database lookup
+ReleaseSchema.pre(
+  [
+    'find',
+    'findOne',
+    'findOneAndUpdate',
+    'findOneAndDelete',
+    'findOneAndReplace',
+    'updateOne',
+    'updateMany',
+    'replaceOne',
+    'deleteOne',
+    'deleteMany',
+    'countDocuments',
+  ],
+  function () {
+    convertSemverInFilter(this.getFilter())
+  },
+)
 
 const ReleaseModel = model<ReleaseDoc>('v2_Release', ReleaseSchema)
 

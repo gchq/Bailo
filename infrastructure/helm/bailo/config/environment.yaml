@@ -1,5 +1,7 @@
 inference:
   authorisationToken: INFERENCING_WRITE_TOKEN
+llm:
+  apiKey: LLM_API_KEY
 instrumentation:
   authenticationToken: OTEL_EXPORTER_TOKEN
 modelMirror:

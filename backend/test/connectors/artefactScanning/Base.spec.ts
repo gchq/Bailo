@@ -117,4 +117,37 @@ describe('connectors > artefactScanning > Base', () => {
     })
     expect(result.lastRunAt).toBeInstanceOf(Date)
   })
+
+  test('scan() returns an error result when scan exceeds configured "setTimeout".', async () => {
+    // Simulate waiting for an extended period of time
+    vi.useFakeTimers()
+
+    const connector = new TestConnector()
+    const artefact = { id: 'file1' } as any
+
+    // Mock an unresolved promise i.e. Unresponsive service.
+    connector.executeScan.mockReturnValueOnce(new Promise(() => {}))
+
+    const scanPromise = connector.scan(artefact)
+
+    try {
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      const pendingResult = await Promise.race([scanPromise, Promise.resolve('still pending')])
+
+      expect(pendingResult).toMatch('still pending')
+
+      await vi.advanceTimersByTimeAsync(31_000) // Total timeout > 60_000
+
+      const timeoutResult = await Promise.race([scanPromise, Promise.resolve('still pending')])
+
+      expect(timeoutResult).toMatchObject({
+        toolName: 'TestScanner',
+        state: ArtefactScanState.Error,
+        summary: ['Scan timeout exceeded.'],
+      })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

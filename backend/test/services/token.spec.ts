@@ -60,11 +60,12 @@ describe('services > token', () => {
 
   test('removeToken > success', async () => {
     const mockDelete = vi.fn()
-    TokenModelMock.findOne.mockResolvedValueOnce({ user: testUser.dn, delete: mockDelete })
+    const mockToken = { user: testUser.dn, delete: mockDelete }
+    TokenModelMock.findOne.mockResolvedValueOnce(mockToken)
 
     const result = await removeToken(testUser, 'accessKey')
 
-    expect(result).toEqual({ success: true })
+    expect(result).toEqual(mockToken)
     expect(mockDelete).toHaveBeenCalled()
   })
 

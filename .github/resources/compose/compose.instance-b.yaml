@@ -1,0 +1,27 @@
+services:
+  nginx:
+    ports:
+      - '8082:8080'
+
+  backend:
+    environment:
+      - NODE_CONFIG_ENV=prod_docker_compose
+    networks:
+      - default
+      - internal
+      # allow communicating with A's S3 store
+      - bailo-shared
+
+  registry:
+    ports:
+      - '5001:5000'
+
+networks:
+  default:
+    name: bailo-b_default
+
+  internal:
+    name: bailo-b_internal
+
+  bailo-shared:
+    external: true

@@ -14,8 +14,8 @@ import config from '../utils/config.js'
  * Creates a Node Mailer transporter that uses AWS SES
  * @returns The created Transporter connected to SES
  */
-export const createSesTransporter = async (): Promise<Transporter> => {
-  const sesClient = await createSesClient()
+export function createSesTransporter(): Transporter {
+  const sesClient = createSesClient()
   log.info('Creating AWS SES Transporter')
   return nodemailer.createTransport({
     SES: { sesClient, SendEmailCommand },
@@ -26,7 +26,7 @@ export const createSesTransporter = async (): Promise<Transporter> => {
  * Creates a client for interacting with AWS SES
  * @returns the SES client
  */
-async function createSesClient(): Promise<SESv2Client> {
+function createSesClient(): SESv2Client {
   return new SESv2Client({
     region: config.ses.region,
   })

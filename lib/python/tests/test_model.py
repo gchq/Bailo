@@ -1,17 +1,42 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
-from bailo.core.enums import CollaboratorEntry, MinimalSchema, Role
-
-# isort: split
-
 from bailo import Client, Datacard, Experiment, Model, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, Role
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 
 
 def test_model(local_model):
     assert isinstance(local_model, Model)
+
+
+def test_unpack_hydrates_all_fields(local_model):
+    res = {
+        "id": "test-id",
+        "name": "updated-name",
+        "description": "updated-desc",
+        "visibility": "private",
+        "kind": "model",
+        "organisation": "New Org",
+        "state": "Production",
+        "tags": ["tag1", "tag2"],
+        "collaborators": [{"entity": "user:admin", "roles": ["owner"]}],
+        "settings": {"ungovernedAccess": True, "allowTemplating": False, "mirror": {}},
+    }
+    local_model._unpack(res)
+
+    assert local_model.name == "updated-name"
+    assert local_model.description == "updated-desc"
+    assert local_model.visibility == ModelVisibility.PRIVATE
+    assert local_model.kind == EntryKind.MODEL
+    assert local_model.organisation == "New Org"
+    assert local_model.state == "Production"
+    assert local_model.tags == ["tag1", "tag2"]
+    assert local_model.collaborators == [{"entity": "user:admin", "roles": ["owner"]}]
+    assert local_model.settings["ungovernedAccess"] is True
 
 
 def test_create_experiment_from_model(local_model):
@@ -22,10 +47,28 @@ def test_create_experiment_from_model(local_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "organisation", "state", "tags", "visibility", "collaborators"),
+    ("name", "description", "organisation", "state", "tags", "visibility", "collaborators", "metadata"),
     [
-        ("test-model", "test", None, None, None, ModelVisibility.PUBLIC, None),
-        ("test-model", "test", None, None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
+        (
+            "test-model",
+            "test",
+            None,
+            None,
+            None,
+            ModelVisibility.PUBLIC,
+            None,
+            None,
+        ),
+        (
+            "test-model",
+            "test",
+            None,
+            None,
+            None,
+            None,
+            [CollaboratorEntry("user:user", ["owner", "contributor"])],
+            None,
+        ),
         (
             "test-model",
             "test",
@@ -34,6 +77,19 @@ def test_create_experiment_from_model(local_model):
             ["taga", "tagb"],
             None,
             [CollaboratorEntry("user:user", [Role.OWNER])],
+            None,
+        ),
+        (
+            "test-model",
+            "test-description",
+            "Example Organisation",
+            "Development",
+            ["taga", "tagb"],
+            None,
+            [CollaboratorEntry("user:user", [Role.OWNER])],
+            {
+                "overview": {"modelSummary": "I am filled."},
+            },
         ),
     ],
 )
@@ -46,6 +102,7 @@ def test_create_get_from_id_update_and_delete_model(
     tags: list[str] | None,
     collaborators: list[CollaboratorEntry] | None,
     integration_client: Client,
+    metadata: dict[str, Any],
 ):
     # Create model
     model = Model.create(
@@ -61,17 +118,48 @@ def test_create_get_from_id_update_and_delete_model(
     model.card_from_schema("minimal-general-v10")
     assert isinstance(model, Model)
 
+    if metadata is not None:
+        model.update_model_card(model_card=metadata)
+
     # Check that a model can be changed
     model.description = "testing-1234"
-    model.update()
 
-    get_model = Model.from_id(integration_client, model.model_id)
-
-    assert get_model.description == "testing-1234"
-
-    assert model.model_id == get_model.model_id
+    if state is not None and metadata is None:
+        with pytest.raises(BailoException):
+            model.update()
+    else:
+        model.update()
+        get_model = Model.from_id(integration_client, model.model_id)
+        assert get_model.description == "testing-1234"
+        assert model.model_id == get_model.model_id
 
     # Check that the model is deleted
+    assert model.delete()
+
+
+@pytest.mark.integration
+def test_update_round_trips_all_fields(integration_client):
+    model = Model.create(
+        client=integration_client,
+        name="test-round-trip",
+        description="original",
+        visibility=ModelVisibility.PUBLIC,
+        organisation="Example Organisation",
+        tags=["alpha"],
+    )
+    model.card_from_schema("minimal-general-v10")
+
+    model.description = "updated"
+    model.tags = ["alpha", "beta"]
+    model.update()
+
+    fetched = Model.from_id(integration_client, model.model_id)
+    assert fetched.description == "updated"
+    assert fetched.tags == ["alpha", "beta"]
+    assert fetched.organisation == "Example Organisation"
+    assert fetched.settings is not None
+    assert isinstance(fetched.settings, dict)
+
     assert model.delete()
 
 
@@ -103,6 +191,20 @@ def test_get_and_update_latest_model_card(integration_client):
     model.get_card_latest()
 
     assert model.model_card_schema == "minimal-general-v10"
+
+
+@pytest.mark.integration
+def test_update_model_card_schema_validation_error(example_model):
+    with pytest.raises(BailoException) as exc_info:
+        example_model.update_model_card(
+            model_card={"overview": {"modelSummary": "Valid"}, "invalidField": "should fail validation"},
+        )
+
+    exc = exc_info.value
+    assert exc.context is not None
+    assert "validationErrors" in exc.context
+    assert len(exc.context["validationErrors"]) > 0
+    assert "schema" in exc.message.lower() or "validated" in exc.message.lower()
 
 
 @pytest.mark.integration
@@ -164,7 +266,7 @@ def test_get_datacard_as_model(integration_client):
     )
 
     with pytest.raises(BailoException):
-        model = Model.from_id(client=integration_client, model_id=datacard.datacard_id)
+        Model.from_id(client=integration_client, model_id=datacard.datacard_id)
 
 
 @pytest.mark.integration
@@ -218,7 +320,7 @@ def test_import_model_from_mlflow(integration_client, mlflow_model, request):
 @pytest.mark.mlflow
 def test_import_nonexistent_model_from_mlflow(integration_client, request):
     with pytest.raises(BailoException):
-        model = Model.from_mlflow(
+        Model.from_mlflow(
             client=integration_client,
             mlflow_uri=request.config.mlflow_uri,
             schema_id="minimal-general-v10",
@@ -229,7 +331,7 @@ def test_import_nonexistent_model_from_mlflow(integration_client, request):
 @pytest.mark.mlflow
 def test_import_model_files_no_run(integration_client, mlflow_model_no_run, request):
     with pytest.raises(BailoException):
-        model = Model.from_mlflow(
+        Model.from_mlflow(
             client=integration_client,
             mlflow_uri=request.config.mlflow_uri,
             schema_id="minimal-general-v10",

@@ -1,4 +1,4 @@
-import { GppBad } from '@mui/icons-material'
+import GppBad from '@mui/icons-material/GppBad'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { CSSProperties, ReactElement } from 'react'
 import Link from 'src/Link'
@@ -17,7 +17,15 @@ export default function Forbidden({
   hideNavButton = false,
 }: ForbiddenProps) {
   return (
-    <Stack justifyContent='center' alignItems='center' sx={additionalStyling}>
+    <Stack
+      sx={[
+        {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        ...(Array.isArray(additionalStyling) ? additionalStyling : [additionalStyling]),
+      ]}
+    >
       <Box
         sx={{
           p: 2,
@@ -25,14 +33,34 @@ export default function Forbidden({
           m: noMargin ? 0 : 5,
         }}
       >
-        <Stack spacing={2} alignItems='center' sx={{ pt: 2 }}>
-          <Stack direction='row' justifyContent='center' alignItems='center' spacing={2}>
+        <Stack
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            pt: 2,
+          }}
+        >
+          <Stack
+            direction='row'
+            spacing={2}
+            sx={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
             <GppBad color='secondary' sx={{ fontSize: 75 }} />
             <Typography color='secondary' sx={{ fontSize: 75 }}>
               403
             </Typography>
           </Stack>
-          <Typography component='h3' variant='h5' color='primary' fontWeight='bold'>
+          <Typography
+            component='h3'
+            variant='h5'
+            color='primary'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             Uh oh! Looks like you don&apos;t have permission to view this content.
           </Typography>
           <Typography>{errorMessage}</Typography>

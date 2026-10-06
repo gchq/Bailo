@@ -6,11 +6,15 @@ import { z } from '../../../lib/zod.js'
 import { SchemaInterface } from '../../../models/Schema.js'
 import { getSchemaById } from '../../../services/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/specification.js'
+import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getSchemaSchema = z.object({
   params: z.object({
     schemaId: z.string(),
+  }),
+  query: z.object({
+    modelState: z.enum(config.ui.modelDetails.states as [string, ...string[]]).optional(),
   }),
 })
 
@@ -41,9 +45,12 @@ interface GetSchemaResponse {
 export const getSchema = [
   async (req: Request, res: Response<GetSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewSchema
-    const { params } = parse(req, getSchemaSchema)
+    const {
+      query: { modelState },
+      params: { schemaId },
+    } = parse(req, getSchemaSchema)
 
-    const schema = await getSchemaById(params.schemaId)
+    const schema = await getSchemaById(schemaId, modelState)
     await audit.onViewSchema(req, schema)
 
     res.json({

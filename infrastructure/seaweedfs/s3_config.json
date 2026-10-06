@@ -1,0 +1,14 @@
+{
+  "identities": [
+    {
+      "name": "bailoadmin",
+      "credentials": [
+        {
+          "accessKey": "bailoadmin",
+          "secretKey": "bailoadmin"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

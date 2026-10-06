@@ -62,20 +62,13 @@ from bailo import Client, Model
 client = Client("http://localhost:8080")
 
 # Create a model
-yolo = Model.create(
-    client=client,
-    name="YoloV4",
-    description="You only look once!"
-)
+yolo = Model.create(client=client, name="YoloV4", description="You only look once!")
 
 # Populate datacard using a predefined schema
 yolo.card_from_schema("minimal-general-v10")
 
 # Create a new release
-my_release = yolo.create_release(
-    version="0.1.0",
-    notes="Beta"
-)
+my_release = yolo.create_release(version="0.1.0", notes="Beta")
 
 # Upload a binary file to the release
 with open("yolo.onnx") as f:
@@ -132,7 +125,7 @@ To run the mlflow integration tests (requires Bailo running on `https://localhos
 
 ```bash
 docker run -p 5050:5000 \
-    "ghcr.io/mlflow/mlflow:v$(python -m pip show mlflow | awk '/Version:/ {print $2}')" \
+    "ghcr.io/mlflow/mlflow:v$(python -m pip show mlflow-skinny | awk '/Version:/ {print $2}')" \
     mlflow server --host 0.0.0.0 --port 5000
 
 pytest -m mlflow

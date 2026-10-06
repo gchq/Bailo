@@ -66,6 +66,9 @@ smtp:
       pass: {{ .Values.config.smtp.pass }}
     tls:
       rejectUnauthorized: {{ .Values.config.smtp.rejectUnauthorized }}
+  lifecycle:
+    preReminderIntervals: {{ toJson .Values.config.smtp.preReminderIntervals }}
+    postReminderInterval: {{ .Values.config.smtp.postReminderInterval }}
   from: {{ .Values.config.smtp.from }}
 log:
   level: {{ .Values.config.log.level }}
@@ -92,6 +95,8 @@ oauth:
     userPoolId: {{ .Values.oauth.identityProviderClient.userPoolId }}
     userIdAttribute: {{ .Values.oauth.identityProviderClient.userIdAttribute }}
     adminGroupName: {{ .Values.oauth.cognito.adminGroupName }}
+    complianceGroupName: {{ .Values.oauth.cognito.complianceGroupName }}
+    untrustedModelGroupName: {{ .Values.oauth.cognito.untrustedModelGroupName }}
 ui:
   banner:
     enabled: {{ .Values.config.ui.banner.enabled }}
@@ -131,6 +136,13 @@ ui:
     owner: {{ .Values.config.ui.roleDisplayNames.owner }}
     consumer: {{ .Values.config.ui.roleDisplayNames.consumer }}
     contributor: {{ .Values.config.ui.roleDisplayNames.contributor }}
+  untrustedModel:
+    enabled: {{ .Values.config.ui.untrustedModel.enabled }}
+    untrustedModelLongDescription: {{ .Values.config.ui.untrustedModel.untrustedModelLongDescription }}
+    untrustedModelShortDescription: {{ .Values.config.ui.untrustedModel.untrustedModelShortDescription }}
+    fileUploadGuidance: {{ .Values.config.ui.untrustedModel.fileUploadGuidance }}
+  lifecycle:
+    maxReviewInterval: {{ .Values.config.ui.lifecycle.maxReviewInterval }}
 connectors:
   authentication:
     kind: {{ .Values.connectors.authentication.kind }}
@@ -143,6 +155,7 @@ connectors:
     retryDelayInMinutes: {{ .Values.connectors.artefactScanners.retryDelayInMinutes }}
     maxInitRetries:  {{ .Values.connectors.artefactScanners.maxInitRetries }}
     initRetryDelay: {{ .Values.connectors.artefactScanners.initRetryDelay }}
+    scanTimeoutMs: {{ .Values.connectors.artefactScanners.scanTimeoutMs }}
 instrumentation:
   enabled: {{ .Values.instrumentation.enabled }}
   endpoint: {{ .Values.instrumentation.endpoint }}
@@ -154,6 +167,7 @@ s3:
   endpoint: {{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}
   region: {{ .Values.minio.region }}
   forcePathStyle: true
+  responseChecksumValidation: {{ .Values.aws.s3.responseChecksumValidation }}
   buckets:
     uploads: {{ .Values.minio.uploadBucket }}
     registry: {{ .Values.minio.registryBucket }}
@@ -167,10 +181,20 @@ modelMirror:
       enabled: {{ .Values.modelMirror.export.kmsSignature.enabled }}
       keyId: {{ .Values.modelMirror.export.kmsSignature.keyId }}
 stroom:
-  logOnlyMode: {{ .Values.stroom.logOnlyMode }}
-  feed: {{ .Values.stroom.feed }}
+  sendEvents: {{ .Values.stroom.sendEvents }}
   url: {{ .Values.stroom.url }}
   environment: {{ .Values.stroom.environment }}
   interval: {{ .Values.stroom.interval }}
   generator: {{ .Values.stroom.generator }}
   rejectUnauthorized: {{ .Values.stroom.rejectUnauthorized }}
+  xmlns: {{ .Values.stroom.xmlns }}
+  schemaLocation: {{ .Values.stroom.schemaLocation }}
+  version: {{ .Values.stroom.version }}
+  headers: {{ toJson .Values.stroom.headers }}
+llm:
+  endpoint: {{ .Values.llm.endpoint }}
+  model: {{ .Values.llm.model }}
+  maxTokens: {{ .Values.llm.maxTokens }}
+  timeoutMs: {{ .Values.llm.timeoutMs }}
+  temperature: {{ .Values.llm.temperature }}
+  systemPrompt: {{ toJson .Values.llm.systemPrompt }}

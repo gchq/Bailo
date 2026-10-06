@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb'
+
 import {} from '../../src/models/SchemaMigration.js'
 import { ReviewKind, SchemaKind, SchemaMigrationKind } from '../../src/types/enums.js'
 
@@ -55,6 +57,9 @@ export const testDeploymentSchema = {
 }
 
 export const testReviewResponse = {
+  _id: new ObjectId('6776901b879d08e34b599d7e'),
+  entity: 'user:user',
+  reactions: [],
   comment: 'test comment',
   user: 'user',
   parentId: '66854110aab20df2b7481a82',
@@ -106,7 +111,7 @@ export const testRelease = {
 
 export const testResponse = {
   message: 'test comment',
-  user: 'user',
+  entity: 'user',
   createdAt: '2024-05-17T06:13:41.690Z',
   _id: '6646f5953391b094ca4f55ee',
 }

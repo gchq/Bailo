@@ -1,4 +1,5 @@
-import { Close, Delete } from '@mui/icons-material'
+import Close from '@mui/icons-material/Close'
+import Delete from '@mui/icons-material/Delete'
 import {
   Button,
   Dialog,

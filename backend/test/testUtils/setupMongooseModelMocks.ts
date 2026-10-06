@@ -15,6 +15,9 @@ const CHAINABLE_METHODS = [
   'findOneAndDelete',
   'findOneAndUpdate',
   'group',
+  'insertMany',
+  'lean',
+  'limit',
   'lookup',
   'match',
   'save',
@@ -23,6 +26,7 @@ const CHAINABLE_METHODS = [
   'updateMany',
   'updateOne',
   'markModified',
+  'replaceOne',
 ] as const
 
 const QUERY_LIKE_METHODS = [

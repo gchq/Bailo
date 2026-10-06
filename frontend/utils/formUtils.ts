@@ -1,6 +1,6 @@
 import { Registry, RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
-import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
+import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
@@ -36,6 +36,8 @@ export function createStep({
   uiSchema,
   state,
   mirroredState,
+  compareFromState,
+  compareFromMirroredState,
   type,
   section,
   index,
@@ -46,6 +48,8 @@ export function createStep({
   uiSchema?: any
   state: unknown
   mirroredState?: unknown
+  compareFromState?: unknown
+  compareFromMirroredState?: unknown
   type: StepType
   section: string
   index: number
@@ -57,14 +61,13 @@ export function createStep({
     uiSchema,
     state,
     mirroredState,
+    compareFromState,
+    compareFromMirroredState,
     type,
     index,
-
     section,
     schemaRef,
-
     shouldValidate: false,
-
     isComplete,
   }
 }
@@ -116,6 +119,8 @@ export function getStepsFromSchema(
   omitFields: Array<string> = [],
   state: any = {},
   mirroredState: any = {},
+  compareFromState?: any,
+  compareFromMirroredState?: any,
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -139,6 +144,11 @@ export function getStepsFromSchema(
       uiSchema: uiSchema[prop],
       state: state[prop] || {},
       mirroredState: mirroredState ? mirroredState[prop] || {} : {},
+      // Slice compare-mode "from" states per section to match `state` / `mirroredState`. Left
+      // `undefined` (rather than defaulted to `{}`) when the caller didn't provide them, so the
+      // widgets can distinguish "not in compare mode" from "compare mode with an empty section".
+      compareFromState: compareFromState ? compareFromState[prop] || {} : undefined,
+      compareFromMirroredState: compareFromMirroredState ? compareFromMirroredState[prop] || {} : undefined,
       type: 'Form',
       index,
       schemaRef: schema.reference,
@@ -218,6 +228,70 @@ export const getState = (id: string, formContext: Registry['formContext']) => {
     .reduce((prev, cur) => prev && prev[cur], formContext.state)
 }
 
+// Mirrors backend `deepMergePreferFirst`
+export function deepMergePreferFirst<TPreferred extends object, TFallback extends object>(
+  first: TPreferred,
+  second: TFallback,
+): TPreferred & TFallback {
+  return mergeWith({}, second, first, (objValue, srcValue) => {
+    // Arrays: first object wins completely
+    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+      return srcValue ?? objValue
+    }
+
+    // Primitives: first object wins when present
+    if (srcValue !== undefined && (srcValue === null || typeof srcValue !== 'object')) {
+      return srcValue
+    }
+
+    // Return undefined to let lodash continue normal deep merge.
+    return undefined
+  }) as TPreferred & TFallback
+}
+
+function getPreferFirstValue(firstValue: unknown, secondValue: unknown): unknown {
+  // Picks first value when it has meaningful content, otherwise falls back to second.
+  if (firstValue === undefined || firstValue === null || firstValue === '') {
+    return secondValue
+  }
+  if (Array.isArray(firstValue) && firstValue.length === 0) {
+    return secondValue
+  }
+  return firstValue
+}
+
+/**
+ * Look up the compare-mode "from" local-card value for a field, mirroring `getState`. Returns
+ * `undefined` when the current form isn't running in compare mode (i.e. no `compareFromState` was
+ * placed on the `formContext`), which callers use to detect single-vs-double-diff rendering.
+ */
+export const getCompareFromState = (id: string, formContext: Registry['formContext']) => {
+  if (formContext.compareFromState === undefined) {
+    return undefined
+  }
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromState)
+}
+
+/**
+ * Look up the compare-mode "from" mirrored-card value for a field, mirroring `getMirroredState`.
+ */
+export const getCompareFromMirroredState = (id: string, formContext: Registry['formContext']) => {
+  if (formContext.compareFromMirroredState === undefined) {
+    return undefined
+  }
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromMirroredState)
+}
+
 function isMetricsKey(key: string): boolean {
   return key.toLowerCase().includes('metrics')
 }
@@ -233,6 +307,34 @@ function isAnswered(value: any): boolean {
     return value.length > 0
   }
   return true
+}
+
+export function isQuestionAnswered(id: string, schema: any, formContext: Registry['formContext']): boolean {
+  if (!schema || typeof schema !== 'object') {
+    return false
+  }
+
+  // For mirrored models, a field is answered if present in either local or source card (local value preferred)
+  const localValue = getState(id, formContext)
+  const value = formContext.mirroredModel
+    ? getPreferFirstValue(localValue, getMirroredState(id, formContext))
+    : localValue
+
+  if (isPrimitiveSchema(schema)) {
+    return isAnswered(value)
+  }
+
+  if (schema.type === 'array' && schema.items) {
+    if (!Array.isArray(value) || value.length === 0) {
+      return false
+    }
+    // For arrays of objects/primitives, ensure the first entry is fully answered
+    const total = countQuestionsFromSchema(schema.items)
+    const answered = countAnswersFromSchemaAndState(schema.items, value[0])
+    return total === 0 ? isAnswered(value[0]) : answered >= total
+  }
+
+  return isAnswered(value)
 }
 
 function isRequiredArray(schema: any): boolean {
@@ -253,13 +355,20 @@ function isPrimitiveSchema(schema: any): boolean {
   return ['string', 'number', 'boolean'].includes(schema.type)
 }
 
-function countQuestionsFromSchema(schema: any): number {
+export function requiredByStateFilter(schema: any, requiredByModelState?: string) {
+  return requiredByModelState &&
+    !(schema.requiredByModelStates && schema.requiredByModelStates.includes(requiredByModelState))
+    ? false
+    : true
+}
+
+function countQuestionsFromSchema(schema: any, requiredByModelState?: string): number {
   if (!schema || typeof schema !== 'object') {
     return 0
   }
 
   if (isPrimitiveSchema(schema)) {
-    return 1
+    return requiredByStateFilter(schema, requiredByModelState) ? 1 : 0
   }
 
   // If array - Only count if needed
@@ -267,7 +376,7 @@ function countQuestionsFromSchema(schema: any): number {
     if (!isRequiredArray(schema)) {
       return 0
     }
-    return countQuestionsFromSchema(schema.items)
+    return countQuestionsFromSchema(schema.items, requiredByModelState)
   }
 
   if (schema.type === 'object' && schema.properties) {
@@ -276,7 +385,7 @@ function countQuestionsFromSchema(schema: any): number {
       if (isMetricsKey(key)) {
         continue
       }
-      total += countQuestionsFromSchema(prop)
+      total += countQuestionsFromSchema(prop, requiredByModelState)
     }
     return total
   }
@@ -284,13 +393,13 @@ function countQuestionsFromSchema(schema: any): number {
   return 0
 }
 
-function countAnswersFromSchemaAndState(schema: any, state: any): number {
+function countAnswersFromSchemaAndState(schema: any, state: any, requiredByModelState?: string): number {
   if (!schema || typeof schema !== 'object') {
     return 0
   }
 
   if (isPrimitiveSchema(schema)) {
-    return isAnswered(state) ? 1 : 0
+    return isAnswered(state) && requiredByStateFilter(schema, requiredByModelState) ? 1 : 0
   }
 
   // If Array - Check first item
@@ -298,7 +407,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
     if (!Array.isArray(state) || state.length === 0) {
       return 0
     }
-    return countAnswersFromSchemaAndState(schema.items, state[0])
+    return countAnswersFromSchemaAndState(schema.items, state[0], requiredByModelState)
   }
 
   if (schema.type === 'object' && schema.properties) {
@@ -307,7 +416,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
       if (isMetricsKey(key)) {
         continue
       }
-      total += countAnswersFromSchemaAndState(prop, state?.[key])
+      total += countAnswersFromSchemaAndState(prop, state?.[key], requiredByModelState)
     }
     return total
   }
@@ -325,7 +434,7 @@ function countAnswersFromSchemaAndState(schema: any, state: any): number {
  * If no step is provided, all numeric values are returned as -1 and the form
  * is marked as incomplete.
  */
-export function getFormStats(step?: StepNoRender, mirroredModel?: boolean): FormStats {
+export function getFormStats(step?: StepNoRender, mirroredModel?: boolean, requiredByModelState?: string): FormStats {
   if (!step) {
     return {
       totalQuestions: -1,
@@ -335,29 +444,37 @@ export function getFormStats(step?: StepNoRender, mirroredModel?: boolean): Form
     }
   }
 
-  const totalQuestions = countQuestionsFromSchema(step.schema)
-  const totalAnswers = countAnswersFromSchemaAndState(step.schema, mirroredModel ? step.mirroredState : step.state)
+  const totalQuestions = countQuestionsFromSchema(step.schema, requiredByModelState)
+  // Mirrored models validate against the combined card with local values preferred to source values
+  const stateForValidation = mirroredModel
+    ? deepMergePreferFirst(step.state || {}, step.mirroredState || {})
+    : step.state
+  const totalAnswers = countAnswersFromSchemaAndState(step.schema, stateForValidation, requiredByModelState)
 
-  // If more answers given than required answers then return 100% otherwise calulate percentage
+  // If more answers given than required answers then return 100% otherwise calculate percentage
   const percentageQuestionsComplete =
-    totalQuestions === 0 ? 0 : Math.min(100, roundToOneDecimal((totalAnswers / totalQuestions) * 100))
+    totalQuestions === 0 ? 100 : Math.min(100, roundToOneDecimal((totalAnswers / totalQuestions) * 100))
 
   return {
     totalQuestions,
     totalAnswers,
     percentageQuestionsComplete,
-    formCompleted: totalAnswers >= totalQuestions,
+    formCompleted: totalAnswers >= totalQuestions || totalQuestions === 0,
   }
 }
 
-export function getOverallCompletionStats(steps: StepNoRender[], mirroredModel?: boolean): ModelFormStats {
+export function getOverallCompletionStats(
+  steps: StepNoRender[],
+  mirroredModel?: boolean,
+  requiredByModelState?: string,
+): ModelFormStats {
   let totalQuestions = 0
   let totalAnswers = 0
   let totalPages = 0
   let pagesCompleted = 0
 
   steps.forEach((step) => {
-    const stepStats = getFormStats(step, mirroredModel)
+    const stepStats = getFormStats(step, mirroredModel, requiredByModelState)
     totalQuestions += stepStats.totalQuestions
     totalAnswers += stepStats.totalAnswers
     totalPages += 1

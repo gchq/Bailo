@@ -1,10 +1,10 @@
 import { PassThrough } from 'node:stream'
 
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
-import { DockerManifestMediaType } from '../../../../src/utils/registryResponses.js'
+import { DockerManifestMediaType } from '../../../../src/utils/registryResponseTypes.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -17,6 +17,11 @@ const registryServiceMocks = vi.hoisted(() => ({
   splitDistributionPackageName: vi.fn(() => ({ path: 'imageName', tag: 'tag' })),
 }))
 vi.mock('../../../../src/services/registry.js', () => registryServiceMocks)
+
+const modelTransferMock = vi.hoisted(() => ({
+  updateArtefactTransferStatus: vi.fn(),
+}))
+vi.mock('../../../../src/services/modelTransfer.js', () => modelTransferMock)
 
 const registryClientMocks = vi.hoisted(() => ({
   doesLayerExist: vi.fn(),
@@ -85,7 +90,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
   test('processEntry > success extract manifest.json', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'content-dir/manifest.json', type: 'file' } as Headers
+    const entry: Header = { name: 'content-dir/manifest.json', type: 'file' } as Header
     const mockManifest = {
       schemaVersion: 2,
       mediaType: DockerManifestMediaType,
@@ -114,11 +119,11 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   test('processEntry > success skips blob if it exists in registry', async () => {
     registryClientMocks.doesLayerExist.mockResolvedValue(true)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/blobs/sha256/' + 'a'.repeat(64),
       type: 'file',
       size: 10,
-    } as Headers
+    } as Header
     const stream = new PassThrough()
     const resumeSpy = vi.spyOn(stream, 'resume')
 
@@ -131,10 +136,10 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   test('processEntry > success uploads blob if not in registry', async () => {
     registryClientMocks.doesLayerExist.mockResolvedValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
       type: 'file',
-    } as Headers
+    } as Header
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)
@@ -154,11 +159,11 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
       throw new Error('init fail')
     })
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = {
+    const entry: Header = {
       name: 'content-dir/blobs/sha256/' + 'c'.repeat(64),
       type: 'file',
       size: 30,
-    } as Headers
+    } as Header
     const stream = new PassThrough()
 
     await expect(importer.processEntry(entry, stream)).rejects.toThrow(/^Failed to upload blob to registry\./)
@@ -166,7 +171,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
   test('processEntry > error for unrecognised file path', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'content-dir/invalid.json', type: 'file' } as Headers
+    const entry: Header = { name: 'content-dir/invalid.json', type: 'file' } as Header
     const stream = new PassThrough()
 
     await expect(importer.processEntry(entry, stream)).rejects.toThrow(
@@ -176,7 +181,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
   test('processEntry > success warns & skips non-file entries', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
-    const entry: Headers = { name: 'some-dir', type: 'directory' } as Headers
+    const entry: Header = { name: 'some-dir', type: 'directory' } as Header
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)
@@ -203,6 +208,58 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
       // @ts-expect-error accessing protected property
       JSON.stringify(importer.manifestBody),
       'mt',
+    )
+    expect(resolve).toHaveBeenCalledWith({
+      metadata: mockMetadata,
+      image: { modelId: mockMetadata.mirroredModelId, imageName: 'imageName', imageTag: 'tag' },
+    })
+  })
+
+  test('finishListener > success upload fat manifest successfully when valid', async () => {
+    const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
+    const platformDigest = 'sha256:' + 'a'.repeat(64)
+    // @ts-expect-error accessing protected property
+    importer.manifestBody = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+      manifests: [
+        {
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          digest: platformDigest,
+          size: 123,
+          platform: {
+            architecture: 'amd64',
+            os: 'linux',
+          },
+        },
+      ],
+    }
+    // @ts-expect-error accessing protected property
+    importer.manifestsToUpload.set(
+      platformDigest,
+      JSON.stringify({
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { digest: 'sha256:config', size: 1, mediaType: 'application/json' },
+        layers: [],
+      }),
+    )
+    const resolve = vi.fn()
+    const reject = vi.fn()
+    await importer.handleStreamCompletion(resolve, reject)
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      1,
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', digest: platformDigest },
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.v2+json',
+    )
+    expect(registryClientMocks.putManifest).toHaveBeenNthCalledWith(
+      2,
+      undefined,
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', tag: 'tag' },
+      expect.anything(),
+      'application/vnd.docker.distribution.manifest.list.v2+json',
     )
     expect(resolve).toHaveBeenCalledWith({
       metadata: mockMetadata,

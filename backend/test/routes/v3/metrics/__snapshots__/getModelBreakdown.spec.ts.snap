@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > metrics > getModelBreakdown > 200 > ok 1`] = `
+[
+  {
+    "collaborators": [
+      {
+        "entity": "user:user",
+        "roles": [
+          "owner",
+        ],
+      },
+    ],
+    "entryId": "print-ocr-model-g9yuo2",
+    "entryName": "Print OCR model",
+  },
+]
+`;

@@ -1,4 +1,5 @@
-import { Add, Delete } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import Delete from '@mui/icons-material/Delete'
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { deleteUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -34,12 +35,32 @@ export default function AuthenticationTab() {
           })
           .map((token, index) => (
             <Fragment key={token.accessKey}>
-              <Stack direction='row' alignItems='center' justifyContent='space-between'>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography>{token.description}</Typography>
-                <Box pl={1}>
-                  <Typography variant='caption' mr={1}>
+                <Box
+                  sx={{
+                    pl: 1,
+                  }}
+                >
+                  <Typography
+                    variant='caption'
+                    sx={{
+                      mr: 1,
+                    }}
+                  >
                     Created on
-                    <Typography variant='caption' fontWeight='bold'>
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        fontWeight: 'bold',
+                      }}
+                    >
                       {` ${formatDateString(token.createdAt)}`}
                     </Typography>
                   </Typography>
@@ -89,11 +110,18 @@ export default function AuthenticationTab() {
     <Box sx={{ p: 2 }}>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        justifyContent={{ xs: 'center', sm: 'space-between' }}
-        alignItems='center'
-        sx={{ pb: 2 }}
+        sx={{
+          justifyContent: { xs: 'center', sm: 'space-between' },
+          alignItems: 'center',
+          pb: 2,
+        }}
       >
-        <Typography fontWeight='bold' mb={1}>
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+            mb: 1,
+          }}
+        >
           Personal access tokens
         </Typography>
         <Button

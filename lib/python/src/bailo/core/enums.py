@@ -40,6 +40,8 @@ class EntryKind(ValuedEnum):
     MODEL = "model"
     DATACARD = "data-card"
     MIRRORED_MODEL = "mirrored-model"
+    UNTRUSTED_MODEL = "untrusted-model"
+    MIRRORED_DATACARD = "mirrored-data-card"
 
 
 class MinimalSchema(ValuedEnum):

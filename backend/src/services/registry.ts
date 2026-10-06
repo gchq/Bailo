@@ -2,7 +2,6 @@ import { ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
-  getImageTagManifest,
   getImageTagManifests,
   getRegistryLayerStream,
   listImageTags,
@@ -28,7 +27,8 @@ import {
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { isManifestList } from '../utils/registryResponses.js'
+import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponseTypes.js'
 import { platformToString } from '../utils/registryUtils.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getLayersForImage } from './images/getImageLayers.js'
@@ -41,8 +41,7 @@ const imageRegex =
   /^(?:(?<domain>(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)|(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?::\d{1,5})|(?:\d{1,3}\.){3}\d{1,3}|\[(?:[0-9A-Fa-f:.]+)\])(?::\d{1,5})?)\/)?(?<path>[a-z0-9]+(?:(?:[_.]|__|-+)[a-z0-9]+)*(?:\/[a-z0-9]+(?:(?:[_.]|__|-+)[a-z0-9]+)*)*)(?::(?<tag>[\w][\w.-]{0,127}))?(?:@(?<digest>[A-Za-z][A-Za-z0-9]*(?:[+.\-_][A-Za-z][A-Za-z0-9]*)*:[0-9a-fA-F]{32,}))?$/
 
 export type DistributionPackageName =
-  | { domain?: string; path: string; tag: string }
-  | { domain?: string; path: string; digest: string }
+  { domain?: string; path: string; tag: string } | { domain?: string; path: string; digest: string }
 
 export function splitDistributionPackageName(distributionPackageName: string): DistributionPackageName {
   const split = imageRegex.exec(distributionPackageName)
@@ -95,27 +94,43 @@ export async function checkUserAuth(user: UserInterface, modelId: string, action
   }
 }
 
-export async function listModelImages(user: UserInterface, modelId: string): Promise<ModelImages> {
+type ModelImageWithToken = ModelImages[number] & { repositoryToken: string }
+
+export async function listModelImages(
+  user: UserInterface,
+  modelId: string,
+  includeTokens: true,
+): Promise<ModelImageWithToken[]>
+export async function listModelImages(user: UserInterface, modelId: string, includeTokens?: false): Promise<ModelImages>
+export async function listModelImages(
+  user: UserInterface,
+  modelId: string,
+  includeTokens = false,
+): Promise<ModelImages | ModelImageWithToken[]> {
   await checkUserAuth(user, modelId, ['list'])
 
   const registryToken = await issueAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
-  return (
-    (
-      await Promise.all(
-        repos.map(async (repo) => {
-          const [repository, name] = repo.split(/\/(.*)/s)
-          const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-            { type: 'repository', name: repo, actions: ['pull'] },
-          ])
-          const tags = await listImageTags(repositoryToken, { repository, name })
-          return { repository, name, tags }
-        }),
-      )
+
+  const results = (
+    await Promise.all(
+      repos.map(async (repo) => {
+        const [repository, name] = repo.split(/\/(.*)/s)
+        const repositoryToken = await issueAccessToken({ dn: user.dn }, [
+          { type: 'repository', name: repo, actions: ['pull'] },
+        ])
+        const tags = await listImageTags(repositoryToken, { repository, name })
+        return { repository, name, tags, repositoryToken }
+      }),
     )
-      // Docker Distribution Registry does not remove empty repositories so filter out repos that have no remaining tags.
-      .filter((repo) => repo.tags && repo.tags.length > 0)
   )
+    // Docker Distribution Registry does not remove empty repositories so filter out repos that have no remaining tags.
+    .filter((repo) => repo.tags && repo.tags.length > 0)
+
+  if (includeTokens) {
+    return results
+  }
+  return results.map(({ repositoryToken: _token, ...img }) => img)
 }
 
 export async function getScansFromLayers(
@@ -184,7 +199,7 @@ export async function getModelImageWithScanResults(
   let platform: string | undefined
 
   let layerRef: ImageRef
-  if ('manifests' in body) {
+  if (isManifestList(body)) {
     if (!digest) {
       throw BadReq('Must provide digest for multiplatform image', { imageRef })
     }
@@ -216,18 +231,10 @@ export async function listModelImagesWithScanResults(
   user: UserInterface,
   modelId: string,
 ): Promise<ModelImagesWithScanResults[]> {
-  const modelImages = await listModelImages(user, modelId)
+  const modelImagesWithToken = await listModelImages(user, modelId, true)
 
   return Promise.all(
-    modelImages.map(async (img) => {
-      const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-        {
-          type: 'repository',
-          name: `${img.repository}/${img.name}`,
-          actions: ['pull'],
-        },
-      ])
-
+    modelImagesWithToken.map(async ({ repositoryToken, ...img }) => {
       const scanSummaries = (
         await Promise.all(
           img.tags.map(async (tag) => {
@@ -237,7 +244,7 @@ export async function listModelImagesWithScanResults(
               return []
             }
 
-            if ('manifests' in manifestResponse.body) {
+            if (isManifestList(manifestResponse.body)) {
               return Promise.all(
                 manifestResponse.body.manifests.map(async (manifest) => {
                   const layers = await getLayersForImage(repositoryToken, { ...img, digest: manifest.digest })
@@ -253,7 +260,7 @@ export async function listModelImagesWithScanResults(
               )
             }
 
-            const layers = await getLayersForImage(repositoryToken, { ...img, tag })
+            const layers = await getLayersForImage(repositoryToken, { ...img, tag }, manifestResponse.body)
 
             const scan = await getScansFromLayers(layers)
 
@@ -281,17 +288,6 @@ function countSeverities(scanSummary: ScanSummary): SeverityCounts {
     }
     return acc
   }, initial)
-}
-
-export async function getImageManifest(user: UserInterface, imageRef: ImageRef) {
-  await checkUserAuth(user, imageRef.repository, ['pull'])
-
-  const repositoryToken = await issueAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
-  ])
-
-  // get which layers exist for the model
-  return await getImageTagManifest(repositoryToken, imageRef)
 }
 
 export async function getImageBlob(user: UserInterface, repoRef: ImageNameRef, digest: string) {
@@ -329,7 +325,7 @@ async function getTagDigestReferenceMap(
       if (rootDigest) {
         refs.add(rootDigest)
       }
-      if (body && 'manifests' in body) {
+      if (body && isManifestList(body)) {
         for (const manifest of body.manifests) {
           if (manifest.digest) {
             refs.add(manifest.digest)
@@ -446,7 +442,7 @@ async function renameMultiManifest(
       }
 
       const { body: childManifest } = await getImageTagManifests(multiRepositoryToken, digestRef)
-      if (!childManifest || 'manifests' in childManifest) {
+      if (!childManifest || isManifestList(childManifest)) {
         throw InternalError('Platform manifest missing.', { digestRef })
       }
 
@@ -587,7 +583,7 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
     })
   }
 
-  if ('manifests' in manifest.body) {
+  if (isManifestList(manifest.body)) {
     await renameMultiManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)
   } else {
     await renameStandardManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)

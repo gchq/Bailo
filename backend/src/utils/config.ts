@@ -110,6 +110,7 @@ export interface Config {
       maxInitRetries: number
       /** Retry delay between initialisation attempts (minutes) */
       initRetryDelay: number
+      scanTimeoutMs: number
     }
 
     metrics: {
@@ -165,6 +166,12 @@ export interface Config {
         rejectUnauthorized: boolean
       }
     }
+    /** Reminder schedule for model card review lifecycle emails. Refer to: https://github.com/agenda/human-interval#uses */
+    lifecycle: {
+      preReminderIntervals: string[]
+      postReminderInterval: string
+    }
+
     /** From address used by Bailo, can be different from the SMTP server details. */
     from: string
   }
@@ -304,6 +311,8 @@ export interface Config {
       userIdAttribute: string
       /** Cognito admin group name */
       adminGroupName: string
+      complianceGroupName: string
+      untrustedModelGroupName: string
     }
   }
 
@@ -340,8 +349,7 @@ export interface Config {
   }
 
   stroom: {
-    logOnlyMode: boolean
-    feed: string
+    sendEvents: boolean
     url: string
     environment: string
     interval: number
@@ -350,6 +358,7 @@ export interface Config {
     xmlns: string
     schemaLocation: string
     version: string
+    headers: Record<string, string>
   }
 
   /** ### Artefact Scanning
@@ -436,8 +445,14 @@ export interface Config {
     authorisationToken: string
   }
 
-  untrustedModels: {
-    defaultState: string
+  llm: {
+    endpoint: string
+    apiKey: string
+    model: string
+    maxTokens: number
+    timeoutMs: number
+    temperature: number
+    systemPrompt: string
   }
 }
 

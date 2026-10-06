@@ -50,17 +50,23 @@ export async function postFileForModelId(
             ? error.response.data
             : error.response.data?.error?.message || JSON.stringify(error.response.data)
 
-        throw new Error(`${error.response.statusText} for "${file.name}": ${serverMessage}`)
+        throw new Error(`${error.response.statusText} for "${file.name}": ${serverMessage}`, { cause: error })
       }
 
       if (error.request) {
-        throw new Error(`There was a problem with the request whilst attempting to upload file "${file.name}"`)
+        throw new Error(`There was a problem with the request whilst attempting to upload file "${file.name}"`, {
+          cause: error,
+        })
       }
 
-      throw new Error(`Request setup failed while uploading "${file.name}": ${error.message}`)
+      throw new Error(`Request setup failed while uploading "${file.name}": ${error.message}`, {
+        cause: error,
+      })
     }
 
-    throw new Error(`Unknown error whilst attempting to upload file "${file.name}"`)
+    throw new Error(`Unknown error whilst attempting to upload file "${file.name}"`, {
+      cause: error,
+    })
   }
 }
 

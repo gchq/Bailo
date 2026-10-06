@@ -15,10 +15,9 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { patchSchema } from 'actions/schema'
-import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import renderQueryState from 'src/common/renderQueryState'
 import { SchemaInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
@@ -42,16 +41,6 @@ export default function UpdateReviewRolesForSchemaDialog({
   const [warningDialogMessage, setWarningDialogMessage] = useState('')
 
   const theme = useTheme()
-
-  const onSetCheckedEvent = useEffectEvent((newReviewRoles: string[]) => {
-    setChecked(newReviewRoles)
-  })
-
-  useEffect(() => {
-    if (schema) {
-      onSetCheckedEvent(schema.reviewRoles)
-    }
-  }, [schema])
 
   const handleToggle = useCallback(
     (value: string) => () => {
@@ -116,12 +105,9 @@ export default function UpdateReviewRolesForSchemaDialog({
     [reviewRoles, checked, handleToggle],
   )
 
-  if (isReviewRolesError) {
-    return <MessageAlert message={isReviewRolesError.info.message} severity='error' />
-  }
-
-  if (isReviewRolesLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isReviewRolesError], isReviewRolesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

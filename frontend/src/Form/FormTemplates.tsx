@@ -1,11 +1,14 @@
-import { Share } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
+import Done from '@mui/icons-material/Done'
+import Error from '@mui/icons-material/ErrorOutlineOutlined'
+import Share from '@mui/icons-material/Share'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { alpha, useTheme } from '@mui/material/styles'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
+  FieldTemplateProps,
   ObjectFieldTemplateProps,
   RJSFSchema,
   TitleFieldProps,
@@ -13,11 +16,18 @@ import {
 import { ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
+import { isQuestionAnswered } from 'utils/formUtils'
 
 export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
     <Card sx={{ p: 2 }}>
-      <Typography fontWeight='bold' variant='h5' component='h2'>
+      <Typography
+        variant='h5'
+        component='h2'
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         {title}
       </Typography>
       {canAdd && registry.formContext.editMode && !registry.formContext.mirroredModel && (
@@ -53,6 +63,57 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
+export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+  const theme = useTheme()
+  const answered = isQuestionAnswered(id, schema, registry.formContext)
+  const requiredByState =
+    registry.formContext.requiredByModelState &&
+    schema.requiredByModelStates &&
+    schema.requiredByModelStates.includes(registry.formContext.requiredByModelState)
+
+  if (requiredByState) {
+    return (
+      <Stack
+        spacing={0.5}
+        sx={{
+          backgroundColor: alpha(answered ? theme.palette.primary.main : theme.palette.error.main, 0.1),
+          p: 1,
+        }}
+      >
+        <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+          {answered ? (
+            <Done
+              color='success'
+              fontSize='small'
+              aria-label={`Answered field required for ${registry.formContext.requiredByModelState}`}
+            />
+          ) : (
+            <Error
+              color='error'
+              fontSize='small'
+              aria-label={`Unanswered field required for ${registry.formContext.requiredByModelState}`}
+            />
+          )}
+          <Typography variant='caption' color={answered ? 'success' : 'error'}>
+            {`Required for ${registry.formContext.requiredByModelState}`}
+          </Typography>
+        </Stack>
+        {children}
+      </Stack>
+    )
+  }
+
+  return <>{children}</>
+}
+
+export function ErrorListTemplate() {
+  return (
+    <Typography color='error' sx={{ mb: 2 }}>
+      Please make sure that all errors listed below have been resolved.
+    </Typography>
+  )
+}
+
 export function ObjectFieldTemplate({
   title,
   properties,
@@ -64,16 +125,31 @@ export function ObjectFieldTemplate({
     <Box sx={{ p: 2, scrollMarginTop: 100 }} id={fieldPathId.$id}>
       <Stack spacing={2}>
         <div>
-          <Stack direction='row' alignItems='center' spacing={1}>
-            <Typography fontWeight='bold' variant='h6' component='h3'>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              variant='h6'
+              component='h3'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {title}
             </Typography>
             <Tooltip title='Share'>
-              <Link href={`#${fieldPathId.$id}`} onClick={() => registry.formContext.onShare(fieldPathId.$id)}>
-                <IconButton>
-                  <Share fontSize='small' color='secondary' />
-                </IconButton>
-              </Link>
+              <IconButton
+                component={Link}
+                href={`#${fieldPathId.$id}`}
+                onClick={() => registry.formContext.onShare(fieldPathId.$id)}
+                aria-label='Share'
+              >
+                <Share fontSize='small' color='secondary' />
+              </IconButton>
             </Tooltip>
           </Stack>
           <Typography variant='caption'>{description}</Typography>
@@ -122,7 +198,14 @@ export function ObjectFieldTemplateForQuestionViewer({
       <Stack spacing={2}>
         <Stack>
           <Button size='large' sx={{ textTransform: 'none', textAlign: 'left', width: 'fit-content' }}>
-            <Typography fontWeight='bold' variant='h6' component='h3' onClick={handleOnClick}>
+            <Typography
+              variant='h6'
+              component='h3'
+              onClick={handleOnClick}
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {title}
             </Typography>
           </Button>
@@ -144,11 +227,22 @@ export function ObjectFieldTemplateForQuestionViewer({
 
 export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
   return id === 'root__title' ? (
-    <Typography variant='h5' fontWeight='bold'>
+    <Typography
+      variant='h5'
+      sx={{
+        fontWeight: 'bold',
+      }}
+    >
       {title}
     </Typography>
   ) : (
-    <Typography variant='h6' fontWeight='bold' sx={{ pt: 2 }}>
+    <Typography
+      variant='h6'
+      sx={{
+        fontWeight: 'bold',
+        pt: 2,
+      }}
+    >
       test {title}
     </Typography>
   )

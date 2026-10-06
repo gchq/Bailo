@@ -1,23 +1,23 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Link, Paper, Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
-import { useGetUiConfig } from 'actions/uiConfig'
+import { useGetModel } from 'actions/entry'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
 
 export default function InferenceApp() {
   const router = useRouter()
   const { modelId, image, tag }: { modelId?: string; image?: string; tag?: string } = router.query
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
+  const uiConfig = useContext(UiConfigContext)
 
   const [isSpinningUp, setIsSpinningUp] = useState(true)
 
   const serviceEndpoint = useMemo(
-    () => `${uiConfig?.inference.connection.host}/inference/${modelId}/${image}/${tag}`,
+    () => `${uiConfig.inference.connection.host}/inference/${modelId}/${image}/${tag}`,
     [uiConfig, modelId, image, tag],
   )
 
@@ -25,27 +25,35 @@ export default function InferenceApp() {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isModelLoading || isUiConfigLoading) {
+  if (isModelLoading) {
     return <Loading />
   }
 
   return (
     <>
       <Title text='Inferencing Service' />
-      {(isModelLoading || isUiConfigLoading) && <Loading />}
+      {isModelLoading && <Loading />}
       <Container maxWidth='lg'>
         <Paper sx={{ my: 4, p: 4 }}>
           {model && (
             <Stack spacing={2}>
-              <Typography component='h1' variant='h4' color='primary' fontWeight='bold'>
+              <Typography
+                component='h1'
+                variant='h4'
+                color='primary'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {model.name}
               </Typography>
               {image}:{tag}
-              <Stack direction='row' justifyContent='space-between'>
+              <Stack
+                direction='row'
+                sx={{
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Link href={`/model/${modelId}?tab=inferencing`}>
                   <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                     Back to model
@@ -56,8 +64,20 @@ export default function InferenceApp() {
                 </Link>
               </Stack>
               {isSpinningUp && (
-                <Stack direction='row' spacing={3} alignItems='center' justifyContent='center'>
-                  <Typography fontWeight='bold' color='primary'>
+                <Stack
+                  direction='row'
+                  spacing={3}
+                  sx={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography
+                    color='primary'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
                     Spinning up {image}
                   </Typography>
                   <Loading />

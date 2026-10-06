@@ -10,7 +10,7 @@ const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
     remarkPlugins: ['remark-frontmatter', 'remark-gfm'],
-    rehypePlugins: ['rehype-highlight'],
+    rehypePlugins: ['rehype-highlight', 'rehype-slug'],
   },
 })
 

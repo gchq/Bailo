@@ -1,14 +1,18 @@
-import { Forward } from '@mui/icons-material'
-import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material'
+import SwapHoriz from '@mui/icons-material/SwapHoriz'
+import SwapVert from '@mui/icons-material/SwapVert'
+import { Autocomplete, Container, Stack, TextField, Typography, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import renderQueryState from 'src/common/renderQueryState'
 import { SchemaInterface } from 'types/types'
 
 export default function SchemaCompare() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
+  const theme = useTheme()
+
+  const isMdOrLarger = useMediaQuery(theme.breakpoints.up('lg'))
 
   const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>(null)
   const [afterSchema, setAfterSchema] = useState<SchemaInterface | null>(null)
@@ -29,6 +33,7 @@ export default function SchemaCompare() {
           newValue={JSON.stringify(afterSchema, null, 2)}
           splitView={true}
           compareMethod={DiffMethod.WORDS}
+          useDarkTheme={theme.palette.mode === 'dark'}
           styles={{
             gutter: {
               pre: {
@@ -41,24 +46,23 @@ export default function SchemaCompare() {
     } else {
       return <Typography sx={{ textAlign: 'center' }}>Please select two schemas to compare</Typography>
     }
-  }, [beforeSchema, afterSchema])
+  }, [beforeSchema, afterSchema, theme])
 
-  if (isSchemasError) {
-    return <MessageAlert message={isSchemasError.info.message} severity='error' />
-  }
-
-  if (isSchemasLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isSchemasError], isSchemasLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Container sx={{ my: 4 }}>
       <Stack spacing={4}>
         <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          spacing={{ xs: 2, sm: 6 }}
-          justifyContent='center'
-          alignItems='center'
+          direction={{ md: 'column', lg: 'row' }}
+          spacing={{ md: 2, lg: 4 }}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
         >
           <Autocomplete
             disablePortal
@@ -71,7 +75,11 @@ export default function SchemaCompare() {
             renderInput={(params) => <TextField {...params} label='Source schema' />}
             onChange={handleBeforeSchemaChange}
           />
-          <Forward color='primary' fontSize='large' aria-label='Compare arrow' />
+          {isMdOrLarger ? (
+            <SwapHoriz color='primary' fontSize='large' aria-label='Compare arrow' />
+          ) : (
+            <SwapVert color='primary' fontSize='large' aria-label='Compare arrow' />
+          )}
           <Autocomplete
             disablePortal
             options={schemas}
@@ -86,6 +94,6 @@ export default function SchemaCompare() {
         </Stack>
         {schemaDiff}
       </Stack>
-    </Box>
+    </Container>
   )
 }

@@ -3,12 +3,13 @@
 exports[`services > smtp > smtp > that an email is sent after a response for a an access request review 1`] = `
 [
   {
-    "attachments": undefined,
+    "bcc": [
+      "email@email.com",
+    ],
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
     "text": "text",
-    "to": "email@email.com",
   },
 ]
 `;
@@ -16,12 +17,13 @@ exports[`services > smtp > smtp > that an email is sent after a response for a a
 exports[`services > smtp > smtp > that an email is sent after a response for a release review 1`] = `
 [
   {
-    "attachments": undefined,
+    "bcc": [
+      "email@email.com",
+    ],
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
     "text": "text",
-    "to": "email@email.com",
   },
 ]
 `;
@@ -29,15 +31,13 @@ exports[`services > smtp > smtp > that an email is sent after a response for a r
 exports[`services > smtp > smtp > that an email is sent after an import has begun 1`] = `
 [
   {
-    "attachments": undefined,
+    "bcc": [
+      "email@email.com",
+    ],
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
     "text": "text",
-    "to": [
-      "user@example.com",
-      "user2@example.com",
-    ],
   },
 ]
 `;
@@ -45,15 +45,13 @@ exports[`services > smtp > smtp > that an email is sent after an import has begu
 exports[`services > smtp > smtp > that an email is sent after an import has complete 1`] = `
 [
   {
-    "attachments": undefined,
+    "bcc": [
+      "email@email.com",
+    ],
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
     "text": "text",
-    "to": [
-      "user@example.com",
-      "user2@example.com",
-    ],
   },
 ]
 `;
@@ -61,15 +59,13 @@ exports[`services > smtp > smtp > that an email is sent after an import has comp
 exports[`services > smtp > smtp > that an email is sent after an import has failed 1`] = `
 [
   {
-    "attachments": undefined,
+    "bcc": [
+      "email@email.com",
+    ],
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
     "text": "text",
-    "to": [
-      "user@example.com",
-      "user2@example.com",
-    ],
   },
 ]
 `;
@@ -77,12 +73,13 @@ exports[`services > smtp > smtp > that an email is sent after an import has fail
 exports[`services > smtp > smtp > that an email is sent for Access Request Reviews 1`] = `
 [
   {
-    "attachments": undefined,
+    "bcc": [
+      "email@email.com",
+    ],
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
     "text": "text",
-    "to": "email@email.com",
   },
 ]
 `;
@@ -90,31 +87,14 @@ exports[`services > smtp > smtp > that an email is sent for Access Request Revie
 exports[`services > smtp > smtp > that an email is sent for Release Reviews 1`] = `
 [
   {
-    "attachments": undefined,
+    "bcc": [
+      "email@email.com",
+    ],
     "from": ""Bailo 📝" <bailo@example.org>",
     "html": "html",
     "subject": "subject",
     "text": "text",
-    "to": "email@email.com",
   },
-]
-`;
-
-exports[`services > smtp > smtp > that email is sent to model owners 1`] = `
-[
-  [
-    {
-      "attachments": undefined,
-      "from": ""Bailo 📝" <bailo@example.org>",
-      "html": "",
-      "subject": "",
-      "text": "",
-      "to": [
-        "user@example.com",
-        "user2@example.com",
-      ],
-    },
-  ],
 ]
 `;
 
@@ -122,22 +102,14 @@ exports[`services > smtp > smtp > that sendEmail is called for each member of a 
 [
   [
     {
-      "attachments": undefined,
+      "bcc": [
+        "member1@email.com",
+        "member2@email.com",
+      ],
       "from": ""Bailo 📝" <bailo@example.org>",
       "html": "html",
       "subject": "subject",
       "text": "text",
-      "to": "member1@email.com",
-    },
-  ],
-  [
-    {
-      "attachments": undefined,
-      "from": ""Bailo 📝" <bailo@example.org>",
-      "html": "html",
-      "subject": "subject",
-      "text": "text",
-      "to": "member2@email.com",
     },
   ],
 ]

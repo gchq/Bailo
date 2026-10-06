@@ -1,9 +1,7 @@
 import { Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useMemo, useState } from 'react'
 import SplitButton from 'src/common/SplitButton'
-import MessageAlert from 'src/MessageAlert'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import {
   getKubernetesImagePullSecretsExampleConfig,
@@ -19,24 +17,27 @@ type KubernetesSecretProps = {
 }
 
 export default function KubernetesSecret({ token }: KubernetesSecretProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const [showFilePreview, setShowFilePreview] = useState(false)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-secret.yml`, [token.description])
   const secretName = useMemo(() => `${toKebabCase(token.description)}`, [token.description])
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading || !uiConfig) {
-    return <Loading />
-  }
-
   return (
     <Stack spacing={4}>
-      <Stack spacing={2} alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 1: Download Secret</Typography>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 1: Download Secret
+        </Typography>
         <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
         <SplitButton
           aria-label='download Kubernetes pull secret'
@@ -69,8 +70,20 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           </CodeSnippet>
         )}
       </Stack>
-      <Stack spacing={2} direction='column' alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 2: Submit</Typography>
+      <Stack
+        spacing={2}
+        direction='column'
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 2: Submit
+        </Typography>
         <Typography>Second, submit the secret to the cluster using this command:</Typography>
         <TokenCommand
           disableVisibilityToggle
@@ -78,11 +91,28 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           command={`kubectl create -f ${configFileName} --namespace=<namespace>`}
         />
       </Stack>
-      <Stack spacing={2} direction='column' alignItems='flex-start'>
-        <Typography fontWeight='bold'>Step 3: Update Kubernetes configuration</Typography>
+      <Stack
+        spacing={2}
+        direction='column'
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Step 3: Update Kubernetes configuration
+        </Typography>
         <Typography>
           Finally, add a reference to the secret to your Kubernetes pod config via an
-          <Typography component='span' fontWeight='bold'>
+          <Typography
+            component='span'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {' imagePullSecrets '}
           </Typography>
           field. For example:

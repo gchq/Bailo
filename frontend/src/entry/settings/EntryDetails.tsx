@@ -1,11 +1,11 @@
-import { Lock, LockOpen, Save } from '@mui/icons-material'
+import Lock from '@mui/icons-material/Lock'
+import LockOpen from '@mui/icons-material/LockOpen'
+import Save from '@mui/icons-material/Save'
 import { Box, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { patchEntry, useGetEntry } from 'actions/entry'
-import { FormEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
-import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
-import EntryStateInput from 'src/entry/EntryStateInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, EntryKindLabel, UpdateEntryForm } from 'types/types'
@@ -14,13 +14,12 @@ import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryDetailsProps = {
   entry: EntryInterface
+  onSave?: () => void
 }
 
-export default function EntryDetails({ entry }: EntryDetailsProps) {
+export default function EntryDetails({ entry, onSave }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
-  const [organisation, setOrganisation] = useState(entry.organisation || '')
-  const [state, setState] = useState(entry.state || '')
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -37,7 +36,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
     return ''
   }, [isFormValid])
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
     setIsLoading(true)
@@ -46,8 +45,6 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       name,
       description,
       visibility,
-      organisation: organisation || '',
-      state: state || '',
     }
     const response = await patchEntry(entry.id, formData)
 
@@ -60,16 +57,30 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateEntry()
+      onSave?.()
     }
     setIsLoading(false)
   }
 
   const privateLabel = () => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Lock />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Private</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Private
+          </Typography>
           <Typography variant='caption'>{`Only named individuals will be able to view this ${
             EntryKindLabel[entry.kind]
           }`}</Typography>
@@ -80,10 +91,23 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
 
   const publicLabel = () => {
     return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+      <Stack
+        direction='row'
+        spacing={1}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <LockOpen />
         <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Public</Typography>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            Public
+          </Typography>
           <Typography variant='caption'>{`Any authorised user will be able to see this ${
             EntryKindLabel[entry.kind]
           }`}</Typography>
@@ -101,16 +125,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           </Typography>
           <Divider />
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
-          <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
-          {entry.kind === EntryKind.UNTRUSTED_MODEL ? (
-            <Stack>
-              <Typography fontWeight='bold'>State</Typography>
-              <Typography>{entry.state}</Typography>
-            </Stack>
-          ) : (
-            <EntryStateInput value={state} onChange={(value) => setState(value)} />
-          )}
         </>
         <Divider />
         <>

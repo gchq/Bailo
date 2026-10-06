@@ -17,8 +17,8 @@ describe('ChipSelector', () => {
     const dogChipOption = await screen.findByTestId('chipOption-dog')
     const catChipOption = await screen.findByTestId('chipOption-cat')
     await waitFor(async () => {
-      expect(dogChipOption.className.includes('MuiChip-clickableColorSecondary')).toBe(true)
-      expect(catChipOption.className.includes('MuiChip-clickableColorDefault')).toBe(true)
+      expect(dogChipOption.className.includes('MuiChip-colorSecondary')).toBe(true)
+      expect(catChipOption.className.includes('MuiChip-colorDefault')).toBe(true)
     })
   })
 })

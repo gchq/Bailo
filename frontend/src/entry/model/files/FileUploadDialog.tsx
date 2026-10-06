@@ -1,11 +1,16 @@
 import styled from '@emotion/styled'
+import FileUpload from '@mui/icons-material/FileUpload'
 import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import { Transition } from 'src/common/Transition'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
-import { EntryInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import MessageAlert from 'src/MessageAlert'
+import { EntryInterface, EntryKind, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 interface FileUploadDialogProps {
@@ -20,6 +25,7 @@ const Input = styled('input')({
 })
 
 export default function FileUploadDialog({ open, onDialogClose, model, mutateModelFiles }: FileUploadDialogProps) {
+  const uiConfig = useContext(UiConfigContext)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [filesToBeUploaded, setFilesToBeUpload] = useState<FileUploadWithMetadata[]>([])
@@ -131,7 +137,12 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     () =>
       failedFileUploads.map((file) => (
         <div key={file.fileName}>
-          <Box component='span' fontWeight='bold'>
+          <Box
+            component='span'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {file.fileName}
           </Box>
           {` - ${file.error}`}
@@ -141,16 +152,40 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
   )
 
   return (
-    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
+    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth slots={{ transition: Transition }}>
       <DialogContent>
         <Stack spacing={2}>
-          <label htmlFor='add-files-button'>
-            <Button loading={isFilesUploading} component='span' variant='outlined' sx={{ width: '100%' }}>
+          <label htmlFor='add-files-button' style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <Button
+              loading={isFilesUploading}
+              endIcon={<FileUpload />}
+              component='span'
+              variant='outlined'
+              sx={{ width: '40%' }}
+            >
               Select files
             </Button>
           </label>
+          {model.kind === EntryKind.UNTRUSTED_MODEL && (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <MessageAlert
+                message={uiConfig.untrustedModel.fileUploadGuidance}
+                severity='warning'
+                style={{ width: 'fit-content' }}
+              />
+            </Box>
+          )}
           <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
-          {filesToBeUploaded.length > 0 && <Typography fontWeight='bold'>Files to upload</Typography>}
+          {filesToBeUploaded.length === 0 && <EmptyBlob text='No files selected.' />}
+          {filesToBeUploaded.length > 0 && (
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              Files to upload
+            </Typography>
+          )}
           <Stack divider={<Divider />} spacing={1}>
             {fileListToUpload}
           </Stack>
@@ -169,6 +204,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
           )}
           <Box sx={{ width: '100%' }}>
             <Button
+              disabled={filesToBeUploaded.length === 0}
               loading={isFilesUploading}
               onClick={handleFileUpload}
               variant='contained'

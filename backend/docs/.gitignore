@@ -10,3 +10,4 @@ venv.bak/
 # Build artifacts
 python-docs/
 _build/
+bailo_docs.egg-info/

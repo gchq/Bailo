@@ -1,9 +1,9 @@
 module.exports = {
-    s3: {
-      credentials: {
-        accessKeyId: 'minioadmin',
-        secretAccessKey: 'minioadmin',
-      },
-      endpoint: 'http://localhost:9000'
-    }
+  s3: {
+    credentials: {
+      accessKeyId: 'bailoadmin',
+      secretAccessKey: 'bailoadmin',
+    },
+    endpoint: 'http://localhost:8333',
+  },
 }

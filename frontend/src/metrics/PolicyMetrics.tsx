@@ -1,45 +1,154 @@
 import { Container, Stack } from '@mui/material'
-import { useGetPolicyMetrics } from 'actions/metrics'
-import { useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
-import MetricsHeader from 'src/metrics/MetricsHeader'
-import PolicyMetricsCharts from 'src/metrics/PolicyMetricsCharts'
+import { useGetEntryRoles } from 'actions/entry'
+import {
+  useGetNoReleasesPolicyMetrics,
+  useGetRolePolicyMetrics,
+  useGetUnapprovedReleasesPolicyMetrics,
+  useLifecyclePolicyMetrics,
+} from 'actions/metrics'
+import { ReactElement, useCallback, useMemo, useState } from 'react'
+import renderQueryState from 'src/common/renderQueryState'
+import MetricsHeader from 'src/metrics/components/MetricsHeader'
+import PolicyLifecycleMetricsCharts from 'src/metrics/PolicyLifecycleMetricsCharts'
+import PolicyNoReleasesMetricsCharts from 'src/metrics/PolicyNoReleasesMetricsCharts'
+import PolicyRoleMetricsCharts from 'src/metrics/PolicyRoleMetricsCharts'
+import PolicyUnapprovedReleasesCharts from 'src/metrics/PolicyUnapprovedReleasesCharts'
+import {
+  BaseLifecycleMetrics,
+  BaseNoReleaseMetrics,
+  BaseUnapprovedReleaseMetrics,
+  PolicyRoleMetrics,
+} from 'types/types'
+
+export const SelectedMetricKind = {
+  MISSING_ROLES: 'role',
+  NO_RELEASES: 'noReleases',
+  UNAPPROVED_RELEASES: 'unapprovedReleases',
+  LIFECYCLE: 'lifecycle',
+} as const
+export type SelectedMetricKindKeys = (typeof SelectedMetricKind)[keyof typeof SelectedMetricKind]
+
+export const WeekFilterOptions = {
+  OVERDUE: 0,
+  TWO_WEEKS: 2,
+  TEN_WEEKS: 10,
+} as const
+export type WeekFilterOptionsKeys = (typeof WeekFilterOptions)[keyof typeof WeekFilterOptions]
 
 export default function PolicyMetrics() {
-  const { policyMetrics, isPolicyMetricsLoading, isPolicyMetricsError } = useGetPolicyMetrics()
-
   const [selectedOrganisation, setSelectedOrganisation] = useState('All')
+  const [dueDateWeekFilter, setDueDateWeekFilter] = useState<WeekFilterOptionsKeys>(2)
 
-  const filteredDataset = useMemo(() => {
-    if (!policyMetrics) {
-      return undefined
+  const { rolePolicyMetrics, isRolePolicyMetricsLoading, isRolePolicyMetricsError } = useGetRolePolicyMetrics()
+  const { noReleasesPolicyMetrics, isNoReleasesPolicyMetricsLoading, isNoReleasesPolicyMetricsError } =
+    useGetNoReleasesPolicyMetrics()
+  const {
+    unapprovedReleasesPolicyMetrics,
+    isUnapprovedReleasesPolicyMetricsLoading,
+    isUnapprovedReleasesPolicyMetricsError,
+  } = useGetUnapprovedReleasesPolicyMetrics()
+  const { lifecyclePolicyMetrics, isLifecyclePolicyMetricsLoading, isLifecyclePolicyMetricsError } =
+    useLifecyclePolicyMetrics(dueDateWeekFilter)
+  const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles()
+
+  const filteredDataset = useCallback(
+    (metricData) => {
+      if (selectedOrganisation === 'All') {
+        return metricData.global
+      }
+      return metricData.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
+    },
+    [selectedOrganisation],
+  )
+  const [selectedMetric, setSelectedMetric] = useState<SelectedMetricKindKeys>(SelectedMetricKind.MISSING_ROLES)
+  const selectedData:
+    undefined | PolicyRoleMetrics | BaseNoReleaseMetrics | BaseLifecycleMetrics | BaseUnapprovedReleaseMetrics =
+    (() => {
+      switch (selectedMetric) {
+        case SelectedMetricKind.MISSING_ROLES:
+          return rolePolicyMetrics
+        case SelectedMetricKind.NO_RELEASES:
+          return noReleasesPolicyMetrics
+        case SelectedMetricKind.UNAPPROVED_RELEASES:
+          return unapprovedReleasesPolicyMetrics
+        case SelectedMetricKind.LIFECYCLE:
+          return lifecyclePolicyMetrics
+        default:
+          return rolePolicyMetrics
+      }
+    })()
+  const selectedChart: ReactElement = useMemo(() => {
+    if (!selectedData) {
+      return <></>
     }
-    if (selectedOrganisation === 'All') {
-      return policyMetrics.global
+    switch (selectedMetric) {
+      case SelectedMetricKind.MISSING_ROLES:
+        return <PolicyRoleMetricsCharts data={filteredDataset(rolePolicyMetrics)} entryRoles={entryRoles} />
+      case SelectedMetricKind.NO_RELEASES:
+        return <PolicyNoReleasesMetricsCharts data={filteredDataset(noReleasesPolicyMetrics)} entryRoles={entryRoles} />
+      case SelectedMetricKind.UNAPPROVED_RELEASES:
+        return (
+          <PolicyUnapprovedReleasesCharts
+            data={filteredDataset(unapprovedReleasesPolicyMetrics)}
+            entryRoles={entryRoles}
+          />
+        )
+      case SelectedMetricKind.LIFECYCLE:
+        return (
+          <PolicyLifecycleMetricsCharts
+            data={filteredDataset(lifecyclePolicyMetrics)}
+            weekFilter={dueDateWeekFilter}
+            weekFilterOnChange={(newFilter) => setDueDateWeekFilter(newFilter)}
+            entryRoles={entryRoles}
+          />
+        )
+      default:
+        return <></>
     }
-    return policyMetrics.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
-  }, [policyMetrics, selectedOrganisation])
+  }, [
+    dueDateWeekFilter,
+    entryRoles,
+    filteredDataset,
+    lifecyclePolicyMetrics,
+    noReleasesPolicyMetrics,
+    rolePolicyMetrics,
+    selectedData,
+    selectedMetric,
+    unapprovedReleasesPolicyMetrics,
+  ])
 
-  if (isPolicyMetricsError) {
-    return <MessageAlert message={isPolicyMetricsError.info.message} />
-  }
-
-  if (isPolicyMetricsLoading) {
-    return <Loading />
+  const queryState = renderQueryState(
+    [
+      isRolePolicyMetricsError,
+      isNoReleasesPolicyMetricsError,
+      isUnapprovedReleasesPolicyMetricsError,
+      isLifecyclePolicyMetricsError,
+      isEntryRolesError,
+    ],
+    isRolePolicyMetricsLoading ||
+      isNoReleasesPolicyMetricsLoading ||
+      isUnapprovedReleasesPolicyMetricsLoading ||
+      isLifecyclePolicyMetricsLoading ||
+      isEntryRolesLoading,
+  )
+  if (queryState) {
+    return queryState
   }
 
   return (
     <Container maxWidth='lg'>
       <Stack spacing={4} sx={{ mt: 2 }}>
-        {filteredDataset && policyMetrics && (
+        {selectedData && selectedChart && (
           <MetricsHeader
-            data={policyMetrics}
+            organisations={selectedData.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={selectedData.lastUpdated}
             onOrganisationChange={(newOrganisation) => setSelectedOrganisation(newOrganisation)}
             selectedOrganisation={selectedOrganisation}
+            onMetricChange={(newMetric) => setSelectedMetric(newMetric)}
+            selectedMetric={selectedMetric}
             exportDocumentTitle='Bailo policy metrics'
           >
-            <PolicyMetricsCharts data={filteredDataset} />
+            {selectedChart}
           </MetricsHeader>
         )}
       </Stack>

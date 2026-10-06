@@ -1,5 +1,26 @@
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from '@dayjs'
+import humanInterval from 'human-interval'
 import { plural } from 'utils/stringUtils'
+
+export const currentTimestampSimple = (): string => {
+  return dayjs.utc().format('YYYY-MM-DDTHH-mm-ss')
+}
+
+export const utcDate = (value: string) => {
+  return dayjs.utc(value)
+}
+
+export const utcStartOfDate = (value: string) => {
+  return dayjs.utc(value).startOf('day')
+}
+
+export const utcStartOfCurrentDate = () => {
+  return dayjs.utc().startOf('day')
+}
+
+export const utcStartOfDateISOString = (date: Dayjs) => {
+  return date.utc().startOf('day').toISOString()
+}
 
 export const formatDate = (date: Date) => {
   return date.toDateString()
@@ -25,6 +46,10 @@ export const formatDateStringWithMinutes = (value: string) => {
 
 export const formatDateStringAsMonthAndYear = (value: string) => {
   return dayjs(value).format('MMM YYYY')
+}
+
+export const formatDateStringAsDayMonthAndYear = (value: string) => {
+  return dayjs(value).format('DD/MM/YYYY')
 }
 
 export const timeDifference = (current: Date, previous: Date) => {
@@ -65,4 +90,21 @@ export const setAsFirstDayOfMonth = (date: Dayjs): string => {
 
 export const setAsLastDayOfMonth = (date: Dayjs): string => {
   return date.endOf('month').toISOString().split('T')[0]
+}
+
+export const increaseCurrentDateInDays = (daysToAdd: number) => {
+  const currentDate = dayjs(new Date())
+  return currentDate.add(daysToAdd, 'day')
+}
+
+export function increaseCurrentDateByHumanInterval(interval: string): Dayjs {
+  const currentDate = dayjs(new Date())
+  const intervalMs = humanInterval(interval) ?? 0
+  return currentDate.add(intervalMs, 'millisecond')
+}
+
+export const isOverdue = (dueDate: string): boolean => {
+  const today = new Date().setHours(0, 0, 0, 0)
+  const dateToCheck = new Date(dueDate).setHours(0, 0, 0, 0)
+  return dateToCheck < today
 }

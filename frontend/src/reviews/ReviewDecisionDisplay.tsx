@@ -1,7 +1,7 @@
-import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import Undo from '@mui/icons-material/Undo'
 import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryRoles } from 'actions/entry'
@@ -22,6 +22,7 @@ type ReviewDecisionDisplayProps = {
   response: ResponseInterface
   modelId: string
   onReplyButtonClick: (value: string) => void
+  showReplyButton?: boolean
   currentUser: User | undefined
   mutateResponses: () => void
 }
@@ -30,6 +31,7 @@ export default function ReviewDecisionDisplay({
   response,
   modelId,
   onReplyButtonClick,
+  showReplyButton = true,
   currentUser,
   mutateResponses,
 }: ReviewDecisionDisplayProps) {
@@ -96,7 +98,13 @@ export default function ReviewDecisionDisplay({
 
   return (
     <>
-      <Stack direction='row' spacing={2} alignItems='flex-start'>
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
         <Box sx={{ pt: 2, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
@@ -109,12 +117,27 @@ export default function ReviewDecisionDisplay({
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1}
-            alignItems='center'
-            sx={{ width: '100%' }}
-            justifyContent='space-between'
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
           >
-            <Stack alignItems='center' direction='row' sx={{ width: '100%' }} spacing={1}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={1}
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
                 <UserDisplay dn={username} />
                 <span data-test='reviewDecisionDisplayApproved'>
                   {response.decision === Decision.Approve && 'has approved'}
@@ -140,11 +163,14 @@ export default function ReviewDecisionDisplay({
                 )}
               </span>
             </Stack>
-            <Stack direction='row' alignItems='center' spacing={1}>
-              <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
-              <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
-                <MoreHorizIcon />
-              </IconButton>
+            <Stack direction='row' sx={{ alignItems: 'center' }} spacing={1}>
+              <Typography sx={{ fontWeight: 'bold' }}>{formatDateString(response.createdAt)}</Typography>
+              {showReplyButton ||
+                (currentUser && currentUser.dn === username && (
+                  <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
+                    <MoreHorizIcon />
+                  </IconButton>
+                ))}
             </Stack>
           </Stack>
           <Divider sx={{ mt: 1, mb: 2 }} />
@@ -162,7 +188,7 @@ export default function ReviewDecisionDisplay({
         </Box>
       </Stack>
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
+        {showReplyButton && <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>}
         {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit comment</MenuItem>}
       </Menu>
     </>

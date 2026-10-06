@@ -15,7 +15,13 @@ import { httpLog } from './services/log.js'
 
 export const server = express()
 
-server.use([bodyParser.json(), httpLog, helmet()])
+const LARGE_BODY_ROUTES = ['/api/v2/model/', '/import-model-card-text']
+const jsonParser = (req, res, next) => {
+  const needsLargeBody = LARGE_BODY_ROUTES.every((segment) => req.path.includes(segment))
+  const limit = needsLargeBody ? '500kb' : '100kb'
+  bodyParser.json({ limit })(req, res, next)
+}
+server.use([jsonParser, httpLog, helmet()])
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
@@ -49,6 +55,6 @@ server.use(
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/html')))
 
 server.use(expressErrorHandler)

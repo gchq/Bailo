@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { Roles } from '../../../src/connectors/authentication/constants.js'
 import {
   AccessRequestAction,
   FileAction,
@@ -176,6 +177,53 @@ describe('connectors > authorisation > base', () => {
 
     expect(result).toStrictEqual({
       id: 'testModel',
+      success: true,
+    })
+  })
+
+  test('model > create untrusted model without the untrusted model role', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAuthentication.hasRole.mockResolvedValueOnce(false)
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'untrustedModel',
+        kind: EntryKind.UntrustedModel,
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Create,
+    )
+
+    expect(mockAuthentication.hasRole).toHaveBeenCalledWith(user, Roles.UntrustedModel)
+
+    expect(result).toStrictEqual({
+      id: 'untrustedModel',
+      success: false,
+      info: 'You do not have permission to manage untrusted models.',
+    })
+  })
+
+  test('model > create untrusted model with the untrusted model role', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAuthentication.hasRole.mockResolvedValueOnce(true)
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'untrustedModel',
+        kind: EntryKind.UntrustedModel,
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Create,
+    )
+
+    expect(mockAuthentication.hasRole).toHaveBeenCalledWith(user, Roles.UntrustedModel)
+
+    expect(result).toStrictEqual({
+      id: 'untrustedModel',
       success: true,
     })
   })
@@ -570,6 +618,75 @@ describe('connectors > authorisation > base', () => {
       info: 'You cannot upload or modify a schema if you are not an admin.',
       success: false,
     })
+  })
+
+  test.each([SchemaAction.Create, SchemaAction.Delete, SchemaAction.Update])(
+    'schemas > %s without admin role',
+    async (action) => {
+      const connector = new BasicAuthorisationConnector()
+      mockAuthentication.hasRole.mockResolvedValue(false)
+
+      const result = await connector.schemas(user, [{ id: 'testSchema' } as SchemaDoc], action)
+
+      expect(mockAuthentication.hasRole).toHaveBeenCalledWith(user, Roles.Admin)
+      expect(result).toStrictEqual([
+        {
+          id: 'testSchema',
+          info: 'You cannot upload or modify a schema if you are not an admin.',
+          success: false,
+        },
+      ])
+    },
+  )
+
+  test.each([SchemaAction.Create, SchemaAction.Delete, SchemaAction.Update])(
+    'schemas > %s as admin',
+    async (action) => {
+      const connector = new BasicAuthorisationConnector()
+      mockAuthentication.hasRole.mockResolvedValue(true)
+
+      const result = await connector.schemas(user, [{ id: 'testSchema' } as SchemaDoc], action)
+
+      expect(result).toStrictEqual([{ id: 'testSchema', success: true }])
+    },
+  )
+
+  test('schemas > constrained user token', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.hasRole.mockResolvedValue(true)
+    mockTokenService.validateTokenForUse.mockResolvedValueOnce({
+      success: false,
+      info: 'Token invalid',
+      id: 'testSchema',
+    } as any)
+
+    const result = await connector.schemas(user, [{ id: 'testSchema' } as SchemaDoc], SchemaAction.Create)
+
+    expect(result).toStrictEqual([{ success: false, info: 'Token invalid', id: 'testSchema' }])
+  })
+
+  test('schemas > returns a response for every schema', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.hasRole.mockResolvedValue(false)
+
+    const result = await connector.schemas(
+      user,
+      [{ id: 'schemaOne' } as SchemaDoc, { id: 'schemaTwo' } as SchemaDoc],
+      SchemaAction.Update,
+    )
+
+    expect(result).toStrictEqual([
+      { id: 'schemaOne', info: 'You cannot upload or modify a schema if you are not an admin.', success: false },
+      { id: 'schemaTwo', info: 'You cannot upload or modify a schema if you are not an admin.', success: false },
+    ])
+  })
+
+  test('schemas > empty list', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    const result = await connector.schemas(user, [], SchemaAction.Create)
+
+    expect(result).toStrictEqual([])
   })
 
   test('schemaMigration > create without admin role', async () => {
@@ -994,18 +1111,21 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('reviewRoles > create without admin role', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAuthentication.hasRole.mockResolvedValue(false)
+  test.each([ReviewRoleAction.Create, ReviewRoleAction.Delete, ReviewRoleAction.Update])(
+    'reviewRoles > $0 without admin role',
+    async (action) => {
+      const connector = new BasicAuthorisationConnector()
+      mockAuthentication.hasRole.mockResolvedValue(false)
 
-    const result = await connector.reviewRole(user as any, 'role1', ReviewRoleAction.Create)
+      const result = await connector.reviewRole(user as any, 'role1', action)
 
-    expect(result).toStrictEqual({
-      id: 'role1',
-      success: false,
-      info: 'You cannot upload or modify a review role if you are not an admin.',
-    })
-  })
+      expect(result).toStrictEqual({
+        id: 'role1',
+        success: false,
+        info: 'You cannot upload or modify a review role if you are not an admin.',
+      })
+    },
+  )
 
   test('partials > merges new responses into successes', async () => {
     const data = ['a', 'b', 'c']

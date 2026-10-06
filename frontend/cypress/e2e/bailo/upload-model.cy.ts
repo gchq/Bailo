@@ -71,10 +71,10 @@ describe('Create new model', () => {
     cy.visit(`/model/${modelUuid}`)
     cy.contains(modelUuid)
 
-    cy.log('Navigating to releases tab to draft a new release')
+    cy.log('Navigating to releases tab to create a new release')
     cy.get('[data-test=releasesTab]').click({ force: true })
-    cy.contains('Draft new release')
-    cy.get('[data-test=draftNewReleaseButton').click()
+    cy.contains('Create new release')
+    cy.get('[data-test=createNewReleaseButton').click()
     cy.contains('A release takes a snapshot of the current state of the model code, files and model card')
 
     cy.log('Filling out release form and submitting')
@@ -96,7 +96,7 @@ describe('Create new model', () => {
     cy.get('#root_modelSummary').type('This is a test summary', { force: true }).wait(500)
     cy.get('[data-test=cancelEditEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary').should('not.exist')
-    cy.get('[data-test=openEntryOverviewActions]').click()
+    cy.get('[data-test=openEntryOverviewActions]').click({ force: true })
     cy.get('[data-test=editEntryCardButton]').click({ force: true })
     // Wait for debounce to finish rendering change
     cy.get('#root_modelSummary').type('This is a test summary', { force: true }).wait(500)
@@ -108,12 +108,12 @@ describe('Create new model', () => {
     cy.log('Navigating to an existing model')
     cy.visit(`/model/${modelUuid}`)
     cy.log('Test that we can edit the model card')
-    cy.get('[data-test=openEntryOverviewActions]').click()
+    cy.get('[data-test=openEntryOverviewActions]').click({ force: true })
     cy.contains('View History')
-    cy.get('[data-test=viewHistoryButton]').click()
+    cy.get('[data-test=viewHistoryButton]').click({ force: true })
     cy.contains('Model Card History')
-    cy.visit(`/model/${modelUuid}/history/1`)
-    cy.contains('Back to model')
+    cy.visit(`/model-card/compare?fromEntry=${modelUuid}fromVersion=1`)
+    cy.contains('Compare Model Cards')
   })
 
   it('can soft delete the model', () => {

@@ -1,4 +1,5 @@
-import TokenModel, { HashType } from '../models/Token.js'
+import TokenModel from '../models/Token.js'
+import { HashType } from '../services/hash.js'
 
 export async function up() {
   const tokens = await TokenModel.find({})

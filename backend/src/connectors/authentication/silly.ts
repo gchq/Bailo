@@ -29,10 +29,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   async hasRole(_user: UserInterface, role: RoleKeys) {
-    if (role === Roles.Admin) {
-      return true
-    }
-    return false
+    return Object.values(Roles).includes(role)
   }
 
   async queryEntities(_query: string) {

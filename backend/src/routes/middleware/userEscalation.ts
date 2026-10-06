@@ -1,6 +1,6 @@
 /**
  * Each Bailo instance is responsible for it's own authentication.
- * User escelation validation here is kept to a minimum, and only runs
+ * User escalation validation here is kept to a minimum, and only runs
  * if it is enabled in config.
  */
 
@@ -39,7 +39,7 @@ export const isAuthorisedToEscalate = (userId: string, instanceId: string): bool
  * Check if a request needs escalation, and if authorised then escalate it
  * from the system system user to the original requesting user.
  */
-export async function escalateUser(req: Request, _res: Response, next: NextFunction) {
+export function escalateUser(req: Request, _res: Response, next: NextFunction) {
   // If escalation is enabled then check if the request requires escalating
   if (config.federation.isEscalationEnabled) {
     const requestingUser = req.header(USER_HEADER)

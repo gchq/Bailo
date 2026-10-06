@@ -1,11 +1,9 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import { SxProps, useTheme } from '@mui/material/styles'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { ReactNode } from 'react'
+import { ReactNode, useContext } from 'react'
 import ExpandableTypography from 'src/common/ExpandableTypography'
-import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import MessageAlert from 'src/MessageAlert'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 
 interface AdditionalInformationProps {
   children: ReactNode
@@ -32,35 +30,27 @@ export default function AdditionalInformation({
   mirroredState,
   description = undefined,
 }: AdditionalInformationProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const theme = useTheme()
-
-  if (children === undefined || (Array.isArray(children) && children.length === 0)) {
-    return <></>
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading) {
-    return <Loading />
-  }
 
   if (!mirroredModel) {
     return (
       <Stack spacing={1}>
         <Typography
-          fontWeight='bold'
           id={`${id}-label`}
           aria-label={`Label for ${label}`}
           component='label'
           htmlFor={id}
+          sx={{
+            fontWeight: 'bold',
+          }}
         >
           {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          {required && editMode && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
         </Typography>
-        {description && editMode && <ExpandableTypography whiteSpace='pre-wrap'>{description}</ExpandableTypography>}
+        {description && editMode && (
+          <ExpandableTypography sx={{ whiteSpace: 'pre-wrap' }}>{description}</ExpandableTypography>
+        )}
         {children}
       </Stack>
     )
@@ -78,16 +68,17 @@ export default function AdditionalInformation({
         return mirroredState
     }
   }
-
   if (!display && !editMode) {
     return (
       <>
         <Typography
-          fontWeight='bold'
           id={`${id}-label`}
           aria-label={`Label for ${label}`}
           component='label'
           htmlFor={id}
+          sx={{
+            fontWeight: 'bold',
+          }}
         >
           {label}
           {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -107,7 +98,6 @@ export default function AdditionalInformation({
       </>
     )
   }
-
   return (
     <Stack>
       {editMode && (
@@ -129,25 +119,32 @@ export default function AdditionalInformation({
           >
             <Stack>
               <Typography
-                fontWeight='bold'
                 id={`${id}-label`}
                 aria-label={`Label for ${label}`}
                 component='label'
                 htmlFor={id}
+                sx={{
+                  fontWeight: 'bold',
+                }}
               >
                 {label}
                 {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
               </Typography>
               {description && (
-                <ExpandableTypography variant='caption' whiteSpace='pre-wrap'>
+                <ExpandableTypography variant='caption' sx={{ whiteSpace: 'pre-wrap' }}>
                   {description}
                 </ExpandableTypography>
               )}
             </Stack>
             <Divider sx={{ mt: 1 }} />
             <Stack spacing={1} sx={{ mt: 1 }}>
-              <Typography variant='caption' fontWeight='bold'>
-                {uiConfig ? uiConfig.modelMirror.import.originalAnswerHeading : 'Original answer'}
+              <Typography
+                variant='caption'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {uiConfig.modelMirror.import.originalAnswerHeading}
               </Typography>
               <Box>
                 {mirroredState !== undefined ? (
@@ -163,8 +160,14 @@ export default function AdditionalInformation({
                   </Typography>
                 )}
               </Box>
-              <Typography sx={{ pl: 4 }} variant='caption' fontWeight='bold'>
-                {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
+              <Typography
+                variant='caption'
+                sx={{
+                  fontWeight: 'bold',
+                  pl: 4,
+                }}
+              >
+                {uiConfig.modelMirror.import.additionalInfoHeading}
               </Typography>
               {<Box sx={{ pl: 4, pb: 2 }}>{children}</Box>}
             </Stack>
@@ -175,11 +178,13 @@ export default function AdditionalInformation({
         <Stack spacing={2}>
           <Stack>
             <Typography
-              fontWeight='bold'
               id={`${id}-label`}
               aria-label={`Label for ${label}`}
               component='label'
               htmlFor={id}
+              sx={{
+                fontWeight: 'bold',
+              }}
             >
               {label}
               {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -197,7 +202,8 @@ export default function AdditionalInformation({
               <Box sx={{ wordBreak: 'break-word' }}>{mirroredStateDisplay()}</Box>
             )}
           </Stack>
-          {children && (
+          {((children && !Array.isArray(children)) ||
+            (Array.isArray(children) && children.some((child) => !!child))) && (
             <Box>
               <Box
                 sx={{
@@ -213,8 +219,13 @@ export default function AdditionalInformation({
                 }}
               >
                 <Stack spacing={1}>
-                  <Typography variant='caption' fontWeight='bold'>
-                    {uiConfig ? uiConfig.modelMirror.import.additionalInfoHeading : 'Additional information'}
+                  <Typography
+                    variant='caption'
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {uiConfig.modelMirror.import.additionalInfoHeading}
                   </Typography>
                   {children}
                 </Stack>

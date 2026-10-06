@@ -71,9 +71,9 @@ export default function EntryAccessInput({ initialUsers, onChange, entryKind, en
   }, [collaborators, entryRoles, onChange])
 
   const onUserChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, updatedMutiselectList: EntityObject[] | null) => {
-      if (updatedMutiselectList) {
-        const newValues = updatedMutiselectList.filter(
+    (_event: SyntheticEvent<Element, Event>, updatedMultiselectList: EntityObject[] | null) => {
+      if (updatedMultiselectList) {
+        const newValues = updatedMultiselectList.filter(
           (newValue) => !collaborators.find(({ entity }) => entity === `${newValue.kind}:${newValue.id}`),
         )
         const updatedCollaborators = [

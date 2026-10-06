@@ -2,6 +2,12 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Artefact Scanners
 
+> **Common questions this page answers:**
+>
+> - What scanners does Bailo use?
+> - How do I configure artefact scanning?
+> - What is the ArtefactScan service?
+
 Within Bailo, it is possible to optionally deploy artefact scanners which are designed to help manage any potential risk
 of artefacts being uploaded with potentially malicious contents.
 
@@ -11,12 +17,12 @@ The scanners currently supported by Bailo are:
 - [ArtefactScan](https://github.com/gchq/Bailo/tree/main/lib/artefactscan_api) - Bailo scanning service that
   orchestrates multiple scanners
   - [ModelScan](https://github.com/protectai/modelscan) - malicious or unsafe content detection in model artefacts
-  - [Trivy](https://github.com/aquasecurity/trivy) - vulnerability scanning and SBOM generation for container image
-    layers
+  - [Trivy](https://github.com/aquasecurity/trivy) - vulnerability scanning and SBOM (Software Bill of Materials)
+    generation for container image layers
 
 ## ClamAV
 
-ClamAV is used for traditional malware detection on uploaded files.
+ClamAV provides traditional antivirus malware detection for uploaded files.
 
 - Uses the official [ClamAV Docker image](https://hub.docker.com/r/clamav/clamav)
 - Integrated via a
@@ -62,16 +68,20 @@ Trivy is used to analyse container image layers for known vulnerabilities and to
 - Scans uploaded image layer tarballs (overlay filesystems)
 - Uses a locally cached Trivy vulnerability database
 
-> Trivy is an open‑source vulnerability scanner from Aqua Security for containers and other artefacts.
+> Trivy is an open-source vulnerability scanner from Aqua Security for containers and other artefacts.
 
-## Minimal Configuration
+## Minimal configuration
 
-| Name                                              | Description                                           | Value  |
-| ------------------------------------------------- | ----------------------------------------------------- | ------ |
-| `connectors.artefactScanners.kinds`               | List of enabled artefact scanner kinds                | `[]`   |
-| `connectors.artefactScanners.retryDelayInMinutes` | Minutes between repeated scans of the same artefact   | `60`   |
-| `connectors.artefactScanners.maxInitRetries`      | Number of startup connection attempts before failing  | `5`    |
-| `connectors.artefactScanners.initRetryDelay`      | Delay between successive startup pings (milliseconds) | `5000` |
+Configure scanner settings in the backend application configuration. These settings will apply to all scanners.
+
+- **connectors.artefactScanners.kinds** - List of enabled artefact scanner kinds. Default: `[]`
+- **connectors.artefactScanners.retryDelayInMinutes** - Minutes between repeated scans of the same artefact. Default:
+  `60`.
+- **connectors.artefactScanners.maxInitRetries** - Number of startup connection attempts before failing. Default: `5`
+- **connectors.artefactScanners.initRetryDelay** - Delay between successive startup pings (milliseconds). Default:
+  `5000`.
+- **connectors.artefactScanners.scanTimeoutMs** - Number of milliseconds waited before a scan times out. Default:
+  `60000`.
 
 Enabling or disabling specific scanners is handled via connector configuration and deployed microservices.
 

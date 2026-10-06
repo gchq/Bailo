@@ -3,9 +3,13 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   addInterval,
   buildModelMatchStage,
+  buildReleaseKey,
   getActiveRoleSet,
   getApplicableRoleSet,
+  getModelOwners,
+  semverToString,
 } from '../../../src/connectors/metrics/metricUtils.js'
+import { SystemRoles } from '../../../src/models/Model.js'
 
 describe('connectors > metrics > metricUtils > addInterval', () => {
   beforeEach(() => {
@@ -136,5 +140,71 @@ describe('connectors > metrics > metricUtils > getActiveRoleSet', () => {
     const result = getActiveRoleSet(collaborators)
 
     expect(Array.from(result)).toEqual(['msro'])
+  })
+})
+
+describe('connectors > metrics > metricUtils > getModelOwners', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('returns collaborators with the Owner role', () => {
+    const collaborators = [
+      { entity: 'user1', roles: [SystemRoles.Owner] },
+      { entity: 'user2', roles: ['msro'] },
+      { entity: 'user3', roles: [SystemRoles.Owner, 'mtr'] },
+    ]
+
+    const result = getModelOwners(collaborators)
+
+    expect(result).toEqual(['user1', 'user3'])
+  })
+
+  test('returns empty array when no owners exist', () => {
+    const collaborators = [{ entity: 'user1', roles: ['msro'] }]
+
+    const result = getModelOwners(collaborators)
+
+    expect(result).toEqual([])
+  })
+
+  test('handles undefined collaborators', () => {
+    const result = getModelOwners(undefined)
+
+    expect(result).toEqual([])
+  })
+})
+
+describe('connectors > metrics > metricUtils > buildReleaseKey', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('builds a unique release key from model id and semver', () => {
+    const result = buildReleaseKey('model-123', '1.2.3')
+
+    expect(result).toBe('model-123::1.2.3')
+  })
+})
+
+describe('connectors > metrics > metricUtils > semverToString', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('returns string semvers unchanged', () => {
+    const result = semverToString('1.2.3')
+
+    expect(result).toBe('1.2.3')
+  })
+
+  test('converts semver objects to strings', () => {
+    const result = semverToString({
+      major: 1,
+      minor: 2,
+      patch: 3,
+    })
+
+    expect(result).toBe('1.2.3')
   })
 })

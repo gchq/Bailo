@@ -5,23 +5,29 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 Bailo is built to be deployed on isolated environments, where access to the internet is strictly regulated. To install
 Bailo on a segregated environment you will need the following dependencies.
 
-## Helm Charts
+> **Common questions this page answers:**
+>
+> - How do I deploy Bailo in an air-gapped environment?
+> - What dependencies does Bailo need for offline deployment?
+> - How do I configure the Trivy database in an isolated environment?
 
-We rely on the following [Bitnami charts](https://charts.bitnami.com/):
+## Helm charts
+
+Bailo's Helm chart depends on [Bitnami charts](https://charts.bitnami.com/):
 
 - MinIO https://charts.bitnami.com/bitnami
 - MongoDB https://charts.bitnami.com/bitnami
 
-## Docker Images
+## Docker images
 
-We rely on the following images:
+These container images must be available in your connected registry:
 
-- mongodb/mongodb-community-server:8.2.2-ubi9
-- bitnami/minio:2025.7.23
-- marlonb/mailcrab:v1.6.2
-- nginxinc/nginx-unprivileged:1.28.0-alpine3.21-slim
-- registry:3.0.0
-- node:24.11.1-alpine
+- mongodb/mongodb-community-server:8.x-ubi9
+- bitnamilegacy/minio:2025.x
+- marlonb/mailcrab:v1.x
+- nginxinc/nginx-unprivileged:1.x-alpine3.x-slim
+- registry:3.x
+- node:26.x-alpine
 
 These are regularly updated. To retrieve the latest versions used, check `./compose.yaml` and `./backend/Dockerfile`.
 These versions can be configured using the `tag` attribute for each image in `values.yaml` to override the defaults. In
@@ -29,17 +35,19 @@ general, keeping to the same major version will maintain compatibility with Bail
 
 ## NPM
 
-We rely on many NPM packages. The full list is available in `package-lock.json`, `frontend/package-lock.json` and
-`backend/package-lock.json`. Most are standard packages with the exception of:
+Bailo relies on many NPM (Node Package Manager) packages. The full list is available in `package-lock.json`,
+`frontend/package-lock.json` and `backend/package-lock.json`. Most are standard packages with the exception of:
 
-- `sharp`, which is an optimised image transformer and requires some compilation tools.
-- `cypress`, which is a user interface testing tool and requires a Chromium download.
+- `sharp`, which is an optimised image transformer and requires some compilation tools
+- `cypress`, which is a user interface testing tool and requires a Chromium download
 
 `sharp` includes instructions on installing / building without internet [here](https://sharp.pixelplumbing.com/install).
 Instructions on installing `cypress` without internet are available
 [here](https://docs.cypress.io/guides/references/advanced-installation).
 
-## Trivy Database
+## Trivy database
+
+In isolated environments, Trivy may need custom configuration to access its vulnerability database.
 
 To give greater visibility of Bailo's registry and it's containing images, some environments may use Trivy to scan for
 threats, packages and more.
@@ -53,7 +61,8 @@ There are a number of environment variables that can be configured to customise 
 - `TRIVY_DB_HOSTNAME=ghcr.io` - Host to retrieve the database from
 - `TRIVY_DB_IMAGE=ghcr.io/aquasecurity/trivy-db:2` - Image to retrieve the database from
 
-- `TRIVY_DB_TLS_VERIFY=True` - Enable or disable TLS verification or use a path to point to a custom certificate
+- `TRIVY_DB_TLS_VERIFY=True` - Enable or disable TLS (Transport Layer Security) verification or use a path to point to a
+  custom certificate
 - `TRIVY_DB_INSECURE=False` - Enable if database host is not using TLS or has a custom certificate implementation
 
 - `TRIVY_DB_USERNAME` - Registry login username

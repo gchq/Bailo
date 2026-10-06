@@ -21,7 +21,7 @@ export default function MetricItem({ metric, onChange, onDelete }: MetricItemPro
     (value: string) => {
       setErrorMessage('')
       if (!isValidNumber(value)) {
-        setErrorMessage('Metric value must be a valid whole number')
+        setErrorMessage('Metric value must be a valid number')
       }
       onChange({ id: metric.id, name: metric.name, value })
     },

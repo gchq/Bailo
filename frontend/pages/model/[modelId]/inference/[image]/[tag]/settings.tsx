@@ -1,4 +1,4 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Card, Container, Divider, Link, Stack, Typography } from '@mui/material'
 import { useGetInference } from 'actions/inferencing'
 import { useRouter } from 'next/router'

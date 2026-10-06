@@ -2,14 +2,14 @@ import { createHash, X509Certificate } from 'crypto'
 import { readFile } from 'fs/promises'
 
 import config from './config.js'
-import { ManifestPlatform } from './registryResponses.js'
+import { ManifestPlatform } from './registryResponseTypes.js'
 
 export async function getKid(cert?: X509Certificate) {
   if (!cert) {
     cert = new X509Certificate(await getPublicKey())
   }
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
-  const hash = createHash('sha256').update(der).digest().slice(0, 30)
+  const hash = createHash('sha256').update(der).digest().subarray(0, 30)
 
   return formatKid(hash)
 }

@@ -52,8 +52,8 @@ export default function TokenDialog({ token }: TokenDialogProps) {
       fullWidth
       maxWidth='xl'
       open={!!token}
-      PaperProps={{ sx: { height: '90vh' } }}
-      TransitionComponent={Transition}
+      slotProps={{ paper: { sx: { height: '90vh' } } }}
+      slots={{ transition: Transition }}
     >
       <DialogTitle>Token Created</DialogTitle>
       <DialogContent>
@@ -69,42 +69,78 @@ export default function TokenDialog({ token }: TokenDialogProps) {
               onClick={() => handleListItemClick(TokenCategory.PERSONAL_ACCESS)}
             >
               <Person fontSize='small' />
-              <Typography ml={1}>Personal Access Token</Typography>
+              <Typography
+                sx={{
+                  ml: 1,
+                }}
+              >
+                Personal Access Token
+              </Typography>
             </SimpleListItemButton>
             <SimpleListItemButton
               selected={tokenCategory === TokenCategory.KUBERNETES}
               onClick={() => handleListItemClick(TokenCategory.KUBERNETES)}
             >
               <Image src={KubernetesIcon} alt='kubernetes-icon' width={20} height={20} />
-              <Typography ml={1}>Kubernetes Secret</Typography>
+              <Typography
+                sx={{
+                  ml: 1,
+                }}
+              >
+                Kubernetes Secret
+              </Typography>
             </SimpleListItemButton>
             <SimpleListItemButton
               selected={tokenCategory === TokenCategory.ROCKET}
               onClick={() => handleListItemClick(TokenCategory.ROCKET)}
             >
               <Image src={RktLogo} alt='rocket-icon' width={20} height={20} />
-              <Typography ml={1}>Rkt Configuration</Typography>
+              <Typography
+                sx={{
+                  ml: 1,
+                }}
+              >
+                Rkt Configuration
+              </Typography>
             </SimpleListItemButton>
             <SimpleListItemButton
               selected={tokenCategory === TokenCategory.PODMAN}
               onClick={() => handleListItemClick(TokenCategory.PODMAN)}
             >
               <Image src={PodmanIcon} alt='podman-icon' width={20} height={20} />
-              <Typography ml={1}>Podman Login</Typography>
+              <Typography
+                sx={{
+                  ml: 1,
+                }}
+              >
+                Podman Login
+              </Typography>
             </SimpleListItemButton>
             <SimpleListItemButton
               selected={tokenCategory === TokenCategory.DOCKER_LOGIN}
               onClick={() => handleListItemClick(TokenCategory.DOCKER_LOGIN)}
             >
               <Image src={DockerIcon} alt='docker icon' width={20} height={20} />
-              <Typography ml={1}>Docker Login</Typography>
+              <Typography
+                sx={{
+                  ml: 1,
+                }}
+              >
+                Docker Login
+              </Typography>
             </SimpleListItemButton>
             <SimpleListItemButton
               selected={tokenCategory === TokenCategory.DOCKER_CONFIGURATION}
               onClick={() => handleListItemClick(TokenCategory.DOCKER_CONFIGURATION)}
             >
               <Image src={DockerIcon} alt='docker-icon' width={20} height={20} />
-              <Typography ml={1}>Docker Configuration</Typography>
+              <Typography
+                sx={{
+                  ml: 1,
+                }}
+              >
+                Docker Configuration
+              </Typography>
             </SimpleListItemButton>
           </List>
           <Container sx={{ my: 2, overflowY: 'auto' }}>

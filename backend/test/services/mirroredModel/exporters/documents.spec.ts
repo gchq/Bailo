@@ -4,8 +4,11 @@ import { SeverityLevel } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
+import { ReleaseAction } from '../../../../src/connectors/authorisation/actions.js'
 import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
-import { BadReq, InternalError } from '../../../../src/utils/error.js'
+import config from '../../../../src/utils/config.js'
+import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
+import { setTestConfig } from '../../../testUtils/setupTestConfig.js'
 
 vi.mock('bytes')
 
@@ -41,13 +44,8 @@ const scannersMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/connectors/artefactScanning/index.js', () => scannersMocks)
 
-const configMocks = vi.hoisted(() => ({
-  default: { modelMirror: { export: { maxSize: 1000 } } },
-}))
-vi.mock('../../../../src/utils/config.js', () => configMocks)
-
 const authMocks = vi.hoisted(() => ({
-  default: { model: vi.fn() },
+  default: { model: vi.fn(), release: vi.fn() },
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
@@ -82,6 +80,7 @@ const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'Docume
 
 describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   beforeEach(() => {
+    setTestConfig({ modelMirror: { export: { maxSize: 1000 } } })
     tarballMocks.initialiseTarGzUpload.mockResolvedValue({
       tarStream: {} as any,
       gzipStream: {} as any,
@@ -95,6 +94,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     releaseServiceMocks.getAllFileIds.mockResolvedValue(['fileId'])
     scannersMocks.default.scannersInfo.mockReturnValue([])
     authMocks.default.model.mockResolvedValue({ success: true })
+    authMocks.default.release.mockResolvedValue({ success: true })
   })
 
   test('constructor sets releases array', () => {
@@ -134,7 +134,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease, mockRelease], mockLogData)
     const expectedErr = BadReq('Requested export is too large.\nMethod `DocumentsExporter._init` failure.', {
       size: 2000,
-      maxSize: configMocks.default.modelMirror.export.maxSize,
+      maxSize: config.modelMirror.export.maxSize,
     })
 
     // @ts-expect-error calling protected method
@@ -194,6 +194,29 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
 
     // @ts-expect-error calling protected method
     await expect(exporter._init()).rejects.toEqual(expectedErr)
+  })
+
+  test('_checkAuths runs successfully when auth passes', async () => {
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
+
+    // @ts-expect-error calling protected method
+    await expect(exporter._checkAuths()).resolves.toBeUndefined()
+
+    expect(authMocks.default.release).toHaveBeenCalledWith(mockUser, mockModel, ReleaseAction.View, mockRelease)
+  })
+
+  test('_checkAuths throws Forbidden if release fails', async () => {
+    authMocks.default.release.mockResolvedValueOnce({ success: false, info: 'no release access' })
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
+    const expectedErr = Forbidden('no release access\nMethod `DocumentsExporter._checkAuths` failure.', {
+      userDn: mockUser.dn,
+      modelId: mockModel.id,
+      semver: mockRelease.semver,
+      ...mockLogData,
+    })
+
+    // @ts-expect-error calling protected method
+    await expect(exporter._checkAuths()).rejects.toEqual(expectedErr)
   })
 
   test('getInitialiseTarGzUploadParams returns correct params', () => {

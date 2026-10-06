@@ -6,8 +6,6 @@ from typing import Any
 
 from semantic_version import Version
 
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility
 from bailo.core.exceptions import BailoException
@@ -58,6 +56,7 @@ class MirroredModel(Entry):
             collaborators=collaborators,
         )
         self.sourceModelId = sourceModelId
+        self._original_source_model_id = sourceModelId
         self.model_id = model_id
 
         self._mirrored_card = None
@@ -87,7 +86,7 @@ class MirroredModel(Entry):
         :param tags: Tags to assign to the mirrored model, defaults to None
         :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
-        :return: Model object
+        :return: MirroredModel object
         """
         res = client.post_model(
             name=name,
@@ -119,6 +118,28 @@ class MirroredModel(Entry):
         model._unpack(res["model"])
 
         return model
+
+    def update(self) -> None:
+        """Upload and retrieve any changes to the mirrored model summary on Bailo.
+
+        Merges the sourceModelId into settings when it has changed, then delegates to the base update.
+        """
+        if self.sourceModelId != self._original_source_model_id:
+            if self.settings is None:
+                self.settings = {}
+            self.settings.setdefault("mirror", {})["sourceModelId"] = self.sourceModelId
+        super().update()
+        self._original_source_model_id = self.sourceModelId
+
+    def _unpack(self, res):
+        """Update mirrored model attributes from API response.
+
+        :param res: Response dictionary containing model information.
+        """
+        super()._unpack(res)
+        source_id = res.get("settings", {}).get("mirror", {}).get("sourceModelId", self.sourceModelId)
+        self.sourceModelId = source_id
+        self._original_source_model_id = source_id
 
     @classmethod
     def from_id(cls, client: Client, model_id: str) -> MirroredModel:
@@ -290,7 +311,7 @@ class MirroredModel(Entry):
 
         :param model_card: Model card dictionary, defaults to None
 
-        ..note:: If a model card is not provided, the current model card attribute value is used
+        .. note:: If a model card is not provided, the current model card attribute value is used
         """
         self._update_card(card=model_card)
 
@@ -301,11 +322,11 @@ class MirroredModel(Entry):
             self._unpack_card(res["model"]["card"])
             logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
-            warnings.warn(f"ID {self.id} does not have any associated model card.")
+            warnings.warn(f"ID {self.id} does not have any associated model card.", stacklevel=2)
         if "mirroredCard" in res["model"]:
             self._unpack_card(res["model"]["mirroredCard"], True)
         else:
-            warnings.warn(f"ID {self.id} does not have any associated additional information.")
+            warnings.warn(f"ID {self.id} does not have any associated additional information.", stacklevel=2)
 
     def _unpack_card(self, res, mirrored=False) -> None:
         if mirrored:
@@ -355,6 +376,6 @@ class MirroredModel(Entry):
     def __str__(self) -> str:
         """Return the human-readable string representation of the mirrored model.
 
-        :return: String value of the enum.
+        :return: String representation of the mirrored model.
         """
         return f"{self.model_id}"

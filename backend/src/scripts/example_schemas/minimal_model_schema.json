@@ -12,7 +12,8 @@
           "description": "A description of what the model does.",
           "type": "string",
           "minLength": 1,
-          "maxLength": 5000
+          "maxLength": 5000,
+          "requiredByModelStates": ["Development", "Production", "Review"]
         },
         "datasets": {
           "title": "Are there any datasets related to this model?",
@@ -62,7 +63,8 @@
               "title": "Question three",
               "description": "This is a date question",
               "type": "string",
-              "format": "date"
+              "format": "date",
+              "requiredByModelStates": ["Production", "Review"]
             }
           }
         },

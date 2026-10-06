@@ -9,8 +9,6 @@ from typing import Any
 
 from semantic_version import Version
 
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
@@ -331,7 +329,7 @@ class Model(Entry):
 
         :param model_card: Model card dictionary, defaults to None
 
-        ..note:: If a model card is not provided, the current model card attribute value is used
+        .. note:: If a model card is not provided, the current model card attribute value is used
         """
         self._update_card(card=model_card)
 
@@ -356,9 +354,9 @@ class Model(Entry):
         """Call the Release.create method to build a release from Bailo and upload it.
 
         :param version: A semantic version for the release
-        :param notes: Notes on release, defaults to ""
-        :param files: A list of files for release, defaults to []
-        :param images: A list of images for release, defaults to []
+        :param notes: Notes on release
+        :param files: A list of files for release, defaults to None
+        :param images: A list of images for release, defaults to None
         :param minor: Is a minor release?, defaults to False
         :param draft: Is a draft release?, defaults to True
         :return: Release object
@@ -494,7 +492,7 @@ class Model(Entry):
     def __str__(self) -> str:
         """Return the human-readable string representation of the model.
 
-        :return: String value of the enum.
+        :return: String representation of the model.
         """
         return f"{self.model_id}"
 
@@ -611,7 +609,8 @@ class Experiment:
             )
         else:
             warnings.warn(
-                f"MLFlow experiment {experiment_id} does not have any runs and publishing requires at least one valid run. Are you sure the ID is correct?"
+                f"MLFlow experiment {experiment_id} does not have any runs and publishing requires at least one valid run. Are you sure the ID is correct?",
+                stacklevel=2,
             )
 
         for run in runs:
@@ -649,7 +648,7 @@ class Experiment:
 
         logger.info("Successfully imported MLFlow experiment %s.", experiment_id)
 
-    def publish(
+    def publish(  # noqa: PLR0912
         self,
         mc_loc: str,
         semver: str = "0.1.0",
@@ -665,8 +664,8 @@ class Experiment:
         :param run_id: Local experiment run ID to be selected, defaults to None
         :param select_by: String describing experiment to be selected (e.g. "accuracy MIN|MAX"), defaults to None
 
-        ..note:: mc_loc is dependent on the model card schema being used
-        ..warning:: User must specify either run_id or select_by, otherwise the code will error
+        .. note:: mc_loc is dependent on the model card schema being used
+        .. warning:: User must specify either run_id or select_by, otherwise the code will error
         """
 
         # Check if already published, can only published once
@@ -715,7 +714,7 @@ class Experiment:
             try:
                 release_latest_version = self.model.get_latest_release().version
                 release_new_version = release_latest_version.next_minor()
-            except:
+            except Exception:
                 release_new_version = semver
 
             run_id = sel_run["run"]
@@ -744,7 +743,7 @@ class Experiment:
     def __select_run(self, select_by: str) -> dict:
         # Parse target and order from select_by string
         select_by_split = select_by.split(" ")
-        if len(select_by_split) != 2:
+        if len(select_by_split) != 2:  # noqa: PLR2004
             raise BailoException("Invalid select_by string. Expected format is 'metric_name MIN|MAX'.")
         order_str = select_by_split[1].upper()
         order_opt = {"MIN": 0, "MAX": -1}

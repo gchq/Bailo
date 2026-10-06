@@ -26,3 +26,9 @@ infrastructure/helm/bailo/local.yaml
 # MLFlow
 mlartifacts/
 mlruns/
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json

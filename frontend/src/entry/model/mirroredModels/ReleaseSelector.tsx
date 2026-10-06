@@ -20,13 +20,12 @@ import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
 import { useCallback, useMemo, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
-import Loading from 'src/common/Loading'
 import MirrorInfo from 'src/common/MirrorInfo'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
-import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
-import MessageAlert from 'src/MessageAlert'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
 type ReleaseSelectorProps = {
@@ -90,10 +89,20 @@ export default function ReleaseSelector({
 
     return (
       <ListItem key={release.semver} disablePadding>
-        <Stack width='100%'>
+        <Stack
+          sx={{
+            width: '100%',
+          }}
+        >
           <ListItemButton dense disabled={isAlreadySelected} onClick={handleToggle(release)}>
             <ListItemIcon>
-              <Checkbox edge='start' checked={isAlreadySelected || isChecked} tabIndex={-1} disableRipple />
+              <Checkbox
+                edge='start'
+                checked={isAlreadySelected || isChecked}
+                tabIndex={-1}
+                disableRipple
+                data-test={`releaseSelectorSemverCheckbox${release.semver}`}
+              />
             </ListItemIcon>
             <ListItemText
               primary={
@@ -115,30 +124,56 @@ export default function ReleaseSelector({
             />
           </ListItemButton>
           <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider variant='middle' />}</Box>
-          <Stack spacing={1} padding={2}>
+          <Stack
+            spacing={1}
+            sx={{
+              padding: 2,
+            }}
+          >
             <ReleaseAssetsAccordion model={model} release={release} mode='readonly' />
-            <ReleaseAssetsResponses model={model} release={release} includeResponses={false} />
+            <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
           </Stack>
         </Stack>
       </ListItem>
     )
   })
 
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
-  }
-
-  if (isReleasesLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isReleasesError], isReleasesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
-    <Stack spacing={2} width='100%'>
-      <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left' alignItems='center'>
-        <Typography fontWeight='bold'>Releases to export</Typography>
+    <Stack
+      spacing={2}
+      sx={{
+        width: '100%',
+      }}
+    >
+      <Stack
+        direction='row'
+        spacing={0.5}
+        sx={{
+          marginBottom: 2,
+          justifyContent: 'left',
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
+          Releases to export
+        </Typography>
         <HelpDialog title='Mirror Export Info' content={<MirrorInfo />} />
       </Stack>
-      <Button variant='outlined' disabled={isReadOnly} onClick={() => setIsDialogOpen(true)}>
+      <Button
+        variant='outlined'
+        disabled={isReadOnly}
+        onClick={() => setIsDialogOpen(true)}
+        data-test='releaseSelectorSelectReleasesButton'
+      >
         Select releases
       </Button>
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} maxWidth='md' fullWidth>
@@ -160,7 +195,12 @@ export default function ReleaseSelector({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-          <Button onClick={handleAddReleases} disabled={checkedReleases.length === 0} variant='contained'>
+          <Button
+            onClick={handleAddReleases}
+            disabled={checkedReleases.length === 0}
+            variant='contained'
+            data-test='releaseSelectorConfirmReleasesButton'
+          >
             Add releases
           </Button>
         </DialogActions>
@@ -168,7 +208,13 @@ export default function ReleaseSelector({
       {selectedReleases.length > 0 && (
         <Stack spacing={1}>
           <Typography variant='subtitle2'>Selected releases</Typography>
-          <Stack direction='row' spacing={1} flexWrap='wrap'>
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              flexWrap: 'wrap',
+            }}
+          >
             {selectedReleases.map((release) => (
               <Chip
                 key={release.semver}

@@ -1,0 +1,32 @@
+services:
+  nginx:
+    ports:
+      - '8081:8080'
+
+  backend:
+    environment:
+      - NODE_CONFIG_ENV=prod_docker_compose
+
+  seaweedfs:
+    ports:
+      - 8333:8333
+    networks:
+      # allow communicating with B's backend
+      shared:
+        aliases:
+          # prevent service name collision
+          - s3-a
+
+  registry:
+    ports:
+      - '5000:5000'
+
+networks:
+  default:
+    name: bailo-a_default
+
+  internal:
+    name: bailo-a_internal
+
+  shared:
+    name: bailo-shared

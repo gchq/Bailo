@@ -44,8 +44,9 @@ export const deleteSchema = [
     req.audit = AuditInfo.DeleteSchema
     const { params } = parse(req, deleteSchemaSchema)
 
-    await deleteSchemaById(req.user, params.schemaId)
-    await audit.onDeleteSchema(req, params.schemaId)
+    const schema = await deleteSchemaById(req.user, params.schemaId)
+
+    await audit.onDeleteSchema(req, schema)
 
     res.json({
       deleted: true,

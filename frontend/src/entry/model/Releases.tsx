@@ -1,88 +1,70 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useGetReviewRoles } from 'actions/reviewRoles'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useState } from 'react'
 import semver from 'semver'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
-import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
-import { hasRole } from 'utils/roles'
+import { EntryInterface, ReleaseInterface } from 'types/types'
 
 type ReleasesProps = {
   model: EntryInterface
-  currentUserRoles: string[]
   readOnly?: boolean
 }
 
-export default function Releases({ model, currentUserRoles, readOnly = false }: ReleasesProps) {
+export function getLatestRelease(releases: ReleaseInterface[]) {
+  if (releases.length > 0) {
+    const ordered = semver.sort(releases.filter((release) => release.draft !== true).map((release) => release.semver))
+    return ordered[ordered.length - 1]
+  } else {
+    return ''
+  }
+}
+
+export default function Releases({ model, readOnly = false }: ReleasesProps) {
   const router = useRouter()
-  const [latestRelease, setLatestRelease] = useState('')
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
-  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
 
   const ReleaseListItem = memoize(({ data }) => (
-    <ReleaseDisplay
-      key={data.semver}
-      model={model}
-      release={data}
-      latestRelease={latestRelease}
-      hideReviewBanner={
-        !hasRole(
-          currentUserRoles,
-          reviewRoles.map((role) => role.shortName),
-        ) || readOnly
-      }
-    />
+    <ReleaseDisplay key={data.semver} model={model} release={data} latestRelease={getLatestRelease(releases)} />
   ))
-
-  const onLatestReleaseChange = useEffectEvent((release: string) => {
-    setLatestRelease(release)
-  })
-
-  useEffect(() => {
-    if (model && releases.length > 0) {
-      onLatestReleaseChange(semver.sort(releases.map((release) => release.semver))[releases.length - 1])
-    }
-  }, [latestRelease, model, releases])
 
   function handleDraftNewRelease() {
     router.push(`/model/${model.id}/release/new`)
   }
 
-  if (isReleasesLoading || isReviewRolesLoading) {
-    return <Loading />
-  }
-
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
-  }
-
-  if (isReviewRolesError) {
-    return <MessageAlert message={isReviewRolesError.info.message} severity='error' />
+  const queryState = renderQueryState([isReleasesError], isReleasesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         {!readOnly && (
-          <Box display='flex'>
-            <Box ml='auto'>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <Box
+              sx={{
+                ml: 'auto',
+              }}
+            >
               <Restricted action='createRelease' fallback={<Button disabled>Draft new Release</Button>}>
                 <Button
                   variant='outlined'
                   onClick={handleDraftNewRelease}
                   disabled={!model.card}
-                  data-test='draftNewReleaseButton'
+                  data-test='createNewReleaseButton'
                   startIcon={<Create />}
                 >
-                  Draft new release
+                  Create new release
                 </Button>
               </Restricted>
             </Box>
@@ -101,6 +83,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
           ]}
           searchPlaceholderText='Search by version'
           defaultSortProperty='semver'
+          prioritiseItems={(a, b) => Number(b.draft === true) - Number(a.draft === true)}
         >
           {ReleaseListItem}
         </Paginate>

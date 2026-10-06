@@ -26,7 +26,7 @@ export default function TextInputDialog({
     setFormData('')
   }
   return (
-    <Dialog maxWidth='lg' open={open} onClose={onClose} TransitionComponent={Transition}>
+    <Dialog maxWidth='lg' open={open} onClose={onClose} slots={{ transition: Transition }}>
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent sx={{ p: 2 }}>
         <TextField

@@ -1,4 +1,4 @@
-import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
 import { SoftDeleteDocument, SoftDeleteInterface, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 import { ScanInterface } from './Scan.js'
@@ -7,7 +7,7 @@ import { ScanInterface } from './Scan.js'
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface FileInterface {
-  _id: ObjectId
+  _id: Types.ObjectId
   modelId: string
 
   name: string

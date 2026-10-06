@@ -1,4 +1,4 @@
-import { HydratedDocument, model, ObjectId, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
@@ -16,13 +16,13 @@ export const ResponseKind = {
 export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export interface ResponseInterface {
-  _id: ObjectId
+  _id: Types.ObjectId
   entity: string
   kind: ResponseKindKeys
   role?: string
   decision?: DecisionKeys
   comment?: string
-  parentId: Schema.Types.ObjectId
+  parentId: Types.ObjectId
   reactions: ResponseReaction[]
   commentEditedAt?: string
 
@@ -69,6 +69,8 @@ const ResponseSchema = new Schema<ResponseDoc>(
     collection: 'v2_responses',
   },
 )
+
+ResponseSchema.index({ parentId: 1, kind: 1, entity: 1, createdAt: -1 })
 
 ResponseSchema.plugin(softDeletionPlugin)
 

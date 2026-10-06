@@ -1,13 +1,12 @@
-import { Create } from '@mui/icons-material'
+import Create from '@mui/icons-material/Create'
 import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import { memoize } from 'lodash-es'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
 import { formatDateString } from 'utils/dateUtils'
 
 export default function SchemaMigrationList() {
@@ -15,9 +14,22 @@ export default function SchemaMigrationList() {
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations()
   const SchemaMigrationList = memoize(({ data }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
-      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} justifyContent='space-between'>
+      <Stack
+        direction={{ sm: 'column', md: 'row' }}
+        spacing={2}
+        sx={{
+          justifyContent: 'space-between',
+        }}
+      >
         <Link href={`/schemas/migrations/${data.id}`} noLinkStyle aria-label={`go to the ${data.name} migration plan`}>
-          <Typography fontWeight='bold' color='primary' variant='h6' component='h2'>
+          <Typography
+            color='primary'
+            variant='h6'
+            component='h2'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {`${data.name}`}
             <em style={{ color: theme.palette.secondary.main }}>{` ${data.draft ? '(draft)' : ''}`}</em>
           </Typography>
@@ -26,8 +38,18 @@ export default function SchemaMigrationList() {
           Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data.createdAt)}</span>
         </Typography>
       </Stack>
-      <Stack direction='row' alignItems='center'>
-        <Typography fontWeight='bold' color='primary'>
+      <Stack
+        direction='row'
+        sx={{
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          color='primary'
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           {data.id}
         </Typography>
         <CopyToClipboardButton
@@ -49,19 +71,16 @@ export default function SchemaMigrationList() {
     </Stack>
   ))
 
-  if (isSchemaMigrationsError) {
-    return <MessageAlert message={isSchemaMigrationsError.info.message} severity='error' />
-  }
-
-  if (isSchemaMigrationsLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isSchemaMigrationsError], isSchemaMigrationsLoading)
+  if (queryState) {
+    return queryState
   }
   return (
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/schemas/migrations/new`}>
-            <Button variant='outlined' data-test='createNewSchemaMigration' startIcon={<Create />}>
+            <Button variant='contained' data-test='createNewSchemaMigration' startIcon={<Create />}>
               New schema migration plan
             </Button>
           </Link>

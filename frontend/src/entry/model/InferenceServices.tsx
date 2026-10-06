@@ -1,12 +1,13 @@
 import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { sendTokenToService, useGetInferencesForModelId } from 'actions/inferencing'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { deleteUserToken, postUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
@@ -23,13 +24,13 @@ export default function InferenceServices({ model }: InferenceProps) {
   const [healthCheck, setHealthCheck] = useState(false)
 
   const { tokens, isTokensLoading, isTokensError, mutateTokens } = useGetUserTokens()
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   useEffect(() => {
     async function checkAuthentication() {
       try {
         setErrorMessage('')
-        const response = await fetch(`${uiConfig?.inference.connection.host}/api/health`, { credentials: 'include' })
+        const response = await fetch(`${uiConfig.inference.connection.host}/api/health`, { credentials: 'include' })
         setHealthCheck(response.ok)
         if (!response.ok) {
           return setErrorMessage(await getErrorMessage(response))
@@ -57,7 +58,7 @@ export default function InferenceServices({ model }: InferenceProps) {
   const handleCreateToken = async () => {
     setErrorMessage('')
 
-    const authorizationTokenName = uiConfig?.inference.authorizationTokenName
+    const authorizationTokenName = uiConfig.inference.authorizationTokenName
     const authorizationAccessKeys = tokens.filter((value) => value.description === authorizationTokenName)
     if (authorizationTokenName) {
       for (const token of authorizationAccessKeys) {
@@ -78,7 +79,7 @@ export default function InferenceServices({ model }: InferenceProps) {
         try {
           const inferenceCheck = await sendTokenToService(`${uiConfig.inference.connection.host}/api/login`, token)
           if (!inferenceCheck.ok) {
-            setErrorMessage('Login failed when when accessing the inferencing service')
+            setErrorMessage('Login failed when accessing the inferencing service')
           } else {
             router.reload()
           }
@@ -94,28 +95,25 @@ export default function InferenceServices({ model }: InferenceProps) {
     router.push(`/model/${model.id}/inference/new`)
   }
 
-  if (isInferencesError) {
-    return <MessageAlert message={isInferencesError.info.message} severity='error' />
-  }
-
-  if (isTokensError) {
-    return <MessageAlert message={isTokensError.info.message} severity='error' />
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isTokensLoading || isUiConfigLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isInferencesError, isTokensError], isTokensLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
     <Container sx={{ my: 2 }}>
       {healthCheck ? (
         <Stack spacing={4}>
-          <Box display='flex'>
-            <Box ml='auto'>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <Box
+              sx={{
+                ml: 'auto',
+              }}
+            >
               <Restricted action='createInferenceService' fallback={<Button disabled>Create Service</Button>}>
                 <Button variant='outlined' onClick={handleCreateNewInferenceService}>
                   Create Service
@@ -129,7 +127,7 @@ export default function InferenceServices({ model }: InferenceProps) {
       ) : (
         <Stack spacing={2}>
           <Typography>
-            Access to inferencing services requires token a with model access. Are you sure you want to proceed?
+            Access to inferencing services requires a token with model access. Are you sure you want to proceed?
           </Typography>
           <Stack spacing={2} direction='row'>
             <Button variant='contained' onClick={handleCreateToken}>

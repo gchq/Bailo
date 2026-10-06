@@ -52,7 +52,13 @@ export default function ExpandableButton({
     return (
       <StyledButton onClick={() => onClick()}>
         <Box sx={{ px: 1 }}>
-          <Stack direction='row' alignItems='center' spacing={2}>
+          <Stack
+            direction='row'
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             {icon}
             <Typography sx={{ whiteSpace: 'nowrap' }}>{label}</Typography>
           </Stack>

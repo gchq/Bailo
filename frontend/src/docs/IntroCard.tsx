@@ -20,7 +20,13 @@ export default function IntroCard({ title, user, url, children }: IntroCardProps
         <Typography variant='h5' component='div'>
           {title}
         </Typography>
-        <Typography sx={{ mb: 1.5 }} color='text.secondary' component='div'>
+        <Typography
+          component='div'
+          sx={{
+            color: 'text.secondary',
+            mb: 1.5,
+          }}
+        >
           {user}
         </Typography>
         <Typography variant='body2' component='div'>

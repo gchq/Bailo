@@ -394,7 +394,7 @@ The following tables describe selected configuration options available in `value
 | Name | Description | Value |
 | ---- | ----------- | ----- |
 | `nginxAuth.repository` | Runs Nginx as non-root unprivileged user | `nginxinc/nginx-unprivileged` |
-| `mongodb.enabled` | Using bitnami chart 15.1.4. <https://artifacthub.io/packages/helm/bitnami/mongodb/15.1.4>. Also refer to Mongo host defination and Create the mongo connection URI in template/_helper.tpl | `true` |
+| `mongodb.enabled` | Using bitnami chart 15.1.4. <https://artifacthub.io/packages/helm/bitnami/mongodb/15.1.4>. Also refer to Mongo host definition and Create the mongo connection URI in template/_helper.tpl | `true` |
 | `minio.enabled` | Using bitnami chart 14.2.0. <https://artifacthub.io/packages/helm/bitnami/minio/14.2.0> | `true` |
 | `mail.enabled` | Using image marlonb/mailcrab:latest | `true` |
 | `registry.enabled` | Using image registry:3.0.0. Must use registry:3.0.0 if registry.serviceAccount is defined | `true` |
@@ -437,10 +437,10 @@ The following tables describe selected configuration options available in `value
 | `connectors.artefactScanners.retryDelayInMinutes` | Number of minutes between scans on a given file | `60` |
 | `connectors.artefactScanners.maxInitRetries` | Number of times the microservice is attempted to be reached before failing at startup | `5` |
 | `connectors.artefactScanners.initRetryDelay` | Delay between successive microservice pings in milliseconds | `5000` |
+| `connectors.artefactScanners.scanTimeoutMs` | Number of milliseconds waited until the microservice is considered unresponsive | `60000` |
 | `instrumentation.enabled` | Enable OpenTelemetry instrumentation | `false` |
 | `instrumentation.debug` | Enable instrumentation debugging | `false` |
-| `stroom.logOnlyMode` | Enable Stroom audit logging | `true` |
-| `stroom.feed` | Name of the Stroom feed | `feed` |
+| `stroom.sendEvents` | Enable Stroom audit logging | `true` |
 | `stroom.url` | URL for the associated Stroom feed | `https://url` |
 | `stroom.environment` | Stroom environment | `local` |
 | `stroom.interval` | Interval (in ms) on how frequently events should be sent to stroom | 1000 * 50 |

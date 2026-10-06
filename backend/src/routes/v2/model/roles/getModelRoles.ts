@@ -52,9 +52,10 @@ export const getModelRoles = [
       query: { modelId },
     } = parse(req, getModelRolesSchema)
 
-    const allRoles = await getAllEntryRoles(req.user, modelId)
+    const { allRoles, reviewRoleDocs } = await getAllEntryRoles(req.user, modelId)
 
-    await audit.onViewReviewRoles(req, allRoles)
+    // only the non-system roles are audited as system roles are not stored in the DB so have no ID
+    await audit.onViewReviewRoles(req, reviewRoleDocs)
 
     res.json({
       roles: allRoles,

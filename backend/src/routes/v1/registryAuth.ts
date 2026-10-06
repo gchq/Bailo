@@ -37,7 +37,7 @@ export async function getAdminToken(): Promise<string> {
   }
 
   const key = await getPrivateKey()
-  const hash = createHash('sha256').update(key).digest().slice(0, 16)
+  const hash = createHash('sha256').update(key).digest().subarray(0, 16)
   hash[6] = (hash[6] & 0x0f) | 0x40
   hash[8] = (hash[8] & 0x3f) | 0x80
 

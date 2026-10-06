@@ -7,7 +7,7 @@ import { testReviewRole } from '../../../testUtils/testModels.js'
 vi.mock('../../../../src/connectors/audit/index.js')
 
 vi.mock('../../../../src/services/roles.js', () => ({
-  getAllEntryRoles: vi.fn(() => [testReviewRole]),
+  getAllEntryRoles: vi.fn(() => ({ allRoles: [testReviewRole], reviewRoleDocs: [testReviewRole] })),
 }))
 
 describe('routes > model > roles > getModelRoles', () => {

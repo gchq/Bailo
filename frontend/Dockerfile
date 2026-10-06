@@ -1,16 +1,11 @@
 # syntax=docker/dockerfile:1
 
-FROM node:24.15.0-alpine AS base
+FROM node:26.10.0-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS base
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN apk add --no-cache libc6-compat ca-certificates && \
-    apk update
+RUN apk add --no-cache libc6-compat ca-certificates
 
 WORKDIR /app
-
-# Don't run production as root
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
 
 COPY package*.json ./
 
@@ -18,11 +13,7 @@ EXPOSE 3000
 
 FROM base AS dev
 
-RUN --mount=type=cache,target=/cache/npm npm ci --omit=dev --cache=/cache/npm
-
-# Pickup dev packages too
-RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm && \
-    npm install sharp@0.33.5 --cache=/cache/npm
+RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 
 COPY . .
 
@@ -36,10 +27,11 @@ RUN npm run build
 FROM base AS prod
 ENV PORT=3000
 
-COPY --from=dev --chown=nextjs:0 /app/next.config.mjs .
-COPY --from=dev --chown=nextjs:0 /app/package.json .
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# Automatically leverage output traces to reduce image size
+COPY --from=build --chown=nextjs:0 /app/next.config.mjs .
+COPY --from=build --chown=nextjs:0 /app/package.json .
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=build --chown=nextjs:0 /app/.next/standalone ./
 COPY --from=build --chown=nextjs:0 /app/.next/static ./.next/static

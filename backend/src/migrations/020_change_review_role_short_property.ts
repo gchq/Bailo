@@ -10,6 +10,8 @@ export async function up() {
   if ('short_1' in indexes) {
     await ReviewRoleModel.collection.dropIndex('short_1')
   }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore convert legacy value
   await ReviewRoleModel.updateMany({ kind: 'schema' }, { $set: { kind: RoleKind.REVIEW } })
   const reviewRoles = await ReviewRoleModel.find()
   for (const reviewRole of reviewRoles) {

@@ -78,9 +78,7 @@ export async function uploadFile(
 }
 
 export async function saveImportedFile(file: FileInterface) {
-  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
-    upsert: true,
-  })
+  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, { upsert: true })
 }
 
 export async function startUploadMultipartFile(
@@ -327,7 +325,7 @@ export async function getFilesByIds(
   ])
 
   if (files.length !== fileIds.length) {
-    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file.id === id))
+    const notFoundFileIds = fileIds.filter((id) => !files.some((file) => file.id === id))
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
@@ -351,6 +349,9 @@ export async function removeFiles(
 
   for (const fileId of fileIds) {
     const file = await getFileById(user, fileId)
+    if (file.modelId !== modelId) {
+      throw NotFound('The requested file was not found.', { fileId, modelId })
+    }
     allFiles.push(file)
     const auth = await authorisation.file(user, model, file, FileAction.Delete)
     if (!auth.success) {
@@ -363,7 +364,7 @@ export async function removeFiles(
 
     // Unless specified, we don't actually remove the file from storage, we only hide all
     // references to it.  This makes the file not visible to the user.
-    await FileModel.findOneAndDelete({ _id: file._id }, session)
+    await FileModel.findByIdAndDelete(file._id, session)
     // We cannot use the mongo session with aws-sdk so send the aws-sdk API call last as if
     // aws-sdk fails then the mongo session will roll back
     if (hardDelete) {

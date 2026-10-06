@@ -1,0 +1,89 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Creating a Data Card
+
+A **Data Card** documents a dataset used in machine learning - its provenance, storage location, contents, and
+relationship to models. Data cards help your organisation track what data is being used, where it comes from, and how it
+should be handled.
+
+> **Common questions this page answers:**
+>
+> - How do I create a data card in Bailo?
+> - When should I use a data card instead of a model?
+> - How do I document a dataset?
+
+## When to use a data card
+
+Create a data card when you want to:
+
+- Document a training or evaluation dataset
+- Track data provenance and lineage
+- Record data storage locations and access requirements
+- Link datasets to the models that use them
+- Meet compliance or governance requirements around data handling
+
+## Creating a data card
+
+Create a data card from the navigation bar by selecting the Data Card entry type:
+
+1. Click the **+ Create** button in the navigation bar
+2. Select **Data Card** as the entry type
+3. Provide the basic information about your dataset through the required fields:
+   - **Data Card Name**: A clear, descriptive name for the dataset
+   - **Description**: What the dataset contains and its intended use
+   - **Access control**: Choose **Public** (visible to all users) or **Private** (visible only to collaborators)
+4. Once you have filled in these details, click **Create data card**
+
+## Selecting a schema
+
+After creating the data card, you'll be prompted to select a **schema**. The schema defines what information you need to
+provide about your dataset. Your administrator will have set up schemas appropriate for your organisation.
+
+Common fields in a data card schema might include:
+
+- Data source and collection methodology
+- Size and format
+- Storage location
+- Sensitivity classification
+- Retention period
+- Known limitations or biases
+
+## Filling in the data card
+
+Work through the form sections to document your dataset, then save to create a versioned record.
+
+Once you've selected a schema, the data card form appears. Click **Edit data card** then work through each section,
+providing as much detail as you can. The form is divided into tabs based on the schema structure.
+
+Click **Save** once you are happy with the form. This creates a new data card version which is automatically shown to
+anyone viewing the data card.
+
+## Using the Python client
+
+You can also create and manage data cards programmatically using the Bailo Python client:
+
+```python
+from bailo import Client, Datacard
+
+client = Client("https://your-bailo-instance.com")
+
+# Create a new data card
+data_card = Datacard.create(
+    client=client,
+    name="Training Dataset v2",
+    description="Curated training data for image classification",
+)
+
+# Update the data card metadata
+data_card.update_data_card(metadata={"overview": {"tags": ["image", "classification"]}})
+```
+
+A full example is available in the [Data Cards demo notebook](../../python/notebooks/datacards_demo.html).
+
+## Related pages
+
+- [Managing Data Cards](managing-data-cards) - Editing, versioning, and linking data cards
+- [Core Concepts](../../getting-started/core-concepts) - How data cards fit into the Bailo data model
+- [Python Client](../programmatically-using-bailo/python-client) - Programmatic access to Bailo
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

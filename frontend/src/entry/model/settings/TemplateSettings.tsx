@@ -1,4 +1,4 @@
-import { Save } from '@mui/icons-material'
+import Save from '@mui/icons-material/Save'
 import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { patchEntry } from 'actions/entry'
 import { useState } from 'react'

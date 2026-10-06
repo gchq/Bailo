@@ -11,8 +11,6 @@ from semantic_version import Version
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NO_COLOR
@@ -46,7 +44,7 @@ class Release:
         :param minor: Is a minor release?
         :param draft: Is a draft release?
 
-        ..note:: Currently files and images are stored as string references
+        .. note:: Currently files and images are stored as string references
         """
         self.client = client
         self.model_id = model_id
@@ -90,6 +88,7 @@ class Release:
         :param images: Images for release, defaults to None
         :param minor: Signifies a minor release, defaults to False
         :param draft: Signifies a draft release, defaults to False
+        :return: Release object
         """
         if files is None:
             files = []
@@ -132,6 +131,7 @@ class Release:
         :param client: A client object used to interact with Bailo
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
+        :return: Release object
         """
         res = client.get_release(model_id, str(version))["release"]
 
@@ -182,23 +182,22 @@ class Release:
                 path = filename
             total_size = int(res.headers.get("content-length", 0))
 
-            if NO_COLOR:
-                colour = "white"
-            else:
-                colour = "green"
+            colour = "white" if NO_COLOR else "green"
 
-            with tqdm(
-                total=total_size,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=BLOCK_SIZE,
-                postfix=f"downloading {filename} as {path}",
-                colour=colour,
-            ) as t:
-                with open(path, "wb") as f:
-                    for data in res.iter_content(BLOCK_SIZE):
-                        t.update(len(data))
-                        f.write(data)
+            with (
+                tqdm(
+                    total=total_size,
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=BLOCK_SIZE,
+                    postfix=f"downloading {filename} as {path}",
+                    colour=colour,
+                ) as t,
+                open(path, "wb") as f,
+            ):
+                for data in res.iter_content(BLOCK_SIZE):
+                    t.update(len(data))
+                    f.write(data)
 
             logger.info("File written to %s", path)
 
@@ -223,7 +222,7 @@ class Release:
         :param include: List of glob patterns (str) or single string to include, defaults to None
         :param exclude: List of glob patterns (str) or single string to exclude, defaults to None
         :raises BailoException: If the release has no files assigned.
-        ..note:: Fnmatch statements support Unix shell-style wildcards.
+        .. note:: Fnmatch statements support Unix shell-style wildcards.
         """
         files_metadata = self.client.get_release(self.model_id, str(self.version))["release"]["files"]
         if files_metadata == []:
@@ -263,7 +262,7 @@ class Release:
         :param data: A BytesIO object if not loading from disk, defaults to None
 
         :return: The unique file ID of the file uploaded
-        ..note:: If path provided is a directory, it will be uploaded as a zip
+        .. note:: If path provided is a directory, it will be uploaded as a zip
         """
         logger.info(
             "Uploading file(s) to version %s of %s...",
@@ -288,7 +287,7 @@ class Release:
                 path = f"{name}.zip"
                 name = path
 
-            data: BytesIO = open(path, "rb")  # type: ignore[reportAssignmentType]
+            data: BytesIO = open(path, "rb")  # noqa: SIM115  # type: ignore[reportAssignmentType]
             to_close = True
 
             if zip_required:
@@ -300,10 +299,7 @@ class Release:
         size = data.tell()
         data.seek(old_file_position, os.SEEK_SET)
 
-        if NO_COLOR:
-            colour = "white"
-        else:
-            colour = "blue"
+        colour = "white" if NO_COLOR else "blue"
 
         with tqdm(
             total=size,
@@ -314,7 +310,9 @@ class Release:
             colour=colour,
         ) as t:
             wrapped_buffer = CallbackIOWrapper(t.update, data, "read")
-            res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()  # type: ignore[reportArgumentType]
+            res: dict[str, Any] = self.client._parse_json(
+                self.client.simple_upload(self.model_id, name, wrapped_buffer)  # type: ignore[reportArgumentType]
+            )
 
         self.files.append(res["file"]["id"])
         self.update()

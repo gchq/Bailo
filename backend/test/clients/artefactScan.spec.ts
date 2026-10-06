@@ -2,22 +2,6 @@ import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const configMock = vi.hoisted(() => ({
-  artefactScanning: {
-    artefactscan: {
-      enabled: true,
-      connection: {
-        host: 'example.com',
-      },
-    },
-  },
-}))
-
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(),
 }))

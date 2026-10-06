@@ -6,7 +6,9 @@ import { z } from '../../../lib/zod.js'
 import { Decision, ResponseInterface } from '../../../models/Response.js'
 import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
 import { respondToReview } from '../../../services/v3/response.js'
+import { isLifecycleReviewDateValid } from '../../../services/v3/review.js'
 import { ReviewKind } from '../../../types/enums.js'
+import config from '../../../utils/config.js'
 import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -28,7 +30,17 @@ export const postReviewResponseSchema = z.object({
     z.discriminatedUnion('kind', [
       z.object({
         kind: z.literal(ReviewKind.Lifecycle),
-        dueDate: z.coerce.date(),
+        dueDate: z.coerce
+          .date({
+            required_error: 'Please provide a next review due date when submitting this review.',
+          })
+          .refine((date) => date.getTime() > Date.now(), {
+            message: 'Due date of next review cannot be in the past.',
+          })
+          .refine((date) => isLifecycleReviewDateValid(date), {
+            message: `Due date of next review cannot be further than ${config.ui.lifecycle.maxReviewInterval} in the future.`,
+          }),
+        decision: z.literal(Decision.Approve),
       }),
       z.object({
         kind: z.enum([ReviewKind.Release, ReviewKind.Access]),

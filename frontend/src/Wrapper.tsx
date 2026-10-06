@@ -1,12 +1,13 @@
-import { CSSProperties } from '@mui/material'
+import { CSSProperties, useMediaQuery } from '@mui/material'
 import Box from '@mui/material/Box'
+import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import { useGetUiConfig } from 'actions/uiConfig'
 import cookies from 'js-cookie'
 import { useRouter } from 'next/router'
-import { ReactElement, ReactNode, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { ReactElement, ReactNode, useCallback, useContext, useMemo, useState } from 'react'
 import Announcement from 'src/Announcement'
 import Loading from 'src/common/Loading'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
 import { DISMISSED_COOKIE_NAME } from 'utils/constants'
 
@@ -22,51 +23,28 @@ export type WrapperProps = {
 
 export default function Wrapper({ children }: WrapperProps): ReactElement {
   const [open, setOpen] = useState(false)
-  const [pageTopStyling, setPageTopStyling] = useState({})
-  const [contentTopStyling, setContentTopStyling] = useState({})
+
+  const uiConfig = useContext(UiConfigContext)
+  const router = useRouter()
+  const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
+  const theme = useTheme()
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
+
   const [errorMessage, setErrorMessage] = useState('')
 
-  const router = useRouter()
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
   const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
 
   const dismissedTimestamp = cookies.get(DISMISSED_COOKIE_NAME)
-  const [announcementBannerOpen, setAnnouncementBannerOpen] = useState(false)
+  const [announcementBannerOpen, setAnnouncementBannerOpen] = useState(
+    (uiConfig.announcement.enabled &&
+      (!dismissedTimestamp || new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp))) ||
+      false,
+  )
 
-  const onPageTopStylingChanged = useEffectEvent((newStyling: CSSProperties) => {
-    setPageTopStyling(newStyling)
-  })
-  const onContentTopStylingChanged = useEffectEvent((newStyling: CSSProperties) => {
-    setContentTopStyling(newStyling)
-  })
-  const onAnnouncementBannerOpenChanged = useEffectEvent((show: boolean) => {
-    setAnnouncementBannerOpen(show)
-  })
-
-  useEffect(() => {
-    if (!isUiConfigLoading) {
-      if (uiConfig && uiConfig.banner.enabled) {
-        onPageTopStylingChanged({
-          mt: 4,
-        })
-        onContentTopStylingChanged({
-          mt: isDocsPage ? 2 : 4,
-        })
-      }
-    }
-  }, [isUiConfigLoading, uiConfig, isDocsPage])
-
-  useEffect(() => {
-    if (uiConfig) {
-      onAnnouncementBannerOpenChanged(
-        uiConfig.announcement.enabled &&
-          (!dismissedTimestamp || new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp)),
-      )
-    }
-  }, [dismissedTimestamp, uiConfig])
+  const pageTopStyling: CSSProperties = uiConfig.banner.enabled ? { mt: 4 } : { mt: 'unset' }
+  const contentTopStyling: CSSProperties = uiConfig.banner.enabled ? { mt: isDocsPage ? 2 : 4 } : { mt: 'unset' }
 
   const handleSideNavigationError = useCallback((message: string) => setErrorMessage(message), [])
 
@@ -81,30 +59,21 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
     cookies.set(DISMISSED_COOKIE_NAME, new Date().toISOString())
   }
 
-  if (isUiConfigError) {
-    if (isUiConfigError.status === 403) {
-      return <MessageAlert message='Error authenticating user.' severity='error' />
-    }
-
-    return <MessageAlert message={`Error loading UI Config: ${isUiConfigError.info.message}`} severity='error' />
-  }
-
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
   return (
     <>
-      <Banner />
+      {uiConfig.banner.enabled && <Banner />}
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
-        {currentUser && uiConfig && (
+        {uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
+        {currentUser && (
           <>
-            <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
+            <TopNavigation toggleDrawer={toggleDrawer} pageTopStyling={pageTopStyling} currentUser={currentUser} />
             <SideNavigation
               page={page}
               bannerVisible={uiConfig.banner.enabled}
-              currentUser={currentUser}
               drawerOpen={open}
               pageTopStyling={pageTopStyling}
               toggleDrawer={toggleDrawer}
@@ -119,22 +88,27 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
             // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
+            minWidth: 0,
             ...theme.applyStyles('light', {
               backgroundColor: theme.palette.grey[100],
             }),
           })}
         >
           <Toolbar />
-          <Box sx={{ ...contentTopStyling, paddingLeft: 7.5 }}>
+          <Box sx={{ ...contentTopStyling, paddingLeft: isSmOrLarger ? 7.5 : 0 }}>
             {isDocsPage ? (
               children
             ) : (
               <>
                 {isCurrentUserLoading && <Loading />}
-                {uiConfig && announcementBannerOpen && (
+                {announcementBannerOpen && (
                   <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
                 )}
-                <Box paddingTop={4}>
+                <Box
+                  sx={{
+                    paddingTop: 4,
+                  }}
+                >
                   <MessageAlert message={errorMessage} severity='error' />
                   {children}
                   <Copyright sx={{ p: 2 }} />

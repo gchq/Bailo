@@ -1,21 +1,18 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
-import { useGetEntry } from 'actions/entry'
-import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
-import { useGetReviewRoles } from 'actions/reviewRoles'
-import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { getCurrentUserRoles, hasRole } from 'utils/roles'
+import { ReviewKind } from 'types/types'
 
 export default function AccessRequest() {
   const router = useRouter()
@@ -23,46 +20,13 @@ export default function AccessRequest() {
 
   const [isEdit, setIsEdit] = useState(false)
 
-  const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
+  const { accessRequest, isAccessRequestLoading, isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(
     modelId,
-    accessRequestId: accessRequestId || '',
-  })
-  const {
-    reviews: userReviews,
-    isReviewsLoading: isUserReviewsLoading,
-    isReviewsError: isUserReviewsError,
-  } = useGetReviewRequestsForUser()
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(
-    accessRequest ? accessRequest.schemaId : undefined,
-  )
-
-  const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
-
-  const userCanReview = useMemo(
-    () =>
-      hasRole(
-        currentUserRoles,
-        reviewRoles.map((role) => role.shortName),
-      ) &&
-      reviews.filter((review) =>
-        userReviews.some(
-          (userReview) =>
-            userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
-        ),
-      ).length > 0,
-    [currentUserRoles, reviews, userReviews, reviewRoles],
+    accessRequestId,
   )
 
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
-    isReviewsError,
-    isUserReviewsError,
-    isModelError,
-    isCurrentUserError,
-    isReviewRolesError,
   })
   if (error) {
     return error
@@ -73,15 +37,10 @@ export default function AccessRequest() {
       <Title text={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
       <Container maxWidth='lg' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
-          {(isAccessRequestLoading ||
-            isReviewsLoading ||
-            isUserReviewsLoading ||
-            isModelLoading ||
-            isCurrentUserLoading ||
-            isReviewRolesLoading) && <Loading />}
+          {isAccessRequestLoading && <Loading />}
           {accessRequest && (
             <>
-              {userCanReview && <ReviewBanner accessRequest={accessRequest} />}
+              <ReviewBanner accessRequest={accessRequest} />
               <Stack spacing={2} sx={{ p: 4 }}>
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}
@@ -93,7 +52,12 @@ export default function AccessRequest() {
                       Back to model
                     </Button>
                   </Link>
-                  <Stack direction='row' alignItems='center'>
+                  <Stack
+                    direction='row'
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <Typography variant='h6' color='primary' component='h1'>
                       {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
                     </Typography>
@@ -104,10 +68,18 @@ export default function AccessRequest() {
                     />
                   </Stack>
                 </Stack>
+                <ReleaseAccessRequestReviewSummary accessRequest={accessRequest} includeResponsesSummary={false} />
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
                 )}
-                <ReviewComments accessRequest={accessRequest} isEdit={isEdit} />
+                <ReviewComments
+                  identifier={accessRequest.id}
+                  parentId={accessRequest._id}
+                  entryId={accessRequest.modelId}
+                  kind={ReviewKind.ACCESS}
+                  isEdit={isEdit}
+                  mutator={mutateAccessRequest}
+                />
               </Stack>
             </>
           )}

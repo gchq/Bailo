@@ -1,6 +1,6 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface } from '../../models/File.js'
-import { EntryVisibility, ModelDoc } from '../../models/Model.js'
+import { EntryKind, EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
@@ -117,6 +117,10 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
+        if (model.kind === EntryKind.UntrustedModel && !(await authentication.hasRole(user, Roles.UntrustedModel))) {
+          return { id: model.id, success: false, info: 'You do not have permission to manage untrusted models.' }
+        }
+
         // Prohibit non-collaborators from interacting with private models
         if (ModelAction.Import !== action && !(await this.hasModelVisibilityAccess(user, model))) {
           return {
@@ -179,7 +183,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === SchemaAction.Create || action === SchemaAction.Delete) {
+        if (action === SchemaAction.Create || action === SchemaAction.Delete || action === SchemaAction.Update) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
@@ -238,15 +242,25 @@ export class BasicAuthorisationConnector {
     releases: Array<ReleaseDoc | ReleaseInterface>,
     action: ReleaseActionKeys,
   ): Promise<Array<Response>> {
-    // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
-    // We do need to map some actions to other model actions.
-    const actionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+    const actionMap: Record<Exclude<ReleaseActionKeys, typeof ReleaseAction.View>, ModelActionKeys> = {
       [ReleaseAction.Create]: ModelAction.Write,
       [ReleaseAction.Delete]: ModelAction.Write,
       [ReleaseAction.Update]: ModelAction.Update,
-      [ReleaseAction.View]: ModelAction.View,
       [ReleaseAction.Import]: ModelAction.Import,
       [ReleaseAction.Export]: ModelAction.Export,
+    }
+
+    // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
+    // We do need to map some actions to other model actions.
+    const releaseActionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+      ...actionMap,
+      [ReleaseAction.View]: ModelAction.View,
+    }
+
+    //If release is draft, map view action to update instead
+    const draftActionMap: Record<ReleaseActionKeys, ModelActionKeys> = {
+      ...actionMap,
+      [ReleaseAction.View]: ModelAction.Update,
     }
 
     // Is this a constrained user token.
@@ -255,7 +269,15 @@ export class BasicAuthorisationConnector {
       return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
-    return new Array(releases.length || 1).fill(await this.model(user, model, actionMap[action]))
+    if (!releases || releases.length === 0) {
+      const response = await this.model(user, model, actionMap[action])
+      return [response]
+    }
+
+    const draftResponse = await this.model(user, model, draftActionMap[action])
+    const response = await this.model(user, model, releaseActionMap[action])
+
+    return releases.map((release) => (release.draft ? draftResponse : response))
   }
 
   async accessRequests(
@@ -486,7 +508,11 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === ReviewRoleAction.Create || action === ReviewRoleAction.Delete) {
+        if (
+          action === ReviewRoleAction.Create ||
+          action === ReviewRoleAction.Delete ||
+          action === ReviewRoleAction.Update
+        ) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {

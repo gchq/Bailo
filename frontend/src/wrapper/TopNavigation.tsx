@@ -1,11 +1,15 @@
 import '@fontsource/pacifico'
 
-import { Add, KeyboardArrowDown, KeyboardArrowUp, Menu as MenuIcon, Person, Settings } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import LogoutIcon from '@mui/icons-material/Logout'
+import MenuIcon from '@mui/icons-material/Menu'
+import Person from '@mui/icons-material/Person'
+import Settings from '@mui/icons-material/Settings'
 import {
   Box,
   Button,
-  Divider,
   IconButton,
   ListItemIcon,
   ListItemText,
@@ -13,8 +17,8 @@ import {
   MenuItem,
   Stack,
   Toolbar,
+  Tooltip,
   Typography,
-  useMediaQuery,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { alpha, styled, useTheme } from '@mui/material/styles'
@@ -22,7 +26,8 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import EntrySearch from 'src/wrapper/EntrySearch'
+import DocsSearch from 'src/docs/DocsSearch'
+import DocsSearchDialog from 'src/docs/DocsSearchDialog'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
@@ -30,7 +35,7 @@ import ExpandableButton from '../common/ExpandableButton'
 import Link from '../Link'
 
 export type TopNavigationProps = {
-  drawerOpen?: boolean
+  toggleDrawer: () => void
   pageTopStyling?: CSSProperties
   currentUser: User
 }
@@ -60,23 +65,17 @@ const AppBar = styled(MuiAppBar, {
   ],
 }))
 
-export default function TopNavigation({ drawerOpen = false, pageTopStyling = {}, currentUser }: TopNavigationProps) {
+export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, currentUser }: TopNavigationProps) {
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
-  const [navbarAnchorEl, setNavbarAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [docsSearchOpen, setDocsSearchOpen] = useState(false)
 
   const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
-  const navbarMenuOpen = useMemo(() => !!navbarAnchorEl, [navbarAnchorEl])
 
   const router = useRouter()
   const theme = useTheme()
-  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
-  }
-
-  const handleNavMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
-    setNavbarAnchorEl(event.currentTarget)
   }
 
   const handleCreateEntryClick = () => {
@@ -89,16 +88,16 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
 
   return (
     <AppBar
-      open={drawerOpen}
       position='fixed'
       data-test='appBar'
       sx={(theme) => ({
         ...pageTopStyling,
         top: 'unset',
-        // TODO - use "theme.applyStyles" when implementing dark mode
-        background: '#242424',
         ...theme.applyStyles('light', {
-          background: 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)',
+          background: `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`,
+        }),
+        ...theme.applyStyles('dark', {
+          background: theme.palette.container.dark,
         }),
       })}
     >
@@ -107,57 +106,141 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           pr: '24px', // keep right padding when drawer closed
         }}
       >
-        <Stack direction='row' spacing={2} justifyContent='space-between' alignItems='center' sx={{ width: '100%' }}>
-          {!isSmOrLarger && (
-            <Box>
-              <IconButton onClick={handleNavMenuClicked}>
-                <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
-              </IconButton>
-              <Menu
-                anchorEl={navbarAnchorEl}
-                open={navbarMenuOpen}
-                onClose={() => setNavbarAnchorEl(null)}
-                sx={{ py: 0 }}
-                role='menuitem'
-              >
-                <MenuItem component='a' href='/entry/new'>
-                  <ListItemIcon>
-                    <Add fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Create</ListItemText>
-                </MenuItem>
-                <span style={{ marginLeft: 2 }}>
-                  <EntrySearch />
-                </span>
-                <Divider />
-                <MenuItem component='a' href='/settings' data-test='settingsLink' role='menuitem'>
-                  <ListItemIcon>
-                    <Settings fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Settings</ListItemText>
-                </MenuItem>
-                <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
-                  <ListItemIcon>
-                    <LogoutIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>Sign out</ListItemText>
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
-          <Link
-            href='/'
-            color='inherit'
-            underline='none'
-            style={{ color: 'inherit', textDecoration: 'inherit', cursor: 'pointer' }}
-          >
-            <Stack justifyContent='center' alignItems='left'>
-              <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, width: '100%' }}>
+            <Stack
+              direction='row'
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              <Stack direction='row'>
+                <IconButton onClick={toggleDrawer}>
+                  <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
+                </IconButton>
+                <Link
+                  href='/'
+                  color='inherit'
+                  underline='none'
+                  style={{ color: 'inherit', textDecoration: 'inherit', cursor: 'pointer' }}
+                >
+                  <Stack
+                    sx={{
+                      justifyContent: 'center',
+                      alignItems: 'left',
+                    }}
+                  >
+                    <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
+                  </Stack>
+                </Link>
+              </Stack>
+              <Stack direction='row' sx={{ alignItems: 'center' }} spacing={1}>
+                <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
+                <Tooltip title='Create a new model or data card'>
+                  <IconButton
+                    onClick={handleCreateEntryClick}
+                    sx={{
+                      color: 'white',
+                      backgroundColor: alpha(theme.palette.common.white, 0.15),
+                      '&:hover, &:focus': {
+                        backgroundColor: alpha(theme.palette.common.white, 0.25),
+                      },
+                      textTransform: 'capitalize',
+                      height: 'max-content',
+                    }}
+                  >
+                    <Add />
+                  </IconButton>
+                </Tooltip>
+                {currentUser ? (
+                  <>
+                    <Tooltip title='User settings'>
+                      <IconButton
+                        sx={{
+                          color: 'white',
+                          backgroundColor: alpha(theme.palette.common.white, 0.15),
+                          '&:hover, &:focus': {
+                            backgroundColor: alpha(theme.palette.common.white, 0.25),
+                          },
+                          textTransform: 'capitalize',
+                          height: 'max-content',
+                        }}
+                        onClick={handleUserMenuClicked}
+                        data-test='userMenuButton'
+                        aria-label='User menu dropdown button'
+                      >
+                        <Person />
+                      </IconButton>
+                    </Tooltip>
+                    <Menu
+                      disableScrollLock
+                      anchorEl={userMenuAnchorEl}
+                      open={actionOpen}
+                      onClose={handleMenuClose}
+                      role='menu'
+                    >
+                      <MenuItem component='a' data-test='settingsLink' role='menuitem' href='/settings'>
+                        <ListItemIcon>
+                          <Settings fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Settings</ListItemText>
+                      </MenuItem>
+                      <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
+                        <ListItemIcon>
+                          <LogoutIcon fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText>Sign out</ListItemText>
+                      </MenuItem>
+                    </Menu>
+                  </>
+                ) : (
+                  <Typography variant='caption'>Loading...</Typography>
+                )}
+              </Stack>
             </Stack>
-          </Link>
-          {isSmOrLarger && (
-            <Box>
-              <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
+          </Box>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, width: '100%' }}>
+            <Stack
+              direction='row'
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              <Link
+                href='/'
+                color='inherit'
+                underline='none'
+                style={{ color: 'inherit', textDecoration: 'inherit', cursor: 'pointer' }}
+              >
+                <Stack
+                  sx={{
+                    justifyContent: 'center',
+                    alignItems: 'left',
+                  }}
+                >
+                  <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
+                </Stack>
+              </Link>
+              <Stack
+                direction='row'
+                spacing={1}
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <ExpandableButton
                   label='Create'
                   icon={<Add />}
@@ -165,7 +248,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                   ariaLabel='Create a new data card or model'
                   height='40px'
                 />
-                <EntrySearch />
+                <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
                 {currentUser ? (
                   <>
                     <Button
@@ -210,10 +293,11 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                   <Typography variant='caption'>Loading...</Typography>
                 )}
               </Stack>
-            </Box>
-          )}
+            </Stack>
+          </Box>
         </Stack>
       </Toolbar>
+      <DocsSearchDialog open={docsSearchOpen} onClose={() => setDocsSearchOpen(false)} />
     </AppBar>
   )
 }

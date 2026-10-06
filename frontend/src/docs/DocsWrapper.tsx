@@ -1,5 +1,7 @@
+import { MDXProvider } from '@mdx-js/react'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import ArrowForward from '@mui/icons-material/ArrowForward'
+import LinkIcon from '@mui/icons-material/Link'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { grey } from '@mui/material/colors'
@@ -14,10 +16,56 @@ import { styled, useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { Fragment, ReactElement, ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
+import { DocumentationNavigationTree } from 'types/docs'
 
-import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
 import Title from '../common/Title'
 import Copyright from '../Copyright'
+import { directory, flatDirectory } from './directory'
+
+function makeHeadingComponent(tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') {
+  return function HeadingComponent({ children, id }: { children?: React.ReactNode; id?: string }) {
+    return (
+      <Box
+        id={id}
+        component={tag}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          scrollMarginTop: 100,
+          '&:hover .heading-anchor': { opacity: 1 },
+        }}
+      >
+        {children}
+        {id && (
+          <Box
+            component='a'
+            href={`#${id}`}
+            className='heading-anchor'
+            aria-label='Link to this section'
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.15s',
+              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              flexShrink: 0,
+              textDecoration: 'none',
+              '&:hover': { color: 'primary.main' },
+            }}
+          >
+            <LinkIcon fontSize='small' />
+          </Box>
+        )}
+      </Box>
+    )
+  }
+}
+
+const mdxComponents = {
+  h2: makeHeadingComponent('h2'),
+  h3: makeHeadingComponent('h3'),
+}
 
 type DocsWrapperProps = {
   children?: ReactNode
@@ -29,20 +77,21 @@ enum DirectionalNavigation {
 
 const paddingIncrement = 2
 
+const StyledList = styled(List)(({ theme }) => ({
+  paddingTop: 0,
+  paddingBottom: 0,
+  '&& .Mui-selected, && .Mui-selected:hover': {
+    '&, & .MuiListItemIcon-root': {
+      color: theme.palette.secondary.main,
+    },
+  },
+}))
+
 export default function DocsWrapper({ children }: DocsWrapperProps): ReactElement {
   const theme = useTheme()
-  const { pathname, push } = useRouter()
+  const router = useRouter()
+  const { pathname, push } = router
   const ref = useRef(null)
-
-  const StyledList = styled(List)({
-    paddingTop: 0,
-    paddingBottom: 0,
-    '&& .Mui-selected, && .Mui-selected:hover': {
-      '&, & .MuiListItemIcon-root': {
-        color: theme.palette.secondary.main,
-      },
-    },
-  })
 
   useEffect(() => {
     if (ref && pathname) {
@@ -55,7 +104,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   }, [ref, pathname])
 
   const createDocElement = useCallback(
-    (doc: DirectoryTree, paddingLeft = paddingIncrement) => {
+    (doc: DocumentationNavigationTree, paddingLeft = paddingIncrement) => {
       let children: Array<any> = []
       if (doc.children) {
         // eslint-disable-next-line react-hooks/immutability
@@ -69,6 +118,12 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
       const path = `/docs/${doc.slug}`
       const isSelected = pathname === path
 
+      const headerFontSize =
+        {
+          1: theme.typography.h6.fontSize,
+          2: theme.typography.subtitle1.fontSize,
+        }[doc.level] ?? theme.typography.body2.fontSize
+
       return (
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
@@ -76,7 +131,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <ListItemText
                 primary={doc.title}
                 slotProps={{
-                  primary: { fontWeight: 'bold' },
+                  primary: { sx: { fontSize: headerFontSize, fontWeight: 'bold' } },
                 }}
               />
             </ListItem>
@@ -87,7 +142,9 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
-                      primary: { fontWeight: doc.slug ? 'normal' : 'bold' },
+                      primary: {
+                        sx: { fontWeight: doc.slug ? 'normal' : 'bold', fontSize: doc.header ? headerFontSize : '' },
+                      },
                     }}
                   />
                 </ListItemButton>
@@ -98,7 +155,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         </Fragment>
       )
     },
-    [pathname],
+    [pathname, theme.typography.body2.fontSize, theme.typography.h6.fontSize, theme.typography.subtitle1.fontSize],
   )
 
   const docList = () => {
@@ -135,21 +192,37 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   return (
     <>
       <Title text='Documentation' />
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
         <Box
-          sx={(theme) => ({
-            backgroundColor: theme.palette.background.paper,
-            borderRight: `1px solid ${theme.palette.divider}`,
-            overflow: 'auto',
-            py: 2,
-          })}
-          position={{ xs: 'relative', sm: 'fixed' }}
-          height={{ xs: '250px', sm: 'calc(100vh - 80px)' }}
+          sx={[
+            {
+              position: { xs: 'relative', sm: 'fixed' },
+              height: { xs: '250px', sm: 'calc(100vh - 80px)' },
+            },
+            (theme) => ({
+              backgroundColor: theme.palette.background.paper,
+              borderRight: `1px solid ${theme.palette.divider}`,
+              overflow: 'auto',
+              py: 2,
+            }),
+          ]}
         >
           {docList()}
         </Box>
-        <Box flex={1} overflow='auto' sx={{ height: '100%' }} paddingLeft={{ sm: '350px' }}>
-          <Box display='flex' flexDirection='column'>
+        <Box
+          sx={{
+            flex: 1,
+            overflow: 'auto',
+            paddingLeft: { sm: '350px' },
+            height: '100%',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <Container
               maxWidth='lg'
               sx={{
@@ -161,20 +234,25 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                 },
                 blockquote: {
                   fontStyle: 'italic',
-                  background: grey.A200,
+                  background: theme.palette.mode === 'light' ? grey.A200 : grey.A700,
                   borderLeft: `2px solid ${grey[900]}`,
                   px: 1,
                   py: 0.5,
                 },
               }}
             >
-              {children}
+              <MDXProvider components={mdxComponents}>{children}</MDXProvider>
             </Container>
             <Box sx={{ width: '100%', pl: 4, pr: 4, mt: 'auto' }}>
               <Divider flexItem />
               {flatDirectory.length > 0 && (
                 <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
-                  <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-around'>
+                  <Stack
+                    direction={{ sm: 'column', md: 'row' }}
+                    sx={{
+                      justifyContent: 'space-around',
+                    }}
+                  >
                     {currentIndex === 0 && (
                       <Button startIcon={<ArrowBack />} onClick={() => changePageToDocsHome()}>
                         Home

@@ -1,4 +1,4 @@
-import { deleteManifest, getImageTagManifest } from '../clients/registry.js'
+import { deleteManifest, getImageTagManifests } from '../clients/registry.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import log from '../services/log.js'
 
@@ -44,7 +44,7 @@ async function main() {
     }
 
     log.info({ imageRefByTag }, 'Fetching manifest to resolve digest')
-    const { headers } = await getImageTagManifest(token, imageRefByTag)
+    const { headers } = await getImageTagManifests(token, imageRefByTag)
     const digest = headers['docker-content-digest']
 
     if (!digest) {
