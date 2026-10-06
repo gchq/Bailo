@@ -77,7 +77,7 @@ services:
       - backend
 
   registry:
-    image: registry:3.1.2@sha256:21078ecfcba8a0cd7e1a384f75b3509899661dd21823bf1da21b5a4674aaceb9
+    image: registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8
     networks:
       internal:
     environment:
