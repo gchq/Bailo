@@ -60,8 +60,9 @@ describe('CompareField', () => {
     )
 
     expect(screen.queryByTestId('child')).toBeNull()
-    expect(screen.getByText('old value')).toBeDefined()
-    expect(screen.getByText('new value')).toBeDefined()
+    expect(document.querySelector('del')?.textContent).toContain('old')
+    expect(document.querySelector('ins')?.textContent).toContain('new')
+    expect(document.body.textContent).toContain('value')
   })
 
   it('applies formatter to values in non-mirrored compare mode', () => {
@@ -106,6 +107,26 @@ describe('CompareField', () => {
 
     expect(screen.getByText('mirrored fallback')).toBeDefined()
     expect(screen.getByText('current')).toBeDefined()
+  })
+
+  it('diffs numeric values in non-mirrored compare mode without a formatter', () => {
+    const { container } = renderWithUiConfig(
+      <CompareField
+        id='root_field'
+        label='Test Label'
+        compare={makeCompare({
+          inCompareMode: true,
+          isMirroredModel: false,
+          compareFromState: 0.5,
+        })}
+        value={0.75}
+      >
+        <span>child</span>
+      </CompareField>,
+    )
+
+    expect(container.querySelector('del')?.textContent).toContain('5')
+    expect(container.querySelector('ins')?.textContent).toContain('75')
   })
 
   it('renders children in mirrored compare mode', () => {
