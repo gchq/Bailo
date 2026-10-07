@@ -104,4 +104,28 @@ Every edit to the model card creates a new version that is preserved in the mode
 - [Understanding Reviews](../../reviews/understanding-reviews) - The review process
 - [Roles & Permissions](../../../reference/roles-and-permissions) - Detailed role reference
 
+## Images stored in model files
+
+Owners can make individual files available without approving an access request for all model files. Upload the image
+from the model's Files tab, select **Allow downloads without an access request**, and confirm the change. Only enable
+this for files that are suitable for everyone who can view the model.
+
+Use the file's download link in a Markdown field on the model card:
+
+```markdown
+![Description of the image](/api/v2/model/MODEL_ID/file/FILE_ID/download)
+```
+
+Replace `MODEL_ID` and `FILE_ID` with the values in the uploaded file's link. Viewers still need to be signed in and
+able to view the model. API clients still need their normal model and file-read permissions. Other files retain their
+existing access rules.
+
+Owners can select **Require normal file access** to remove the file-specific exception. Model-wide ungoverned access,
+existing access requests and collaborator permissions still apply. New and existing files are restricted by default
+unless either a file exception or the normal model access rules permit downloading them.
+
+The same setting is available through `PATCH /api/v2/model/{modelId}/file/{fileId}` using `{"ungovernedAccess": true}`
+or `{"ungovernedAccess": false}`. Changing it requires permission to edit the model as well as the file. A contributor's
+ability to edit file tags alone does not grant this permission.
+
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
