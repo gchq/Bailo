@@ -14,17 +14,6 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const InferenceModelMock = getTypedModelMock('InferenceModel')
 
-const configMock = vi.hoisted(() => ({
-  inference: {
-    authorisationToken: 'test',
-  },
-}))
-
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({

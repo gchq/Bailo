@@ -24,23 +24,23 @@ dynamic = ["version"]
 dependencies = [
     "requests==2.34.2",
     "semantic-version==2.10.0",
-    "tqdm==4.70.0"
+    "tqdm==4.70.1"
 ]
 
 [project.optional-dependencies]
 mlflow = [
-    "mlflow-skinny[mlserver]==3.15.2"
+    "mlflow-skinny[mlserver]==3.16.1"
 ]
 test = [
     "check-manifest==0.51",
     "pre-commit==4.6.2",
     "pytest-cov==7.1.0",
-    "pytest-mock==3.15.1",
+    "pytest-mock==3.16.0",
     "pytest-runner==6.0.1",
     "pytest==9.1.1",
     "pytest-github-actions-annotate-failures==0.4.2",
     "requests_mock==1.12.1",
-    "ruff==0.16.5",
+    "ruff==0.16.10",
     "shellcheck-py==0.11.0.1",
     "bailo[mlflow]"
 ]

@@ -12,13 +12,13 @@ import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
+import { isManifestList } from '../../../utils/registryResponses.js'
 import {
   ImageManifestV2,
-  isManifestList,
   ManifestListV2,
   ManifestResponseBodySchema,
   OCIEmptyMediaType,
-} from '../../../utils/registryResponses.js'
+} from '../../../utils/registryResponseTypes.js'
 import log from '../../log.js'
 import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'

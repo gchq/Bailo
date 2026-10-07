@@ -1,25 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { createInferenceService, updateInferenceService } from '../../src/clients/inferencing.js'
-
-const configMock = vi.hoisted(() => ({
-  ui: {
-    inference: {
-      enabled: true,
-      connection: {
-        host: 'http://example.com',
-      },
-    },
-  },
-  inference: {
-    authorisationToken: 'test',
-  },
-}))
-
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(function () {
@@ -72,7 +54,7 @@ describe('clients > inferencing', () => {
   })
 
   test('createInferencing > no authorization token', async () => {
-    vi.spyOn(configMock, 'inference', 'get').mockReturnValueOnce({ authorisationToken: '' })
+    setTestConfig({ inference: { authorisationToken: '' } })
 
     await expect(() => createInferenceService({} as any)).rejects.toThrow(/^No authentication key exists./)
   })
@@ -116,7 +98,7 @@ describe('clients > inferencing', () => {
   })
 
   test('updateInferencing > no authorization token', async () => {
-    vi.spyOn(configMock, 'inference', 'get').mockReturnValueOnce({ authorisationToken: '' })
+    setTestConfig({ inference: { authorisationToken: '' } })
 
     await expect(() => updateInferenceService({} as any)).rejects.toThrow(/^No authentication key exists./)
   })

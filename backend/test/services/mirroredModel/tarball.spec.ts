@@ -12,7 +12,7 @@ import {
   initialiseTarGzUpload,
   TarEntrySink,
 } from '../../../src/services/mirroredModel/tarball.js'
-import config from '../../../src/utils/__mocks__/config.js'
+import config from '../../../src/utils/config.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -199,10 +199,10 @@ describe('service > mirroredModel > tarball', () => {
       const { tarStream, passThrough } = setUpExtractTarGzStreams()
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry(
-        { name: config.modelMirror!.metadataFile!, type: 'file' },
+        { name: config.modelMirror.metadataFile, type: 'file' },
         Buffer.from(JSON.stringify(dummyMetadata)),
       )
-      tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+      tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
       tarStream.finalize()
       authMocks.default.model.mockResolvedValue({ success: true })
 
@@ -225,8 +225,8 @@ describe('service > mirroredModel > tarball', () => {
         exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-      tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+      tarStream.entry({ name: config.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+      tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
       tarStream.finalize()
       authMocks.default.model.mockResolvedValue({ success: true })
 
@@ -249,8 +249,8 @@ describe('service > mirroredModel > tarball', () => {
         exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-      tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-      tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+      tarStream.entry({ name: config.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+      tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
       tarStream.finalize()
       authMocks.default.model.mockResolvedValue({ success: true })
 
@@ -283,7 +283,7 @@ describe('service > mirroredModel > tarball', () => {
           exportId: 'exportId',
         }
         servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-        tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+        tarStream.entry({ name: config.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
         tarStream.finalize()
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
@@ -295,7 +295,7 @@ describe('service > mirroredModel > tarball', () => {
         const { tarStream, passThrough } = setUpExtractTarGzStreams()
         servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
         tarStream.entry(
-          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          { name: config.modelMirror.metadataFile, type: 'file' },
           Buffer.from(JSON.stringify(dummyMetadata)),
         )
         tarStream.finalize()
@@ -314,8 +314,8 @@ describe('service > mirroredModel > tarball', () => {
           importKind: mirroredModelMocks.MirrorKind.Documents,
         }
         servicesModelMocks.validateMirroredModel.mockRejectedValue('Error')
-        tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.entry({ name: config.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+        tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
         tarStream.finalize()
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
@@ -327,7 +327,7 @@ describe('service > mirroredModel > tarball', () => {
         const { tarStream, passThrough } = setUpExtractTarGzStreams()
         servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
         tarStream.entry(
-          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          { name: config.modelMirror.metadataFile, type: 'file' },
           Buffer.from(JSON.stringify(dummyMetadata)),
         )
         tarStream.finalize()
@@ -347,10 +347,10 @@ describe('service > mirroredModel > tarball', () => {
         const { tarStream, passThrough } = setUpExtractTarGzStreams()
         servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
         tarStream.entry(
-          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          { name: config.modelMirror.metadataFile, type: 'file' },
           Buffer.from(JSON.stringify(dummyMetadata)),
         )
-        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
         tarStream.finalize()
         authMocks.default.model.mockResolvedValue({ success: true })
         mirroredModelMocks.processEntrySpy.mockRejectedValueOnce('Error')
@@ -393,7 +393,7 @@ describe('service > mirroredModel > tarball', () => {
         servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
         authMocks.default.model.mockResolvedValue({ success: true })
         tarStream.entry(
-          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          { name: config.modelMirror.metadataFile, type: 'file' },
           Buffer.from(JSON.stringify(dummyMetadata)),
         )
         // async failure after await
@@ -401,7 +401,7 @@ describe('service > mirroredModel > tarball', () => {
           await Promise.resolve()
           throw new Error('async importer failure')
         })
-        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
         tarStream.finalize()
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
@@ -416,11 +416,11 @@ describe('service > mirroredModel > tarball', () => {
         servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
         authMocks.default.model.mockResolvedValue({ success: true })
         tarStream.entry(
-          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          { name: config.modelMirror.metadataFile, type: 'file' },
           Buffer.from(JSON.stringify(dummyMetadata)),
         )
         mirroredModelMocks.processEntrySpy.mockRejectedValueOnce(new Error('entry failure'))
-        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
         tarStream.finalize()
         const rejectSpy = vi.fn()
         const resolveSpy = vi.fn()
@@ -437,14 +437,14 @@ describe('service > mirroredModel > tarball', () => {
         servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
         authMocks.default.model.mockResolvedValue({ success: true })
         tarStream.entry(
-          { name: config.modelMirror!.metadataFile!, type: 'file' },
+          { name: config.modelMirror.metadataFile, type: 'file' },
           Buffer.from(JSON.stringify(dummyMetadata)),
         )
         mirroredModelMocks.processEntrySpy.mockImplementationOnce(async () => {
           await new Promise((r) => setTimeout(r, 1))
           throw new Error('late async failure')
         })
-        tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+        tarStream.entry({ name: `${config.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
         tarStream.finalize()
 
         const promise = extractTarGzStream(passThrough, { dn: 'user' }, {} as any)

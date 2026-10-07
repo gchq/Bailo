@@ -238,7 +238,7 @@ export async function checkReleaseApproved(modelId: string, semver: string) {
     },
   ])
 
-  const totalReviews = await ReviewModel.countDocuments({ semver })
+  const totalReviews = await ReviewModel.countDocuments({ semver, modelId })
 
   return totalReviews > 0 && reviewsWithoutApproval.length === 0
 }

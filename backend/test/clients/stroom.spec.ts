@@ -2,8 +2,6 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { sendEvents } from '../../src/clients/stroom.js'
 
-vi.mock('../../../src/utils/config.js')
-
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(() => ({})),
 }))

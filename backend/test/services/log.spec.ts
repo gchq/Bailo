@@ -1,20 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const configMock = vi.hoisted(
-  () =>
-    ({
-      log: {
-        level: 'info',
-      },
-      instrumentation: {
-        enabled: false,
-      },
-    }) as any,
-)
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
 vi.mock('pino', () => ({
   default: vi.fn(() => ({
@@ -57,7 +43,7 @@ describe('services > log', () => {
     )
   })
   test('targets > instrumentation', async () => {
-    vi.spyOn(configMock.instrumentation, 'enabled', 'get').mockReturnValueOnce(true)
+    setTestConfig({ instrumentation: { enabled: true } })
 
     await import('../../src/services/log.js')
     const pino = (await import('pino')).default

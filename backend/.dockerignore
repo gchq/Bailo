@@ -38,6 +38,7 @@ docs/backenddocsvenv
 
 # Tests
 test
+**/__mocks__
 
 # Environment files
 .env*

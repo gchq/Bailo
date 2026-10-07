@@ -4,7 +4,7 @@ import { Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { FileImporter, FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
-import config from '../../../../src/utils/__mocks__/config.js'
+import config from '../../../../src/utils/config.js'
 import { getTypedModelMock } from '../../../testUtils/setupMongooseModelMocks.js'
 
 const FileModelMock = getTypedModelMock('FileModel')
@@ -87,7 +87,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith('updated/file/path', stream, config?.s3?.buckets?.uploads)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith('updated/file/path', stream, config.s3.buckets.uploads)
     expect(fileServiceMocks.markFileAsCompleteAfterImport).toHaveBeenCalledWith('updated/file/path')
     expect(importer).toMatchSnapshot()
   })
