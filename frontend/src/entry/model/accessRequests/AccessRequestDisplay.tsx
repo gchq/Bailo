@@ -1,4 +1,4 @@
-import { Box, Card, Grid, Stack, Typography } from '@mui/material'
+import { Box, Card, Chip, Grid, Stack, Typography } from '@mui/material'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
@@ -52,6 +52,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                   {accessRequest.metadata.overview.name}
                 </Typography>
               </Link>
+              {accessRequest.groupId && <Chip label='Grouped request' size='small' />}
               <CopyToClipboardButton
                 textToCopy={accessRequest.id}
                 notificationText='Copied access request ID to clipboard'

@@ -6,6 +6,7 @@ import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import AccessRequestGroupLinks from 'src/entry/model/accessRequests/AccessRequestGroupLinks'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
@@ -68,6 +69,7 @@ export default function AccessRequest() {
                     />
                   </Stack>
                 </Stack>
+                <AccessRequestGroupLinks accessRequest={accessRequest} />
                 <ReleaseAccessRequestReviewSummary accessRequest={accessRequest} includeResponsesSummary={false} />
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
