@@ -432,8 +432,8 @@ const deploymentAssessmentReviewDecisionSchema = z
   .openapi({ example: Decision.Approve })
 
 export const deploymentAssessmentCommentSchema = z.object({
-  author: z.string().openapi({ example: 'charlie' }),
-  text: z.string().openapi({ example: 'Have you considered approach X?' }),
+  entity: z.string().openapi({ example: 'user:user' }),
+  comment: z.string().openapi({ example: 'Have you considered approach X?' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
@@ -443,8 +443,7 @@ export const deploymentAssessmentReviewStatusSchema = z.object({
 })
 
 export const deploymentAssessmentReviewSchema = z.object({
-  reviewer: z.string().openapi({ example: 'alice' }),
-  role: z.string().openapi({ example: 'riskOwners' }),
+  entity: z.string().openapi({ example: 'user:user' }),
   decision: deploymentAssessmentReviewDecisionSchema,
   comment: z.string().optional().openapi({ example: 'Looks good.' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -452,13 +451,13 @@ export const deploymentAssessmentReviewSchema = z.object({
 
 export const getDeploymentAssessmentCommentsResponseSchema = z.object({
   id: deploymentAssessmentIdSchema,
-  title: deploymentAssessmentNameSchema,
+  name: deploymentAssessmentNameSchema,
   comments: z.array(deploymentAssessmentCommentSchema),
 })
 
 export const getDeploymentAssessmentReviewsResponseSchema = z.object({
   id: deploymentAssessmentIdSchema,
-  title: deploymentAssessmentNameSchema,
+  name: deploymentAssessmentNameSchema,
   statuses: z.array(deploymentAssessmentReviewStatusSchema),
   reviews: z.array(deploymentAssessmentReviewSchema),
 })

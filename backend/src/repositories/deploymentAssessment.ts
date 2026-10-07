@@ -153,21 +153,22 @@ export interface DeploymentAssessmentCommentsRecord {
   comments: DeploymentAssessmentCommentRecord[]
 }
 
-export interface DeploymentAssessmentReviewResponseRecord {
+export interface DeploymentAssessmentReviewRecord {
   entity: string
   decision?: DecisionKeys
   comment?: string
   createdAt: string
 }
 
-export interface DeploymentAssessmentReviewRecord {
+export interface DeploymentAssessmentReviewStatusRecord {
   role: string
-  responses: DeploymentAssessmentReviewResponseRecord[]
+  status: DecisionKeys
 }
 
 export interface DeploymentAssessmentReviewsRecord {
   id: string
   name: string
+  statuses: DeploymentAssessmentReviewStatusRecord[]
   reviews: DeploymentAssessmentReviewRecord[]
 }
 
@@ -272,18 +273,87 @@ export async function findDeploymentAssessmentReviews(
                   },
                 },
               ],
-              as: 'responses',
+              as: 'reviewResponses',
             },
+          },
+          {
+            $unwind: '$reviewResponses',
+          },
+          {
+            $sort: { 'reviewResponses.createdAt': 1 },
+          },
+          {
+            $group: {
+              _id: null,
+              reviews: { $push: '$reviewResponses' },
+            },
+          },
+        ],
+        as: 'reviewRecords',
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_reviews',
+        let: { deploymentAssessmentId: '$id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$deploymentAssessmentId', '$$deploymentAssessmentId'] },
+                  { $eq: ['$kind', ReviewKind.DeploymentAssessment] },
+                ],
+              },
+            },
+          },
+          {
+            $sort: { createdAt: -1 },
+          },
+          {
+            $limit: 1,
+          },
+          {
+            $lookup: {
+              from: 'v2_responses',
+              let: { reviewId: '$_id' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', ResponseKind.Review] }],
+                    },
+                  },
+                },
+                {
+                  $sort: { createdAt: -1 },
+                },
+                {
+                  $limit: 1,
+                },
+              ],
+              as: 'latestResponse',
+            },
+          },
+          {
+            $unwind: '$latestResponse',
           },
           {
             $project: {
               _id: 0,
               role: 1,
-              responses: 1,
+              status: '$latestResponse.decision',
             },
           },
         ],
-        as: 'reviews',
+        as: 'statuses',
+      },
+    },
+    {
+      $set: {
+        reviews: {
+          $ifNull: [{ $arrayElemAt: ['$reviewRecords.reviews', 0] }, []],
+        },
       },
     },
     {
@@ -291,6 +361,7 @@ export async function findDeploymentAssessmentReviews(
         _id: 0,
         id: 1,
         name: 1,
+        statuses: 1,
         reviews: 1,
       },
     },

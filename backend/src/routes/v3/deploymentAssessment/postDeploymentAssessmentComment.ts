@@ -40,8 +40,8 @@ export const postDeploymentAssessmentComment = [
     const response = await commentOnDeploymentAssessment(req.user, params.deploymentAssessmentId, body.comment)
     await audit.onCommentOnDeploymentAssessment(req, response)
     res.status(201).json({
-      author: req.user.dn,
-      text: body.comment,
+      entity: response.entity,
+      comment: response.comment ?? body.comment,
       createdAt: response.createdAt,
     })
   },

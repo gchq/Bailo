@@ -54,10 +54,9 @@ export const postDeploymentAssessmentReviews = [
     )
     await audit.onReviewDeploymentAssessment(req, response)
     res.status(201).json({
-      reviewer: req.user.dn,
-      role: response.role ?? 'riskOwners',
+      entity: response.entity,
       decision: body.decision,
-      ...(body.comment && { comment: body.comment }),
+      ...(response.comment && { comment: response.comment }),
       createdAt: response.createdAt,
     })
   },
