@@ -41,7 +41,6 @@ import FileDisplay, { MutateReleases } from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -101,7 +100,7 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
-  const { files: modelFiles, mutateFiles } = useGetFilesForModel(model.id)
+  const { files: modelFiles, isFilesLoading, isFilesError, mutateFiles } = useGetFilesForModel(model.id)
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
     model.id,
   )
@@ -190,12 +189,15 @@ export default function ReleaseForm({
     return <MessageAlert message={isEntryCardRevisionsError.info.message} severity='error' />
   }
 
-  const error = MultipleErrorWrapper('Unable to load release form', {
-    isModelCardRevisionsError: isEntryCardRevisionsError,
-    isReleasesError,
-  })
-  if (error) {
-    return error
+  if (isFilesError) {
+    return <MessageAlert message={isFilesError.info.message} severity='error' />
+  }
+
+  // The model's existing files are the only source of truth for detecting upload conflicts, so the
+  // form cannot be completed until they are known. Rendering it against a partial list would let a
+  // replacement upload through as a new file, leaving two files of the same name on the model.
+  if (isFilesLoading) {
+    return <Loading />
   }
 
   return (

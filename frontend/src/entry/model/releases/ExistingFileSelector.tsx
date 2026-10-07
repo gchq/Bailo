@@ -24,8 +24,8 @@ import { collectAllFiles, type FileTreeNode } from 'utils/fileTreeUtils'
 interface ExistingFileSelectorProps {
   files: FileInterface[]
   model: EntryInterface
-  existingReleaseFiles: (File | FileInterface)[]
-  onChange: (value: (File | FileInterface)[]) => void
+  existingReleaseFiles: FileInterface[]
+  onChange: (value: FileInterface[]) => void
 }
 
 export default function ExistingFileSelector({
