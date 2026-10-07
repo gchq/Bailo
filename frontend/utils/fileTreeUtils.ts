@@ -7,19 +7,12 @@ export function getFileUploadName(file: File | FileInterface): string {
   return file.name
 }
 
-export function isFolderMarker(file: FileInterface): boolean {
-  return file.name.endsWith('/.folder')
-}
-
 export interface FileTreeNode {
   name: string
   fullPath: string
   isDirectory: boolean
   children: FileTreeNode[]
   file?: FileInterface
-  // The ".folder" marker file for this directory, if one was uploaded (e.g. for empty folders).
-  // Preserved so that getFolderDates can fall back to the marker's timestamps when the folder has no real files.
-  markerFile?: FileInterface
   totalFileCount: number
 }
 
@@ -34,13 +27,12 @@ export function getFileBaseName(name: string): string {
  * slashes in their name become direct children of the root node.
  */
 export function buildFileTree(files: FileInterface[]): FileTreeNode {
-  const realFiles = files.filter((f) => !isFolderMarker(f))
   const root: FileTreeNode = {
     name: '',
     fullPath: '',
     isDirectory: true,
     children: [],
-    totalFileCount: realFiles.length,
+    totalFileCount: files.length,
   }
 
   for (const file of files) {
@@ -50,14 +42,21 @@ export function buildFileTree(files: FileInterface[]): FileTreeNode {
     }
     let current = root
 
-    if (isFolderMarker(file)) {
-      // Folder marker (e.g. "path/to/dir/.folder"): create directory nodes but skip the .folder leaf.
-      // The marker's metadata is stored on the deepest directory node so getFolderDates can use its
-      // timestamps as a fallback when the folder contains no real files.
-      const dirSegments = segments.slice(0, -1)
-      for (let i = 0; i < dirSegments.length; i++) {
-        const segment = dirSegments[i]
-        const fullPath = dirSegments.slice(0, i + 1).join('/')
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i]
+      const isLast = i === segments.length - 1
+      const fullPath = segments.slice(0, i + 1).join('/')
+
+      if (isLast) {
+        current.children.push({
+          name: segment,
+          fullPath,
+          isDirectory: false,
+          children: [],
+          file,
+          totalFileCount: 0,
+        })
+      } else {
         let dir = current.children.find((child) => child.isDirectory && child.name === segment)
         if (!dir) {
           dir = {
@@ -70,37 +69,6 @@ export function buildFileTree(files: FileInterface[]): FileTreeNode {
           current.children.push(dir)
         }
         current = dir
-      }
-      current.markerFile = file
-    } else {
-      for (let i = 0; i < segments.length; i++) {
-        const segment = segments[i]
-        const isLast = i === segments.length - 1
-        const fullPath = segments.slice(0, i + 1).join('/')
-
-        if (isLast) {
-          current.children.push({
-            name: segment,
-            fullPath,
-            isDirectory: false,
-            children: [],
-            file,
-            totalFileCount: 0,
-          })
-        } else {
-          let dir = current.children.find((child) => child.isDirectory && child.name === segment)
-          if (!dir) {
-            dir = {
-              name: segment,
-              fullPath,
-              isDirectory: true,
-              children: [],
-              totalFileCount: 0,
-            }
-            current.children.push(dir)
-          }
-          current = dir
-        }
       }
     }
   }
@@ -154,7 +122,7 @@ export function getBreadcrumbParts(path: string): { name: string; fullPath: stri
 
 /** Returns true if any file in the array has a slash in its name, indicating folder structure. */
 export function hasAnyNestedFiles(files: FileInterface[]): boolean {
-  return files.some((file) => file.name.includes('/') || isFolderMarker(file))
+  return files.some((file) => file.name.includes('/'))
 }
 
 /** Collects all file names recursively under a tree node, for use as searchable text. */
@@ -182,15 +150,11 @@ export function buildFolderSearchableText(node: FileTreeNode): string {
  *   - createdAt: earliest createdAt among all nested files (when the folder effectively came into being)
  *   - updatedAt: latest updatedAt among all nested files (when the folder's contents last changed)
  *
- * Falls back to the ".folder" marker file's timestamps for empty folders (created via "Create folder").
- * Returns epoch (1970-01-01) only if neither real files nor a marker exist.
+ * Returns epoch (1970-01-01) for a folder with no files, which the tree does not currently produce.
  */
 export function getFolderDates(node: FileTreeNode): { createdAt: Date; updatedAt: Date } {
   const files = collectAllFiles(node)
   if (files.length === 0) {
-    if (node.markerFile) {
-      return { createdAt: new Date(node.markerFile.createdAt), updatedAt: new Date(node.markerFile.updatedAt) }
-    }
     return { createdAt: new Date(0), updatedAt: new Date(0) }
   }
   return {
@@ -240,7 +204,6 @@ export interface FileConflict {
 
 /**
  * Compares staged upload file names against existing files to detect conflicts.
- * Folder markers (.folder) are excluded from conflict detection as they are structural, not user files.
  * Returns conflicts and non-conflicting files separately so the caller can prompt the user.
  */
 export function detectFileConflicts(
@@ -249,9 +212,7 @@ export function detectFileConflicts(
 ): { conflicts: FileConflict[]; nonConflicting: FileUploadWithMetadata[] } {
   const existingByName = new Map<string, FileInterface>()
   for (const file of existingFiles) {
-    if (!isFolderMarker(file)) {
-      existingByName.set(file.name, file)
-    }
+    existingByName.set(file.name, file)
   }
 
   const conflicts: FileConflict[] = []

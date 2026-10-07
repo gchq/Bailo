@@ -213,17 +213,7 @@ describe('utils > fileTreeUtils', () => {
       expect(dates.updatedAt).toEqual(late)
     })
 
-    test('falls back to .folder marker dates for empty folders', () => {
-      const created = new Date('2024-05-01')
-      const updated = new Date('2024-05-02')
-      const tree = buildFileTree([makeFile('folder/.folder', { createdAt: created, updatedAt: updated })])
-      const folder = tree.children.find((c) => c.name === 'folder')!
-      const dates = getFolderDates(folder)
-      expect(dates.createdAt).toEqual(created)
-      expect(dates.updatedAt).toEqual(updated)
-    })
-
-    test('returns epoch dates when folder has no files and no marker', () => {
+    test('returns real file dates for a nested folder', () => {
       const tree = buildFileTree([makeFile('folder/sub/file.txt')])
       const folder = tree.children.find((c) => c.name === 'folder')!
       const sub = folder.children.find((c) => c.name === 'sub')!
@@ -232,20 +222,6 @@ describe('utils > fileTreeUtils', () => {
       // so we verify the sub folder uses real file dates instead
       const dates = getFolderDates(sub)
       expect(dates.createdAt.getTime()).toBeGreaterThan(0)
-    })
-
-    test('prefers real file dates over marker when folder has files', () => {
-      const markerDate = new Date('2024-01-01')
-      const fileCreated = new Date('2024-06-01')
-      const fileUpdated = new Date('2024-09-01')
-      const tree = buildFileTree([
-        makeFile('folder/.folder', { createdAt: markerDate, updatedAt: markerDate }),
-        makeFile('folder/data.bin', { createdAt: fileCreated, updatedAt: fileUpdated }),
-      ])
-      const folder = tree.children.find((c) => c.name === 'folder')!
-      const dates = getFolderDates(folder)
-      expect(dates.createdAt).toEqual(fileCreated)
-      expect(dates.updatedAt).toEqual(fileUpdated)
     })
 
     test('considers deeply nested files', () => {
@@ -314,14 +290,6 @@ describe('utils > fileTreeUtils', () => {
       const uploads = [makeUpload('model.bin', 'weights/model.bin')]
       const { conflicts } = detectFileConflicts(uploads, existing)
       expect(conflicts).toHaveLength(1)
-    })
-
-    test('excludes .folder markers from conflict detection', () => {
-      const existing = [makeFile('data/.folder')]
-      const uploads = [makeUpload('.folder', 'data/.folder')]
-      const { conflicts, nonConflicting } = detectFileConflicts(uploads, existing)
-      expect(conflicts).toHaveLength(0)
-      expect(nonConflicting).toHaveLength(1)
     })
 
     test('returns no conflicts when no matches', () => {

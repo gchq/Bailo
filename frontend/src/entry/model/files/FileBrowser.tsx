@@ -11,7 +11,7 @@ import FileDisplay, { MutateFiles, MutateReleases } from 'src/entry/model/files/
 import useNotification from 'src/hooks/useNotification'
 import { EntryKind, FileInterface, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { collectAllFiles, countMatchingFiles, type FileTreeNode, isFolderMarker } from 'utils/fileTreeUtils'
+import { collectAllFiles, countMatchingFiles, type FileTreeNode } from 'utils/fileTreeUtils'
 import { plural } from 'utils/stringUtils'
 
 interface FileBrowserProps {
@@ -90,18 +90,10 @@ function FolderRow({
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const sendNotification = useNotification()
-  const { modelFiles, mutateModelFiles } = useGetModelFiles(modelId)
+  const { mutateModelFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
   const allFilesInFolder = useMemo(() => collectAllFiles(node), [node])
-
-  const folderMarkers = useMemo(
-    () =>
-      modelFiles.filter(
-        (f) => isFolderMarker(f) && (f.name === `${node.fullPath}/.folder` || f.name.startsWith(`${node.fullPath}/`)),
-      ),
-    [modelFiles, node.fullPath],
-  )
 
   const associatedReleases = useMemo(
     () => releases.filter((release) => allFilesInFolder.some((file) => release.fileIds.includes(file._id))),
@@ -115,7 +107,7 @@ function FolderRow({
     try {
       setIsDeleting(true)
       setDeleteError('')
-      const allFileIds = [...allFilesInFolder, ...folderMarkers].map((file) => file._id)
+      const allFileIds = allFilesInFolder.map((file) => file._id)
       const res = await deleteEntryFiles(modelId, allFileIds)
       if (!res.ok) {
         setDeleteError(await getErrorMessage(res))
@@ -134,7 +126,7 @@ function FolderRow({
     } finally {
       setIsDeleting(false)
     }
-  }, [isDeleting, allFilesInFolder, folderMarkers, modelId, node.name, sendNotification, mutateModelFiles, router])
+  }, [isDeleting, allFilesInFolder, modelId, node.name, sendNotification, mutateModelFiles, router])
 
   const canDelete = !readOnly && modelKind === EntryKind.MODEL
   const matchingCount = useMemo(() => countMatchingFiles(node, searchQuery), [node, searchQuery])
