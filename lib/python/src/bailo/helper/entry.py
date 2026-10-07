@@ -1,193 +1,80 @@
 from __future__ import annotations
 
 import logging
-import warnings
-from typing import Any
+
+from semantic_version import Version
 
 from bailo.core.client import Client
-from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, ModelVisibility
+from bailo.core.entry import Entry
+from bailo.core.exceptions import BailoException
+from bailo.helper.release import Release
+
+__all__ = ["Entry", "ReleaseMixin"]
 
 logger = logging.getLogger(__name__)
 
 
-class Entry:
-    """Represent an entry in Bailo
+class ReleaseMixin:
+    """Release and image behaviour shared by the entry kinds that support releases.
 
-    :param client: A client object used to interact with Bailo
-    :param id: A unique ID for the entry
-    :param name: Name of the entry
-    :param description: Description of the entry
-    :param kind: Represents whether entry type (i.e. Model, Mirrored Model or Datacard)
-    :param visibility: Visibility of entry, using ModelVisibility enum (i.e. Public or Private), defaults to None
-    :param organisation: Organisation responsible for the entry, defaults to None
-    :param state: Development readiness of the entry, defaults to None
-    :param tags: Tags to assign to the entry, defaults to None
-    :param collaborators: List of CollaboratorEntry to define who the entry's collaborators (a.k.a. entry access) are, defaults to None
+    Mixed into :class:`~bailo.core.entry.Entry` subclasses, which provide ``client`` and ``id``.
     """
 
-    def __init__(
-        self,
-        client: Client,
-        id: str,
-        name: str,
-        description: str,
-        kind: EntryKind,
-        visibility: ModelVisibility | None = None,
-        organisation: str | None = None,
-        state: str | None = None,
-        tags: list[str] | None = None,
-        collaborators: list[CollaboratorEntry] | None = None,
-    ) -> None:
-        self.client = client
+    client: Client
+    id: str
 
-        self.id = id
-        self.name = name
-        self.description = description
-        self.kind = kind
-        self.visibility = visibility
-        self.organisation = organisation
-        self.state = state
-        self.tags = tags
-        self.collaborators = collaborators
-        self.settings: dict | None = None
+    def get_releases(self) -> list[Release]:
+        """Get all releases for the entry.
 
-        self._card = None
-        self._card_version = None
-        self._card_schema = None
+        :return: List of Release objects
+        """
+        res = self.client.get_all_releases(model_id=self.id)
+        releases = [self.get_release(version=release["semver"]) for release in res["releases"]]
 
-    def update(self) -> None:
-        """Upload and retrieve any changes to the entry summary on Bailo."""
-        res = self.client.patch_model(
-            model_id=self.id,
-            name=self.name,
-            kind=self.kind,
-            description=self.description,
-            visibility=self.visibility,
-            organisation=self.organisation,
-            state=self.state,
-            tags=self.tags,
-            collaborators=self.collaborators,
-            settings=self.settings,
+        logger.info("Successfully retrieved all releases for %s.", self.id)
+
+        return releases
+
+    def get_release(self, version: Version | str) -> Release:
+        """Call the Release.from_version method to return an existing release from Bailo.
+
+        :param version: A semantic version for the release
+        :return: Release object
+        """
+        return Release.from_version(self.client, self.id, version)
+
+    def get_latest_release(self) -> Release:
+        """Get the latest release for the entry from Bailo.
+
+        :return: Release object
+        """
+        releases = self.get_releases()
+        if not releases:
+            raise BailoException(f"{self.__class__.__name__} {self.id} has no releases.")
+
+        latest_release = max(releases)
+        logger.info(
+            "latest_release (%s) for %s retrieved successfully.",
+            str(latest_release.version),
+            self.id,
         )
-        self._unpack(res["model"])
 
-        logger.info("ID %s updated locally and on server.", self.id)
+        return latest_release
 
-    def delete(self) -> Any:
-        """Delete the entry from Bailo."""
-        res = self.client.delete_model(self.id)
-        logger.info("Model %s successfully deleted.", self.id)
+    def get_images(self) -> list[str]:
+        """Get all model image references for the entry.
 
-        return res
-
-    def card_from_schema(self, schema_id: str | None = None) -> None:
-        """Create a card using a schema on Bailo.
-
-        :param schema_id: A unique schema ID, defaults to None. If None, either minimal-general-v10 or minimal-data-card-v10 is used
+        :return: List of images
         """
-        if schema_id is None:
-            if self.kind == EntryKind.MODEL:
-                schema_id = MinimalSchema.MODEL
-            elif self.kind == EntryKind.DATACARD:
-                schema_id = MinimalSchema.DATACARD
-            else:
-                raise NotImplementedError(f"No default schema set for {self.kind=}")
+        res = self.client.get_all_images(model_id=self.id)
 
-        res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
-        self._unpack_card(res["card"])
+        logger.info("Images for %s retrieved successfully.", self.id)
 
-        logger.info("Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
+        return res["images"]
 
-    def card_from_template(self, template_id: str) -> None:
-        """Create a card using a template.
+    def get_image(self):
+        """Get a model image reference.
 
-        :param template_id: Previous model's unique ID to be used as template
+        :raises NotImplementedError: Not implemented error.
         """
-        res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
-        self._unpack_card(res["card"])
-
-        logger.info("Card for ID %s successfully created using template ID %s", self.id, template_id)
-
-    def get_card_latest(self) -> None:
-        """Get the latest card from Bailo."""
-        res = self.client.get_model(model_id=self.id)
-        if "card" in res["model"]:
-            self._unpack_card(res["model"]["card"])
-            logger.info("Latest card for ID %s successfully retrieved.", self.id)
-        else:
-            warnings.warn(
-                f"ID {self.id} does not have any associated cards. If needed, create a card with the .card_from_schema() method.",
-                stacklevel=2,
-            )
-
-    def get_card_revision(self, version: str) -> None:
-        """Get a specific entry card revision from Bailo.
-
-        :param version: Entry card version
-        """
-        res = self.client.get_model_card(model_id=self.id, version=version)
-        self._unpack_card(res["modelCard"])
-
-        logger.info("Card version %s for ID %s successfully retrieved.", version, self.id)
-
-    def get_roles(self):
-        """Get all roles for the entry.
-
-        :return: List of roles
-        """
-        res = self.client.get_model_roles(model_id=self.id)
-
-        return res["roles"]
-
-    def _update_card(self, card: dict[str, Any] | None = None) -> None:
-        """Update the card metadata for this entry on the Bailo server.
-
-        :param card: Metadata dictionary to update, defaults to None to use existing card.
-        """
-        if card is None:
-            card = self._card
-
-        res = self.client.put_model_card(model_id=self.id, metadata=card)
-        self._unpack_card(res["card"])
-
-        logger.info("Card for %s successfully updated on server.", self.id)
-
-    def _unpack(self, res):
-        """Update entry attributes from API response.
-
-        :param res: Response dictionary containing entry information.
-        """
-        self.id = res["id"]
-        self.name = res["name"]
-        self.description = res["description"]
-
-        if res["visibility"] == "private":
-            self.visibility = ModelVisibility.PRIVATE
-        else:
-            self.visibility = ModelVisibility.PUBLIC
-
-        if "kind" in res:
-            self.kind = EntryKind(res["kind"])
-
-        self.organisation = res.get("organisation", self.organisation)
-        self.state = res.get("state", self.state)
-        self.tags = res.get("tags", self.tags)
-        self.collaborators = res.get("collaborators", self.collaborators)
-        self.settings = res.get("settings", self.settings)
-
-        logger.info("Attributes for ID %s successfully unpacked.", self.id)
-
-    def _unpack_card(self, res):
-        """Private method. Unpack card metadata, version, and schema ID from API response.
-
-        :param res: Card-related dictionary from the API response.
-        """
-        self._card_version = res["version"]
-        self._card_schema = res["schemaId"]
-
-        try:
-            self._card = res["metadata"]
-        except KeyError:
-            self._card = None
-
-        logger.info("Card attributes for ID %s successfully unpacked.", self.id)
+        raise NotImplementedError
