@@ -1,7 +1,7 @@
 import Home from '@mui/icons-material/Home'
 import { Breadcrumbs, Link, Stack, Typography } from '@mui/material'
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
-import Paginate, { SortingProperty } from 'src/common/Paginate'
+import Paginate, { SortingDirection, SortingDirectionKeys, SortingProperty } from 'src/common/Paginate'
 import { FileInterface } from 'types/types'
 import {
   buildFileTree,
@@ -30,6 +30,7 @@ interface FolderNavigableListProps {
   searchPlaceholderText?: string
   sortingProperties?: SortingProperty<BrowseListItem>[]
   defaultSortProperty?: keyof BrowseListItem
+  defaultSortDirection?: SortingDirectionKeys
 }
 
 const DEFAULT_SORT_PROPERTIES: SortingProperty<BrowseListItem>[] = [
@@ -47,6 +48,7 @@ export default function FolderNavigableList({
   searchPlaceholderText = 'Search files and folders',
   sortingProperties = DEFAULT_SORT_PROPERTIES,
   defaultSortProperty = 'name',
+  defaultSortDirection = SortingDirection.DESC,
 }: FolderNavigableListProps) {
   const [currentPath, _setCurrentPath] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -145,6 +147,7 @@ export default function FolderNavigableList({
         onSearchChange={setSearchQuery}
         sortingProperties={sortingProperties}
         defaultSortProperty={defaultSortProperty}
+        defaultSortDirection={defaultSortDirection}
         searchPlaceholderText={searchPlaceholderText}
       >
         {({ data }) => children({ data, onNavigate: setCurrentPath, searchQuery })}

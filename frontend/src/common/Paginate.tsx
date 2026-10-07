@@ -112,15 +112,15 @@ export default function Paginate<T>({
 
   const sortByValue = useMemo(
     () => (a: T, b: T) => {
-      // Group items by a primary key before applying the user-selected sort.
-      // Ascending: lower group values first (e.g. folders before files).
-      // Descending: higher group values first (e.g. files before folders), matching Windows Explorer.
+      // Group items by a primary key before applying the user-selected sort. Grouping is
+      // deliberately independent of the sort direction: lower group values always come first
+      // (e.g. folders before files, matching Windows Explorer), so reversing the sort reorders
+      // items within each group rather than flipping the groups themselves.
       if (groupByProperty) {
         const groupA = a[groupByProperty]
         const groupB = b[groupByProperty]
         if (groupA !== groupB) {
-          const groupDirection = ascOrDesc === SortingDirection.ASC ? 1 : -1
-          return groupA < groupB ? -groupDirection : groupDirection
+          return groupA < groupB ? -1 : 1
         }
       }
       if (ascOrDesc === SortingDirection.ASC) {
