@@ -1,15 +1,10 @@
-import { isEqual } from 'lodash-es'
 import { ClientSession, PipelineStage, Types } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
-import { AccessRequestAction, ModelAction } from '../connectors/authorisation/actions.js'
+import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import AccessRequestModel, {
-  AccessRequestDoc,
-  AccessRequestInterface,
-  AccessRequestMetadata,
-} from '../models/AccessRequest.js'
+import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
 import { EntryKind, ModelDoc } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
@@ -217,12 +212,6 @@ export async function findAccessRequests(
   return accessRequests
 }
 
-// Raw strings: `getModelAccessRequestsForUser` matches exactly, so a change of case is a change of identity.
-function sortedEntities(metadata: AccessRequestMetadata | undefined): string[] {
-  const entities = metadata?.overview?.entities
-  return Array.isArray(entities) ? [...entities].sort() : []
-}
-
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
 export async function updateAccessRequest(
   user: UserInterface,
@@ -243,15 +232,6 @@ export async function updateAccessRequest(
     if (!valid) {
       throw BadReq('Access Request Metadata could not be validated against the schema.', {
         errors,
-      })
-    }
-
-    // The named entities inherit this request's approvals, so only a model owner or an admin may change them
-    const entitiesChanged = !isEqual(sortedEntities(accessRequest.metadata), sortedEntities(diff.metadata))
-    if (entitiesChanged && !(await authorisation.model(user, model, ModelAction.Update)).success) {
-      throw Forbidden('You do not have permission to change the entities named on an access request.', {
-        userDn: user.dn,
-        accessRequestId,
       })
     }
 

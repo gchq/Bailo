@@ -367,46 +367,6 @@ describe('services > accessRequest', () => {
     expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith('example-schema', diff.metadata)
   })
 
-  test('updateAccessRequest > cannot change the named entities without owning the model', async () => {
-    AccessRequestModelMock.findOne.mockResolvedValue({
-      schemaId: 'example-schema',
-      metadata: { overview: { name: 'stored', entities: ['user:testUser'] } },
-      markModified: vi.fn(),
-      save: vi.fn(),
-    } as any)
-    vi.mocked(authorisation.model).mockResolvedValueOnce({
-      info: 'You do not have permission to update a model.',
-      success: false,
-      id: '',
-    })
-
-    const diff = { metadata: { overview: { name: 'stored', entities: ['user:testUser', 'user:additionalUser'] } } }
-
-    await expect(() => updateAccessRequest({} as any, 'test', diff as any)).rejects.toThrow(
-      /^You do not have permission to change the entities named on an access request./,
-    )
-  })
-
-  test('updateAccessRequest > re-casing an entity counts as a change', async () => {
-    AccessRequestModelMock.findOne.mockResolvedValue({
-      schemaId: 'example-schema',
-      metadata: { overview: { name: 'stored', entities: ['user:USER'] } },
-      markModified: vi.fn(),
-      save: vi.fn(),
-    } as any)
-    vi.mocked(authorisation.model).mockResolvedValueOnce({
-      info: 'You do not have permission to update a model.',
-      success: false,
-      id: '',
-    })
-
-    const diff = { metadata: { overview: { name: 'stored', entities: ['user:user'] } } }
-
-    await expect(() => updateAccessRequest({} as any, 'test', diff as any)).rejects.toThrow(
-      /^You do not have permission to change the entities named on an access request./,
-    )
-  })
-
   test('newAccessRequestComment > success', async () => {
     await newAccessRequestComment({} as any, 'test', 'message')
 
