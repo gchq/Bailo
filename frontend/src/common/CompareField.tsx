@@ -1,6 +1,8 @@
 import { SxProps } from '@mui/material/styles'
 import { ReactNode } from 'react'
 import InlineDiff from 'src/common/InlineDiff'
+import InlineMarkdownDiff from 'src/common/InlineDiff/InlineMarkdownDiff'
+import InlineTypographyDiff from 'src/common/InlineDiff/InlineTypographyDiff'
 import { CompareFieldState } from 'src/hooks/useCompareField'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 
@@ -37,7 +39,11 @@ export default function CompareField({
     if (formatter) {
       return formatter(val)
     }
-    return val as string | undefined
+    // RJSF passes numbers and integers through TextWidget, so values are not guaranteed to be strings
+    if (val === undefined || val === null || val === '') {
+      return undefined
+    }
+    return String(val)
   }
 
   if (compare.inCompareMode && !compare.isMirroredModel) {
@@ -52,7 +58,11 @@ export default function CompareField({
         mirroredModel={false}
         description={description}
       >
-        <InlineDiff from={format(from)} to={format(value)} markdown={markdown} />
+        {markdown ? (
+          <InlineMarkdownDiff from={format(from)} to={format(value)} />
+        ) : (
+          <InlineTypographyDiff from={format(from)} to={format(value)} />
+        )}
       </AdditionalInformation>
     )
   }
