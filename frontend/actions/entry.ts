@@ -114,6 +114,41 @@ export function useGetModel(entryId: string | undefined | null) {
   return useGetEntry(entryId, MODEL_ENTRY_KINDS)
 }
 
+const emptyModelList: EntryInterface[] = []
+const emptyIdList: string[] = []
+
+type SettledModelResults = { models: EntryInterface[]; failedIds: string[] }
+
+export function useGetModels(entryIds: string[]) {
+  const { data, isLoading } = useSWR<SettledModelResults>(
+    entryIds.length > 0
+      ? entryIds.map((id) => `/api/v2/model/${id}?${qs.stringify({ kind: MODEL_ENTRY_KINDS })}`)
+      : null,
+    async (urls: string[]) => {
+      const settled = await Promise.allSettled(
+        urls.map((url) => fetcher(url).then((res: { model: EntryInterface }) => res.model)),
+      )
+      const models: EntryInterface[] = []
+      const failedIds: string[] = []
+      settled.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          models.push(result.value)
+        } else {
+          failedIds.push(entryIds[index])
+        }
+      })
+      return { models, failedIds }
+    },
+  )
+
+  return {
+    models: data?.models ?? emptyModelList,
+    failedModelIds: data?.failedIds ?? emptyIdList,
+    isModelsLoading: isLoading,
+    isModelsError: data ? data.failedIds.length > 0 : false,
+  }
+}
+
 const emptyRolesList = []
 
 export function useGetEntryRoles(entryId?: string | null) {
