@@ -184,7 +184,10 @@ updates:
     schedule:
       interval: 'weekly'
 
-  # Python (uv) - group all so a common dep (e.g. ruff) has a single PR rather than 1 per dir
+  # Python (uv) - security updates only. `open-pull-requests-limit: 0` disables version updates,
+  # but security updates still use this entry's settings. A vulnerable direct dependency has its
+  # pyproject.toml floor raised; a vulnerable transitive dependency changes only uv.lock.
+  # Dependabot relocks itself, so each PR keeps both files in sync.
   - package-ecosystem: 'uv'
     directories:
       - '/lib/python'
@@ -192,53 +195,41 @@ updates:
       - '/backend/docs'
     schedule:
       interval: 'weekly'
-    # `pyproject.toml` files declare deliberate, tested lower bounds and no upper
-    # bounds, so a new release almost always already satisfies the declared range.
-    # `increase-if-necessary` updates uv.lock and leaves those floors alone.
-    versioning-strategy: increase-if-necessary
-    open-pull-requests-limit: 10
-    # Let a release settle before raising a version-update PR. Security updates are exempt.
-    cooldown:
-      default-days: 7
+    open-pull-requests-limit: 0
+    # Raise the floor past the vulnerable version so `bailo` consumers cannot resolve to it.
+    # Not `lockfile-only`, which blocks transitive security updates (dependabot-core#16449).
+    versioning-strategy: increase
     groups:
-      scanning-stack:
-        patterns:
-          - modelscan
-          - oras
       server-stack:
+        applies-to: security-updates
         patterns:
           - fastapi
+          - starlette
           - uvicorn
+          - pydantic
+          - pydantic-core
           - pydantic-settings
-          - python-multipart
-          - content-size-limit-asgi
-          - filelock
       sphinx-stack:
+        applies-to: security-updates
         patterns:
           - sphinx
           - sphinx-*
+          - sphinxcontrib-*
           - myst-parser
           - nbsphinx
-          - ipython
-      client-runtime:
+      http-stack:
+        applies-to: security-updates
         patterns:
           - requests
-          - semantic-version
-          - tqdm
-          - mlflow-skinny
-      dev-tooling:
+          - urllib3
+          - certifi
+          - idna
+          - charset-normalizer
+      testing-stack:
+        applies-to: security-updates
         patterns:
-          - pre-commit
           - pytest
           - pytest-*
-          - requests-mock
-          - ruff
-      # uv.lock pins transitive dependencies as well as direct ones. Every group
-      # above covers direct dependencies, so this catch-all must be last.
-      # It bundles all indirect packages into one PR instead of one PR each.
-      transitive-dependencies:
-        patterns:
-          - '*'
 
   # GitHub Actions
   - package-ecosystem: 'github-actions'

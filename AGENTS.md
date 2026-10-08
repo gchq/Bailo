@@ -70,7 +70,8 @@ Each Python project is an independent [uv](https://docs.astral.sh/uv/) project w
 deliberately not a uv workspace: a workspace forces a single `requires-python` across all members (the intersection here
 is Python 3.12 only), which would break the `bailo` 3.10-3.14 test matrix.
 
-Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
+Run `uv lock` after changing dependencies, and commit the updated `uv.lock`. Dependabot only raises Python dependency
+PRs for security advisories. Routine upgrades are manual (`uv lock --upgrade-package <name>`).
 
 ### Python client (`lib/python/`)
 
