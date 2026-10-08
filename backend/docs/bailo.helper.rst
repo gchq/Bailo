@@ -19,23 +19,28 @@ bailo.helper package
    :members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
+
+The ``Entry`` base class that every entry kind derives from lives in :mod:`bailo.core.entry`. It is
+re-exported from :mod:`bailo.helper.entry` for convenience, and its members are listed again on each
+subclass below.
 
 .. automodule:: bailo.helper.entry
    :members: ReleaseMixin
    :undoc-members:
    :show-inheritance:
 
-   The ``Entry`` base class lives in :mod:`bailo.core.entry` and is re-exported here.
-
 .. automodule:: bailo.helper.mirroredModel
    :members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
 
 .. automodule:: bailo.helper.model
    :members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
 
 .. automodule:: bailo.helper.release
    :members:

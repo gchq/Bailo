@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from semantic_version import Version
 
-from bailo.core.client import Client
 from bailo.core.entry import Entry
 from bailo.core.exceptions import BailoException
 from bailo.helper.release import Release
+
+if TYPE_CHECKING:
+    from bailo.core.client import Client
 
 __all__ = ["Entry", "ReleaseMixin"]
 
@@ -20,8 +23,10 @@ class ReleaseMixin:
     Mixed into :class:`~bailo.core.entry.Entry` subclasses, which provide ``client`` and ``id``.
     """
 
-    client: Client
-    id: str
+    if TYPE_CHECKING:
+        # Declared for type checkers only; the Entry subclass this is mixed into sets them.
+        client: Client
+        id: str
 
     def get_releases(self) -> list[Release]:
         """Get all releases for the entry.
