@@ -147,25 +147,31 @@ type WholeValueDiffProps = {
   render: (value: string) => ReactNode
 }
 
+function Unanswered() {
+  return (
+    <Typography
+      component='span'
+      data-test='diff-unanswered'
+      sx={{ color: 'customTextInput.main', fontStyle: 'italic' }}
+    >
+      Unanswered
+    </Typography>
+  )
+}
+
 /** Renders a value that is unchanged, or that was added or removed entirely, so no word-level diff is needed. */
 export function WholeValueDiff({ from, to, render }: WholeValueDiffProps) {
   if (from === to) {
-    return from ? (
-      render(from)
-    ) : (
-      <Typography component='span' sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-        Unanswered
-      </Typography>
-    )
+    return from ? render(from) : <Unanswered />
   }
 
   return (
     <Box sx={{ display: 'grid', gap: 0.5 }}>
       <DiffMark operation='delete' block>
-        {from ? render(from) : 'Unanswered'}
+        {from ? render(from) : <Unanswered />}
       </DiffMark>
       <DiffMark operation='insert' block>
-        {to ? render(to) : 'Unanswered'}
+        {to ? render(to) : <Unanswered />}
       </DiffMark>
     </Box>
   )
