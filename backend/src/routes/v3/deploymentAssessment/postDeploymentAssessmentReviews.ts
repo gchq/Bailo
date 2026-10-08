@@ -6,8 +6,8 @@ import { z } from '../../../lib/zod.js'
 import { Decision } from '../../../models/Response.js'
 import { reviewDeploymentAssessment } from '../../../services/deploymentAssessment.js'
 import {
-  DeploymentAssessmentReview,
-  deploymentAssessmentReviewSchema,
+  DeploymentAssessmentReviewHistory,
+  deploymentAssessmentReviewHistorySchema,
   registerPath,
 } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -35,7 +35,7 @@ registerPath(
     responses: {
       201: {
         description: 'The created formal review response.',
-        content: { 'application/json': { schema: deploymentAssessmentReviewSchema } },
+        content: { 'application/json': { schema: deploymentAssessmentReviewHistorySchema } },
       },
     },
   },
@@ -43,7 +43,7 @@ registerPath(
 )
 
 export const postDeploymentAssessmentReviews = [
-  async (req: Request, res: Response<DeploymentAssessmentReview>): Promise<void> => {
+  async (req: Request, res: Response<DeploymentAssessmentReviewHistory>): Promise<void> => {
     req.audit = AuditInfo.ReviewDeploymentAssessment
     const { params, body } = parse(req, postDeploymentAssessmentReviewSchema)
     const response = await reviewDeploymentAssessment(
@@ -54,10 +54,15 @@ export const postDeploymentAssessmentReviews = [
     )
     await audit.onReviewDeploymentAssessment(req, response)
     res.status(201).json({
+      id: response._id.toString(),
       entity: response.entity,
       decision: body.decision,
       ...(response.comment && { comment: response.comment }),
+      reactions: response.reactions ?? [],
+      ...(response.commentEditedAt && { commentEditedAt: response.commentEditedAt }),
       createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      outdated: false,
     })
   },
 ]

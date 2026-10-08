@@ -5,8 +5,8 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { commentOnDeploymentAssessment } from '../../../services/deploymentAssessment.js'
 import {
-  DeploymentAssessmentComment,
-  deploymentAssessmentCommentSchema,
+  DeploymentAssessmentCommentHistory,
+  deploymentAssessmentCommentHistorySchema,
   registerPath,
 } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -26,7 +26,7 @@ registerPath(
     responses: {
       201: {
         description: 'The created comment.',
-        content: { 'application/json': { schema: deploymentAssessmentCommentSchema } },
+        content: { 'application/json': { schema: deploymentAssessmentCommentHistorySchema } },
       },
     },
   },
@@ -34,15 +34,19 @@ registerPath(
 )
 
 export const postDeploymentAssessmentComment = [
-  async (req: Request, res: Response<DeploymentAssessmentComment>): Promise<void> => {
+  async (req: Request, res: Response<DeploymentAssessmentCommentHistory>): Promise<void> => {
     req.audit = AuditInfo.CommentOnDeploymentAssessment
     const { params, body } = parse(req, postDeploymentAssessmentCommentSchema)
     const response = await commentOnDeploymentAssessment(req.user, params.deploymentAssessmentId, body.comment)
     await audit.onCommentOnDeploymentAssessment(req, response)
     res.status(201).json({
+      id: response._id.toString(),
       entity: response.entity,
       comment: response.comment ?? body.comment,
+      reactions: response.reactions ?? [],
+      ...(response.commentEditedAt && { commentEditedAt: response.commentEditedAt }),
       createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
     })
   },
 ]
