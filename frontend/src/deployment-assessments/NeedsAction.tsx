@@ -7,7 +7,7 @@ interface SwimLaneColumnConfig {
 }
 
 const columnConfig: SwimLaneColumnConfig[] = [
-  { key: 'in_draft', label: 'Publish Draft' },
+  { key: 'in_draft', label: 'In Draft' },
   { key: DeploymentAssessmentState.NeedsReview, label: 'Needs Review' },
   {
     key: DeploymentAssessmentState.ChangesRequested,
