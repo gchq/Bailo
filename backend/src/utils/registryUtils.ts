@@ -2,7 +2,7 @@ import { createHash, X509Certificate } from 'crypto'
 import { readFile } from 'fs/promises'
 
 import config from './config.js'
-import { ManifestPlatform } from './registryResponses.js'
+import { ManifestPlatform } from './registryResponseTypes.js'
 
 export async function getKid(cert?: X509Certificate) {
   if (!cert) {

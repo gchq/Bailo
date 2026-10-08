@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.3.8-ubi9@sha256:9eaebd2de3487bfc36c4f77646702f616cf7130813c62f1ffbd3fddc265aeb67
+    image: mongodb/mongodb-community-server:8.3.11-ubi9@sha256:bc6d54e492f6b2bc03f6b27fd3645a7da77c89c0a3d8ba5dbf07f1e0af7f6d2a
     networks:
       internal:
     environment:
@@ -35,7 +35,7 @@ services:
       start_period: 30s
 
   seaweedfs:
-    image: chrislusf/seaweedfs:4.45@sha256:fc9f76fa993ad69966ffeb2f65d0318fcae39c6f8e20cf68ef7b3a5cb97769e5
+    image: chrislusf/seaweedfs:4.48@sha256:4e61d15fd35994cb1e43e1e553dff106794841fd9a99ade2fc8c8bfce4d7872d
     networks:
       - internal
     command:
@@ -77,8 +77,7 @@ services:
       - backend
 
   registry:
-    # https://github.com/distribution/distribution/pull/4898
-    image: distribution/distribution@sha256:1eda63c5b5ba2c53b8b7e7071d7e67ca42e93c4ea5d9015c2b8160eb09a95d61
+    image: registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8
     networks:
       internal:
     environment:

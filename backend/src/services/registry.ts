@@ -27,13 +27,8 @@ import {
   SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import {
-  Descriptors,
-  ImageManifestV2,
-  isManifestList,
-  ManifestListV2,
-  OCIEmptyMediaType,
-} from '../utils/registryResponses.js'
+import { isManifestList } from '../utils/registryResponses.js'
+import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponseTypes.js'
 import { platformToString } from '../utils/registryUtils.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getLayersForImage } from './images/getImageLayers.js'

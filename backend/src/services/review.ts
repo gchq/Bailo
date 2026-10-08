@@ -447,11 +447,11 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
   const reviews = await ReviewModel.find()
 
   for (const release of releases) {
-    const validReviews = reviews.find(
+    const hasValidReview = reviews.some(
       (review) =>
         review.role === newReviewRole.shortName && review.modelId === model.id && review.semver === release.semver,
     )
-    if (!Array.isArray(validReviews) || validReviews.length === 0) {
+    if (!hasValidReview) {
       const review = new ReviewModel({
         semver: release.semver,
         modelId: model.id,
@@ -463,13 +463,13 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
   }
 
   for (const accessRequest of accessRequests) {
-    const validReviews = reviews.find(
+    const hasValidReview = reviews.some(
       (review) =>
         review.role === newReviewRole.shortName &&
         review.modelId === model.id &&
         review.accessRequestId === accessRequest.id,
     )
-    if (!Array.isArray(validReviews) || validReviews.length === 0) {
+    if (!hasValidReview) {
       const review = new ReviewModel({
         accessRequestId: accessRequest.id,
         modelId: model.id,

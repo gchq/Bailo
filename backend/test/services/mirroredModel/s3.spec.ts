@@ -1,51 +1,9 @@
 import { PassThrough, Readable } from 'node:stream'
 
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { getObjectFromExportS3Location, uploadToS3 } from '../../../src/services/mirroredModel/s3.js'
-
-const configMock = vi.hoisted(
-  () =>
-    ({
-      ui: {
-        modelMirror: {
-          import: {
-            enabled: true,
-          },
-          export: {
-            enabled: true,
-          },
-        },
-      },
-
-      s3: { buckets: { uploads: 'test' } },
-
-      modelMirror: {
-        export: {
-          maxSize: 100,
-          kmsSignature: {
-            enabled: true,
-          },
-        },
-      },
-
-      registry: {
-        connection: {
-          internal: 'https://localhost:5000',
-        },
-      },
-
-      connectors: {
-        audit: {
-          kind: 'silly',
-        },
-      },
-    }) as any,
-)
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -81,16 +39,15 @@ const kmsMocks = vi.hoisted(() => ({
 vi.mock('../../../src/clients/kms.js', () => kmsMocks)
 
 describe('services > mirroredModel > s3', () => {
-  test('uploadToS3 > single S3 upload when kms not enabled', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
-      enabled: true,
-      export: {
-        maxSize: 10,
-        kmsSignature: {
-          enabled: false,
-        },
-      },
+  beforeEach(() => {
+    setTestConfig({
+      ui: { modelMirror: { import: { enabled: true }, export: { enabled: true } } },
+      s3: { buckets: { uploads: 'test' } },
     })
+  })
+
+  test('uploadToS3 > single S3 upload when kms not enabled', async () => {
+    setTestConfig({ modelMirror: { export: { maxSize: 10, kmsSignature: { enabled: false } } } })
     await uploadToS3('', {} as unknown as Readable, {} as any)
 
     expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(1)
@@ -98,15 +55,7 @@ describe('services > mirroredModel > s3', () => {
   })
 
   test('uploadToS3 > Double S3 upload when kms enabled', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
-      enabled: true,
-      export: {
-        maxSize: 10,
-        kmsSignature: {
-          enabled: true,
-        },
-      },
-    })
+    setTestConfig({ modelMirror: { export: { maxSize: 10, kmsSignature: { enabled: true } } } })
     await uploadToS3('', {} as unknown as Readable, {} as any)
 
     expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(2)
@@ -114,15 +63,7 @@ describe('services > mirroredModel > s3', () => {
   })
 
   test('uploadToS3 > handle sign error', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
-      enabled: true,
-      export: {
-        maxSize: 10,
-        kmsSignature: {
-          enabled: true,
-        },
-      },
-    })
+    setTestConfig({ modelMirror: { export: { maxSize: 10, kmsSignature: { enabled: true } } } })
     kmsMocks.sign.mockRejectedValueOnce('Error')
 
     await uploadToS3('', {} as unknown as Readable, {} as any)
@@ -132,15 +73,7 @@ describe('services > mirroredModel > s3', () => {
   })
 
   test('uploadToS3 > handle getObjectFromTemporaryS3Location error', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
-      enabled: true,
-      export: {
-        maxSize: 10,
-        kmsSignature: {
-          enabled: true,
-        },
-      },
-    })
+    setTestConfig({ modelMirror: { export: { maxSize: 10, kmsSignature: { enabled: true } } } })
     s3Mocks.getObjectStream.mockRejectedValueOnce('Error')
 
     await uploadToS3('', {} as unknown as Readable, {} as any)
@@ -150,15 +83,7 @@ describe('services > mirroredModel > s3', () => {
   })
 
   test('uploadToS3 > Handle error when kms enabled', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
-      enabled: true,
-      export: {
-        maxSize: 10,
-        kmsSignature: {
-          enabled: true,
-        },
-      },
-    })
+    setTestConfig({ modelMirror: { export: { maxSize: 10, kmsSignature: { enabled: true } } } })
     s3Mocks.putObjectStream.mockRejectedValueOnce('Error')
 
     await uploadToS3('', {} as unknown as Readable, {} as any)
@@ -168,15 +93,7 @@ describe('services > mirroredModel > s3', () => {
   })
 
   test('uploadToS3 > Handle error when kms not enabled', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
-      enabled: true,
-      export: {
-        maxSize: 10,
-        kmsSignature: {
-          enabled: false,
-        },
-      },
-    })
+    setTestConfig({ modelMirror: { export: { maxSize: 10, kmsSignature: { enabled: false } } } })
     s3Mocks.putObjectStream.mockRejectedValueOnce('Error')
 
     await uploadToS3('', {} as unknown as Readable, {} as any)

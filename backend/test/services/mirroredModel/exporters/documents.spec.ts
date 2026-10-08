@@ -6,7 +6,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ArtefactScanState } from '../../../../src/connectors/artefactScanning/Base.js'
 import { ReleaseAction } from '../../../../src/connectors/authorisation/actions.js'
 import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
+import config from '../../../../src/utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
+import { setTestConfig } from '../../../testUtils/setupTestConfig.js'
 
 vi.mock('bytes')
 
@@ -41,11 +43,6 @@ const scannersMocks = vi.hoisted(() => ({
   default: { scannersInfo: vi.fn() },
 }))
 vi.mock('../../../../src/connectors/artefactScanning/index.js', () => scannersMocks)
-
-const configMocks = vi.hoisted(() => ({
-  default: { modelMirror: { export: { maxSize: 1000 } } },
-}))
-vi.mock('../../../../src/utils/config.js', () => configMocks)
 
 const authMocks = vi.hoisted(() => ({
   default: { model: vi.fn(), release: vi.fn() },
@@ -83,6 +80,7 @@ const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'Docume
 
 describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   beforeEach(() => {
+    setTestConfig({ modelMirror: { export: { maxSize: 1000 } } })
     tarballMocks.initialiseTarGzUpload.mockResolvedValue({
       tarStream: {} as any,
       gzipStream: {} as any,
@@ -136,7 +134,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease, mockRelease], mockLogData)
     const expectedErr = BadReq('Requested export is too large.\nMethod `DocumentsExporter._init` failure.', {
       size: 2000,
-      maxSize: configMocks.default.modelMirror.export.maxSize,
+      maxSize: config.modelMirror.export.maxSize,
     })
 
     // @ts-expect-error calling protected method

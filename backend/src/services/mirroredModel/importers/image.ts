@@ -3,7 +3,7 @@ import { json, text } from 'node:stream/consumers'
 
 import { escapeRegExp } from 'lodash-es'
 import { finished } from 'stream/promises'
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { TransferStatus } from '../../../models/ModelTransfer.js'
@@ -12,13 +12,13 @@ import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
 import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
+import { isManifestList } from '../../../utils/registryResponses.js'
 import {
   ImageManifestV2,
-  isManifestList,
   ManifestListV2,
   ManifestResponseBodySchema,
   OCIEmptyMediaType,
-} from '../../../utils/registryResponses.js'
+} from '../../../utils/registryResponseTypes.js'
 import log from '../../log.js'
 import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
@@ -76,7 +76,7 @@ export class ImageImporter extends BaseImporter {
     ;({ path: this.imageName, tag: this.imageTag } = distributionPackageNameObject)
   }
 
-  async processEntry(entry: Headers, stream: PassThrough) {
+  async processEntry(entry: Header, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
       if (ImageImporter.indexRegex.test(entry.name)) {

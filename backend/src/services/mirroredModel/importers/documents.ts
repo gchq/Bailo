@@ -2,7 +2,7 @@ import { PassThrough } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
 import { Types } from 'mongoose'
-import { Headers } from 'tar-stream'
+import { Header } from 'tar-stream'
 
 import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
@@ -62,7 +62,7 @@ export class DocumentsImporter extends BaseImporter {
     this.user = user
   }
 
-  async processEntry(entry: Headers, stream: PassThrough) {
+  async processEntry(entry: Header, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
       const fileContentsJson = await json(stream)

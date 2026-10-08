@@ -1,8 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { ArtefactScanResult } from '../../../src/connectors/artefactScanning/Base.js'
-import { getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
+import { AuthorisationKindKeys, getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 vi.mock('../../../src/services/model.js', () => ({
   default: {
@@ -25,51 +26,6 @@ const fileScanningMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/connectors/artefactScanning/index.js', async () => ({ default: fileScanningMock }))
 
-const configMock = vi.hoisted(() => ({
-  app: {
-    protocol: 'http',
-  },
-  instrumentation: {
-    enabled: false,
-  },
-  log: {
-    level: 'info',
-  },
-  smtp: {
-    transporter: 'smtp',
-    connection: {
-      host: 'localhost',
-      port: 1025,
-      secure: false,
-      auth: undefined,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    },
-    from: '"Bailo 📝" <bailo@example.org>',
-  },
-  connectors: {
-    authorisation: {
-      kind: 'basic',
-    },
-    audit: {
-      kind: 'silly',
-    },
-    artefactScanners: {
-      kinds: [],
-    },
-  },
-  registry: {
-    connection: {
-      internal: 'https://localhost:5000',
-    },
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 describe('connectors > authorisation', () => {
   test('basic', () => {
     const connector = getAuthorisationConnector(false)
@@ -77,7 +33,7 @@ describe('connectors > authorisation', () => {
   })
   test('invalid', () => {
     const invalidConnector = 'invalid'
-    configMock.connectors.authorisation.kind = invalidConnector
+    setTestConfig({ connectors: { authorisation: { kind: invalidConnector as AuthorisationKindKeys } } })
     expect(() => getAuthorisationConnector(false)).toThrow(`'${invalidConnector}' is not a valid authorisation kind.`)
   })
 })

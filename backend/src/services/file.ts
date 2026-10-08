@@ -325,7 +325,7 @@ export async function getFilesByIds(
   ])
 
   if (files.length !== fileIds.length) {
-    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file.id === id))
+    const notFoundFileIds = fileIds.filter((id) => !files.some((file) => file.id === id))
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
@@ -349,6 +349,9 @@ export async function removeFiles(
 
   for (const fileId of fileIds) {
     const file = await getFileById(user, fileId)
+    if (file.modelId !== modelId) {
+      throw NotFound('The requested file was not found.', { fileId, modelId })
+    }
     allFiles.push(file)
     const auth = await authorisation.file(user, model, file, FileAction.Delete)
     if (!auth.success) {
