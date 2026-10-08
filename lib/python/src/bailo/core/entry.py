@@ -341,7 +341,7 @@ class Entry(ABC):
     def delete(self) -> Any:
         """Delete the entry from Bailo."""
         res = self.client.delete_model(self.id)
-        logger.info("Model %s successfully deleted.", self.id)
+        logger.info("%s %s successfully deleted.", type(self).__name__, self.id)
 
         return res
 
