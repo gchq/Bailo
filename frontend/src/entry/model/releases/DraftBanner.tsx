@@ -15,22 +15,22 @@ type DraftBannerProps = {
       showButton: false
       dialogTitle?: never
       disableButton?: never
-      handlePublish?: never
+      handleSubmitForReview?: never
       isLoading?: never
       errorMessage?: never
       setErrorMessage?: never
-      validateBeforePublish?: never
+      validateBeforeSubmitForReview?: never
     }
   | {
       showButton: true
       dialogTitle: string
       disableButton: boolean
-      handlePublish: () => void
+      handleSubmitForReview: () => void
       isLoading: boolean
       errorMessage?: string
       setErrorMessage: (err: string) => void
-      /** Runs when publish is clicked. Returning false stops the confirmation dialogue from opening. */
-      validateBeforePublish?: () => boolean
+      /** Runs when submission for review is clicked. Returning false stops the confirmation dialogue from opening. */
+      validateBeforeSubmitForReview?: () => boolean
     }
 )
 
@@ -41,10 +41,10 @@ export function DraftBanner({
   isLoading,
   errorMessage = '',
   setErrorMessage,
-  handlePublish,
+  handleSubmitForReview,
   showButton,
   disableButton,
-  validateBeforePublish,
+  validateBeforeSubmitForReview,
 }: DraftBannerProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
@@ -52,8 +52,8 @@ export function DraftBanner({
     return <></>
   }
 
-  function handlePublishClick() {
-    if (validateBeforePublish && !validateBeforePublish()) {
+  function handleSubmitForReviewClick() {
+    if (validateBeforeSubmitForReview && !validateBeforeSubmitForReview()) {
       return
     }
     setOpen(true)
@@ -82,20 +82,20 @@ export function DraftBanner({
               <Button
                 variant='outlined'
                 sx={{ borderColor: 'white', color: theme.palette.common.white }}
-                onClick={handlePublishClick}
+                onClick={handleSubmitForReviewClick}
                 disabled={disableButton}
                 loading={isLoading}
                 data-test='publishDraftButton'
               >
-                <Typography>Publish</Typography>
+                <Typography>Submit for Review</Typography>
               </Button>
               <ConfirmationDialogue
                 open={open}
                 title={dialogTitle}
-                onConfirm={handlePublish}
+                onConfirm={handleSubmitForReview}
                 onCancel={() => [setOpen(false), setErrorMessage('')]}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to publish this? This is irreversible.'}
+                dialogMessage={'Are you sure you want to submit this for review? This is irreversible.'}
                 confirmLoading={isLoading}
               />
             </>
