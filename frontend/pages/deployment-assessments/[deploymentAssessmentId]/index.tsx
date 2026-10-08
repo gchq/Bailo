@@ -2,7 +2,11 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Box, Button, Container, Divider, Paper, Popper, Stack } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
-import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
+import {
+  useGetDeploymentAssessment,
+  useGetDeploymentAssessmentComments,
+  useGetDeploymentAssessmentReviews,
+} from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
@@ -10,6 +14,7 @@ import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
+import DeploymentAssessmentReviewHistory from 'src/deployment-assessments/DeploymentAssessmentReviewHistory'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
@@ -17,8 +22,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import ReviewComments from 'src/reviews/ReviewComments'
-import { DecisionKeys, ReviewKind } from 'types/types'
+import { DecisionKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function DeploymentAssessment() {
@@ -59,6 +63,19 @@ export default function DeploymentAssessment() {
   } = useGetDeploymentAssessment(deploymentAssessmentId)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } =
     useGetReviewsForDeploymentAssessment(deploymentAssessmentId)
+  const {
+    deploymentAssessmentComments,
+    isDeploymentAssessmentCommentsLoading,
+    isDeploymentAssessmentCommentsError,
+    mutateDeploymentAssessmentComments,
+  } = useGetDeploymentAssessmentComments(deploymentAssessmentId)
+  const {
+    deploymentAssessmentReviews,
+    deploymentAssessmentReviewStatuses,
+    isDeploymentAssessmentReviewsLoading,
+    isDeploymentAssessmentReviewsError,
+    mutateDeploymentAssessmentReviews,
+  } = useGetDeploymentAssessmentReviews(deploymentAssessmentId)
 
   async function handleSubmit(decision: DecisionKeys, comment: string) {
     setErrorMessage('')
@@ -82,12 +99,15 @@ export default function DeploymentAssessment() {
       setIsReviewPanelShown(false)
       mutateReviews()
       mutateDeploymentAssessment()
+      mutateDeploymentAssessmentReviews()
     }
   }
 
   const error = MultipleErrorWrapper('Unable to load deployment assessment', {
     isDeploymentAssessmentError,
     isReviewsError,
+    isDeploymentAssessmentCommentsError,
+    isDeploymentAssessmentReviewsError,
   })
   if (error) {
     return error
@@ -120,7 +140,12 @@ export default function DeploymentAssessment() {
   }
 
   const isLoadingDeploymentAssessment =
-    !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment || isReviewsLoading
+    !router.isReady ||
+    isDeploymentAssessmentLoading ||
+    !deploymentAssessment ||
+    isReviewsLoading ||
+    isDeploymentAssessmentCommentsLoading ||
+    isDeploymentAssessmentReviewsLoading
 
   return (
     <>
@@ -187,14 +212,15 @@ export default function DeploymentAssessment() {
                       </Box>
                     )}
                   </Stack>
-                  <ReviewComments
-                    identifier={deploymentAssessment.id}
-                    parentId={deploymentAssessment._id}
-                    kind={ReviewKind.DEPLOYMENTS}
+                  <DeploymentAssessmentReviewHistory
+                    deploymentAssessmentId={deploymentAssessment.id}
+                    comments={deploymentAssessmentComments}
+                    reviews={deploymentAssessmentReviews}
+                    statuses={deploymentAssessmentReviewStatuses}
+                    isLoading={isDeploymentAssessmentCommentsLoading || isDeploymentAssessmentReviewsLoading}
                     isEdit={isEdit}
-                    mutator={mutateDeploymentAssessment}
-                    entryId=''
-                    responseList={deploymentAssessment.responses}
+                    mutateComments={mutateDeploymentAssessmentComments}
+                    mutateReviews={mutateDeploymentAssessmentReviews}
                   />
                 </Stack>
               </>
