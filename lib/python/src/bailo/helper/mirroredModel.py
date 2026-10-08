@@ -7,6 +7,7 @@ from typing import Any, ClassVar
 from bailo.core.client import Client
 from bailo.core.entry import Entry
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility
+from bailo.core.exceptions import BailoException
 from bailo.helper.entry import ReleaseMixin
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class MirroredModel(ReleaseMixin, Entry):
     _id_alias: ClassVar[str] = "model_id"
     # Search summaries do not carry settings.mirror.sourceModelId, so each result must be refetched.
     _search_refetches_each_result: ClassVar[bool] = True
+    _extra_create_args: ClassVar[tuple[str, ...]] = ("sourceModelId",)
 
     def __init__(
         self,
@@ -127,9 +129,14 @@ class MirroredModel(ReleaseMixin, Entry):
         """Extract the source model ID from an API response.
 
         :param res: Response dictionary containing model information.
+        :raises BailoException: If the response has no mirror source model ID.
         :return: Dictionary containing the source model ID.
         """
-        return {"sourceModelId": res["settings"]["mirror"]["sourceModelId"]}
+        source_model_id = res.get("settings", {}).get("mirror", {}).get("sourceModelId")
+        if source_model_id is None:
+            raise BailoException(f"Mirrored model {res.get('id')} has no settings.mirror.sourceModelId.")
+
+        return {"sourceModelId": source_model_id}
 
     def update(self) -> None:
         """Upload and retrieve any changes to the mirrored model summary on Bailo.

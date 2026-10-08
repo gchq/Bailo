@@ -52,6 +52,8 @@ class Entry(ABC):
     _id_alias: ClassVar[str | None] = None
     #: Whether :meth:`search` must fetch each result individually to populate all attributes.
     _search_refetches_each_result: ClassVar[bool] = False
+    #: Subclass-specific arguments accepted by :meth:`create` beyond the standard ones.
+    _extra_create_args: ClassVar[tuple[str, ...]] = ()
 
     def __init__(
         self,
@@ -66,6 +68,9 @@ class Entry(ABC):
         tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
     ) -> None:
+        if type(self) is Entry:
+            raise TypeError("Entry is a base class and cannot be instantiated directly.")
+
         self.client = client
 
         self.id = id
@@ -84,11 +89,15 @@ class Entry(ABC):
         self._card_schema: str | None = None
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Generate the subclass-specific ID alias property (e.g. ``model_id``).
+        """Check the subclass sets ``entry_kind`` and generate its ID alias property (e.g. ``model_id``).
 
         :param kwargs: Keyword arguments forwarded to the parent implementation.
+        :raises TypeError: If a concrete subclass does not define ``entry_kind``.
         """
         super().__init_subclass__(**kwargs)
+
+        if not hasattr(cls, "entry_kind"):
+            raise TypeError(f"{cls.__name__} must define an 'entry_kind' class attribute.")
 
         alias = cls.__dict__.get("_id_alias")
         if alias is not None:
@@ -126,8 +135,17 @@ class Entry(ABC):
         :param collaborators: List of CollaboratorEntry to define who the entry's collaborators (a.k.a. entry access) are, defaults to None
         :param visibility: Visibility of entry, using ModelVisibility enum (e.g Public or Private), defaults to None
         :param extra: Subclass-specific arguments (e.g. ``sourceModelId``)
+        :raises BailoException: If an argument not accepted by this entry kind is given
         :return: Entry object
         """
+        unexpected = set(extra) - set(cls._extra_create_args)
+        if unexpected:
+            accepted = ", ".join(cls._extra_create_args) or "none"
+            raise BailoException(
+                f"{cls.__name__}.create() got unexpected argument(s) {', '.join(sorted(unexpected))}. "
+                f"Arguments accepted in addition to the standard ones: {accepted}."
+            )
+
         res = client.post_model(
             name=name,
             kind=cls.entry_kind,
@@ -170,8 +188,9 @@ class Entry(ABC):
         :return: An entry object
         """
         res = client.get_model(model_id=entry_id)["model"]
-        if res["kind"] != cls.entry_kind:
-            raise BailoException(f"ID {entry_id} is of kind '{res['kind']}', not '{cls.entry_kind}'.")
+        kind = res.get("kind")
+        if kind != cls.entry_kind:
+            raise BailoException(f"ID {entry_id} is of kind '{kind}', not '{cls.entry_kind}'.")
 
         logger.info("%s %s successfully retrieved from server.", cls.__name__, entry_id)
 
