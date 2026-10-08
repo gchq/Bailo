@@ -9,8 +9,13 @@ export type SequenceEdit<T> =
   { operation: 'equal'; from: T; to: T } | { operation: 'insert'; to: T } | { operation: 'delete'; from: T }
 
 // LCS is O(n^2), so can crash the frontend via a large edit distance matrix. This is a fallback.
-const MAX_DIFF_CELLS = 250_000
+const MAX_DIFF_CELLS = 500 ** 2
 
+/**
+ * \s+              whitespace runs
+ * [\p{L}\p{N}_]+   words, numbers and underscores
+ * [^\s\p{L}\p{N}_] individual punctuation or symbols
+ */
 function tokenise(value: string): string[] {
   return value.match(/\s+|[\p{L}\p{N}_]+|[^\s\p{L}\p{N}_]/gu) ?? []
 }
