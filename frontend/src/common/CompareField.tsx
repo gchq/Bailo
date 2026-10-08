@@ -1,6 +1,5 @@
 import { SxProps } from '@mui/material/styles'
 import { ReactNode } from 'react'
-import InlineDiff from 'src/common/InlineDiff'
 import InlineMarkdownDiff from 'src/common/InlineDiff/InlineMarkdownDiff'
 import InlineTypographyDiff from 'src/common/InlineDiff/InlineTypographyDiff'
 import { CompareFieldState } from 'src/hooks/useCompareField'
@@ -46,8 +45,14 @@ export default function CompareField({
     return String(val)
   }
 
+  const renderDiff = (from: unknown, to: unknown) =>
+    markdown ? (
+      <InlineMarkdownDiff from={format(from)} to={format(to)} />
+    ) : (
+      <InlineTypographyDiff from={format(from)} to={format(to)} />
+    )
+
   if (compare.inCompareMode && !compare.isMirroredModel) {
-    const from = compare.compareFromState ?? compare.mirroredState
     return (
       <AdditionalInformation
         editMode={false}
@@ -58,27 +63,35 @@ export default function CompareField({
         mirroredModel={false}
         description={description}
       >
-        {markdown ? (
-          <InlineMarkdownDiff from={format(from)} to={format(value)} />
-        ) : (
-          <InlineTypographyDiff from={format(from)} to={format(value)} />
-        )}
+        {renderDiff(compare.compareFromState ?? compare.mirroredState, value)}
       </AdditionalInformation>
     )
   }
 
-  const mirroredContent = compare.inMirroredCompare ? (
-    <InlineDiff
-      from={format(compare.compareFromMirroredState)}
-      to={format(compare.mirroredState)}
-      markdown={markdown}
-    />
-  ) : (
-    (fallbackMirroredContent ?? compare.mirroredState)
-  )
+  if (compare.inMirroredCompare) {
+    // Diff both the original (mirrored) answer and the locally added additional information. The additional
+    // information is shown if either version has a value, so that removed information is still visible.
+    const hasAdditionalInformation = !!format(compare.compareFromState) || !!format(value)
 
-  const effectiveHasValue = hasValue ?? !!value
-  const display = compare.inMirroredCompare ? true : effectiveHasValue
+    return (
+      <AdditionalInformation
+        editMode={false}
+        mirroredState={renderDiff(compare.compareFromMirroredState, compare.mirroredState)}
+        display
+        label={label}
+        id={id}
+        required={required}
+        mirroredModel
+        description={description}
+        sx={sx}
+      >
+        {hasAdditionalInformation && renderDiff(compare.compareFromState, value)}
+      </AdditionalInformation>
+    )
+  }
+
+  const mirroredContent = fallbackMirroredContent ?? compare.mirroredState
+  const display = hasValue ?? !!value
 
   return (
     <AdditionalInformation

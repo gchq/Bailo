@@ -14,7 +14,7 @@ import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import InlineDiff from 'src/common/InlineDiff'
+import InlineTypographyDiff from 'src/common/InlineDiff/InlineTypographyDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -112,12 +112,13 @@ export default function Metrics({ onChange, value, label, id, registry, required
 
   const compare = getCompareFieldState<MetricValue[]>(id, registry.formContext)
 
-  const metricsTableRows = (metrics: MetricValue[], compareWith?: MetricValue[]) => {
-    if (!metrics) {
+  const metricsTableRows = (metrics?: MetricValue[], compareWith?: MetricValue[]) => {
+    if (!metrics && !compareWith) {
       return undefined
     }
-    return _.zip(metrics, compareWith).map(([metric, compareWith]) => (
-      <TableRow key={metric?.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+    // zip pads the shorter list with undefined, so removed metrics have no name and the index is used as the key
+    return _.zip(metrics ?? [], compareWith ?? []).map(([metric, compareWith], index) => (
+      <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell
           component='th'
           scope='row'
@@ -126,20 +127,11 @@ export default function Metrics({ onChange, value, label, id, registry, required
             maxWidth: '500px',
           }}
         >
-          {compare.inCompareMode ? (
-            <InlineDiff from={compareWith?.name} to={metric?.name} direction={'row'} />
-          ) : (
-            metric?.name
-          )}
+          {compare.inCompareMode ? <InlineTypographyDiff from={compareWith?.name} to={metric?.name} /> : metric?.name}
         </TableCell>
         <TableCell align='right'>
           {compare.inCompareMode ? (
-            <InlineDiff
-              from={compareWith?.value?.toString()}
-              to={metric?.value?.toString()}
-              direction={'row'}
-              align='right'
-            />
+            <InlineTypographyDiff from={compareWith?.value?.toString()} to={metric?.value?.toString()} />
           ) : (
             metric?.value
           )}
@@ -147,6 +139,10 @@ export default function Metrics({ onChange, value, label, id, registry, required
       </TableRow>
     ))
   }
+
+  // In compare mode the table is also shown when only the older version has metrics, so removals are visible
+  const compareFromMetrics = compare.inCompareMode ? (compare.compareFromState ?? []) : []
+  const showTable = value.length > 0 || compareFromMetrics.length > 0
 
   return (
     <AdditionalInformation
@@ -169,7 +165,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       )}
       {!compare.editMode && (
         <>
-          {!compare.isMirroredModel && value.length === 0 && (
+          {!compare.isMirroredModel && !showTable && (
             <Typography
               sx={{
                 fontStyle: 'italic',
@@ -179,7 +175,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
               Unanswered
             </Typography>
           )}
-          {value.length > 0 && (
+          {showTable && (
             <TableContainer component={Paper}>
               <Table sx={{ maxWidth: 'xs' }} size='small'>
                 <TableHead>

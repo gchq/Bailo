@@ -129,27 +129,96 @@ describe('CompareField', () => {
     expect(container.querySelector('ins')?.textContent).toContain('75')
   })
 
-  it('renders children in mirrored compare mode', () => {
-    renderWithUiConfig(
-      <CompareField
-        id='root_field'
-        label='Test Label'
-        compare={makeCompare({
-          inCompareMode: true,
-          isMirroredModel: true,
-          inMirroredCompare: true,
-          mirroredState: 'mirrored-to',
-          compareFromMirroredState: 'mirrored-from',
-        })}
-        value='local value'
-        hasValue
-      >
-        <span data-test='child'>Child renders</span>
-      </CompareField>,
-    )
+  describe('mirrored compare mode', () => {
+    const mirroredCompare = (overrides: Partial<CompareFieldState<unknown>> = {}) =>
+      makeCompare({ inCompareMode: true, isMirroredModel: true, inMirroredCompare: true, ...overrides })
 
-    expect(screen.getByTestId('child')).toBeDefined()
-    expect(screen.getByText('mirrored-from')).toBeDefined()
-    expect(screen.getByText('mirrored-to')).toBeDefined()
+    function getAdditionalInformation() {
+      return screen.getByText('Additional info').parentElement as HTMLElement
+    }
+
+    it('diffs the original answer and the additional information instead of rendering children', () => {
+      renderWithUiConfig(
+        <CompareField
+          id='root_field'
+          label='Test Label'
+          compare={mirroredCompare({
+            compareFromMirroredState: 'original old',
+            mirroredState: 'original new',
+            compareFromState: 'extra old',
+          })}
+          value='extra new'
+        >
+          <span data-test='child'>Should not appear</span>
+        </CompareField>,
+      )
+
+      const additionalInformation = getAdditionalInformation()
+
+      expect(screen.queryByTestId('child')).toBeNull()
+      expect(document.querySelectorAll('del')).toHaveLength(2)
+      expect(document.querySelectorAll('ins')).toHaveLength(2)
+      expect(additionalInformation.querySelector('del')?.textContent).toContain('old')
+      expect(additionalInformation.querySelector('ins')?.textContent).toContain('new')
+      expect(additionalInformation.textContent).not.toContain('original')
+    })
+
+    it('shows additional information that was removed in the newer version', () => {
+      renderWithUiConfig(
+        <CompareField
+          id='root_field'
+          label='Test Label'
+          compare={mirroredCompare({
+            mirroredState: 'same',
+            compareFromMirroredState: 'same',
+            compareFromState: 'gone',
+          })}
+          value=''
+        >
+          <span>child</span>
+        </CompareField>,
+      )
+
+      const additionalInformation = getAdditionalInformation()
+
+      expect(additionalInformation.querySelector('del')?.textContent).toContain('gone')
+      expect(additionalInformation.querySelector('ins')?.textContent).toContain('Unanswered')
+    })
+
+    it('diffs a false answer using the formatter', () => {
+      renderWithUiConfig(
+        <CompareField
+          id='root_field'
+          label='Test Label'
+          compare={mirroredCompare({ mirroredState: true, compareFromMirroredState: true, compareFromState: true })}
+          value={false}
+          formatter={(val) => (val === undefined ? undefined : val ? 'Yes' : 'No')}
+        >
+          <span>child</span>
+        </CompareField>,
+      )
+
+      const additionalInformation = getAdditionalInformation()
+
+      expect(additionalInformation.querySelector('del')?.textContent).toContain('Yes')
+      expect(additionalInformation.querySelector('ins')?.textContent).toContain('No')
+    })
+
+    it('hides the additional information section when neither version has any', () => {
+      renderWithUiConfig(
+        <CompareField
+          id='root_field'
+          label='Test Label'
+          compare={mirroredCompare({ mirroredState: 'new', compareFromMirroredState: 'old' })}
+          value=''
+        >
+          <span>child</span>
+        </CompareField>,
+      )
+
+      expect(screen.queryByText('Additional info')).toBeNull()
+      expect(document.querySelector('del')?.textContent).toContain('old')
+      expect(document.querySelector('ins')?.textContent).toContain('new')
+    })
   })
 })
