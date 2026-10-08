@@ -6,16 +6,16 @@ All dates are formatted dd/mm/yyyy.
 
 ### Changes
 
-- Move the shared `Entry` base class to `bailo.core.entry` as an ABC holding `create`, `from_id`, `search`, card accessors and `__repr__`/`__str__`. `bailo.helper.entry` now holds the release-aware `ReleaseMixin` and re-exports `Entry`. `Model`, `MirroredModel` and `Datacard` no longer duplicate methods
-- Fix `model_id` and `datacard_id` becoming stale after `Entry._unpack` reassigns `id`
-- Fix `Model.create` silently dropping the `tags` argument
-- `Entry.from_id` kind mismatches are now detected from the subclass kind rather than hardcoded strings, and the raised `BailoException` names the kind that was found
-- Add `__repr__` and `__str__` to `Datacard`
-- Add `Datacard.search`, inherited from `Entry` and filtered to the `data-card` kind
-- `Entry.create` now raises `BailoException` naming the accepted arguments when given an argument the entry kind does not support (e.g. `sourceModelId` on `Model.create`)
-- `MirroredModel.from_id` and `MirroredModel.search` now raise `BailoException` naming the entry when a mirrored model has no `settings.mirror.sourceModelId`, instead of a `KeyError`
-- `Entry` can no longer be instantiated directly, and subclasses must define an `entry_kind` class attribute
-- Tighten type hints on card, settings and release accessors to match `ModelInterface` in the backend
+- Deduplicate `Model`, `MirroredModel` and `Datacard` onto a shared `Entry` base, moved to `bailo.core.entry`. `bailo.helper.entry` keeps `ReleaseMixin` and re-exports `Entry`
+- Add `Datacard.search`, plus `__repr__` and `__str__` on `Datacard`
+- Fix `model_id` and `datacard_id` going stale after `Entry._unpack` reassigns `id`
+- Fix `Model.create` dropping `tags`
+- Fix `MirroredModel.update_model_card()` overwriting the editable additional information with the read only source card
+- Fix `MirroredModel.get_card_latest` warning about the wrong missing card
+- Optimise `Entry.get_releases` to reduce number of API requests sent
+- Raise `BailoException` instead of `KeyError`/`TypeError` for a mirrored model with no `settings.mirror.sourceModelId`, and for arguments an `Entry` kind does not accept
+- `Entry` can no longer be instantiated directly, and subclasses must set `entry_kind`
+- Tighten type hints to match `ModelInterface` in the backend
 
 ## 3.10.0 - 28/07/2026
 
