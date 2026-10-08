@@ -34,7 +34,8 @@ class ReleaseMixin:
         :return: List of Release objects
         """
         res = self.client.get_all_releases(model_id=self.id)
-        releases = [self.get_release(version=release["semver"]) for release in res["releases"]]
+        # The list response carries the same fields as the single-release one, so no refetch needed.
+        releases = [Release._from_json(self.client, self.id, release) for release in res["releases"]]
 
         logger.info("Successfully retrieved all releases for %s.", self.id)
 

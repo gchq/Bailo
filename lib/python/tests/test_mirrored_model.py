@@ -53,6 +53,48 @@ def test_get_card_latest_with_card_and_mirrored_card(local_mirrored_model, reque
     }
 
 
+@pytest.mark.parametrize(
+    "present_key, expected_warning",
+    [
+        ("card", "does not have any associated model card"),
+        ("mirroredCard", "does not have any associated additional information"),
+    ],
+)
+def test_get_card_latest_warns_about_the_missing_card(
+    present_key, expected_warning, local_mirrored_model, requests_mock
+):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "kind": EntryKind.MIRRORED_MODEL,
+                present_key: {
+                    "schemaId": "minimal-general-v10",
+                    "version": 1,
+                    "metadata": {"overview": {"summary": "present"}},
+                },
+            }
+        },
+    )
+
+    with pytest.warns(UserWarning, match=expected_warning):
+        local_mirrored_model.get_card_latest()
+
+
+def test_update_model_card_defaults_to_additional_information(local_mirrored_model, requests_mock):
+    local_mirrored_model._card = {"overview": {"summary": "read only source card"}}
+    local_mirrored_model._additional_information_card = {"overview": {"summary": "editable"}}
+    put_mock = requests_mock.put(
+        "https://example.com/api/v2/model/test-id/model-cards",
+        json={"card": {"schemaId": "minimal-general-v10", "version": 2, "metadata": {"overview": {}}}},
+    )
+
+    local_mirrored_model.update_model_card()
+
+    assert put_mock.last_request.json()["metadata"] == {"overview": {"summary": "editable"}}
+
+
 def test_update_sends_source_model_id_when_changed(local_mirrored_model, requests_mock):
     requests_mock.patch(
         "https://example.com/api/v2/model/test-id",

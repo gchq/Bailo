@@ -132,6 +132,36 @@ def test_create_rejects_unexpected_argument():
         Model.create(client=client, name="test", description="test", sourceModelId="test-1234")
 
 
+def test_mirrored_create_rejects_unexpected_argument():
+    client = Client("https://example.com")
+
+    with pytest.raises(BailoException, match="unexpected argument"):
+        MirroredModel.create(client=client, name="test", description="test", sourceModelId="test-1234", nonsense=True)
+
+
+def test_get_releases_does_not_refetch_each_release(requests_mock):
+    release = {
+        "semver": "1.0.0",
+        "modelCardVersion": 1,
+        "notes": "test",
+        "fileIds": [],
+        "images": [],
+        "minor": False,
+        "draft": False,
+    }
+    list_mock = requests_mock.get("https://example.com/api/v2/model/test-id/releases", json={"releases": [release]})
+    detail_mock = requests_mock.get("https://example.com/api/v2/model/test-id/release/1.0.0", json={"release": release})
+    model = Model(client=Client("https://example.com"), model_id="test-id", name="test", description="test")
+
+    releases = model.get_releases()
+
+    assert len(releases) == 1
+    assert str(releases[0].version) == "1.0.0"
+    assert releases[0].notes == "test"
+    assert list_mock.call_count == 1
+    assert detail_mock.call_count == 0
+
+
 def test_from_id_rejects_response_without_kind(requests_mock):
     response = _entry_response("test-id", EntryKind.MODEL)
     del response["kind"]
@@ -172,7 +202,7 @@ def test_mirrored_search_refetches_each_result(requests_mock):
     requests_mock.get("https://example.com/api/v2/models/search", json={"models": [summary]})
     detail_mock = requests_mock.get("https://example.com/api/v2/model/test-id", json={"model": detail})
 
-    with pytest.warns(UserWarning, match="does not have any associated model card"):
+    with pytest.warns(UserWarning, match="does not have any associated additional information"):
         models = MirroredModel.search(client=Client("https://example.com"))
 
     assert len(models) == 1

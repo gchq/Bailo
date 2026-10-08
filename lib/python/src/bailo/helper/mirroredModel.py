@@ -79,6 +79,7 @@ class MirroredModel(ReleaseMixin, Entry):
         tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
+        **extra: Any,
     ) -> MirroredModel:
         """Build a mirrored model from Bailo and upload it.
 
@@ -91,6 +92,8 @@ class MirroredModel(ReleaseMixin, Entry):
         :param tags: Tags to assign to the mirrored model, defaults to None
         :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
+        :param extra: Rejected by :meth:`Entry.create`, so that an unsupported argument raises the same BailoException here as it does for other entry kinds
+        :raises BailoException: If an argument not accepted by this entry kind is given
         :return: MirroredModel object
         """
         return super().create(
@@ -103,6 +106,7 @@ class MirroredModel(ReleaseMixin, Entry):
             collaborators=collaborators,
             visibility=visibility,
             sourceModelId=sourceModelId,
+            **extra,
         )
 
     @classmethod
@@ -165,22 +169,33 @@ class MirroredModel(ReleaseMixin, Entry):
 
         :param model_card: Model card dictionary, defaults to None
 
-        .. note:: If a model card is not provided, the current model card attribute value is used
+        .. note:: If a model card is not provided, the current additional information value is used
         """
         self._update_card(card=model_card)
+
+    def _update_card(self, card: dict[str, Any] | None = None) -> None:
+        """Update the editable additional information for this mirrored model on the Bailo server.
+
+        The card synced from the source model is read only, so the default falls back to the
+        additional information rather than :attr:`Entry._card`.
+
+        :param card: Metadata dictionary to update, defaults to None to use the additional information.
+        """
+        super()._update_card(card=card if card is not None else self._additional_information_card)
 
     def get_card_latest(self) -> None:
         """Get the latest card from Bailo."""
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
             self._unpack_card(res["model"]["card"])
+            logger.info("Latest additional information for ID %s successfully retrieved.", self.id)
+        else:
+            warnings.warn(f"ID {self.id} does not have any associated additional information.", stacklevel=2)
+        if "mirroredCard" in res["model"]:
+            self._unpack_card(res["model"]["mirroredCard"], True)
             logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(f"ID {self.id} does not have any associated model card.", stacklevel=2)
-        if "mirroredCard" in res["model"]:
-            self._unpack_card(res["model"]["mirroredCard"], True)
-        else:
-            warnings.warn(f"ID {self.id} does not have any associated additional information.", stacklevel=2)
 
     def _unpack_card(self, res, mirrored=False) -> None:
         """Unpack a card from an API response into the mirrored or additional information slot.
