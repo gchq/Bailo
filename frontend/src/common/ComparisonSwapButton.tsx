@@ -49,6 +49,7 @@ export default function ComparisonSwapButton({
           </IconButton>
         </span>
       </Tooltip>
+      <Typography>&nbsp;</Typography>
     </Stack>
   )
 }
