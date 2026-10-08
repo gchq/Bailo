@@ -142,9 +142,16 @@ export async function findLatestDecisionsByAssessmentIds(
 }
 
 export interface DeploymentAssessmentCommentRecord {
+  id: string
   entity: string
   comment?: string
+  reactions: Array<{
+    kind: string
+    users: string[]
+  }>
+  commentEditedAt?: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface DeploymentAssessmentCommentsRecord {
@@ -154,10 +161,17 @@ export interface DeploymentAssessmentCommentsRecord {
 }
 
 export interface DeploymentAssessmentReviewRecord {
+  id: string
   entity: string
   decision?: DecisionKeys
   comment?: string
+  reactions: Array<{
+    kind: string
+    users: string[]
+  }>
+  commentEditedAt?: string
   createdAt: string
+  updatedAt: string
   outdated: boolean
 }
 
@@ -203,9 +217,13 @@ export async function findDeploymentAssessmentComments(
           {
             $project: {
               _id: 0,
+              id: { $toString: '$_id' },
               entity: 1,
               comment: 1,
+              reactions: { $ifNull: ['$reactions', []] },
+              commentEditedAt: 1,
               createdAt: 1,
+              updatedAt: 1,
             },
           },
         ],
@@ -267,10 +285,14 @@ export async function findDeploymentAssessmentReviews(
                 {
                   $project: {
                     _id: 0,
+                    id: { $toString: '$_id' },
                     entity: 1,
                     decision: 1,
                     comment: 1,
+                    reactions: { $ifNull: ['$reactions', []] },
+                    commentEditedAt: 1,
                     createdAt: 1,
+                    updatedAt: 1,
                   },
                 },
               ],
