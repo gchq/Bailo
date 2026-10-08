@@ -71,9 +71,45 @@ jobs:
           name: python-docs
           path: ./backend/docs/python-docs/html
 
+  # Generate static config
+  config-docs:
+    needs: changes
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate config docs
+        run: npm run generate-config-docs
+
+      - name: Upload config docs
+        uses: actions/upload-artifact@v6
+        with:
+          name: config-docs
+          path: ./backend/dist/config-docs.json
+
   # Build job
   build:
-    needs: [changes, sphinx]
+    needs: [changes, sphinx, config-docs]
     if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     defaults:
@@ -89,6 +125,12 @@ jobs:
         with:
           name: python-docs
           path: ./backend/docs/python-docs/html
+
+      - name: Download backend config docs
+        uses: actions/download-artifact@v7
+        with:
+          name: config-docs
+          path: ./backend/dist
 
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -128,13 +170,16 @@ jobs:
         run: npx tsx src/scripts/generateOpenApiSpecs.ts
 
       - name: Install dependencies
-        run: npm i
+        run: npm ci
+
       - name: Run generator
         run: npm run generate
+
       - name: Build and export
         run: npm run build
         env:
           BASE_PATH: "/Bailo"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

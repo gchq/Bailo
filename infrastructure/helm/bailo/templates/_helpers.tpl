@@ -83,6 +83,7 @@ Minio host definition
 {{- end -}}
 {{- end -}}
 
+{{/*
 Registry host definition
 */}}
 {{- define "bailo.registry.host" -}}
