@@ -240,7 +240,7 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
     { $match: { accessRequestId: { $in: accessRequestIds } } },
     ...latestDecisionPerReviewerStages(),
     {
-      // Only groups access requests with at least one review
+      // Only groups access requests with at least one approved review
       $group: {
         _id: '$accessRequestId',
         approvedReviews: { $sum: { $cond: [isReviewApproved(), 1, 0] } },
