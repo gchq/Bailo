@@ -29,6 +29,7 @@ A lightweight, Python API wrapper for Bailo, providing streamlined programmatic 
             <a href="#development">Development</a>
             <ul>
                 <li><a href="#python-setup">Python Setup</a></li>
+                <li><a href="#dependency-management">Dependency Management</a></li>
                 <li><a href="#running-tests">Running Tests</a></li>
             </ul>
         </li>
@@ -109,6 +110,23 @@ uv sync --extra mlflow --group test
 
 This creates a `.venv` and installs the pinned dependencies from `uv.lock`. Prefix commands with
 `uv run` to use it, or activate it with `source .venv/bin/activate`.
+
+### Dependency Management
+
+`pyproject.toml` declares minimum versions only (`>=`, no upper caps), as these are what `pip install bailo` users
+resolve against. `uv.lock` pins the exact versions used in development and CI. Dependabot only raises PRs for security
+advisories. Routine upgrades are manual with `uv lock --upgrade-package <name>`, and the ruff version comes from
+`.pre-commit-config.yaml`.
+
+The `python_test_lowest` CI job runs the tests against those minimum versions on Python 3.10. If it fails, reproduce it
+locally without touching `uv.lock` or `.venv`:
+
+```bash
+uv run --python 3.10 --resolution lowest-direct --isolated --extra mlflow --group test pytest
+```
+
+Then raise the failing floor in `pyproject.toml` to the oldest version that passes, re-run the command above, and
+finish with `uv lock`.
 
 ### Running Tests
 

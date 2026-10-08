@@ -24,6 +24,8 @@ jobs:
             relevant:
               - 'lib/python/**'
               - '.github/workflows/python.yml'
+              - '.pre-commit-config.yaml'
+              - 'ruff.toml'
 
   python_static_checks:
     needs: changes
@@ -44,13 +46,12 @@ jobs:
         working-directory: lib/python
         run: uv sync --group test --locked
 
+      # ruff version comes from the pre-commit hook rev, so local hooks and CI cannot drift
       - name: Check formatting
-        working-directory: lib/python
-        run: uv run ruff format --check .
+        run: uv run --project lib/python --no-sync pre-commit run ruff-format --all-files --show-diff-on-failure
 
       - name: Check linting
-        working-directory: lib/python
-        run: uv run ruff check src/bailo
+        run: uv run --project lib/python --no-sync pre-commit run ruff-check --all-files --show-diff-on-failure
 
 
   python_test:
@@ -82,13 +83,42 @@ jobs:
         env:
           PYTEST_RUN_PATH: "lib/python"
 
+  # Floors in pyproject.toml are what pip users of `bailo` can resolve to, so test them on the oldest Python version
+  python_test_lowest:
+    needs: [changes, python_static_checks]
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.10"
+          # Lowest versions differ from the lock so keep them out of the shared cache
+          enable-cache: false
+
+      # Not `--locked` to re-resolve to the lowest direct versions
+      - name: Install lowest dependencies
+        working-directory: lib/python
+        run: uv sync --resolution lowest-direct --extra mlflow --group test
+
+      - name: Run basic testing
+        working-directory: lib/python
+        run: uv run --no-sync pytest
+        env:
+          PYTEST_RUN_PATH: "lib/python"
+
   # Gate job for branch protection: always runs so the required check is never left pending when the matrix is skipped
   python_test_result:
     if: always()
-    needs: [changes, python_test]
+    needs: [changes, python_test, python_test_lowest]
     runs-on: ubuntu-latest
     steps:
       - run: exit 1
         if: >-
           needs.python_test.result == 'failure'
+          || needs.python_test_lowest.result == 'failure'
           || (needs.changes.outputs.relevant == 'true' && needs.python_test.result != 'success')
+          || (needs.changes.outputs.relevant == 'true' && needs.python_test_lowest.result != 'success')

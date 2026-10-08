@@ -70,8 +70,15 @@ Each Python project is an independent [uv](https://docs.astral.sh/uv/) project w
 deliberately not a uv workspace: a workspace forces a single `requires-python` across all members (the intersection here
 is Python 3.12 only), which would break the `bailo` 3.10-3.14 test matrix.
 
-Run `uv lock` after changing dependencies, and commit the updated `uv.lock`. Dependabot only raises Python dependency
-PRs for security advisories. Routine upgrades are manual (`uv lock --upgrade-package <name>`).
+Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
+
+- `pyproject.toml` declares `>=` floors only, with no upper caps. Raise a floor only for a needed feature, a CVE, or a
+  failing `python_test_lowest` CI job. Use a `; python_version >= "3.x"` marker when only newer Pythons need a newer
+  version.
+- Dependabot keeps the direct dependencies of `lib/artefactscan_api` (shipped as a Docker image) at their latest
+  versions. `lib/python` and `backend/docs` only get security updates; routine upgrades there are manual
+  (`uv lock --upgrade-package <name>`).
+- The ruff version comes from the hook `rev` in `.pre-commit-config.yaml`, not from any `uv.lock`.
 
 ### Python client (`lib/python/`)
 
@@ -82,8 +89,8 @@ uv sync --extra mlflow --group test
 - Unit tests: `uv run pytest`
 - Integration tests: `uv run pytest -m integration` (requires Bailo running on `https://localhost:8080`)
 - MLFlow tests: `uv run pytest -m mlflow`
-- Format check: `uv run ruff format --check .`
-- Lint: `uv run ruff check src/bailo`
+- Format check: `uv run pre-commit run ruff-format --all-files`
+- Lint: `uv run pre-commit run ruff-check --all-files`
 
 ### ArtefactScan API (`lib/artefactscan_api/`)
 
@@ -182,7 +189,8 @@ All PRs to `main` must pass these `.github/workflows/` checks:
 
 Path-filtered (only run when relevant files change):
 
-9. **Python static checks** - `ruff format --check` + `ruff check` (when `lib/python/` changes)
+9. **Python static checks** - ruff format + check via pre-commit (when `lib/python/`, `.pre-commit-config.yaml` or
+   `ruff.toml` changes)
 10. **Python unit tests** - pytest across Python 3.10-3.14 (when `lib/python/` changes)
 11. **ArtefactScan tests** - pytest (when `lib/artefactscan_api/` changes)
 12. **Docs style** - `frontend/scripts/check-docs-style.sh` (when `frontend/pages/docs/**/*.mdx` changes)

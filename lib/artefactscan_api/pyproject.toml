@@ -24,7 +24,6 @@ dev = [
     "pytest>=9",
     "pytest-github-actions-annotate-failures>=0.4",
     "pytest-mock>=3",
-    "ruff>=0.16",
 ]
 
 [tool.flit.module]

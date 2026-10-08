@@ -99,6 +99,12 @@ uv sync --group dev
 This creates a `.venv` and installs the pinned dependencies from `uv.lock`. Prefix commands with
 `uv run` to use it, or activate it with `source .venv/bin/activate`.
 
+### Dependency Management
+
+As this service ships as a Docker image built from `uv.lock`, Dependabot keeps its direct dependencies at their latest
+versions, raising the `pyproject.toml` floor and relocking in each PR. Transitive dependencies only change when a direct
+upgrade or a security fix needs them. The ruff version comes from `.pre-commit-config.yaml`.
+
 ### Developer Mode via Docker
 
 ```bash

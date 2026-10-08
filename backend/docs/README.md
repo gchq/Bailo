@@ -52,6 +52,9 @@ uv pip install ../../lib/python
 This creates a `.venv` and installs the pinned dependencies from `uv.lock`. Prefix commands with
 `uv run` to use it, or activate it with `source .venv/bin/activate`.
 
+`pyproject.toml` declares minimum versions only (`>=`, no upper caps) and `uv.lock` pins the exact versions. Dependabot
+only raises PRs for security advisories. Routine upgrades are manual with `uv lock --upgrade-package <name>`.
+
 #### Building
 
 Run either `uv run make html` (Linux & Mac) or `make.bat` (Windows). This will build the docs in the backend directory by default.

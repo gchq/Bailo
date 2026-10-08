@@ -191,7 +191,6 @@ updates:
   - package-ecosystem: 'uv'
     directories:
       - '/lib/python'
-      - '/lib/artefactscan_api'
       - '/backend/docs'
     schedule:
       interval: 'weekly'
@@ -200,36 +199,64 @@ updates:
     # Not `lockfile-only`, which blocks transitive security updates (dependabot-core#16449).
     versioning-strategy: increase
     groups:
-      server-stack:
+      fastapi-security:
         applies-to: security-updates
         patterns:
           - fastapi
           - starlette
-          - uvicorn
+      pydantic-security:
+        applies-to: security-updates
+        patterns:
           - pydantic
           - pydantic-core
           - pydantic-settings
-      sphinx-stack:
+      sphinx-security:
         applies-to: security-updates
         patterns:
           - sphinx
           - sphinx-*
           - sphinxcontrib-*
-          - myst-parser
-          - nbsphinx
-      http-stack:
-        applies-to: security-updates
-        patterns:
-          - requests
-          - urllib3
-          - certifi
-          - idna
-          - charset-normalizer
-      testing-stack:
+      pytest-security:
         applies-to: security-updates
         patterns:
           - pytest
           - pytest-*
+
+  # Python (uv) - artefactscan API ships as a Docker image, so track the latest direct dependencies
+  - package-ecosystem: 'uv'
+    directory: '/lib/artefactscan_api'
+    schedule:
+      interval: 'weekly'
+    versioning-strategy: increase
+    allow:
+      - dependency-type: 'direct'
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    groups:
+      pytest:
+        patterns:
+          - pytest
+          - pytest-*
+      fastapi-security:
+        applies-to: security-updates
+        patterns:
+          - fastapi
+          - starlette
+      pydantic-security:
+        applies-to: security-updates
+        patterns:
+          - pydantic
+          - pydantic-core
+          - pydantic-settings
+
+  # pre-commit hooks (run locally via husky)
+  - package-ecosystem: 'pre-commit'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+    cooldown:
+      default-days: 7
 
   # GitHub Actions
   - package-ecosystem: 'github-actions'
