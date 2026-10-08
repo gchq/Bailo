@@ -2,7 +2,7 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.10.1 - dd/mm/yyyy
+## 3.11.0 - dd/mm/yyyy
 
 ### Changes
 
@@ -11,6 +11,10 @@ All dates are formatted dd/mm/yyyy.
 - Fix `Model.create` silently dropping the `tags` argument
 - `Entry.from_id` kind mismatches are now detected from the subclass kind rather than hardcoded strings, and the raised `BailoException` names the kind that was found
 - Add `__repr__` and `__str__` to `Datacard`
+- Add `Datacard.search`, inherited from `Entry` and filtered to the `data-card` kind
+- `Entry.create` now raises `BailoException` naming the accepted arguments when given an argument the entry kind does not support (e.g. `sourceModelId` on `Model.create`)
+- `MirroredModel.from_id` and `MirroredModel.search` now raise `BailoException` naming the entry when a mirrored model has no `settings.mirror.sourceModelId`, instead of a `KeyError`
+- `Entry` can no longer be instantiated directly, and subclasses must define an `entry_kind` class attribute
 - Tighten type hints on card, settings and release accessors to match `ModelInterface` in the backend
 
 ## 3.10.0 - 28/07/2026
