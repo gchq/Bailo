@@ -158,6 +158,7 @@ export interface DeploymentAssessmentReviewRecord {
   decision?: DecisionKeys
   comment?: string
   createdAt: string
+  outdated: boolean
 }
 
 export interface DeploymentAssessmentReviewStatusRecord {
@@ -278,6 +279,29 @@ export async function findDeploymentAssessmentReviews(
           },
           {
             $unwind: '$reviewResponses',
+          },
+          {
+            $sort: { 'reviewResponses.createdAt': -1 },
+          },
+          {
+            $group: {
+              _id: {
+                reviewId: '$_id',
+                entity: '$reviewResponses.entity',
+              },
+              reviewResponses: { $push: '$reviewResponses' },
+            },
+          },
+          {
+            $unwind: {
+              path: '$reviewResponses',
+              includeArrayIndex: 'responseIndex',
+            },
+          },
+          {
+            $set: {
+              'reviewResponses.outdated': { $gt: ['$responseIndex', 0] },
+            },
           },
           {
             $sort: { 'reviewResponses.createdAt': 1 },
