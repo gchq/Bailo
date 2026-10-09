@@ -22,7 +22,7 @@ import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
 import { fromEntity } from 'utils/entityUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
-type DeploymentAssessmentHistoryItem =
+type DeploymentAssessmentReviewHistoryItem =
   | {
       kind: 'comment'
       item: DeploymentAssessmentCommentHistory
@@ -32,7 +32,7 @@ type DeploymentAssessmentHistoryItem =
       item: DeploymentAssessmentReviewHistory
     }
 
-type DeploymentAssessmentHistoryProps = {
+type DeploymentAssessmentReviewHistoryProps = {
   deploymentAssessmentId: string
   comments: DeploymentAssessmentCommentHistory[]
   reviews: DeploymentAssessmentReviewHistory[]
@@ -42,7 +42,7 @@ type DeploymentAssessmentHistoryProps = {
   mutateReviews: () => void
 }
 
-export default function DeploymentAssessmentHistory({
+export default function DeploymentAssessmentReviewHistory({
   deploymentAssessmentId,
   comments,
   reviews,
@@ -50,7 +50,7 @@ export default function DeploymentAssessmentHistory({
   isEdit,
   mutateComments,
   mutateReviews,
-}: DeploymentAssessmentHistoryProps) {
+}: DeploymentAssessmentReviewHistoryProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [newComment, setNewComment] = useState('')
   const [submissionError, setSubmissionError] = useState('')
@@ -58,9 +58,9 @@ export default function DeploymentAssessmentHistory({
   const [editingItemId, setEditingItemId] = useState<string>()
   const [editedComment, setEditedComment] = useState('')
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
-  const [selectedItem, setSelectedItem] = useState<DeploymentAssessmentHistoryItem>()
+  const [selectedItem, setSelectedItem] = useState<DeploymentAssessmentReviewHistoryItem>()
 
-  const history = useMemo<DeploymentAssessmentHistoryItem[]>(
+  const history = useMemo<DeploymentAssessmentReviewHistoryItem[]>(
     () =>
       [
         ...comments.map((item) => ({ kind: 'comment' as const, item })),
@@ -69,7 +69,7 @@ export default function DeploymentAssessmentHistory({
     [comments, reviews],
   )
 
-  function refreshHistory(kind: DeploymentAssessmentHistoryItem['kind']) {
+  function refreshHistory(kind: DeploymentAssessmentReviewHistoryItem['kind']) {
     if (kind === 'comment') {
       mutateComments()
     } else {
@@ -77,7 +77,7 @@ export default function DeploymentAssessmentHistory({
     }
   }
 
-  function openActions(event: MouseEvent<HTMLElement>, historyItem: DeploymentAssessmentHistoryItem) {
+  function openActions(event: MouseEvent<HTMLElement>, historyItem: DeploymentAssessmentReviewHistoryItem) {
     setMenuAnchor(event.currentTarget)
     setSelectedItem(historyItem)
   }
@@ -87,7 +87,7 @@ export default function DeploymentAssessmentHistory({
     setSelectedItem(undefined)
   }
 
-  function startEditing(historyItem: DeploymentAssessmentHistoryItem) {
+  function startEditing(historyItem: DeploymentAssessmentReviewHistoryItem) {
     closeActions()
     setEditingItemId(historyItem.item.id)
     setEditedComment(historyItem.item.comment ?? '')
@@ -98,7 +98,7 @@ export default function DeploymentAssessmentHistory({
     setEditedComment('')
   }
 
-  async function saveEdit(historyItem: DeploymentAssessmentHistoryItem) {
+  async function saveEdit(historyItem: DeploymentAssessmentReviewHistoryItem) {
     setSubmissionError('')
     const response = await patchResponse(historyItem.item.id, editedComment)
     if (!response.ok) {
@@ -110,7 +110,7 @@ export default function DeploymentAssessmentHistory({
     cancelEditing()
   }
 
-  function replyTo(historyItem: DeploymentAssessmentHistoryItem) {
+  function replyTo(historyItem: DeploymentAssessmentReviewHistoryItem) {
     closeActions()
     const { id: userDn } = fromEntity(historyItem.item.entity)
     const quote = `> Replying to **${userDn}** on **${formatDateString(historyItem.item.createdAt)}**\n>\n${(
