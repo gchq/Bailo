@@ -5,6 +5,7 @@ const CHAINABLE_METHODS = [
   'append',
   'at',
   'bulkWrite',
+  'countDocuments',
   'delete',
   'deleteMany',
   'deleteOne',
@@ -43,6 +44,7 @@ const QUERY_LIKE_METHODS = [
   'lookup',
   'map',
   'match',
+  'select',
   'sort',
   'unwind',
 ] as const

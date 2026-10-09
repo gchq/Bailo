@@ -17,6 +17,26 @@ from fastapi import BackgroundTasks, HTTPException, UploadFile
 EMPTY_CONTENTS = b""
 EMPTY_DIGEST = hashlib.sha256(EMPTY_CONTENTS).hexdigest()
 
+# 32MiB of zero bytes compresses down to a few KB, i.e. a tar bomb.
+BOMB_MEMBER_SIZE = 32 * 1024**2
+
+
+def build_tar_bytes(members: dict[str, bytes], compress: bool = True) -> bytes:
+    """Build an in-memory tar archive containing the given name to content mapping."""
+    buffer = BytesIO()
+    mode = "w:gz" if compress else "w"
+    with tarfile.open(fileobj=buffer, mode=mode) as tar:
+        for name, content in members.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(content)
+            tar.addfile(info, BytesIO(content))
+    return buffer.getvalue()
+
+
+def build_tar_bomb_bytes() -> bytes:
+    """Build a small compressed archive that expands to a disproportionately large filesystem."""
+    return build_tar_bytes({"bomb.bin": b"\0" * BOMB_MEMBER_SIZE})
+
 
 @pytest.mark.parametrize(
     ("file_name", "file_content"),
@@ -202,3 +222,75 @@ def test_download_database_atomic_on_failure(mock_client_cls: Mock, tmp_path: Pa
             trivy.download_database()
 
     assert sentinel.read_text() == "original", "Original DB should be preserved on failure"
+
+
+def test_safe_extract_rejects_oversized_archive(tmp_path: Path) -> None:
+    """A tar bomb is rejected before any of its contents are written to disk."""
+    target = tmp_path / "extracted"
+    target.mkdir()
+    settings = trivy.Settings(MAX_EXTRACT_BYTES=1024**2)
+
+    with (
+        patch.object(trivy, "get_settings", return_value=settings),
+        tarfile.open(fileobj=BytesIO(build_tar_bomb_bytes())) as tar,
+        pytest.raises(HTTPException) as exception,
+    ):
+        trivy.safe_extract(tar, str(target))
+
+    assert exception.value.status_code == HTTPStatus.BAD_REQUEST.value
+    assert exception.value.detail == "Invalid tar contents: extracted size exceeds limit"
+    assert list(target.iterdir()) == [], "No archive contents should have been extracted"
+
+
+def test_safe_extract_rejects_too_many_entries(tmp_path: Path) -> None:
+    """An archive with an excessive number of members is rejected."""
+    target = tmp_path / "extracted"
+    target.mkdir()
+    archive = build_tar_bytes({f"file-{index}.txt": b"x" for index in range(20)})
+    settings = trivy.Settings(MAX_EXTRACT_ENTRIES=5)
+
+    with (
+        patch.object(trivy, "get_settings", return_value=settings),
+        tarfile.open(fileobj=BytesIO(archive)) as tar,
+        pytest.raises(HTTPException) as exception,
+    ):
+        trivy.safe_extract(tar, str(target))
+
+    assert exception.value.status_code == HTTPStatus.BAD_REQUEST.value
+    assert exception.value.detail == "Invalid tar contents: too many entries"
+    assert len(list(target.iterdir())) == 5, "Only members within the entry limit should be extracted"
+
+
+def test_safe_extract_allows_archive_within_limits(tmp_path: Path) -> None:
+    """An archive comfortably within the limits extracts as normal."""
+    target = tmp_path / "extracted"
+    target.mkdir()
+    archive = build_tar_bytes({"nested/hello.txt": b"hello world"})
+
+    with (
+        patch.object(trivy, "get_settings", return_value=trivy.Settings()),
+        tarfile.open(fileobj=BytesIO(archive)) as tar,
+    ):
+        trivy.safe_extract(tar, str(target))
+
+    assert (target / "nested/hello.txt").read_bytes() == b"hello world"
+
+
+def test_scan_rejects_zip_bomb_and_cleans_up(tmp_path: Path) -> None:
+    """An uploaded tar bomb is rejected and its tmp directory is removed."""
+    archive = build_tar_bomb_bytes()
+    digest = hashlib.sha256(archive).hexdigest()
+    working_dir = tmp_path / "working"
+    working_dir.mkdir()
+    settings = trivy.Settings(TEMP_DIR=str(tmp_path), MAX_EXTRACT_BYTES=1024**2)
+
+    with (
+        patch.object(trivy, "get_settings", return_value=settings),
+        patch.object(trivy, "mkdtemp", return_value=str(working_dir)),
+        pytest.raises(HTTPException) as exception,
+    ):
+        trivy.scan(UploadFile(BytesIO(archive), filename=digest), BackgroundTasks([]))
+
+    assert exception.value.status_code == HTTPStatus.BAD_REQUEST.value
+    assert exception.value.detail == "Invalid tar contents: extracted size exceeds limit"
+    assert not working_dir.exists(), "Tmp directory should be cleaned up when extraction fails"

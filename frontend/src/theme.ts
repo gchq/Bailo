@@ -104,15 +104,14 @@ export const lightTheme = createTheme({
     MuiListItemButton: {
       styleOverrides: {
         root: {
+          borderRight: 'solid',
+          borderWidth: '2px',
+          borderColor: 'transparent',
           '&:hover': {
             backgroundColor: '#f5f5f5',
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#f7a4c0',
           },
           '&.Mui-selected': {
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#b5497d',
           },
         },
@@ -259,15 +258,14 @@ export const darkTheme = createTheme({
     MuiListItemButton: {
       styleOverrides: {
         root: {
+          borderRight: 'solid',
+          borderWidth: '2px',
+          borderColor: 'transparent',
           '&:hover': {
             backgroundColor: '#5c5c5c',
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#cbbfda',
           },
           '&.Mui-selected': {
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#b5a0ce',
           },
         },
