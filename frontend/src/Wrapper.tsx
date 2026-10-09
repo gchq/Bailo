@@ -66,8 +66,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   return (
     <>
       {uiConfig.banner.enabled && <Banner />}
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        {uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
+      <Box data-test='wrapper-layout' sx={{ display: 'flex', minHeight: '100dvh' }}>
         {currentUser && (
           <>
             <TopNavigation toggleDrawer={toggleDrawer} pageTopStyling={pageTopStyling} currentUser={currentUser} />
@@ -87,6 +86,8 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           sx={(theme) => ({
             // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
+            display: 'flex',
+            flexDirection: 'column',
             flexGrow: 1,
             minWidth: 0,
             ...theme.applyStyles('light', {
@@ -95,9 +96,17 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           })}
         >
           <Toolbar />
-          <Box sx={{ ...contentTopStyling, paddingLeft: isSmOrLarger ? 7.5 : 0 }}>
+          <Box
+            sx={{
+              ...contentTopStyling,
+              display: 'flex',
+              flexDirection: 'column',
+              flexGrow: 1,
+              paddingLeft: isSmOrLarger ? 7.5 : 0,
+            }}
+          >
             {isDocsPage ? (
-              children
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>{children}</Box>
             ) : (
               <>
                 {isCurrentUserLoading && <Loading />}
@@ -106,11 +115,16 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
                 )}
                 <Box
                   sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flexGrow: 1,
                     paddingTop: 4,
                   }}
                 >
                   <MessageAlert message={errorMessage} severity='error' />
-                  {children}
+                  <Box data-test='wrapper-page-content' sx={{ flexGrow: 1, minWidth: 0 }}>
+                    {children}
+                  </Box>
                   <Copyright sx={{ p: 2 }} />
                 </Box>
               </>

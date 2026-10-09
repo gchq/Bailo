@@ -18,6 +18,7 @@ been recorded correctly.
 > - Can I compare model cards from different models?
 > - Can I compare different versions of a model card?
 > - How do I view the differences between model cards?
+> - How do I read the highlighted changes on the comparison page?
 
 ## Selecting model cards to compare
 
@@ -39,18 +40,8 @@ The screenshot above shows two model card versions selected for comparison.
 
 ## Comparing model cards
 
-After selecting two model cards, the comparison page displays their content side by side. This allows you to identify
-differences between the selected cards.
-
-The comparison can be used to review changes to:
-
-- Model summaries
-- Intended use
-- Training methodology
-- Performance metrics
-- Known limitations
-- Lifecycle and status information
-- Other fields defined by the model card schema
+After selecting two model cards, the comparison page displays a single copy of the model card with the differences
+between the selected cards highlighted inline. Each answer shows what changed from the **From** card to the **To** card.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image
@@ -61,6 +52,29 @@ The comparison can be used to review changes to:
 </Box>
 
 The screenshot above shows the model card comparison page, where the selected model cards are displayed.
+
+## Reading the differences
+
+Changes are marked in each answer:
+
+| Marker                           | Meaning                                                           |
+| -------------------------------- | ----------------------------------------------------------------- |
+| **+** with a green highlight     | Content that appears in the **To** card but not the **From** card |
+| **-** with a red highlight       | Content that appears in the **From** card but not the **To** card |
+| No highlight                     | Content that is the same in both cards                            |
+| _Unanswered_ inside a change     | The question had no answer in that card                           |
+| _Unanswered_ without a highlight | The question has no answer in either card                         |
+
+How a change is shown depends on the type of answer:
+
+- **Text answers** - only the words that changed are highlighted, so you can see small edits within a longer answer
+- **Rich text answers** - formatting such as headings, lists, tables and links is kept, and the changed parts are
+  highlighted within it
+- **Images** - a changed item is shown in full, with the old version marked **-** and the new version marked **+**, each
+  inside a coloured frame
+- **Performance metrics** - changes to metric names and values are highlighted row by row, and metrics that were removed
+  are still listed so that you can see what was taken out
+- **Other answers**, such as dates, selections, tags and users - the old and new answers are compared as text
 
 ## Comparing versions of the same model
 
