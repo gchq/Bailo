@@ -29,6 +29,7 @@ A lightweight, Python API wrapper for Bailo, providing streamlined programmatic 
             <a href="#development">Development</a>
             <ul>
                 <li><a href="#python-setup">Python Setup</a></li>
+                <li><a href="#dependency-management">Dependency Management</a></li>
                 <li><a href="#running-tests">Running Tests</a></li>
             </ul>
         </li>
@@ -97,38 +98,58 @@ Refer to [backend/docs/README.md](https://github.com/gchq/Bailo/blob/main/backen
 
 The following steps are only required for users who wish to extend or develop the Bailo Python client locally.
 
+> **Requires:** Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
 ### Python Setup
 
 From within the `lib/python` directory:
 
 ```bash
-python3 -m venv libpythonvenv
-source libpythonvenv/bin/activate
-pip install -e .[test]
+uv sync --extra mlflow --group test
 ```
+
+This creates a `.venv` and installs the pinned dependencies from `uv.lock`. Prefix commands with
+`uv run` to use it, or activate it with `source .venv/bin/activate`.
+
+### Dependency Management
+
+`pyproject.toml` declares minimum versions only (`>=`, no upper caps), as these are what `pip install bailo` users
+resolve against. `uv.lock` pins the exact versions used in development and CI. Dependabot only raises PRs for security
+advisories. Routine upgrades are manual with `uv lock --upgrade-package <name>`, and the ruff version comes from
+`.pre-commit-config.yaml`.
+
+The `python_test_lowest` CI job runs the tests against those minimum versions on Python 3.10. If it fails, reproduce it
+locally without touching `uv.lock` or `.venv`:
+
+```bash
+uv run --python 3.10 --resolution lowest-direct --isolated --extra mlflow --group test pytest
+```
+
+Then raise the failing floor in `pyproject.toml` to the oldest version that passes, re-run the command above, and
+finish with `uv lock`.
 
 ### Running Tests
 
 To run the unit tests:
 
 ```bash
-pytest
+uv run pytest
 ```
 
 To run the integration tests (requires Bailo running on `https://localhost:8080`):
 
 ```bash
-pytest -m integration
+uv run pytest -m integration
 ```
 
 To run the mlflow integration tests (requires Bailo running on `https://localhost:8080` and mlflow running on `https://localhost:5050` e.g. via docker):
 
 ```bash
 docker run -p 5050:5000 \
-    "ghcr.io/mlflow/mlflow:v$(python -m pip show mlflow-skinny | awk '/Version:/ {print $2}')" \
+    "ghcr.io/mlflow/mlflow:v$(uv pip show mlflow-skinny | awk '/Version:/ {print $2}')" \
     mlflow server --host 0.0.0.0 --port 5000
 
-pytest -m mlflow
+uv run pytest -m mlflow
 ```
 
 <!-- MARKDOWN LINKS & IMAGES -->

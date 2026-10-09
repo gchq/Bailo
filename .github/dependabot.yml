@@ -184,58 +184,79 @@ updates:
     schedule:
       interval: 'weekly'
 
-  # Python - bailo client library
-  - package-ecosystem: 'pip'
+  # Python (uv) - security updates only. `open-pull-requests-limit: 0` disables version updates,
+  # but security updates still use this entry's settings. A vulnerable direct dependency has its
+  # pyproject.toml floor raised; a vulnerable transitive dependency changes only uv.lock.
+  # Dependabot relocks itself, so each PR keeps both files in sync.
+  - package-ecosystem: 'uv'
     directories:
       - '/lib/python'
-    schedule:
-      interval: 'weekly'
-    versioning-strategy: increase
-    open-pull-requests-limit: 10
-
-  # Python - artefactscan API
-  - package-ecosystem: 'pip'
-    directories:
-      - '/lib/artefactscan_api'
-    schedule:
-      interval: 'weekly'
-    versioning-strategy: increase
-    open-pull-requests-limit: 10
-    groups:
-      scanning-stack:
-        patterns:
-          - modelscan
-          - modelscan[*]
-          - oras
-      server-stack:
-        patterns:
-          - fastapi
-          - fastapi[*]
-          - uvicorn
-          - pydantic_settings
-          - python-multipart
-          - content-size-limit-asgi
-      testing-stack:
-        patterns:
-          - pytest
-          - pytest-*
-          - pre_commit
-
-  # Python - backend docs
-  - package-ecosystem: 'pip'
-    directories:
       - '/backend/docs'
     schedule:
       interval: 'weekly'
+    open-pull-requests-limit: 0
+    # Raise the floor past the vulnerable version so `bailo` consumers cannot resolve to it.
+    # Not `lockfile-only`, which blocks transitive security updates (dependabot-core#16449).
     versioning-strategy: increase
-    open-pull-requests-limit: 10
     groups:
-      sphinx-stack:
+      fastapi-security:
+        applies-to: security-updates
+        patterns:
+          - fastapi
+          - starlette
+      pydantic-security:
+        applies-to: security-updates
+        patterns:
+          - pydantic
+          - pydantic-core
+          - pydantic-settings
+      sphinx-security:
+        applies-to: security-updates
         patterns:
           - sphinx
           - sphinx-*
-          - myst_parser
-          - nbsphinx
+          - sphinxcontrib-*
+      pytest-security:
+        applies-to: security-updates
+        patterns:
+          - pytest
+          - pytest-*
+
+  # Python (uv) - artefactscan API ships as a Docker image, so track the latest direct dependencies
+  - package-ecosystem: 'uv'
+    directory: '/lib/artefactscan_api'
+    schedule:
+      interval: 'weekly'
+    versioning-strategy: increase
+    allow:
+      - dependency-type: 'direct'
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    groups:
+      pytest:
+        patterns:
+          - pytest
+          - pytest-*
+      fastapi-security:
+        applies-to: security-updates
+        patterns:
+          - fastapi
+          - starlette
+      pydantic-security:
+        applies-to: security-updates
+        patterns:
+          - pydantic
+          - pydantic-core
+          - pydantic-settings
+
+  # pre-commit hooks (run locally via husky)
+  - package-ecosystem: 'pre-commit'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+    cooldown:
+      default-days: 7
 
   # GitHub Actions
   - package-ecosystem: 'github-actions'

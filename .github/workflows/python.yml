@@ -24,6 +24,8 @@ jobs:
             relevant:
               - 'lib/python/**'
               - '.github/workflows/python.yml'
+              - '.pre-commit-config.yaml'
+              - 'ruff.toml'
 
   python_static_checks:
     needs: changes
@@ -33,36 +35,23 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: "3.14"
-
-      - name: Cache pip dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-static-${{ hashFiles('lib/python/pyproject.toml') }}-python3.14
-          restore-keys: |
-            ${{ runner.os }}-pip-static-python3.14
+          enable-cache: true
+          cache-dependency-glob: lib/python/uv.lock
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          cd lib/python
-          python -m pip install -e .[test]
+        working-directory: lib/python
+        run: uv sync --group test --locked
 
+      # ruff version comes from the pre-commit hook rev, so local hooks and CI cannot drift
       - name: Check formatting
-        run: |
-          cd lib/python
-          ruff format --check .
-        continue-on-error: true
+        run: uv run --project lib/python --no-sync pre-commit run ruff-format --all-files --show-diff-on-failure
 
       - name: Check linting
-        run: |
-          cd lib/python
-          ruff check src/bailo
-        continue-on-error: true
+        run: uv run --project lib/python --no-sync pre-commit run ruff-check --all-files --show-diff-on-failure
 
 
   python_test:
@@ -76,40 +65,60 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Cache pip dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-test-${{ matrix.python-version }}-${{ hashFiles('lib/python/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-test-${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: lib/python/uv.lock
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          cd lib/python
-          python -m pip install -e .[test]
+        working-directory: lib/python
+        run: uv sync --extra mlflow --group test --locked
 
       # Pytest
       - name: Run basic testing
-        run: |
-          cd lib/python
-          python -m pytest
+        working-directory: lib/python
+        run: uv run pytest
+        env:
+          PYTEST_RUN_PATH: "lib/python"
+
+  # Floors in pyproject.toml are what pip users of `bailo` can resolve to, so test them on the oldest Python version
+  python_test_lowest:
+    needs: [changes, python_static_checks]
+    if: github.ref == 'refs/heads/main' || needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.10"
+          # Lowest versions differ from the lock so keep them out of the shared cache
+          enable-cache: false
+
+      # Not `--locked` to re-resolve to the lowest direct versions
+      - name: Install lowest dependencies
+        working-directory: lib/python
+        run: uv sync --resolution lowest-direct --extra mlflow --group test
+
+      - name: Run basic testing
+        working-directory: lib/python
+        run: uv run --no-sync pytest
         env:
           PYTEST_RUN_PATH: "lib/python"
 
   # Gate job for branch protection: always runs so the required check is never left pending when the matrix is skipped
   python_test_result:
     if: always()
-    needs: [changes, python_test]
+    needs: [changes, python_test, python_test_lowest]
     runs-on: ubuntu-latest
     steps:
       - run: exit 1
         if: >-
           needs.python_test.result == 'failure'
+          || needs.python_test_lowest.result == 'failure'
           || (needs.changes.outputs.relevant == 'true' && needs.python_test.result != 'success')
+          || (needs.changes.outputs.relevant == 'true' && needs.python_test_lowest.result != 'success')
