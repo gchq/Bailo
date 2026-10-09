@@ -282,8 +282,8 @@ export async function getDeploymentAssessmentDetails(
   // Get the latest review and its corresponding responses to determine the state of this deployment assessment
   const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
 
-  // Get the latest response to derive the latest decision
-  const response = await ResponseModel.findOne({ parentId: [latestReview._id, deploymentAssessment._id] }).sort({
+  // Get the latest review response to derive the latest decision
+  const response = await ResponseModel.findOne({ parentId: latestReview._id, kind: ResponseKind.Review }).sort({
     createdAt: -1,
   })
   const latestDecision = response?.decision

@@ -71,7 +71,6 @@ export default function DeploymentAssessment() {
   } = useGetDeploymentAssessmentComments(deploymentAssessmentId)
   const {
     deploymentAssessmentReviews,
-    deploymentAssessmentReviewStatuses,
     isDeploymentAssessmentReviewsLoading,
     isDeploymentAssessmentReviewsError,
     mutateDeploymentAssessmentReviews,
@@ -216,7 +215,6 @@ export default function DeploymentAssessment() {
                     deploymentAssessmentId={deploymentAssessment.id}
                     comments={deploymentAssessmentComments}
                     reviews={deploymentAssessmentReviews}
-                    statuses={deploymentAssessmentReviewStatuses}
                     isLoading={isDeploymentAssessmentCommentsLoading || isDeploymentAssessmentReviewsLoading}
                     isEdit={isEdit}
                     mutateComments={mutateDeploymentAssessmentComments}
