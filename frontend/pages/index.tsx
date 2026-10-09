@@ -125,68 +125,8 @@ export default function Marketplace() {
 
   const searchFilter = debouncedFilter.length >= 3 ? debouncedFilter : ''
 
-  const {
-    entries: models,
-    entryErrors: modelsErrors,
-    isEntriesError: isModelsError,
-    isEntriesLoading: isModelsLoading,
-  } = useListEntries(
-    EntryKind.MODEL,
-    selectedRoles,
-    '',
-    selectedTags,
-    selectedOrganisations,
-    selectedStates,
-    selectedPeers,
-    searchFilter,
-    false,
-    '',
-    titleOnly,
-  )
-
-  const {
-    entries: dataCards,
-    entryErrors: dataCardsErrors,
-    isEntriesError: isDataCardsError,
-    isEntriesLoading: isDataCardsLoading,
-  } = useListEntries(
-    EntryKind.DATA_CARD,
-    selectedRoles,
-    '',
-    selectedTags,
-    selectedOrganisations,
-    selectedStates,
-    selectedPeers,
-    searchFilter,
-    false,
-    '',
-    titleOnly,
-  )
-
-  const {
-    entries: mirroredModels,
-    isEntriesError: isMirroredModelsError,
-    isEntriesLoading: isMirroredModelsLoading,
-  } = useListEntries(
-    EntryKind.MIRRORED_MODEL,
-    selectedRoles,
-    '',
-    selectedTags,
-    selectedOrganisations,
-    selectedStates,
-    selectedPeers,
-    searchFilter,
-    false,
-    '',
-    titleOnly,
-  )
-
-  const {
-    entries: untrustedModels,
-    isEntriesError: isUntrustedModelsError,
-    isEntriesLoading: isUntrustedModelsLoading,
-  } = useListEntries(
-    EntryKind.UNTRUSTED_MODEL,
+  const { entries, entryErrors, isEntriesError, isEntriesLoading } = useListEntries(
+    [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL, EntryKind.DATA_CARD],
     selectedRoles,
     '',
     selectedTags,
@@ -344,29 +284,27 @@ export default function Marketplace() {
 
   const filteredModels = useMemo(() => {
     return [
-      ...(selectedKinds.includes(EntryKind.MODEL) ? models : []),
+      ...(selectedKinds.includes(EntryKind.MODEL) ? entries.filter((model) => model.kind === EntryKind.MODEL) : []),
       ...(availableModelKinds.includes(EntryKind.MIRRORED_MODEL) && selectedKinds.includes(EntryKind.MIRRORED_MODEL)
-        ? mirroredModels
+        ? entries.filter((model) => model.kind === EntryKind.MIRRORED_MODEL)
         : []),
       ...(availableModelKinds.includes(EntryKind.UNTRUSTED_MODEL) && selectedKinds.includes(EntryKind.UNTRUSTED_MODEL)
-        ? untrustedModels
+        ? entries.filter((model) => model.kind === EntryKind.UNTRUSTED_MODEL)
         : []),
     ]
-  }, [models, mirroredModels, untrustedModels, selectedKinds, availableModelKinds])
+  }, [entries, selectedKinds, availableModelKinds])
+
+  const dataCards = useMemo(() => {
+    return entries.filter((entry) => entry.kind === EntryKind.DATA_CARD)
+  }, [entries])
 
   const combinedModelErrorMessage = useMemo(() => {
     let errorMessage = ''
-    if (isModelsError) {
-      errorMessage += `${isModelsError.info.message}. `
-    }
-    if (isMirroredModelsError) {
-      errorMessage += `${isMirroredModelsError.info.message}. `
-    }
-    if (isUntrustedModelsError) {
-      errorMessage += `${isUntrustedModelsError.info.message}. `
+    if (isEntriesError) {
+      errorMessage += `${isEntriesError.info.message}. `
     }
     return errorMessage
-  }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
+  }, [isEntriesError])
 
   if (isReviewRolesLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
@@ -586,22 +524,20 @@ export default function Marketplace() {
                   variant='scrollable'
                 >
                   <Tab
-                    label={`Models ${models ? `(${filteredModels.length})` : ''}`}
+                    label={`Models ${entries ? `(${filteredModels.length})` : ''}`}
                     value={EntryKind.MODEL}
                     onClick={() => setSelectedTab(EntryKind.MODEL)}
                   />
                   <Tab
-                    label={`Data Cards ${dataCards ? `(${dataCards.length})` : ''}`}
+                    label={`Data Cards ${dataCards.length}`}
                     value={EntryKind.DATA_CARD}
                     onClick={() => setSelectedTab(EntryKind.DATA_CARD)}
                   />
                 </Tabs>
               </Box>
-              {(isModelsLoading ||
-                (isMirroredModelEnabled && isMirroredModelsLoading) ||
-                (isUntrustedModelEnabled && isUntrustedModelsLoading)) && <Loading />}
-              {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
-              {!isModelsLoading && selectedTab === EntryKind.MODEL && (
+              {isEntriesLoading && <Loading />}
+              {entryErrors && MultipleErrorWrapper('Error with model search', entryErrors)}
+              {!isEntriesLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
                     entries={filteredModels}
@@ -622,13 +558,13 @@ export default function Marketplace() {
                 </div>
               )}
               {selectedTab === EntryKind.DATA_CARD &&
-                dataCardsErrors &&
-                MultipleErrorWrapper('Error with data-card search', dataCardsErrors)}
-              {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
+                entryErrors &&
+                MultipleErrorWrapper('Error with data-card search', entryErrors)}
+              {!isEntriesLoading && selectedTab === EntryKind.DATA_CARD && (
                 <div data-test='dataCardListBox'>
                   <EntryList
                     entries={dataCards}
-                    entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
+                    entriesErrorMessage={entryErrors ? entryErrors.info.message : ''}
                     selectedChips={selectedTags}
                     onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}
