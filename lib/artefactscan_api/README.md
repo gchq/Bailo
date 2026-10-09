@@ -1,6 +1,6 @@
 # ArtefactScan REST API
 
-![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
+![Python](https://img.shields.io/badge/python-3.12-blue.svg?style=for-the-badge)
 ![Version](https://img.shields.io/badge/version-4.1.0-orange.svg?style=for-the-badge)
 [![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
@@ -23,7 +23,7 @@ The built ArtefactScan image is published to [GHCR bailo_artefactscan](https://g
 
 ## Quickstart
 
-> **Requires:** Docker, Python 3.10 to 3.12 (local dev only)
+> **Requires:** Docker, Python 3.12.11+ (local dev only)
 
 ### Build and Run via Docker
 
