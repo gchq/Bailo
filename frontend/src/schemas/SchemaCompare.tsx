@@ -1,18 +1,15 @@
-import SwapHoriz from '@mui/icons-material/SwapHoriz'
-import SwapVert from '@mui/icons-material/SwapVert'
-import { Autocomplete, Container, Stack, TextField, Typography, useMediaQuery } from '@mui/material'
+import { Autocomplete, Container, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
+import ComparisonSwapButton from 'src/common/ComparisonSwapButton'
 import renderQueryState from 'src/common/renderQueryState'
 import { SchemaInterface } from 'types/types'
 
 export default function SchemaCompare() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
   const theme = useTheme()
-
-  const isMdOrLarger = useMediaQuery(theme.breakpoints.up('lg'))
 
   const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>(null)
   const [afterSchema, setAfterSchema] = useState<SchemaInterface | null>(null)
@@ -24,6 +21,12 @@ export default function SchemaCompare() {
   const handleAfterSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
     setAfterSchema(newValue)
   }, [])
+
+  const flipComparison = () => {
+    const oldSchema = beforeSchema
+    setBeforeSchema(afterSchema)
+    setAfterSchema(oldSchema)
+  }
 
   const schemaDiff = useMemo(() => {
     if (beforeSchema && afterSchema) {
@@ -75,11 +78,12 @@ export default function SchemaCompare() {
             renderInput={(params) => <TextField {...params} label='Source schema' />}
             onChange={handleBeforeSchemaChange}
           />
-          {isMdOrLarger ? (
-            <SwapHoriz color='primary' fontSize='large' aria-label='Compare arrow' />
-          ) : (
-            <SwapVert color='primary' fontSize='large' aria-label='Compare arrow' />
-          )}
+          <ComparisonSwapButton
+            label='schema'
+            onClick={flipComparison}
+            disabled={!beforeSchema || !afterSchema}
+            breakpoint='lg'
+          />
           <Autocomplete
             disablePortal
             options={schemas}

@@ -1,6 +1,6 @@
-import { vi } from 'vitest'
+import { type Mock, vi } from 'vitest'
 
-const audit = {
+const audit: Record<string, Mock> = {
   onCreateModel: vi.fn(),
   onViewModel: vi.fn(),
   onSearchModel: vi.fn(),

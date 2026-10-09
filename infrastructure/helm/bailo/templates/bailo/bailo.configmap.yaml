@@ -327,6 +327,7 @@ data:
         schemaLocation: '{{ .Values.stroom.schemaLocation }}',
         version: '{{ .Values.stroom.version }}',
         headers: {{ toJson .Values.stroom.headers }},
+        batchSizeLimit: {{ .Values.stroom.batchSizeLimit }},
       },
 
       llm: {

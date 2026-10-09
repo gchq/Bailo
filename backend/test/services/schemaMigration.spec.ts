@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind } from '../../src/models/Model.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
@@ -156,6 +157,24 @@ describe('services > schemaMigration', () => {
       draft: true,
     })
     expect(SchemaMigrationModelMock.save).toHaveBeenCalled()
+  })
+
+  test('update migration > not authorised', async () => {
+    vi.mocked(authorisation.schemaMigration).mockResolvedValueOnce({
+      id: testSchemaMigration.id,
+      success: false,
+      info: 'You cannot upload or modify a schema migration if you are not an admin.',
+    })
+
+    await expect(() =>
+      updateSchemaMigrationPlan(testUser, '1241', {
+        name: 'my migration plan',
+        description: 'This is a test migration plan',
+        questionMigrations: [],
+        draft: true,
+      }),
+    ).rejects.toThrow(/^You cannot upload or modify a schema migration if you are not an admin./)
+    expect(SchemaMigrationModelMock.save).not.toHaveBeenCalled()
   })
 
   test('update migration > not found', async () => {

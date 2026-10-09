@@ -189,7 +189,9 @@ export class StroomAuditConnector extends BaseAuditConnector {
     super()
     this.hostIP = this.getHostDeviceIP()[0] ?? '0.0.0.0'
     setInterval(() => {
-      processBatch()
+      processBatch().catch((err) => {
+        log.error({ err }, 'Failed to process batch of STROOM events.')
+      })
     }, config.stroom.interval)
   }
 
