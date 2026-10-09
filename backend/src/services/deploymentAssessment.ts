@@ -11,10 +11,12 @@ import DeploymentAssessmentModel, {
   DeploymentAssessmentStateKeys,
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
-import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
+import ResponseModel, { Decision, DecisionKeys, ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import {
+  findDeploymentAssessmentComments,
+  findDeploymentAssessmentReviews,
   findDeploymentAssessments,
   findLatestDecisionsByAssessmentIds,
   SearchDeploymentAssessmentsParams,
@@ -47,7 +49,6 @@ export type { SearchDeploymentAssessmentsParams }
 
 export interface DeploymentAssessmentDetails {
   deploymentAssessment: DeploymentAssessmentDoc
-  responses: ResponseInterface[]
   state?: DeploymentAssessmentStateKeys
 }
 
@@ -275,21 +276,22 @@ export async function getDeploymentAssessmentDetails(
   if (deploymentAssessment.draft === true) {
     return {
       deploymentAssessment,
-      responses: [],
     }
   }
 
   // Get the latest review and its corresponding responses to determine the state of this deployment assessment
   const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
-  const responses = await ResponseModel.find({ parentId: [latestReview._id, deploymentAssessment._id] })
 
-  const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
-    DecisionKeys | undefined
+  // Get the latest review response to derive the latest decision
+  const response = await ResponseModel.findOne({ parentId: latestReview._id, kind: ResponseKind.Review }).sort({
+    createdAt: -1,
+  })
+  const latestDecision = response?.decision
+
   const state = deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
 
   return {
     deploymentAssessment,
-    responses,
     state,
   }
 }
@@ -305,6 +307,16 @@ async function getLatestDeploymentAssessmentReview(deploymentAssessmentId: strin
   }
 
   return review
+}
+
+export async function getCommentsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
+  await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  return findDeploymentAssessmentComments(deploymentAssessmentId)
+}
+
+export async function getReviewsByDeploymentAssessmentId(user: UserInterface, deploymentAssessmentId: string) {
+  await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  return findDeploymentAssessmentReviews(deploymentAssessmentId)
 }
 
 export async function commentOnDeploymentAssessment(

@@ -371,25 +371,24 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('returns authorised comments and review history', async () => {
-      const reviewResponses = [
-        {
-          _id: { toString: () => 'response-id' },
-          kind: ResponseKind.Review,
-          decision: Decision.Approve,
-          createdAt: '2026-01-02T00:00:00.000Z',
-        },
-      ]
+      const reviewResponse = {
+        _id: { toString: () => 'response-id' },
+        kind: ResponseKind.Review,
+        decision: Decision.Approve,
+        createdAt: '2026-01-02T00:00:00.000Z',
+      }
+
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
       ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
-      ResponseModelMock.find.mockResolvedValueOnce(reviewResponses)
+      ResponseModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(reviewResponse) })
 
       await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, assessment.id)).resolves.toEqual({
         deploymentAssessment: assessment,
-        responses: reviewResponses,
         state: 'approved',
       })
-      expect(ResponseModelMock.find).toHaveBeenCalledWith({
-        parentId: [review._id, assessment._id],
+      expect(ResponseModelMock.findOne).toHaveBeenCalledWith({
+        parentId: review._id,
+        kind: ResponseKind.Review,
       })
     })
 

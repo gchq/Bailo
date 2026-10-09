@@ -249,7 +249,7 @@ export async function postDeploymentAssessmentReviewResponse({
   decision,
 }: postDeploymentAssessmentReviewResponseParams) {
   const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
-  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/review`, {
+  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/reviews`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment, decision }),

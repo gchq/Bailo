@@ -5,7 +5,11 @@ import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { Decision } from '../../../models/Response.js'
 import { reviewDeploymentAssessment } from '../../../services/deploymentAssessment.js'
-import { deploymentAssessmentResponseSchema, registerPath } from '../../../services/specification.js'
+import {
+  DeploymentAssessmentReviewHistory,
+  deploymentAssessmentReviewHistorySchema,
+  registerPath,
+} from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postDeploymentAssessmentReviewSchema = z.object({
@@ -24,22 +28,22 @@ export const postDeploymentAssessmentReviewSchema = z.object({
 registerPath(
   {
     method: 'post',
-    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/review',
+    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/reviews',
     tags: ['deployment assessments'],
     description: 'Create a formal deployment risk owner decision',
     schema: postDeploymentAssessmentReviewSchema,
     responses: {
       201: {
         description: 'The created formal review response.',
-        content: { 'application/json': { schema: z.object({ response: deploymentAssessmentResponseSchema }) } },
+        content: { 'application/json': { schema: deploymentAssessmentReviewHistorySchema } },
       },
     },
   },
   'v3',
 )
 
-export const postDeploymentAssessmentReview = [
-  async (req: Request, res: Response): Promise<void> => {
+export const postDeploymentAssessmentReviews = [
+  async (req: Request, res: Response<DeploymentAssessmentReviewHistory>): Promise<void> => {
     req.audit = AuditInfo.ReviewDeploymentAssessment
     const { params, body } = parse(req, postDeploymentAssessmentReviewSchema)
     const response = await reviewDeploymentAssessment(
@@ -49,6 +53,16 @@ export const postDeploymentAssessmentReview = [
       body.comment,
     )
     await audit.onReviewDeploymentAssessment(req, response)
-    res.status(201).json({ response })
+    res.status(201).json({
+      id: response._id.toString(),
+      entity: response.entity,
+      decision: body.decision,
+      ...(response.comment && { comment: response.comment }),
+      reactions: response.reactions ?? [],
+      ...(response.commentEditedAt && { commentEditedAt: response.commentEditedAt }),
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      outdated: false,
+    })
   },
 ]
