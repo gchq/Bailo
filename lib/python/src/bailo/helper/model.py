@@ -5,15 +5,16 @@ import os
 import shutil
 import tempfile
 import warnings
-from typing import Any
+from typing import Any, ClassVar
 
 from semantic_version import Version
 
 from bailo.core.client import Client
+from bailo.core.entry import Entry
 from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
-from bailo.helper.entry import Entry
+from bailo.helper.entry import ReleaseMixin
 from bailo.helper.release import Release
 
 try:
@@ -26,7 +27,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class Model(Entry):
+class Model(ReleaseMixin, Entry):
     """Represent a model within Bailo.
 
     :param client: A client object used to interact with Bailo
@@ -39,6 +40,9 @@ class Model(Entry):
     :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
+
+    entry_kind: ClassVar[EntryKind] = EntryKind.MODEL
+    _id_alias: ClassVar[str] = "model_id"
 
     def __init__(
         self,
@@ -65,60 +69,6 @@ class Model(Entry):
             collaborators=collaborators,
         )
 
-        self.model_id = model_id
-
-    @classmethod
-    def create(
-        cls,
-        client: Client,
-        name: str,
-        description: str,
-        organisation: str | None = None,
-        state: str | None = None,
-        tags: list[str] | None = None,
-        collaborators: list[CollaboratorEntry] | None = None,
-        visibility: ModelVisibility | None = None,
-    ) -> Model:
-        """Build a model from Bailo and upload it.
-
-        :param client: A client object used to interact with Bailo
-        :param name: Name of model
-        :param description: Description of model
-        :param organisation: Organisation responsible for the model, defaults to None
-        :param state: Development readiness of the model, defaults to None
-        :param tags: Tags to assign to the model, defaults to None
-        :param collaborators: List of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
-        :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
-        :return: Model object
-        """
-        res = client.post_model(
-            name=name,
-            kind=EntryKind.MODEL,
-            description=description,
-            visibility=visibility,
-            organisation=organisation,
-            state=state,
-            collaborators=collaborators,
-        )
-        model_id = res["model"]["id"]
-        logger.info("Model successfully created on server with ID %s.", model_id)
-
-        model = cls(
-            client=client,
-            model_id=model_id,
-            name=name,
-            description=description,
-            visibility=visibility,
-            organisation=organisation,
-            state=state,
-            tags=tags,
-            collaborators=collaborators,
-        )
-
-        model._unpack(res["model"])
-
-        return model
-
     @classmethod
     def from_id(cls, client: Client, model_id: str) -> Model:
         """Return an existing model from Bailo.
@@ -127,101 +77,7 @@ class Model(Entry):
         :param model_id: A unique model ID
         :return: A model object
         """
-        res = client.get_model(model_id=model_id)["model"]
-        if res["kind"] != "model":
-            raise BailoException(f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?")
-
-        logger.info("Model %s successfully retrieved from server.", model_id)
-
-        model = cls(
-            client=client,
-            model_id=model_id,
-            name=res["name"],
-            description=res["description"],
-            collaborators=res["collaborators"],
-            organisation=res.get("organisation"),
-            state=res.get("state"),
-            tags=res.get("tags"),
-        )
-
-        model._unpack(res)
-        model.get_card_latest()
-
-        return model
-
-    @classmethod
-    def search(
-        cls,
-        client: Client,
-        task: str | None = None,
-        libraries: list[str] | None = None,
-        filters: list[str] | None = None,
-        search: str = "",
-        organisations: list[str] | None = None,
-        states: list[str] | None = None,
-        allow_templating: bool | None = None,
-        schema_id: str | None = None,
-        admin_access: bool | None = None,
-        peers: list[str] | None = None,
-        title_only: bool | None = None,
-    ) -> list[Model]:
-        """Return a list of model objects from Bailo, based on search parameters.
-
-        :param client: A client object used to interact with Bailo
-        :param task: Model task (e.g. image classification), defaults to None
-        :param libraries: Model library (e.g. TensorFlow), defaults to None
-        :param filters: List of collaborator role filters. Special value `"mine"` restricts results to
-            models where the current user is a collaborator. Otherwise, values are treated as collaborator
-            roles, defaults to None
-        :param search: Free-text search string. Always performs a partial, case-insensitive match against
-            the model name. If `title_only` is False, a full-text search across model content is also
-            performed, defaults to ""
-        :param organisations: List of organisation identifiers to restrict results, defaults to None
-        :param states: List of model lifecycle states to restrict results, defaults to None
-        :param allow_templating: If True, restricts results to models with templating enabled, defaults to None
-        :param schema_id: Schema ID to restrict results to models using that schema, defaults to None
-        :param admin_access: If True, returns models requiring admin access. The caller must
-            have the Admin role or the request will be rejected by the backend, defaults to None
-        :param peers: List of peer identifiers to include remote search results from, defaults to None
-        :param title_only: If True, limits searching to model titles only and disables
-            full-text search, defaults to None
-        :return: List of model objects
-        """
-        res = client.get_models(
-            task=task,
-            libraries=libraries,
-            filters=filters,
-            search=search,
-            kind=EntryKind.MODEL,
-            organisations=organisations,
-            states=states,
-            allow_templating=allow_templating,
-            schema_id=schema_id,
-            admin_access=admin_access,
-            peers=peers,
-            title_only=title_only,
-        )
-        models: list[Model] = []
-
-        for model_data in res["models"]:
-            model_obj = cls(
-                client=client,
-                model_id=model_data["id"],
-                name=model_data["name"],
-                description=model_data["description"],
-                collaborators=model_data["collaborators"],
-                organisation=model_data.get("organisation"),
-                state=model_data.get("state"),
-                tags=model_data.get("tags"),
-            )
-            model_obj._unpack(model_data)
-
-            if "card" in model_data:
-                model_obj._unpack_card(model_data["card"])
-
-            models.append(model_obj)
-
-        return models
+        return cls._from_id(client, model_id)
 
     @classmethod
     def from_mlflow(
@@ -277,22 +133,8 @@ class Model(Entry):
 
         name = sel_model.name
         description = str(sel_model.description) + " Imported from MLFlow."
-        bailo_res = client.post_model(
-            name=name,
-            kind=EntryKind.MODEL,
-            description=description,
-            visibility=visibility,
-            organisation=organisation,
-            state=state,
-            tags=tags,
-            collaborators=collaborators,
-        )
-        model_id = bailo_res["model"]["id"]
-        logger.info("MLFlow model successfully imported to Bailo with ID %s", model_id)
-
-        model = cls(
+        model = cls.create(
             client=client,
-            model_id=model_id,
             name=name,
             description=description,
             visibility=visibility,
@@ -301,7 +143,7 @@ class Model(Entry):
             tags=tags,
             collaborators=collaborators,
         )
-        model._unpack(bailo_res["model"])
+        logger.info("MLFlow model successfully imported to Bailo with ID %s", model.id)
 
         if files:
             model.card_from_schema(schema_id=schema_id)
@@ -375,126 +217,53 @@ class Model(Entry):
             )
         raise BailoException("Create a model card before creating a release")
 
-    def get_releases(self) -> list[Release]:
-        """Get all releases for the model.
-
-        :return: List of Release objects
-        """
-        res = self.client.get_all_releases(model_id=self.model_id)
-        releases = []
-
-        for release in res["releases"]:
-            releases.append(self.get_release(version=release["semver"]))
-
-        logger.info("Successfully retrieved all releases for model %s.", self.model_id)
-
-        return releases
-
-    def get_release(self, version: Version | str) -> Release:
-        """Call the Release.from_version method to return an existing release from Bailo.
-
-        :param version: A semantic version for the release
-        :return: Release object
-        """
-        return Release.from_version(self.client, self.model_id, version)
-
-    def get_latest_release(self):
-        """Get the latest release for the model from Bailo.
-
-        :return: Release object
-        """
-        releases = self.get_releases()
-        if not releases:
-            raise BailoException("This model has no releases.")
-
-        latest_release = max(releases)
-        logger.info(
-            "latest_release (%s) for %s retrieved successfully.",
-            str(latest_release.version),
-            self.model_id,
-        )
-
-        return max(releases)
-
-    def get_images(self):
-        """Get all model image references for the model.
-
-        :return: List of images
-        """
-        res = self.client.get_all_images(model_id=self.model_id)
-
-        logger.info("Images for %s retrieved successfully.", self.model_id)
-
-        return res["images"]
-
-    def get_image(self):
-        """Get a model image reference.
-
-        :raises NotImplementedError: Not implemented error.
-        """
-        raise NotImplementedError
-
     @property
-    def model_card(self):
+    def model_card(self) -> dict[str, Any] | None:
         """Get the data of the model card.
 
         :return: Model card data.
         """
-        return self._card
+        return self.card
 
     @model_card.setter
-    def model_card(self, value):
+    def model_card(self, value: dict[str, Any] | None) -> None:
         """Set the data of the model card.
 
         :param value: The data to set.
         """
-        self._card = value
+        self.card = value
 
     @property
-    def model_card_version(self):
+    def model_card_version(self) -> int | None:
         """Get the version of the model card.
 
         :return: Model card version.
         """
-        return self._card_version
+        return self.card_version
 
     @model_card_version.setter
-    def model_card_version(self, value):
+    def model_card_version(self, value: int | None) -> None:
         """Set the version of the model card.
 
         :param value: The version to set.
         """
-        self._card_version = value
+        self.card_version = value
 
     @property
-    def model_card_schema(self):
+    def model_card_schema(self) -> str | None:
         """Get the schema of the model card.
 
         :return: Model card schema.
         """
-        return self._card_schema
+        return self.card_schema
 
     @model_card_schema.setter
-    def model_card_schema(self, value):
+    def model_card_schema(self, value: str | None) -> None:
         """Set the schema of the model card.
 
         :param value: The schema to set.
         """
-        self._card_schema = value
-
-    def __repr__(self) -> str:
-        """Return a developer-oriented string representation of the model.
-
-        :return: String representation with class and ID
-        """
-        return f"{self.__class__.__name__}({str(self)})"
-
-    def __str__(self) -> str:
-        """Return the human-readable string representation of the model.
-
-        :return: String representation of the model.
-        """
-        return f"{self.model_id}"
+        self.card_schema = value
 
 
 class Experiment:
