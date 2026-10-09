@@ -11,7 +11,7 @@ import subprocess
 import tarfile
 from functools import lru_cache
 from http import HTTPStatus
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from tempfile import mkdtemp
 from typing import Any
 
@@ -46,15 +46,23 @@ def get_trivy_version() -> str:
     return "unknown"
 
 
+def _is_safe_member_name(name: str) -> bool:
+    """Lexically check that a member name stays within the extraction directory, without touching the filesystem."""
+    member_path = PurePosixPath(name)
+    return bool(name) and not member_path.is_absolute() and ".." not in member_path.parts
+
+
 def safe_extract(
     tar: tarfile.TarFile,
     path: str,
     max_bytes: int | None = None,
     max_entries: int | None = None,
 ) -> None:
-    """tar.extractall is vulnerable to relative path relative.
+    """Extract only regular files and directories from an untrusted tar archive.
 
-    See [here](https://docs.python.org/3/library/tarfile.html#tarfile-extraction-filter)
+    Symlinks, hardlinks and special files are skipped so no later member can be redirected outside ``path``. Path checks
+    are lexical because ``realpath`` based checks can be bypassed (CVE-2025-4517). The stdlib ``data`` filter is applied
+    as a second layer and also strips unsafe permission bits.
 
     Extraction is also bound by a total uncompressed size and entry count so that a small
     compressed archive cannot expand into a disproportionately large filesystem (a tar bomb).
@@ -68,7 +76,6 @@ def safe_extract(
     max_bytes = settings.MAX_EXTRACT_BYTES if max_bytes is None else max_bytes
     max_entries = settings.MAX_EXTRACT_ENTRIES if max_entries is None else max_entries
 
-    base = Path(path).resolve()
     total_bytes = 0
 
     # Iterate so an oversized archive is rejected at the offending member instead of after every
@@ -82,13 +89,18 @@ def safe_extract(
         if total_bytes > max_bytes:
             raise HTTPException(400, "Invalid tar contents: extracted size exceeds limit")
 
-        # Create a PurePath where relative links `..` are resolved
-        member_path = (base / member.name).resolve()
-
-        if not member_path.is_relative_to(base):
+        if not _is_safe_member_name(member.name):
             raise HTTPException(400, "Invalid tar contents")
 
-        tar.extract(member, path)
+        # Trivy only analyses regular files, so links and special files are not needed for scanning
+        if not (member.isreg() or member.isdir()):
+            logger.debug("Skipping non-regular tar member %s", member.name)
+            continue
+
+        try:
+            tar.extract(member, path, filter="data")
+        except tarfile.FilterError as exception:
+            raise HTTPException(400, "Invalid tar contents") from exception
 
 
 class Settings(BaseSettings):
