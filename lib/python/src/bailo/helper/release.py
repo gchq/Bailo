@@ -135,29 +135,40 @@ class Release:
         """
         res = client.get_release(model_id, str(version))["release"]
 
-        model_card_version = res["modelCardVersion"]
-        notes = res["notes"]
-        files = res["fileIds"]
-        images = res["images"]
-        minor = res["minor"]
-        draft = res["draft"]
-
         logger.info(
             "Release %s of model ID %s successfully retrieved from server.",
             str(version),
             model_id,
         )
 
+        return cls._from_json(client, model_id, res, version)
+
+    @classmethod
+    def _from_json(
+        cls,
+        client: Client,
+        model_id: str,
+        res: dict[str, Any],
+        version: Version | str | None = None,
+    ) -> Release:
+        """Build a release from a release object in an API response.
+
+        :param client: A client object used to interact with Bailo
+        :param model_id: A Unique Model ID
+        :param res: A single release object from an API response
+        :param version: Version to use in place of the response's ``semver``, defaults to None
+        :return: Release object
+        """
         return cls(
             client,
             model_id,
-            version,
-            model_card_version,
-            notes,
-            files,
-            images,
-            minor,
-            draft,
+            version if version is not None else res["semver"],
+            res["modelCardVersion"],
+            res["notes"],
+            res["fileIds"],
+            res["images"],
+            res["minor"],
+            res["draft"],
         )
 
     def download(self, filename: str, write: bool = True, path: str | None = None) -> Any:
