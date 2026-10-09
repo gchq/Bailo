@@ -154,35 +154,37 @@ export default function ReleaseReview() {
     <>
       <Title text={semver ? semver : 'Loading...'} />
       <Container maxWidth='xl'>
-        <Stack spacing={2}>
-          <Paper sx={{ p: 2 }}>
-            <Stack direction='row' sx={{ justifyContent: 'space-between' }}>
-              <Stack
-                spacing={2}
-                sx={{ alignItems: 'center' }}
-                direction='row'
-                divider={<Divider flexItem orientation='vertical' />}
-              >
-                <Link href={`/model/${modelId}/release/${semver}`}>
-                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                    Back to release
-                  </Button>
-                </Link>
-                <Typography variant='h6' component='h1' color='primary'>
-                  Reviewing release <span style={{ fontWeight: 'bold' }}>{release.semver}</span> for{' '}
-                  <span style={{ fontWeight: 'bold' }}>{model.name}</span>
-                </Typography>
-              </Stack>
-              <ReviewPopper
-                reviews={reviews}
-                onSubmit={handleSubmit}
-                includeDueDate={false}
-                isLoading={isReviewButtonLoading}
-                errorMessage={errorMessage}
-              />
+        <Paper>
+          <Stack direction='row' sx={{ justifyContent: 'space-between', p: 2 }}>
+            <Stack
+              spacing={2}
+              sx={{ alignItems: 'center' }}
+              direction='row'
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              <Link href={`/model/${modelId}/release/${semver}`}>
+                <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                  Back to release
+                </Button>
+              </Link>
+              <Typography variant='h6' component='h1' color='primary'>
+                Reviewing release <span style={{ fontWeight: 'bold' }}>{release.semver}</span> for{' '}
+                <span style={{ fontWeight: 'bold' }}>{model.name}</span>
+              </Typography>
             </Stack>
-          </Paper>
-          <Stack direction={{ md: 'column', lg: 'row' }} spacing={2}>
+            <ReviewPopper
+              reviews={reviews}
+              onSubmit={handleSubmit}
+              includeDueDate={false}
+              isLoading={isReviewButtonLoading}
+              errorMessage={errorMessage}
+            />
+          </Stack>
+          <Divider />
+          <Stack
+            direction={{ md: 'column', lg: 'row' }}
+            divider={<Divider flexItem orientation={isLgOrLarger ? 'vertical' : 'horizontal'} />}
+          >
             <Paper sx={{ p: 4, width: isLgOrLarger ? '40%' : '100%' }}>
               <Stack spacing={2}>
                 <Stack spacing={1}>
@@ -253,7 +255,7 @@ export default function ReleaseReview() {
               </Box>
             </Paper>
           </Stack>
-        </Stack>
+        </Paper>
       </Container>
     </>
   )
