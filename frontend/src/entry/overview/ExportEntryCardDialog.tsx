@@ -26,6 +26,7 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
         liveValidate
         omitExtraData
         liveOmit
+        experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
         formContext={{
           formSchema: currentStep.schema,
         }}
