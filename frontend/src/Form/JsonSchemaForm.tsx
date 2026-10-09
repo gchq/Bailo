@@ -315,6 +315,7 @@ export default function JsonSchemaForm({
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
             liveOmit
+            experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
             formContext={{
               editMode: canEdit,
               formSchema: currentStep.schema,
