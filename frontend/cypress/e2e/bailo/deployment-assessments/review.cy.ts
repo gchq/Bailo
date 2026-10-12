@@ -81,7 +81,7 @@ describe('Create and review a deployment assessment', () => {
     cy.log('Requesting changes on the deployment assessment')
     cy.request({
       method: 'POST',
-      url: `/api/v3/deployment-assessments/${publishedAssessmentId}/review`,
+      url: `/api/v3/deployment-assessments/${publishedAssessmentId}/reviews`,
       body: {
         decision: 'request_changes',
         comment: 'Please address the issues identified in this assessment.',
@@ -116,7 +116,7 @@ describe('Create and review a deployment assessment', () => {
 
     cy.request({
       method: 'POST',
-      url: `/api/v3/deployment-assessments/${draftAssessmentId}/review`,
+      url: `/api/v3/deployment-assessments/${draftAssessmentId}/reviews`,
       failOnStatusCode: false,
       body: { decision: 'approve', comment: '' },
     }).then((response) => {
