@@ -55,6 +55,6 @@ Here are some things you can do to make this all smoother:
 
 ## After approval
 
-- Once your PR has been approved and all required checks have passed, **you are expected to merge it yourself**.
+- Once your PR has been approved and all required checks have passed, **the Bailo team will merge it**.
 - Make sure your branch is **up to date** with the target branch before merging.
 - If you cannot merge (e.g., due to permissions or technical issues), please inform the maintainers.
