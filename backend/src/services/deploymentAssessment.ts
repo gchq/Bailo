@@ -273,9 +273,10 @@ export async function getDeploymentAssessmentDetails(
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
 
   if (deploymentAssessment.draft === true) {
+    const responses = await ResponseModel.find({ parentId: deploymentAssessment._id })
     return {
       deploymentAssessment,
-      responses: [],
+      responses,
     }
   }
 
