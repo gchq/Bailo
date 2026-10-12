@@ -5,6 +5,5 @@ exports[`routes > v3 > deploymentAssessment > getDeploymentAssessment > 200 > ok
   "deploymentAssessment": {
     "id": "assessment-id",
   },
-  "responses": [],
 }
 `;

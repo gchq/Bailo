@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > v3 > deploymentAssessment > getDeploymentAssessmentComments > 200 > ok 1`] = `
+{
+  "comments": [
+    {
+      "comment": "A comment",
+      "commentEditedAt": "2026-01-02T00:00:00.000Z",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "entity": "user:commenter",
+      "id": "comment-id",
+      "reactions": [
+        {
+          "kind": "like",
+          "users": [
+            "user:reactor",
+          ],
+        },
+      ],
+      "updatedAt": "2026-01-02T00:00:00.000Z",
+    },
+  ],
+  "id": "assessment-id",
+  "name": "Assessment",
+}
+`;
