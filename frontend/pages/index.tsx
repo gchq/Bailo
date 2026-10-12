@@ -529,7 +529,7 @@ export default function Marketplace() {
                     onClick={() => setSelectedTab(EntryKind.MODEL)}
                   />
                   <Tab
-                    label={`Data Cards ${dataCards.length}`}
+                    label={`Data Cards (${dataCards.length})`}
                     value={EntryKind.DATA_CARD}
                     onClick={() => setSelectedTab(EntryKind.DATA_CARD)}
                   />
