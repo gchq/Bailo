@@ -11,9 +11,7 @@ import {
   Paper,
   Stack,
   Typography,
-  useMediaQuery,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { useGetModel } from 'actions/entry'
 import { useGetRelease, useGetReleasesForModelId } from 'actions/release'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
@@ -58,10 +56,7 @@ export default function ReleaseReview() {
     setSplitSchema(newSplitSchema)
   })
 
-  const theme = useTheme()
   const scanners = useContext(ArtefactScanningInfoContext)
-
-  const isLgOrLarger = useMediaQuery(theme.breakpoints.up('lg'))
 
   useEffect(() => {
     if (!model || !schema) {
@@ -153,7 +148,7 @@ export default function ReleaseReview() {
   return (
     <>
       <Title text={semver ? semver : 'Loading...'} />
-      <Container maxWidth='xl'>
+      <Container maxWidth='md'>
         <Paper>
           <Stack direction='row' sx={{ justifyContent: 'space-between', p: 2 }}>
             <Stack
@@ -181,11 +176,8 @@ export default function ReleaseReview() {
             />
           </Stack>
           <Divider />
-          <Stack
-            direction={{ md: 'column', lg: 'row' }}
-            divider={<Divider flexItem orientation={isLgOrLarger ? 'vertical' : 'horizontal'} />}
-          >
-            <Paper sx={{ p: 4, width: isLgOrLarger ? '40%' : '100%' }}>
+          <Stack divider={<Divider flexItem />}>
+            <Paper sx={{ p: 4, width: '100%' }}>
               <Stack spacing={2}>
                 <Stack spacing={1}>
                   <Typography sx={{ fontWeight: 'bold' }}>Created by</Typography>
