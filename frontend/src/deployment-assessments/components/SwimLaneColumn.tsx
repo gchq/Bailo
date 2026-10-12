@@ -34,11 +34,7 @@ export function SwimLaneColumn({ columnKey, title, color, assessments, isLoading
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography
-          component='h2'
-          variant='caption'
-          sx={{ fontWeight: 700, textTransform: 'capitalize', letterSpacing: 0.3 }}
-        >
+        <Typography component='h2' variant='caption' sx={{ fontWeight: 700, letterSpacing: 0.3, ml: 1 }}>
           {`${title} (${assessments.length})`}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
