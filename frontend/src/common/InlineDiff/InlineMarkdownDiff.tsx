@@ -4,7 +4,7 @@ import { MarkdownToJSX, RuleType } from 'markdown-to-jsx'
 import { astToJSX } from 'markdown-to-jsx/react'
 import { cloneElement, Fragment, isValidElement, ReactNode, useId, useMemo } from 'react'
 import { diffText } from 'src/common/InlineDiff/diffEngine'
-import DiffMark, { DiffChunks, WholeValueDiff } from 'src/common/InlineDiff/DiffMark'
+import DiffMark, { DiffChunks, stackedDiffLayout, WholeValueDiff } from 'src/common/InlineDiff/DiffMark'
 import { diffMarkdown, RichDiff } from 'src/common/InlineDiff/markdownDiff'
 import MarkdownDisplay, { createMarkdownOptions } from 'src/common/MarkdownDisplay'
 import { ASTNode, getMediaKind, MarkdownAST, parseMarkdown } from 'utils/markdownUtils'
@@ -150,7 +150,7 @@ function renderReplacement(from: ASTNode, to: ASTNode, context: RenderContext, i
     </>
   )
 
-  return inline ? marks : <Box sx={{ display: 'grid', gap: 0.5 }}>{marks}</Box>
+  return inline ? marks : <Box sx={stackedDiffLayout}>{marks}</Box>
 }
 
 function renderRichDiff(entry: RichDiff, context: RenderContext, inline = false): ReactNode {

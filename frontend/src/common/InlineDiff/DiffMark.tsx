@@ -32,6 +32,10 @@ const forcedColours = {
   },
 }
 
+// A grid column sizes itself to its widest content by default, so long code lines and tables would stretch the page.
+// Capping the column at the available width lets that content scroll or wrap inside it instead.
+export const stackedDiffLayout = { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 0.5 } as const
+
 function highlight(theme: Theme, inserted: boolean) {
   return alpha(inserted ? theme.palette.success.main : theme.palette.error.main, 0.3)
 }
@@ -166,7 +170,7 @@ export function WholeValueDiff({ from, to, render }: WholeValueDiffProps) {
   }
 
   return (
-    <Box sx={{ display: 'grid', gap: 0.5 }}>
+    <Box data-diff-whole-value sx={stackedDiffLayout}>
       <DiffMark operation='delete' block>
         {from ? render(from) : <Unanswered />}
       </DiffMark>
