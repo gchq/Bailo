@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { StroomAuditConnector } from '../../../src/connectors/audit/stroom.js'
 import { AccessRequestDoc } from '../../../src/models/AccessRequest.js'
+import { DeploymentAssessmentDoc } from '../../../src/models/DeploymentAssessment.js'
 import { FileInterfaceDoc, FileWithScanResultsInterface } from '../../../src/models/File.js'
 import { InferenceDoc } from '../../../src/models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/models/Model.js'
@@ -13,6 +14,7 @@ import { ReviewRoleDoc } from '../../../src/models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../../src/models/Schema.js'
 import { SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
 import { TokenDoc } from '../../../src/models/Token.js'
+import { DeploymentAssessmentSummary } from '../../../src/services/deploymentAssessment.js'
 import { MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
 import { ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
@@ -436,6 +438,61 @@ describe('connectors > audit > stroom', () => {
 
   test('onDeleteReviewRole > save expected event', async () => {
     await connector.onDeleteReviewRole(deleteEventRequest, { id: 'reviewRoleId' } as ReviewRoleDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onCreateDeploymentAssessment > save expected event', async () => {
+    await connector.onCreateDeploymentAssessment(createEventRequest, {
+      id: 'deploymentAssessmentId',
+    } as DeploymentAssessmentDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onUpdateDeploymentAssessment > save expected event', async () => {
+    await connector.onUpdateDeploymentAssessment(updateEventRequest, {
+      id: 'deploymentAssessmentId',
+    } as DeploymentAssessmentDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onDeleteDeploymentAssessment > save expected event', async () => {
+    await connector.onDeleteDeploymentAssessment(deleteEventRequest, {
+      id: 'deploymentAssessmentId',
+    } as DeploymentAssessmentDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onSearchDeploymentAssessments > save expected event', async () => {
+    await connector.onSearchDeploymentAssessments(searchEventRequest, [
+      { id: 'test-model' } as DeploymentAssessmentSummary,
+    ])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewDeploymentAssessment > save expected event', async () => {
+    await connector.onViewDeploymentAssessment(viewEventRequest, {
+      id: 'deploymentAssessmentId',
+    } as DeploymentAssessmentDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewDeploymentAssessmentReviews > save expected event', async () => {
+    await connector.onViewDeploymentAssessmentReviews(viewEventRequest, 'deploymentAssessmentId')
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewDeploymentAssessmentComments > save expected event', async () => {
+    await connector.onViewDeploymentAssessmentComments(viewEventRequest, 'deploymentAssessmentId')
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onReviewDeploymentAssessment > save expected event', async () => {
+    await connector.onReviewDeploymentAssessment(createEventRequest, { _id: 'abc' as any } as ResponseInterface)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onCommentOnDeploymentAssessment > save expected event', async () => {
+    await connector.onCommentOnDeploymentAssessment(createEventRequest, { _id: 'abc' as any } as ResponseInterface)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
