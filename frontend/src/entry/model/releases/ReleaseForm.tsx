@@ -284,7 +284,7 @@ export default function ReleaseForm({
             <Typography>
               {formData.modelCardVersion} -{' '}
               <Link href={buildModelCardHref(model.id, model.kind, formData.modelCardVersion)}>
-                <Button size='small'>View Model card</Button>
+                <Button size='small'>View and compare model card</Button>
               </Link>
             </Typography>
           ) : (
@@ -313,7 +313,7 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         {isReadOnly ? (
-          <Accordion defaultExpanded sx={{ p: 0 }}>
+          <Accordion sx={{ p: 0 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
               <Typography
                 sx={{
@@ -360,7 +360,7 @@ export default function ReleaseForm({
         )}
       </Stack>
       <Stack>
-        <Accordion defaultExpanded sx={{ p: 0 }}>
+        <Accordion sx={{ p: 0 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
             <Typography
               sx={{
@@ -458,7 +458,7 @@ export default function ReleaseForm({
       </Stack>
       {model.kind !== EntryKind.UNTRUSTED_MODEL && (
         <Box>
-          <Accordion defaultExpanded sx={{ p: 0 }}>
+          <Accordion sx={{ p: 0 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
               <Typography
                 sx={{ fontWeight: 'bold' }}

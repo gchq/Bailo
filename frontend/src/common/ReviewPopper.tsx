@@ -11,14 +11,14 @@ interface ReviewPopperProps {
   reviews: ReviewRequestInterface[]
   errorMessage: string
   onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate?: Dayjs | null) => void
-  includeDueDate: boolean
+  includeDueDate?: boolean
   deploymentAssessmentReview?: boolean
 }
 
 export default function ReviewPopper({
   isLoading,
   reviews,
-  includeDueDate,
+  includeDueDate = false,
   errorMessage,
   onSubmit,
   deploymentAssessmentReview = false,
@@ -32,7 +32,12 @@ export default function ReviewPopper({
   }
   return (
     <>
-      <Button variant='contained' onClick={(e) => setAnchorEl(e.currentTarget)} data-test='openReviewPopperBtn'>
+      <Button
+        variant='contained'
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        data-test='openReviewPopperBtn'
+        sx={{ height: 'max-content' }}
+      >
         Submit review
       </Button>
       <Popper
