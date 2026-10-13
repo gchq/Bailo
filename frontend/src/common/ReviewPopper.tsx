@@ -32,7 +32,7 @@ export default function ReviewPopper({
   }
   return (
     <>
-      <Button variant='contained' onClick={(e) => setAnchorEl(e.currentTarget)}>
+      <Button variant='contained' onClick={(e) => setAnchorEl(e.currentTarget)} data-test='openReviewPopperBtn'>
         Submit review
       </Button>
       <Popper
