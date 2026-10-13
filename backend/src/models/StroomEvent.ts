@@ -1,4 +1,4 @@
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema, Types } from 'mongoose'
 
 import { EventDetail } from '../connectors/audit/stroom.js'
 import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
@@ -24,6 +24,8 @@ export interface StroomEventObject {
 }
 
 export interface StroomEventInterface {
+  // Persisted as a JSON string by `setSchema`, and parsed back by `getSchema` on access.
+  // Getters do not run on `lean()` queries - use `StroomEventLean` to read this field leanly.
   event: StroomEventObject
   batchId: string
   inFlight: boolean
@@ -38,9 +40,12 @@ export interface StroomEventInterface {
 // object from Mongoose it should use this interface
 export type StroomEventInterfaceDoc = HydratedDocument<StroomEventInterface> & SoftDeleteDocument
 
+// The shape returned by `lean()` queries, where the `event` getter has not been applied.
+export type StroomEventLean = Omit<StroomEventInterface, 'event'> & { _id: Types.ObjectId; event: string }
+
 const StroomEventSchema = new Schema<StroomEventInterface>(
   {
-    event: { type: Schema.Types.Mixed, required: true, get: getSchema, set: setSchema },
+    event: { type: String, required: true, get: getSchema, set: setSchema },
     batchId: { type: String, default: '' },
     inFlight: { type: Boolean, default: false },
     attempts: { type: Number, default: 0 },
@@ -52,11 +57,11 @@ const StroomEventSchema = new Schema<StroomEventInterface>(
   },
 )
 
-function getSchema(schema: string) {
+function getSchema(schema: string): StroomEventObject {
   return JSON.parse(schema)
 }
 
-function setSchema(schema: unknown) {
+function setSchema(schema: StroomEventObject): string {
   return JSON.stringify(schema)
 }
 

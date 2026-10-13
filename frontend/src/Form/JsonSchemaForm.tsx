@@ -16,7 +16,7 @@ import {
 import { alpha, useTheme } from '@mui/material/styles'
 import CoreForm from '@rjsf/core'
 import Form from '@rjsf/mui'
-import { RJSFSchema } from '@rjsf/utils'
+import { Experimental_DefaultFormStateBehavior, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -49,7 +49,10 @@ import {
 } from 'utils/formUtils'
 import { parseNat, toSentenceCase } from 'utils/stringUtils'
 
-const defaultFormStateBehavior = { arrayMinItems: { computeSkipPopulate: skipPopulatingPrimitiveArrays } }
+const defaultFormStateBehavior: Experimental_DefaultFormStateBehavior = {
+  arrayMinItems: { computeSkipPopulate: skipPopulatingPrimitiveArrays },
+  requiredBooleanDefault: 'skip',
+}
 
 export default function JsonSchemaForm({
   splitSchema,
