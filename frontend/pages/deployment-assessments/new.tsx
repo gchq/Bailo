@@ -1,5 +1,6 @@
-import { TextField } from '@mui/material'
+import { Alert, TextField } from '@mui/material'
 import { postDeploymentAssessment } from 'actions/deploymentAssessment'
+import { useGetModels } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -16,10 +17,16 @@ import { getStepsData, getStepsFromSchema, removeEmptyValues, setStepValidate, v
 
 export default function NewDeploymentAssessment() {
   const router = useRouter()
-  const { schemaId }: { schemaId?: string } = router.query
+  const { schemaId: rawSchemaId, preselectedModelId: rawModelId } = router.query
+  const schemaId = Array.isArray(rawSchemaId) ? rawSchemaId[0] : rawSchemaId
+  const modelIds = useMemo(
+    () => (rawModelId ? (Array.isArray(rawModelId) ? rawModelId : [rawModelId]) : []),
+    [rawModelId],
+  )
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { models, failedModelIds, isModelsLoading, isModelsError } = useGetModels(modelIds)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [name, setName] = useState('')
   const [errorText, setErrorText] = useState('')
@@ -27,7 +34,10 @@ export default function NewDeploymentAssessment() {
   const [draftButtonLoading, setDraftButtonLoading] = useState(false)
   const [formValidationErrorState, setFormValidationErrorState] = useState(false)
 
-  const isFormLoading = useMemo(() => isSchemaLoading || isCurrentUserLoading, [isSchemaLoading, isCurrentUserLoading])
+  const isFormLoading = useMemo(
+    () => isSchemaLoading || isCurrentUserLoading || isModelsLoading,
+    [isSchemaLoading, isCurrentUserLoading, isModelsLoading],
+  )
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -36,13 +46,14 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    const steps = getStepsFromSchema(schema)
+    const defaultState = modelIds.length > 0 ? { modelOverview: { modelIds } } : {}
+    const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
       step.steps = steps
     }
 
     setSplitSchema({ reference: schema.id, steps })
-  }, [schema, currentUser])
+  }, [schema, currentUser, modelIds])
 
   // Picking a different schema starts a new form, so stop highlighting errors until it is submitted
   useEffect(() => {
@@ -144,7 +155,12 @@ export default function NewDeploymentAssessment() {
       isLoading={isFormLoading}
       splitSchema={splitSchema}
       setSplitSchema={setSplitSchema}
-      backHref='/deployment-assessments/new'
+      backHref={(() => {
+        const params = new URLSearchParams()
+        modelIds.forEach((id) => params.append('preselectedModelId', id))
+        const qs = params.toString()
+        return qs ? `/deployment-assessments/new?${qs}` : '/deployment-assessments/new'
+      })()}
       backLabel='Select a different schema'
       onSubmit={onSubmit}
       submitButtonLoading={submitButtonLoading}
@@ -154,6 +170,19 @@ export default function NewDeploymentAssessment() {
       draftButtonLoading={draftButtonLoading}
       disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
     >
+      {isModelsError && (
+        <Alert severity='error' sx={{ mb: 2 }}>
+          The following model ID(s) supplied in the URL could not be loaded:{' '}
+          <strong>{failedModelIds.join(', ')}</strong>. The model(s) may not exist or you may not have permission to
+          access them. Any valid models have still been pre-filled in the form.
+        </Alert>
+      )}
+      {!isModelsError && models.length > 0 && (
+        <Alert severity='info' sx={{ mb: 2 }}>
+          This assessment will be linked to <strong>{models.map((m) => m.name).join(', ')}</strong>. The{' '}
+          {models.length === 1 ? 'model has' : 'models have'} been pre-filled in the form.
+        </Alert>
+      )}
       <LabelledInput fullWidth label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
         <TextField
           fullWidth
