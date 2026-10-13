@@ -89,15 +89,13 @@ function renderList(entry: Extract<RichDiff, { kind: 'list' }>, context: RenderC
 }
 
 function renderTable(entry: Extract<RichDiff, { kind: 'table' }>, context: RenderContext): ReactNode {
-  const align = entry.node.type === RuleType.table ? entry.node.align : []
-
   return (
     <Box sx={{ overflowX: 'auto' }}>
       <table>
         <thead>
           <tr>
             {entry.header.map((cell, index) => (
-              <th key={index} style={{ textAlign: align[index] ?? undefined }}>
+              <th key={index} style={{ textAlign: entry.align[index] ?? undefined }}>
                 {renderEntries(cell, context, true)}
               </th>
             ))}
@@ -107,7 +105,7 @@ function renderTable(entry: Extract<RichDiff, { kind: 'table' }>, context: Rende
           {entry.cells.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) => (
-                <td key={cellIndex} style={{ textAlign: align[cellIndex] ?? undefined }}>
+                <td key={cellIndex} style={{ textAlign: entry.align[cellIndex] ?? undefined }}>
                   {renderEntries(cell, context, true)}
                 </td>
               ))}

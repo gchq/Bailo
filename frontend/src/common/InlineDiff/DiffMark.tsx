@@ -37,10 +37,10 @@ const forcedColours = {
 export const stackedDiffLayout = { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 0.5 } as const
 
 function highlight(theme: Theme, inserted: boolean) {
-  return alpha(inserted ? theme.palette.success.main : theme.palette.error.main, 0.3)
+  return alpha(inserted ? theme.palette.success.main : theme.palette.error.main, 0.2)
 }
 
-function MediaFrame({ media, inserted, children }: { media: MediaKind; inserted: boolean; children: ReactNode }) {
+function MediaFrame({ media, children }: { media: MediaKind; inserted: boolean; children: ReactNode }) {
   const audio = media === 'audio'
 
   return (
@@ -50,23 +50,58 @@ function MediaFrame({ media, inserted, children }: { media: MediaKind; inserted:
       sx={(theme) => ({
         display: 'flex',
         width: '100%',
+        minWidth: 0,
         // Audio players have a fixed height, so only images and video are given a 16:9 frame
         aspectRatio: audio ? undefined : '16 / 9',
         padding: audio ? 1 : 0,
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        border: '3px solid',
-        borderColor: inserted ? 'success.main' : 'error.main',
-        borderRadius: 0.5,
+        margin: '2px',
         backgroundColor: 'background.paper',
         '& img, & video': { width: '100%', height: '100%', objectFit: 'contain' },
         '& audio': { width: '100%' },
+        boxSizing: 'border-box',
+        maxWidth: '100%',
         ...forcedColours,
         ...theme.applyStyles('dark', { backgroundColor: theme.palette.grey[900] }),
       })}
     >
       {children}
+    </Box>
+  )
+}
+
+// The marker is part of the changed-content box, rather than a separate column, so it cannot overflow its parent.
+const MARKER_WIDTH = '20px'
+
+function MarkerHeader({ inserted }: { inserted: boolean }) {
+  return (
+    <Box
+      component='span'
+      aria-hidden='true'
+      data-diff-marker
+      sx={(theme) => {
+        const palette = inserted ? theme.palette.success : theme.palette.error
+
+        return {
+          display: 'block',
+          boxSizing: 'border-box',
+          width: MARKER_WIDTH,
+          minHeight: '100%',
+          padding: '2px 6px',
+          color: palette.contrastText,
+          backgroundColor: alpha(palette.main, 0.4),
+          fontSize: '14px',
+          fontWeight: 700,
+          lineHeight: '20px',
+          textAlign: 'left',
+          userSelect: 'none',
+          '@media (forced-colors: active)': { color: 'CanvasText', backgroundColor: 'Canvas' },
+        }
+      }}
+    >
+      {inserted ? '+' : '-'}
     </Box>
   )
 }
@@ -80,55 +115,47 @@ export default function DiffMark({ operation, children, block = false, media }: 
       data-diff-media={media}
       data-diff-operation={operation}
       sx={(theme) => ({
+        display: block || media ? 'flex' : 'inline-flex',
+        flexDirection: 'row',
+        alignItems: 'stretch',
+        boxSizing: 'border-box',
+        minWidth: 0,
+        maxWidth: '100%',
+        width: media ? 'min(100%, 32rem)' : block ? '100%' : 'fit-content',
+        verticalAlign: block || media ? 'top' : 'middle',
         color: 'inherit',
         font: 'inherit',
         textDecoration: 'none',
+        overflow: 'hidden',
         overflowWrap: 'anywhere',
-        margin: 0.3,
-        ...(media
-          ? {
-              display: 'inline-flex',
-              flexDirection: 'column',
-              width: media === 'audio' ? '100%' : 'min(100%, 32rem)',
-              verticalAlign: 'top',
-            }
-          : {
-              display: block ? 'block' : 'inline',
-              whiteSpace: block ? 'normal' : 'pre-wrap',
-              paddingInline: '2px',
-              borderRadius: 0.5,
-              backgroundColor: highlight(theme, inserted),
-            }),
+        borderRadius: 1,
+        backgroundColor: highlight(theme, inserted),
+        margin: media ? 0.3 : 0,
         ...forcedColours,
       })}
     >
+      <MarkerHeader inserted={inserted} />
       <Box
         component='span'
-        aria-hidden='true'
-        sx={(theme) => ({
-          fontWeight: 700,
-          marginInlineEnd: '2px',
-          ...(media && {
-            alignSelf: 'flex-start',
-            paddingInline: '6px',
-            borderRadius: 0.5,
-            marginBlockEnd: 0.5,
-            backgroundColor: highlight(theme, inserted),
-          }),
-        })}
+        sx={{
+          display: 'block',
+          flex: 1,
+          minWidth: 0,
+          maxWidth: '100%',
+          padding: block || media ? '2px 8px' : '0 6px',
+        }}
       >
-        {inserted ? '+' : '-'}
+        <Box component='span' sx={visuallyHidden}>
+          {inserted ? 'Inserted content: ' : 'Deleted content: '}
+        </Box>
+        {media ? (
+          <MediaFrame media={media} inserted={inserted}>
+            {children}
+          </MediaFrame>
+        ) : (
+          children
+        )}
       </Box>
-      <Box component='span' sx={visuallyHidden}>
-        {inserted ? 'Inserted content: ' : 'Deleted content: '}
-      </Box>
-      {media ? (
-        <MediaFrame media={media} inserted={inserted}>
-          {children}
-        </MediaFrame>
-      ) : (
-        children
-      )}
     </Box>
   )
 }
