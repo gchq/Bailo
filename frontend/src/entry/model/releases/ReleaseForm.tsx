@@ -360,7 +360,7 @@ export default function ReleaseForm({
         )}
       </Stack>
       <Stack>
-        <Accordion sx={{ p: 0 }}>
+        <Accordion defaultExpanded sx={{ p: 0 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
             <Typography
               sx={{
@@ -458,7 +458,7 @@ export default function ReleaseForm({
       </Stack>
       {model.kind !== EntryKind.UNTRUSTED_MODEL && (
         <Box>
-          <Accordion sx={{ p: 0 }}>
+          <Accordion defaultExpanded sx={{ p: 0 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
               <Typography
                 sx={{ fontWeight: 'bold' }}

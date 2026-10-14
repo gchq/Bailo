@@ -157,6 +157,7 @@ export default function ReviewWithComment({
                   option.role === value.role
                 }
                 onChange={onChange}
+                clearIcon={false}
                 value={reviewRequest}
                 getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
                 options={reviews}
@@ -169,7 +170,7 @@ export default function ReviewWithComment({
               />
             )}
             <RichTextEditor
-              data-test='reviewWithCommentTextField'
+              dataTest='reviewWithCommentTextField'
               value={reviewComment}
               onChange={(newValue) => setReviewComment(newValue)}
               alwaysShowToolbar
