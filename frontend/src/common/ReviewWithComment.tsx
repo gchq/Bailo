@@ -161,6 +161,11 @@ export default function ReviewWithComment({
                 getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
                 options={reviews}
                 renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
+                slotProps={{
+                  popper: {
+                    sx: { zIndex: theme.zIndex.tooltip + 100 },
+                  },
+                }}
               />
             )}
             <RichTextEditor
