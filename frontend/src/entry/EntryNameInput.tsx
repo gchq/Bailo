@@ -1,6 +1,6 @@
-import { TextField } from '@mui/material'
 import { ChangeEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import LimitedTextField from 'src/common/LimitedTextField'
 import { EntryKindKeys } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -20,7 +20,7 @@ export default function EntryNameInput({ value, kind, onChange, autoFocus = fals
 
   return (
     <LabelledInput fullWidth required label={`${toTitleCase(kind)} Name`} htmlFor={htmlId}>
-      <TextField
+      <LimitedTextField
         required
         fullWidth
         autoFocus={autoFocus}

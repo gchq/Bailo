@@ -1,22 +1,12 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import Schema from '@mui/icons-material/Schema'
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Container,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Autocomplete, Box, Button, Container, MenuItem, Paper, Select, Stack, Typography } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { postSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, SyntheticEvent, useMemo, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Title from 'src/common/Title'
@@ -182,16 +172,14 @@ export default function NewSchema() {
                   >
                     Id <span style={{ color: theme.palette.error.main }}>*</span>
                   </Typography>
-                  <TextField
+                  <LimitedTextField
                     fullWidth
                     required
                     size='small'
                     value={schemaId}
                     label='Schema ID'
                     onChange={(e) => setSchemaId(e.target.value)}
-                    slotProps={{
-                      htmlInput: { autoFocus: true },
-                    }}
+                    slotProps={{ htmlInput: { autoFocus: true } }}
                   />
                   <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
                 </Stack>
@@ -203,7 +191,7 @@ export default function NewSchema() {
                   >
                     Name <span style={{ color: theme.palette.error.main }}>*</span>
                   </Typography>
-                  <TextField
+                  <LimitedTextField
                     fullWidth
                     required
                     size='small'
@@ -245,7 +233,7 @@ export default function NewSchema() {
                   getOptionLabel={(option: ReviewRoleInterface) => option.name}
                   value={newReviewRoles || []}
                   renderInput={(params) => (
-                    <TextField
+                    <LimitedTextField
                       {...params}
                       label='Select an option below'
                       size='small'

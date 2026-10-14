@@ -38,6 +38,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
+import { TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { isEnabled, isReachable } from 'utils/peerUtils'
 import { toKebabCase, toTitleCase } from 'utils/stringUtils'
 
@@ -446,7 +447,7 @@ export default function Marketplace() {
                         id='entry-filter-input'
                         value={filter}
                         disableUnderline
-                        inputProps={{ spellCheck: 'false' }}
+                        inputProps={{ spellCheck: 'false', maxLength: TEXT_INPUT_MAX_LENGTH }}
                         onChange={handleFilterChange}
                         endAdornment={
                           <Tooltip title={titleOnly ? 'Name' : 'Full Text'}>

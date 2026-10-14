@@ -1,7 +1,6 @@
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
-import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
@@ -9,6 +8,7 @@ import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntryKind } from 'types/types'
 
@@ -138,7 +138,7 @@ export default function DataCardSelector({
             ))
           }
           renderInput={(params) => (
-            <TextField
+            <LimitedTextField
               {...params}
               placeholder='Data card name'
               error={rawErrors && rawErrors.length > 0}
