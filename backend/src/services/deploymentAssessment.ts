@@ -284,22 +284,20 @@ async function getDeploymentAssessmentDetailsWithReview(
 ): Promise<DeploymentAssessmentDetails & { latestReview?: ReviewDoc }> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
 
-  if (deploymentAssessment.draft === true) {
-    return {
-      deploymentAssessment,
-      responses: [],
-    }
-  }
-
-  // Get the latest review and its corresponding responses to determine the state of this deployment assessment
-  const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
-  const responses = await ResponseModel.find({ parentId: [latestReview._id, deploymentAssessment._id] }).sort({
+  // Drafts have no review document yet, so skip that lookup and query by DA id only
+  const latestReview = deploymentAssessment.draft
+    ? undefined
+    : await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+  const parentIds = latestReview ? [latestReview._id, deploymentAssessment._id] : deploymentAssessment._id
+  const responses = await ResponseModel.find({ parentId: parentIds }).sort({
     createdAt: -1,
   })
 
   const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
     DecisionKeys | undefined
-  const state = deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
+  const state = deploymentAssessment.draft
+    ? undefined
+    : deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
 
   return {
     deploymentAssessment,

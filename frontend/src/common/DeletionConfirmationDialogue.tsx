@@ -1,8 +1,9 @@
 import Close from '@mui/icons-material/Close'
 import Delete from '@mui/icons-material/Delete'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import { Transition } from 'src/common/Transition'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -103,7 +104,7 @@ export default function DeletionConfirmationDialogue({
             <Typography gutterBottom>
               To confirm deletion, type <strong>{confirmationText}</strong> below. This action cannot be undone.
             </Typography>
-            <TextField
+            <LimitedTextField
               fullWidth
               variant='outlined'
               value={confirmInput}

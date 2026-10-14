@@ -1,7 +1,8 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import { postImportModelCardText } from 'actions/modelCard'
 import { useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
 import { getErrorMessage } from 'utils/fetcher'
@@ -64,7 +65,7 @@ export default function ImportModelCardTextDialog({
         <Alert severity='warning' sx={{ mb: 2 }}>
           You must review any information provided for correctness. AI-extracted data may be incomplete or inaccurate.
         </Alert>
-        <TextField
+        <LimitedTextField
           size='small'
           placeholder='Paste model card text here...'
           multiline

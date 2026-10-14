@@ -409,6 +409,20 @@ describe('services > deploymentAssessment', () => {
       expect(details.state).toBe('needs_review')
     })
 
+    test('returns comments on a draft assessment without requiring a review', async () => {
+      const draftAssessment = { ...assessment, draft: true }
+      const savedComment = { _id: 'comment-id', kind: ResponseKind.Comment, comment: 'A question' }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(draftAssessment)
+      ResponseModelMock.sort.mockResolvedValueOnce([savedComment])
+
+      await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, draftAssessment.id)).resolves.toEqual({
+        deploymentAssessment: draftAssessment,
+        responses: [savedComment],
+      })
+      expect(ResponseModelMock.find).toHaveBeenCalledWith({ parentId: draftAssessment._id })
+      expect(ReviewModelMock.findOne).not.toHaveBeenCalled()
+    })
+
     test('does not read history when assessment view authorisation fails', async () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
       vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({

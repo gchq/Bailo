@@ -12,13 +12,13 @@ import {
   Paper,
   Select,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
 import { UpdateReviewRolesParams } from 'actions/reviewRoles'
 import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import LimitedTextField from 'src/common/LimitedTextField'
 import renderQueryState from 'src/common/renderQueryState'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import Link from 'src/Link'
@@ -98,7 +98,7 @@ export default function ReviewRoleFormContainer<
           <Stack spacing={2}>
             <Stack spacing={2} direction='row'>
               <LabelledInput required fullWidth label='Name' htmlFor='role-name-input'>
-                <TextField
+                <LimitedTextField
                   required
                   value={draftFormData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
@@ -109,7 +109,7 @@ export default function ReviewRoleFormContainer<
                 />
               </LabelledInput>
               <LabelledInput required fullWidth label='Short name' htmlFor='role-shortname-input'>
-                <TextField
+                <LimitedTextField
                   required
                   disabled={providedData}
                   fullWidth
@@ -121,7 +121,7 @@ export default function ReviewRoleFormContainer<
               </LabelledInput>
             </Stack>
             <LabelledInput fullWidth label='Description' htmlFor='role-description-input'>
-              <TextField
+              <LimitedTextField
                 fullWidth
                 value={draftFormData.description}
                 onChange={(e) => handleChange('description', e.target.value)}

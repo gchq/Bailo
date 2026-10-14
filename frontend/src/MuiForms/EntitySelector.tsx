@@ -1,12 +1,12 @@
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
-import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UserDisplay from 'src/common/UserDisplay'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntityObject } from 'types/types'
@@ -165,7 +165,7 @@ export default function EntitySelector({
               ))
             }
             renderInput={(params) => (
-              <TextField
+              <LimitedTextField
                 {...params}
                 placeholder='Username or group name'
                 error={rawErrors && rawErrors.length > 0}
