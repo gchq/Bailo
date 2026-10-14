@@ -11,7 +11,7 @@ import { getDeploymentAssessmentReviews } from './deploymentAssessment/getDeploy
 import { getDeploymentAssessments } from './deploymentAssessment/getDeploymentAssessments.js'
 import { patchDeploymentAssessment } from './deploymentAssessment/patchDeploymentAssessment.js'
 import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
-import { postDeploymentAssessmentComment } from './deploymentAssessment/postDeploymentAssessmentComment.js'
+import { postDeploymentAssessmentComments } from './deploymentAssessment/postDeploymentAssessmentComments.js'
 import { postDeploymentAssessmentReviews } from './deploymentAssessment/postDeploymentAssessmentReviews.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
@@ -37,7 +37,7 @@ router.post('/deployment-assessments', ...postDeploymentAssessment)
 router.get('/deployment-assessments/:deploymentAssessmentId', ...getDeploymentAssessment)
 router.delete('/deployment-assessments/:deploymentAssessmentId', ...deleteDeploymentAssessment)
 router.get('/deployment-assessments/:deploymentAssessmentId/comments', ...getDeploymentAssessmentComments)
-router.post('/deployment-assessments/:deploymentAssessmentId/comments', ...postDeploymentAssessmentComment)
+router.post('/deployment-assessments/:deploymentAssessmentId/comments', ...postDeploymentAssessmentComments)
 router.get('/deployment-assessments/:deploymentAssessmentId/reviews', ...getDeploymentAssessmentReviews)
 router.post('/deployment-assessments/:deploymentAssessmentId/reviews', ...postDeploymentAssessmentReviews)
 router.get(

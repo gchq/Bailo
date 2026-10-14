@@ -11,7 +11,7 @@ import {
 } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const postDeploymentAssessmentCommentSchema = z.object({
+export const postDeploymentAssessmentCommentsSchema = z.object({
   params: z.object({ deploymentAssessmentId: z.string().min(1) }),
   body: z.object({ comment: z.string().trim().min(1) }).strict(),
 })
@@ -22,7 +22,7 @@ registerPath(
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/comments',
     tags: ['deployment assessments'],
     description: 'Comment on a deployment assessment',
-    schema: postDeploymentAssessmentCommentSchema,
+    schema: postDeploymentAssessmentCommentsSchema,
     responses: {
       201: {
         description: 'The created comment.',
@@ -33,10 +33,10 @@ registerPath(
   'v3',
 )
 
-export const postDeploymentAssessmentComment = [
+export const postDeploymentAssessmentComments = [
   async (req: Request, res: Response<DeploymentAssessmentCommentHistory>): Promise<void> => {
     req.audit = AuditInfo.CommentOnDeploymentAssessment
-    const { params, body } = parse(req, postDeploymentAssessmentCommentSchema)
+    const { params, body } = parse(req, postDeploymentAssessmentCommentsSchema)
     const response = await commentOnDeploymentAssessment(req.user, params.deploymentAssessmentId, body.comment)
     await audit.onCommentOnDeploymentAssessment(req, response)
     res.status(201).json({

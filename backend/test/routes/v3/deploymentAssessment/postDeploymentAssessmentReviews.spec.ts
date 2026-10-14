@@ -17,7 +17,17 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReviews',
     [Decision.Reject, 'The deployment risk is unacceptable.'],
     [Decision.RequestChanges, 'Add further mitigations.'],
   ])('creates and audits a %s formal response', async (decision, comment) => {
-    const response = { _id: 'response-id', kind: ResponseKind.Review, decision, comment }
+    const response = {
+      _id: 'response-id',
+      kind: ResponseKind.Review,
+      entity: 'user:risk-owner',
+      decision,
+      comment,
+      reactions: [{ kind: 'heart', users: ['user:reactor'] }],
+      commentEditedAt: '2026-01-02T00:00:00.000Z',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    }
     serviceMock.reviewDeploymentAssessment.mockResolvedValueOnce(response)
 
     const res = await testPost('/api/v3/deployment-assessments/assessment-id/reviews', {
@@ -25,6 +35,17 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReviews',
     })
 
     expect(res.statusCode).toBe(201)
+    expect(res.body).toStrictEqual({
+      id: 'response-id',
+      entity: 'user:risk-owner',
+      decision,
+      ...(comment && { comment }),
+      reactions: [{ kind: 'heart', users: ['user:reactor'] }],
+      commentEditedAt: '2026-01-02T00:00:00.000Z',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+      outdated: false,
+    })
     expect(serviceMock.reviewDeploymentAssessment).toHaveBeenCalledWith(
       expect.anything(),
       'assessment-id',
