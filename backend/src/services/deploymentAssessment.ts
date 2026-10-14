@@ -563,7 +563,7 @@ export async function updateDeploymentAssessment(
         deploymentAssessmentId,
         role: deploymentAssessmentRiskOwnerRole,
       })
-    : await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+    : undefined
 
   // revoke an existing approval if DA is edited
   const response =
@@ -572,7 +572,7 @@ export async function updateDeploymentAssessment(
           entity: toEntity('user', user.dn),
           kind: ResponseKind.Review,
           role: SystemRoles.Owner,
-          parentId: review._id,
+          parentId: (await getLatestDeploymentAssessmentReview(deploymentAssessmentId))._id,
           decision: Decision.Undo,
           comment: "Automatically revoked this deployment assessment's approval status by making changes",
         })
@@ -580,7 +580,7 @@ export async function updateDeploymentAssessment(
 
   await useTransaction([
     (session) => deploymentAssessment.save({ session }),
-    ...(review && isBeingSubmitted ? [(session) => review.save({ session })] : []),
+    ...(review ? [(session) => review.save({ session })] : []),
     ...(response ? [(session) => response.save({ session })] : []),
   ])
 

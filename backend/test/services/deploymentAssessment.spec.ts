@@ -760,6 +760,13 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('does not re-notify stakeholders when an already submitted assessment is edited', async () => {
+      const review = {
+        _id: 'review-object-id',
+        kind: ReviewKind.DeploymentAssessment,
+        role: 'dro',
+        createdAt: new Date('10/10/2026'),
+      }
+      ReviewModelMock.sort.mockResolvedValue(review)
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.draft = false
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
@@ -768,6 +775,51 @@ describe('services > deploymentAssessment', () => {
 
       expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
       expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
+    })
+
+    test('does not look up a review when a draft is updated', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
+
+      expect(ReviewModelMock.findOne).not.toHaveBeenCalled()
+      expect(ResponseModelMock).not.toHaveBeenCalled()
+      expect(deploymentAssessment.save).toHaveBeenCalled()
+    })
+
+    test('adds a new Undo response when last state is approved', async () => {
+      const review = { _id: 'review-object-id', kind: ReviewKind.DeploymentAssessment, role: 'riskOwners' }
+      ReviewModelMock.sort.mockResolvedValue(review)
+      ResponseModelMock.find.mockResolvedValueOnce([{ kind: ResponseKind.Review, decision: Decision.Approve }])
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.draft = false
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
+
+      expect(ResponseModelMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entity: 'user:creator',
+          kind: ResponseKind.Review,
+          parentId: review._id,
+          decision: Decision.Undo,
+        }),
+      )
+      expect(ResponseModelMock.save).toHaveBeenCalled()
+      expect(deploymentAssessment.save).toHaveBeenCalled()
+    })
+
+    test('does not add an Undo response when last state is not approved', async () => {
+      ResponseModelMock.find.mockResolvedValueOnce([{ kind: ResponseKind.Review, decision: Decision.RequestChanges }])
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.draft = false
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
+
+      expect(ResponseModelMock).not.toHaveBeenCalled()
+      expect(deploymentAssessment.save).toHaveBeenCalled()
     })
   })
 
