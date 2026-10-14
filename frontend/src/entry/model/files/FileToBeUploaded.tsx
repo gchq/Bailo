@@ -6,7 +6,6 @@ import LimitedTextField from 'src/common/LimitedTextField'
 import Restricted from 'src/common/Restricted'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
-import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface FileToBeUploadedProps {
   fileWithMetadata: FileUploadWithMetadata
@@ -94,7 +93,6 @@ export default function FileToBeUploaded({
             size='small'
             value={fileWithMetadata.metadata?.text}
             onChange={handleMetadataTextOnChange}
-            maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
           />
         )}
       </Grid>

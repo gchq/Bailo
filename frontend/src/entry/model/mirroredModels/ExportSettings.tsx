@@ -10,7 +10,6 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 type ExportSettingsProps = {
   model: EntryInterface
@@ -76,7 +75,6 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                     onChange={handleDestinationModelId}
                     size='small'
                     data-test='destinationModelIdTextField'
-                    maxLength={NAME_INPUT_MAX_LENGTH}
                   />
                 </LabelledInput>
                 <Button

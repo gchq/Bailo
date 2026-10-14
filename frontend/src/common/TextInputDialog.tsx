@@ -2,7 +2,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/
 import { useState } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
 import { Transition } from 'src/common/Transition'
-import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface TextUploadDialogProps {
   open: boolean
@@ -38,7 +37,6 @@ export default function TextInputDialog({
           minRows={10}
           maxRows={15}
           value={formData}
-          maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
           onChange={(e) => setFormData(e.target.value)}
           sx={{ minWidth: '500px' }}
         />

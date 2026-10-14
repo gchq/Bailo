@@ -12,13 +12,13 @@ import {
   FormControlLabel,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { postUserToken, useGetUserTokenList } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
@@ -26,7 +26,6 @@ import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
 import { TokenActionKind, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
@@ -222,7 +221,7 @@ export default function NewToken() {
                 >
                   Description <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
-                <TextField
+                <LimitedTextField
                   required
                   multiline
                   size='small'
@@ -230,7 +229,7 @@ export default function NewToken() {
                   maxRows={8}
                   onChange={handleDescriptionChange}
                   slotProps={{
-                    htmlInput: { 'data-test': 'tokenDescriptionTextField', maxLength: DESCRIPTION_INPUT_MAX_LENGTH },
+                    htmlInput: { 'data-test': 'tokenDescriptionTextField' },
                   }}
                 />
               </Stack>
@@ -277,7 +276,12 @@ export default function NewToken() {
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     onChange={handleSelectedEntriesChange}
                     renderInput={(params) => (
-                      <TextField {...params} required size='small' placeholder={entriesAutocompletePlaceholder} />
+                      <LimitedTextField
+                        {...params}
+                        required
+                        size='small'
+                        placeholder={entriesAutocompletePlaceholder}
+                      />
                     )}
                     slotProps={{
                       chip: { size: 'small' },
@@ -323,7 +327,7 @@ export default function NewToken() {
                     disableClearable={selectedActions.length === 1}
                     getLimitTagsText={(more) => `+${plural(more, 'action')}`}
                     onChange={handleSelectedActionsChange}
-                    renderInput={(params) => <TextField {...params} required size='small' />}
+                    renderInput={(params) => <LimitedTextField {...params} required size='small' />}
                     renderValue={(value, getItemProps) => renderActionTags(value, getItemProps)}
                   />
                 </Stack>

@@ -24,7 +24,6 @@ import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryKind, ReviewRolesFormData } from 'types/types'
-import { DESCRIPTION_INPUT_MAX_LENGTH, NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 type ReviewRoleFormContainerProps<ReviewRoleFormData extends UpdateReviewRolesParams | ReviewRolesFormData> = {
   providedData: boolean
@@ -107,7 +106,6 @@ export default function ReviewRoleFormContainer<
                   fullWidth
                   autoFocus
                   id='role-name-input'
-                  maxLength={NAME_INPUT_MAX_LENGTH}
                 />
               </LabelledInput>
               <LabelledInput required fullWidth label='Short name' htmlFor='role-shortname-input'>
@@ -119,7 +117,6 @@ export default function ReviewRoleFormContainer<
                   onChange={(e) => handleChange('shortName', e.target.value)}
                   size='small'
                   id='role-shortname-input'
-                  maxLength={NAME_INPUT_MAX_LENGTH}
                 />
               </LabelledInput>
             </Stack>
@@ -130,7 +127,6 @@ export default function ReviewRoleFormContainer<
                 onChange={(e) => handleChange('description', e.target.value)}
                 size='small'
                 id='role-description-input'
-                maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
               />
             </LabelledInput>
             <FormControl size='small'>

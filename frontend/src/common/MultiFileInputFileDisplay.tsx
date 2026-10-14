@@ -8,7 +8,6 @@ import LimitedTextField from 'src/common/LimitedTextField'
 import Restricted from 'src/common/Restricted'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInterface } from 'types/types'
-import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface MultiFileInputDisplayProps {
   file: File | FileInterface
@@ -110,7 +109,6 @@ export default function MultiFileInputFileDisplay({
           sx={{ width: '100%', display: 'none' }}
           value={metadata}
           onChange={handleMetadataChange}
-          maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
         />
       </Grid>
       <Grid

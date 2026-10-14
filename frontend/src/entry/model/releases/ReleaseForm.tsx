@@ -14,7 +14,6 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -24,6 +23,7 @@ import { memoize } from 'lodash-es'
 import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
 import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
@@ -51,7 +51,6 @@ import {
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
-import { DESCRIPTION_INPUT_MAX_LENGTH, NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { buildModelCardHref } from 'utils/routerUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -253,7 +252,7 @@ export default function ReleaseForm({
           {isReadOnly || isEdit ? (
             <ReadOnlyAnswer value={formData.semver} />
           ) : (
-            <TextField
+            <LimitedTextField
               id='semantic-version-input'
               required
               size='small'
@@ -263,7 +262,7 @@ export default function ReleaseForm({
               value={formData.semver}
               onChange={handleSemverChange}
               slotProps={{
-                htmlInput: { 'data-test': 'releaseSemanticVersionTextField', maxLength: NAME_INPUT_MAX_LENGTH },
+                htmlInput: { 'data-test': 'releaseSemanticVersionTextField' },
               }}
             />
           )}
@@ -336,7 +335,6 @@ export default function ReleaseForm({
             label={releaseNotesLabel}
             textareaProps={{ autoFocus: isEdit, id: 'release-notes-input' }}
             dataTest='releaseNotesInput'
-            maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
           />
         )}
       </Stack>

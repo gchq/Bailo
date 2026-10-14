@@ -13,7 +13,6 @@ import SchemaSelect from 'src/schemas/SchemaSelect'
 import { SchemaKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, removeEmptyValues, setStepValidate, validateForm } from 'utils/formUtils'
-import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 export default function NewDeploymentAssessment() {
   const router = useRouter()
@@ -162,7 +161,6 @@ export default function NewDeploymentAssessment() {
           id='deployment-assessment-name'
           value={name}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-          maxLength={NAME_INPUT_MAX_LENGTH}
         />
       </LabelledInput>
     </SchemaFormPage>

@@ -1,24 +1,14 @@
 import { Dayjs } from '@dayjs'
-import {
-  Autocomplete,
-  Button,
-  Divider,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Autocomplete, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
 import { ChangeEvent, SyntheticEvent, useContext, useEffect, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
-import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetEntryRoles } from '../../actions/entry'
@@ -161,7 +151,7 @@ export default function ReviewWithComment({
                 value={reviewRequest}
                 getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
                 options={reviews}
-                renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
+                renderInput={(params) => <LimitedTextField {...params} label='Select your role' size='small' />}
               />
             )}
             <RichTextEditor
@@ -169,7 +159,6 @@ export default function ReviewWithComment({
               value={reviewComment}
               onChange={(newValue) => setReviewComment(newValue)}
               alwaysShowToolbar
-              maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
             />
             <Typography variant='caption' color='error'>
               {errorText}

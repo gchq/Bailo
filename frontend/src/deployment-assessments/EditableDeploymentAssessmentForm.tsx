@@ -21,7 +21,6 @@ import { KeyedMutator } from 'swr'
 import { DeploymentAssessmentInterface, DeploymentAssessmentStateKeys, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
-import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
@@ -186,7 +185,6 @@ export default function EditableDeploymentAssessmentForm({
                     onChange={(event) => setNewName(event.target.value)}
                     size='small'
                     data-test='editNameInput'
-                    maxLength={NAME_INPUT_MAX_LENGTH}
                   />
                 ) : (
                   <>

@@ -1,4 +1,4 @@
-import { Slider, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Slider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
@@ -7,7 +7,6 @@ import ProcessorTypeList from 'src/entry/model/inferencing/ProcessorTypeList'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import { EntryInterface, FlattenedModelImage } from 'types/types'
-import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { isValidPortNumber } from 'utils/stringUtils'
 
 type InferenceFormData = {
@@ -86,13 +85,7 @@ export default function InferenceForm({
         {isReadOnly ? (
           <ReadOnlyAnswer value={formData.description} />
         ) : (
-          <LimitedTextField
-            required
-            size='small'
-            value={formData.description}
-            onChange={handleDescriptionChange}
-            maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
-          />
+          <LimitedTextField required size='small' value={formData.description} onChange={handleDescriptionChange} />
         )}
       </Stack>
       {!(isReadOnly || editable) && (
@@ -134,7 +127,7 @@ export default function InferenceForm({
         {isReadOnly ? (
           <ReadOnlyAnswer value={formData.port.toString()} />
         ) : (
-          <TextField
+          <LimitedTextField
             required
             size='small'
             value={formData.port}

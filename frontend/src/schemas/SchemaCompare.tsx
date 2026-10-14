@@ -1,9 +1,10 @@
-import { Autocomplete, Container, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Container, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import ComparisonSwapButton from 'src/common/ComparisonSwapButton'
+import LimitedTextField from 'src/common/LimitedTextField'
 import renderQueryState from 'src/common/renderQueryState'
 import { SchemaInterface } from 'types/types'
 
@@ -75,7 +76,7 @@ export default function SchemaCompare() {
             getOptionDisabled={(option) => option.id === afterSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='Source schema' />}
+            renderInput={(params) => <LimitedTextField {...params} label='Source schema' />}
             onChange={handleBeforeSchemaChange}
           />
           <ComparisonSwapButton
@@ -92,7 +93,7 @@ export default function SchemaCompare() {
             getOptionDisabled={(option) => option.id === beforeSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='Target schema' />}
+            renderInput={(params) => <LimitedTextField {...params} label='Target schema' />}
             onChange={handleAfterSchemaChange}
           />
         </Stack>

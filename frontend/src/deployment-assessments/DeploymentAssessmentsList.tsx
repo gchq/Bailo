@@ -9,7 +9,6 @@ import {
   Divider,
   MenuItem,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import { DeploymentAssessmentFilters, useGetDeploymentAssessments } from 'actions/deploymentAssessments'
@@ -93,7 +92,7 @@ export default function DeploymentAssessmentsList() {
             onChange={(event) => setSearch(event.target.value)}
             sx={{ width: { xs: '100%', sm: 320 } }}
           />
-          <TextField
+          <LimitedTextField
             data-test='deploymentAssessmentStatusFilter'
             select
             size='small'
@@ -110,7 +109,7 @@ export default function DeploymentAssessmentsList() {
                 {label}
               </MenuItem>
             ))}
-          </TextField>
+          </LimitedTextField>
           <Stack spacing={0.5} sx={{ width: { xs: '100%', sm: 340 } }}>
             <DeploymentModelFilter
               selectedModelIds={filters.modelIds}
@@ -142,7 +141,7 @@ export default function DeploymentAssessmentsList() {
           </AccordionSummary>
           <AccordionDetails sx={{ px: 0, pt: 0 }}>
             <Stack direction='row' spacing={2} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              <TextField
+              <LimitedTextField
                 data-test='deploymentAssessmentSchemaFilter'
                 select
                 label='Schema'
@@ -160,7 +159,7 @@ export default function DeploymentAssessmentsList() {
                     {schema.name}
                   </MenuItem>
                 ))}
-              </TextField>
+              </LimitedTextField>
               <Box sx={{ width: { xs: '100%', sm: 260 } }}>
                 {/* TODO: Add a user only property to the following component. Enforce options based on this */}
                 <EntityAutocompleteFilter

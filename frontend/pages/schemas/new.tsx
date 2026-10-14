@@ -1,17 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import Schema from '@mui/icons-material/Schema'
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Container,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Autocomplete, Box, Button, Container, MenuItem, Paper, Select, Stack, Typography } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { postSchema } from 'actions/schema'
@@ -26,7 +15,6 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { ReviewRoleInterface, SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { DESCRIPTION_INPUT_MAX_LENGTH, NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { camelCaseToSentenceCase, camelCaseToTitleCase } from 'utils/stringUtils'
 
 const VisuallyHiddenInput = styled('input')({
@@ -184,16 +172,14 @@ export default function NewSchema() {
                   >
                     Id <span style={{ color: theme.palette.error.main }}>*</span>
                   </Typography>
-                  <TextField
+                  <LimitedTextField
                     fullWidth
                     required
                     size='small'
                     value={schemaId}
                     label='Schema ID'
                     onChange={(e) => setSchemaId(e.target.value)}
-                    slotProps={{
-                      htmlInput: { autoFocus: true, maxLength: NAME_INPUT_MAX_LENGTH },
-                    }}
+                    slotProps={{ htmlInput: { autoFocus: true } }}
                   />
                   <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
                 </Stack>
@@ -212,7 +198,6 @@ export default function NewSchema() {
                     value={schemaName}
                     label='Schema name'
                     onChange={(e) => setSchemaName(e.target.value)}
-                    maxLength={NAME_INPUT_MAX_LENGTH}
                   />
                   <Typography variant='caption'>Please specify a name for your schema</Typography>
                 </Stack>
@@ -229,7 +214,6 @@ export default function NewSchema() {
                   value={schemaDescription}
                   onChange={(input) => setSchemaDescription(input)}
                   aria-label='Schema description'
-                  maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
                 />
                 <Typography variant='caption'>A short description describing the purpose of this schema</Typography>
               </Stack>
@@ -249,7 +233,7 @@ export default function NewSchema() {
                   getOptionLabel={(option: ReviewRoleInterface) => option.name}
                   value={newReviewRoles || []}
                   renderInput={(params) => (
-                    <TextField
+                    <LimitedTextField
                       {...params}
                       label='Select an option below'
                       size='small'

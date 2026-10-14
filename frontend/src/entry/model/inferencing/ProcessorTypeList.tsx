@@ -1,5 +1,6 @@
-import { Autocomplete, TextField, Typography } from '@mui/material'
+import { Autocomplete, Typography } from '@mui/material'
 import { SyntheticEvent, useContext, useMemo } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 
 type ProcessorTypeListProps = {
@@ -31,7 +32,7 @@ export default function ProcessorTypeList({ value, onChange, readOnly = false }:
           options={processorTypesList}
           value={value}
           onChange={handleChange}
-          renderInput={(params) => <TextField {...params} size='small' />}
+          renderInput={(params) => <LimitedTextField {...params} size='small' />}
         />
       )}
     </>

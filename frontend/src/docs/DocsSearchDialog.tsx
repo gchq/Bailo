@@ -14,7 +14,6 @@ import {
   ListItemButton,
   ListItemText,
   Stack,
-  TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material'
@@ -22,6 +21,7 @@ import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
 import {
@@ -313,7 +313,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
         })}
       >
         <Box sx={{ p: 1.5 }}>
-          <TextField
+          <LimitedTextField
             inputRef={inputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}

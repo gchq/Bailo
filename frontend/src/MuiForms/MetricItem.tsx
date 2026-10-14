@@ -5,7 +5,6 @@ import * as _ from 'lodash-es'
 import { useCallback, useState } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
 import { MetricValueWithId } from 'src/MuiForms/Metrics'
-import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { isValidNumber } from 'utils/stringUtils'
 
 interface MetricItemProps {
@@ -38,7 +37,6 @@ export default function MetricItem({ metric, onChange, onDelete }: MetricItemPro
           aria-label='metric name input'
           value={metric.name}
           onChange={(e) => onChange({ id: metric.id, name: e.target.value, value: metric.value })}
-          maxLength={NAME_INPUT_MAX_LENGTH}
         />
         <LimitedTextField
           error={errorMessage.length > 0}
@@ -47,7 +45,6 @@ export default function MetricItem({ metric, onChange, onDelete }: MetricItemPro
           aria-label='metric value input'
           value={metric.value}
           onChange={(e) => handleMetricValueOnChange(e.target.value)}
-          maxLength={NAME_INPUT_MAX_LENGTH}
         />
         <Tooltip title='Remove item'>
           <IconButton>
