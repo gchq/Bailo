@@ -121,6 +121,7 @@ export default function Release() {
       mutateResponses()
       router.push(`/model/${modelId}/release/${semver}`)
     }
+    setIsReviewButtonLoading(false)
   }
 
   const error = MultipleErrorWrapper('Unable to load release', {
