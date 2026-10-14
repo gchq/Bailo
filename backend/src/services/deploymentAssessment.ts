@@ -12,7 +12,7 @@ import DeploymentAssessmentModel, {
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
-import ReviewModel from '../models/Review.js'
+import ReviewModel, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import {
   findDeploymentAssessments,
@@ -270,6 +270,17 @@ export async function getDeploymentAssessmentDetails(
   user: UserInterface,
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
+  const { deploymentAssessment, responses, state } = await getDeploymentAssessmentDetailsWithReview(
+    user,
+    deploymentAssessmentId,
+  )
+  return { deploymentAssessment, responses, state }
+}
+
+async function getDeploymentAssessmentDetailsWithReview(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+): Promise<DeploymentAssessmentDetails & { latestReview?: ReviewDoc }> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
 
   if (deploymentAssessment.draft === true) {
@@ -281,7 +292,9 @@ export async function getDeploymentAssessmentDetails(
 
   // Get the latest review and its corresponding responses to determine the state of this deployment assessment
   const latestReview = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
-  const responses = await ResponseModel.find({ parentId: [latestReview._id, deploymentAssessment._id] })
+  const responses = await ResponseModel.find({ parentId: [latestReview._id, deploymentAssessment._id] }).sort({
+    createdAt: -1,
+  })
 
   const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
     DecisionKeys | undefined
@@ -291,6 +304,7 @@ export async function getDeploymentAssessmentDetails(
     deploymentAssessment,
     responses,
     state,
+    latestReview,
   }
 }
 
@@ -516,7 +530,10 @@ export async function updateDeploymentAssessment(
   deploymentAssessmentId: string,
   diff: Partial<UpdateDeploymentAssessmentParams>,
 ) {
-  const { deploymentAssessment, state } = await getDeploymentAssessmentDetails(user, deploymentAssessmentId)
+  const { deploymentAssessment, state, latestReview } = await getDeploymentAssessmentDetailsWithReview(
+    user,
+    deploymentAssessmentId,
+  )
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
   if (!auth.success) {
@@ -567,12 +584,12 @@ export async function updateDeploymentAssessment(
 
   // revoke an existing approval if DA is edited
   const response =
-    state === DeploymentAssessmentState.Approved
+    state === DeploymentAssessmentState.Approved && latestReview
       ? new ResponseModel({
           entity: toEntity('user', user.dn),
           kind: ResponseKind.Review,
           role: SystemRoles.Owner,
-          parentId: (await getLatestDeploymentAssessmentReview(deploymentAssessmentId))._id,
+          parentId: latestReview._id,
           decision: Decision.Undo,
           comment: "Automatically revoked this deployment assessment's approval status by making changes",
         })

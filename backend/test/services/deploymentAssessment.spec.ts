@@ -381,7 +381,7 @@ describe('services > deploymentAssessment', () => {
       ]
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
       ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
-      ResponseModelMock.find.mockResolvedValueOnce(reviewResponses)
+      ResponseModelMock.sort.mockResolvedValueOnce(reviewResponses)
 
       await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, assessment.id)).resolves.toEqual({
         deploymentAssessment: assessment,
@@ -391,6 +391,21 @@ describe('services > deploymentAssessment', () => {
       expect(ResponseModelMock.find).toHaveBeenCalledWith({
         parentId: [review._id, assessment._id],
       })
+      expect(ResponseModelMock.sort).toHaveBeenCalledWith({ createdAt: -1 })
+    })
+
+    test('derives state from the most recent review response', async () => {
+      const reviewResponses = [
+        { kind: ResponseKind.Review, decision: Decision.Undo, createdAt: '2026-01-03T00:00:00.000Z' },
+        { kind: ResponseKind.Review, decision: Decision.Approve, createdAt: '2026-01-02T00:00:00.000Z' },
+      ]
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      ResponseModelMock.sort.mockResolvedValueOnce(reviewResponses)
+
+      const details = await getDeploymentAssessmentDetails({ dn: 'viewer' }, assessment.id)
+
+      expect(details.state).toBe('needs_review')
     })
 
     test('does not read history when assessment view authorisation fails', async () => {
@@ -791,7 +806,7 @@ describe('services > deploymentAssessment', () => {
     test('adds a new Undo response when last state is approved', async () => {
       const review = { _id: 'review-object-id', kind: ReviewKind.DeploymentAssessment, role: 'riskOwners' }
       ReviewModelMock.sort.mockResolvedValue(review)
-      ResponseModelMock.find.mockResolvedValueOnce([{ kind: ResponseKind.Review, decision: Decision.Approve }])
+      ResponseModelMock.sort.mockResolvedValueOnce([{ kind: ResponseKind.Review, decision: Decision.Approve }])
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.draft = false
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
@@ -810,8 +825,23 @@ describe('services > deploymentAssessment', () => {
       expect(deploymentAssessment.save).toHaveBeenCalled()
     })
 
+    test('does not add another Undo response when the approval has already been revoked', async () => {
+      ResponseModelMock.sort.mockResolvedValueOnce([
+        { kind: ResponseKind.Review, decision: Decision.Undo },
+        { kind: ResponseKind.Review, decision: Decision.Approve },
+      ])
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.draft = false
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
+
+      expect(ResponseModelMock).not.toHaveBeenCalled()
+      expect(deploymentAssessment.save).toHaveBeenCalled()
+    })
+
     test('does not add an Undo response when last state is not approved', async () => {
-      ResponseModelMock.find.mockResolvedValueOnce([{ kind: ResponseKind.Review, decision: Decision.RequestChanges }])
+      ResponseModelMock.sort.mockResolvedValueOnce([{ kind: ResponseKind.Review, decision: Decision.RequestChanges }])
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.draft = false
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
