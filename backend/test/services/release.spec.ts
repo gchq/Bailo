@@ -570,6 +570,28 @@ describe('services > release', () => {
     expect(result).toEqual(resultObject)
   })
 
+  test('removeFileFromReleases > enrols the release update in the transaction session', async () => {
+    const mockUser: any = { dn: 'test' }
+    const mockModel: any = { id: 'test' }
+    const mockRelease = { _id: 'release' }
+    // A marker value, so the assertion cannot pass against an empty options object by accident.
+    const mockSession: any = { marker: 'session' }
+
+    ReleaseModelMock.find.mockResolvedValueOnce([mockRelease])
+    ReleaseModelMock.updateMany.mockResolvedValueOnce({ modifiedCount: 1, matchedCount: 1 })
+
+    await removeFileFromReleases(mockUser, mockModel, 'fileId', false, mockSession)
+
+    // `updateMany` is native Mongoose, not a softDeletionPlugin static, so the session belongs
+    // inside the options object. Passed positionally it is silently ignored and the $pull is
+    // never rolled back with the rest of the transaction.
+    expect(ReleaseModelMock.updateMany).toHaveBeenCalledWith(
+      expect.anything(),
+      { $pull: { fileIds: 'fileId' } },
+      { session: mockSession },
+    )
+  })
+
   test('removeFileFromReleases > should throw a bad req when attempting to remove a file from a mirrored model', async () => {
     const mockUser: any = { dn: 'test' }
     const mockModel: any = { id: 'test', kind: 'mirrored-model' }
