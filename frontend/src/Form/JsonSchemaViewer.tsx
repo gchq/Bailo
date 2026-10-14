@@ -114,6 +114,7 @@ export default function JsonSchemaViewer({
           omitExtraData
           disabled={!canEdit}
           liveOmit
+          experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
           formContext={{
             editMode: canEdit,
             formSchema: currentStep.schema,

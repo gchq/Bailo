@@ -2,7 +2,22 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.10.0 - dd/mm/2026
+## 3.11.0 - dd/mm/yyyy
+
+### Changes
+
+- Deduplicate `Model`, `MirroredModel` and `Datacard` onto a shared `Entry` base, moved to `bailo.core.entry`. `bailo.helper.entry` keeps `ReleaseMixin` and re-exports `Entry`
+- Add `Datacard.search`, plus `__repr__` and `__str__` on `Datacard`
+- Fix `model_id` and `datacard_id` going stale after `Entry._unpack` reassigns `id`
+- Fix `Model.create` dropping `tags`
+- Fix `MirroredModel.update_model_card()` overwriting the editable additional information with the read only source card
+- Fix `MirroredModel.get_card_latest` warning about the wrong missing card
+- Optimise `Entry.get_releases` to reduce number of API requests sent
+- Raise `BailoException` instead of `KeyError`/`TypeError` for a mirrored model with no `settings.mirror.sourceModelId`, and for arguments an `Entry` kind does not accept
+- `Entry` can no longer be instantiated directly, and subclasses must set `entry_kind`
+- Tighten type hints to match `ModelInterface` in the backend
+
+## 3.10.0 - 28/07/2026
 
 ### Breaking Changes
 

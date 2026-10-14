@@ -284,4 +284,36 @@ describe('JsonSchemaForm', () => {
     expect(screen.getByLabelText('radio input field for Agreed').getAttribute('aria-invalid')).toBe('true')
     expect(document.getElementById('root_tags')?.getAttribute('aria-invalid')).toBe('true')
   })
+
+  it('leaves an unanswered required boolean unanswered rather than defaulting it to false', async () => {
+    const booleanSchema = {
+      id: 'boolean-schema',
+      reference: 'boolean-schema',
+      jsonSchema: {
+        type: 'object',
+        properties: {
+          details: {
+            type: 'object',
+            title: 'Details',
+            properties: {
+              agreed: { type: 'boolean', title: 'Agreed' },
+            },
+            required: ['agreed'],
+          },
+        },
+      },
+    }
+    const steps = getStepsFromSchema(booleanSchema, {}, [], {})
+    for (const step of steps) {
+      step.steps = steps
+    }
+
+    renderWithTheme(
+      <JsonSchemaForm splitSchema={{ reference: booleanSchema.id, steps }} setSplitSchema={vi.fn()} canEdit />,
+    )
+
+    await waitFor(() => expect(screen.getByLabelText('radio input field for Agreed')).toBeDefined())
+    expect(screen.getByRole<HTMLInputElement>('radio', { name: 'Yes' }).checked).toBe(false)
+    expect(screen.getByRole<HTMLInputElement>('radio', { name: 'No' }).checked).toBe(false)
+  })
 })
