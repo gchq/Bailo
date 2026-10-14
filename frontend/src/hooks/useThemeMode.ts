@@ -1,11 +1,11 @@
 import { Theme } from '@mui/material/styles'
-import { ChangeEvent, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { darkTheme, lightTheme } from '../theme'
 
 export type ThemeModeHook = {
   theme: Theme
-  toggleDarkMode: (event: ChangeEvent<HTMLInputElement>) => void
+  toggleDarkMode: (isDark: boolean) => void
 }
 
 export default function useThemeMode(): ThemeModeHook {
@@ -13,8 +13,8 @@ export default function useThemeMode(): ThemeModeHook {
     typeof window !== 'undefined' && localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme,
   )
 
-  const toggleDarkMode = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    localStorage.setItem('dark_mode_enabled', `${event.target.checked}`)
+  const toggleDarkMode = useCallback((isDark: boolean) => {
+    localStorage.setItem('dark_mode_enabled', `${isDark}`)
     setTheme(localStorage.getItem('dark_mode_enabled') === 'true' ? darkTheme : lightTheme)
   }, [])
 

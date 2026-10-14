@@ -42,7 +42,7 @@ import {
   setStepState,
   widgets,
 } from 'utils/formUtils'
-import { toSentenceCase } from 'utils/stringUtils'
+import { parseNat, toSentenceCase } from 'utils/stringUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -53,7 +53,9 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList = false,
   mirroredModel = false,
   displayStats = false,
+  compareMode = false,
   stateList,
+  currentState,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -63,13 +65,15 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
   mirroredModel?: boolean
   displayStats?: boolean
+  compareMode?: boolean
   stateList?: string[]
+  currentState?: string
 }) {
   const theme = useTheme()
   const router = useRouter()
   const [activeStep, setActiveStep] = useState<number>(
     router.query && router.query.page !== undefined && typeof router.query.page === 'string'
-      ? Number(router.query.page)
+      ? parseNat(router.query.page)
       : 0,
   )
   const requiredByModelState = router.query.requiredByModelState as string
@@ -177,7 +181,7 @@ export default function JsonSchemaForm({
   }
 
   function onShareSectionOnClick(sectionId: string) {
-    const link = `${window.location.origin}${window.location.pathname}?page=${activeStep}#${sectionId}`
+    const link = `${window.location.origin}${window.location.pathname}${window.location.search}#${sectionId}`
 
     copyToClipboard(link, 'Link saved to clipboard', 'Failed to save link to clipboard', {
       horizontal: 'center',
@@ -243,8 +247,7 @@ export default function JsonSchemaForm({
                       <Typography
                         sx={{
                           wordBreak: 'break-word',
-                          color:
-                            !step.isComplete(step) && displayLabelValidation ? 'error' : theme.palette.common.black,
+                          color: !step.isComplete(step) && displayLabelValidation ? 'error' : 'unset',
                         }}
                       >
                         {step.schema.title}
@@ -291,7 +294,14 @@ export default function JsonSchemaForm({
                 </Stack>
               )}
               <Typography sx={{ pt: 1 }}>
-                Required fields for this state are marked with an asterisk
+                Required fields
+                {currentState && (
+                  <>
+                    <span> for the current state</span>
+                    <span style={{ fontWeight: 'bold' }}>{` (${currentState})`}</span>
+                  </>
+                )}{' '}
+                are marked with an asterisk
                 <span style={{ color: theme.palette.error.main }}> *</span>
               </Typography>
             </Stack>
@@ -303,17 +313,19 @@ export default function JsonSchemaForm({
             validator={validator}
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
-            liveValidate
-            omitExtraData
             disabled={!canEdit}
             liveOmit
+            experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
             formContext={{
               editMode: canEdit,
               formSchema: currentStep.schema,
               defaultCurrentUser: defaultCurrentUserInEntityList,
               mirroredState: currentStep.mirroredState,
               state: currentStep.state,
+              compareFromState: currentStep.compareFromState,
+              compareFromMirroredState: currentStep.compareFromMirroredState,
               mirroredModel,
+              compareMode,
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
             }}

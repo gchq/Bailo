@@ -1,8 +1,10 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import bailoUploadFile from 'public/docs/bailo_file_upload.png'
+import bailoUploadFileRelease from 'public/docs/bailo_release_file_upload.png'
+import bailoUploadedFileRelease from 'public/docs/bailo_created_release_upload_file.png'
 
 # Uploading Files
 
@@ -29,6 +31,7 @@ Upload files from the **File Management** tab on your model page:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image
+    style={{ width: '100%', height: 'auto' }}
     alt='the file upload dialog with a destination folder set and four files staged for upload'
     src={bailoUploadFile}
   />
@@ -90,13 +93,37 @@ version number.
 Read that warning before you continue. If the releases must keep the original file, upload the new version under a
 different name or into a different destination folder instead of overwriting.
 
-## Adding files to a release
+## Adding files to a new release
 
-When creating or editing a release, you can attach files in two ways:
+When creating a new release, you can attach files in two ways:
 
 - **Select existing files** - choose from files already uploaded to the model
 - **Upload new files** - opens the upload dialog described above, and the uploaded files are added to the release
   automatically
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='new release form with file attached'
+    src={bailoUploadFileRelease}
+  />
+</Box>
+
+The screenshot above shows the new release form with a file already attached.
+
+## Adding files to an existing release
+
+You can edit existing releases to add or remove file attachments.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='view of existing release with edit release button'
+    src={bailoUploadedFileRelease}
+  />
+</Box>
+
+The screenshot above shows an existing release with an Edit release button for adding or removing files.
 
 Files on a release are displayed in a folder-navigable browser. You can remove a file from a release using the context
 menu (⋮) on each file or folder row — this detaches the file from the release without deleting it from the model.

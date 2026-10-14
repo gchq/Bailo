@@ -70,6 +70,8 @@ const ResponseSchema = new Schema<ResponseDoc>(
   },
 )
 
+ResponseSchema.index({ parentId: 1, kind: 1, entity: 1, createdAt: -1 })
+
 ResponseSchema.plugin(softDeletionPlugin)
 
 const ResponseModel = model<ResponseDoc>('v2_response', ResponseSchema)

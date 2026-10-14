@@ -1,7 +1,5 @@
 import pino from 'pino'
 
-import { GenericError, InternalError } from '../utils/error.js'
-
 export interface BailoError extends Error {
   // Inherited from 'Error'
   // name: string
@@ -37,13 +35,4 @@ export function isBailoError(err: unknown): err is BailoError {
   }
 
   return false
-}
-
-export function toBailoError(err: unknown, context?: BailoError['context'], code: number = 500): BailoError {
-  if (isBailoError(err)) {
-    return err
-  } else if (Error.isError(err)) {
-    return InternalError(err.message, { ...context, err })
-  }
-  return GenericError(code, String(err), { ...context, cause: err })
 }

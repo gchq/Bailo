@@ -3,24 +3,23 @@ import { useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
-import MetricsHeader from 'src/metrics/MetricsHeader'
+import renderQueryState from 'src/common/renderQueryState'
+import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
-import { BreakdownQueryType, buildEntriesTabHref } from 'utils/metricsUtils'
+import { BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
 
 export default function OverviewMetrics() {
   const router = useRouter()
   const { overviewMetrics, isOverviewMetricsLoading, isOverviewMetricsError } = useGetOverviewMetrics()
   const { schemas } = useGetSchemas()
 
-  const [selectedOrganisation, setSelectedOrganisation] = useState('All')
+  const [selectedOrganisation, setSelectedOrganisation] = useState(filterSelectTypes.ALL)
 
   const filteredDataset = useMemo(() => {
     if (!overviewMetrics) {
       return undefined
     }
-    if (selectedOrganisation === 'All') {
+    if (selectedOrganisation === filterSelectTypes.ALL) {
       return overviewMetrics.global
     }
     return overviewMetrics.byOrganisation.find((subset) => subset.organisation === selectedOrganisation)
@@ -34,16 +33,26 @@ export default function OverviewMetrics() {
     [router, selectedOrganisation, schemas],
   )
 
+  const handleMonthSelection = useCallback(
+    (month: string) => {
+      router.push(
+        buildEntriesHref({
+          organisation: selectedOrganisation !== filterSelectTypes.ALL ? selectedOrganisation : undefined,
+          startMonth: month,
+          endMonth: month,
+        }),
+      )
+    },
+    [router, selectedOrganisation],
+  )
+
   const handleOrganisationChange = useCallback((newOrganisation: string) => {
     setSelectedOrganisation(newOrganisation)
   }, [])
 
-  if (isOverviewMetricsError) {
-    return <MessageAlert message={isOverviewMetricsError.info.message} />
-  }
-
-  if (isOverviewMetricsLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isOverviewMetricsError], isOverviewMetricsLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
@@ -51,7 +60,8 @@ export default function OverviewMetrics() {
       <Stack spacing={4} sx={{ mt: 2, mb: 4 }}>
         {filteredDataset && overviewMetrics && (
           <MetricsHeader
-            data={overviewMetrics}
+            organisations={overviewMetrics.byOrganisation.map((organisationSubset) => organisationSubset.organisation)}
+            lastUpdated={overviewMetrics.lastUpdated}
             onOrganisationChange={handleOrganisationChange}
             selectedOrganisation={selectedOrganisation}
             exportDocumentTitle='Bailo overview metrics'
@@ -63,6 +73,7 @@ export default function OverviewMetrics() {
               )}
               selectedOrganisation={selectedOrganisation}
               onSelect={handleBreakdownSelection}
+              onSelectMonth={handleMonthSelection}
             />
           </MetricsHeader>
         )}

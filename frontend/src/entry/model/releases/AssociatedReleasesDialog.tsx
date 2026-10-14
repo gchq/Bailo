@@ -1,5 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
-import { Transition } from 'src/common/Transition'
+import DisplayDialog from 'src/common/DisplayDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import { ReleaseInterface } from 'types/types'
 
@@ -19,16 +18,8 @@ export default function AssociatedReleasesDialog({
   onClose,
 }: AssociatedReleasesDialogProps) {
   return (
-    <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
-      <DialogTitle>Associated Releases</DialogTitle>
-      <DialogContent>
-        <AssociatedReleasesList modelId={modelId} latestRelease={latestRelease} releases={sortedAssociatedReleases} />
-      </DialogContent>
-      <DialogActions>
-        <Button variant='contained' onClick={onClose}>
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <DisplayDialog open={open} onClose={onClose} title='Associated Releases'>
+      <AssociatedReleasesList modelId={modelId} latestRelease={latestRelease} releases={sortedAssociatedReleases} />
+    </DisplayDialog>
   )
 }

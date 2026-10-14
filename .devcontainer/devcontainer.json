@@ -6,19 +6,15 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "charliermarsh.ruff",
         "DavidAnson.vscode-markdownlint",
         "dbaeumer.vscode-eslint",
         "editorconfig.editorconfig",
         "esbenp.prettier-vscode",
         "mongodb.mongodb-vscode",
         "ms-azuretools.vscode-docker",
-        "ms-python.black-formatter",
         "ms-python.debugpy",
-        "ms-python.flake8",
-        "ms-python.isort",
-        "ms-python.pylint",
         "ms-python.python",
-        "ms-python.vscode-pylance",
         "ms-python.vscode-python-envs",
         "ms-toolsai.jupyter",
         "ms-toolsai.jupyter-keymap",

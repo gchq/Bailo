@@ -44,9 +44,9 @@ export const deleteModel = [
       params: { modelId },
     } = parse(req, deleteModelSchema)
 
-    await removeModel(req.user, modelId)
+    const model = await removeModel(req.user, modelId)
 
-    await audit.onDeleteModel(req, modelId)
+    await audit.onDeleteModel(req, model)
 
     res.json({
       message: 'Successfully removed model.',

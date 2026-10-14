@@ -437,7 +437,7 @@ exports[`connectors > audit > stroom > onCreateReviewRole > save expected event 
       "Create": {
         "Object": {
           "Description": "test description",
-          "Id": "Review role created for reviewRole",
+          "Id": "reviewRoleId",
           "Name": "testKind",
         },
       },
@@ -1419,7 +1419,7 @@ exports[`connectors > audit > stroom > onUpdateReviewRole > save expected event 
         "After": {
           "Object": {
             "Description": "test description",
-            "Id": "reviewRole",
+            "Id": "reviewRoleId",
             "Name": "testKind",
           },
         },
@@ -1939,11 +1939,13 @@ exports[`connectors > audit > stroom > onViewReviewRoles > save expected event 1
     "EventDetail": {
       "TypeId": "TestType",
       "View": {
-        "Object": {
-          "Description": "test description",
-          "Id": "1 review roles found.",
-          "Name": "testKind",
-        },
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "reviewRoleId",
+            "Name": "review role",
+          },
+        ],
       },
     },
     "EventSource": {

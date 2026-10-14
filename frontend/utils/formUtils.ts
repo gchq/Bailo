@@ -1,6 +1,6 @@
 import { Registry, RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
-import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
+import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
@@ -36,6 +36,8 @@ export function createStep({
   uiSchema,
   state,
   mirroredState,
+  compareFromState,
+  compareFromMirroredState,
   type,
   section,
   index,
@@ -46,6 +48,8 @@ export function createStep({
   uiSchema?: any
   state: unknown
   mirroredState?: unknown
+  compareFromState?: unknown
+  compareFromMirroredState?: unknown
   type: StepType
   section: string
   index: number
@@ -57,6 +61,8 @@ export function createStep({
     uiSchema,
     state,
     mirroredState,
+    compareFromState,
+    compareFromMirroredState,
     type,
     index,
     section,
@@ -113,6 +119,8 @@ export function getStepsFromSchema(
   omitFields: Array<string> = [],
   state: any = {},
   mirroredState: any = {},
+  compareFromState?: any,
+  compareFromMirroredState?: any,
 ): Array<StepNoRender> {
   const schemaDupe = omit(schema.jsonSchema, omitFields) as any
 
@@ -136,6 +144,11 @@ export function getStepsFromSchema(
       uiSchema: uiSchema[prop],
       state: state[prop] || {},
       mirroredState: mirroredState ? mirroredState[prop] || {} : {},
+      // Slice compare-mode "from" states per section to match `state` / `mirroredState`. Left
+      // `undefined` (rather than defaulted to `{}`) when the caller didn't provide them, so the
+      // widgets can distinguish "not in compare mode" from "compare mode with an empty section".
+      compareFromState: compareFromState ? compareFromState[prop] || {} : undefined,
+      compareFromMirroredState: compareFromMirroredState ? compareFromMirroredState[prop] || {} : undefined,
       type: 'Form',
       index,
       schemaRef: schema.reference,
@@ -215,6 +228,70 @@ export const getState = (id: string, formContext: Registry['formContext']) => {
     .reduce((prev, cur) => prev && prev[cur], formContext.state)
 }
 
+// Mirrors backend `deepMergePreferFirst`
+export function deepMergePreferFirst<TPreferred extends object, TFallback extends object>(
+  first: TPreferred,
+  second: TFallback,
+): TPreferred & TFallback {
+  return mergeWith({}, second, first, (objValue, srcValue) => {
+    // Arrays: first object wins completely
+    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+      return srcValue ?? objValue
+    }
+
+    // Primitives: first object wins when present
+    if (srcValue !== undefined && (srcValue === null || typeof srcValue !== 'object')) {
+      return srcValue
+    }
+
+    // Return undefined to let lodash continue normal deep merge.
+    return undefined
+  }) as TPreferred & TFallback
+}
+
+function getPreferFirstValue(firstValue: unknown, secondValue: unknown): unknown {
+  // Picks first value when it has meaningful content, otherwise falls back to second.
+  if (firstValue === undefined || firstValue === null || firstValue === '') {
+    return secondValue
+  }
+  if (Array.isArray(firstValue) && firstValue.length === 0) {
+    return secondValue
+  }
+  return firstValue
+}
+
+/**
+ * Look up the compare-mode "from" local-card value for a field, mirroring `getState`. Returns
+ * `undefined` when the current form isn't running in compare mode (i.e. no `compareFromState` was
+ * placed on the `formContext`), which callers use to detect single-vs-double-diff rendering.
+ */
+export const getCompareFromState = (id: string, formContext: Registry['formContext']) => {
+  if (formContext.compareFromState === undefined) {
+    return undefined
+  }
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromState)
+}
+
+/**
+ * Look up the compare-mode "from" mirrored-card value for a field, mirroring `getMirroredState`.
+ */
+export const getCompareFromMirroredState = (id: string, formContext: Registry['formContext']) => {
+  if (formContext.compareFromMirroredState === undefined) {
+    return undefined
+  }
+  return id
+    .replaceAll('root_', '')
+    .replaceAll('_', '.')
+    .split('.')
+    .filter((t) => t !== '')
+    .reduce((prev, cur) => prev && prev[cur], formContext.compareFromMirroredState)
+}
+
 function isMetricsKey(key: string): boolean {
   return key.toLowerCase().includes('metrics')
 }
@@ -237,7 +314,11 @@ export function isQuestionAnswered(id: string, schema: any, formContext: Registr
     return false
   }
 
-  const value = getState(id, formContext)
+  // For mirrored models, a field is answered if present in either local or source card (local value preferred)
+  const localValue = getState(id, formContext)
+  const value = formContext.mirroredModel
+    ? getPreferFirstValue(localValue, getMirroredState(id, formContext))
+    : localValue
 
   if (isPrimitiveSchema(schema)) {
     return isAnswered(value)
@@ -364,13 +445,13 @@ export function getFormStats(step?: StepNoRender, mirroredModel?: boolean, requi
   }
 
   const totalQuestions = countQuestionsFromSchema(step.schema, requiredByModelState)
-  const totalAnswers = countAnswersFromSchemaAndState(
-    step.schema,
-    mirroredModel ? step.mirroredState : step.state,
-    requiredByModelState,
-  )
+  // Mirrored models validate against the combined card with local values preferred to source values
+  const stateForValidation = mirroredModel
+    ? deepMergePreferFirst(step.state || {}, step.mirroredState || {})
+    : step.state
+  const totalAnswers = countAnswersFromSchemaAndState(step.schema, stateForValidation, requiredByModelState)
 
-  // If more answers given than required answers then return 100% otherwise calulate percentage
+  // If more answers given than required answers then return 100% otherwise calculate percentage
   const percentageQuestionsComplete =
     totalQuestions === 0 ? 100 : Math.min(100, roundToOneDecimal((totalAnswers / totalQuestions) * 100))
 

@@ -77,13 +77,13 @@ export function useGetEntryCard(entryId?: string, entryCardVersion?: number, mir
   }
 }
 
-export function useGetEntryCardRevisions(entryId: string) {
+export function useGetEntryCardRevisions(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       modelCardRevisions: EntryCardRevisionInterface[]
     },
     ErrorInfo
-  >(`/api/v2/model/${entryId}/model-card-revisions`, fetcher)
+  >(entryId ? `/api/v2/model/${entryId}/model-card-revisions` : null, fetcher)
 
   return {
     mutateEntryCardRevisions: mutate,

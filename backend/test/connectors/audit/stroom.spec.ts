@@ -9,40 +9,15 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/model
 import { ImageTagRef, ReleaseDoc } from '../../../src/models/Release.js'
 import { ResponseInterface } from '../../../src/models/Response.js'
 import { ReviewInterface } from '../../../src/models/Review.js'
-import { ReviewRoleInterface } from '../../../src/models/ReviewRole.js'
-import { SchemaInterface } from '../../../src/models/Schema.js'
+import { ReviewRoleDoc } from '../../../src/models/ReviewRole.js'
+import { SchemaDoc, SchemaInterface } from '../../../src/models/Schema.js'
 import { SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
 import { TokenDoc } from '../../../src/models/Token.js'
 import { MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
 import { FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
 import { ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
+import config from '../../../src/utils/config.js'
 import { InternalError } from '../../../src/utils/error.js'
-
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    audit: {
-      kind: 'stroom',
-    },
-  },
-  stroom: {
-    logOnlyMode: true,
-    feed: 'feed',
-    url: 'https://url',
-    environment: 'local',
-    interval: 1000 * 50,
-    generator: 'Generator',
-  },
-  s3: {
-    buckets: {
-      uploads: 'uploads',
-      registry: 'registry',
-    },
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -56,6 +31,7 @@ vi.mock('../../../src/services/log.js', async () => ({
 
 const mockStroomService = vi.hoisted(() => ({
   saveEvent: vi.fn(),
+  processBatch: vi.fn(async () => {}),
 }))
 vi.mock('../../../src/services/stroom.js', () => mockStroomService)
 
@@ -156,7 +132,7 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onDeleteModel > save expected event', async () => {
-    await connector.onDeleteModel(deleteEventRequest, 'test-model')
+    await connector.onDeleteModel(deleteEventRequest, { id: 'test-model' } as ModelDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -235,7 +211,7 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onDeleteRelease > save expected event', async () => {
-    await connector.onDeleteRelease(deleteEventRequest, 'model ID', '1.2.3')
+    await connector.onDeleteRelease(deleteEventRequest, { modelId: 'model ID', semver: '1.2.3' } as ReleaseDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -269,7 +245,7 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onDeleteUserToken > save expected event', async () => {
-    await connector.onDeleteUserToken(deleteEventRequest, 'access')
+    await connector.onDeleteUserToken(deleteEventRequest, { accessKey: 'access' } as TokenDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -304,7 +280,7 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onDeleteAccessRequest > save expected event', async () => {
-    await connector.onDeleteAccessRequest(deleteEventRequest, 'id')
+    await connector.onDeleteAccessRequest(deleteEventRequest, { id: 'id' } as AccessRequestDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -331,12 +307,12 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onUpdateSchema > save expected event', async () => {
-    await connector.onUpdateSchema(updateEventRequest, { id: 'id' } as SchemaInterface)
+    await connector.onUpdateSchema(updateEventRequest, { id: 'id' } as SchemaDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onDeleteSchema > save expected event', async () => {
-    await connector.onDeleteSchema(deleteEventRequest, 'id')
+    await connector.onDeleteSchema(deleteEventRequest, { id: 'id' } as SchemaDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -446,22 +422,22 @@ describe('connectors > audit > stroom', () => {
   })
 
   test('onCreateReviewRole > save expected event', async () => {
-    await connector.onCreateReviewRole(createEventRequest, { name: 'reviewRole' } as ReviewRoleInterface)
+    await connector.onCreateReviewRole(createEventRequest, { id: 'reviewRoleId' } as ReviewRoleDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onViewReviewRoles > save expected event', async () => {
-    await connector.onViewReviewRoles(viewEventRequest, [{ name: 'reviewRole' } as ReviewRoleInterface])
+    await connector.onViewReviewRoles(viewEventRequest, [{ id: 'reviewRoleId' } as ReviewRoleDoc])
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onUpdateReviewRole > save expected event', async () => {
-    await connector.onUpdateReviewRole(updateEventRequest, { name: 'reviewRole' } as ReviewRoleInterface)
+    await connector.onUpdateReviewRole(updateEventRequest, { id: 'reviewRoleId' } as ReviewRoleDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('onDeleteReviewRole > save expected event', async () => {
-    await connector.onDeleteReviewRole(deleteEventRequest, 'reviewRoleId')
+    await connector.onDeleteReviewRole(deleteEventRequest, { id: 'reviewRoleId' } as ReviewRoleDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 
@@ -488,5 +464,13 @@ describe('connectors > audit > stroom', () => {
   test('onError > save expected event for Search error', async () => {
     await connector.onError(searchEventRequest, InternalError('Error'))
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('scheduled batch > logs a failure instead of rejecting unhandled', async () => {
+    mockStroomService.processBatch.mockRejectedValueOnce(new Error('batch failed'))
+
+    await vi.advanceTimersByTimeAsync(config.stroom.interval)
+
+    expect(logMock.error).toHaveBeenCalledWith({ err: expect.any(Error) }, 'Failed to process batch of STROOM events.')
   })
 })

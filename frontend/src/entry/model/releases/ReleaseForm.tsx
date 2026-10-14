@@ -2,7 +2,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FileUpload from '@mui/icons-material/FileUpload'
 import Folder from '@mui/icons-material/Folder'
 import MoreVert from '@mui/icons-material/MoreVert'
-import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline'
+import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import {
   Accordion,
   AccordionDetails,
@@ -40,6 +40,7 @@ import FileBrowser from 'src/entry/model/files/FileBrowser'
 import FileDisplay, { MutateReleases } from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import ModelImageList from 'src/entry/model/ModelImageList'
+import { getLatestRelease } from 'src/entry/model/Releases'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
@@ -48,12 +49,13 @@ import { EntryInterface, EntryKind, FileInterface, FlattenedModelImage, ReleaseI
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
 import { collectAllFiles, type FileTreeNode } from 'utils/fileTreeUtils'
+import { buildModelCardHref } from 'utils/routerUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
 export type ReleaseFormData = {
   semver: string
   releaseNotes: string
-  isMinorRelease: boolean
+  isMinorRelease?: boolean
   files: FileInterface[]
   imageList: FlattenedModelImage[]
   modelCardVersion: number
@@ -106,8 +108,6 @@ export default function ReleaseForm({
   )
 
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
-
-  const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
@@ -211,7 +211,7 @@ export default function ReleaseForm({
           >
             Latest version
           </Typography>
-          <Typography noWrap>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+          <Typography noWrap>{isReleasesLoading ? 'Loading...' : getLatestRelease(releases)}</Typography>
         </Stack>
       )}
       <Stack
@@ -265,9 +265,7 @@ export default function ReleaseForm({
           {isReadOnly ? (
             <Typography>
               {formData.modelCardVersion} -{' '}
-              <Link
-                href={`/model/${model.id}/history/${formData.modelCardVersion}${model.kind === EntryKind.MIRRORED_MODEL ? '?mirrored=true' : ''}`}
-              >
+              <Link href={buildModelCardHref(model.id, model.kind, formData.modelCardVersion)}>
                 <Button size='small'>View Model card</Button>
               </Link>
             </Typography>
@@ -297,10 +295,20 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         {isReadOnly ? (
-          <>
-            {releaseNotesLabel}
-            <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
-          </>
+          <Accordion defaultExpanded sx={{ p: 0 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {releaseNotesLabel}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
+            </AccordionDetails>
+          </Accordion>
         ) : (
           <RichTextEditor
             value={formData.releaseNotes}

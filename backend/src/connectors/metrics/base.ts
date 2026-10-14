@@ -1,11 +1,14 @@
+import humanInterval from 'human-interval'
 import { Model, PipelineStage, QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { ModelInterface, SystemRoles } from '../../models/Model.js'
-import ReleaseModel from '../../models/Release.js'
+import ModelModel, { EntryKind, ModelInterface } from '../../models/Model.js'
+import ReleaseModel, { SemverObject } from '../../models/Release.js'
+import ResponseModel, { Decision } from '../../models/Response.js'
+import ReviewModel, { ReviewInterface } from '../../models/Review.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
@@ -14,21 +17,27 @@ import {
   EntryVolumeInterval,
   GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
+import { GetLifecycleComplianceMetricsResponse } from '../../routes/v3/metrics/getLifecycleComplianceMetrics.js'
 import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
 import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
 import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
+import { GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/getUnapprovedComplianceMetrics.js'
 import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
-import { MetricsCacheKeys, SchemaKind } from '../../types/enums.js'
-import { MetricsEntrySearchOptionsParams } from '../../types/types.js'
+import { MetricsCacheKeys, ReviewKind } from '../../types/enums.js'
+import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
+import { sortSemvers } from '../../utils/version.js'
 import {
   addInterval,
   buildModelMatchStage,
+  buildReleaseKey,
   getActiveRoleSet,
   getApplicableRoleSet,
+  getModelOwners,
   ModelFilter,
   SchemaRoleMap,
+  semverToString,
 } from './metricUtils.js'
 
 const METRICS_CACHE_TTL = 5 * 60 // 5 minutes
@@ -115,7 +124,10 @@ async function calculateTotalEntries(filter: ModelFilter): Promise<number> {
 async function countDistinctEntriesWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
   if (filter.organisation === undefined) {
     const ids = await collection.distinct('modelId')
-    return ids.length
+    if (ids.length === 0) {
+      return 0
+    }
+    return ModelModel.countDocuments({ id: { $in: ids } })
   }
 
   const pipeline: PipelineStage[] = [
@@ -153,7 +165,6 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
   const pipeline: PipelineStage[] = [
     {
       $match: {
-        kind: SchemaKind.Model,
         hidden: false,
       },
     },
@@ -204,8 +215,7 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
  * Calculates the full set of usage metrics either globally
  * or scoped to a specific organisation.
  */
-async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): Promise<BaseMetrics> {
-  await checkUserIsAuthorised(user)
+async function calculateUsageMetrics(filter: ModelFilter): Promise<BaseMetrics> {
   const [totalEntries, stateMetrics, schemaMetrics, totalEntriesWithReleases, totalEntriesWithAccessRequests] =
     await Promise.all([
       calculateTotalEntries(filter),
@@ -302,7 +312,7 @@ type NoReleasesComplianceMetricsResultSubset = {
   summary: {
     modelsWithNoReleases: number
   }
-  models: ModelWithNoReleases[]
+  entries: ModelWithNoReleases[]
 }
 
 type NoReleasesComplianceMetricsResultByOrgSubset = {
@@ -369,9 +379,7 @@ async function calculateMissingEntryRoles(
       entriesResult.push({
         entryId: model.id,
         missingRoles,
-        modelOwners: model.collaborators
-          .filter((collaborator) => (collaborator.roles ?? []).includes(SystemRoles.Owner))
-          .map((collaborator) => collaborator.entity),
+        modelOwners: getModelOwners(model.collaborators),
       })
     }
   }
@@ -399,7 +407,7 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   }
 
   const pipeline: PipelineStage[] = [
-    { $match: filter },
+    { $match: { ...filter, kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] } } },
     {
       $lookup: {
         from: 'v2_releases',
@@ -445,14 +453,227 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
   ]
 
   // Gets models by the specified organisation | no organisation
-  const models = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
+  const entries = await ModelModel.aggregate<ModelWithNoReleases>(pipeline)
 
   return {
     summary: {
-      modelsWithNoReleases: models.length,
+      modelsWithNoReleases: entries.length,
     },
-    models,
+    entries,
   }
+}
+
+type EntryWithUnapprovedReleases = {
+  entryId: string
+  modelOwners: string[]
+  unapprovedReleases: string[]
+}
+
+type UnapprovedComplianceMetricsResultSubset = {
+  summary: {
+    totalModelsWithUnapprovedReleases: number
+    totalUnapprovedReleases: number
+  }
+  entries: EntryWithUnapprovedReleases[]
+}
+
+/**
+ * Builds compliance results for models with unapproved releases.
+ */
+function buildUnapprovedReleaseEntries(
+  models: Pick<ModelInterface, 'id' | 'collaborators'>[],
+  unapprovedByModel: Map<string, Set<string>>,
+): UnapprovedComplianceMetricsResultSubset {
+  const entries: EntryWithUnapprovedReleases[] = []
+  let totalUnapprovedReleases = 0
+
+  for (const model of models) {
+    const unapprovedReleases = unapprovedByModel.get(model.id)
+
+    if (unapprovedReleases === undefined || unapprovedReleases.size === 0) {
+      continue
+    }
+
+    const sortedReleases = sortSemvers([...unapprovedReleases])
+
+    totalUnapprovedReleases += sortedReleases.length
+
+    entries.push({
+      entryId: model.id,
+      modelOwners: getModelOwners(model.collaborators),
+      unapprovedReleases: sortedReleases,
+    })
+  }
+
+  return {
+    summary: {
+      totalModelsWithUnapprovedReleases: entries.length,
+      totalUnapprovedReleases,
+    },
+    entries,
+  }
+}
+
+/**
+ * Determines whether a release is still awaiting one or more required approvals.
+ */
+function releaseHasOutstandingReview(roles?: { requiredRoles: Set<string>; approvedRoles: Set<string> }): boolean {
+  return roles === undefined || [...roles.requiredRoles].some((role) => !roles.approvedRoles.has(role))
+}
+
+type ReleaseWithSemver = {
+  modelId: string
+  semver: string | SemverObject
+}
+type RoleMap = {
+  requiredRoles: Set<string>
+  approvedRoles: Set<string>
+}
+
+/**
+ * Groups unapproved release versions by model identifier.
+ */
+function buildUnapprovedReleaseMap(
+  releases: ReleaseWithSemver[],
+  releaseRoleMap: Map<string, RoleMap>,
+): Map<string, Set<string>> {
+  const unapprovedByModel = new Map<string, Set<string>>()
+
+  for (const release of releases) {
+    const semver = semverToString(release.semver)
+    const key = buildReleaseKey(release.modelId, semver)
+    const roles = releaseRoleMap.get(key)
+
+    if (!releaseHasOutstandingReview(roles)) {
+      continue
+    }
+
+    if (!unapprovedByModel.has(release.modelId)) {
+      unapprovedByModel.set(release.modelId, new Set<string>())
+    }
+
+    unapprovedByModel.get(release.modelId)!.add(semver)
+  }
+
+  return unapprovedByModel
+}
+
+type ReleaseRoleInfo = {
+  requiredRoles: Set<string>
+  approvedRoles: Set<string>
+}
+
+type ReleaseRoleMap = Map<string, ReleaseRoleInfo>
+
+type ReleaseReview = Pick<ReviewInterface, '_id' | 'modelId' | 'semver' | 'role'>
+
+/**
+ * Builds a release-to-review-role mapping from review and approval data.
+ */
+function buildReleaseRoleMap(reviews: ReleaseReview[], approvedReviewIds: Set<string>): ReleaseRoleMap {
+  const releaseRoleMap: ReleaseRoleMap = new Map()
+
+  for (const review of reviews) {
+    if (review.semver === undefined) {
+      continue
+    }
+
+    const key = buildReleaseKey(review.modelId, semverToString(review.semver))
+
+    if (!releaseRoleMap.has(key)) {
+      releaseRoleMap.set(key, {
+        requiredRoles: new Set<string>(),
+        approvedRoles: new Set<string>(),
+      })
+    }
+
+    const entry = releaseRoleMap.get(key)!
+
+    entry.requiredRoles.add(review.role)
+
+    // Dependant on just 1 approval - there could be additional in pending state
+    if (approvedReviewIds.has(review._id.toString())) {
+      entry.approvedRoles.add(review.role)
+    }
+  }
+
+  return releaseRoleMap
+}
+
+/**
+ * Calculates which entries have releases that are missing reviews either
+ * globally or scoped to a specific organisation.
+ */
+async function calculateUnapprovedReleases(org?: string): Promise<UnapprovedComplianceMetricsResultSubset> {
+  const filter: ModelFilter = {}
+  const emptyResult: UnapprovedComplianceMetricsResultSubset = {
+    summary: {
+      totalModelsWithUnapprovedReleases: 0,
+      totalUnapprovedReleases: 0,
+    },
+    entries: [],
+  }
+
+  // Only undefined means global
+  if (org !== undefined) {
+    filter.organisation = org
+  }
+
+  // Fetch candidate models (by organisation | all) that could have releases
+  const models = await ModelModel.find({
+    ...filter,
+    kind: { $in: [EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] },
+  })
+    .select('id collaborators')
+    .lean()
+
+  if (models.length === 0) {
+    return emptyResult
+  }
+
+  const modelIds = models.map((model) => model.id)
+
+  // All non-draft releases belonging to the candidate models
+  const releases = await ReleaseModel.find({
+    modelId: { $in: modelIds },
+    draft: { $ne: true },
+  })
+    .select('modelId semver')
+    .lean()
+
+  if (releases.length === 0) {
+    return emptyResult
+  }
+
+  // Release review documents state which roles were requested to review each release (modelId + semver)
+  const reviews = await ReviewModel.find({
+    modelId: { $in: modelIds },
+    kind: ReviewKind.Release,
+  })
+    .select('_id modelId semver role')
+    .lean()
+
+  // Determine which reviews have an approving response
+  const reviewIds = reviews.map((review) => review._id)
+  const approvingResponses =
+    reviewIds.length > 0
+      ? await ResponseModel.find({
+          parentId: { $in: reviewIds },
+          decision: Decision.Approve,
+        })
+          .select('parentId')
+          .lean()
+      : []
+
+  const approvedReviewIds = new Set<string>(approvingResponses.map((response) => response.parentId.toString()))
+
+  // Build a map of releases to review roles
+  const releaseRoleMap = buildReleaseRoleMap(reviews, approvedReviewIds)
+
+  // Groups those unapproved release versions by model id
+  const unapprovedByModel = buildUnapprovedReleaseMap(releases, releaseRoleMap)
+
+  return buildUnapprovedReleaseEntries(models, unapprovedByModel)
 }
 
 /**
@@ -461,6 +682,95 @@ async function calculateModelsMissingReleases(org?: string): Promise<NoReleasesC
  */
 function buildEntryVolumeCacheKey(interval: EntryVolumeInterval, start: Date, end: Date, timezone?: string): string {
   return ['entryVolume', interval, start.toISOString(), end.toISOString(), timezone ?? 'none'].join(':')
+}
+
+interface CalculatedLifecycleComplianceMetrics {
+  summary: {
+    count: number
+  }
+  entries: {
+    entryId: string
+    dueDate: string
+    modelOwners: string[]
+  }[]
+}
+
+async function calculateLifecycleComplianceMetrics(
+  weeksUntilDue: number,
+  organisation?: string,
+): Promise<CalculatedLifecycleComplianceMetrics> {
+  const dueDateCutOff = new Date()
+  const interval = humanInterval(`${weeksUntilDue} weeks`)
+  dueDateCutOff.setTime(dueDateCutOff.getTime() + (interval as number))
+  const openLifecycleReviewsPipeline: PipelineStage[] = [
+    {
+      $match: {
+        kind: ReviewKind.Lifecycle,
+        dueDate: { $lte: dueDateCutOff },
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'responses',
+      },
+    },
+    { $match: { responses: { $size: 0 } } },
+    {
+      $lookup: {
+        from: 'v2_models',
+        localField: 'modelId',
+        foreignField: 'id',
+        as: 'model',
+      },
+    },
+    { $unwind: '$model' },
+    {
+      $match: {
+        ...(organisation !== undefined && {
+          'model.organisation': organisation,
+        }),
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        entryId: '$modelId',
+        dueDate: 1,
+        modelOrganisation: '$model.organisation',
+        modelOwners: {
+          $map: {
+            input: {
+              $filter: {
+                input: '$model.collaborators',
+                as: 'item',
+                cond: { $in: ['owner', { $ifNull: ['$$item.roles', []] }] },
+              },
+            },
+            as: 'owner',
+            in: '$$owner.entity',
+          },
+        },
+      },
+    },
+    {
+      $sort: {
+        dueDate: 1,
+      },
+    },
+  ]
+
+  openLifecycleReviewsPipeline.push({ $unset: 'modelOrganisation' })
+
+  const entries = await ReviewModel.aggregate(openLifecycleReviewsPipeline)
+  return {
+    summary: {
+      count: entries.length,
+    },
+    entries,
+  }
 }
 
 export class BaseMetricsConnector {
@@ -492,62 +802,26 @@ export class BaseMetricsConnector {
       }
     }
 
+    await checkUserIsAuthorised(user)
+
     const organisationIds = await this.getOrganisationIds()
 
-    const byOrganisation = await Promise.all(
-      organisationIds.map(async (orgRaw) => {
-        const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
-
-        const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
-
-        const metrics = await calculateUsageMetrics(user, filter)
-
-        return { organisation, ...metrics }
-      }),
-    )
-
-    const schemaCounts = new Map<string, SchemaInfo>()
-    const stateCounts = new Map<string, StateInfo>()
-
-    let entries = 0
-    let withReleases = 0
-    let withAccessRequest = 0
-
-    // Tally up the metrics for each org to get global metrics
-    for (const org of byOrganisation) {
-      entries += org.entries
-      withReleases += org.withReleases
-      withAccessRequest += org.withAccessRequest
-
-      for (const schema of org.schemaBreakdown ?? []) {
-        const key = String(schema.schemaId)
-        const existing = schemaCounts.get(key)
-
-        if (existing) {
-          existing.count += schema.count
-        } else {
-          schemaCounts.set(key, { ...schema, schemaId: key })
-        }
-      }
-
-      for (const state of org.entryState ?? []) {
-        const existing = stateCounts.get(state.state)
-
-        if (existing) {
-          existing.count += state.count
-        } else {
-          stateCounts.set(state.state, { ...state })
-        }
-      }
-    }
+    const [byOrganisation, globalMetrics, users] = await Promise.all([
+      Promise.all(
+        organisationIds.map(async (orgRaw) => {
+          const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
+          const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
+          const metrics = await calculateUsageMetrics(filter)
+          return { organisation, ...metrics }
+        }),
+      ),
+      calculateUsageMetrics({}),
+      calculateTotalUsers(),
+    ])
 
     const global: BaseMetrics = {
-      users: await calculateTotalUsers(),
-      entries,
-      withReleases,
-      withAccessRequest,
-      schemaBreakdown: Array.from(schemaCounts.values()),
-      entryState: Array.from(stateCounts.values()).sort((a, b) => b.count - a.count),
+      ...globalMetrics,
+      users,
     }
 
     const result = { global, byOrganisation }
@@ -596,6 +870,52 @@ export class BaseMetricsConnector {
     const lastUpdated = new Date().toISOString()
 
     setCached(MetricsCacheKeys.ROLE_COMPLIANCE, {
+      data: result,
+      lastUpdated,
+    })
+
+    return {
+      ...result,
+      lastUpdated,
+    }
+  }
+
+  /**
+   * Gets metrics around entries with releases that are missing reviews.
+   */
+  async getUnapprovedComplianceMetrics(user: UserInterface): Promise<GetUnapprovedComplianceMetricsResponse> {
+    await checkUserIsAuthorised(user)
+
+    const cached = getCached<CachedMetrics<GetUnapprovedComplianceMetricsResponse>>(
+      MetricsCacheKeys.UNAPPROVED_RELEASES_COMPLIANCE,
+    )
+    if (cached !== undefined) {
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
+    }
+
+    const global = await calculateUnapprovedReleases()
+
+    const organisationIds = await this.getOrganisationIds()
+
+    const byOrganisation = await Promise.all(
+      organisationIds.map(async (org) => {
+        const { summary, entries } = await calculateUnapprovedReleases(org)
+        return {
+          organisation: org || 'unset',
+          modelsWithUnapprovedReleases: summary.totalModelsWithUnapprovedReleases,
+          entries,
+        }
+      }),
+    )
+
+    const result = { global, byOrganisation }
+
+    const lastUpdated = new Date().toISOString()
+
+    setCached(MetricsCacheKeys.UNAPPROVED_RELEASES_COMPLIANCE, {
       data: result,
       lastUpdated,
     })
@@ -825,15 +1145,22 @@ export class BaseMetricsConnector {
 
     const mongoQuery: QueryFilter<ModelInterface> = {}
 
+    const idFilter: {
+      $in?: string[]
+      $nin?: string[]
+    } = {}
+
     // Filter by organisation only if provided and not 'all' - if 'none' then query any with empty string
     if (query.organisation !== undefined && query.organisation.toLowerCase() !== 'all') {
       mongoQuery.organisation = query.organisation.toLowerCase() === 'unset' ? '' : query.organisation
     }
 
+    // Filter by model state if provided
     if (query.state !== undefined) {
       mongoQuery.state = query.state.toLowerCase() === 'none' ? '' : query.state
     }
 
+    // Filter by schemaId if provided
     if (query.schemaId !== undefined) {
       if (query.schemaId.toLowerCase() === 'none') {
         mongoQuery['card.schemaId'] = { $exists: false }
@@ -842,10 +1169,82 @@ export class BaseMetricsConnector {
       }
     }
 
+    // Filter by entry kind(s) if provided (model, data-card, mirrored-model, untrusted-model)
+    if (query.kinds !== undefined && query.kinds.length > 0) {
+      const validKinds = Object.values(EntryKind)
+      const invalidKinds = query.kinds.filter((kind) => !validKinds.includes(kind))
+
+      if (invalidKinds.length > 0) {
+        throw BadReq(`Invalid entryKind. Must be one of: ${validKinds.join(', ')}.`, {
+          entryKind: invalidKinds,
+        })
+      }
+
+      mongoQuery.kind = { $in: query.kinds }
+    }
+
+    // Filter by models with releases if provided
+    if (query.release !== undefined) {
+      const releaseModelIds = await ReleaseModel.distinct('modelId')
+
+      if (query.release.toLowerCase() === EntryFilter.WITH) {
+        idFilter.$in = releaseModelIds
+      } else {
+        idFilter.$nin = releaseModelIds
+      }
+    }
+
+    // Filter by models with access requests if provided
+    if (query.accessRequest !== undefined) {
+      const accessRequestModelIds = await AccessRequestModel.distinct('modelId')
+      const accessRequestModelIdSet = new Set(accessRequestModelIds)
+
+      if (query.accessRequest.toLowerCase() === EntryFilter.WITH) {
+        idFilter.$in = idFilter.$in
+          ? idFilter.$in.filter((id) => accessRequestModelIdSet.has(id))
+          : accessRequestModelIds
+      } else {
+        idFilter.$nin = [...(idFilter.$nin ?? []), ...accessRequestModelIds]
+      }
+    }
+
+    // Filter by createdAt month range if provided. startMonth and endMonth are
+    // each independently optional, so only add the bound that was supplied.
+    if (query.startMonth !== undefined || query.endMonth !== undefined) {
+      const createdAtFilter: { $gte?: Date; $lt?: Date } = {}
+
+      if (query.startMonth !== undefined) {
+        const start = new Date(query.startMonth)
+        if (isNaN(start.getTime())) {
+          throw BadReq('Invalid startMonth. Must be in the format YYYY-MM.', { startMonth: query.startMonth })
+        }
+        createdAtFilter.$gte = start
+      }
+
+      if (query.endMonth !== undefined) {
+        const end = new Date(query.endMonth)
+        if (isNaN(end.getTime())) {
+          throw BadReq('Invalid endMonth. Must be in the format YYYY-MM.', { endMonth: query.endMonth })
+        }
+        createdAtFilter.$lt = addInterval(end, 'month')
+      }
+
+      if (query.startMonth && query.endMonth && query.startMonth > query.endMonth) {
+        throw BadReq('startMonth must be before or equal to endMonth')
+      }
+
+      mongoQuery.createdAt = createdAtFilter
+    }
+
+    if (Object.keys(idFilter).length > 0) {
+      mongoQuery.id = idFilter
+    }
+
     const models = await ModelModel.find(mongoQuery)
       .select({
         id: true,
         name: true,
+        kind: true,
         collaborators: true,
         _id: false,
       })
@@ -857,11 +1256,54 @@ export class BaseMetricsConnector {
     return models.map((model) => ({
       entryId: model.id,
       entryName: model.name,
+      entryKind: model.kind,
       collaborators:
         model.collaborators?.map((collaborator) => ({
           entity: collaborator.entity,
           roles: collaborator.roles ?? [],
         })) ?? [],
     }))
+  }
+
+  async getLifecycleComplianceMetrics(
+    user: UserInterface,
+    weeksUntilDue: number,
+  ): Promise<GetLifecycleComplianceMetricsResponse> {
+    await checkUserIsAuthorised(user)
+
+    const cached = getCached<CachedMetrics<GetLifecycleComplianceMetricsResponse>>(
+      `${MetricsCacheKeys.LIFECYCLE}-${weeksUntilDue}`,
+    )
+    if (cached !== undefined) {
+      return {
+        ...cached.data,
+        lastUpdated: cached.lastUpdated,
+      }
+    }
+
+    const global = await calculateLifecycleComplianceMetrics(weeksUntilDue)
+
+    const organisationIds = await this.getOrganisationIds()
+
+    const byOrganisation = await Promise.all(
+      organisationIds.map(async (org) => ({
+        organisation: org || 'unset',
+        ...(await calculateLifecycleComplianceMetrics(weeksUntilDue, org)),
+      })),
+    )
+
+    const result: Omit<GetLifecycleComplianceMetricsResponse, 'lastUpdated'> = { global, byOrganisation }
+
+    const lastUpdated = new Date().toISOString()
+
+    setCached(`${MetricsCacheKeys.LIFECYCLE}-${weeksUntilDue}`, {
+      data: result,
+      lastUpdated,
+    })
+
+    return {
+      ...result,
+      lastUpdated,
+    }
   }
 }

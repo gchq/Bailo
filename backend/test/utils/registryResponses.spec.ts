@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest'
 
+import { parseRegistryResponse } from '../../src/utils/registryResponses.js'
 import {
   BaseApiCheckResponseBodySchema,
   BaseApiCheckResponseHeadersSchema,
-  parseRegistryResponse,
-} from '../../src/utils/registryResponses.js'
+} from '../../src/utils/registryResponseTypes.js'
 
 describe('clients > registryResponses', () => {
   test('parseRegistryResponse > success', () => {

@@ -1,4 +1,4 @@
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import bailoAccessRequest from 'public/docs/bailo_access_request.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
@@ -20,7 +20,11 @@ Navigate to the **Reviews** page from the navigation bar. Access requests awaiti
 reviews** tab.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='open access requests reviews page with a unreviewed request' src={bailoAccessRequest} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='open access requests reviews page with a unreviewed request'
+    src={bailoAccessRequest}
+  />
 </Box>
 
 The screenshot above shows the Reviews page with an open access request awaiting review.

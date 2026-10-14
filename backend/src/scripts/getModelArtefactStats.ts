@@ -22,7 +22,7 @@ import log from '../services/log.js'
 import { joinDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
-import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponseTypes.js'
 
 function calculateAverages(values: number[]) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length

@@ -153,3 +153,6 @@ class AccessRequest:
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.access_request_id == other.access_request_id
+
+    def __hash__(self):
+        return hash(self.access_request_id)

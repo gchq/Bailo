@@ -85,6 +85,7 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
   // Model cache
   const models: Record<string, ModelDoc> = {}
 
+  const accessRequests: AccessRequestDoc[] = []
   for (const accessRequestId of accessRequestIds) {
     const accessRequest = await getAccessRequestById(user, accessRequestId)
     let model: ModelDoc
@@ -109,15 +110,14 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
       [...reviewsForAccessRequest.map((review) => review.id), accessRequest._id.toString()],
       session,
     )
+    accessRequests.push(accessRequest)
   }
 
-  return { accessRequestIds }
+  return accessRequests
 }
 
 export async function removeAccessRequest(user: UserInterface, accessRequestId: string, session?: ClientSession) {
-  await removeAccessRequests(user, [accessRequestId], session)
-
-  return { accessRequestId }
+  return (await removeAccessRequests(user, [accessRequestId], session))[0]
 }
 
 export async function getAccessRequestsByModel(user: UserInterface, modelId: string) {
@@ -226,15 +226,15 @@ export async function updateAccessRequest(
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
-  // Ensure that the AR meets the schema
-  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
-  if (!valid) {
-    throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      errors,
-    })
-  }
-
   if (diff.metadata) {
+    // Validate the incoming content, not what is already stored
+    const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
+    if (!valid) {
+      throw BadReq('Access Request Metadata could not be validated against the schema.', {
+        errors,
+      })
+    }
+
     accessRequest.metadata = diff.metadata
     accessRequest.markModified('metadata')
   }

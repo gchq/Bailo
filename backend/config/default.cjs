@@ -189,6 +189,7 @@ module.exports = {
       userIdAttribute: '',
       adminGroupName: '',
       complianceGroupName: '',
+      untrustedModelGroupName: '',
     },
   },
 
@@ -273,12 +274,19 @@ module.exports = {
 
     untrustedModel: {
       enabled: false,
-      untrustedModelDescription: 'These are private only models.',
+      untrustedModelLongDescription:
+        'Untrusted models are private-only models with the Registry tab disabled. They have not been verified or validated to the same standard as regular models.',
+      untrustedModelShortDescription:
+        'An untrusted model repository contains all files, history, and information associated with a private model.',
       fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.',
     },
 
     llmImport: {
       enabled: false,
+    },
+
+    lifecycle: {
+      maxReviewInterval: '',
     },
   },
 
@@ -313,7 +321,7 @@ module.exports = {
       accessKeyId: '',
       secretAccessKey: '',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
@@ -338,8 +346,7 @@ module.exports = {
   },
 
   stroom: {
-    logOnlyMode: true,
-    feed: 'feed',
+    sendEvents: true,
     url: 'https://url',
     environment: 'local',
     interval: 1000 * 50,
@@ -348,6 +355,10 @@ module.exports = {
     xmlns: 'default-namespace',
     schemaLocation: 'default-namespace file://schema-location.xsd',
     version: '1.0.0',
+    headers: {
+      'Content-Encoding': 'gzip',
+    },
+    batchSizeLimit: 50,
   },
 
   modelMirror: {

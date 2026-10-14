@@ -1,4 +1,7 @@
+import { readFileSync } from 'fs'
+import Handlebars from 'handlebars'
 import { outdent } from 'outdent'
+import { resolve } from 'path'
 import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
@@ -10,6 +13,10 @@ import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard, getRoleEntities } from './model.js'
 import { getSchemaById } from './schema.js'
+
+const modelCardTemplate = Handlebars.compile(
+  readFileSync(resolve(import.meta.dirname, 'templates', 'modelCardExport.hbs'), 'utf-8'),
+)
 
 type Common = {
   title: string
@@ -161,37 +168,7 @@ export async function renderToHtml(
   converter.setFlavor('github')
   const body = converter.makeHtml(markdown)
 
-  const html = `
-    <html>
-      <head>
-        <style>
-          body { margin: 0px; font-family: Helvetica; color: #1e1e1e; background-color: #f9f9f9; }
-          h1 { text-align: center }
-          h2 { margin-top: 32px; margin-bottom: 16px }
-          h3 { margin-top: 24px; margin-bottom: 8px }
-          h4 { margin-top: 16px; margin-bottom: 8px }
-          h5 { margin-top: 16px; margin-bottom: 8px }
-          h6 { margin-top: 16px; margin-bottom: 8px }
-          p { margin-top: 8px; margin-bottom: 8px }
-          table { border-spacing: 0px; }
-          td, th { border-bottom: 1px solid rgba(81, 81, 81, 1); padding: 8px; }
-          tbody > tr:last-child > td { border-bottom: 0; }
-        </style>
-      </head>
-      <body>
-        <div style="padding-left: 8px; height: 64px; width: 100%; background: linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)">
-          <div style="line-height: 64px; color: white; font-size: 20px; text-align: left; max-width: 900px; margin: auto">
-            Bailo
-          </div>
-        </div>
-        <div style="margin: 8px; max-width: 900px; margin: auto; margin-bottom: 16px; overflow-wrap: break-word">
-          ${body}
-        </div>
-      </body>
-    </html>
-  `
-
-  return html
+  return modelCardTemplate({ body })
 }
 
 function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {

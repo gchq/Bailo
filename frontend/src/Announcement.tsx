@@ -3,12 +3,12 @@ import Close from '@mui/icons-material/Close'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import ExpandableTypography from 'src/common/ExpandableTypography'
-interface AnnoucementProps {
+interface AnnouncementProps {
   message: string
   onClose: () => void
 }
 
-export default function Announcement({ message, onClose }: AnnoucementProps) {
+export default function Announcement({ message, onClose }: AnnouncementProps) {
   const theme = useTheme()
 
   return (
@@ -32,10 +32,13 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
       >
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
+          spacing={1}
           sx={{
             justifyContent: 'center',
             alignItems: 'center',
+            py: 1,
+            width: '100%',
+            textAlign: 'center',
           }}
         >
           <CampaignIcon color='primary' />

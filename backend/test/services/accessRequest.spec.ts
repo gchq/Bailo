@@ -135,7 +135,7 @@ describe('services > accessRequest', () => {
     ])
 
     const accessRequests = await getAccessRequestsByModel({} as any, 'modelId')
-    expect(accessRequests).toMatchSnapshot()
+    expect(accessRequests).toEqual([{ _id: 'b' }])
   })
 
   test('findAccessRequests > no filters', async () => {
@@ -155,7 +155,7 @@ describe('services > accessRequest', () => {
     vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
 
     const accessRequests = await findAccessRequests({} as any, [], '', true, false)
-    expect(accessRequests).toMatchSnapshot()
+    expect(accessRequests).toEqual([{ id: 'a' }])
   })
 
   test('findAccessRequests > all filters', async () => {
@@ -175,7 +175,7 @@ describe('services > accessRequest', () => {
     vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
 
     const accessRequests = await findAccessRequests({} as any, ['modelId'], 'schemaId', false, false)
-    expect(accessRequests).toMatchSnapshot()
+    expect(accessRequests).toEqual([{ id: 'a' }])
   })
 
   test('findAccessRequests > admin access without auth', async () => {
@@ -198,13 +198,15 @@ describe('services > accessRequest', () => {
     ])
 
     const accessRequests = await findAccessRequests({} as any, [], '', true, true)
-    expect(accessRequests).toMatchSnapshot()
+    expect(accessRequests).toEqual([{ accessRequests: [{ id: 'a' }] }])
   })
 
   test('removeAccessRequest > success', async () => {
     ReviewModelMock.find.mockResolvedValue([])
     ResponseModelMock.find.mockResolvedValue([])
-    expect(await removeAccessRequest({} as any, 'test')).toStrictEqual({ accessRequestId: 'test' })
+    const result = await removeAccessRequest({} as any, 'test')
+    expect(result.id).toBe('mock-id')
+    expect(result.delete).toHaveBeenCalledWith(undefined)
   })
 
   test('removeAccessRequest > no permission', async () => {
@@ -229,9 +231,12 @@ describe('services > accessRequest', () => {
     ReviewModelMock.find.mockResolvedValue([])
     ResponseModelMock.find.mockResolvedValue([])
 
-    expect(await removeAccessRequests({} as any, ['test', 'test2'])).toStrictEqual({
-      accessRequestIds: ['test', 'test2'],
-    })
+    const results = await removeAccessRequests({} as any, ['test', 'test2'])
+    expect(results).toHaveLength(2)
+    expect(results[0].id).toBe('mock-id')
+    expect(results[0].delete).toHaveBeenCalled()
+    expect(results[1].id).toBe('mock-id')
+    expect(results[1].delete).toHaveBeenCalled()
     expect(ReviewModelMock.find).toHaveBeenCalledTimes(2)
     // Once in removeAccessRequests and twice in getAccessRequestById
     expect(modelMocks.getModelById).toHaveBeenCalledTimes(3)
@@ -259,7 +264,10 @@ describe('services > accessRequest', () => {
     const user = { dn: 'testUser' } as UserInterface
     await getModelAccessRequestsForUser(user, 'test-model')
 
-    expect(AccessRequestModelMock.find.mock.calls).matchSnapshot()
+    expect(AccessRequestModelMock.find).toHaveBeenCalledWith({
+      'metadata.overview.entities': { $in: ['user:testUser'] },
+      modelId: 'test-model',
+    })
   })
 
   test('getCurrentUserPermissionsByAccessRequest > current user has all access request permissions', async () => {
@@ -339,9 +347,24 @@ describe('services > accessRequest', () => {
   test('updateAccessRequest > validation error', async () => {
     schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
-    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
-      /^Access Request Metadata could not be validated against the schema./,
-    )
+    await expect(() =>
+      updateAccessRequest({} as any, 'test', { metadata: { overview: { name: 'test', entities: [] } } } as any),
+    ).rejects.toThrow(/^Access Request Metadata could not be validated against the schema./)
+  })
+
+  test('updateAccessRequest > validates the incoming metadata, not the stored metadata', async () => {
+    const stored = {
+      schemaId: 'example-schema',
+      metadata: { overview: { name: 'stored', entities: ['user:testUser'] } },
+      markModified: vi.fn(),
+      save: vi.fn(),
+    }
+    AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
+    const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
+
+    await updateAccessRequest({} as any, 'test', diff as any)
+
+    expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith('example-schema', diff.metadata)
   })
 
   test('newAccessRequestComment > success', async () => {

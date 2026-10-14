@@ -15,7 +15,11 @@ import {
   putManifest,
   uploadLayerMonolithic,
 } from '../../src/clients/registry.js'
-import { DockerManifestMediaType, OCIEmptyMediaType, OCIManifestMediaType } from '../../src/utils/registryResponses.js'
+import {
+  DockerManifestMediaType,
+  OCIEmptyMediaType,
+  OCIManifestMediaType,
+} from '../../src/utils/registryResponseTypes.js'
 
 const mockHttpService = vi.hoisted(() => {
   return {
@@ -41,6 +45,7 @@ class AbortControllerMock {
     aborted: boolean
     onabort: ((...args: any[]) => void) | null
     addEventListener: (type: string, listener: (...args: any[]) => void) => void
+    removeEventListener: (type: string, listener: (...args: any[]) => void) => void
   }
   constructor() {
     this.signal = {
@@ -49,6 +54,11 @@ class AbortControllerMock {
       addEventListener: (type, listener) => {
         if (type === 'abort' && typeof listener === 'function') {
           this.signal.onabort = listener
+        }
+      },
+      removeEventListener: (type, listener) => {
+        if (type === 'abort' && this.signal.onabort === listener) {
+          this.signal.onabort = null
         }
       },
     }

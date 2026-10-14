@@ -4,7 +4,7 @@ import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -20,6 +20,7 @@ export default function NewRelease() {
   const [releaseNotes, setReleaseNotes] = useState('')
   const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
+  const draft = useRef(false)
   const [files, setFiles] = useState<FileInterface[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
@@ -64,6 +65,7 @@ export default function NewRelease() {
     const release: CreateReleaseParams = {
       modelId: model.id,
       semver,
+      draft: draft.current as boolean,
       notes: releaseNotes,
       minor: isMinorRelease,
       fileIds: files.map((file) => file._id),
@@ -80,6 +82,10 @@ export default function NewRelease() {
       router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
     setLoading(false)
+  }
+
+  function handleDraftRelease() {
+    draft.current = true
   }
 
   const error = MultipleErrorWrapper(`Unable to load release page`, {
@@ -111,7 +117,7 @@ export default function NewRelease() {
                   }}
                 >
                   <Typography variant='h6' component='h1' color='primary'>
-                    Draft New Release
+                    Create new release
                   </Typography>
                   <DesignServices color='primary' fontSize='large' />
                   <Typography>
@@ -122,9 +128,9 @@ export default function NewRelease() {
                 <ReleaseForm
                   model={model}
                   formData={{
+                    isMinorRelease,
                     semver,
                     releaseNotes,
-                    isMinorRelease,
                     files,
                     imageList,
                     modelCardVersion,
@@ -142,16 +148,28 @@ export default function NewRelease() {
                     alignItems: 'flex-end',
                   }}
                 >
-                  <Button
-                    variant='contained'
-                    loading={loading}
-                    type='submit'
-                    disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
-                    sx={{ width: 'fit-content' }}
-                    data-test='createReleaseButton'
-                  >
-                    Create Release
-                  </Button>
+                  <Stack spacing={1} direction='row'>
+                    <Button
+                      variant='outlined'
+                      loading={loading}
+                      onClick={handleDraftRelease}
+                      type='submit'
+                      disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
+                      sx={{ width: 'fit-content' }}
+                    >
+                      Draft release
+                    </Button>
+                    <Button
+                      variant='contained'
+                      loading={loading}
+                      type='submit'
+                      disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
+                      sx={{ width: 'fit-content' }}
+                      data-test='createReleaseButton'
+                    >
+                      Publish release
+                    </Button>
+                  </Stack>
                   <MessageAlert message={errorMessage} severity='error' />
                 </Stack>
               </Stack>

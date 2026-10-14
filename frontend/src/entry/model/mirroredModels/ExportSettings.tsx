@@ -83,12 +83,13 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                     value={destinationModelId}
                     onChange={handleDestinationModelId}
                     size='small'
+                    data-test='destinationModelIdTextField'
                   />
                 </LabelledInput>
                 <Button
                   sx={{ width: 'fit-content' }}
                   variant='contained'
-                  data-test='createAccessRequestButton'
+                  data-test='destinationModelIdSaveButton'
                   loading={loading}
                   type='submit'
                   startIcon={<Save />}

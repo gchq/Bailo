@@ -1,4 +1,4 @@
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import bailoMarketIcon from 'public/docs/bailo_market_icon.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
@@ -41,7 +41,7 @@ Public models are visible to all users. Private models are only visible to users
 configured in the model settings.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view of the marketplace' src={bailoMarketIcon} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view of the marketplace' src={bailoMarketIcon} />
 </Box>
 
 The screenshot above shows the marketplace with the model creation button.

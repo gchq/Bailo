@@ -1,6 +1,9 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
+import { clone } from 'lodash-es'
 
+import { AuditInfo, AuditInfoKeys } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { ImageRef } from '../../../models/Release.js'
 import log from '../../../services/log.js'
@@ -59,12 +62,30 @@ export const handleRegistryEvents = [
     // registry only stops sending events when we return, so return early and only log errors
     res.json()
 
+    // safely handle setting potentially missing value
+    const reqClone = clone(req)
+    const existingUserDn = reqClone.user?.dn
+    if (existingUserDn === undefined) {
+      reqClone.user = { dn: undefined }
+    }
     /**
      * Note for developers: registry webhooks are able to trigger before all parts of the resource (e.g. tags)
      * are necessarily finalised/available. Take care to handle this possibility.
      */
-
     for (const event of events) {
+      reqClone.user.dn = existingUserDn ?? event.actor?.name ?? ''
+      const eventTarget = JSON.stringify(event.target)
+
+      if (event?.action === 'pull') {
+        await audit.onRegistryImagePulled(withAudit(reqClone, AuditInfo.RegistryImagePulled), eventTarget)
+        continue
+      }
+
+      if (event?.action === 'delete') {
+        await audit.onRegistryImageDeleted(withAudit(reqClone, AuditInfo.RegistryImageDeleted), eventTarget)
+        continue
+      }
+
       if (event?.action !== 'push') {
         log.debug({ event }, 'Ignoring registry event for non-push action')
         continue
@@ -109,6 +130,8 @@ export const handleRegistryEvents = [
         { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
       ])
 
+      await audit.onRegistryImagePushed(withAudit(reqClone, AuditInfo.RegistryImagePushed), eventTarget)
+
       try {
         const status = await rerunImageScanNoAuth(imageRef, repositoryToken)
         log.debug({ event }, status)
@@ -120,3 +143,7 @@ export const handleRegistryEvents = [
     }
   },
 ]
+
+function withAudit(req: Request, auditInfo: AuditInfoKeys): Request {
+  return Object.assign(Object.create(req), { audit: auditInfo })
+}

@@ -6,14 +6,15 @@
 
 from __future__ import annotations
 
+import importlib.metadata
+
 # -- Project information -----------------------------------------------------
 
 project = "Bailo Python Client Docs"
 copyright = "%Y, GCHQ"
 author = "Various"
 
-# The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = importlib.metadata.version("bailo")
 
 
 # -- General configuration ---------------------------------------------------

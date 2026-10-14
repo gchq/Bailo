@@ -2,7 +2,51 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.8.0 - dd/mm/2026
+## 3.11.0 - dd/mm/yyyy
+
+### Changes
+
+- Deduplicate `Model`, `MirroredModel` and `Datacard` onto a shared `Entry` base, moved to `bailo.core.entry`. `bailo.helper.entry` keeps `ReleaseMixin` and re-exports `Entry`
+- Add `Datacard.search`, plus `__repr__` and `__str__` on `Datacard`
+- Fix `model_id` and `datacard_id` going stale after `Entry._unpack` reassigns `id`
+- Fix `Model.create` dropping `tags`
+- Fix `MirroredModel.update_model_card()` overwriting the editable additional information with the read only source card
+- Fix `MirroredModel.get_card_latest` warning about the wrong missing card
+- Optimise `Entry.get_releases` to reduce number of API requests sent
+- Raise `BailoException` instead of `KeyError`/`TypeError` for a mirrored model with no `settings.mirror.sourceModelId`, and for arguments an `Entry` kind does not accept
+- `Entry` can no longer be instantiated directly, and subclasses must set `entry_kind`
+- Tighten type hints to match `ModelInterface` in the backend
+
+## 3.10.0 - 28/07/2026
+
+### Breaking Changes
+
+- Fix `Client.get_model_roles` URL from `/api/v2/model/{modelId}/roles` (non-existent) to `/api/v2/roles` with
+  `modelId` as an optional query parameter, matching the backend. The `model_id` parameter is now optional
+  (`str | None = None`). Existing callers passing `model_id` as a keyword argument are unaffected
+
+### Changes
+
+- Add `Client.patch_file` method for updating file metadata (name, mime, tags, metadata)
+- Add multipart file upload support: `Client.start_multipart_upload`, `Client.upload_multipart_part`, and `Client.finish_multipart_upload` for chunked large-file uploads
+- Add `Client.get_filescanning_info` method for retrieving available scanner information
+- Add `Client.post_webhook`, `Client.get_webhooks`, `Client.put_webhook`, and `Client.delete_webhook` methods for model webhook management
+- Add `Client.get_model_tags` method for retrieving popular tags across all models
+- Add API coverage regression test (`test_api_coverage.py`) that dynamically discovers client routes and compares against the live backend Swagger spec
+
+## 3.9.0 - 21/07/2026
+
+### Changes
+
+- Align Python client with full backend `patchModel`, `postModel`, and `getModel` API specs
+- Add `settings` kwarg to `Client.post_model` and `Client.patch_model`; add `kind` kwarg to `Client.get_model`
+- Add `UNTRUSTED_MODEL` to `EntryKind` enum; improve `Client.patch_model` type hints to accept enum types
+- `Entry._unpack` now hydrates all fields (`organisation`, `state`, `tags`, `collaborators`, `kind`, `settings`) from API responses; `Entry.update` sends `settings` to the server
+- `MirroredModel.update` tracks `sourceModelId` changes and only sends them when modified
+- Fix boolean settings (`ungovernedAccess`, `allowTemplating`) being stringified in JSON request bodies
+- Extend unit and integration test coverage
+
+## 3.8.0 - 26/06/2026
 
 ### Changes
 

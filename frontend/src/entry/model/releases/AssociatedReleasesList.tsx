@@ -8,10 +8,10 @@ import { formatDateString } from 'utils/dateUtils'
 interface AssociatedReleasesListProps {
   releases: ReleaseInterface[]
   modelId: string
-  latestRelease: string
+  latestRelease?: string
 }
 
-export default function AssociatedReleasesList({ releases, modelId, latestRelease }: AssociatedReleasesListProps) {
+export default function AssociatedReleasesList({ releases, modelId }: AssociatedReleasesListProps) {
   const releaseList = useMemo(
     () =>
       releases.length > 0 ? (
@@ -29,17 +29,6 @@ export default function AssociatedReleasesList({ releases, modelId, latestReleas
                         <Typography color='primary' component='span'>
                           {associatedRelease.semver}
                         </Typography>
-                        {latestRelease === associatedRelease.semver && (
-                          <Typography
-                            color='secondary'
-                            component='span'
-                            sx={{
-                              pl: 1,
-                            }}
-                          >
-                            (Latest)
-                          </Typography>
-                        )}
                       </>
                     }
                     secondary={formatDateString(associatedRelease.createdAt)}
@@ -52,7 +41,7 @@ export default function AssociatedReleasesList({ releases, modelId, latestReleas
       ) : (
         <EmptyBlob text='No Associated Releases' />
       ),
-    [latestRelease, modelId, releases],
+    [modelId, releases],
   )
 
   return <>{releaseList}</>

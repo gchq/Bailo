@@ -29,3 +29,9 @@ mlruns/
 
 # Local dev overrides
 compose.local.yaml
+
+# Agents
+.agents/
+.claude/
+agent/
+skills-lock.json

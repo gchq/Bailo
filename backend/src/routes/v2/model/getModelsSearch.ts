@@ -11,7 +11,7 @@ import {
   EntrySearchOptionsSchema,
   EntrySearchResultWithErrors,
 } from '../../../types/types.js'
-import { parse } from '../../../utils/validate.js'
+import { coerceArray, parse } from '../../../utils/validate.js'
 
 export const getModelsSearchSchema = z.object({
   query: EntrySearchOptionsSchema,
@@ -35,7 +35,7 @@ registerPath({
                 name: z.string().openapi({ example: 'Yolo v4' }),
                 description: z.string().openapi({ example: 'You only look once' }),
                 tags: z.array(z.string()).openapi({ example: ['tag', 'ml'] }),
-                kind: z.string().openapi({ example: EntryKind.Model }),
+                kind: coerceArray(z.array(z.string().openapi({ example: EntryKind.Model }))),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
                 adminAccess: z.boolean().optional(),

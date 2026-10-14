@@ -14,6 +14,7 @@ declare namespace Express {
     session: {
       destroy: (callback) => void
       grant: any
+      loginRedirect?: string
     }
   }
 

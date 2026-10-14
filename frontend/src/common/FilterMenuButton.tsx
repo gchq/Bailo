@@ -43,7 +43,6 @@ export function FilterMenuButton({ label, allValue = 'All', options, selectedVal
     <>
       <Button
         variant='outlined'
-        color='inherit'
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}
         aria-haspopup='true'
@@ -61,7 +60,7 @@ export function FilterMenuButton({ label, allValue = 'All', options, selectedVal
             <ListItemIcon sx={{ minWidth: 28 }}>
               {option.value === selectedValue ? <CheckIcon fontSize='small' /> : null}
             </ListItemIcon>
-            {option.label}
+            {option.label === 'All' ? <em>All</em> : option.label}
           </MenuItem>
         ))}
       </Menu>

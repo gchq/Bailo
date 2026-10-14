@@ -44,6 +44,26 @@ def normalise_query_params(value: Any) -> Any:
     return value
 
 
+def normalise_json_params(value: Any) -> Any:
+    """Recursively convert Python values into representations suitable for JSON request bodies.
+
+    Unlike normalise_query_params, this preserves booleans as native Python bools
+    since JSON natively supports boolean types.
+
+    :param value: The value or structure to normalise. May be a scalar, mapping, or sequence
+    :return: A normalised value suitable for use in a JSON request body
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, Enum):
+        return normalise_json_params(value.value)
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):  # e.g. list, tuple
+        return [normalise_json_params(v) for v in value]
+    if isinstance(value, Mapping):  # e.g. dict
+        return {k: normalise_json_params(v) for k, v in value.items()}
+    return value
+
+
 class NestedDict(dict):
     def __getitem__(self, keytuple):
         """Retrieve a value from a (possibly nested) dictionary using a single key or a tuple of keys.

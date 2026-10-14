@@ -97,7 +97,7 @@ export default function SchemaMigrationSelector() {
     if (!res.ok) {
       setSubmitErrorText(await getErrorMessage(res))
     } else {
-      router.push('/schemas/list?tab=migrations')
+      router.push('/admin?section=migration')
     }
   }
 
@@ -151,7 +151,7 @@ export default function SchemaMigrationSelector() {
               }}
             >
               <Box sx={{ textAlign: 'left', width: '100%' }}>
-                <Link href={`/schemas/list?tab=migrations`}>
+                <Link href={`/admin?section=migration`}>
                   <Button
                     size='small'
                     sx={{ width: 'fit-content', pb: 2 }}
@@ -247,7 +247,7 @@ export default function SchemaMigrationSelector() {
                   >
                     <MoveDown fontSize='large' color='primary' />
                     <Typography>
-                      {`Questions on an older schema can be mapped to a new question (using the the "Move" action type) so that
+                      {`Questions on an older schema can be mapped to a new question (using the "Move" action type) so that
                   existing data is not lost when a question is moved from one section on the form to another.`}
                     </Typography>
                   </Stack>

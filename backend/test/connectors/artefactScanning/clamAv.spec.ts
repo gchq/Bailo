@@ -5,6 +5,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { ArtefactScanState } from '../../../src/connectors/artefactScanning/Base.js'
 import { ClamAvFileScanningConnector } from '../../../src/connectors/artefactScanning/clamAv.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 vi.mock('../../../src/clients/s3.js')
 vi.mock('../../../src/services/log.js')
@@ -118,6 +119,7 @@ describe('connectors > artefactScanning > clamAv', () => {
   })
 
   test('scan() skip too large file', async () => {
+    setTestConfig({ artefactScanning: { clamdscan: { streamMaxLength: '10M' } } })
     clamAvMocks.getVersion.mockResolvedValueOnce('ClamAV 1.2.3/456')
     clamAvMocks.scanStream.mockResolvedValueOnce({ viruses: [] })
     const stream = Readable.from('file')

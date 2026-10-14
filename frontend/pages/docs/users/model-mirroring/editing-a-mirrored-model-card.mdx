@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import editMirroredModel from 'public/docs/edit-mirrored-model.png'
 import editMirroredModelForm from 'public/docs/edit-mirrored-model-form.png'
@@ -22,7 +22,11 @@ You cannot directly edit source content in a mirrored model, however, you can ad
 provide context that is specific to your environment or use case.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='mirrored model card with read-only source content' src={editMirroredModel} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='mirrored model card with read-only source content'
+    src={editMirroredModel}
+  />
 </Box>
 
 The screenshot above shows a mirrored model card with read-only source content and an Add additional information button.
@@ -35,7 +39,11 @@ Instead of an **Edit** button, mirrored models display an **Add additional infor
 allows you to add local responses alongside the source content:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='mirrored model additional information form' src={editMirroredModelForm} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='mirrored model additional information form'
+    src={editMirroredModelForm}
+  />
 </Box>
 
 The screenshot above shows the form for adding local information alongside the source model's content.
@@ -54,7 +62,11 @@ Key points:
 Local additions appear beneath the source content, making the origin of each piece of information clear.
 
 <Box sx={{ maxWidth: '40%', margin: 'auto' }}>
-  <Image alt='mirrored model card showing source and local content' src={editMirroredModelResult} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='mirrored model card showing source and local content'
+    src={editMirroredModelResult}
+  />
 </Box>
 
 The screenshot above shows the model card with source content and locally added information displayed separately.

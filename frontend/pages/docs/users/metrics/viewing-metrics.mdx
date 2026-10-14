@@ -1,4 +1,4 @@
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
 import breakdownTable from 'public/docs/metrics-breakdown-table.png'
@@ -25,14 +25,14 @@ To view usage metrics, click the chart icon at the bottom of the side menu bar. 
 Within this page you have the option to view system-wide metrics, or filter down to a specific organisation.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view of the metrics overview' src={overview} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view of the metrics overview' src={overview} />
 </Box>
 
 You can click either of the two pie charts to see a more in-depth breakdown of the models. Doing so will display a table
 below, where you can view the models and their basic information.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view of the breakdown table' src={breakdownTable} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view of the breakdown table' src={breakdownTable} />
 </Box>
 
 ## Viewing compliance metrics
@@ -43,7 +43,7 @@ This will show you the breakdown of models in Bailo, detailing which roles are m
 down to a specific organisation, as well as selecting a specific role to focus on.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view of the compliance metrics' src={compliance} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='view of the compliance metrics' src={compliance} />
 </Box>
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

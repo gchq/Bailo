@@ -1,50 +1,26 @@
 import { Box, Divider, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useGetReviewRequestsForModel } from 'actions/review'
-import { useGetUiConfig } from 'actions/uiConfig'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
+import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
-import ReleaseAssetsResponses from 'src/entry/model/releases/ReleaseAssetsResponses'
+import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
 export interface ReleaseDisplayProps {
   model: EntryInterface
   release: ReleaseInterface
   latestRelease?: string
-  hideReviewBanner?: boolean
   hideFileDownloads?: boolean
 }
 
-export default function ReleaseDisplay({
-  model,
-  release,
-  latestRelease,
-  hideReviewBanner = false,
-  hideFileDownloads,
-}: ReleaseDisplayProps) {
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
-    modelId: model.id,
-    semver: release.semver,
-  })
-
+export default function ReleaseDisplay({ model, release, latestRelease, hideFileDownloads }: ReleaseDisplayProps) {
   const { isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const { isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
-  const error = MultipleErrorWrapper('Unable to load release', {
-    isReviewsError,
-    isUiConfigError,
-    isReleasesError,
-  })
-  if (error) {
-    return error
-  }
-
-  if (isReviewsLoading || isReleasesLoading || isUiConfigLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isReleasesError], isReleasesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
@@ -58,7 +34,8 @@ export default function ReleaseDisplay({
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
+          <DraftBanner text='This is a draft release' draft={release.draft} showButton={false} />
+          <ReviewBanner release={release} />
           <Stack
             spacing={1}
             sx={{
@@ -69,7 +46,7 @@ export default function ReleaseDisplay({
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
               <ReleaseAssetsAccordion model={model} release={release} hideFileDownloads={hideFileDownloads} />
-              <ReleaseAssetsResponses model={model} release={release} />
+              <ReleaseAccessRequestReviewSummary release={release} />
             </Stack>
           </Stack>
         </Box>

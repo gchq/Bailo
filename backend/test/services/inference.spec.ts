@@ -14,17 +14,6 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const InferenceModelMock = getTypedModelMock('InferenceModel')
 
-const configMock = vi.hoisted(() => ({
-  inference: {
-    authorisationToken: 'test',
-  },
-}))
-
-vi.mock('../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
-
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({
@@ -144,7 +133,10 @@ describe('services > inference', () => {
       { modelId: 'model2', image: 'image', tag: 'tag' },
     ])
 
-    expect(result).toMatchSnapshot()
+    expect(result).toHaveLength(3)
+    expect(result[0].id).toBe('mock-id')
+    expect(result[1].id).toBe('mock-id')
+    expect(result[2].id).toBe('mock-id')
     expect(InferenceModelMock.delete).toHaveBeenCalledTimes(3)
     expect(inferenceServiceMocks.deleteInferenceService).toHaveBeenCalledTimes(3)
     expect(modelMocks.getModelById).toHaveBeenCalledTimes(2)
@@ -196,7 +188,10 @@ describe('services > inference', () => {
     ])
 
     const inference = await getInferencesByModel({} as any, 'modelId')
-    expect(inference).toMatchSnapshot()
+    expect(inference).toEqual([
+      { image: 'nginx', tag: 'latest' },
+      { image: 'yolov4', tag: 'latest' },
+    ])
   })
 
   test('getInferenceByModel > bad authorisation', async () => {

@@ -1,5 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 
 import bailoResetApprovals from '../../../../public/docs/bailo_upload_new_schema.png'
@@ -22,7 +22,11 @@ production system.
 2. Click the **Upload a new Schema** button in the top left.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoResetApprovals} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='upload new schema page with upload button'
+    src={bailoResetApprovals}
+  />
 </Box>
 
 The screenshot above shows the Schemas page on the Model tab, with a populated schema called Minimal Schema v10

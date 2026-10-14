@@ -1,4 +1,5 @@
 import * as _ from 'lodash-es'
+import { ProjectionType } from 'mongoose'
 import { Optional } from 'utility-types'
 
 import { Roles } from '../connectors/authentication/constants.js'
@@ -31,6 +32,7 @@ import {
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { deepMergePreferFirst } from '../utils/object.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
@@ -200,7 +202,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     getAccessRequestsByModel(user, modelId),
   ])
 
-  return await useTransaction([
+  await useTransaction([
     // Initial concurrency has no overlapping Documents.
     (session) =>
       Promise.all([
@@ -273,6 +275,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     // Finally, delete the Model
     (session) => model.delete(session),
   ])
+
+  return model
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
@@ -369,8 +373,8 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind) {
-    query['kind'] = { $all: opts.kind }
+  if (opts.kind?.length) {
+    query['kind'] = { $in: opts.kind }
   }
 
   if (opts.organisations?.length) {
@@ -418,7 +422,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  const projection = {
+  const projection: ProjectionType<ModelDoc> = {
     settings: false,
     card: false,
     deleted: false,
@@ -430,7 +434,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   // Always do a partial match on the model name
   const escapedSearch = opts.search ? opts.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
-  let results = await ModelModel.find(
+  let results = await ModelModel.find<ModelDoc>(
     escapedSearch ? { ...query, name: { $regex: escapedSearch, $options: 'i' } } : query,
     projection,
   ).sort({
@@ -439,7 +443,10 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   //Include all full text matches
   if (opts.search && !opts.titleOnly) {
-    let fullTextOnlyResults = await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
+    let fullTextOnlyResults = await ModelModel.find<ModelDoc>(
+      { ...query, $text: { $search: opts.search } },
+      projection,
+    ).sort({
       score: { $meta: 'textScore' },
     })
     // Remove duplicate items
@@ -571,9 +578,12 @@ export async function updateModelCard(
 
   const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
   if (!valid) {
-    throw BadReq('Model metadata could not be validated against the schema.', {
-      validationErrors: errors,
-    })
+    throw BadReq(
+      `Model metadata could not be validated against the schema${model.state && `, for ${model.state} state`}.`,
+      {
+        validationErrors: errors,
+      },
+    )
   }
 
   const revision = await _setModelCard(user, modelId, model.card.schemaId, model.card.version + 1, metadata)
@@ -588,14 +598,19 @@ export type UpdateModelParams = Pick<
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
+  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
+    throw BadReq('You cannot select both mirror settings simultaneously.')
+  }
   if (modelDiff.settings?.mirror?.sourceModelId) {
-    throw BadReq('Cannot change standard model to be a mirrored model.')
+    if (model.kind !== EntryKind.MirroredModel) {
+      throw BadReq('Cannot set a source model ID on a non-mirrored model.')
+    }
+    if (model.mirroredCard?.metadata !== undefined) {
+      throw BadReq('Cannot change the source model ID after the model has been imported.')
+    }
   }
   if (EntryKind.MirroredModel === model.kind && modelDiff.settings?.mirror?.destinationModelId) {
     throw BadReq('Cannot set a destination model ID for a mirrored model.')
-  }
-  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
-    throw BadReq('You cannot select both mirror settings simultaneously.')
   }
   if (modelDiff.collaborators) {
     await validateCollaborators(modelDiff.collaborators, model.collaborators)
@@ -615,9 +630,14 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   if (modelDiff.state && model.card) {
-    const { valid } = await validateContentAgainstSchema(model.card.schemaId, model.card.metadata, modelDiff.state)
+    const card =
+      model.kind === EntryKind.MirroredModel && model.mirroredCard?.metadata
+        ? deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata)
+        : model.card.metadata
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, modelDiff.state)
+
     if (!valid) {
-      throw BadReq(`Please fill in all required fields in the model card, to update the state to ${modelDiff.state}`)
+      throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)
     }
   }
 
@@ -753,15 +773,13 @@ export async function createModelCardFromTemplate(
 }
 
 export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
-  if (modelCardRevision.version === 1) {
-    // Special case for the first when a schema is set but `metadata` is still `undefined`
-    if (modelCardRevision.metadata !== undefined) {
-      throw BadReq('Model card metadata must not be set for the first version.', {
-        metadata: modelCardRevision.metadata,
-      })
-    }
-  } else {
-    const { valid, errors } = await validateContentAgainstSchema(modelCardRevision.schemaId, modelCardRevision.metadata)
+  // Special case for the first model card revision when a schema is set but `metadata` is still `undefined`
+  // This only happens when created from a schema, but when created from a template the first revision will not be undefined
+  if (modelCardRevision.version !== 1 || modelCardRevision.metadata !== undefined) {
+    const { valid, errors } = await validateContentAgainstSchema(
+      modelCardRevision.schemaId,
+      modelCardRevision.metadata || {},
+    )
     if (!valid) {
       throw BadReq('Model metadata could not be validated against the schema.', {
         validationErrors: errors,
@@ -775,9 +793,8 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
     mirrored: true,
   })
 
-  if (!foundModelCardRevision && modelCardRevision.version !== 1) {
+  if (!foundModelCardRevision) {
     // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
-    // Ignore model cards with a version number of 1 as these will always be blank.
     const newModelCardRevision = new ModelCardRevisionModel({ ...modelCardRevision, mirrored: true })
     await newModelCardRevision.save()
     return modelCardRevision
@@ -785,7 +802,8 @@ export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRev
 }
 
 /**
- * Note that we do not authorise that the user can access the model here.
+ * @remarks
+ * Note that we do _not_ authorise that the user can access the model here.
  * This function should only be used during the import model card process.
  * Do not expose this functionality to users.
  */

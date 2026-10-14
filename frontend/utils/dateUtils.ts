@@ -1,5 +1,10 @@
 import dayjs, { Dayjs } from '@dayjs'
+import humanInterval from 'human-interval'
 import { plural } from 'utils/stringUtils'
+
+export const currentTimestampSimple = (): string => {
+  return dayjs.utc().format('YYYY-MM-DDTHH-mm-ss')
+}
 
 export const utcDate = (value: string) => {
   return dayjs.utc(value)
@@ -90,4 +95,16 @@ export const setAsLastDayOfMonth = (date: Dayjs): string => {
 export const increaseCurrentDateInDays = (daysToAdd: number) => {
   const currentDate = dayjs(new Date())
   return currentDate.add(daysToAdd, 'day')
+}
+
+export function increaseCurrentDateByHumanInterval(interval: string): Dayjs {
+  const currentDate = dayjs(new Date())
+  const intervalMs = humanInterval(interval) ?? 0
+  return currentDate.add(intervalMs, 'millisecond')
+}
+
+export const isOverdue = (dueDate: string): boolean => {
+  const today = new Date().setHours(0, 0, 0, 0)
+  const dateToCheck = new Date(dueDate).setHours(0, 0, 0, 0)
+  return dateToCheck < today
 }

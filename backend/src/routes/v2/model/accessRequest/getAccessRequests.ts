@@ -10,10 +10,10 @@ import { coerceArray, parse, strictCoerceBoolean } from '../../../../utils/valid
 
 export const GetAccessRequestsSchema = z.object({
   query: z.object({
-    modelId: coerceArray(z.array(z.string()).optional().default([])),
+    modelId: coerceArray(z.array(z.string())).optional().default([]),
     schemaId: z.string().optional().default(''),
-    mine: strictCoerceBoolean(z.boolean().optional().default(false)),
-    adminAccess: strictCoerceBoolean(z.boolean().optional().default(false)),
+    mine: strictCoerceBoolean(z.boolean()).optional().default(false),
+    adminAccess: strictCoerceBoolean(z.boolean()).optional().default(false),
   }),
 })
 

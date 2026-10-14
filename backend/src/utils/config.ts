@@ -163,6 +163,7 @@ export interface Config {
       userIdAttribute: string
       adminGroupName: string
       complianceGroupName: string
+      untrustedModelGroupName: string
     }
   }
 
@@ -183,8 +184,7 @@ export interface Config {
   }
 
   stroom: {
-    logOnlyMode: boolean
-    feed: string
+    sendEvents: boolean
     url: string
     environment: string
     interval: number
@@ -193,6 +193,8 @@ export interface Config {
     xmlns: string
     schemaLocation: string
     version: string
+    headers: Record<string, string>
+    batchSizeLimit: number
   }
 
   artefactScanning: {

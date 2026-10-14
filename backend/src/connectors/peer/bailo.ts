@@ -2,10 +2,9 @@ import fetch, { Response } from 'node-fetch'
 
 import { UserInterface } from '../../models/User.js'
 import { BAILO_ID_HEADER, USER_HEADER } from '../../routes/middleware/userEscalation.js'
-import { toBailoError } from '../../types/error.js'
 import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { InternalError } from '../../utils/error.js'
+import { InternalError, toBailoError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 const emptyPing: SystemStatus = {
@@ -22,8 +21,8 @@ export class BailoPeerConnector extends BasePeerConnector {
     if (opts.search) {
       query.append('search', opts.search)
     }
-    if (opts.kind) {
-      query.append('kind', opts.kind)
+    if (opts.kind?.length) {
+      opts.kind.forEach((kind) => query.append('kind', kind))
     }
     if (opts.organisations?.length) {
       opts.organisations.forEach((organisation) => query.append('organisations', organisation))

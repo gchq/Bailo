@@ -17,6 +17,17 @@ export default function MyDocument(props: DocumentProps & DocumentHeadTagsProps)
           {/* PWA primary color */}
           <meta name='theme-color' content={lightTheme.palette.primary.main} />
           <link rel='shortcut icon' href='/favicon.png' />
+          {/* Set the markdown editor colour mode before hydration to avoid a flash of the wrong theme. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  var d = localStorage.getItem('dark_mode_enabled') === 'true';
+                  document.documentElement.setAttribute('data-color-mode', d ? 'dark' : 'light');
+                } catch (e) {}
+              `,
+            }}
+          />
         </Head>
         <body>
           <Main />

@@ -1,9 +1,7 @@
 import { Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useMemo, useState } from 'react'
 import SplitButton from 'src/common/SplitButton'
-import MessageAlert from 'src/MessageAlert'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import {
   getKubernetesImagePullSecretsExampleConfig,
@@ -19,19 +17,11 @@ type KubernetesSecretProps = {
 }
 
 export default function KubernetesSecret({ token }: KubernetesSecretProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const [showFilePreview, setShowFilePreview] = useState(false)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-secret.yml`, [token.description])
   const secretName = useMemo(() => `${toKebabCase(token.description)}`, [token.description])
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading || !uiConfig) {
-    return <Loading />
-  }
 
   return (
     <Stack spacing={4}>

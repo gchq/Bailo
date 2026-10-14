@@ -74,7 +74,7 @@ def test_documentation_url_excluded_from_context_display():
     result = str(exc)
     assert "Context:" in result
     assert "'modelId': 'abc'" in result
-    assert "documentationUrl" not in result.split("Context:")[1].split("\n")[0]
+    assert "documentationUrl" not in result.split("Context:")[1].split("\n", maxsplit=1)[0]
     assert "Documentation: https://docs.example.com" in result
 
 

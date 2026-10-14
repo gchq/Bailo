@@ -13,11 +13,12 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import * as _ from 'lodash-es'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import MetricItem from 'src/MuiForms/MetricItem'
-import { getMirroredState } from 'utils/formUtils'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -43,21 +44,33 @@ interface MetricsProps {
 }
 
 export default function Metrics({ onChange, value, label, id, registry, required, schema }: MetricsProps) {
-  const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>(
-    value.map((metric) => ({
-      ...metric,
-      id: uuidv4(),
-    })),
-  )
+  const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
+
+  useEffect(() => {
+    setMetricsWithIds((current) =>
+      value.map((metric, index) => ({
+        ...metric,
+        id: current[index]?.id ?? uuidv4(),
+      })),
+    )
+  }, [value])
 
   const theme = useTheme()
 
-  const handleChange = useCallback(
-    (newValues: MetricValue[]) => {
-      onChange(newValues)
-    },
-    [onChange],
-  )
+  const handleAddItem = useCallback(() => {
+    const newMetric: MetricValueWithId = {
+      id: uuidv4(),
+      name: '',
+      value: 0,
+    }
+
+    const updatedMetrics = [...metricsWithIds, newMetric]
+
+    setMetricsWithIds(updatedMetrics)
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onChange(updatedMetrics.map(({ id, ...metric }) => metric))
+  }, [metricsWithIds, onChange])
 
   const handleMetricItemOnChange = useCallback(
     (updatedMetricItem: MetricValueWithId) => {
@@ -77,9 +90,12 @@ export default function Metrics({ onChange, value, label, id, registry, required
 
   const handleDeleteItem = useCallback(
     (id: string) => {
-      const updatedMetricArray = _.cloneDeep(metricsWithIds)
-      onChange(updatedMetricArray.filter((metric) => metric.id !== id))
-      return
+      const updatedMetricArray = metricsWithIds.filter((metric) => metric.id !== id)
+
+      setMetricsWithIds(updatedMetricArray)
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onChange(updatedMetricArray.map(({ id, ...metric }) => metric))
     },
     [metricsWithIds, onChange],
   )
@@ -90,12 +106,18 @@ export default function Metrics({ onChange, value, label, id, registry, required
     ))
   }, [handleDeleteItem, handleMetricItemOnChange, metricsWithIds])
 
-  const metricsTableRows = (metrics) => {
+  if (!registry || !registry.formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
+  const compare = getCompareFieldState<MetricValue[]>(id, registry.formContext)
+
+  const metricsTableRows = (metrics: MetricValue[], compareWith?: MetricValue[]) => {
     if (!metrics) {
       return undefined
     }
-    return metrics.map((metric) => (
-      <TableRow key={metric.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+    return _.zip(metrics, compareWith).map(([metric, compareWith]) => (
+      <TableRow key={metric?.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell
           component='th'
           scope='row'
@@ -104,41 +126,50 @@ export default function Metrics({ onChange, value, label, id, registry, required
             maxWidth: '500px',
           }}
         >
-          {metric.name}
+          {compare.inCompareMode ? (
+            <InlineDiff from={compareWith?.name} to={metric?.name} direction={'row'} />
+          ) : (
+            metric?.name
+          )}
         </TableCell>
-        <TableCell align='right'>{metric.value}</TableCell>
+        <TableCell align='right'>
+          {compare.inCompareMode ? (
+            <InlineDiff
+              from={compareWith?.value?.toString()}
+              to={metric?.value?.toString()}
+              direction={'row'}
+              align='right'
+            />
+          ) : (
+            metric?.value
+          )}
+        </TableCell>
       </TableRow>
     ))
   }
 
-  if (!registry || !registry.formContext) {
-    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
-  }
-
-  const mirroredState = getMirroredState(id, registry.formContext)
-
   return (
     <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={metricsTableRows(mirroredState)}
-      display={registry.formContext.mirroredModel && value !== undefined && value.length > 0}
+      editMode={compare.editMode}
+      mirroredState={metricsTableRows(compare.mirroredState as MetricValue[], compare.compareFromMirroredState)}
+      display={compare.isMirroredModel && value !== undefined && value.length > 0}
       label={label}
       required={required}
       id={id}
-      mirroredModel={registry.formContext.mirroredModel}
+      mirroredModel={compare.isMirroredModel}
       description={schema.description}
     >
-      {registry.formContext && registry.formContext.editMode && (
+      {compare.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
           <Stack spacing={2}>{metricItems}</Stack>
-          <Button onClick={() => handleChange([...value, { name: '', value: 0 }])} aria-label='add metric button'>
+          <Button onClick={handleAddItem} aria-label='add metric button'>
             Add item
           </Button>
         </Stack>
       )}
-      {registry.formContext && !registry.formContext.editMode && (
+      {!compare.editMode && (
         <>
-          {!registry.formContext.mirroredModel && value.length === 0 && (
+          {!compare.isMirroredModel && value.length === 0 && (
             <Typography
               sx={{
                 fontStyle: 'italic',
@@ -157,7 +188,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
                     <TableCell align='right'>Value</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>{metricsTableRows(value)}</TableBody>
+                <TableBody>{metricsTableRows(value, compare.compareFromState)}</TableBody>
               </Table>
             </TableContainer>
           )}

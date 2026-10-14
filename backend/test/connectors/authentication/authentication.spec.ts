@@ -1,18 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { getAuthenticationConnector } from '../../../src/connectors/authentication/index.js'
-
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    authentication: {
-      kind: 'silly',
-    },
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
+import { AuthenticationKindKeys, getAuthenticationConnector } from '../../../src/connectors/authentication/index.js'
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 vi.mock('../../../src/connectors/authentication/Base.js', () => ({ BaseAuthenticationConnector: vi.fn() }))
 vi.mock('../../../src/connectors/authentication/silly.js', () => ({
@@ -37,14 +26,14 @@ describe('connectors > authentication', () => {
   })
 
   test('oauth', () => {
-    configMock.connectors.authentication.kind = 'oauth'
+    setTestConfig({ connectors: { authentication: { kind: 'oauth' } } })
     const connector = getAuthenticationConnector(false)
     expect(connector.constructor.name).toBe('oauth')
   })
 
   test('invalid', () => {
     const invalidConnector = 'invalid'
-    configMock.connectors.authentication.kind = invalidConnector
+    setTestConfig({ connectors: { authentication: { kind: invalidConnector as AuthenticationKindKeys } } })
 
     expect(() => getAuthenticationConnector(false)).toThrow(`'${invalidConnector}' is not a valid authentication kind.`)
   })

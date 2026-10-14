@@ -1,14 +1,15 @@
+import { Alert, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
+import SourceModelIdField from 'src/entry/model/mirroredModels/SourceModelIdField'
 import ModelFileManagement from 'src/entry/model/ModelFileManagement'
 import ModelImages from 'src/entry/model/ModelImages'
 import Releases from 'src/entry/model/Releases'
@@ -17,24 +18,20 @@ import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
 import { EntryKind } from 'types/types'
-import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
   const { modelId: entryId }: { modelId?: string } = router.query
   const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetModel(entryId)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
 
   const { userPermissions } = useContext(UserPermissionsContext)
-
-  const currentUserRoles = useMemo(() => getCurrentUserRoles(entry, currentUser), [entry, currentUser])
 
   const settingsPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
 
   const tabs: PageTab[] = useMemo(
     () =>
-      entry && uiConfig
+      entry
         ? [
             {
               title: 'Overview',
@@ -44,20 +41,14 @@ export default function Model() {
             {
               title: 'Releases',
               path: 'releases',
-              view: (
-                <Releases
-                  model={entry}
-                  currentUserRoles={currentUserRoles}
-                  readOnly={entry.kind === EntryKind.MIRRORED_MODEL}
-                />
-              ),
+              view: <Releases model={entry} readOnly={entry.kind === EntryKind.MIRRORED_MODEL} />,
               disabled: !entry.card,
               disabledText: 'Select a schema to view this tab.',
             },
             {
               title: 'Access requests',
               path: 'access',
-              view: <AccessRequests model={entry} currentUserRoles={currentUserRoles} />,
+              view: <AccessRequests model={entry} />,
               datatest: 'accessRequestTab',
               disabled: !entry.card || entry.kind === EntryKind.UNTRUSTED_MODEL,
               disabledText:
@@ -89,21 +80,37 @@ export default function Model() {
               datatest: 'settingsTab',
               disabled: !settingsPermission.hasPermission,
               disabledText: settingsPermission.info,
-              view: <Settings entry={entry} />,
+              view: <Settings entry={entry} mutateEntry={mutateEntry} />,
             },
           ]
         : [],
-    [entry, uiConfig, currentUserRoles, settingsPermission.hasPermission, settingsPermission.info, mutateEntry],
+    [entry, uiConfig, settingsPermission.hasPermission, settingsPermission.info, mutateEntry],
   )
 
   function requestAccess() {
     router.push(`/model/${entryId}/access-request/schema`)
   }
 
+  function additionalHeaderDisplay() {
+    if (!entry) {
+      return undefined
+    }
+    if (entry.kind === EntryKind.MIRRORED_MODEL) {
+      return (
+        <Alert severity='info' sx={{ my: 2 }}>
+          <Typography>This is a mirrored model, some sections will be read-only.</Typography>
+          <SourceModelIdField entry={entry} mutateEntry={mutateEntry} />
+        </Alert>
+      )
+    } else if (entry.kind === EntryKind.UNTRUSTED_MODEL) {
+      return <MessageAlert message={'This is an untrusted model.'} severity='warning' />
+    } else {
+      return undefined
+    }
+  }
+
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isEntryError,
-    isCurrentUserError,
-    isUiConfigError,
   })
   if (error) {
     return error
@@ -112,7 +119,7 @@ export default function Model() {
   return (
     <>
       <Title text={entry ? entry.name : 'Loading...'} />
-      {!entry || isEntryLoading || isCurrentUserLoading || isUiConfigLoading ? (
+      {!entry || isEntryLoading ? (
         <Loading />
       ) : (
         <PageWithTabs
@@ -126,20 +133,7 @@ export default function Model() {
           requiredUrlParams={{ modelId: entry.id }}
           titleToCopy={entry.name}
           subheadingToCopy={entry.id}
-          additionalHeaderDisplay={
-            <>
-              {entry.kind === EntryKind.MIRRORED_MODEL && (
-                <MessageAlert
-                  message={`This is a mirrored model, some sections will be read-only.`}
-                  subHeading={`Source model ID: ${entry.settings.mirror?.sourceModelId}`}
-                  severity='info'
-                />
-              )}
-              {entry.kind === EntryKind.UNTRUSTED_MODEL && (
-                <MessageAlert message={'This is an untrusted model.'} severity='warning' />
-              )}
-            </>
-          }
+          additionalHeaderDisplay={additionalHeaderDisplay()}
         />
       )}
     </>

@@ -1,12 +1,10 @@
 import { configure } from '@testing-library/react'
-import { beforeAll, vi } from 'vitest'
+import { vi } from 'vitest'
 
 configure({ testIdAttribute: 'data-test' })
 
-beforeAll(() => {
-  /* eslint-disable @typescript-eslint/no-require-imports */
-  vi.mock('next/router', () => require('next-router-mock'))
-})
+/* eslint-disable @typescript-eslint/no-require-imports */
+vi.mock('next/router', () => require('next-router-mock'))
 
 export function doNothing() {
   /* Do nothing */

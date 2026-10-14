@@ -98,6 +98,37 @@ exports[`connectors > authentication > oauth > getRoutes > returns expected rout
       "methods": {
         "get": true,
       },
+      "path": "/api/login/callback",
+      "stack": [
+        Layer {
+          "handle": [Function],
+          "keys": [],
+          "matchers": [
+            [Function],
+          ],
+          "method": "get",
+          "name": "<anonymous>",
+          "params": undefined,
+          "path": undefined,
+          "slash": false,
+        },
+      ],
+    },
+    "slash": false,
+  },
+  Layer {
+    "handle": [Function],
+    "keys": [],
+    "matchers": [
+      [Function],
+    ],
+    "name": "handle",
+    "params": undefined,
+    "path": undefined,
+    "route": Route {
+      "methods": {
+        "get": true,
+      },
       "path": "/api/logout",
       "stack": [
         Layer {

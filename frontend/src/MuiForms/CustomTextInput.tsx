@@ -1,11 +1,11 @@
-import { Box, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useMemo } from 'react'
+import CompareField from 'src/common/CompareField'
+import InlineDiff from 'src/common/InlineDiff'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getMirroredState } from 'utils/formUtils'
 
 interface CustomTextInputProps {
   label?: string
@@ -50,20 +50,19 @@ export default function CustomTextInput({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const compare = getCompareFieldState<string>(id, registry.formContext)
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={value}
     >
-      {registry.formContext.editMode && (
+      {compare.inMirroredCompare && value && <InlineDiff from={compare.compareFromState} to={value} />}
+      {!compare.inCompareMode && (
         <TextField
           size='small'
           error={rawErrors && rawErrors.length > 0}
@@ -95,14 +94,14 @@ export default function CustomTextInput({
                 },
           ]}
           onChange={handleChange}
-          variant={!registry.formContext.editMode ? 'standard' : 'outlined'}
-          required={registry.formContext.editMode}
-          value={value || (!registry.formContext.editMode ? 'Unanswered' : '')}
-          disabled={!registry.formContext.editMode}
+          variant={!compare.editMode ? 'standard' : 'outlined'}
+          required={compare.editMode}
+          value={value || (!compare.editMode ? 'Unanswered' : '')}
+          disabled={!compare.editMode}
           slotProps={{
             input: {
               ...InputProps,
-              ...(!registry.formContext.editMode && { disableUnderline: true }),
+              ...(!compare.editMode && { disableUnderline: true }),
               'data-test': id,
               'aria-label': `text input field for ${label}`,
               id: id,
@@ -110,20 +109,6 @@ export default function CustomTextInput({
           }}
         />
       )}
-      {!registry.formContext.editMode && (
-        <Box sx={{ wordBreak: 'break-word' }}>
-          {value || (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
-        </Box>
-      )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

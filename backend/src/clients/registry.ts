@@ -26,7 +26,7 @@ import {
   RegistryErrorResponseBodySchema,
   TagsListResponseBodySchema,
   TagsListResponseHeadersSchema,
-} from '../utils/registryResponses.js'
+} from '../utils/registryResponseTypes.js'
 
 const registry = config.registry.connection.internal
 

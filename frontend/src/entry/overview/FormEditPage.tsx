@@ -28,7 +28,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -125,20 +125,42 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   }
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
+  function removeEmptyValues(value) {
+    if (value === '') {
+      return undefined
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(removeEmptyValues).filter((item) => item !== undefined)
+    }
+
+    if (value !== null && typeof value === 'object') {
+      const cleaned = Object.fromEntries(
+        Object.entries(value)
+          .map(([key, item]) => [key, removeEmptyValues(item)])
+          .filter(([, item]) => item !== undefined),
+      )
+
+      return Object.keys(cleaned).length > 0 ? cleaned : undefined
+    }
+
+    return value
+  }
+
   async function onSubmit() {
     if (schema) {
       setErrorMessage('')
       setLoading(true)
       const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-
       if (getChangedFields(oldData, data).length === 0) {
         handleChangeEditMode(false)
       } else {
-        const res = await putEntryCard(entry.id, data)
+        const res = await putEntryCard(entry.id, removeEmptyValues(data) || {})
         if (res.status && res.status < 400) {
           handleChangeEditMode(false)
           mutateEntryCardRevisions()
+          mutateEntry()
         } else {
           setErrorMessage(res.data)
         }
@@ -254,16 +276,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     })
   }
 
-  if (isSchemaError) {
-    return <MessageAlert message={isSchemaError.info.message} severity='error' />
-  }
-
-  if (isSchemaMigrationsError) {
-    return <MessageAlert message={isSchemaMigrationsError.info.message} severity='error' />
-  }
-
-  if (isSchemaMigrationsLoading || isSchemaLoading) {
-    return <Loading />
+  const queryState = renderQueryState(
+    [isSchemaError, isSchemaMigrationsError],
+    isSchemaMigrationsLoading || isSchemaLoading,
+  )
+  if (queryState) {
+    return queryState
   }
 
   return (
@@ -273,7 +291,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           <Box>
             {schemaMigrations.length > 0 && canBeMigrated() && (
               <Restricted action='editEntryCard' fallback={<></>}>
-                <Box sx={{ width: 'fit-content' }}>
+                <Box sx={{ width: 'fit-content', mt: 2 }}>
                   <MessageAlert
                     severity='info'
                     style={{ my: 0 }}
@@ -290,7 +308,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack direction={{ sm: 'row', xs: 'column' }} sx={{ justifyContent: 'space-between' }} spacing={1}>
+            <Stack direction={{ md: 'row', sm: 'column' }} sx={{ justifyContent: 'space-between' }} spacing={1}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
                 sx={{ alignItems: 'center' }}
@@ -429,6 +447,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           canEdit={isEdit}
           displayStats={displayFormStats}
           stateList={(schema?.jsonSchema as { stateList?: string[] } | undefined)?.stateList || []}
+          currentState={entry.state}
         />
         {isEdit && (
           <SaveAndCancelButtons

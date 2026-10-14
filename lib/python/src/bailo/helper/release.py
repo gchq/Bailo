@@ -11,8 +11,6 @@ from semantic_version import Version
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NO_COLOR
@@ -137,29 +135,40 @@ class Release:
         """
         res = client.get_release(model_id, str(version))["release"]
 
-        model_card_version = res["modelCardVersion"]
-        notes = res["notes"]
-        files = res["fileIds"]
-        images = res["images"]
-        minor = res["minor"]
-        draft = res["draft"]
-
         logger.info(
             "Release %s of model ID %s successfully retrieved from server.",
             str(version),
             model_id,
         )
 
+        return cls._from_json(client, model_id, res, version)
+
+    @classmethod
+    def _from_json(
+        cls,
+        client: Client,
+        model_id: str,
+        res: dict[str, Any],
+        version: Version | str | None = None,
+    ) -> Release:
+        """Build a release from a release object in an API response.
+
+        :param client: A client object used to interact with Bailo
+        :param model_id: A Unique Model ID
+        :param res: A single release object from an API response
+        :param version: Version to use in place of the response's ``semver``, defaults to None
+        :return: Release object
+        """
         return cls(
             client,
             model_id,
-            version,
-            model_card_version,
-            notes,
-            files,
-            images,
-            minor,
-            draft,
+            version if version is not None else res["semver"],
+            res["modelCardVersion"],
+            res["notes"],
+            res["fileIds"],
+            res["images"],
+            res["minor"],
+            res["draft"],
         )
 
     def download(self, filename: str, write: bool = True, path: str | None = None) -> Any:
@@ -188,23 +197,22 @@ class Release:
                 os.makedirs(parent_dir, exist_ok=True)
             total_size = int(res.headers.get("content-length", 0))
 
-            if NO_COLOR:
-                colour = "white"
-            else:
-                colour = "green"
+            colour = "white" if NO_COLOR else "green"
 
-            with tqdm(
-                total=total_size,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=BLOCK_SIZE,
-                postfix=f"downloading {filename} as {path}",
-                colour=colour,
-            ) as t:
-                with open(path, "wb") as f:
-                    for data in res.iter_content(BLOCK_SIZE):
-                        t.update(len(data))
-                        f.write(data)
+            with (
+                tqdm(
+                    total=total_size,
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=BLOCK_SIZE,
+                    postfix=f"downloading {filename} as {path}",
+                    colour=colour,
+                ) as t,
+                open(path, "wb") as f,
+            ):
+                for data in res.iter_content(BLOCK_SIZE):
+                    t.update(len(data))
+                    f.write(data)
 
             logger.info("File written to %s", path)
 
@@ -304,7 +312,7 @@ class Release:
                 path = f"{name}.zip"
                 name = path
 
-            data: BytesIO = open(path, "rb")  # type: ignore[reportAssignmentType]
+            data: BytesIO = open(path, "rb")  # noqa: SIM115  # type: ignore[reportAssignmentType]
             to_close = True
 
             if zip_required:
@@ -316,10 +324,7 @@ class Release:
         size = data.tell()
         data.seek(old_file_position, os.SEEK_SET)
 
-        if NO_COLOR:
-            colour = "white"
-        else:
-            colour = "blue"
+        colour = "white" if NO_COLOR else "blue"
 
         with tqdm(
             total=size,

@@ -1,3 +1,4 @@
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
@@ -18,15 +19,16 @@ import { useGetEntryRoles } from 'actions/entry'
 import { UpdateReviewRolesParams } from 'actions/reviewRoles'
 import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryKind, ReviewRolesFormData } from 'types/types'
 
 type ReviewRoleFormContainerProps<ReviewRoleFormData extends UpdateReviewRolesParams | ReviewRolesFormData> = {
   providedData: boolean
   formData: ReviewRoleFormData
-  handleCancel: () => void
+  handleCancel?: () => void
   headingComponent: ReactElement
   handleSubmit: (event: ChangeEvent, form: ReviewRoleFormData) => void
   loading: boolean
@@ -71,17 +73,26 @@ export default function ReviewRoleFormContainer<
     )
   }, [draftFormData.defaultEntities, handleCollaboratorsChange])
 
-  if (isEntryRolesError) {
-    return <MessageAlert message={isEntryRolesError.info.message} />
-  }
-
-  if (isEntryRolesLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isEntryRolesError], isEntryRolesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
     <Container>
       <Paper sx={{ p: 4, mb: 4 }}>
+        <Box sx={{ textAlign: 'left', width: '100%' }}>
+          <Link href={`/admin?section=roles`}>
+            <Button
+              size='small'
+              sx={{ width: 'fit-content', pb: 2 }}
+              startIcon={<ArrowBack />}
+              aria-label={'Back to review role list button'}
+            >
+              Back to review role list
+            </Button>
+          </Link>
+        </Box>
         <Box component='form' onSubmit={(e) => handleSubmit(e, draftFormData)}>
           {headingComponent}
           <Stack spacing={2}>
@@ -158,9 +169,11 @@ export default function ReviewRoleFormContainer<
               }}
             >
               <Stack direction='row' spacing={2}>
-                <Button loading={loading} type='button' variant='outlined' color='primary' onClick={handleCancel}>
-                  Cancel
-                </Button>
+                {handleCancel && (
+                  <Button loading={loading} type='button' variant='outlined' color='primary' onClick={handleCancel}>
+                    Cancel
+                  </Button>
+                )}
                 <Button
                   loading={loading}
                   type='submit'

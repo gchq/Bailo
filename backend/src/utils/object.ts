@@ -1,3 +1,5 @@
+import { mergeWith } from 'lodash-es'
+
 export function deepFreeze(object) {
   // Retrieve the property names defined on object
   const propNames = Reflect.ownKeys(object)
@@ -22,4 +24,24 @@ export function getPropValue<T = unknown>(source: unknown, path: string): T | un
   return trimmedPath.split('.').reduce<any>((acc, key) => {
     return acc != null ? acc[key] : undefined
   }, source)
+}
+
+export function deepMergePreferFirst<TPreferred extends object, TFallback extends object>(
+  first: TPreferred,
+  second: TFallback,
+): TPreferred & TFallback {
+  return mergeWith({}, second, first, (objValue, srcValue) => {
+    // Arrays: first object wins completely
+    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+      return srcValue ?? objValue
+    }
+
+    // Primitives: first object wins when present
+    if (srcValue !== undefined && (srcValue === null || typeof srcValue !== 'object')) {
+      return srcValue
+    }
+
+    // Return undefined to let lodash continue normal deep merge.
+    return undefined
+  }) as TPreferred & TFallback
 }

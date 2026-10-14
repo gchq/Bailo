@@ -123,7 +123,7 @@ export default function FolderNavigableList({
           {breadcrumbs.map((crumb, i) => {
             const isLast = i === breadcrumbs.length - 1
             return isLast ? (
-              <Typography key={crumb.fullPath} fontWeight='bold'>
+              <Typography key={crumb.fullPath} sx={{ fontWeight: 'bold' }}>
                 {crumb.name}
               </Typography>
             ) : (

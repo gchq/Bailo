@@ -4,10 +4,9 @@ import { useTheme } from '@mui/material/styles'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import { memoize } from 'lodash-es'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
 import { formatDateString } from 'utils/dateUtils'
 
 export default function SchemaMigrationList() {
@@ -72,19 +71,16 @@ export default function SchemaMigrationList() {
     </Stack>
   ))
 
-  if (isSchemaMigrationsError) {
-    return <MessageAlert message={isSchemaMigrationsError.info.message} severity='error' />
-  }
-
-  if (isSchemaMigrationsLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isSchemaMigrationsError], isSchemaMigrationsLoading)
+  if (queryState) {
+    return queryState
   }
   return (
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
           <Link href={`/schemas/migrations/new`}>
-            <Button variant='outlined' data-test='createNewSchemaMigration' startIcon={<Create />}>
+            <Button variant='contained' data-test='createNewSchemaMigration' startIcon={<Create />}>
               New schema migration plan
             </Button>
           </Link>

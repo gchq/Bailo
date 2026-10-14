@@ -12,14 +12,11 @@ from unittest.mock import ANY
 
 import modelscan
 import pytest
+from bailo_artefactscan_api import trivy
+from bailo_artefactscan_api.config import Settings
+from bailo_artefactscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app
 from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi.testclient import TestClient
-
-# isort: split
-
-import bailo_artefactscan_api.trivy as trivy
-from bailo_artefactscan_api.config import Settings
-from bailo_artefactscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
 
 MAXIMUM_FILESIZE_OVERRIDE = 20_000
 

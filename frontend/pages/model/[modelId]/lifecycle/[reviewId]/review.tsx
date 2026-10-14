@@ -5,7 +5,6 @@ import { useGetModel } from 'actions/entry'
 import { useGetResponses } from 'actions/response'
 import { postGenericReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -31,7 +30,6 @@ export default function LifecycleReview() {
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: modelId as string,
     reviewId: `${reviewId}`,
@@ -106,7 +104,6 @@ export default function LifecycleReview() {
 
   const error = MultipleErrorWrapper('Unable to load release review page', {
     isModelError,
-    isUiConfigError,
     isReviewsError,
     isSchemaError,
     isResponsesError,
@@ -118,12 +115,10 @@ export default function LifecycleReview() {
   if (
     !reviews ||
     !model ||
-    !uiConfig ||
     !schema ||
     !responses ||
     isReviewsLoading ||
     isModelLoading ||
-    isUiConfigLoading ||
     isSchemaLoading ||
     isResponsesLoading
   ) {

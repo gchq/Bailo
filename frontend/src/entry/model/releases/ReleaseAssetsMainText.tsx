@@ -1,11 +1,12 @@
 import { Button, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
+import ExpandableMarkdown from 'src/common/ExpandableMarkdown'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { EntryInterface, EntryKind, ReleaseInterface } from 'types/types'
+import { EntryInterface, ReleaseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
+import { buildModelCardHref } from 'utils/routerUtils'
 
 export interface ReleaseAssetsMainTextProps {
   model: EntryInterface
@@ -19,18 +20,11 @@ export interface ReleaseAssetsMainTextProps {
 export default function ReleaseAssetsMainText({
   model,
   release,
-  latestRelease,
   hideCopySemver = false,
   hideDescription = false,
   includeLinks = true,
 }: ReleaseAssetsMainTextProps) {
   const router = useRouter()
-
-  function latestVersionAdornment() {
-    if (release.semver === latestRelease) {
-      return <Typography color='secondary'>(Latest)</Typography>
-    }
-  }
 
   return (
     <>
@@ -72,16 +66,9 @@ export default function ReleaseAssetsMainText({
               ariaLabel='copy release semver to clipboard'
             />
           )}
-          {latestVersionAdornment()}
         </Stack>
         {includeLinks && (
-          <Button
-            onClick={() =>
-              router.push(
-                `/model/${model.id}/history/${release.modelCardVersion}${model.kind === EntryKind.MIRRORED_MODEL ? '?mirrored=true' : ''}`,
-              )
-            }
-          >
+          <Button onClick={() => router.push(buildModelCardHref(model.id, model.kind, release.modelCardVersion))}>
             View Model Card
           </Button>
         )}
@@ -109,7 +96,11 @@ export default function ReleaseAssetsMainText({
           {` ${formatDateString(release.createdAt)}`}
         </Typography>
       </Stack>
-      {!hideDescription && <MarkdownDisplay>{release.notes}</MarkdownDisplay>}
+      {!hideDescription && (
+        <ExpandableMarkdown maxLength={500} showMoreDirection='column'>
+          {release.notes}
+        </ExpandableMarkdown>
+      )}
     </>
   )
 }

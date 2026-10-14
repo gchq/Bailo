@@ -1,8 +1,7 @@
 import { Stack, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useContext, useMemo, useState } from 'react'
 import SplitButton from 'src/common/SplitButton'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
 import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import { getDockerCredentialsConfig } from 'src/settings/authentication/configTemplates'
@@ -16,18 +15,10 @@ type DockerConfigurationProps = {
 }
 
 export default function DockerConfiguration({ token }: DockerConfigurationProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const [showFilePreview, setShowFilePreview] = useState(false)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-auth.json`, [token.description])
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUiConfigLoading || !uiConfig) {
-    return <Loading />
-  }
 
   return (
     <Stack spacing={4}>

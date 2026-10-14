@@ -43,8 +43,9 @@ export const deleteReviewRole = [
 
     const { params } = parse(req, deleteReviewRoleSchema)
 
-    await removeReviewRole(req.user, params.reviewRoleShortName)
-    await audit.onDeleteReviewRole(req, params.reviewRoleShortName)
+    const reviewRole = await removeReviewRole(req.user, params.reviewRoleShortName)
+
+    await audit.onDeleteReviewRole(req, reviewRole)
 
     res.json({ deleted: true })
   },

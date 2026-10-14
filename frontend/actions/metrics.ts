@@ -1,6 +1,15 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { CollaboratorEntry, ModelVolume, OverviewMetrics, PolicyMetrics } from 'types/types'
+import {
+  BaseLifecycleMetrics,
+  BaseNoReleaseMetrics,
+  BaseUnapprovedReleaseMetrics,
+  CollaboratorEntry,
+  EntryKindKeys,
+  ModelVolume,
+  OverviewMetrics,
+  PolicyRoleMetrics,
+} from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetVolumeForModel(interval: string = 'month', startDate?: string, endDate?: string) {
@@ -34,7 +43,7 @@ export function useGetOverviewMetrics() {
 }
 
 export function useGetRolePolicyMetrics() {
-  const { data, isLoading, error, mutate } = useSWR<PolicyMetrics, ErrorInfo>(
+  const { data, isLoading, error, mutate } = useSWR<PolicyRoleMetrics, ErrorInfo>(
     '/api/v3/metrics/compliance/roles',
     fetcher,
   )
@@ -47,9 +56,24 @@ export function useGetRolePolicyMetrics() {
   }
 }
 
+export function useGetNoReleasesPolicyMetrics() {
+  const { data, isLoading, error, mutate } = useSWR<BaseNoReleaseMetrics, ErrorInfo>(
+    '/api/v3/metrics/compliance/no-releases',
+    fetcher,
+  )
+
+  return {
+    mutateNoReleasesPolicyMetrics: mutate,
+    noReleasesPolicyMetrics: data,
+    isNoReleasesPolicyMetricsLoading: isLoading,
+    isNoReleasesPolicyMetricsError: error,
+  }
+}
+
 export interface ModelBreakdownResponse {
   entryId: string
   entryName: string
+  entryKind: EntryKindKeys
   collaborators: CollaboratorEntry[]
 }
 
@@ -57,13 +81,29 @@ interface UseGetModelBreakdownParams {
   organisation?: string
   state?: string
   schemaId?: string
+  release?: string
+  accessRequest?: string
+  startMonth?: string
+  endMonth?: string
 }
 
-export function useGetModelBreakdown({ organisation, state, schemaId }: UseGetModelBreakdownParams) {
+export function useGetModelBreakdown({
+  organisation,
+  state,
+  schemaId,
+  release,
+  accessRequest,
+  startMonth,
+  endMonth,
+}: UseGetModelBreakdownParams) {
   const queryParams = {
     ...(organisation && { organisation }),
     ...(state && { state }),
     ...(schemaId && { schemaId }),
+    ...(release && { release }),
+    ...(accessRequest && { accessRequest }),
+    ...(startMonth && { startMonth }),
+    ...(endMonth && { endMonth }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<ModelBreakdownResponse[], ErrorInfo>(
@@ -76,5 +116,36 @@ export function useGetModelBreakdown({ organisation, state, schemaId }: UseGetMo
     entries: data,
     isEntriesLoading: isLoading,
     isEntriesError: error,
+  }
+}
+
+export function useGetUnapprovedReleasesPolicyMetrics() {
+  const { data, isLoading, error, mutate } = useSWR<BaseUnapprovedReleaseMetrics, ErrorInfo>(
+    '/api/v3/metrics/compliance/unapproved',
+    fetcher,
+  )
+
+  return {
+    mutateUnapprovedReleasesPolicyMetrics: mutate,
+    unapprovedReleasesPolicyMetrics: data,
+    isUnapprovedReleasesPolicyMetricsLoading: isLoading,
+    isUnapprovedReleasesPolicyMetricsError: error,
+  }
+}
+
+export function useLifecyclePolicyMetrics(weeksUntilDue: number) {
+  const queryParams = {
+    weeksUntilDue,
+  }
+  const { data, isLoading, error, mutate } = useSWR<BaseLifecycleMetrics, ErrorInfo>(
+    `/api/v3/metrics/compliance/lifecycle?${qs.stringify(queryParams)}`,
+    fetcher,
+  )
+
+  return {
+    mutateLifecyclePolicyMetrics: mutate,
+    lifecyclePolicyMetrics: data,
+    isLifecyclePolicyMetricsLoading: isLoading,
+    isLifecyclePolicyMetricsError: error,
   }
 }

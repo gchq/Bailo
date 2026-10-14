@@ -17,21 +17,22 @@ import {
   Tabs,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetPeers, useGetStatus } from 'actions/system'
-import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
 import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
@@ -50,6 +51,8 @@ const ALL_KINDS = 'All'
 
 export default function Marketplace() {
   const router = useRouter()
+  const theme = useTheme()
+  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   function parseQueryArray(value?: string | string[]): string[] {
     if (!value) {
@@ -58,12 +61,12 @@ export default function Marketplace() {
     return Array.isArray(value) ? [...value] : [value]
   }
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const uiConfig = useContext(UiConfigContext)
   const { peers, isPeersLoading, isPeersError } = useGetPeers()
   const { status, isStatusLoading, isStatusError } = useGetStatus()
 
-  const isMirroredModelEnabled = !!uiConfig?.modelMirror.import.enabled
-  const isUntrustedModelEnabled = !!uiConfig?.untrustedModel.enabled
+  const isMirroredModelEnabled = !!uiConfig.modelMirror.import.enabled
+  const isUntrustedModelEnabled = !!uiConfig.untrustedModel.enabled
 
   const [availableModelKinds, setAvailableModelKinds] = useState<EntryKindKeys[]>([])
   const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([])
@@ -75,6 +78,11 @@ export default function Marketplace() {
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [titleOnly, setTitleOnly] = useState(false)
+  const [isFiltersHidden, setIsFiltersHidden] = useState(!isSmOrLarger)
+
+  useEffect(() => {
+    setIsFiltersHidden(!isSmOrLarger)
+  }, [isSmOrLarger])
 
   useEffect(() => {
     if (!router.isReady) {
@@ -117,68 +125,8 @@ export default function Marketplace() {
 
   const searchFilter = debouncedFilter.length >= 3 ? debouncedFilter : ''
 
-  const {
-    entries: models,
-    entryErrors: modelsErrors,
-    isEntriesError: isModelsError,
-    isEntriesLoading: isModelsLoading,
-  } = useListEntries(
-    EntryKind.MODEL,
-    selectedRoles,
-    '',
-    selectedTags,
-    selectedOrganisations,
-    selectedStates,
-    selectedPeers,
-    searchFilter,
-    false,
-    '',
-    titleOnly,
-  )
-
-  const {
-    entries: dataCards,
-    entryErrors: dataCardsErrors,
-    isEntriesError: isDataCardsError,
-    isEntriesLoading: isDataCardsLoading,
-  } = useListEntries(
-    EntryKind.DATA_CARD,
-    selectedRoles,
-    '',
-    selectedTags,
-    selectedOrganisations,
-    selectedStates,
-    selectedPeers,
-    searchFilter,
-    false,
-    '',
-    titleOnly,
-  )
-
-  const {
-    entries: mirroredModels,
-    isEntriesError: isMirroredModelsError,
-    isEntriesLoading: isMirroredModelsLoading,
-  } = useListEntries(
-    EntryKind.MIRRORED_MODEL,
-    selectedRoles,
-    '',
-    selectedTags,
-    selectedOrganisations,
-    selectedStates,
-    selectedPeers,
-    searchFilter,
-    false,
-    '',
-    titleOnly,
-  )
-
-  const {
-    entries: untrustedModels,
-    isEntriesError: isUntrustedModelsError,
-    isEntriesLoading: isUntrustedModelsLoading,
-  } = useListEntries(
-    EntryKind.UNTRUSTED_MODEL,
+  const { entries, entryErrors, isEntriesError, isEntriesLoading } = useListEntries(
+    [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL, EntryKind.DATA_CARD],
     selectedRoles,
     '',
     selectedTags,
@@ -202,8 +150,6 @@ export default function Marketplace() {
       }),
     ]
   }, [reviewRoles])
-
-  const theme = useTheme()
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -242,11 +188,11 @@ export default function Marketplace() {
   }, [peers])
 
   const organisationList = useMemo(() => {
-    return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
+    return uiConfig.modelDetails.organisations
   }, [uiConfig])
 
   const stateList = useMemo(() => {
-    return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
+    return uiConfig.modelDetails.states
   }, [uiConfig])
 
   const modelKindOptions = useMemo((): string[] => {
@@ -338,31 +284,29 @@ export default function Marketplace() {
 
   const filteredModels = useMemo(() => {
     return [
-      ...(selectedKinds.includes(EntryKind.MODEL) ? models : []),
+      ...(selectedKinds.includes(EntryKind.MODEL) ? entries.filter((model) => model.kind === EntryKind.MODEL) : []),
       ...(availableModelKinds.includes(EntryKind.MIRRORED_MODEL) && selectedKinds.includes(EntryKind.MIRRORED_MODEL)
-        ? mirroredModels
+        ? entries.filter((model) => model.kind === EntryKind.MIRRORED_MODEL)
         : []),
       ...(availableModelKinds.includes(EntryKind.UNTRUSTED_MODEL) && selectedKinds.includes(EntryKind.UNTRUSTED_MODEL)
-        ? untrustedModels
+        ? entries.filter((model) => model.kind === EntryKind.UNTRUSTED_MODEL)
         : []),
     ]
-  }, [models, mirroredModels, untrustedModels, selectedKinds, availableModelKinds])
+  }, [entries, selectedKinds, availableModelKinds])
+
+  const dataCards = useMemo(() => {
+    return entries.filter((entry) => entry.kind === EntryKind.DATA_CARD)
+  }, [entries])
 
   const combinedModelErrorMessage = useMemo(() => {
     let errorMessage = ''
-    if (isModelsError) {
-      errorMessage += `${isModelsError.info.message}. `
-    }
-    if (isMirroredModelsError) {
-      errorMessage += `${isMirroredModelsError.info.message}. `
-    }
-    if (isUntrustedModelsError) {
-      errorMessage += `${isUntrustedModelsError.info.message}. `
+    if (isEntriesError) {
+      errorMessage += `${isEntriesError.info.message}. `
     }
     return errorMessage
-  }, [isMirroredModelsError, isModelsError, isUntrustedModelsError])
+  }, [isEntriesError])
 
-  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
+  if (isReviewRolesLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
 
@@ -378,10 +322,6 @@ export default function Marketplace() {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
-  if (isUiConfigError) {
-    return <ErrorWrapper message={isUiConfigError.info.message} />
-  }
-
   if (isTagsError) {
     return <ErrorWrapper message={isTagsError.info.message} />
   }
@@ -394,162 +334,185 @@ export default function Marketplace() {
       <Title text='Marketplace' />
       <Container maxWidth='xl'>
         <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
-          <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '300px' } }}>
-            <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
-              Create
-            </Button>
-            <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center', mb: 2 }}>
-                <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
-                  Filters
-                </Typography>
-                <HelpDialog title='Search Information' content={<SearchInfo />} />
-              </Stack>
-              <FormControl
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  maxWidth: { sm: 'unset', md: '400px' },
-                  mb: 3,
-                  my: 2,
-                }}
-                variant='filled'
-                onSubmit={onFilterSubmit}
-              >
-                <InputLabel htmlFor='entry-filter-input'>
-                  {titleOnly ? 'Search by name' : 'Search by full text'}
-                </InputLabel>
-                <FilledInput
-                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
-                  id='entry-filter-input'
-                  value={filter}
-                  disableUnderline
-                  inputProps={{ spellCheck: 'false' }}
-                  onChange={handleFilterChange}
-                  endAdornment={
-                    <Tooltip title={titleOnly ? 'Name' : 'Full Text'}>
-                      <IconButton aria-label='titleOnly' onClick={handleChangeTitleOnly} color='primary'>
-                        {titleOnly ? <TitleIcon /> : <SubjectIcon />}
-                      </IconButton>
-                    </Tooltip>
-                  }
-                />
-                {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
-                  <Typography variant='caption' color='error'>
-                    Please enter at least three characters
-                  </Typography>
-                )}
-              </FormControl>
-              <Stack divider={<Divider flexItem />} spacing={0}>
-                {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
-                  <Box>
-                    <ChipSelector
-                      label='Organisations'
-                      chipTooltipTitle={'Filter by organisation'}
-                      options={organisationList}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={selectedOrganisations}
-                      onChange={handleOrganisationsOnChange}
-                      size='small'
-                      ariaLabel='add organisation to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                {uiConfig && uiConfig.modelDetails.states.length > 0 && (
-                  <Box>
-                    <ChipSelector
-                      label='States'
-                      chipTooltipTitle={'Filter by state'}
-                      options={stateList}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={selectedStates}
-                      onChange={handleStatesOnChange}
-                      size='small'
-                      ariaLabel='add state to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                {federationEnabled && peers && Array.from(peers.keys()).length > 0 && (
-                  <Box>
-                    <ChipSelector
-                      label='External repositories'
-                      chipTooltipTitle={'Include external repostories'}
-                      options={Array.from(peers.keys())}
-                      unreachableOptions={unreachablePeerList}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={selectedPeers}
-                      onChange={handlePeersOnChange}
-                      size='small'
-                      ariaLabel='add external repository to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                <Box>
-                  <ChipSelector
-                    label='Popular tags'
-                    subheading='(top 10)'
-                    chipTooltipTitle={'Filter by frequently used tags'}
-                    options={tags}
-                    expandThreshold={10}
-                    multiple
-                    selectedChips={selectedTags}
-                    onChange={handlePopularTagsOnChange}
-                    size='small'
-                    ariaLabel='add tag to search filter'
-                    accordion
-                  />
-                </Box>
-                {uiConfig && selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
-                  <Box>
-                    <ChipSelector
-                      label='Model kinds'
-                      chipTooltipTitle={'Filter by model kinds'}
-                      options={modelKindOptions}
-                      expandThreshold={10}
-                      multiple
-                      selectedChips={
-                        selectedKinds.length === availableModelKinds.length
-                          ? [ALL_KINDS, ...selectedKinds.map(toTitleCase)]
-                          : selectedKinds.map(toTitleCase)
-                      }
-                      onChange={handleModelKindsOnChange}
-                      size='small'
-                      ariaLabel='add model kind to search filter'
-                      accordion
-                    />
-                  </Box>
-                )}
-                <Box>
-                  <ChipSelector
-                    label='My roles'
-                    multiple
-                    options={roleOptions.map((role) => role.label)}
-                    onChange={handleSelectedRolesOnChange}
-                    selectedChips={roleOptions
-                      .filter((label) => selectedRoles.includes(label.key))
-                      .map((type) => type.label)}
-                    size='small'
-                  />
-                </Box>
-              </Stack>
+          <Box sx={{ mb: 2 }}>
+            <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '350px' } }}>
+              <Button component={Link} href='/entry/new' variant='contained' startIcon={<Add />}>
+                Create
+              </Button>
               <Box
                 sx={{
-                  justifySelf: 'center',
-                  marginTop: 1,
+                  backgroundColor: theme.palette.mode === 'light' ? grey[200] : grey[800],
+                  borderRadius: '8px',
+                  p: 2,
+                  width: { sm: '100%', md: '350px' },
                 }}
               >
-                <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
-                  Reset filters
-                </Button>
+                <Stack direction='row' sx={{ justifyContent: 'space-between', width: '100%', mb: 2 }}>
+                  <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'left', alignItems: 'center' }}>
+                    <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>
+                      Filters
+                    </Typography>
+                    <HelpDialog title='Search Information' content={<SearchInfo />} />
+                  </Stack>
+                  {!isSmOrLarger && (
+                    <Button size='small' onClick={() => setIsFiltersHidden(!isFiltersHidden)}>
+                      {isFiltersHidden ? 'Show filters' : 'Hide filters'}
+                    </Button>
+                  )}
+                </Stack>
+                {!isFiltersHidden && (
+                  <>
+                    <FormControl
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        maxWidth: { sm: 'unset', md: '400px' },
+                      }}
+                      variant='filled'
+                      onSubmit={onFilterSubmit}
+                    >
+                      <InputLabel htmlFor='entry-filter-input'>
+                        {titleOnly ? 'Search by name' : 'Search by full text'}
+                      </InputLabel>
+                      <FilledInput
+                        sx={{
+                          flex: 1,
+                          backgroundColor: theme.palette.background.paper,
+                          borderRadius: 2,
+                          width: '100%',
+                        }}
+                        id='entry-filter-input'
+                        value={filter}
+                        disableUnderline
+                        inputProps={{ spellCheck: 'false' }}
+                        onChange={handleFilterChange}
+                        endAdornment={
+                          <Tooltip title={titleOnly ? 'Name' : 'Full Text'}>
+                            <IconButton aria-label='titleOnly' onClick={handleChangeTitleOnly} color='primary'>
+                              {titleOnly ? <TitleIcon /> : <SubjectIcon />}
+                            </IconButton>
+                          </Tooltip>
+                        }
+                      />
+                      {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
+                        <Typography variant='caption' color='error'>
+                          Please enter at least three characters
+                        </Typography>
+                      )}
+                    </FormControl>
+                    <Stack divider={<Divider flexItem />} spacing={0}>
+                      {uiConfig.modelDetails.organisations.length > 0 && (
+                        <Box>
+                          <ChipSelector
+                            label='Organisations'
+                            chipTooltipTitle={'Filter by organisation'}
+                            options={organisationList}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={selectedOrganisations}
+                            onChange={handleOrganisationsOnChange}
+                            size='small'
+                            ariaLabel='add organisation to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      {uiConfig.modelDetails.states.length > 0 && (
+                        <Box>
+                          <ChipSelector
+                            label='States'
+                            chipTooltipTitle={'Filter by state'}
+                            options={stateList}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={selectedStates}
+                            onChange={handleStatesOnChange}
+                            size='small'
+                            ariaLabel='add state to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      {federationEnabled && peers && Array.from(peers.keys()).length > 0 && (
+                        <Box>
+                          <ChipSelector
+                            label='External repositories'
+                            chipTooltipTitle={'Include external repositories'}
+                            options={Array.from(peers.keys())}
+                            unreachableOptions={unreachablePeerList}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={selectedPeers}
+                            onChange={handlePeersOnChange}
+                            size='small'
+                            ariaLabel='add external repository to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      <Box>
+                        <ChipSelector
+                          label='Popular tags'
+                          subheading='(top 10)'
+                          chipTooltipTitle={'Filter by frequently used tags'}
+                          options={tags}
+                          expandThreshold={10}
+                          multiple
+                          selectedChips={selectedTags}
+                          onChange={handlePopularTagsOnChange}
+                          size='small'
+                          ariaLabel='add tag to search filter'
+                          accordion
+                        />
+                      </Box>
+                      {selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
+                        <Box>
+                          <ChipSelector
+                            label='Model kinds'
+                            chipTooltipTitle={'Filter by model kinds'}
+                            options={modelKindOptions}
+                            expandThreshold={10}
+                            multiple
+                            selectedChips={
+                              selectedKinds.length === availableModelKinds.length
+                                ? [ALL_KINDS, ...selectedKinds.map(toTitleCase)]
+                                : selectedKinds.map(toTitleCase)
+                            }
+                            onChange={handleModelKindsOnChange}
+                            size='small'
+                            ariaLabel='add model kind to search filter'
+                            accordion
+                          />
+                        </Box>
+                      )}
+                      <Box>
+                        <ChipSelector
+                          label='My roles'
+                          multiple
+                          options={roleOptions.map((role) => role.label)}
+                          onChange={handleSelectedRolesOnChange}
+                          selectedChips={roleOptions
+                            .filter((label) => selectedRoles.includes(label.key))
+                            .map((type) => type.label)}
+                          size='small'
+                        />
+                      </Box>
+                    </Stack>
+                    <Box
+                      sx={{
+                        justifySelf: 'center',
+                        marginTop: 1,
+                      }}
+                    >
+                      <Button onClick={handleResetFilters} startIcon={<RestartAlt />}>
+                        Reset filters
+                      </Button>
+                    </Box>
+                  </>
+                )}
               </Box>
-            </Container>
-          </Stack>
+            </Stack>
+          </Box>
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
             <Paper>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
@@ -561,22 +524,20 @@ export default function Marketplace() {
                   variant='scrollable'
                 >
                   <Tab
-                    label={`Models ${models ? `(${filteredModels.length})` : ''}`}
+                    label={`Models ${entries ? `(${filteredModels.length})` : ''}`}
                     value={EntryKind.MODEL}
                     onClick={() => setSelectedTab(EntryKind.MODEL)}
                   />
                   <Tab
-                    label={`Data Cards ${dataCards ? `(${dataCards.length})` : ''}`}
+                    label={`Data Cards (${dataCards.length})`}
                     value={EntryKind.DATA_CARD}
                     onClick={() => setSelectedTab(EntryKind.DATA_CARD)}
                   />
                 </Tabs>
               </Box>
-              {(isModelsLoading ||
-                (isMirroredModelEnabled && isMirroredModelsLoading) ||
-                (isUntrustedModelEnabled && isUntrustedModelsLoading)) && <Loading />}
-              {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
-              {!isModelsLoading && selectedTab === EntryKind.MODEL && (
+              {isEntriesLoading && <Loading />}
+              {entryErrors && MultipleErrorWrapper('Error with model search', entryErrors)}
+              {!isEntriesLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
                     entries={filteredModels}
@@ -589,21 +550,21 @@ export default function Marketplace() {
                     onSelectedStatesChange={handleStatesOnChange}
                     selectedPeers={selectedPeers}
                     onSelectedPeersChange={handlePeersOnChange}
-                    displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
-                    displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
+                    displayOrganisation={uiConfig.modelDetails.organisations.length > 0}
+                    displayState={uiConfig.modelDetails.states.length > 0}
                     displayPeers={federationEnabled}
                     peers={peers}
                   />
                 </div>
               )}
               {selectedTab === EntryKind.DATA_CARD &&
-                dataCardsErrors &&
-                MultipleErrorWrapper('Error with data-card search', dataCardsErrors)}
-              {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
+                entryErrors &&
+                MultipleErrorWrapper('Error with data-card search', entryErrors)}
+              {!isEntriesLoading && selectedTab === EntryKind.DATA_CARD && (
                 <div data-test='dataCardListBox'>
                   <EntryList
                     entries={dataCards}
-                    entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
+                    entriesErrorMessage={entryErrors ? entryErrors.info.message : ''}
                     selectedChips={selectedTags}
                     onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}

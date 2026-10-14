@@ -1,19 +1,38 @@
-import { mangoFusionPaletteDark } from '@mui/x-charts'
+import { PieChartData } from 'src/metrics/components/MetricsPieChart'
 import { SchemaInterface } from 'types/types'
 
-export const breakdownQueryTypes = ['byState', 'bySchema'] as const
+export const dateFormat = 'YYYY-MM'
+
+export const filterSelectTypes = {
+  ALL: 'All',
+  NONE: 'none',
+  UNSET: 'unset',
+}
+
+export const breakdownQueryTypes = ['byState', 'bySchema', 'totalEntries', 'withReleases', 'withAccessRequest'] as const
 export type BreakdownQueryType = (typeof breakdownQueryTypes)[number]
+
+export const filterIncludeTypes = {
+  WITH: 'with',
+  WITHOUT: 'without',
+}
 
 type ModelBreakdownRequest = {
   organisation: string
   state?: string
   schemaId?: string
+  release?: string
+  accessRequest?: string
 }
 
 export type EntriesFilterQuery = {
   organisation?: string
   state?: string
   schemaId?: string
+  release?: string
+  accessRequest?: string
+  startMonth?: string
+  endMonth?: string
 }
 
 type BreakdownContext = {
@@ -21,32 +40,49 @@ type BreakdownContext = {
   schemas: SchemaInterface[]
 }
 
-type BreakdownDefinition = {
-  buildQuery: (value: string, context: BreakdownContext) => ModelBreakdownRequest
-}
-
 function resolveSchemaId(schemaName: string, schemas: SchemaInterface[]): string {
   return schemas.find((schema) => schema.name === schemaName)?.id ?? 'none'
 }
 
-const breakdownDefinitions: Record<BreakdownQueryType, BreakdownDefinition> = {
-  byState: {
-    buildQuery: (value, context) => ({
-      organisation: context.organisation,
-      state: value,
-    }),
-  },
-  bySchema: {
-    buildQuery: (value, context) => ({
-      organisation: context.organisation,
-      schemaId: resolveSchemaId(value, context.schemas),
-    }),
-  },
+function buildBreakdownQuery(
+  type: BreakdownQueryType,
+  value: string,
+  context: BreakdownContext,
+): ModelBreakdownRequest {
+  switch (type) {
+    case 'byState':
+      return {
+        organisation: context.organisation,
+        state: value,
+      }
+    case 'bySchema':
+      return {
+        organisation: context.organisation,
+        schemaId: resolveSchemaId(value, context.schemas),
+      }
+    case 'totalEntries':
+      return {
+        organisation: context.organisation,
+      }
+    case 'withReleases':
+      return {
+        organisation: context.organisation,
+        release: filterIncludeTypes.WITH,
+      }
+    case 'withAccessRequest':
+      return {
+        organisation: context.organisation,
+        accessRequest: filterIncludeTypes.WITH,
+      }
+    default: {
+      const exhaustiveCheck: never = type
+      throw new Error(`Unhandled breakdown type: ${exhaustiveCheck}`)
+    }
+  }
 }
 
 /**
- * Builds an Entries tab URL from a set of filters, omitting anything unset
- * or equal to 'All' so the URL stays clean and shareable.
+ * Constructs the URL with any optional query parameters provided.
  */
 export function buildEntriesHref(filters: EntriesFilterQuery): string {
   const params = new URLSearchParams()
@@ -59,47 +95,57 @@ export function buildEntriesHref(filters: EntriesFilterQuery): string {
   if (filters.schemaId) {
     params.set('schemaId', filters.schemaId)
   }
+  if (filters.release) {
+    params.set('release', filters.release)
+  }
+  if (filters.accessRequest) {
+    params.set('accessRequest', filters.accessRequest)
+  }
+  if (filters.startMonth) {
+    params.set('startMonth', filters.startMonth)
+  }
+  if (filters.endMonth) {
+    params.set('endMonth', filters.endMonth)
+  }
   const queryString = params.toString()
   return `/metrics?tab=entries${queryString ? `&${queryString}` : ''}`
 }
 
 /**
- * Builds a deep link to the Entries tab pre-filtered based on a chart selection,
- * reusing the same buildQuery logic as the (now removed) inline breakdown panel.
+ * Builds a deep link to the Entries tab pre-filtered based on a chart or
+ * stat-panel selection on the Overview page.
  */
 export function buildEntriesTabHref(type: BreakdownQueryType, value: string, context: BreakdownContext): string {
-  const request = breakdownDefinitions[type].buildQuery(value, context)
+  const request = buildBreakdownQuery(type, value, context)
   return buildEntriesHref({
     organisation: request.organisation,
     state: request.state,
     schemaId: request.schemaId,
+    release: request.release,
+    accessRequest: request.accessRequest,
   })
 }
-
-export interface PieChartData {
-  label: string
-  value: number
-  color?: string
-}
-
-// Ensure the colour used for 'none' values is consistent across charts
-export const NONE_COLOR = mangoFusionPaletteDark[0]
-
-// Remaining palette, used for everything else
-export const remainingPalette = mangoFusionPaletteDark.filter((colour) => colour !== NONE_COLOR)
 
 /**
- * Maps each pie data item to a colour, pinning 'none' to a
- * fixed palette colour and cycling the rest without repeats.
+ * Sort the pie chart data to ensure the 'None' count is always last.
  */
-export function withConsistentColours<T extends PieChartData>(items: T[]): (T & { color: string })[] {
-  let i = 0
-  return items.map((item) => {
-    if (item.label.toLowerCase() === 'none') {
-      return { ...item, color: NONE_COLOR }
-    }
-    const color = remainingPalette[i % remainingPalette.length]
-    i += 1
-    return { ...item, color }
+export function sortPieData<T extends PieChartData>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    const aIsNone = a.label.toLowerCase() === 'none'
+    const bIsNone = b.label.toLowerCase() === 'none'
+
+    return Number(aIsNone) - Number(bIsNone)
   })
+}
+
+/**
+ * Convert data into the format expected by the pie chart
+ * utilising a specific colour for 'none' values.
+ */
+export function toPieData(items: { label: string; value: number }[], noneColour: string): PieChartData[] {
+  return items.map(({ label, value }) => ({
+    label,
+    value,
+    color: label.toLowerCase() === filterSelectTypes.NONE ? noneColour : undefined,
+  }))
 }

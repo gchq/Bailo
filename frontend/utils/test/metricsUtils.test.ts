@@ -1,5 +1,5 @@
 import { SchemaInterface } from 'types/types'
-import { buildEntriesTabHref } from 'utils/metricsUtils'
+import { buildEntriesTabHref, sortPieData, toPieData } from 'utils/metricsUtils'
 import { expect } from 'vitest'
 
 const mockSchemas = [
@@ -45,5 +45,71 @@ describe('buildEntriesTabHref', () => {
     // which is really the property we care about (not the '+' vs '%20' encoding detail itself)
     const parsedParams = new URLSearchParams(href.split('?')[1])
     expect(parsedParams.get('organisation')).toBe('Uncle Freds Robot Corporation')
+  })
+})
+
+describe('sortPieData', () => {
+  it('moves "None" entries to the end of the array', () => {
+    const data = [
+      { label: 'None', value: 4 },
+      { label: 'Development', value: 3 },
+      { label: 'Review', value: 1 },
+    ]
+
+    const result = sortPieData(data)
+
+    expect(result).toEqual([
+      { label: 'Development', value: 3 },
+      { label: 'Review', value: 1 },
+      { label: 'None', value: 4 },
+    ])
+  })
+
+  it('treats "None" case-insensitively and does not mutate the input array', () => {
+    const data = [
+      { label: 'Development', value: 3 },
+      { label: 'nOnE', value: 4 },
+      { label: 'Review', value: 1 },
+    ]
+
+    const result = sortPieData(data)
+
+    expect(result).toEqual([
+      { label: 'Development', value: 3 },
+      { label: 'Review', value: 1 },
+      { label: 'nOnE', value: 4 },
+    ])
+
+    // Verify the original array was not modified
+    expect(data).toEqual([
+      { label: 'Development', value: 3 },
+      { label: 'nOnE', value: 4 },
+      { label: 'Review', value: 1 },
+    ])
+  })
+})
+
+describe('toPieData', () => {
+  it('maps items to pie chart data and applies the none colour to "none" entries', () => {
+    const result = toPieData(
+      [
+        { label: 'Development', value: 3 },
+        { label: 'None', value: 4 },
+      ],
+      '#999999',
+    )
+
+    expect(result).toEqual([
+      {
+        label: 'Development',
+        value: 3,
+        color: undefined,
+      },
+      {
+        label: 'None',
+        value: 4,
+        color: '#999999',
+      },
+    ])
   })
 })

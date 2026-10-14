@@ -25,7 +25,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            message: z.string().openapi({ example: 'Succesfully removed access key' }),
+            message: z.string().openapi({ example: 'Successfully removed access key' }),
           }),
         },
       },
@@ -44,8 +44,9 @@ export const deleteUserToken = [
       params: { accessKey },
     } = parse(req, deleteUserTokenSchema)
 
-    await removeToken(req.user, accessKey)
-    await audit.onDeleteUserToken(req, accessKey)
+    const token = await removeToken(req.user, accessKey)
+
+    await audit.onDeleteUserToken(req, token)
 
     res.json({
       message: 'Successfully removed access key.',
