@@ -1,9 +1,10 @@
-import { Autocomplete, TextField, Typography } from '@mui/material'
+import { Autocomplete, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 
@@ -92,7 +93,7 @@ export default function Dropdown({
           value={value || ''}
           disabled={!compare.editMode}
           renderInput={(params) => (
-            <TextField
+            <LimitedTextField
               {...params}
               label='Select an option below'
               size='small'

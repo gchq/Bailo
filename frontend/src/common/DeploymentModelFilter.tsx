@@ -1,6 +1,7 @@
-import { Autocomplete, TextField, Typography } from '@mui/material'
+import { Autocomplete, Typography } from '@mui/material'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { useContext, useMemo } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { EntryKind } from 'types/types'
 
@@ -64,7 +65,7 @@ export default function DeploymentModelFilter({ selectedModelIds, onChange }: De
         getOptionLabel={(model) => model.name}
         isOptionEqualToValue={(option, selected) => option.id === selected.id}
         onChange={(_event, selected) => onChange(selected.map((model) => model.id))}
-        renderInput={(params) => <TextField {...params} label='Models' placeholder='Select models' />}
+        renderInput={(params) => <LimitedTextField {...params} label='Models' placeholder='Select models' />}
         slotProps={{ chip: { size: 'small' } }}
       />
       {isEntriesError && (

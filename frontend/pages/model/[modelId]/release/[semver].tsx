@@ -2,6 +2,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
+import { useGetResponses } from 'actions/response'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
@@ -42,6 +43,7 @@ export default function Release() {
     modelId: modelId as string,
     semver: `${semver}`,
   })
+  const { mutateResponses } = useGetResponses([release ? release._id : '', ...reviews.map((review) => review._id)])
 
   const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
     setSplitSchema(newSplitSchema)
@@ -116,6 +118,7 @@ export default function Release() {
     } else {
       mutateReviews()
       mutateRelease()
+      mutateResponses()
       router.push(`/model/${modelId}/release/${semver}`)
     }
   }

@@ -1,8 +1,8 @@
 import { Typography } from '@mui/material'
 import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
-import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/entry'
 import { SyntheticEvent, useEffect, useMemo } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, FlattenedModelImage } from 'types/types'
@@ -97,7 +97,7 @@ export default function ModelImageList({
     getOptionLabel: (option: FlattenedModelImage) => `${option.name}:${option.tag}`,
     groupBy: (option: FlattenedModelImage) => option.name,
     options: sortedImageList,
-    renderInput: (params: AutocompleteRenderInputParams) => <TextField {...params} size='small' />,
+    renderInput: (params: AutocompleteRenderInputParams) => <LimitedTextField {...params} size='small' />,
     'data-test': 'imageListAutocomplete',
   }
 

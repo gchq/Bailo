@@ -16,13 +16,13 @@ import {
   MenuItem,
   Pagination,
   Stack,
-  TextField,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
 import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
+import LimitedTextField from 'src/common/LimitedTextField'
 
 interface PaginateProps<T> {
   list: Array<T>
@@ -274,7 +274,7 @@ export default function Paginate<T>({
         {hideSearchInput ? (
           <div style={{ maxWidth: '200px', width: '100%' }}></div>
         ) : (
-          <TextField
+          <LimitedTextField
             size='small'
             value={searchFilter}
             label={searchPlaceholderText}
