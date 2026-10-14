@@ -516,7 +516,7 @@ export async function updateDeploymentAssessment(
   deploymentAssessmentId: string,
   diff: Partial<UpdateDeploymentAssessmentParams>,
 ) {
-  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const { deploymentAssessment, state } = await getDeploymentAssessmentDetails(user, deploymentAssessmentId)
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
   if (!auth.success) {
@@ -556,16 +556,32 @@ export async function updateDeploymentAssessment(
       deploymentAssessment,
     )
   }
+
   const review = isBeingSubmitted
     ? new ReviewModel({
         kind: ReviewKind.DeploymentAssessment,
         deploymentAssessmentId,
         role: deploymentAssessmentRiskOwnerRole,
       })
-    : undefined
+    : await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
+
+  // revoke an existing approval if DA is edited
+  const response =
+    state === DeploymentAssessmentState.Approved
+      ? new ResponseModel({
+          entity: toEntity('user', user.dn),
+          kind: ResponseKind.Review,
+          role: SystemRoles.Owner,
+          parentId: review._id,
+          decision: Decision.Undo,
+          comment: "Automatically revoked this deployment assessment's approval status by making changes",
+        })
+      : undefined
+
   await useTransaction([
     (session) => deploymentAssessment.save({ session }),
-    ...(review ? [(session) => review.save({ session })] : []),
+    ...(review && isBeingSubmitted ? [(session) => review.save({ session })] : []),
+    ...(response ? [(session) => response.save({ session })] : []),
   ])
 
   return deploymentAssessment
