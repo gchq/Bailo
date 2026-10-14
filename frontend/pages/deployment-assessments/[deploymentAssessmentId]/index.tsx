@@ -121,7 +121,7 @@ export default function DeploymentAssessment() {
     }
   }
 
-  async function handleIsEditChange(isEdit: boolean) {
+  function handleIsEditChange(isEdit: boolean) {
     if (isEdit && deploymentAssessment?.state === DeploymentAssessmentState.Approved) {
       setRevokeApprovalOpen(true)
     } else {
@@ -191,7 +191,7 @@ export default function DeploymentAssessment() {
                   <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
                     {deploymentAssessment && (
                       <Box sx={{ width: '100%' }}>
-                        {isEdit && deploymentAssessment?.state === DeploymentAssessmentState.Approved && (
+                        {isEdit && deploymentAssessment.state === DeploymentAssessmentState.Approved && (
                           <MessageAlert
                             message='Saving changes to this deployment assessment will revoke the approval status'
                             severity='warning'
@@ -213,9 +213,7 @@ export default function DeploymentAssessment() {
                     title='Revoke Approval Status'
                     onConfirm={handleRevokeApprovalConfirm}
                     onCancel={() => setRevokeApprovalOpen(false)}
-                    dialogMessage={
-                      'This deployment assessment is currently approved. Making any changes will revoke the approval status. Are you sure you want to edit this deployment assessment?'
-                    }
+                    dialogMessage='This deployment assessment is currently approved. Making any changes will revoke the approval status. Are you sure you want to edit this deployment assessment?'
                   />
                   <ReviewComments
                     identifier={deploymentAssessment.id}
