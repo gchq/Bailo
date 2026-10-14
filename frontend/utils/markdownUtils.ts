@@ -1,7 +1,30 @@
 import { MarkdownToJSX, parser, RuleType } from 'markdown-to-jsx'
 import { astToMarkdown } from 'markdown-to-jsx/markdown'
 
-type ASTNode = MarkdownToJSX.ASTNode
+export type ASTNode = MarkdownToJSX.ASTNode
+
+export type MarkdownAST = ASTNode[]
+
+export function parseMarkdown(markdown: string): MarkdownAST {
+  return parser(markdown)
+}
+
+export type MediaKind = 'image' | 'video' | 'audio'
+
+const mediaTags: Record<string, MediaKind> = { img: 'image', video: 'video', audio: 'audio' }
+
+/** Identifies images from Markdown syntax, and images, videos and audio from raw HTML tags. */
+export function getMediaKind(node: ASTNode): MediaKind | undefined {
+  if (node.type === RuleType.image) {
+    return 'image'
+  }
+
+  if (node.type === RuleType.htmlBlock || node.type === RuleType.htmlSelfClosing) {
+    return mediaTags[node.tag.toLowerCase()]
+  }
+
+  return undefined
+}
 
 function getVisibleLength(nodes: ASTNode[]): number {
   return nodes.reduce((length, node) => {
