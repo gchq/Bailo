@@ -38,6 +38,7 @@ import {
   notifyModelOwnersOfDeploymentAssessment,
   notifyReviewResponseForDeploymentAssessment,
   notifyRiskOwnerOfDeploymentAssessment,
+  notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked,
 } from './smtp/smtp.js'
 import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
 
@@ -408,6 +409,30 @@ async function notifyDeploymentAssessmentReviewed(
   }
 }
 
+async function notifyRiskOwnersOfApprovalRevoked(
+  editor: UserInterface,
+  deploymentAssessment: DeploymentAssessmentInterface,
+): Promise<void> {
+  const riskOwners = [...new Set(deploymentAssessment.metadata?.signOff?.riskOwners ?? [])]
+  if (riskOwners.length === 0) {
+    return
+  }
+
+  try {
+    const editorEntity = toEntity('user', editor.dn)
+    const editorName = (await authentication.getUserInformation(editorEntity)).name || editor.dn
+    await notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(riskOwners, deploymentAssessment, editorName)
+  } catch (error) {
+    log.warn(
+      {
+        error,
+        deploymentAssessmentId: deploymentAssessment.id,
+      },
+      'Failed to send deployment assessment approval revoked notification',
+    )
+  }
+}
+
 async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
   const modelIds = deploymentAssessment.metadata.modelOverview?.modelIds ?? []
   const models = await getModelsByIdsNoAuth(modelIds)
@@ -600,6 +625,10 @@ export async function updateDeploymentAssessment(
     ...(review ? [(session) => review.save({ session })] : []),
     ...(response ? [(session) => response.save({ session })] : []),
   ])
+
+  if (response) {
+    await notifyRiskOwnersOfApprovalRevoked(user, deploymentAssessment)
+  }
 
   return deploymentAssessment
 }

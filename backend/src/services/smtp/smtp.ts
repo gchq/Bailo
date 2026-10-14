@@ -128,6 +128,36 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
   await dispatchEmail([riskOwner], emailContent)
 }
 
+export async function notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(
+  riskOwners: string[],
+  deployment: DeploymentAssessmentInterface,
+  editorName: string,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = await buildEmail(
+    'A deployment assessment you approved has been edited and needs to be reviewed again',
+    [
+      { title: 'Deployment Assessment Name', data: deployment.name },
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      { title: 'Edited By', data: editorName },
+    ],
+    [
+      {
+        name: 'Open Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
+    ],
+    true,
+  )
+
+  await dispatchEmail(riskOwners, emailContent)
+}
+
 export async function notifyModelOwnersOfDeploymentAssessment(
   entities: string[],
   deployment: DeploymentAssessmentInterface,

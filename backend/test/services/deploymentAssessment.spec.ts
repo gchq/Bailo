@@ -52,6 +52,7 @@ const smtpMocks = vi.hoisted(() => ({
   notifyModelOwnersOfDeploymentAssessment: vi.fn(),
   notifyReviewResponseForDeploymentAssessment: vi.fn(),
   notifyModelOwnersOfDeploymentApproval: vi.fn(),
+  notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
 const modelServiceMocks = vi.hoisted(() => ({
@@ -825,6 +826,23 @@ describe('services > deploymentAssessment', () => {
       expect(deploymentAssessment.save).toHaveBeenCalled()
     })
 
+    test('notifies risk owners when an approval is revoked', async () => {
+      ReviewModelMock.sort.mockResolvedValue({ _id: 'review-object-id' })
+      ResponseModelMock.sort.mockResolvedValueOnce([{ kind: ResponseKind.Review, decision: Decision.Approve }])
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.draft = false
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
+
+      expect(authentication.getUserInformation).toHaveBeenCalledWith('user:creator')
+      expect(smtpMocks.notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked).toHaveBeenCalledWith(
+        ['user:risk-owner'],
+        deploymentAssessment,
+        'Risk Owner',
+      )
+    })
+
     test('does not add another Undo response when the approval has already been revoked', async () => {
       ResponseModelMock.sort.mockResolvedValueOnce([
         { kind: ResponseKind.Review, decision: Decision.Undo },
@@ -837,6 +855,7 @@ describe('services > deploymentAssessment', () => {
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
 
       expect(ResponseModelMock).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked).not.toHaveBeenCalled()
       expect(deploymentAssessment.save).toHaveBeenCalled()
     })
 
@@ -849,6 +868,7 @@ describe('services > deploymentAssessment', () => {
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
 
       expect(ResponseModelMock).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked).not.toHaveBeenCalled()
       expect(deploymentAssessment.save).toHaveBeenCalled()
     })
   })
