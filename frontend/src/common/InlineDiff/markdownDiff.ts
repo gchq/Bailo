@@ -1,5 +1,6 @@
 import { RuleType } from 'markdown-to-jsx'
 import { alignSequence, diffText } from 'src/common/InlineDiff/diffEngine'
+import { alignByKey, alignByPosition, alignKeyedRows, IndexPair } from 'src/common/InlineDiff/rowAlignment'
 import { ASTNode, getMediaKind, MarkdownAST } from 'utils/markdownUtils'
 
 export type RichDiff =
@@ -91,79 +92,8 @@ function diffListItems(from: ASTNode[][], to: ASTNode[][]): RichDiff[][] {
 
 type TableNode = Extract<ASTNode, { type: typeof RuleType.table }>
 
-type IndexPair = { from?: number; to?: number }
-
 function cellKey(cell: ASTNode[] | undefined): string {
   return JSON.stringify(cell ?? []).toLowerCase()
-}
-
-function alignByPosition(fromLength: number, toLength: number): IndexPair[] {
-  return Array.from({ length: Math.max(fromLength, toLength) }, (_, index) => ({
-    from: index < fromLength ? index : undefined,
-    to: index < toLength ? index : undefined,
-  }))
-}
-
-/** Pairs each unmatched old entry with the next related unmatched new entry from the same run, keeping their order. */
-function pairUnmatched(
-  deleted: number[],
-  inserted: number[],
-  isRelated: (from: number, to: number) => boolean,
-): IndexPair[] {
-  const pairs: IndexPair[] = []
-  let nextInsert = 0
-
-  for (const from of deleted) {
-    const offset = inserted.slice(nextInsert).findIndex((to) => isRelated(from, to))
-
-    if (offset === -1) {
-      pairs.push({ from })
-      continue
-    }
-
-    inserted.slice(nextInsert, nextInsert + offset).forEach((to) => pairs.push({ to }))
-    pairs.push({ from, to: inserted[nextInsert + offset] })
-    nextInsert += offset + 1
-  }
-
-  inserted.slice(nextInsert).forEach((to) => pairs.push({ to }))
-
-  return pairs
-}
-
-/** Aligns by key, then pairs entries whose key changed when `isRelated` says they are still the same entry. */
-function alignByKey(
-  fromKeys: string[],
-  toKeys: string[],
-  isRelated: (from: number, to: number) => boolean,
-): IndexPair[] {
-  const fromIndexes = fromKeys.map((_, index) => index)
-  const toIndexes = toKeys.map((_, index) => index)
-  const edits = alignSequence(fromIndexes, toIndexes, (from, to) => fromKeys[from] === toKeys[to])
-
-  const result: IndexPair[] = []
-  let deleted: number[] = []
-  let inserted: number[] = []
-
-  const flush = () => {
-    result.push(...pairUnmatched(deleted, inserted, isRelated))
-    deleted = []
-    inserted = []
-  }
-
-  for (const edit of edits) {
-    if (edit.operation === 'equal') {
-      flush()
-      result.push({ from: edit.from, to: edit.to })
-    } else if (edit.operation === 'delete') {
-      deleted.push(edit.from)
-    } else {
-      inserted.push(edit.to)
-    }
-  }
-  flush()
-
-  return result
 }
 
 function sharesCell(from: ASTNode[][], to: ASTNode[][]): boolean {
@@ -189,15 +119,11 @@ function alignColumns(from: TableNode, to: TableNode): IndexPair[] | undefined {
 
 /** Rows are matched by their first cell when it uniquely identifies each row, otherwise by position. */
 function alignRows(from: TableNode, to: TableNode): IndexPair[] {
-  const fromKeys = from.cells.map((row) => cellKey(row[0]))
-  const toKeys = to.cells.map((row) => cellKey(row[0]))
-  const hasUniqueKeys = new Set(fromKeys).size === fromKeys.length && new Set(toKeys).size === toKeys.length
-
-  if (!hasUniqueKeys) {
-    return alignByPosition(from.cells.length, to.cells.length)
-  }
-
-  return alignByKey(fromKeys, toKeys, (fromIndex, toIndex) => sharesCell(from.cells[fromIndex], to.cells[toIndex]))
+  return alignKeyedRows(
+    from.cells.map((row) => cellKey(row[0])),
+    to.cells.map((row) => cellKey(row[0])),
+    (fromIndex, toIndex) => sharesCell(from.cells[fromIndex], to.cells[toIndex]),
+  )
 }
 
 function diffTableCell(from: ASTNode[] | undefined, to: ASTNode[] | undefined): RichDiff[] {
