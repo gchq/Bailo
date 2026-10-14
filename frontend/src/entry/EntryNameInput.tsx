@@ -2,6 +2,7 @@ import { TextField } from '@mui/material'
 import { ChangeEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import { EntryKindKeys } from 'types/types'
+import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { toTitleCase } from 'utils/stringUtils'
 
 const htmlId = 'entry-name-input'
@@ -29,7 +30,7 @@ export default function EntryNameInput({ value, kind, onChange, autoFocus = fals
         id={htmlId}
         onChange={handleChange}
         slotProps={{
-          htmlInput: { 'data-test': 'entryNameInput' },
+          htmlInput: { 'data-test': 'entryNameInput', maxLength: NAME_INPUT_MAX_LENGTH },
         }}
       />
     </LabelledInput>

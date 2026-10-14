@@ -6,6 +6,7 @@ import RichTextEditor from 'src/common/RichTextEditor'
 import ReactionButtons from 'src/reviews/ReactionButtons'
 import { ResponseInterface } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
+import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface EditableReviewCommentProps {
   comment: string
@@ -43,7 +44,7 @@ export default function EditableReviewComment({
       )}
       {isEditMode && (
         <>
-          <RichTextEditor value={comment} onChange={onCommentChange} />
+          <RichTextEditor value={comment} onChange={onCommentChange} maxLength={DESCRIPTION_INPUT_MAX_LENGTH} />
           <Stack
             direction='row'
             spacing={1}

@@ -4,6 +4,7 @@ import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
+import { DESCRIPTION_INPUT_MAX_LENGTH, NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface EditableTextProps {
   label: string
@@ -89,6 +90,7 @@ export default function EditableText({
               value={newValue || ''}
               onChange={(input) => setNewValue(input)}
               textareaProps={{ 'aria-label': label }}
+              maxLength={multiline ? DESCRIPTION_INPUT_MAX_LENGTH : NAME_INPUT_MAX_LENGTH}
             />
             {submitButtons}
           </Stack>
@@ -106,7 +108,12 @@ export default function EditableText({
               onChange={(event) => setNewValue(event.target.value)}
               size='small'
               multiline={multiline}
-              slotProps={{ htmlInput: { 'aria-label': label } }}
+              slotProps={{
+                htmlInput: {
+                  'aria-label': label,
+                  maxLength: multiline ? DESCRIPTION_INPUT_MAX_LENGTH : NAME_INPUT_MAX_LENGTH,
+                },
+              }}
             />
             {submitButtons}
           </Stack>

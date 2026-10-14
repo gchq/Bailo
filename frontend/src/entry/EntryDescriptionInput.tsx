@@ -1,6 +1,7 @@
 import { TextField } from '@mui/material'
 import { ChangeEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 const htmlId = 'entry-description-input'
 
@@ -25,7 +26,7 @@ export default function EntryDescriptionInput({ value, onChange }: EntryDescript
         size='small'
         onChange={handleChange}
         slotProps={{
-          htmlInput: { 'data-test': 'entryDescriptionInput' },
+          htmlInput: { 'data-test': 'entryDescriptionInput', maxLength: DESCRIPTION_INPUT_MAX_LENGTH },
         }}
       />
     </LabelledInput>

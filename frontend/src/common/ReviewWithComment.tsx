@@ -18,6 +18,7 @@ import { ChangeEvent, SyntheticEvent, useContext, useEffect, useState } from 're
 import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
+import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetEntryRoles } from '../../actions/entry'
@@ -168,6 +169,7 @@ export default function ReviewWithComment({
               value={reviewComment}
               onChange={(newValue) => setReviewComment(newValue)}
               alwaysShowToolbar
+              maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
             />
             <Typography variant='caption' color='error'>
               {errorText}

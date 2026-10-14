@@ -34,6 +34,7 @@ import {
   DocsSearchResult,
   DocsSearchResultSection as ResultSection,
 } from 'types/docs'
+import { TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 import { useDocsSearchIndex } from './useDocsSearchIndex'
 
@@ -324,6 +325,7 @@ export default function DocsSearchDialog({ open, onClose }: DocsSearchDialogProp
             spellCheck={false}
             variant='standard'
             slotProps={{
+              htmlInput: { maxLength: TEXT_INPUT_MAX_LENGTH },
               input: {
                 disableUnderline: true,
                 startAdornment: (

@@ -1,10 +1,12 @@
 import LocalOffer from '@mui/icons-material/LocalOffer'
-import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
+import { Button, Chip, Grid, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useCallback, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Restricted from 'src/common/Restricted'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface FileToBeUploadedProps {
   fileWithMetadata: FileUploadWithMetadata
@@ -88,7 +90,12 @@ export default function FileToBeUploaded({
           errorText={''}
         />
         {showMetaDataInput && (
-          <TextField size='small' value={fileWithMetadata.metadata?.text} onChange={handleMetadataTextOnChange} />
+          <LimitedTextField
+            size='small'
+            value={fileWithMetadata.metadata?.text}
+            onChange={handleMetadataTextOnChange}
+            maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
+          />
         )}
       </Grid>
       <Grid

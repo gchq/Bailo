@@ -1,6 +1,6 @@
 import Close from '@mui/icons-material/Close'
 import Save from '@mui/icons-material/Save'
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { deleteDeploymentAssessment } from 'actions/deploymentAssessments'
@@ -10,6 +10,7 @@ import { useContext, useEffect, useMemo, useState } from 'react'
 import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
 import LabelledInput from 'src/common/LabelledInput'
 import LabelledValue from 'src/common/LabelledValue'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -20,6 +21,7 @@ import { KeyedMutator } from 'swr'
 import { DeploymentAssessmentInterface, DeploymentAssessmentStateKeys, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
+import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 type EditableDeploymentAssessmentFormProps = {
   deploymentAssessment: DeploymentAssessmentInterface
@@ -178,12 +180,13 @@ export default function EditableDeploymentAssessmentForm({
                 }}
               >
                 {isEdit ? (
-                  <TextField
+                  <LimitedTextField
                     value={newName}
                     fullWidth
                     onChange={(event) => setNewName(event.target.value)}
                     size='small'
                     data-test='editNameInput'
+                    maxLength={NAME_INPUT_MAX_LENGTH}
                   />
                 ) : (
                   <>

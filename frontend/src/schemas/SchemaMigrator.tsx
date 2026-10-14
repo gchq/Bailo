@@ -17,15 +17,16 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
 import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { CombinedSchema, QuestionMigration } from 'types/types'
+import { DESCRIPTION_INPUT_MAX_LENGTH, NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { truncateText } from 'utils/stringUtils'
 
 interface SchemaMigratorProps {
@@ -350,11 +351,12 @@ export default function SchemaMigrator({
                   >
                     Migration name
                   </Typography>
-                  <TextField
+                  <LimitedTextField
                     size='small'
                     value={migrationName}
                     onChange={(e) => setMigrationName(e.target.value)}
                     label='migration plan name input'
+                    maxLength={NAME_INPUT_MAX_LENGTH}
                   />
                 </Stack>
                 <Stack spacing={1}>
@@ -365,7 +367,7 @@ export default function SchemaMigrator({
                   >
                     Migration description (optional)
                   </Typography>
-                  <TextField
+                  <LimitedTextField
                     size='small'
                     multiline
                     label='migration plan description input'
@@ -373,6 +375,7 @@ export default function SchemaMigrator({
                     maxRows={10}
                     value={migrationDescription}
                     onChange={(e) => setMigrationDescription(e.target.value)}
+                    maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
                   />
                 </Stack>
                 <ClickAwayListener onClickAway={handleClose}>

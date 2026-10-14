@@ -1,10 +1,12 @@
-import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
+import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface TagEditorProps {
   editable: boolean
@@ -60,7 +62,7 @@ function TagEditor({
         sx={{ alignItems: 'center' }}
       >
         <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-          <TextField
+          <LimitedTextField
             size='small'
             value={newTag}
             onKeyUp={(e) => {
@@ -73,6 +75,7 @@ function TagEditor({
             error={hasErrors || errorText.length > 0}
             onChange={(e) => setNewTag(e.target.value)}
             sx={{ minWidth: '100px' }}
+            maxLength={NAME_INPUT_MAX_LENGTH}
           />
           <Button size='small' onClick={onSubmit}>
             Add tag

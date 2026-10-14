@@ -16,6 +16,7 @@ import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
 import { ResponseInterface, ResponseKind, ReviewKind, ReviewKindKeys } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/arrayUtils'
 import { getErrorMessage } from 'utils/fetcher'
+import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { reviewResponsesForEachUser } from 'utils/reviewUtils'
 
 interface ReviewCommentsProps {
@@ -195,6 +196,7 @@ export default function ReviewComments({
             <RichTextEditor
               value={newReviewComment}
               onChange={(e) => setNewReviewComment(e)}
+              maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
               textareaProps={{ placeholder: 'Add your comment here...' }}
             />
           </Box>

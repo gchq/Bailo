@@ -1,24 +1,16 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Save from '@mui/icons-material/Save'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Divider,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { patchEntry } from 'actions/entry'
 import { ChangeEvent, SyntheticEvent, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import LimitedTextField from 'src/common/LimitedTextField'
 import ExportModelAgreement from 'src/entry/model/mirroredModels/ExportModelAgreement'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 type ExportSettingsProps = {
   model: EntryInterface
@@ -78,12 +70,13 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
             <AccordionDetails>
               <Stack spacing={2}>
                 <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
-                  <TextField
+                  <LimitedTextField
                     id='destination-model-id'
                     value={destinationModelId}
                     onChange={handleDestinationModelId}
                     size='small'
                     data-test='destinationModelIdTextField'
+                    maxLength={NAME_INPUT_MAX_LENGTH}
                   />
                 </LabelledInput>
                 <Button

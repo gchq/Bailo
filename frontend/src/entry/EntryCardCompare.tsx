@@ -1,10 +1,11 @@
-import { Alert, Autocomplete, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Autocomplete, Container, Link, Paper, Stack, Typography } from '@mui/material'
 import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ComparisonSwapButton from 'src/common/ComparisonSwapButton'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import EntryCardSnapshotSelector, {
   buildSnapshots,
@@ -476,7 +477,7 @@ export default function EntryCardCompare({
                   }
                 }}
                 onChange={(_event, value) => setModel(QueryDiffSide.From, value)}
-                renderInput={(params) => <TextField {...params} label={kindLabel} />}
+                renderInput={(params) => <LimitedTextField {...params} label={kindLabel} />}
               />
               <EntryCardSnapshotSelector
                 snapshots={fromSnapshots}
@@ -517,7 +518,7 @@ export default function EntryCardCompare({
                   }
                 }}
                 onChange={(_event, value) => setModel(QueryDiffSide.To, value)}
-                renderInput={(params) => <TextField {...params} label={kindLabel} />}
+                renderInput={(params) => <LimitedTextField {...params} label={kindLabel} />}
               />
               <EntryCardSnapshotSelector
                 snapshots={toSnapshots}

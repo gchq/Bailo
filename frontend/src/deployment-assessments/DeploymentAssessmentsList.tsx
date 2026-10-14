@@ -19,6 +19,7 @@ import CreatedDateRangeFilter from 'src/common/CreatedDateRangeFilter'
 import DeploymentModelFilter from 'src/common/DeploymentModelFilter'
 import { dnToEntity } from 'src/common/EntityAutocomplete'
 import EntityAutocompleteFilter from 'src/common/EntityAutocompleteFilter'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import useDebounce from 'src/hooks/useDebounce'
@@ -84,7 +85,7 @@ export default function DeploymentAssessmentsList() {
     <Stack spacing={2}>
       <Stack spacing={2}>
         <Stack direction='row' spacing={1} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <TextField
+          <LimitedTextField
             data-test='deploymentAssessmentSearchFilter'
             label='Search assessments'
             size='small'

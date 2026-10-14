@@ -8,6 +8,7 @@ import Restricted from 'src/common/Restricted'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 type SourceModelIdFieldProps = {
   entry: EntryInterface
@@ -54,7 +55,10 @@ export default function SourceModelIdField({ entry, mutateEntry }: SourceModelId
               onChange={(e) => setValue(e.target.value)}
               autoFocus
               sx={{ minWidth: 250 }}
-              slotProps={{ input: { sx: { fontSize: 'caption.fontSize' } } }}
+              slotProps={{
+                input: { sx: { fontSize: 'caption.fontSize' } },
+                htmlInput: { maxLength: NAME_INPUT_MAX_LENGTH },
+              }}
               data-test='editMirroredModelSourceModelIdInput'
             />
             <IconButton

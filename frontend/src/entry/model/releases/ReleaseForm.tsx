@@ -51,6 +51,7 @@ import {
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
+import { DESCRIPTION_INPUT_MAX_LENGTH, NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { buildModelCardHref } from 'utils/routerUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -262,7 +263,7 @@ export default function ReleaseForm({
               value={formData.semver}
               onChange={handleSemverChange}
               slotProps={{
-                htmlInput: { 'data-test': 'releaseSemanticVersionTextField' },
+                htmlInput: { 'data-test': 'releaseSemanticVersionTextField', maxLength: NAME_INPUT_MAX_LENGTH },
               }}
             />
           )}
@@ -335,6 +336,7 @@ export default function ReleaseForm({
             label={releaseNotesLabel}
             textareaProps={{ autoFocus: isEdit, id: 'release-notes-input' }}
             dataTest='releaseNotesInput'
+            maxLength={DESCRIPTION_INPUT_MAX_LENGTH}
           />
         )}
       </Stack>

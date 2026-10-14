@@ -26,6 +26,7 @@ import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
 import { TokenActionKind, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { DESCRIPTION_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
@@ -229,7 +230,7 @@ export default function NewToken() {
                   maxRows={8}
                   onChange={handleDescriptionChange}
                   slotProps={{
-                    htmlInput: { 'data-test': 'tokenDescriptionTextField' },
+                    htmlInput: { 'data-test': 'tokenDescriptionTextField', maxLength: DESCRIPTION_INPUT_MAX_LENGTH },
                   }}
                 />
               </Stack>

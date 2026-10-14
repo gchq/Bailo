@@ -1,9 +1,11 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, TextField, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from '@mui/material'
 import { useContext, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
+import { NAME_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface ManualEntityInputProps {
   onAddEntityManually: (entityName: string) => void
@@ -42,12 +44,13 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
             alignItems: 'center',
           }}
         >
-          <TextField
+          <LimitedTextField
             size='small'
             fullWidth
             label='User'
             value={manualEntityName}
             onChange={(e) => setManualEntityName(e.target.value)}
+            maxLength={NAME_INPUT_MAX_LENGTH}
           />
           {uiConfig.helpPopoverText.manualEntryAccess && (
             <HelpPopover>{uiConfig.helpPopoverText.manualEntryAccess}</HelpPopover>

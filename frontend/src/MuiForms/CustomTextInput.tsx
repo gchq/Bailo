@@ -6,6 +6,7 @@ import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
+import { limitText, TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface CustomTextInputProps {
   label?: string
@@ -33,9 +34,10 @@ export default function CustomTextInput({
   schema,
 }: CustomTextInputProps) {
   const theme = useTheme()
+  const maxLength = schema.maxLength ?? TEXT_INPUT_MAX_LENGTH
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value)
+    onChange(limitText(event.target.value, maxLength, value))
   }
 
   const disabledWebkitTextFillColor = useMemo(() => {
@@ -105,6 +107,7 @@ export default function CustomTextInput({
               'data-test': id,
               'aria-label': `text input field for ${label}`,
               id: id,
+              maxLength,
             },
           }}
         />
