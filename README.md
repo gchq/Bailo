@@ -187,8 +187,7 @@ See [our user documentation](https://gchq.github.io/Bailo/docs)
 ## Contributing
 
 Anyone can raise a [GitHub issue](https://github.com/gchq/Bailo/issues). Pull requests are only accepted from approved,
-named contributors. See [CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md) for details,
-including how to become an approved contributor.
+named contributors. See [CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md) for details.
 
 <br />
 

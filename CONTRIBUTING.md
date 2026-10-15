@@ -12,8 +12,7 @@ Issues are the main way for the wider community to collaborate with us. You can 
 - request a feature or suggest an improvement
 - ask for help or start a discussion about a proposed change
 
-Before raising a new issue, check whether one already exists. If it does, add your comments to the existing issue. Do
-not include sensitive information in public issues.
+Before raising a new issue, check whether one already exists. If it does, add your comments to the existing issue.
 
 ## Who can submit pull requests
 
