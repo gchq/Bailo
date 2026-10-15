@@ -4,19 +4,120 @@ exports[`services > response > checkAccessRequestsApproved > approved access req
 [
   [
     [
-      "access-1",
-      "access-2",
-    ],
-  ],
-]
-`;
-
-exports[`services > response > checkAccessRequestsApproved > no approved access requests with a required role 1`] = `
-[
-  [
-    [
-      "access-1",
-      "access-2",
+      {
+        "$match": {
+          "accessRequestId": {
+            "$in": [
+              "access-1",
+              "access-2",
+            ],
+          },
+        },
+      },
+      {
+        "$lookup": {
+          "as": "latestDecisions",
+          "from": "v2_responses",
+          "let": {
+            "reviewId": "$_id",
+          },
+          "pipeline": [
+            {
+              "$match": {
+                "$expr": {
+                  "$eq": [
+                    "$parentId",
+                    "$$reviewId",
+                  ],
+                },
+                "kind": "review",
+              },
+            },
+            {
+              "$sort": {
+                "createdAt": -1,
+              },
+            },
+            {
+              "$group": {
+                "_id": "$entity",
+                "decision": {
+                  "$first": "$decision",
+                },
+              },
+            },
+            {
+              "$group": {
+                "_id": null,
+                "decisions": {
+                  "$addToSet": "$decision",
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        "$addFields": {
+          "reviewerDecisions": {
+            "$ifNull": [
+              {
+                "$arrayElemAt": [
+                  "$latestDecisions.decisions",
+                  0,
+                ],
+              },
+              [],
+            ],
+          },
+        },
+      },
+      {
+        "$group": {
+          "_id": "$accessRequestId",
+          "approvedReviews": {
+            "$sum": {
+              "$cond": [
+                {
+                  "$and": [
+                    {
+                      "$in": [
+                        "approve",
+                        "$reviewerDecisions",
+                      ],
+                    },
+                    {
+                      "$not": [
+                        {
+                          "$in": [
+                            "request_changes",
+                            "$reviewerDecisions",
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          "totalReviews": {
+            "$sum": 1,
+          },
+        },
+      },
+      {
+        "$match": {
+          "$expr": {
+            "$eq": [
+              "$approvedReviews",
+              "$totalReviews",
+            ],
+          },
+        },
+      },
     ],
   ],
 ]

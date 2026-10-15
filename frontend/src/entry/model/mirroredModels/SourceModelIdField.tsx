@@ -1,9 +1,10 @@
 import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
 import EditIcon from '@mui/icons-material/Edit'
-import { IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { patchEntry } from 'actions/entry'
 import { useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Restricted from 'src/common/Restricted'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
@@ -48,13 +49,15 @@ export default function SourceModelIdField({ entry, mutateEntry }: SourceModelId
         <Typography variant='caption'>Source model ID:</Typography>
         {isEditing ? (
           <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
-            <TextField
+            <LimitedTextField
               size='small'
               value={value}
               onChange={(e) => setValue(e.target.value)}
               autoFocus
               sx={{ minWidth: 250 }}
-              slotProps={{ input: { sx: { fontSize: 'caption.fontSize' } } }}
+              slotProps={{
+                input: { sx: { fontSize: 'caption.fontSize' } },
+              }}
               data-test='editMirroredModelSourceModelIdInput'
             />
             <IconButton

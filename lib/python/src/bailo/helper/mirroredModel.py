@@ -2,20 +2,18 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import Any
-
-from semantic_version import Version
+from typing import Any, ClassVar
 
 from bailo.core.client import Client
+from bailo.core.entry import Entry
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility
 from bailo.core.exceptions import BailoException
-from bailo.helper.entry import Entry
-from bailo.helper.release import Release
+from bailo.helper.entry import ReleaseMixin
 
 logger = logging.getLogger(__name__)
 
 
-class MirroredModel(Entry):
+class MirroredModel(ReleaseMixin, Entry):
     """Represent a mirrored model within Bailo.
 
     :param client: A client object used to interact with Bailo
@@ -29,6 +27,12 @@ class MirroredModel(Entry):
     :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
     :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
+
+    entry_kind: ClassVar[EntryKind] = EntryKind.MIRRORED_MODEL
+    _id_alias: ClassVar[str] = "model_id"
+    # Search summaries do not carry settings.mirror.sourceModelId, so each result must be refetched.
+    _search_refetches_each_result: ClassVar[bool] = True
+    _extra_create_args: ClassVar[tuple[str, ...]] = ("sourceModelId",)
 
     def __init__(
         self,
@@ -57,10 +61,11 @@ class MirroredModel(Entry):
         )
         self.sourceModelId = sourceModelId
         self._original_source_model_id = sourceModelId
-        self.model_id = model_id
 
-        self._mirrored_card = None
-        self._mirrored_card_version = None
+        # The backend's `mirroredCard` is the card synced from the source model and is held in
+        # `_card`. The backend's own `card` is the locally editable additional information.
+        self._additional_information_card: dict[str, Any] | None = None
+        self._additional_information_card_version: int | None = None
 
     @classmethod
     def create(
@@ -74,6 +79,7 @@ class MirroredModel(Entry):
         tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
+        **extra: Any,
     ) -> MirroredModel:
         """Build a mirrored model from Bailo and upload it.
 
@@ -86,38 +92,55 @@ class MirroredModel(Entry):
         :param tags: Tags to assign to the mirrored model, defaults to None
         :param collaborators: List of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
+        :param extra: Rejected by :meth:`Entry.create`, so that an unsupported argument raises the same BailoException here as it does for other entry kinds
+        :raises BailoException: If an argument not accepted by this entry kind is given
         :return: MirroredModel object
         """
-        res = client.post_model(
-            name=name,
-            kind=EntryKind.MIRRORED_MODEL,
-            description=description,
-            sourceModelId=sourceModelId,
-            visibility=visibility,
-            organisation=organisation,
-            state=state,
-            tags=tags,
-            collaborators=collaborators,
-        )
-        model_id = res["model"]["id"]
-        logger.info("Model successfully created on server with ID %s.", model_id)
-
-        model = cls(
+        return super().create(
             client=client,
-            model_id=model_id,
             name=name,
             description=description,
-            sourceModelId=sourceModelId,
-            visibility=visibility,
             organisation=organisation,
             state=state,
             tags=tags,
             collaborators=collaborators,
+            visibility=visibility,
+            sourceModelId=sourceModelId,
+            **extra,
         )
 
-        model._unpack(res["model"])
+    @classmethod
+    def from_id(cls, client: Client, model_id: str) -> MirroredModel:
+        """Return an existing mirrored model from Bailo.
 
-        return model
+        :param client: A client object used to interact with Bailo
+        :param model_id: A unique mirrored model ID
+        :return: A mirrored model object
+        """
+        return cls._from_id(client, model_id)
+
+    @classmethod
+    def _create_payload_extras(cls, **kwargs: Any) -> dict[str, Any]:
+        """Return the mirror-specific arguments for the create request.
+
+        :param kwargs: Subclass-specific arguments passed to :meth:`create`.
+        :return: Dictionary containing the source model ID.
+        """
+        return {"sourceModelId": kwargs["sourceModelId"]}
+
+    @classmethod
+    def _init_kwargs_from_response(cls, res: dict[str, Any]) -> dict[str, Any]:
+        """Extract the source model ID from an API response.
+
+        :param res: Response dictionary containing model information.
+        :raises BailoException: If the response has no mirror source model ID.
+        :return: Dictionary containing the source model ID.
+        """
+        source_model_id = res.get("settings", {}).get("mirror", {}).get("sourceModelId")
+        if source_model_id is None:
+            raise BailoException(f"Mirrored model {res.get('id')} has no settings.mirror.sourceModelId.")
+
+        return {"sourceModelId": source_model_id}
 
     def update(self) -> None:
         """Upload and retrieve any changes to the mirrored model summary on Bailo.
@@ -141,241 +164,78 @@ class MirroredModel(Entry):
         self.sourceModelId = source_id
         self._original_source_model_id = source_id
 
-    @classmethod
-    def from_id(cls, client: Client, model_id: str) -> MirroredModel:
-        """Return an existing mirrored model from Bailo.
-
-        :param client: A client object used to interact with Bailo
-        :param model_id: A unique mirrored model ID
-        :return: A mirrored model object
-        """
-        res = client.get_model(model_id=model_id)["model"]
-        if res["kind"] != EntryKind.MIRRORED_MODEL:
-            raise BailoException(
-                f"ID {model_id} does not belong to a mirrored model. Did you mean to use MirroredModel.from_id()?"
-            )
-
-        logger.info("Model %s successfully retrieved from server.", model_id)
-
-        model = cls(
-            client=client,
-            model_id=model_id,
-            name=res["name"],
-            description=res["description"],
-            sourceModelId=res["settings"]["mirror"]["sourceModelId"],
-            collaborators=res["collaborators"],
-            organisation=res.get("organisation"),
-            state=res.get("state"),
-            tags=res.get("tags"),
-        )
-
-        model._unpack(res)
-        model.get_card_latest()
-
-        return model
-
-    @classmethod
-    def search(
-        cls,
-        client: Client,
-        task: str | None = None,
-        libraries: list[str] | None = None,
-        filters: list[str] | None = None,
-        search: str = "",
-        organisations: list[str] | None = None,
-        states: list[str] | None = None,
-        allow_templating: bool | None = None,
-        schema_id: str | None = None,
-        admin_access: bool | None = None,
-        peers: list[str] | None = None,
-        title_only: bool | None = None,
-    ) -> list[MirroredModel]:
-        """Return a list of mirrored model objects from Bailo, based on search parameters.
-
-        :param client: A client object used to interact with Bailo
-        :param task: Mirrored model task (e.g. image classification), defaults to None
-        :param libraries: Mirrored model library (e.g. TensorFlow), defaults to None
-        :param filters: List of collaborator role filters. Special value `"mine"` restricts results to
-            models where the current user is a collaborator. Otherwise, values are treated as collaborator
-            roles, defaults to None
-        :param search: Free-text search string. Always performs a partial, case-insensitive match against
-            the mirrored model name. If `title_only` is False, a full-text search across mirrored model
-            content is also performed, defaults to ""
-        :param organisations: List of organisation identifiers to restrict results, defaults to None
-        :param states: List of mirrored model lifecycle states to restrict results, defaults to None
-        :param allow_templating: If True, restricts results to models with templating enabled, defaults to None
-        :param schema_id: Schema ID to restrict results to models using that schema, defaults to None
-        :param admin_access: If True, returns models requiring admin access. The caller must
-            have the Admin role or the request will be rejected by the backend, defaults to None
-        :param peers: List of peer identifiers to include remote search results from, defaults to None
-        :param title_only: If True, limits searching to mirrored model titles only and disables
-            full-text search, defaults to None
-        :return: List of mirrored model objects
-        """
-        res = client.get_models(
-            task=task,
-            libraries=libraries,
-            filters=filters,
-            search=search,
-            kind=EntryKind.MIRRORED_MODEL,
-            organisations=organisations,
-            states=states,
-            allow_templating=allow_templating,
-            schema_id=schema_id,
-            admin_access=admin_access,
-            peers=peers,
-            title_only=title_only,
-        )
-        models = []
-
-        for model in res["models"]:
-            res_model = client.get_model(model_id=model["id"])["model"]
-            model_obj = cls(
-                client=client,
-                model_id=model["id"],
-                name=model["name"],
-                description=model["description"],
-                sourceModelId=res_model["settings"]["mirror"]["sourceModelId"],
-                collaborators=model["collaborators"],
-                organisation=model.get("organisation"),
-                state=model.get("state"),
-                tags=model.get("tags"),
-            )
-            model_obj._unpack(res_model)
-            model_obj.get_card_latest()
-            models.append(model_obj)
-
-        return models
-
-    def get_releases(self) -> list[Release]:
-        """Get all releases for the mirrored model.
-
-        :return: List of Release objects
-        """
-        res = self.client.get_all_releases(model_id=self.model_id)
-        releases = []
-
-        for release in res["releases"]:
-            releases.append(self.get_release(version=release["semver"]))
-
-        logger.info("Successfully retrieved all releases for mirrored model %s.", self.model_id)
-
-        return releases
-
-    def get_release(self, version: Version | str) -> Release:
-        """Call the Release.from_version method to return an existing release from Bailo.
-
-        :param version: A semantic version for the release
-        :return: Release object
-        """
-        return Release.from_version(self.client, self.model_id, version)
-
-    def get_latest_release(self):
-        """Get the latest release for the mirrored model from Bailo.
-
-        :return: Release object
-        """
-        releases = self.get_releases()
-        if not releases:
-            raise BailoException("This mirrored model has no releases.")
-
-        latest_release = max(releases)
-        logger.info(
-            "latest_release (%s) for %s retrieved successfully.",
-            str(latest_release.version),
-            self.model_id,
-        )
-
-        return max(releases)
-
-    def get_images(self):
-        """Get all model image references for the mirrored model.
-
-        :return: List of images
-        """
-        res = self.client.get_all_images(model_id=self.model_id)
-
-        logger.info("Images for %s retrieved successfully.", self.model_id)
-
-        return res["images"]
-
-    def get_image(self):
-        """Get a model image reference.
-
-        :raises NotImplementedError: Not implemented error.
-        """
-        raise NotImplementedError
-
     def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
         """Upload and retrieve any changes to the editable mirrored model card on Bailo.
 
         :param model_card: Model card dictionary, defaults to None
 
-        .. note:: If a model card is not provided, the current model card attribute value is used
+        .. note:: If a model card is not provided, the current additional information value is used
         """
         self._update_card(card=model_card)
+
+    def _update_card(self, card: dict[str, Any] | None = None) -> None:
+        """Update the editable additional information for this mirrored model on the Bailo server.
+
+        The card synced from the source model is read only, so the default falls back to the
+        additional information rather than :attr:`Entry._card`.
+
+        :param card: Metadata dictionary to update, defaults to None to use the additional information.
+        """
+        super()._update_card(card=card if card is not None else self._additional_information_card)
 
     def get_card_latest(self) -> None:
         """Get the latest card from Bailo."""
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
             self._unpack_card(res["model"]["card"])
+            logger.info("Latest additional information for ID %s successfully retrieved.", self.id)
+        else:
+            warnings.warn(f"ID {self.id} does not have any associated additional information.", stacklevel=2)
+        if "mirroredCard" in res["model"]:
+            self._unpack_card(res["model"]["mirroredCard"], True)
             logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(f"ID {self.id} does not have any associated model card.", stacklevel=2)
-        if "mirroredCard" in res["model"]:
-            self._unpack_card(res["model"]["mirroredCard"], True)
-        else:
-            warnings.warn(f"ID {self.id} does not have any associated additional information.", stacklevel=2)
 
     def _unpack_card(self, res, mirrored=False) -> None:
+        """Unpack a card from an API response into the mirrored or additional information slot.
+
+        :param res: Card-related dictionary from the API response.
+        :param mirrored: True for the card synced from the source model, False for the editable one.
+        """
         if mirrored:
             super()._unpack_card(res)
         else:
-            self._mirrored_card_version = res["version"]
+            self._additional_information_card_version = res["version"]
 
             try:
-                self._mirrored_card = res["metadata"]
+                self._additional_information_card = res["metadata"]
             except KeyError:
-                self._mirrored_card = None
+                self._additional_information_card = None
 
     @property
-    def model_card(self):
+    def model_card(self) -> dict[str, Any]:
         """Get the data of the model card.
 
         :return: Model card data.
         """
-        return {"card": self._card, "additional_information": self._mirrored_card}
+        return {"card": self._card, "additional_information": self._additional_information_card}
 
     @property
-    def model_card_version(self):
+    def model_card_version(self) -> dict[str, int | None]:
         """Get the version of the mirrored model card.
 
         :return: Model card version.
         """
         return {
             "card": self._card_version,
-            "additional_information": self._mirrored_card_version,
+            "additional_information": self._additional_information_card_version,
         }
 
     @property
-    def model_card_schema(self):
+    def model_card_schema(self) -> str | None:
         """Get the schema of the mirrored model card.
 
         :return: Model card schema.
         """
-        return self._card_schema
-
-    def __repr__(self) -> str:
-        """Return a developer-oriented string representation of the mirrored model.
-
-        :return: String representation with class and ID
-        """
-        return f"{self.__class__.__name__}({str(self)})"
-
-    def __str__(self) -> str:
-        """Return the human-readable string representation of the mirrored model.
-
-        :return: String representation of the mirrored model.
-        """
-        return f"{self.model_id}"
+        return self.card_schema

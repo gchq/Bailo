@@ -473,6 +473,18 @@ describe('services > deploymentAssessment', () => {
       })
     })
 
+    test('returns a draft assessment without querying history', async () => {
+      const draftAssessment = { ...assessment, draft: true }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(draftAssessment)
+
+      await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, draftAssessment.id)).resolves.toEqual({
+        deploymentAssessment: draftAssessment,
+      })
+      expect(ResponseModelMock.find).not.toHaveBeenCalled()
+      expect(ResponseModelMock.findOne).not.toHaveBeenCalled()
+      expect(ReviewModelMock.findOne).not.toHaveBeenCalled()
+    })
+
     test('does not read history when assessment view authorisation fails', async () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
       vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({

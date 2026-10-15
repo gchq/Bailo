@@ -14,7 +14,6 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -24,6 +23,7 @@ import { memoize } from 'lodash-es'
 import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
 import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
@@ -252,7 +252,7 @@ export default function ReleaseForm({
           {isReadOnly || isEdit ? (
             <ReadOnlyAnswer value={formData.semver} />
           ) : (
-            <TextField
+            <LimitedTextField
               id='semantic-version-input'
               required
               size='small'

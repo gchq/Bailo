@@ -1,9 +1,10 @@
 import LocalOffer from '@mui/icons-material/LocalOffer'
-import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
+import { Button, Chip, Grid, Tooltip, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Restricted from 'src/common/Restricted'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInterface } from 'types/types'
@@ -102,7 +103,7 @@ export default function MultiFileInputFileDisplay({
           tags={isFileInterface(file) ? file.tags : newFileTags}
           errorText={fileTagErrorMessage}
         />
-        <TextField
+        <LimitedTextField
           size='small'
           placeholder='Optional metadata'
           sx={{ width: '100%', display: 'none' }}
