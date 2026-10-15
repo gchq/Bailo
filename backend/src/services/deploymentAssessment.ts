@@ -146,8 +146,7 @@ async function notifyDeploymentStakeholders(
   modelIds: string[] = [],
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
-  const uniqueRiskOwners = [...new Set(riskOwners)]
-  if (uniqueRiskOwners.length === 0 && modelIds.length === 0) {
+  if (riskOwners.length === 0 && modelIds.length === 0) {
     return
   }
 
@@ -160,7 +159,7 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...uniqueRiskOwners.map((riskOwner) =>
+      ...riskOwners.map((riskOwner) =>
         notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
       ),
       ...models.flatMap((model) => {
@@ -401,7 +400,7 @@ async function notifyRiskOwnersOfApprovalRevoked(
   editor: UserInterface,
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
-  const riskOwners = [...new Set(deploymentAssessment.metadata?.signOff?.riskOwners ?? [])]
+  const riskOwners = deploymentAssessment.metadata?.signOff?.riskOwners ?? []
   if (riskOwners.length === 0) {
     return
   }

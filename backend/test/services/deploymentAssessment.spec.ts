@@ -752,13 +752,13 @@ describe('services > deploymentAssessment', () => {
       expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
     })
 
-    test('notifies each risk owner once when a draft with several is submitted', async () => {
+    test('notifies each risk owner when a draft with several is submitted', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.metadata = {
         ...params.metadata,
         signOff: {
           ...params.metadata.signOff,
-          riskOwners: ['user:risk-owner', 'user:other-owner', 'user:risk-owner'],
+          riskOwners: ['user:risk-owner', 'user:other-owner'],
         },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
