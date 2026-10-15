@@ -1,17 +1,37 @@
 # How to contribute
 
-We love pull requests and we want to make it as easy as possible to contribute changes.
+We welcome feedback, ideas and collaboration from everyone. Anyone can raise issues in public, but only approved, named
+contributors can submit pull requests.
 
-## Getting started
+## Raising issues (open to everyone)
 
-- Make sure you have a [GitHub account](https://github.com/).
+Anyone with a [GitHub account](https://github.com/) can raise a [GitHub issue](https://github.com/gchq/Bailo/issues).
+Issues are the main way for the wider community to collaborate with us. You can use them to:
+
+- report a bug - describe it in as much detail as you can, e.g. step-by-step instructions to reproduce it
+- request a feature or suggest an improvement
+- ask for help or start a discussion about a proposed change
+
+Before raising a new issue, check whether one already exists. If it does, add your comments to the existing issue. Do
+not include sensitive information in public issues.
+
+## Who can submit pull requests
+
+We only accept pull requests from approved, named identities. Pull requests from other accounts will be closed without
+review. If you cannot submit pull requests, raise an issue instead - a maintainer can pick it up.
+
+Approval is for a specific person and a specific GitHub account. Do not share your account, and do not submit changes
+for anyone else. If your GitHub account changes or is compromised, tell the maintainers straight away. Maintainers can
+remove approval at any time.
+
+## Getting started (approved contributors)
+
 - If you are looking for an existing issue to help with, check out the
   [help wanted tickets](https://github.com/gchq/Bailo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) on
   GitHub. If you see any that you are interested in working on, comment on it to let everyone know you are working on
   it.
-- If there is no ticket for what you want to contribute, create a [GitHub issue](https://github.com/gchq/Bailo/issues):
-  is this a comment or documentation change? Does an issue already exist? If you need an issue then describe it in as
-  much detail as you can, e.g. step-by-step to reproduce.
+- If there is no issue for what you want to contribute, create one first, unless it is a minor comment or documentation
+  change.
 - Fork the repository on GitHub.
 - Clone the repo: `git clone https://github.com/gchq/Bailo.git`
 - Create a feature branch for your change, branched off `main` or one of the release tags (`tags/v2.3.0`, etc.) e.g.
@@ -26,9 +46,10 @@ We love pull requests and we want to make it as easy as possible to contribute c
 
 ## Submitting changes
 
+- Make sure you are an approved contributor (see [Who can submit pull requests](#who-can-submit-pull-requests)).
 - Sign the [GCHQ Contributor Licence Agreement](https://cla-assistant.io/gchq/Bailo).
 - Push your changes to your fork.
-- Submit a [pull request](https://github.com/gchq/Bailo/pulls).
+- Submit a [pull request](https://github.com/gchq/Bailo/pulls) from your approved GitHub account.
 - We'll look at it pretty soon after it's submitted.
 
 ## Use of AI tools or LLMs
