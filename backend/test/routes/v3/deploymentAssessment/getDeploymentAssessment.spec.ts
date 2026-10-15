@@ -15,7 +15,6 @@ describe('routes > v3 > deploymentAssessment > getDeploymentAssessment', () => {
   test('200 > ok', async () => {
     serviceMock.getDeploymentAssessmentDetails.mockResolvedValueOnce({
       deploymentAssessment: { id: 'assessment-id' },
-      responses: [],
     })
     const fixture = createFixture(getDeploymentAssessmentSchema)
     const res = await testGet(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`)
@@ -28,7 +27,6 @@ describe('routes > v3 > deploymentAssessment > getDeploymentAssessment', () => {
     const deploymentAssessment = { id: 'assessment-id' }
     serviceMock.getDeploymentAssessmentDetails.mockResolvedValueOnce({
       deploymentAssessment,
-      responses: [],
     })
     const fixture = createFixture(getDeploymentAssessmentSchema)
     const res = await testGet(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`)

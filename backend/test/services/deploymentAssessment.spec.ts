@@ -10,8 +10,10 @@ import { Decision, ResponseKind } from '../../src/models/Response.js'
 import {
   commentOnDeploymentAssessment,
   createDeploymentAssessment,
+  getCommentsByDeploymentAssessmentId,
   getDeploymentAssessmentById,
   getDeploymentAssessmentDetails,
+  getReviewsByDeploymentAssessmentId,
   removeDeploymentAssessment,
   reviewDeploymentAssessment,
   searchDeploymentAssessments,
@@ -27,6 +29,8 @@ import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const repositoryMocks = vi.hoisted(() => ({
+  findDeploymentAssessmentComments: vi.fn(),
+  findDeploymentAssessmentReviews: vi.fn(),
   findDeploymentAssessments: vi.fn(),
   findLatestDecisionsByAssessmentIds: vi.fn(),
 }))
@@ -322,6 +326,83 @@ describe('services > deploymentAssessment', () => {
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toMatchObject({ code: 409 })
   })
 
+  describe('get deployment assessment history', () => {
+    const assessment = {
+      _id: 'assessment-object-id',
+      id: 'assessment-id',
+      draft: false,
+      createdBy: 'creator',
+      metadata: { signOff: { riskOwners: ['user:risk-owner'] } },
+    }
+
+    beforeEach(() => {
+      repositoryMocks.findDeploymentAssessmentComments.mockReset()
+      repositoryMocks.findDeploymentAssessmentReviews.mockReset()
+    })
+
+    test('authorises before returning comments from the repository', async () => {
+      const comments = { id: assessment.id, name: 'Assessment', comments: [] }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      repositoryMocks.findDeploymentAssessmentComments.mockResolvedValueOnce(comments)
+
+      await expect(getCommentsByDeploymentAssessmentId({ dn: 'viewer' }, assessment.id)).resolves.toStrictEqual(
+        comments,
+      )
+
+      expect(authorisation.deploymentAssessment).toHaveBeenCalledWith(
+        { dn: 'viewer' },
+        assessment,
+        DeploymentAssessmentAction.View,
+      )
+      expect(repositoryMocks.findDeploymentAssessmentComments).toHaveBeenCalledWith(assessment.id)
+    })
+
+    test('does not read comments from the repository when the user cannot view the assessment', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
+        success: false,
+        info: 'Forbidden',
+        id: assessment.id,
+      })
+
+      await expect(getCommentsByDeploymentAssessmentId({ dn: 'viewer' }, assessment.id)).rejects.toMatchObject({
+        code: 403,
+      })
+
+      expect(repositoryMocks.findDeploymentAssessmentComments).not.toHaveBeenCalled()
+    })
+
+    test('authorises before returning reviews from the repository', async () => {
+      const reviews = { id: assessment.id, name: 'Assessment', statuses: [], reviews: [] }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      repositoryMocks.findDeploymentAssessmentReviews.mockResolvedValueOnce(reviews)
+
+      await expect(getReviewsByDeploymentAssessmentId({ dn: 'viewer' }, assessment.id)).resolves.toStrictEqual(reviews)
+
+      expect(authorisation.deploymentAssessment).toHaveBeenCalledWith(
+        { dn: 'viewer' },
+        assessment,
+        DeploymentAssessmentAction.View,
+      )
+      expect(repositoryMocks.findDeploymentAssessmentReviews).toHaveBeenCalledWith(assessment.id)
+    })
+
+    test('does not read reviews from the repository when the user cannot view the assessment', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      vi.mocked(authorisation.deploymentAssessment).mockResolvedValueOnce({
+        success: false,
+        info: 'Forbidden',
+        id: assessment.id,
+      })
+
+      await expect(getReviewsByDeploymentAssessmentId({ dn: 'viewer' }, assessment.id)).rejects.toMatchObject({
+        code: 403,
+      })
+
+      expect(repositoryMocks.findDeploymentAssessmentReviews).not.toHaveBeenCalled()
+    })
+  })
+
   describe('comments and reviews', () => {
     const assessment = {
       _id: 'assessment-object-id',
@@ -371,39 +452,36 @@ describe('services > deploymentAssessment', () => {
     })
 
     test('returns authorised comments and review history', async () => {
-      const reviewResponses = [
-        {
-          _id: { toString: () => 'response-id' },
-          kind: ResponseKind.Review,
-          decision: Decision.Approve,
-          createdAt: '2026-01-02T00:00:00.000Z',
-        },
-      ]
+      const reviewResponse = {
+        _id: { toString: () => 'response-id' },
+        kind: ResponseKind.Review,
+        decision: Decision.Approve,
+        createdAt: '2026-01-02T00:00:00.000Z',
+      }
+
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
       ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
-      ResponseModelMock.find.mockResolvedValueOnce(reviewResponses)
+      ResponseModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(reviewResponse) })
 
       await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, assessment.id)).resolves.toEqual({
         deploymentAssessment: assessment,
-        responses: reviewResponses,
         state: 'approved',
       })
-      expect(ResponseModelMock.find).toHaveBeenCalledWith({
-        parentId: [review._id, assessment._id],
+      expect(ResponseModelMock.findOne).toHaveBeenCalledWith({
+        parentId: review._id,
+        kind: ResponseKind.Review,
       })
     })
 
-    test('returns comments on a draft assessment without requiring a review', async () => {
+    test('returns a draft assessment without querying history', async () => {
       const draftAssessment = { ...assessment, draft: true }
-      const savedComment = { _id: 'comment-id', kind: ResponseKind.Comment, comment: 'A question' }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(draftAssessment)
-      ResponseModelMock.find.mockResolvedValueOnce([savedComment])
 
       await expect(getDeploymentAssessmentDetails({ dn: 'viewer' }, draftAssessment.id)).resolves.toEqual({
         deploymentAssessment: draftAssessment,
-        responses: [savedComment],
       })
-      expect(ResponseModelMock.find).toHaveBeenCalledWith({ parentId: draftAssessment._id })
+      expect(ResponseModelMock.find).not.toHaveBeenCalled()
+      expect(ResponseModelMock.findOne).not.toHaveBeenCalled()
       expect(ReviewModelMock.findOne).not.toHaveBeenCalled()
     })
 

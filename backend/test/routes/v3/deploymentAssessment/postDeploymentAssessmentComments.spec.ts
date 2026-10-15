@@ -11,9 +11,18 @@ const serviceMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
-describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentComment', () => {
+describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentComments', () => {
   test('creates and audits a comment response', async () => {
-    const response = { _id: 'response-id', kind: ResponseKind.Comment, comment: 'A question' }
+    const response = {
+      _id: 'response-id',
+      kind: ResponseKind.Comment,
+      entity: 'user:commenter',
+      comment: 'A question',
+      reactions: [{ kind: 'like', users: ['user:reactor'] }],
+      commentEditedAt: '2026-01-02T00:00:00.000Z',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    }
     serviceMock.commentOnDeploymentAssessment.mockResolvedValueOnce(response)
 
     const res = await testPost('/api/v3/deployment-assessments/assessment-id/comments', {
@@ -21,6 +30,15 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentComment',
     })
 
     expect(res.statusCode).toBe(201)
+    expect(res.body).toStrictEqual({
+      id: 'response-id',
+      entity: 'user:commenter',
+      comment: 'A question',
+      reactions: [{ kind: 'like', users: ['user:reactor'] }],
+      commentEditedAt: '2026-01-02T00:00:00.000Z',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    })
     expect(serviceMock.commentOnDeploymentAssessment).toHaveBeenCalledWith(
       expect.anything(),
       'assessment-id',

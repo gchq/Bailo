@@ -14,7 +14,7 @@ import { ReactionKind, ReactionKindKeys, ResponseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface ReactionButtonsProps {
-  response: ResponseInterface
+  response: Pick<ResponseInterface, '_id' | 'reactions'>
   mutateResponses: () => void
   onError: (message: string) => void
 }
@@ -70,7 +70,7 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
                 case ReactionKind.HEART:
                   activeReactions.push(
                     <ReactionDisplay
-                      kind={ReactionKind.CELEBRATE}
+                      kind={ReactionKind.HEART}
                       icon={<FavoriteTwoTone fontSize='small' />}
                       users={reaction.users}
                       onReactionClick={handleReactionClick}

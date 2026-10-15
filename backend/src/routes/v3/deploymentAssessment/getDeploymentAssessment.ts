@@ -6,7 +6,6 @@ import { z } from '../../../lib/zod.js'
 import { getDeploymentAssessmentDetails } from '../../../services/deploymentAssessment.js'
 import {
   deploymentAssessmentInterfaceSchema,
-  deploymentAssessmentResponseSchema,
   deploymentAssessmentStateSchema,
   registerPath,
 } from '../../../services/specification.js'
@@ -33,7 +32,6 @@ registerPath(
             schema: z.object({
               deploymentAssessment: deploymentAssessmentInterfaceSchema,
               state: deploymentAssessmentStateSchema.optional(),
-              responses: z.array(deploymentAssessmentResponseSchema),
             }),
           },
         },

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { Decision, ResponseKind } from '../../src/models/Response.js'
 import {
+  findDeploymentAssessmentComments,
+  findDeploymentAssessmentReviews,
   findDeploymentAssessments,
   findLatestDecisionsByAssessmentIds,
 } from '../../src/repositories/deploymentAssessment.js'
@@ -213,6 +215,282 @@ describe('repositories > deploymentAssessment', () => {
           $group: {
             _id: '$deploymentAssessmentId',
             decision: { $first: '$latestResponse.decision' },
+          },
+        },
+      ])
+    })
+  })
+
+  describe('findDeploymentAssessmentComments', () => {
+    test('returns the deployment assessment comments record', async () => {
+      const comments = {
+        id: 'assessment-id',
+        name: 'Assessment',
+        comments: [
+          {
+            id: 'comment-id',
+            entity: 'user:commenter',
+            comment: 'A comment',
+            reactions: [],
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      }
+      DeploymentAssessmentModelMock.aggregate.mockResolvedValueOnce([comments])
+
+      const result = await findDeploymentAssessmentComments('assessment-id')
+
+      expect(result).toStrictEqual(comments)
+    })
+
+    test('returns undefined when the deployment assessment does not exist', async () => {
+      DeploymentAssessmentModelMock.aggregate.mockResolvedValueOnce([])
+
+      const result = await findDeploymentAssessmentComments('missing-assessment')
+
+      expect(result).toBeUndefined()
+    })
+
+    test('runs the correct aggregate pipeline shape', async () => {
+      DeploymentAssessmentModelMock.aggregate.mockResolvedValueOnce([])
+
+      await findDeploymentAssessmentComments('assessment-id')
+
+      expect(DeploymentAssessmentModelMock.aggregate).toHaveBeenCalledWith([
+        {
+          $match: {
+            id: 'assessment-id',
+          },
+        },
+        {
+          $lookup: {
+            from: 'v2_responses',
+            let: { deploymentAssessmentObjectId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$parentId', '$$deploymentAssessmentObjectId'] },
+                      { $eq: ['$kind', ResponseKind.Comment] },
+                    ],
+                  },
+                },
+              },
+              { $sort: { createdAt: 1 } },
+              {
+                $project: {
+                  _id: 0,
+                  id: { $toString: '$_id' },
+                  entity: 1,
+                  comment: 1,
+                  reactions: { $ifNull: ['$reactions', []] },
+                  commentEditedAt: 1,
+                  createdAt: 1,
+                  updatedAt: 1,
+                },
+              },
+            ],
+            as: 'comments',
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            id: 1,
+            name: 1,
+            comments: 1,
+          },
+        },
+      ])
+    })
+  })
+
+  describe('findDeploymentAssessmentReviews', () => {
+    test('returns the deployment assessment reviews record', async () => {
+      const reviews = {
+        id: 'assessment-id',
+        name: 'Assessment',
+        statuses: [{ role: 'riskOwners', status: Decision.Approve }],
+        reviews: [
+          {
+            id: 'review-response-id',
+            entity: 'user:risk-owner',
+            decision: Decision.Approve,
+            comment: 'Approved',
+            reactions: [],
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+            outdated: false,
+          },
+        ],
+      }
+      DeploymentAssessmentModelMock.aggregate.mockResolvedValueOnce([reviews])
+
+      const result = await findDeploymentAssessmentReviews('assessment-id')
+
+      expect(result).toStrictEqual(reviews)
+    })
+
+    test('returns undefined when the deployment assessment does not exist', async () => {
+      DeploymentAssessmentModelMock.aggregate.mockResolvedValueOnce([])
+
+      const result = await findDeploymentAssessmentReviews('missing-assessment')
+
+      expect(result).toBeUndefined()
+    })
+
+    test('runs the correct aggregate pipeline shape', async () => {
+      DeploymentAssessmentModelMock.aggregate.mockResolvedValueOnce([])
+
+      await findDeploymentAssessmentReviews('assessment-id')
+
+      expect(DeploymentAssessmentModelMock.aggregate).toHaveBeenCalledWith([
+        {
+          $match: {
+            id: 'assessment-id',
+          },
+        },
+        {
+          $lookup: {
+            from: 'v2_reviews',
+            let: { deploymentAssessmentId: '$id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$deploymentAssessmentId', '$$deploymentAssessmentId'] },
+                      { $eq: ['$kind', ReviewKind.DeploymentAssessment] },
+                    ],
+                  },
+                },
+              },
+              {
+                $lookup: {
+                  from: 'v2_responses',
+                  let: { reviewId: '$_id' },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', ResponseKind.Review] }],
+                        },
+                      },
+                    },
+                    { $sort: { createdAt: 1 } },
+                    {
+                      $project: {
+                        _id: 0,
+                        id: { $toString: '$_id' },
+                        entity: 1,
+                        decision: 1,
+                        comment: 1,
+                        reactions: { $ifNull: ['$reactions', []] },
+                        commentEditedAt: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                      },
+                    },
+                  ],
+                  as: 'reviewResponses',
+                },
+              },
+              { $unwind: '$reviewResponses' },
+              { $sort: { 'reviewResponses.createdAt': -1 } },
+              {
+                $group: {
+                  _id: {
+                    reviewId: '$_id',
+                    entity: '$reviewResponses.entity',
+                  },
+                  reviewResponses: { $push: '$reviewResponses' },
+                },
+              },
+              {
+                $unwind: {
+                  path: '$reviewResponses',
+                  includeArrayIndex: 'responseIndex',
+                },
+              },
+              {
+                $set: {
+                  'reviewResponses.outdated': { $gt: ['$responseIndex', 0] },
+                },
+              },
+              { $sort: { 'reviewResponses.createdAt': 1 } },
+              {
+                $group: {
+                  _id: null,
+                  reviews: { $push: '$reviewResponses' },
+                },
+              },
+            ],
+            as: 'reviewRecords',
+          },
+        },
+        {
+          $lookup: {
+            from: 'v2_reviews',
+            let: { deploymentAssessmentId: '$id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$deploymentAssessmentId', '$$deploymentAssessmentId'] },
+                      { $eq: ['$kind', ReviewKind.DeploymentAssessment] },
+                    ],
+                  },
+                },
+              },
+              { $sort: { createdAt: -1 } },
+              { $limit: 1 },
+              {
+                $lookup: {
+                  from: 'v2_responses',
+                  let: { reviewId: '$_id' },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', ResponseKind.Review] }],
+                        },
+                      },
+                    },
+                    { $sort: { createdAt: -1 } },
+                    { $limit: 1 },
+                  ],
+                  as: 'latestResponse',
+                },
+              },
+              { $unwind: '$latestResponse' },
+              {
+                $project: {
+                  _id: 0,
+                  role: 1,
+                  status: '$latestResponse.decision',
+                },
+              },
+            ],
+            as: 'statuses',
+          },
+        },
+        {
+          $set: {
+            reviews: {
+              $ifNull: [{ $arrayElemAt: ['$reviewRecords.reviews', 0] }, []],
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            id: 1,
+            name: 1,
+            statuses: 1,
+            reviews: 1,
           },
         },
       ])

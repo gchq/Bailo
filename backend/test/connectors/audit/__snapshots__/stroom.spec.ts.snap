@@ -1,5 +1,38 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`connectors > audit > stroom > onCommentOnDeploymentAssessment > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "abc",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
 exports[`connectors > audit > stroom > onCreateAccessRequest > save expected event 1`] = `
 [
   {
@@ -41,6 +74,39 @@ exports[`connectors > audit > stroom > onCreateCommentResponse > save expected e
         "Object": {
           "Description": "test description",
           "Id": "acb",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onCreateDeploymentAssessment > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "deploymentAssessmentId",
           "Name": "testKind",
         },
       },
@@ -628,6 +694,39 @@ exports[`connectors > audit > stroom > onDeleteAccessRequest > save expected eve
 ]
 `;
 
+exports[`connectors > audit > stroom > onDeleteDeploymentAssessment > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "Object": {
+          "Description": "test description",
+          "Id": "deploymentAssessmentId",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
 exports[`connectors > audit > stroom > onDeleteFile > save expected event 1`] = `
 [
   {
@@ -1074,6 +1173,79 @@ exports[`connectors > audit > stroom > onError > save expected event for View er
 ]
 `;
 
+exports[`connectors > audit > stroom > onReviewDeploymentAssessment > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "abc",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onSearchDeploymentAssessments > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Search": {
+        "Description": "test description",
+        "Query": {
+          "Raw": "All testKinds",
+        },
+        "Results": {
+          "SearchResult": [
+            {
+              "Id": "test-model",
+            },
+          ],
+        },
+        "TotalResults": 1,
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
 exports[`connectors > audit > stroom > onSearchModel > save expected event 1`] = `
 [
   {
@@ -1216,6 +1388,41 @@ exports[`connectors > audit > stroom > onUpdateAccessRequest > save expected eve
         },
       },
       "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onUpdateDeploymentAssessment > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Description": "test description",
+            "Id": "deploymentAssessmentId",
+            "Name": "testKind",
+          },
+        },
+      },
     },
     "EventSource": {
       "Device": {
@@ -1561,6 +1768,105 @@ exports[`connectors > audit > stroom > onViewAccessRequests > save expected even
             "Name": "access Request",
           },
         ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onViewDeploymentAssessment > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "deploymentAssessmentId",
+          "Name": "testKind",
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onViewDeploymentAssessmentComments > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "deploymentAssessmentId",
+          "Name": "testKind",
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onViewDeploymentAssessmentReviews > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": {
+          "Description": "test description",
+          "Id": "deploymentAssessmentId",
+          "Name": "testKind",
+        },
       },
     },
     "EventSource": {

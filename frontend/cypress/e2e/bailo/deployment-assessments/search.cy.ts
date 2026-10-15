@@ -131,7 +131,7 @@ describe('Search deployment assessments', () => {
           false,
           alternateRiskOwner,
         ).then((approvedAssessment) => {
-          cy.request('POST', `/api/v3/deployment-assessments/${approvedAssessment.id}/review`, {
+          cy.request('POST', `/api/v3/deployment-assessments/${approvedAssessment.id}/reviews`, {
             decision: 'approve',
           })
             .its('status')

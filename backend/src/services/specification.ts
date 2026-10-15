@@ -7,7 +7,7 @@ import { z } from '../lib/zod.js'
 import { DeploymentAssessmentState } from '../models/DeploymentAssessment.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
-import { Decision, ResponseKind } from '../models/Response.js'
+import { Decision, ReactionKind, ResponseKind } from '../models/Response.js'
 import { ArtefactKind, SeverityLevel, SeverityLevelKeys } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
@@ -426,6 +426,69 @@ export const deploymentAssessmentResponseSchema = z.object({
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
+
+const deploymentAssessmentReviewDecisionSchema = z
+  .enum([Decision.Approve, Decision.Reject, Decision.RequestChanges])
+  .openapi({ example: Decision.Approve })
+
+export const deploymentAssessmentCommentSchema = z.object({
+  entity: z.string().openapi({ example: 'user:user' }),
+  comment: z.string().openapi({ example: 'Have you considered approach X?' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const deploymentAssessmentReactionSchema = z.object({
+  kind: z.nativeEnum(ReactionKind).openapi({ example: ReactionKind.LIKE }),
+  users: z.array(z.string()).openapi({ example: ['alice'] }),
+})
+
+export const deploymentAssessmentCommentHistorySchema = deploymentAssessmentCommentSchema.extend({
+  id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  reactions: z.array(deploymentAssessmentReactionSchema),
+  commentEditedAt: z.string().optional().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const deploymentAssessmentReviewStatusSchema = z.object({
+  role: z.string().openapi({ example: 'riskOwners' }),
+  status: deploymentAssessmentReviewDecisionSchema,
+})
+
+export const deploymentAssessmentReviewSchema = z.object({
+  entity: z.string().openapi({ example: 'user:user' }),
+  decision: deploymentAssessmentReviewDecisionSchema,
+  comment: z.string().optional().openapi({ example: 'Looks good.' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const deploymentAssessmentReviewHistorySchema = deploymentAssessmentReviewSchema.extend({
+  id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  reactions: z.array(deploymentAssessmentReactionSchema),
+  commentEditedAt: z.string().optional().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+  outdated: z.boolean().openapi({ example: false }),
+})
+
+export const getDeploymentAssessmentCommentsResponseSchema = z.object({
+  id: deploymentAssessmentIdSchema,
+  name: deploymentAssessmentNameSchema,
+  comments: z.array(deploymentAssessmentCommentHistorySchema),
+})
+
+export const getDeploymentAssessmentReviewsResponseSchema = z.object({
+  id: deploymentAssessmentIdSchema,
+  name: deploymentAssessmentNameSchema,
+  statuses: z.array(deploymentAssessmentReviewStatusSchema),
+  reviews: z.array(deploymentAssessmentReviewHistorySchema),
+})
+
+export type DeploymentAssessmentComment = z.infer<typeof deploymentAssessmentCommentSchema>
+export type DeploymentAssessmentCommentHistory = z.infer<typeof deploymentAssessmentCommentHistorySchema>
+export type DeploymentAssessmentReviewStatus = z.infer<typeof deploymentAssessmentReviewStatusSchema>
+export type DeploymentAssessmentReview = z.infer<typeof deploymentAssessmentReviewSchema>
+export type DeploymentAssessmentReviewHistory = z.infer<typeof deploymentAssessmentReviewHistorySchema>
+export type GetDeploymentAssessmentCommentsResponse = z.infer<typeof getDeploymentAssessmentCommentsResponseSchema>
+export type GetDeploymentAssessmentReviewsResponse = z.infer<typeof getDeploymentAssessmentReviewsResponseSchema>
 
 export const accessRequestInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'looking-at-pictures-zyxwvu' }),

@@ -11,20 +11,41 @@ const serviceMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
-describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReview', () => {
+describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReviews', () => {
   test.each([
     [Decision.Approve, undefined],
     [Decision.Reject, 'The deployment risk is unacceptable.'],
     [Decision.RequestChanges, 'Add further mitigations.'],
   ])('creates and audits a %s formal response', async (decision, comment) => {
-    const response = { _id: 'response-id', kind: ResponseKind.Review, decision, comment }
+    const response = {
+      _id: 'response-id',
+      kind: ResponseKind.Review,
+      entity: 'user:risk-owner',
+      decision,
+      comment,
+      reactions: [{ kind: 'heart', users: ['user:reactor'] }],
+      commentEditedAt: '2026-01-02T00:00:00.000Z',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    }
     serviceMock.reviewDeploymentAssessment.mockResolvedValueOnce(response)
 
-    const res = await testPost('/api/v3/deployment-assessments/assessment-id/review', {
+    const res = await testPost('/api/v3/deployment-assessments/assessment-id/reviews', {
       body: { decision, ...(comment && { comment }) },
     })
 
     expect(res.statusCode).toBe(201)
+    expect(res.body).toStrictEqual({
+      id: 'response-id',
+      entity: 'user:risk-owner',
+      decision,
+      ...(comment && { comment }),
+      reactions: [{ kind: 'heart', users: ['user:reactor'] }],
+      commentEditedAt: '2026-01-02T00:00:00.000Z',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+      outdated: false,
+    })
     expect(serviceMock.reviewDeploymentAssessment).toHaveBeenCalledWith(
       expect.anything(),
       'assessment-id',
@@ -40,7 +61,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessmentReview', 
     { decision: Decision.Undo },
     { decision: 'invalid' },
   ])('rejects an invalid formal response: %j', async (body) => {
-    const res = await testPost('/api/v3/deployment-assessments/assessment-id/review', { body })
+    const res = await testPost('/api/v3/deployment-assessments/assessment-id/reviews', { body })
 
     expect(res.statusCode).toBe(400)
     expect(serviceMock.reviewDeploymentAssessment).not.toHaveBeenCalled()
