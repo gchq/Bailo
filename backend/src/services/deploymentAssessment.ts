@@ -50,6 +50,7 @@ export interface DeploymentAssessmentDetails {
   deploymentAssessment: DeploymentAssessmentDoc
   responses: ResponseInterface[]
   state?: DeploymentAssessmentStateKeys
+  latestReview?: ReviewDoc
 }
 
 // Allow partial metadata when updating to support draft updates where sections may be missing
@@ -271,17 +272,6 @@ export async function getDeploymentAssessmentDetails(
   user: UserInterface,
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
-  const { deploymentAssessment, responses, state } = await getDeploymentAssessmentDetailsWithReview(
-    user,
-    deploymentAssessmentId,
-  )
-  return { deploymentAssessment, responses, state }
-}
-
-async function getDeploymentAssessmentDetailsWithReview(
-  user: UserInterface,
-  deploymentAssessmentId: string,
-): Promise<DeploymentAssessmentDetails & { latestReview?: ReviewDoc }> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
 
   // Drafts have no review document yet, so skip that lookup and query by DA id only
@@ -553,7 +543,7 @@ export async function updateDeploymentAssessment(
   deploymentAssessmentId: string,
   diff: Partial<UpdateDeploymentAssessmentParams>,
 ) {
-  const { deploymentAssessment, state, latestReview } = await getDeploymentAssessmentDetailsWithReview(
+  const { deploymentAssessment, state, latestReview } = await getDeploymentAssessmentDetails(
     user,
     deploymentAssessmentId,
   )

@@ -388,6 +388,7 @@ describe('services > deploymentAssessment', () => {
         deploymentAssessment: assessment,
         responses: reviewResponses,
         state: 'approved',
+        latestReview: review,
       })
       expect(ResponseModelMock.find).toHaveBeenCalledWith({
         parentId: [review._id, assessment._id],
