@@ -374,7 +374,7 @@ describe('services > smtp > smtp', () => {
     await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, models, 'user:user')
 
     const [, , , , list] = emailBuilderMock.buildEmail.mock.calls.at(-1) as unknown as any[]
-    expect(list.title).toBe('Models (showing 5 of 6)')
+    expect(list.title).toBe('Models')
     expect(list.items).toHaveLength(5)
     expect(list.items.map((item: any) => item.detail)).toEqual(['model-0', 'model-1', 'model-2', 'model-3', 'model-4'])
   })

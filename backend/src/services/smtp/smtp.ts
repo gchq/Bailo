@@ -15,7 +15,7 @@ import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
 import { getModelReview } from '../../utils/review.js'
 import { entryKindForRedirect } from '../../utils/routerUtils.js'
-import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
+import { plural, resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
 import { checkAccessRequestsApproved } from '../response.js'
@@ -131,13 +131,9 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
 
 function buildModelList(models: ModelInterface[]): EmailList {
   const visibleModels = models.slice(0, MAX_MODELS_IN_EMAIL)
-  const remainingModels = models.length - visibleModels.length
 
   return {
-    title:
-      models.length === 1
-        ? 'Model'
-        : `Models${remainingModels > 0 ? ` (showing ${visibleModels.length} of ${models.length})` : ''}`,
+    title: models.length === 1 ? 'Model' : 'Models',
     items: visibleModels.map((model) => ({
       label: model.name,
       detail: model.id,
@@ -158,7 +154,7 @@ export async function notifyModelOwnersOfDeploymentAssessment(
   }
 
   const emailContent = await buildEmail(
-    `A deployment assessment has been created for ${models.length === 1 ? 'a model' : 'models'} you own`,
+    `A deployment assessment has been created for ${models.length === 1 ? 'a model' : plural(models.length, 'model')} you own`,
     [
       { title: 'Deployment Assessment ID', data: deployment.id },
       {
@@ -238,7 +234,7 @@ export async function notifyModelOwnersOfDeploymentApproval(
   }
 
   const emailContent = await buildEmail(
-    `A deployment assessment, containing ${models.length === 1 ? 'a model' : 'models'} you own, has been approved`,
+    `A deployment assessment, containing ${models.length === 1 ? 'a model' : plural(models.length, 'model')} you own, has been approved`,
     [
       { title: 'Deployment Assessment ID', data: deployment.id },
       {
