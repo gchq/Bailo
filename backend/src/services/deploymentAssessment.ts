@@ -157,23 +157,20 @@ async function notifyDeploymentStakeholders(
     const creator = await authentication.getUserInformation(toEntity('user', deploymentAssessment.createdBy))
     const creatorName = creator.name || deploymentAssessment.createdBy
 
+    const modelsByOwner = new Map<string, typeof models>()
+    for (const model of models) {
+      for (const owner of new Set(getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner])) {
+        modelsByOwner.set(owner, [...(modelsByOwner.get(owner) ?? []), model])
+      }
+    }
+
     const notifications = [
       ...uniqueRiskOwners.map((riskOwner) =>
         notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
       ),
-      ...models.flatMap((model) => {
-        const owners = [
-          ...new Set(
-            model.collaborators
-              .filter((collaborator) => collaborator.roles.includes(SystemRoles.Owner))
-              .map((collaborator) => collaborator.entity),
-          ),
-        ]
-
-        return owners.length
-          ? [notifyModelOwnersOfDeploymentAssessment(owners, deploymentAssessment, model, creatorName)]
-          : []
-      }),
+      ...[...modelsByOwner].map(([owner, ownerModels]) =>
+        notifyModelOwnersOfDeploymentAssessment([owner], deploymentAssessment, ownerModels, creatorName),
+      ),
     ]
 
     const results = await Promise.allSettled(notifications)
@@ -368,13 +365,19 @@ async function notifyDeploymentAssessmentReviewed(
         break
 
       case Decision.Approve: {
-        const modelDevelopers = await getModelDevelopers(deploymentAssessment)
+        const models = await getModelsByIdsNoAuth(deploymentAssessment.metadata.modelOverview?.modelIds ?? [])
+        const modelsByOwner = new Map<string, typeof models>()
+        for (const model of models) {
+          for (const owner of new Set(getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner])) {
+            modelsByOwner.set(owner, [...(modelsByOwner.get(owner) ?? []), model])
+          }
+        }
         await Promise.all(
-          modelDevelopers.map(({ model, developers }) =>
+          [...modelsByOwner].map(([owner, ownerModels]) =>
             notifyModelOwnersOfDeploymentApproval(
-              developers,
+              [owner],
               deploymentAssessment,
-              model,
+              ownerModels,
               deploymentAssessment.createdBy,
             ),
           ),
@@ -392,18 +395,6 @@ async function notifyDeploymentAssessmentReviewed(
       'Failed to send deployment assessment review notification',
     )
   }
-}
-
-async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
-  const modelIds = deploymentAssessment.metadata.modelOverview?.modelIds ?? []
-  const models = await getModelsByIdsNoAuth(modelIds)
-
-  const modelDevelopers = models.map((model) => ({
-    model,
-    developers: getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner],
-  }))
-
-  return modelDevelopers
 }
 
 export async function createDeploymentAssessment(

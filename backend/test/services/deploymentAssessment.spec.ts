@@ -538,9 +538,11 @@ describe('services > deploymentAssessment', () => {
       expect(notifyModelOwnersOfDeploymentApproval).toHaveBeenCalledWith(
         ['user:model-owner'],
         assessment,
-        expect.objectContaining({
-          id: 'model-1',
-        }),
+        [
+          expect.objectContaining({
+            id: 'model-1',
+          }),
+        ],
         assessment.createdBy,
       )
     })
@@ -719,6 +721,59 @@ describe('services > deploymentAssessment', () => {
         'Risk Owner',
       )
       expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
+    })
+
+    test('sends one model-owner notification per owner when a submitted assessment contains several models', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.metadata = {
+        ...params.metadata,
+        modelOverview: { modelIds: ['model-one', 'model-two'] },
+      }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      ModelModelMock.find
+        .mockResolvedValueOnce([
+          liveModel,
+          {
+            ...liveModel,
+            id: 'model-two',
+            collaborators: [
+              { entity: 'user:user', roles: ['owner'] },
+              { entity: 'user:other-owner', roles: ['owner'] },
+            ],
+          },
+        ])
+        .mockReturnValueOnce({
+          lean: () => [
+            liveModel,
+            {
+              ...liveModel,
+              id: 'model-two',
+              collaborators: [
+                { entity: 'user:user', roles: ['owner'] },
+                { entity: 'user:other-owner', roles: ['owner'] },
+              ],
+            },
+          ],
+        })
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalledTimes(2)
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalledWith(
+        ['user:user'],
+        deploymentAssessment,
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'model-one' }),
+          expect.objectContaining({ id: 'model-two' }),
+        ]),
+        'Risk Owner',
+      )
+      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalledWith(
+        ['user:other-owner'],
+        deploymentAssessment,
+        [expect.objectContaining({ id: 'model-two' })],
+        'Risk Owner',
+      )
     })
 
     test('notifies each risk owner once when a draft with several is submitted', async () => {

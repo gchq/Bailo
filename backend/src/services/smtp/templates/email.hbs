@@ -84,6 +84,40 @@
         </mj-column>
       {{/each}}
     </mj-section>
+    {{#if list}}
+      <mj-section background-color='#9e60f2' padding-top='0px' padding-bottom='15px'>
+        <mj-column>
+          <mj-text
+            align='center'
+            color='#FFF'
+            font-size='15px'
+            font-family='Ubuntu, Helvetica, Arial, sans-serif'
+            padding-left='25px'
+            padding-right='25px'
+            padding-bottom='10px'
+          ><strong>{{list.title}}</strong></mj-text>
+          {{#each list.items}}
+            <mj-text
+              align='center'
+              color='#FFF'
+              font-size='13px'
+              font-family='Helvetica'
+              padding-left='25px'
+              padding-right='25px'
+              padding-top='4px'
+              padding-bottom='4px'
+            >
+              {{#if this.url}}
+                <a href='{{this.url}}' style='color: #FFF; font-weight: bold'>{{this.label}}</a>
+              {{else}}
+                <strong>{{this.label}}</strong>
+              {{/if}}
+              {{#if this.detail}}({{this.detail}}){{/if}}
+            </mj-text>
+          {{/each}}
+        </mj-column>
+      </mj-section>
+    {{/if}}
     <mj-section background-color='#4d3075' padding-bottom='20px' padding-top='20px'>
       {{#each actions}}
         <mj-column width='50%'>
