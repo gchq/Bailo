@@ -215,7 +215,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   const isBeingPublished = release.draft && !delta.draft
 
   //Attempt to draft a published release
-  if (!isBeingPublished) {
+  if (!release.draft && delta.draf) {
     throw BadReq('Once a release has been published, it cannot be returned to draft status.')
   }
 
