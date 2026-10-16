@@ -113,13 +113,9 @@ export default function Release() {
     })
 
     if (!res.ok) {
-      setIsReviewButtonLoading(false)
       setReviewErrorMessage(await getErrorMessage(res))
     } else {
-      mutateReviews()
-      mutateRelease()
-      mutateResponses()
-      router.push(`/model/${modelId}/release/${semver}`)
+      await Promise.all([mutateReviews(), mutateRelease(), mutateResponses()])
     }
     setIsReviewButtonLoading(false)
   }
@@ -151,7 +147,7 @@ export default function Release() {
   return (
     <>
       <Title text={release ? release.semver : 'Loading...'} />
-      <Container maxWidth='lg' sx={{ my: 4 }} data-test='releaseContainer'>
+      <Container maxWidth='lg' data-test='releaseContainer'>
         <Paper>
           <>
             <DraftBanner
@@ -201,7 +197,7 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
-              <Stack direction='row' sx={{ justifyContent: 'space-between' }}>
+              <Stack direction='row' sx={{ justifyContent: 'space-between' }} spacing={2}>
                 <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
                 <ReviewPopper
                   reviews={reviews}

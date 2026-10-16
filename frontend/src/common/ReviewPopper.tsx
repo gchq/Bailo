@@ -1,5 +1,16 @@
 import { Dayjs } from '@dayjs'
-import { Button, Dialog, DialogContent, Paper, Popper, Stack, useMediaQuery } from '@mui/material'
+import Close from '@mui/icons-material/Close'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Paper,
+  Popper,
+  Stack,
+  useMediaQuery,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import ReviewWithComment from 'src/common/ReviewWithComment'
@@ -31,6 +42,20 @@ export default function ReviewPopper({
     setAnchorEl(null)
     onSubmit(kind, reviewComment, reviewRole, dueDate)
   }
+
+  const reviewPopperContent = () => (
+    <Stack spacing={2} sx={{ maxWidth: '100%' }}>
+      <ReviewWithComment
+        onSubmit={handleSubmit}
+        reviews={reviews}
+        loading={isLoading}
+        includeDueDate={includeDueDate}
+        onCancel={() => setAnchorEl(null)}
+        deploymentAssessmentReview={deploymentAssessmentReview}
+      />
+      <MessageAlert message={errorMessage} severity='error' />
+    </Stack>
+  )
   return (
     <>
       <Button
@@ -43,19 +68,12 @@ export default function ReviewPopper({
       </Button>
       {isSmallScreen ? (
         <Dialog open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} fullScreen>
-          <DialogContent sx={{ p: 2 }}>
-            <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-              <ReviewWithComment
-                onSubmit={handleSubmit}
-                reviews={reviews}
-                loading={isLoading}
-                includeDueDate={includeDueDate}
-                onCancel={() => setAnchorEl(null)}
-                deploymentAssessmentReview={deploymentAssessmentReview}
-              />
-              <MessageAlert message={errorMessage} severity='error' />
-            </Stack>
-          </DialogContent>
+          <DialogTitle sx={{ textAlign: 'right' }}>
+            <IconButton onClick={() => setAnchorEl(null)}>
+              <Close color='error' />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 2 }}>{reviewPopperContent()}</DialogContent>
         </Dialog>
       ) : (
         <Popper
@@ -67,7 +85,8 @@ export default function ReviewPopper({
             position: 'fixed !important',
             left: '80% !important',
             top: '10% !important',
-            transform: 'translateX(-50%) !important', // Center it at the top
+            right: theme.spacing(4),
+            transform: 'translateX(-50%) !important', // Centre it at the top
             zIndex: (theme) => theme.zIndex.tooltip,
           }}
         >
@@ -82,15 +101,7 @@ export default function ReviewPopper({
           >
             <Stack direction='row' sx={{ p: 2 }}>
               <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-                <ReviewWithComment
-                  onSubmit={handleSubmit}
-                  reviews={reviews}
-                  loading={isLoading}
-                  includeDueDate={includeDueDate}
-                  onCancel={() => setAnchorEl(null)}
-                  deploymentAssessmentReview={deploymentAssessmentReview}
-                />
-                <MessageAlert message={errorMessage} severity='error' />
+                {reviewPopperContent()}
               </Stack>
             </Stack>
           </Paper>
