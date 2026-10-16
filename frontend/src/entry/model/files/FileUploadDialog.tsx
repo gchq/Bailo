@@ -1,16 +1,44 @@
 import styled from '@emotion/styled'
 import FileUpload from '@mui/icons-material/FileUpload'
-import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
+import FolderOpen from '@mui/icons-material/FolderOpen'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  Divider,
+  LinearProgress,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { deleteEntryFile } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
-import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import { Transition } from 'src/common/Transition'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import ConflictResolutionList, { ConflictAction } from 'src/entry/model/files/ConflictResolutionList'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import {
+  EntryInterface,
+  EntryKind,
+  FileInterface,
+  FileUploadMetadata,
+  FileUploadWithMetadata,
+  ReleaseInterface,
+} from 'types/types'
+import {
+  detectFileConflicts,
+  FileConflict,
+  getFileUploadName,
+  joinUploadPath,
+  validateFolderPath,
+} from 'utils/fileTreeUtils'
 import { plural } from 'utils/stringUtils'
 
 interface FileUploadDialogProps {
@@ -18,114 +46,240 @@ interface FileUploadDialogProps {
   open: boolean
   onDialogClose: () => void
   mutateModelFiles: () => void
+  initialUploadPath?: string
+  existingFiles?: FileInterface[]
+  releases?: ReleaseInterface[]
+  onFilesUploaded?: (files: FileInterface[]) => void
+}
+
+// Files are staged by their path relative to the chosen destination, so that changing the
+// destination after selecting files still moves them.
+type StagedFileUpload = {
+  file: File
+  metadata?: FileUploadMetadata
+  relativePath: string
 }
 
 const Input = styled('input')({
   display: 'none',
 })
 
-export default function FileUploadDialog({ open, onDialogClose, model, mutateModelFiles }: FileUploadDialogProps) {
+export default function FileUploadDialog({
+  open,
+  onDialogClose,
+  model,
+  mutateModelFiles,
+  initialUploadPath = '',
+  existingFiles = [],
+  releases = [],
+  onFilesUploaded,
+}: FileUploadDialogProps) {
   const uiConfig = useContext(UiConfigContext)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [isFilesUploading, setIsFilesUploading] = useState(false)
-  const [filesToBeUploaded, setFilesToBeUpload] = useState<FileUploadWithMetadata[]>([])
+  const [stagedFiles, setStagedFiles] = useState<StagedFileUpload[]>([])
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
+  const [destinationPath, setDestinationPath] = useState(initialUploadPath)
+  const folderInputRef = useRef<HTMLInputElement>(null)
+
+  const [showConflictStep, setShowConflictStep] = useState(false)
+  const [detectedConflicts, setDetectedConflicts] = useState<FileConflict[]>([])
+  const [conflictResolutions, setConflictResolutions] = useState<Map<string, ConflictAction>>(new Map())
+
+  // Re-seed the destination from the browsing path each time the dialog is opened, so that
+  // navigating elsewhere and reopening does not leave a stale destination behind.
+  useEffect(() => {
+    if (open) {
+      setDestinationPath(initialUploadPath)
+    }
+  }, [open, initialUploadPath])
+
+  const destinationPathError = useMemo(() => validateFolderPath(destinationPath), [destinationPath])
+
+  const filesToBeUploaded: FileUploadWithMetadata[] = useMemo(
+    () =>
+      stagedFiles.map(({ file, metadata, relativePath }) => ({
+        file,
+        metadata,
+        relativePath,
+        uploadPath: joinUploadPath(destinationPath, relativePath),
+      })),
+    [stagedFiles, destinationPath],
+  )
 
   const handleAddNewFiles = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
-      const newFiles = event.target.files
-        ? Array.from(event.target.files).map((newFile) => {
-            return { file: newFile }
-          })
+      // For folder uploads, webkitRelativePath contains the path relative to the selected folder.
+      const newFiles: StagedFileUpload[] = event.target.files
+        ? Array.from(event.target.files).map((newFile) => ({
+            file: newFile,
+            relativePath: getFileUploadName(newFile),
+          }))
         : []
       const filteredNewFiles = newFiles.filter(
         (newFile) =>
-          filesToBeUploaded.find((existingFile) => existingFile.file.name === newFile.file.name) === undefined,
+          stagedFiles.find((existingFile) => existingFile.relativePath === newFile.relativePath) === undefined,
       )
 
-      setFilesToBeUpload([...filteredNewFiles, ...filesToBeUploaded])
+      setStagedFiles([...filteredNewFiles, ...stagedFiles])
+      // Reset input value so re-selecting the same folder works
+      event.target.value = ''
     },
-    [filesToBeUploaded],
+    [stagedFiles],
   )
 
-  const handleFileMetadataOnChange = useCallback(
-    (metadata: FileUploadMetadata, fileName: string) => {
-      setFilesToBeUpload(
-        filesToBeUploaded.map((fileWithMetadata) =>
-          fileWithMetadata.file.name === fileName
-            ? {
-                ...fileWithMetadata,
-                metadata: {
-                  text: metadata.text,
-                  tags: metadata.tags,
-                },
-              }
-            : fileWithMetadata,
-        ),
-      )
+  const handleFileMetadataOnChange = useCallback((metadata: FileUploadMetadata, relativePath: string) => {
+    setStagedFiles((prev) =>
+      prev.map((stagedFile) =>
+        stagedFile.relativePath === relativePath
+          ? {
+              ...stagedFile,
+              metadata: {
+                text: metadata.text,
+                tags: metadata.tags,
+              },
+            }
+          : stagedFile,
+      ),
+    )
+  }, [])
+
+  // Returns an error message if the replaced file could not be removed, otherwise undefined. The
+  // replacement is already uploaded by this point, so a failure here leaves both files in place
+  // rather than losing anything.
+  const deleteOverwrittenFile = useCallback(
+    async (existingFile: FileInterface): Promise<string | undefined> => {
+      try {
+        const deleteRes = await deleteEntryFile(model.id, existingFile._id)
+        return deleteRes.ok ? undefined : 'Uploaded, but could not remove the existing file it replaces'
+      } catch (e) {
+        return e instanceof Error ? e.message : 'Uploaded, but could not remove the existing file it replaces'
+      }
     },
-    [filesToBeUploaded, setFilesToBeUpload],
+    [model.id],
   )
 
-  const handleFileUpload = useCallback(async () => {
-    const failedFiles: FailedFileUpload[] = []
-    setIsFilesUploading(true)
-    setFailedFileUploads([])
-    for (const fileItem of filesToBeUploaded) {
-      const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
-        if (progressEvent.total) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setCurrentFileUploadProgress({ fileName: fileItem.file.name, uploadProgress: percentCompleted })
+  const handleFileUpload = useCallback(
+    async (filesToProcess: FileUploadWithMetadata[]) => {
+      const failedFiles: FailedFileUpload[] = []
+      const successfulFiles: FileInterface[] = []
+      setIsFilesUploading(true)
+      setFailedFileUploads([])
+
+      // Build a map of files to overwrite so we can delete the old version first
+      const overwriteMap = new Map<string, FileInterface>()
+      for (const conflict of detectedConflicts) {
+        const name = conflict.fileToUpload.uploadPath || conflict.fileToUpload.file.name
+        if (conflictResolutions.get(name) === 'overwrite') {
+          overwriteMap.set(name, conflict.existingFile)
         }
       }
 
-      try {
-        const fileUploadResponse = await postFileForModelId(
-          model.id,
-          fileItem.file,
-          handleUploadProgress,
-          fileItem.metadata,
-        )
-        setCurrentFileUploadProgress(undefined)
-        if (fileUploadResponse) {
-          setUploadedFiles((uploadedFiles) => [...uploadedFiles, fileItem.file.name])
-          setFilesToBeUpload(
-            filesToBeUploaded.filter((FileToBeUploaded) => FileToBeUploaded.file.name !== fileItem.file.name),
+      for (const fileItem of filesToProcess) {
+        const uploadName = fileItem.uploadPath || fileItem.file.name
+        const existingFile = overwriteMap.get(uploadName)
+
+        const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            setCurrentFileUploadProgress({ fileName: fileItem.file.name, uploadProgress: percentCompleted })
+          }
+        }
+
+        try {
+          const fileUploadResponse = await postFileForModelId(
+            model.id,
+            fileItem.file,
+            handleUploadProgress,
+            fileItem.metadata,
+            fileItem.uploadPath,
           )
-          mutateModelFiles()
-        } else {
+          setCurrentFileUploadProgress(undefined)
+          if (fileUploadResponse) {
+            // Remove the file being replaced only once its replacement is safely uploaded. Deleting
+            // first means a failed upload destroys the original with nothing to put in its place.
+            if (existingFile) {
+              const deleteError = await deleteOverwrittenFile(existingFile)
+              if (deleteError) {
+                const failed = { fileName: fileItem.file.name, error: deleteError }
+                failedFiles.push(failed)
+                setFailedFileUploads((prev) => [...prev, failed])
+              }
+            }
+            successfulFiles.push(fileUploadResponse.data.file)
+            setUploadedFiles((prev) => [...prev, fileItem.file.name])
+            setStagedFiles((prev) => prev.filter((f) => f.relativePath !== fileItem.relativePath))
+            mutateModelFiles()
+          } else {
+            setCurrentFileUploadProgress(undefined)
+          }
+        } catch (e) {
+          const message = e instanceof Error ? e.message : 'Unknown upload error'
+          const failed = { fileName: fileItem.file.name, error: message }
+          failedFiles.push(failed)
+          setFailedFileUploads((prev) => [...prev, failed])
           setCurrentFileUploadProgress(undefined)
         }
-      } catch (e) {
-        const message = e instanceof Error ? e.message : 'Unknown upload error'
-        const failed = { fileName: fileItem.file.name, error: message }
-        failedFiles.push(failed)
-
-        setFailedFileUploads((prev) => [...prev, failed])
-        setCurrentFileUploadProgress(undefined)
       }
-    }
-    setUploadedFiles([])
-    setFailedFileUploads(failedFiles)
-    setIsFilesUploading(false)
-    if (failedFiles.length === 0) {
-      onDialogClose()
-      setFilesToBeUpload([])
-    }
-  }, [model.id, mutateModelFiles, filesToBeUploaded, onDialogClose])
-
-  const handleDeleteFileFromUploadList = useCallback(
-    (fileName: string) => {
-      setFilesToBeUpload(filesToBeUploaded.filter((file) => file.file.name !== fileName))
+      if (successfulFiles.length > 0) {
+        onFilesUploaded?.(successfulFiles)
+      }
+      setUploadedFiles([])
+      setFailedFileUploads(failedFiles)
+      setIsFilesUploading(false)
+      if (failedFiles.length === 0) {
+        onDialogClose()
+        setStagedFiles([])
+      }
     },
-    [filesToBeUploaded],
+    [
+      model.id,
+      mutateModelFiles,
+      detectedConflicts,
+      conflictResolutions,
+      onDialogClose,
+      onFilesUploaded,
+      deleteOverwrittenFile,
+    ],
   )
+
+  const handleUploadClick = useCallback(() => {
+    const { conflicts } = detectFileConflicts(filesToBeUploaded, existingFiles)
+    if (conflicts.length > 0) {
+      setDetectedConflicts(conflicts)
+      const defaultResolutions = new Map<string, ConflictAction>()
+      for (const conflict of conflicts) {
+        const name = conflict.fileToUpload.uploadPath || conflict.fileToUpload.file.name
+        defaultResolutions.set(name, 'skip')
+      }
+      setConflictResolutions(defaultResolutions)
+      setShowConflictStep(true)
+    } else {
+      handleFileUpload(filesToBeUploaded)
+    }
+  }, [filesToBeUploaded, existingFiles, handleFileUpload])
+
+  const handleConflictsResolved = useCallback(() => {
+    const { nonConflicting } = detectFileConflicts(filesToBeUploaded, existingFiles)
+    const overwriteFiles = detectedConflicts
+      .filter((c) => {
+        const name = c.fileToUpload.uploadPath || c.fileToUpload.file.name
+        return conflictResolutions.get(name) === 'overwrite'
+      })
+      .map((c) => c.fileToUpload)
+    setShowConflictStep(false)
+    handleFileUpload([...nonConflicting, ...overwriteFiles])
+  }, [filesToBeUploaded, existingFiles, detectedConflicts, conflictResolutions, handleFileUpload])
+
+  const handleDeleteFileFromUploadList = useCallback((relativePath: string) => {
+    setStagedFiles((prev) => prev.filter((file) => file.relativePath !== relativePath))
+  }, [])
 
   const fileListToUpload = useMemo(() => {
     return filesToBeUploaded.map((fileWithMetadata) => (
       <FileToBeUploaded
-        key={fileWithMetadata.file.name}
+        key={fileWithMetadata.uploadPath || fileWithMetadata.file.name}
         fileWithMetadata={fileWithMetadata}
         onFileMetadataChange={handleFileMetadataOnChange}
         onDelete={handleDeleteFileFromUploadList}
@@ -155,17 +309,37 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
     <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth slots={{ transition: Transition }}>
       <DialogContent>
         <Stack spacing={2}>
-          <label htmlFor='add-files-button' style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <TextField
+            fullWidth
+            size='small'
+            label='Destination folder'
+            placeholder='e.g. models/v2/weights'
+            value={destinationPath}
+            onChange={(e) => setDestinationPath(e.target.value)}
+            error={!!destinationPathError}
+            helperText={
+              destinationPathError ||
+              (destinationPath ? `Files will be uploaded to ${destinationPath}/` : 'Files will be uploaded to the root')
+            }
+            disabled={isFilesUploading}
+            slotProps={{ inputLabel: { shrink: true } }}
+            data-test='destinationPathInput'
+          />
+          <Stack direction='row' spacing={2} sx={{ justifyContent: 'center' }}>
+            <label htmlFor='add-files-button'>
+              <Button disabled={isFilesUploading} endIcon={<FileUpload />} component='span' variant='outlined'>
+                Select files
+              </Button>
+            </label>
             <Button
-              loading={isFilesUploading}
-              endIcon={<FileUpload />}
-              component='span'
+              disabled={isFilesUploading}
+              endIcon={<FolderOpen />}
               variant='outlined'
-              sx={{ width: '40%' }}
+              onClick={() => folderInputRef.current?.click()}
             >
-              Select files
+              Select folder
             </Button>
-          </label>
+          </Stack>
           {model.kind === EntryKind.UNTRUSTED_MODEL && (
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <MessageAlert
@@ -175,45 +349,96 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateMod
               />
             </Box>
           )}
-          <Input multiple id='add-files-button' type='file' onChange={handleAddNewFiles} data-test='uploadFileButton' />
-          {filesToBeUploaded.length === 0 && <EmptyBlob text='No files selected.' />}
-          {filesToBeUploaded.length > 0 && (
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >
-              Files to upload
-            </Typography>
-          )}
-          <Stack divider={<Divider />} spacing={1}>
-            {fileListToUpload}
-          </Stack>
-          {currentFileUploadProgress && (
+          <Input
+            multiple
+            id='add-files-button'
+            type='file'
+            onChange={handleAddNewFiles}
+            disabled={isFilesUploading}
+            data-test='uploadFileButton'
+          />
+          <input
+            ref={(el) => {
+              folderInputRef.current = el
+              if (el) {
+                el.setAttribute('webkitdirectory', '')
+              }
+            }}
+            type='file'
+            style={{ display: 'none' }}
+            onChange={handleAddNewFiles}
+            disabled={isFilesUploading}
+            data-test='uploadFolderButton'
+          />
+          {showConflictStep ? (
             <>
-              <LinearProgress
-                variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
-                value={currentFileUploadProgress.uploadProgress}
+              <ConflictResolutionList
+                conflicts={detectedConflicts}
+                resolutions={conflictResolutions}
+                releases={releases}
+                onResolutionChange={(name, action) => {
+                  setConflictResolutions((prev) => new Map(prev).set(name, action))
+                }}
+                onApplyAll={(action) => {
+                  const updated = new Map<string, ConflictAction>()
+                  for (const conflict of detectedConflicts) {
+                    const name = conflict.fileToUpload.uploadPath || conflict.fileToUpload.file.name
+                    updated.set(name, action)
+                  }
+                  setConflictResolutions(updated)
+                }}
               />
-              <FileUploadProgressDisplay
-                currentFileUploadProgress={currentFileUploadProgress}
-                uploadedFiles={uploadedFiles.length}
-                totalFilesToUpload={filesToBeUploaded.length}
-              />
+              <Stack direction='row' spacing={1} sx={{ justifyContent: 'flex-end' }}>
+                <Button variant='outlined' onClick={() => setShowConflictStep(false)}>
+                  Back
+                </Button>
+                <Button variant='contained' onClick={handleConflictsResolved}>
+                  Continue Upload
+                </Button>
+              </Stack>
+            </>
+          ) : (
+            <>
+              {filesToBeUploaded.length === 0 && <EmptyBlob text='No files selected.' />}
+              {filesToBeUploaded.length > 0 && (
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Files to upload
+                </Typography>
+              )}
+              <Stack divider={<Divider />} spacing={1}>
+                {fileListToUpload}
+              </Stack>
+              {currentFileUploadProgress && (
+                <>
+                  <LinearProgress
+                    variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
+                    value={currentFileUploadProgress.uploadProgress}
+                  />
+                  <FileUploadProgressDisplay
+                    currentFileUploadProgress={currentFileUploadProgress}
+                    uploadedFiles={uploadedFiles.length}
+                    totalFilesToUpload={filesToBeUploaded.length}
+                  />
+                </>
+              )}
+              <Box sx={{ width: '100%' }}>
+                <Button
+                  disabled={filesToBeUploaded.length === 0 || !!destinationPathError}
+                  loading={isFilesUploading}
+                  onClick={handleUploadClick}
+                  variant='contained'
+                  color='primary'
+                  sx={{ maxWidth: 'fit-content', float: 'right' }}
+                >
+                  Upload files
+                </Button>
+              </Box>
             </>
           )}
-          <Box sx={{ width: '100%' }}>
-            <Button
-              disabled={filesToBeUploaded.length === 0}
-              loading={isFilesUploading}
-              onClick={handleFileUpload}
-              variant='contained'
-              color='primary'
-              sx={{ maxWidth: 'fit-content', float: 'right' }}
-            >
-              Upload files
-            </Button>
-          </Box>
           {failedFileUploads.length > 0 && (
             <Alert severity='error' sx={{ my: 2 }}>
               <Stack spacing={1}>

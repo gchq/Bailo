@@ -191,6 +191,10 @@ class Release:
         if write:
             if path is None:
                 path = filename
+            # Create parent directories for path-like filenames (e.g. "weights/model.bin")
+            parent_dir = os.path.dirname(path)
+            if parent_dir:
+                os.makedirs(parent_dir, exist_ok=True)
             total_size = int(res.headers.get("content-length", 0))
 
             colour = "white" if NO_COLOR else "green"
@@ -262,15 +266,25 @@ class Release:
             {self.model_id},
         )
         os.makedirs(path, exist_ok=True)
+        target_dir = os.path.realpath(path)
         for file in file_names:
-            file_path = os.path.join(path, file)
+            # File names come from the server, so reject any that would escape the target directory.
+            file_path = os.path.realpath(os.path.join(target_dir, file))
+            if os.path.commonpath([target_dir, file_path]) != target_dir or file_path == target_dir:
+                raise BailoException(f"File name {file!r} would be written outside of the target directory {path!r}.")
+            # Create intermediate directories for path-like filenames (e.g. "weights/model.bin")
+            file_dir = os.path.dirname(file_path)
+            if file_dir:
+                os.makedirs(file_dir, exist_ok=True)
             self.download(filename=file, path=file_path)
 
-    def upload(self, path: str, data: BytesIO | None = None) -> str:  # type: ignore[reportRedeclaration]
+    def upload(self, path: str, data: BytesIO | None = None, upload_name: str | None = None) -> str:  # type: ignore[reportRedeclaration]
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded
         :param data: A BytesIO object if not loading from disk, defaults to None
+        :param upload_name: Optional name to store the file as on the server (e.g. "weights/model.bin"
+            for hierarchical file organisation), defaults to the basename of path
 
         :return: The unique file ID of the file uploaded
         .. note:: If path provided is a directory, it will be uploaded as a zip
@@ -283,7 +297,7 @@ class Release:
 
         to_close = False
         # If no datastream object provided
-        name = os.path.split(path)[-1]
+        name = upload_name if upload_name else os.path.split(path)[-1]
         if data is None:
             # If we haven't passed in a file object, we must create one from the path.
             # Check if file exists, if it does the zip required

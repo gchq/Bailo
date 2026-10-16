@@ -1,6 +1,5 @@
-import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
+import { Divider, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
-import { postFileForModelId } from 'actions/file'
 import {
   deleteRelease,
   putRelease,
@@ -8,27 +7,17 @@ import {
   useGetRelease,
   useGetReleasesForModelId,
 } from 'actions/release'
-import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
-import {
-  FileInterface,
-  FileWithMetadataAndTags,
-  FlattenedModelImage,
-  isFileInterface,
-  ReleaseInterface,
-  SuccessfulFileUpload,
-} from 'types/types'
+import { FileInterface, FlattenedModelImage, ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { plural } from 'utils/stringUtils'
 
 type EditableReleaseProps = { release: ReleaseInterface } & (
   | {
@@ -118,18 +107,13 @@ function ReadOnlyRelease({ release }: { release: ReleaseInterface }) {
           imageList: release.images,
           modelCardVersion: release.modelCardVersion,
         }}
-        filesMetadata={[]}
         onSemverChange={noop}
         onReleaseNotesChange={noop}
         onFilesChange={noop}
         onMinorReleaseChange={noop}
-        onFilesMetadataChange={noop}
         onModelCardVersionChange={noop}
         onImageListChange={noop}
         onRegistryError={noop}
-        currentFileUploadProgress={undefined}
-        uploadedFiles={[]}
-        filesToUploadCount={0}
       />
     </Stack>
   )
@@ -139,19 +123,13 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
-  const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
-  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
+  const [files, setFiles] = useState<FileInterface[]>(release.files)
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [modelCardVersion, setModelCardVersion] = useState(release.modelCardVersion)
   const [errorMessage, setErrorMessage] = useState('')
   const [isRegistryError, setIsRegistryError] = useState(false)
-  const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
-  const [filesToUploadCount, setFilesToUploadCount] = useState(0)
-  const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
-  const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
@@ -176,45 +154,17 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
     }
   }, [model, mutateReleases, semver, router])
 
-  const failedFileList = useMemo(
-    () =>
-      failedFileUploads.map((file) => (
-        <div key={file.fileName}>
-          <Box
-            component='span'
-            sx={{
-              fontWeight: 'bold',
-            }}
-          >
-            {file.fileName}
-          </Box>
-          {` - ${file.error}`}
-        </div>
-      )),
-    [failedFileUploads],
-  )
-
   const resetForm = useCallback(() => {
     setSemver(release.semver)
     setReleaseNotes(release.notes)
     setIsMinorRelease(!!release.minor)
     setFiles(release.files)
-    setFilesMetadata(release.files.map((file) => ({ fileName: file.name, metadata: { tags: [], text: '' } })))
     setImageList(release.images)
   }, [release.semver, release.notes, release.minor, release.files, release.images])
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
-
-  const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
-    // Filter out any deleted files from success list
-    const filteredUploads = successfulFileUploads.filter((file) =>
-      newFiles.some((newFile) => file.fileName !== newFile.name),
-    )
-    setSuccessfulFileUploads(filteredUploads)
-    setFiles(newFiles)
-  }
 
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
@@ -229,7 +179,6 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
   }
 
   const handleCancel = () => {
-    setFailedFileUploads([])
     setErrorMessage('')
     resetForm()
     onIsEditChange(false)
@@ -237,85 +186,15 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
 
   const handleSubmit = async () => {
     setIsLoading(true)
-    setFailedFileUploads([])
-    const failedFiles: FailedFileUpload[] = []
-    const successfulFiles: SuccessfulFileUpload[] = []
-    const newFilesToUpload: File[] = []
-    for (const file of files) {
-      if (isFileInterface(file)) {
-        successfulFiles.push({ fileName: file.name, fileId: file._id })
-      } else {
-        newFilesToUpload.push(file)
-      }
-    }
-
-    setFilesToUploadCount(newFilesToUpload.length)
-    for (const file of newFilesToUpload) {
-      if (isFileInterface(file)) {
-        successfulFiles.push({ fileName: file.name, fileId: file._id })
-        continue
-      }
-
-      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
-        const fileWithMetadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)
-
-        const textMetadata = fileWithMetadata?.metadata?.text ?? ''
-        const tags = fileWithMetadata?.metadata?.tags ?? []
-
-        const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
-          }
-        }
-
-        try {
-          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, {
-            text: textMetadata,
-            tags,
-          })
-          setCurrentFileUploadProgress(undefined)
-          if (fileUploadResponse) {
-            setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-            successfulFiles.push({ fileName: file.name, fileId: fileUploadResponse.data.file._id })
-          } else {
-            setCurrentFileUploadProgress(undefined)
-            return setIsLoading(false)
-          }
-        } catch (e) {
-          const message = e instanceof Error ? e.message : 'Unknown upload error'
-          const failed = { fileName: file.name, error: message }
-          failedFiles.push(failed)
-
-          setFailedFileUploads((prev) => [...prev, failed])
-          setCurrentFileUploadProgress(undefined)
-        }
-      }
-    }
-
-    if (failedFiles.length > 0) {
-      setIsLoading(false)
-      setCurrentFileUploadProgress(undefined)
-      return
-    }
-
-    setSuccessfulFileUploads((prev) => {
-      const updated = [...prev]
-      successfulFiles.forEach((file) => {
-        if (!updated.find((f) => f.fileName === file.fileName)) {
-          updated.push(file)
-        }
-      })
-      return updated
-    })
 
     const updatedRelease: UpdateReleaseParams = {
       modelId: model.id,
       semver,
       modelCardVersion: modelCardVersion,
       notes: releaseNotes,
+      minor: isMinorRelease,
       draft: release.draft,
-      fileIds: successfulFiles.map((file) => file.fileId),
+      fileIds: files.map((file) => file._id),
       images: imageList,
     }
 
@@ -326,8 +205,6 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
     } else {
       mutateReleases()
       mutateRelease()
-      setUploadedFiles([])
-      setCurrentFileUploadProgress(undefined)
       onIsEditChange(false)
     }
     setIsLoading(false)
@@ -372,17 +249,6 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
         isRegistryError={isRegistryError}
         disableSaveButton={releaseNotes === ''}
       />
-      {failedFileUploads.length > 0 && (
-        <Alert severity='error' sx={{ my: 2 }}>
-          <Stack spacing={1}>
-            <Typography>{`Unable to modify release due to issues with the following ${plural(
-              failedFileUploads.length,
-              'file',
-            )}:`}</Typography>
-            {failedFileList}
-          </Stack>
-        </Alert>
-      )}
       <Divider />
       <ReleaseForm
         editable
@@ -396,18 +262,13 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
           imageList,
           modelCardVersion,
         }}
-        filesMetadata={filesMetadata}
         onSemverChange={(value) => setSemver(value)}
         onReleaseNotesChange={(value) => setReleaseNotes(value)}
         onMinorReleaseChange={(value) => setIsMinorRelease(value)}
-        onFilesChange={(value) => handleFileOnChange(value)}
-        onFilesMetadataChange={(value) => setFilesMetadata(value)}
+        onFilesChange={(value) => setFiles(value)}
         onModelCardVersionChange={(value) => setModelCardVersion(value)}
         onImageListChange={(value) => setImageList(value)}
         onRegistryError={handleRegistryError}
-        currentFileUploadProgress={currentFileUploadProgress}
-        uploadedFiles={uploadedFiles}
-        filesToUploadCount={filesToUploadCount}
       />
       <ConfirmationDialogue
         open={open}

@@ -601,12 +601,14 @@ export async function removeFileFromReleases(
     })
   }
 
+  // `updateMany` is not one of the statics softDeletionPlugin overrides, so this is Mongoose's
+  // native (filter, update, options) signature and the session has to go inside the options.
   const result = await ReleaseModel.updateMany(
     query,
     {
       $pull: { fileIds: fileId },
     },
-    session,
+    { session },
   )
 
   return { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
