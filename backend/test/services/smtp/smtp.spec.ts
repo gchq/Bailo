@@ -12,6 +12,7 @@ import {
   notifyReviewResponseForRelease,
   notifyReviewRoleOfAdditionalReview,
   notifyRiskOwnerOfDeploymentAssessment,
+  notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked,
   requestReviewForAccessRequest,
   requestReviewForRelease,
   startImportNotification,
@@ -323,6 +324,31 @@ describe('services > smtp > smtp', () => {
     getModelByIdMock.mockReturnValue(testModel)
     await notifyRiskOwnerOfDeploymentAssessment('user:user', testDeploymentAssessment, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to risk owners when a DA approval is revoked', async () => {
+    await notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(
+      ['user:risk-owner1', 'user:risk-owner2'],
+      testDeploymentAssessment,
+      'Editor Name',
+    )
+    expect(emailBuilderMock.buildEmail).toHaveBeenCalledWith(
+      'A deployment assessment you approved has been edited and needs to be reviewed again',
+      expect.arrayContaining([{ title: 'Edited By', data: 'Editor Name' }]),
+      expect.anything(),
+      true,
+    )
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is not sent to risk owners when a DA approval is revoked when smtp is disabled', async () => {
+    setTestConfig({ smtp: { enabled: false } })
+    await notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(
+      ['user:risk-owner'],
+      testDeploymentAssessment,
+      'Editor Name',
+    )
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
   test('that an email is sent to all model owners on deployment assessment creation', async () => {
