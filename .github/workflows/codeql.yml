@@ -17,6 +17,10 @@ on:
     #        *  * * * *
     - cron: '30 10 * * 0'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 # jobs define their own required permissions
 permissions: {}
 
