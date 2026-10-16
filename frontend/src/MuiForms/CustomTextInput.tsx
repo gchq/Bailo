@@ -3,7 +3,6 @@ import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useMemo } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 
@@ -61,7 +60,6 @@ export default function CustomTextInput({
       compare={compare}
       value={value}
     >
-      {compare.inMirroredCompare && value && <InlineDiff from={compare.compareFromState} to={value} />}
       {!compare.inCompareMode && (
         <TextField
           size='small'

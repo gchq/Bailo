@@ -20,6 +20,11 @@ on:
         required: false
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  # Avoid cancelling GHCR image pushes on main, releases and manual runs
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # jobs define their own required permissions
 permissions: {}
 

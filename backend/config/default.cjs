@@ -358,6 +358,7 @@ module.exports = {
     headers: {
       'Content-Encoding': 'gzip',
     },
+    batchSizeLimit: 50,
   },
 
   modelMirror: {

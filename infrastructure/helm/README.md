@@ -449,6 +449,7 @@ The following tables describe selected configuration options available in `value
 | `stroom.xmlns` | XML Namespace | default-namespace |
 | `stroom.schemaLocation` | XML Schema Location | default-namespace file://schema-location.xsd |
 | `stroom.version` | XML Schema Version | 1.0.0 |
+| `stroom.batchSizeLimit` | Maximum number of STROOM events to send in a single batch | `50` |
 | `modelMirror.import.enabled` | Enable creation of mirrored models | `false` |
 | `modelMirror.export.enabled` | Enable the exporting of models to S3 | `false` |
 | `modelMirror.export.disclaimer` | Disclaimer shown to the user in the UI prior to exporting a model | `## Example Agreement \n I agree that this model is suitable for exporting` |

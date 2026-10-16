@@ -210,10 +210,11 @@ Licensed under Apache 2.0 (see `LICENSE.txt`). See `CONTRIBUTING.md` for full de
 
 - Use [conventional branch names](https://conventionalbranch.org/): `<type>/<description>` (e.g. `feat/add-login-page`,
   `fix/issue-123-broken-upload`, `chore/update-deps`).
+- Anyone can raise issues in public, but only approved, named identities can submit PRs.
 - Sign the GCHQ Contributor Licence Agreement (CLA).
 - Ensure Prettier, ESLint, and all tests pass before opening a PR.
 - Update relevant documentation for new features or UX changes.
-- After approval and all checks pass, the contributor merges their own PR.
+- After approval and all checks pass, the Bailo team merges the PR.
 
 ## Issue and pull request policy
 
