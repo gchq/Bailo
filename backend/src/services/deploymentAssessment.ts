@@ -603,7 +603,7 @@ export async function updateDeploymentAssessment(
           role: SystemRoles.Owner,
           parentId: latestReview._id,
           decision: Decision.Undo,
-          comment: "Automatically revoked this deployment assessment's approval status by making changes",
+          comment: "Automatically revoked this deployment assessment's approval status after changes were made.",
         })
       : undefined
 
