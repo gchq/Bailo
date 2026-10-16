@@ -68,6 +68,10 @@ export interface Config {
   httpClient: {
     /** Default [HTTPS](https://nodejs.org/api/https.html#class-httpsagent) agent options (proxy, TLS, etc.) */
     defaultOpts: AgentOptions
+    /** Optional proxy URL for outbound requests */
+    proxy: string
+    /** Hostnames that bypass the configured proxy */
+    noProxy: string[]
   }
 
   /** ### Connectors
@@ -110,10 +114,13 @@ export interface Config {
       maxInitRetries: number
       /** Retry delay between initialisation attempts (minutes) */
       initRetryDelay: number
+      /** Maximum time allowed for a single artefact scan (milliseconds) */
       scanTimeoutMs: number
     }
 
+    /** Metrics connector configuration */
     metrics: {
+      /** Metrics connector strategy */
       kind: MetricsKindKeys
     }
   }
@@ -202,11 +209,15 @@ export interface Config {
       secretAccessKey: string
     }
 
+    /** Object storage endpoint */
     endpoint: string
     /** AWS region */
     region: string
+    /** Use path-style rather than virtual-hosted-style bucket addressing */
     forcePathStyle: boolean
+    /** Validate the TLS certificate used by the object storage endpoint */
     rejectUnauthorized: boolean
+    /** AWS SDK response checksum validation behaviour */
     responseChecksumValidation: ResponseChecksumValidation | Provider<ResponseChecksumValidation>
 
     /** Automatically create buckets if missing */
@@ -219,9 +230,9 @@ export interface Config {
      * default bucket names for uploads/files and registry/images
      */
     buckets: {
-      /** Bucket name for the bucket to upload files to */
+      /** Bucket used for uploaded files */
       uploads: string
-      /** Bucket name for image uploads */
+      /** Bucket used for registry artefacts */
       registry: string
     }
   }
@@ -348,17 +359,29 @@ export interface Config {
     debug: boolean
   }
 
+  /** ### STROOM event publishing */
   stroom: {
+    /** Send events to STROOM */
     sendEvents: boolean
+    /** STROOM endpoint */
     url: string
+    /** STROOM environment name */
     environment: string
+    /** Delay between event batches (milliseconds) */
     interval: number
+    /** Event generator name */
     generator: string
+    /** Validate the STROOM TLS certificate */
     rejectUnauthorized: boolean
+    /** XML namespace for generated events */
     xmlns: string
+    /** XML schema location for generated events */
     schemaLocation: string
+    /** Event schema version */
     version: string
+    /** Additional HTTP headers sent to STROOM */
     headers: Record<string, string>
+    /** Maximum number of events in a batch */
     batchSizeLimit: number
   }
 
@@ -447,12 +470,19 @@ export interface Config {
   }
 
   llm: {
+    /** LLM API endpoint */
     endpoint: string
+    /** Optional LLM API key */
     apiKey: string
+    /** Model identifier sent to the LLM API */
     model: string
+    /** Maximum number of tokens requested from the model */
     maxTokens: number
+    /** LLM request timeout (milliseconds) */
     timeoutMs: number
+    /** Sampling temperature passed to the model */
     temperature: number
+    /** System prompt used for model-card extraction */
     systemPrompt: string
   }
 }
