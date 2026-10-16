@@ -60,7 +60,7 @@ export default function ReviewBanner({
       onReviewButtonClicked(event.currentTarget)
     } else {
       if (release) {
-        router.push(`/model/${release.modelId}/release/${release.semver}/review`)
+        router.push(`/model/${release.modelId}/release/${release.semver}`)
       } else if (accessRequest) {
         router.push(`/model/${accessRequest.modelId}/access-request/${accessRequest.id}/review`)
       } else if (deploymentAssessment) {

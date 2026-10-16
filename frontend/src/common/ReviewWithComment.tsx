@@ -148,14 +148,20 @@ export default function ReviewWithComment({
                   option.role === value.role
                 }
                 onChange={onChange}
+                disableClearable
                 value={reviewRequest}
                 getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
                 options={reviews}
                 renderInput={(params) => <LimitedTextField {...params} label='Select your role' size='small' />}
+                slotProps={{
+                  popper: {
+                    sx: { zIndex: theme.zIndex.tooltip + 100 },
+                  },
+                }}
               />
             )}
             <RichTextEditor
-              data-test='reviewWithCommentTextField'
+              dataTest='reviewWithCommentTextField'
               value={reviewComment}
               onChange={(newValue) => setReviewComment(newValue)}
               alwaysShowToolbar
