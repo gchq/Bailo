@@ -28,38 +28,20 @@
     </mj-style>
   </mj-head>
   <mj-body background-color='#9e60f2'>
-    <mj-section background-color='#9e60f2' padding-bottom='0px' padding-top='0px'> </mj-section>
-    <mj-section padding-bottom='5px' css-class='gradient-bg'>
+    <mj-section background-color='#9e60f2' padding='0px 0px 0px 0px'> </mj-section>
+    <mj-section padding='0px 0px 5px 0px' css-class='gradient-bg'>
       <mj-column width='100%'>
-        <mj-text
-          align='center'
-          color='#FFF'
-          font-size='13px'
-          font-family='Helvetica'
-          padding-left='25px'
-          padding-right='25px'
-          padding-bottom='28px'
-          padding-top='28px'
-        >
+        <mj-text align='center' color='#FFF' font-size='13px' font-family='Helvetica' padding='28px 25px 28px 25px'>
           <span style='font-size: 20px; font-weight: bold'>Bailo</span>
         </mj-text>
-        <mj-text
-          align='center'
-          color='#FFF'
-          font-size='13px'
-          font-family='Helvetica'
-          padding-left='25px'
-          padding-right='25px'
-          padding-bottom='28px'
-          padding-top='28px'
-        >
+        <mj-text align='center' color='#FFF' font-size='13px' font-family='Helvetica' padding='28px 25px 28px 25px'>
           <span style='font-size: 20px; font-weight: bold'>{{title}}</span>
         </mj-text>
       </mj-column>
     </mj-section>
     <mj-section css-class='diagonal gradient-bg'> </mj-section>
     <mj-section css-class='diagonal gradient-bg-border'> </mj-section>
-    <mj-section background-color='#9e60f2' padding-bottom='15px'>
+    <mj-section background-color='#9e60f2' padding='0px 0px 15px 0px'>
       {{#each metadata}}
         <mj-column>
           <mj-text
@@ -67,24 +49,42 @@
             color='#FFF'
             font-size='15px'
             font-family='Ubuntu, Helvetica, Arial, sans-serif'
-            padding-left='25px'
-            padding-right='25px'
-            padding-bottom='0px'
+            padding='0px 25px 0px 25px'
           ><strong>{{this.title}}</strong></mj-text>
           <mj-text
             align='center'
             color='#FFF'
             font-size='13px'
             font-family='Helvetica'
-            padding-left='25px'
-            padding-right='25px'
-            padding-bottom='20px'
-            padding-top='10px'
+            padding='10px 25px 20px 25px'
           >{{this.data}}</mj-text>
         </mj-column>
       {{/each}}
     </mj-section>
-    <mj-section background-color='#4d3075' padding-bottom='20px' padding-top='20px'>
+    {{#if list}}
+      <mj-section background-color='#9e60f2' padding='0px 0px 15px 0px'>
+        <mj-column>
+          <mj-text
+            align='center'
+            color='#FFF'
+            font-size='15px'
+            font-family='Ubuntu, Helvetica, Arial, sans-serif'
+            padding='0px 25px 10px 25px'
+          ><strong>{{list.title}}</strong></mj-text>
+          {{#each list.items}}
+            <mj-text align='center' color='#FFF' font-size='13px' font-family='Helvetica' padding='4px 25px 4px 25px'>
+              {{#if this.url}}
+                <a href='{{this.url}}' style='color: #FFF; font-weight: bold'>{{this.label}}</a>
+              {{else}}
+                <strong>{{this.label}}</strong>
+              {{/if}}
+              {{#if this.detail}}({{this.detail}}){{/if}}
+            </mj-text>
+          {{/each}}
+        </mj-column>
+      </mj-section>
+    {{/if}}
+    <mj-section background-color='#4d3075' padding='20px 0px 20px 0px'>
       {{#each actions}}
         <mj-column width='50%'>
           <mj-button
@@ -95,13 +95,10 @@
             align='center'
             font-weight='bold'
             border='none'
-            padding='15px 30px'
+            padding='15px 25px 10px 25px'
             border-radius='10px'
             href='{{this.url}}'
             font-family='Helvetica'
-            padding-left='25px'
-            padding-right='25px'
-            padding-bottom='10px'
           >{{this.name}}</mj-button>
         </mj-column>
       {{/each}}

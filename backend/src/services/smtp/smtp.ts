@@ -15,15 +15,16 @@ import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
 import { getModelReview } from '../../utils/review.js'
 import { entryKindForRedirect } from '../../utils/routerUtils.js'
-import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
+import { plural, resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
 import { checkAccessRequestsApproved } from '../response.js'
-import { buildEmail, EmailContent, Info } from './emailBuilder.js'
+import { buildEmail, EmailContent, EmailList, Info } from './emailBuilder.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 const transporter = await generateTransporter(config.smtp.transporter)
 const LINE_BREAK = '<br />'
+const MAX_MODELS_IN_EMAIL = 5
 
 /**
  * Generates a Node Mailer Transporter.
@@ -128,10 +129,23 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
   await dispatchEmail([riskOwner], emailContent)
 }
 
+function buildModelList(models: ModelInterface[]): EmailList {
+  const visibleModels = models.slice(0, MAX_MODELS_IN_EMAIL)
+
+  return {
+    title: models.length === 1 ? 'Model' : 'Models',
+    items: visibleModels.map((model) => ({
+      label: model.name,
+      detail: model.id,
+      url: `${appBaseUrl}/${entryKindForRedirect(model.kind)}/${encodeURIComponent(model.id)}`,
+    })),
+  }
+}
+
 export async function notifyModelOwnersOfDeploymentAssessment(
   entities: string[],
   deployment: DeploymentAssessmentInterface,
-  model: ModelInterface,
+  models: ModelInterface[],
   creatorName: string,
 ) {
   if (!config.smtp.enabled) {
@@ -139,14 +153,10 @@ export async function notifyModelOwnersOfDeploymentAssessment(
     return
   }
 
-  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
-
   const emailContent = await buildEmail(
-    `A deployment assessment has been created for a model you own`,
+    `A deployment assessment has been created for ${models.length === 1 ? 'a model' : plural(models.length, 'model')} you own`,
     [
       { title: 'Deployment Assessment ID', data: deployment.id },
-      { title: 'Model Name', data: model.name },
-      { title: 'Model ID', data: model.id },
       {
         title: 'Created By',
         data: creatorName,
@@ -159,11 +169,11 @@ export async function notifyModelOwnersOfDeploymentAssessment(
       },
       {
         name: 'View Deployment Assessments',
-        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
+        url: `${appBaseUrl}/deployment-assessments`,
       },
-      { name: 'Open Model', url: modelUrl },
     ],
     false,
+    buildModelList(models),
   )
 
   await dispatchEmail(entities, emailContent)
@@ -215,7 +225,7 @@ export async function notifyReviewResponseForDeploymentAssessment(
 export async function notifyModelOwnersOfDeploymentApproval(
   modelDevelopers: string[],
   deployment: DeploymentAssessmentInterface,
-  model: ModelInterface,
+  models: ModelInterface[],
   creatorName: string,
 ) {
   if (!config.smtp.enabled) {
@@ -223,14 +233,10 @@ export async function notifyModelOwnersOfDeploymentApproval(
     return
   }
 
-  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
-
   const emailContent = await buildEmail(
-    `A deployment assessment, containing a model you own, has been approved`,
+    `A deployment assessment, containing ${models.length === 1 ? 'a model' : plural(models.length, 'model')} you own, has been approved`,
     [
       { title: 'Deployment Assessment ID', data: deployment.id },
-      { title: 'Model Name', data: model.name },
-      { title: 'Model ID', data: model.id },
       {
         title: 'Created By',
         data: (await authentication.getUserInformation(toEntity('user', creatorName))).name || creatorName,
@@ -243,11 +249,11 @@ export async function notifyModelOwnersOfDeploymentApproval(
       },
       {
         name: 'View Deployment Assessments',
-        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
+        url: `${appBaseUrl}/deployment-assessments`,
       },
-      { name: 'Open Model', url: modelUrl },
     ],
     false,
+    buildModelList(models),
   )
 
   await dispatchEmail(modelDevelopers, emailContent)
