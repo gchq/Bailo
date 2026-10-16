@@ -340,6 +340,7 @@ stroom:
   version: '1.0.0'
   headers:
     Content-Encoding: 'gzip'
+  batchSizeLimit: 50
 
 modelMirror:
   import:

@@ -11,7 +11,7 @@ import subprocess
 import tarfile
 from functools import lru_cache
 from http import HTTPStatus
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from tempfile import mkdtemp
 from typing import Any
 
@@ -46,24 +46,61 @@ def get_trivy_version() -> str:
     return "unknown"
 
 
-def safe_extract(tar: tarfile.TarFile, path: str) -> None:
-    """tar.extractall is vulnerable to relative path relative.
+def _is_safe_member_name(name: str) -> bool:
+    """Lexically check that a member name stays within the extraction directory, without touching the filesystem."""
+    member_path = PurePosixPath(name)
+    return bool(name) and not member_path.is_absolute() and ".." not in member_path.parts
 
-    See [here](https://docs.python.org/3/library/tarfile.html#tarfile-extraction-filter)
+
+def safe_extract(
+    tar: tarfile.TarFile,
+    path: str,
+    max_bytes: int | None = None,
+    max_entries: int | None = None,
+) -> None:
+    """Extract only regular files and directories from an untrusted tar archive.
+
+    Symlinks, hardlinks and special files are skipped so no later member can be redirected outside ``path``. Path checks
+    are lexical because ``realpath`` based checks can be bypassed (CVE-2025-4517). The stdlib ``data`` filter is applied
+    as a second layer and also strips unsafe permission bits.
+
+    Extraction is also bound by a total uncompressed size and entry count so that a small
+    compressed archive cannot expand into a disproportionately large filesystem (a tar bomb).
 
     :param tar: tarfile to extract
     :param path: the target to extract to
+    :param max_bytes: total uncompressed bytes allowed, defaults to the configured limit
+    :param max_entries: number of archive members allowed, defaults to the configured limit
     """
-    base = Path(path).resolve()
+    settings = get_settings()
+    max_bytes = settings.MAX_EXTRACT_BYTES if max_bytes is None else max_bytes
+    max_entries = settings.MAX_EXTRACT_ENTRIES if max_entries is None else max_entries
 
-    for member in tar.getmembers():
-        # Create a PurePath where relative links `..` are resolved
-        member_path = (base / member.name).resolve()
+    total_bytes = 0
 
-        if not member_path.is_relative_to(base):
+    # Iterate so an oversized archive is rejected at the offending member instead of after every
+    # header has been read into memory
+    for entries, member in enumerate(tar, start=1):
+        if entries > max_entries:
+            raise HTTPException(400, "Invalid tar contents: too many entries")
+
+        # Check size in the header before extracting
+        total_bytes += member.size
+        if total_bytes > max_bytes:
+            raise HTTPException(400, "Invalid tar contents: extracted size exceeds limit")
+
+        if not _is_safe_member_name(member.name):
             raise HTTPException(400, "Invalid tar contents")
 
-    return tar.extractall(path)
+        # Trivy only analyses regular files, so links and special files are not needed for scanning
+        if not (member.isreg() or member.isdir()):
+            logger.debug("Skipping non-regular tar member %s", member.name)
+            continue
+
+        try:
+            tar.extract(member, path, filter="data")
+        except tarfile.FilterError as exception:
+            raise HTTPException(400, "Invalid tar contents") from exception
 
 
 class Settings(BaseSettings):
@@ -93,6 +130,10 @@ class Settings(BaseSettings):
     CREATE_TIMEOUT_SECONDS: int = 900
 
     SCAN_TIMEOUT_SECONDS: int = 60
+
+    # Trivy DB is ~1GB decompressed with only a few files so these limits don't affect normal use
+    MAX_EXTRACT_BYTES: int = 8 * 1024**3
+    MAX_EXTRACT_ENTRIES: int = 100_000
 
 
 @lru_cache
@@ -375,13 +416,18 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
             if tarfile.is_tarfile(file):
                 with tarfile.open(fileobj=file, bufsize=block_size) as tarf:
                     safe_extract(tarf, path=working_dir)
+            create_sbom(working_dir, blob_digest)
         except tarfile.ReadError as exception:
+            # Remove any partial extraction so rejected uploads cannot accumulate on disk.
+            shutil.rmtree(working_dir, ignore_errors=True)
             logger.exception("Failed to extract blob %s", blob_digest)
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                 detail=f"An error occurred while extracting image layer: {exception}",
             ) from exception
-        create_sbom(working_dir, blob_digest)
+        except Exception:
+            shutil.rmtree(working_dir, ignore_errors=True)
+            raise
         logger.info(
             "Cleaning up unpacked filesystem %s SHA256:%s",
             working_dir,

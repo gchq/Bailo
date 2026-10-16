@@ -6,6 +6,10 @@ on:
       tags:
         description: 'Publish to TestPyPI.'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 

@@ -1,21 +1,10 @@
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows'
-import {
-  Alert,
-  Autocomplete,
-  Container,
-  IconButton,
-  Link,
-  Paper,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Alert, Autocomplete, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material'
 import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import ComparisonSwapButton from 'src/common/ComparisonSwapButton'
 import Loading from 'src/common/Loading'
 import EntryCardSnapshotSelector, {
   buildSnapshots,
@@ -501,39 +490,11 @@ export default function EntryCardCompare({
                 onSelect={(snapshot) => setSnapshot(QueryDiffSide.From, snapshot)}
               />
             </Stack>
-            <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
-              <Typography>&nbsp;</Typography>
-              <Tooltip title='Swap comparison sides'>
-                <span>
-                  <IconButton
-                    color='primary'
-                    aria-label='Swap From and To comparison sides'
-                    onClick={flipComparison}
-                    disabled={!fromEntryId && !toEntryId}
-                    sx={{
-                      border: '1px solid',
-                      borderColor: 'primary.main',
-                      '&.Mui-disabled': {
-                        borderColor: 'action.disabled',
-                      },
-                    }}
-                  >
-                    <CompareArrowsIcon
-                      sx={{
-                        transition: 'transform 150ms ease-in-out',
-                        '&:focus': {
-                          transform: 'rotate(180deg)',
-                        },
-                        '&:hover': {
-                          transform: 'rotate(180deg)',
-                        },
-                      }}
-                      fontSize='large'
-                    />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </Stack>
+            <ComparisonSwapButton
+              label={`${kindLabel} card`}
+              onClick={flipComparison}
+              disabled={!fromEntryId && !toEntryId}
+            />
             <Stack spacing={2} sx={{ flex: 1 }}>
               <Stack spacing={1} direction='row' sx={{ alignItems: 'center' }}>
                 <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
