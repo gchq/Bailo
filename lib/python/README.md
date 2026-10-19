@@ -40,7 +40,7 @@ A lightweight, Python API wrapper for Bailo, providing streamlined programmatic 
 
 ## Quickstart
 
-> **Requires:** Python 3.10 to 3.14
+> **Requires:** a Python version as declared by `requires-python` and the classifiers in [pyproject.toml](https://github.com/gchq/Bailo/blob/main/lib/python/pyproject.toml) (also shown on [PyPI](https://pypi.org/project/bailo/))
 
 ### Installation
 
@@ -98,7 +98,7 @@ Refer to [backend/docs/README.md](https://github.com/gchq/Bailo/blob/main/backen
 
 The following steps are only required for users who wish to extend or develop the Bailo Python client locally.
 
-> **Requires:** Python 3.10 to 3.14 and [uv](https://docs.astral.sh/uv/getting-started/installation/)
+> **Requires:** [uv](https://docs.astral.sh/uv/getting-started/installation/). uv installs and uses the Python version in [`.python-version`](https://github.com/gchq/Bailo/blob/main/lib/python/.python-version) by default. Any supported version can be used with `--python`.
 
 ### Python Setup
 

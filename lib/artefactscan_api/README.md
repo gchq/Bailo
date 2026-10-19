@@ -23,7 +23,7 @@ The built ArtefactScan image is published to [GHCR bailo_artefactscan](https://g
 
 ## Quickstart
 
-> **Requires:** Docker, Python 3.10 to 3.12 and [uv](https://docs.astral.sh/uv/getting-started/installation/) (local dev only)
+> **Requires:** Docker, Python (version in [`.python-version`](.python-version), installed automatically by uv) and [uv](https://docs.astral.sh/uv/getting-started/installation/) (local dev only)
 
 ### Build and Run via Docker
 
