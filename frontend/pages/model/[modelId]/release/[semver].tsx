@@ -2,6 +2,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
+import { useGetReviewRequestsForModel, useHeadReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -30,6 +31,11 @@ export default function Release() {
 
   const { release, isReleaseLoading, isReleaseError, mutateRelease } = useGetRelease(modelId, semver)
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
+  const { mutateReviews: mutateHeadReviews } = useHeadReviewRequestsForModel({
+    modelId: modelId ?? '',
+    semver: semver ?? '',
+  })
+  const { mutateReviews } = useGetReviewRequestsForModel({ modelId: modelId ?? '', semver: semver ?? '' })
 
   const error = MultipleErrorWrapper('Unable to load release', {
     isReleaseError,
@@ -66,6 +72,8 @@ export default function Release() {
       setPutErrorMessage(await getErrorMessage(response))
     } else {
       mutateRelease()
+      mutateReviews()
+      mutateHeadReviews()
       sendNotification({ msg: 'Release successfully published.', variant: 'success' })
     }
 
