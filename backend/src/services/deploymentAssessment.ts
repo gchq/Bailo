@@ -12,7 +12,7 @@ import DeploymentAssessmentModel, {
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import ResponseModel, { Decision, DecisionKeys, ResponseKind } from '../models/Response.js'
-import ReviewModel from '../models/Review.js'
+import ReviewModel, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import {
   findDeploymentAssessmentComments,
@@ -40,6 +40,7 @@ import {
   notifyModelOwnersOfDeploymentAssessment,
   notifyReviewResponseForDeploymentAssessment,
   notifyRiskOwnerOfDeploymentAssessment,
+  notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked,
 } from './smtp/smtp.js'
 import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
 
@@ -50,6 +51,7 @@ export type { SearchDeploymentAssessmentsParams }
 export interface DeploymentAssessmentDetails {
   deploymentAssessment: DeploymentAssessmentDoc
   state?: DeploymentAssessmentStateKeys
+  latestReview?: ReviewDoc
 }
 
 // Allow partial metadata when updating to support draft updates where sections may be missing
@@ -145,8 +147,7 @@ async function notifyDeploymentStakeholders(
   modelIds: string[] = [],
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
-  const uniqueRiskOwners = [...new Set(riskOwners)]
-  if (uniqueRiskOwners.length === 0 && modelIds.length === 0) {
+  if (riskOwners.length === 0 && modelIds.length === 0) {
     return
   }
 
@@ -159,7 +160,7 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...uniqueRiskOwners.map((riskOwner) =>
+      ...riskOwners.map((riskOwner) =>
         notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
       ),
       ...models.flatMap((model) => {
@@ -293,6 +294,7 @@ export async function getDeploymentAssessmentDetails(
   return {
     deploymentAssessment,
     state,
+    latestReview,
   }
 }
 
@@ -402,6 +404,30 @@ async function notifyDeploymentAssessmentReviewed(
         decision,
       },
       'Failed to send deployment assessment review notification',
+    )
+  }
+}
+
+async function notifyRiskOwnersOfApprovalRevoked(
+  editor: UserInterface,
+  deploymentAssessment: DeploymentAssessmentInterface,
+): Promise<void> {
+  const riskOwners = deploymentAssessment.metadata?.signOff?.riskOwners ?? []
+  if (riskOwners.length === 0) {
+    return
+  }
+
+  try {
+    const editorEntity = toEntity('user', editor.dn)
+    const editorName = (await authentication.getUserInformation(editorEntity)).name || editor.dn
+    await notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(riskOwners, deploymentAssessment, editorName)
+  } catch (error) {
+    log.warn(
+      {
+        error,
+        deploymentAssessmentId: deploymentAssessment.id,
+      },
+      'Failed to send deployment assessment approval revoked notification',
     )
   }
 }
@@ -528,7 +554,10 @@ export async function updateDeploymentAssessment(
   deploymentAssessmentId: string,
   diff: Partial<UpdateDeploymentAssessmentParams>,
 ) {
-  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const { deploymentAssessment, state, latestReview } = await getDeploymentAssessmentDetails(
+    user,
+    deploymentAssessmentId,
+  )
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
   if (!auth.success) {
@@ -568,6 +597,7 @@ export async function updateDeploymentAssessment(
       deploymentAssessment,
     )
   }
+
   const review = isBeingSubmitted
     ? new ReviewModel({
         kind: ReviewKind.DeploymentAssessment,
@@ -575,10 +605,29 @@ export async function updateDeploymentAssessment(
         role: deploymentAssessmentRiskOwnerRole,
       })
     : undefined
+
+  // revoke an existing approval if DA is edited
+  const response =
+    state === DeploymentAssessmentState.Approved && latestReview
+      ? new ResponseModel({
+          entity: toEntity('user', user.dn),
+          kind: ResponseKind.Review,
+          role: SystemRoles.Owner,
+          parentId: latestReview._id,
+          decision: Decision.Undo,
+          comment: "Automatically revoked this deployment assessment's approval status after changes were made.",
+        })
+      : undefined
+
   await useTransaction([
     (session) => deploymentAssessment.save({ session }),
     ...(review ? [(session) => review.save({ session })] : []),
+    ...(response ? [(session) => response.save({ session })] : []),
   ])
+
+  if (response) {
+    await notifyRiskOwnersOfApprovalRevoked(user, deploymentAssessment)
+  }
 
   return deploymentAssessment
 }
