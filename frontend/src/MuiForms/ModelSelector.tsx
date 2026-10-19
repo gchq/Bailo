@@ -1,13 +1,13 @@
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
-import TextField from '@mui/material/TextField'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import ModelSelectorChip from 'src/MuiForms/ModelSelectorChip'
@@ -160,7 +160,7 @@ export default function ModelSelector({
             ))
           }
           renderInput={(params) => (
-            <TextField
+            <LimitedTextField
               {...params}
               placeholder='Model name'
               error={rawErrors && rawErrors.length > 0}

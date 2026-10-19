@@ -5,6 +5,7 @@ const CHAINABLE_METHODS = [
   'append',
   'at',
   'bulkWrite',
+  'countDocuments',
   'delete',
   'deleteMany',
   'deleteOne',
@@ -43,6 +44,7 @@ const QUERY_LIKE_METHODS = [
   'lookup',
   'map',
   'match',
+  'select',
   'sort',
   'unwind',
 ] as const
@@ -109,9 +111,10 @@ function attachQueryLikeMethods(target: any, queryMockSet: Record<string, Mocked
 function attachFinderMethods<TDoc extends { _id?: any }>(
   target: any,
   createInstanceFn: () => InstanceType<TDoc>,
+  queryMockSet: Record<string, MockedFunction<any>>,
 ): void {
   target.findById = vi.fn(async () => createInstanceFn())
-  target.findOne = vi.fn(async () => createInstanceFn())
+  target.findOne = vi.fn(() => Object.assign(Promise.resolve(createInstanceFn()), queryMockSet))
   target.findOneAndUpdate = vi.fn(async () => createInstanceFn())
   target.findOneAndDelete = vi.fn(async () => createInstanceFn())
   target.countDocuments = vi.fn().mockResolvedValue(0) as MockedFunction<(filter?: any) => Promise<number>>
@@ -163,7 +166,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
 
   // Attach query-like and finder methods
   attachQueryLikeMethods(Model, queryMocks)
-  attachFinderMethods(Model, () => createInstanceFn())
+  attachFinderMethods(Model, () => createInstanceFn(), queryMocks)
   attachResetFunction(Model, chainMocks, queryMocks)
 
   return Model as ModelMock<TDoc>

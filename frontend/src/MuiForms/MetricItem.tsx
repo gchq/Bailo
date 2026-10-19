@@ -1,8 +1,9 @@
 import CloseIcon from '@mui/icons-material/Close'
-import { IconButton, Stack, TextField, Tooltip } from '@mui/material'
+import { IconButton, Stack, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import * as _ from 'lodash-es'
 import { useCallback, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import { MetricValueWithId } from 'src/MuiForms/Metrics'
 import { isValidNumber } from 'utils/stringUtils'
 
@@ -31,13 +32,13 @@ export default function MetricItem({ metric, onChange, onDelete }: MetricItemPro
   return (
     <Stack>
       <Stack direction='row' spacing={1}>
-        <TextField
+        <LimitedTextField
           size='small'
           aria-label='metric name input'
           value={metric.name}
           onChange={(e) => onChange({ id: metric.id, name: e.target.value, value: metric.value })}
         />
-        <TextField
+        <LimitedTextField
           error={errorMessage.length > 0}
           helperText={errorMessage}
           size='small'

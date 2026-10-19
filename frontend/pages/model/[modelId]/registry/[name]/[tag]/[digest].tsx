@@ -42,6 +42,7 @@ import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -78,6 +79,14 @@ export default function ImageTagInformation() {
   const [filterList, setFilterList] = useState<string[]>([])
 
   const toolName = modelImage && modelImage.scanResults ? modelImage.scanResults[0].toolName : ''
+  const scanErrors = Object.fromEntries(
+    modelImage?.scanResults?.flatMap(
+      (scan) =>
+        scan.summary
+          ?.filter((summary): summary is string => typeof summary === 'string')
+          .map((summary) => [scan.toolName, { message: summary }]) ?? [],
+    ) ?? [],
+  )
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
@@ -106,7 +115,7 @@ export default function ImageTagInformation() {
     ))
   }, [filterList, handleFilterListChipOnClick])
 
-  const formattedData = useCallback(() => {
+  const formattedData = useMemo(() => {
     let resultList: VulnerabilityResultItem[] = []
 
     if (!modelImage) {
@@ -168,33 +177,31 @@ export default function ImageTagInformation() {
   }
 
   const tableRows = useCallback(() => {
-    return formattedData()
-      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-      .map((row, index) => (
-        <TableRow key={row.cve + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-          <TableCell component='th' scope='row'>
-            {row.cve}
-          </TableCell>
-          <TableCell>{row.severity.toUpperCase()}</TableCell>
-          <TableCell>
-            <List dense>
-              {row.packageList.map((packageId) => (
-                <ListItem key={packageId} sx={{ pl: 0 }}>
-                  {packageId}
-                </ListItem>
-              ))}
-            </List>
-          </TableCell>
-          <TableCell>
-            <Stack spacing={2}>
-              <MarkdownDisplay>{displayDescriptionSummary(row.description)}</MarkdownDisplay>
-              {(row.description.startsWith('Issue summary') || row.description.length > 250) && (
-                <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
-              )}
-            </Stack>
-          </TableCell>
-        </TableRow>
-      ))
+    return formattedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+      <TableRow key={row.cve + index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+        <TableCell component='th' scope='row'>
+          {row.cve}
+        </TableCell>
+        <TableCell>{row.severity.toUpperCase()}</TableCell>
+        <TableCell>
+          <List dense>
+            {row.packageList.map((packageId) => (
+              <ListItem key={packageId} sx={{ pl: 0 }}>
+                {packageId}
+              </ListItem>
+            ))}
+          </List>
+        </TableCell>
+        <TableCell>
+          <Stack spacing={2}>
+            <MarkdownDisplay>{displayDescriptionSummary(row.description)}</MarkdownDisplay>
+            {(row.description.startsWith('Issue summary') || row.description.length > 250) && (
+              <Button onClick={() => handleModalOpen(row.cve, row.description)}>Read full description</Button>
+            )}
+          </Stack>
+        </TableCell>
+      </TableRow>
+    ))
   }, [formattedData, page, rowsPerPage, handleModalOpen])
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
@@ -280,6 +287,7 @@ export default function ImageTagInformation() {
                 />
               </Stack>
             </Stack>
+            {MultipleErrorWrapper('Image scan failed', scanErrors)}
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={4}>
               <Stack direction='column'>
                 <Typography

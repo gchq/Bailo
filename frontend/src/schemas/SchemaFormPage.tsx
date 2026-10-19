@@ -98,7 +98,7 @@ export default function SchemaFormPage({
                           disabled={draftButtonLoading || actionsDisabled}
                           data-test='submitDeploymentAssessmentButton'
                         >
-                          Submit
+                          Submit for review
                         </Button>
                       </span>
                     </Tooltip>

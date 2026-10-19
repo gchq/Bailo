@@ -6,6 +6,7 @@ import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
@@ -18,7 +19,7 @@ import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { DecisionKeys, ReviewKind } from 'types/types'
+import { DecisionKeys, DeploymentAssessmentState, ReviewKind } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function DeploymentAssessment() {
@@ -43,6 +44,7 @@ export default function DeploymentAssessment() {
   const [isFormValid, setIsFormValid] = useState<boolean | undefined>(undefined)
   const [showValidation, setShowValidation] = useState(false)
   const reviewPopoverOpen = Boolean(anchorEl)
+  const [revokeApprovalOpen, setRevokeApprovalOpen] = useState(false)
 
   const handleValidityChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid)
@@ -93,19 +95,19 @@ export default function DeploymentAssessment() {
     return error
   }
 
-  function validateBeforePublish() {
+  function validateBeforeSubmitForReview() {
     if (isFormValid) {
       return true
     }
     setShowValidation(true)
     sendNotification({
-      msg: 'Please make sure that all required fields are appropriately filled out before publishing.',
+      msg: 'Please make sure that all required fields are appropriately filled out before submitting for review.',
       variant: 'error',
     })
     return false
   }
 
-  async function handlePublish() {
+  async function handleSubmitForReview() {
     if (deploymentAssessment) {
       setIsLoading(true)
       const response = await patchDeploymentAssessment(deploymentAssessment.id, undefined, false)
@@ -113,10 +115,23 @@ export default function DeploymentAssessment() {
         setPatchErrorMessage(await getErrorMessage(response))
       } else {
         mutateDeploymentAssessment()
-        sendNotification({ msg: 'Deployment Assessment successfully published.', variant: 'success' })
+        sendNotification({ msg: 'Deployment Assessment successfully submitted for review.', variant: 'success' })
       }
       setIsLoading(false)
     }
+  }
+
+  function handleIsEditChange(isEdit: boolean) {
+    if (isEdit && deploymentAssessment?.state === DeploymentAssessmentState.Approved) {
+      setRevokeApprovalOpen(true)
+    } else {
+      setIsEdit(isEdit)
+    }
+  }
+
+  function handleRevokeApprovalConfirm() {
+    setIsEdit(true)
+    setRevokeApprovalOpen(false)
   }
 
   const isLoadingDeploymentAssessment =
@@ -136,11 +151,11 @@ export default function DeploymentAssessment() {
                   setErrorMessage={setPatchErrorMessage}
                   disableButton={isEdit || isFormValid === undefined}
                   isLoading={isLoading}
-                  handlePublish={handlePublish}
-                  validateBeforePublish={validateBeforePublish}
+                  handleSubmitForReview={handleSubmitForReview}
+                  validateBeforeSubmitForReview={validateBeforeSubmitForReview}
                   draft={deploymentAssessment.draft}
                   text='This is a draft deployment assessment'
-                  dialogTitle='Confirm publish'
+                  dialogTitle='Confirm submission for review'
                   showButton
                 />
                 {!deploymentAssessment.draft && (
@@ -176,17 +191,30 @@ export default function DeploymentAssessment() {
                   <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
                     {deploymentAssessment && (
                       <Box sx={{ width: '100%' }}>
+                        {isEdit && deploymentAssessment.state === DeploymentAssessmentState.Approved && (
+                          <MessageAlert
+                            message='Saving changes to this deployment assessment will revoke the approval status'
+                            severity='warning'
+                          />
+                        )}
                         <EditableDeploymentAssessmentForm
                           deploymentAssessment={deploymentAssessment}
                           mutate={mutateDeploymentAssessment}
                           isEdit={isEdit}
-                          onIsEditChange={setIsEdit}
+                          onIsEditChange={handleIsEditChange}
                           showValidation={showValidation}
                           onValidityChange={handleValidityChange}
                         />
                       </Box>
                     )}
                   </Stack>
+                  <ConfirmationDialogue
+                    open={revokeApprovalOpen}
+                    title='Revoke Approval Status'
+                    onConfirm={handleRevokeApprovalConfirm}
+                    onCancel={() => setRevokeApprovalOpen(false)}
+                    dialogMessage='This deployment assessment is currently approved. Making any changes will revoke the approval status. Are you sure you want to edit this deployment assessment?'
+                  />
                   <ReviewComments
                     identifier={deploymentAssessment.id}
                     parentId={deploymentAssessment._id}

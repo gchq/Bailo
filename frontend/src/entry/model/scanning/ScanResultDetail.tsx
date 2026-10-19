@@ -90,7 +90,7 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
       )
     }
 
-    if (toolName === 'ModelScan') {
+    if ('vulnerabilityDescription' in vulnerability) {
       const v = vulnerability as ModelScanSummary
       return (
         <ListItem key={v.vulnerabilityDescription} sx={{ display: 'list-item', py: 0 }}>

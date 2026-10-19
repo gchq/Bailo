@@ -1,10 +1,11 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import FileCopy from '@mui/icons-material/FileCopy'
-import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { postFromTemplate } from 'actions/modelCard'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
@@ -101,7 +102,7 @@ export default function ModelTemplateSelect() {
                   value={selectedModel}
                   onChange={handleChange}
                   renderInput={(params) => (
-                    <TextField {...params} size='small' placeholder='Search for a model to use a template' />
+                    <LimitedTextField {...params} size='small' placeholder='Search for a model to use a template' />
                   )}
                 />
                 <Button variant='contained' disabled={!selectedModel} onClick={handleSubmit} loading={isButtonLoading}>

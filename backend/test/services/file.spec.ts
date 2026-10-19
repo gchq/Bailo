@@ -381,14 +381,34 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as any
     const modelId = 'testModelId'
 
-    FileModelMock.aggregate.mockResolvedValueOnce([{ modelId: 'testModel', id: testFileId }])
+    FileModelMock.aggregate.mockResolvedValueOnce([{ modelId: 'testModelId', id: testFileId }])
 
     const result = await removeFile(user, modelId, testFileId)
 
     expect(releaseServiceMocks.removeFileFromReleases).toHaveBeenCalled()
     expect(ScanModelMock.deleteMany).toHaveBeenCalledWith({ fileId: { $eq: testFileId } }, undefined)
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalled()
-    expect(result).toEqual({ id: testFileId, modelId: 'testModel' })
+    expect(result).toEqual({ id: testFileId, modelId: 'testModelId' })
+  })
+
+  test('removeFile > file belongs to a different model', async () => {
+    const user = { dn: 'testUser' } as any
+    const modelId = 'authorisedModelId'
+
+    FileModelMock.aggregate.mockResolvedValueOnce([{ modelId: 'unrelatedModelId', id: testFileId }])
+
+    const error = await removeFile(user, modelId, testFileId).catch((err) => err)
+
+    expect(error).toMatchObject({
+      code: 404,
+      message: 'The requested file was not found.',
+      context: { fileId: testFileId, modelId },
+    })
+    expect(authorisation.file).not.toHaveBeenCalledWith(user, expect.anything(), expect.anything(), FileAction.Delete)
+    expect(releaseServiceMocks.removeFileFromReleases).not.toHaveBeenCalled()
+    expect(ScanModelMock.deleteMany).not.toHaveBeenCalled()
+    expect(FileModelMock.findByIdAndDelete).not.toHaveBeenCalled()
+    expect(s3Mocks.deleteObject).not.toHaveBeenCalled()
   })
 
   test('removeFiles > success', async () => {
@@ -396,8 +416,8 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     vi.mocked(FileModelMock.aggregate)
-      .mockResolvedValueOnce([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
-      .mockResolvedValueOnce([{ modelId: 'testModel2', _id: { toString: vi.fn(() => testFileIdReversed) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileIdReversed) } }])
 
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed])
 
@@ -408,9 +428,9 @@ describe('services > file', () => {
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(s3Mocks.deleteObject).not.toHaveBeenCalled()
     expect(result).toHaveLength(2)
-    expect(result[0].modelId).toBe('testModel')
+    expect(result[0].modelId).toBe(modelId)
     expect(result[0].id).toBeUndefined()
-    expect(result[1].modelId).toBe('testModel2')
+    expect(result[1].modelId).toBe(modelId)
     expect(result[1].id).toBeUndefined()
   })
 
@@ -419,8 +439,8 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     vi.mocked(FileModelMock.aggregate)
-      .mockResolvedValueOnce([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
-      .mockResolvedValueOnce([{ modelId: 'testModel2', _id: { toString: vi.fn(() => testFileIdReversed) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileIdReversed) } }])
 
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], undefined, true)
 
@@ -431,9 +451,9 @@ describe('services > file', () => {
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(s3Mocks.deleteObject).toHaveBeenCalledTimes(2)
     expect(result).toHaveLength(2)
-    expect(result[0].modelId).toBe('testModel')
+    expect(result[0].modelId).toBe(modelId)
     expect(result[0].id).toBeUndefined()
-    expect(result[1].modelId).toBe('testModel2')
+    expect(result[1].modelId).toBe(modelId)
     expect(result[1].id).toBeUndefined()
   })
 
@@ -442,7 +462,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+      { modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     releaseServiceMocks.removeFileFromReleases.mockRejectedValueOnce('Cannot update releases')
@@ -455,7 +475,7 @@ describe('services > file', () => {
 
   test('removeFiles > no file permission', async () => {
     FileModelMock.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+      { modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } },
     ])
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
       if (action === FileAction.View) {
@@ -485,8 +505,8 @@ describe('services > file', () => {
       kind: 'mirrored-model',
     } as any)
     vi.mocked(FileModelMock.aggregate)
-      .mockResolvedValueOnce([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
-      .mockResolvedValueOnce([{ modelId: 'testModel2', _id: { toString: vi.fn(() => testFileIdReversed) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileId) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModelId', _id: { toString: vi.fn(() => testFileIdReversed) } }])
 
     const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], true)
 
@@ -496,9 +516,9 @@ describe('services > file', () => {
     expect(ScanModelMock.deleteMany).toHaveBeenNthCalledWith(2, { fileId: { $eq: undefined } }, undefined)
     expect(FileModelMock.findByIdAndDelete).toHaveBeenCalledTimes(2)
     expect(result).toHaveLength(2)
-    expect(result[0].modelId).toBe('testModel')
+    expect(result[0].modelId).toBe(modelId)
     expect(result[0].id).toBeUndefined()
-    expect(result[1].modelId).toBe('testModel2')
+    expect(result[1].modelId).toBe(modelId)
     expect(result[1].id).toBeUndefined()
   })
 

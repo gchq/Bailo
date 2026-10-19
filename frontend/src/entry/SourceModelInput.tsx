@@ -1,6 +1,6 @@
-import { TextField } from '@mui/material'
 import { ChangeEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import LimitedTextField from 'src/common/LimitedTextField'
 
 const htmlId = 'entry-source-model-id-input'
 
@@ -16,7 +16,7 @@ export default function SourceModelInput({ value, onChange }: SourceModelInputPr
 
   return (
     <LabelledInput fullWidth required label='Source Model ID' htmlFor={htmlId}>
-      <TextField
+      <LimitedTextField
         id={htmlId}
         value={value}
         size='small'

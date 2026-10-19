@@ -1,9 +1,10 @@
-import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import InlineDiff from 'src/common/InlineDiff'
+import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
 
 interface TagEditorProps {
@@ -60,7 +61,7 @@ function TagEditor({
         sx={{ alignItems: 'center' }}
       >
         <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-          <TextField
+          <LimitedTextField
             size='small'
             value={newTag}
             onKeyUp={(e) => {

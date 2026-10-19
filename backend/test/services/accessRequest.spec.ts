@@ -347,9 +347,24 @@ describe('services > accessRequest', () => {
   test('updateAccessRequest > validation error', async () => {
     schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
-    await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(
-      /^Access Request Metadata could not be validated against the schema./,
-    )
+    await expect(() =>
+      updateAccessRequest({} as any, 'test', { metadata: { overview: { name: 'test', entities: [] } } } as any),
+    ).rejects.toThrow(/^Access Request Metadata could not be validated against the schema./)
+  })
+
+  test('updateAccessRequest > validates the incoming metadata, not the stored metadata', async () => {
+    const stored = {
+      schemaId: 'example-schema',
+      metadata: { overview: { name: 'stored', entities: ['user:testUser'] } },
+      markModified: vi.fn(),
+      save: vi.fn(),
+    }
+    AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
+    const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
+
+    await updateAccessRequest({} as any, 'test', diff as any)
+
+    expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith('example-schema', diff.metadata)
   })
 
   test('newAccessRequestComment > success', async () => {

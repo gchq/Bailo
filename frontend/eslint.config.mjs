@@ -93,6 +93,15 @@ export default defineConfig([
               message:
                 "Do not import from the @mui/icons-material barrel. Use per-icon imports instead, e.g. `import Add from '@mui/icons-material/Add'`. Barrel imports significantly slow down Vitest imports.",
             },
+            {
+              name: '@mui/material',
+              importNames: ['TextField'],
+              message: 'Use src/common/LimitedTextField instead.',
+            },
+            {
+              name: '@mui/material/TextField',
+              message: 'Use src/common/LimitedTextField instead.',
+            },
           ],
           patterns: ['dayjs/*'],
         },

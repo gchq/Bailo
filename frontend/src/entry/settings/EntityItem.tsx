@@ -1,7 +1,8 @@
 import ClearIcon from '@mui/icons-material/Clear'
-import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, Tooltip } from '@mui/material'
 import * as _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import { CollaboratorEntry, EntryRole, SystemRoleKeys } from 'types/types'
 import { getRoleDisplayName } from 'utils/roles'
@@ -59,7 +60,7 @@ export default function EntityItem({
             options={entryRoleOptions}
             getOptionLabel={(role) => getRoleDisplayName(role, entryRoles)}
             onChange={onRoleChange}
-            renderInput={(params) => <TextField {...params} label='Select roles' />}
+            renderInput={(params) => <LimitedTextField {...params} label='Select roles' />}
             renderValue={(value, getTagProps) =>
               value.map((option, index) => (
                 <Chip label={getRoleDisplayName(option, entryRoles)} {...getTagProps({ index })} key={option} />

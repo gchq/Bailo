@@ -3,12 +3,13 @@ import Delete from '@mui/icons-material/Delete'
 import Forward from '@mui/icons-material/Forward'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import MoveDown from '@mui/icons-material/MoveDown'
-import { Autocomplete, Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { postSchemaMigration } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useCallback, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
@@ -178,7 +179,7 @@ export default function SchemaMigrationSelector() {
                   getOptionDisabled={(option) => option.name === targetSchema?.schema.name}
                   getOptionLabel={(option: SchemaInterface) => option.name}
                   sx={{ width: 300 }}
-                  renderInput={(params) => <TextField {...params} label='Source schema ' />}
+                  renderInput={(params) => <LimitedTextField {...params} label='Source schema ' />}
                   onChange={handleSourceSchemaChange}
                 />
                 <Forward color='primary' fontSize='large' />
@@ -190,7 +191,7 @@ export default function SchemaMigrationSelector() {
                   getOptionDisabled={(option) => option.id === sourceSchema?.schema.name}
                   getOptionLabel={(option: SchemaInterface) => option.name}
                   sx={{ width: 300 }}
-                  renderInput={(params) => <TextField {...params} label='Target schema' />}
+                  renderInput={(params) => <LimitedTextField {...params} label='Target schema' />}
                   onChange={handleTargetSchemaChange}
                 />
               </Stack>

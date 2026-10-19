@@ -1,10 +1,10 @@
-import { TextField } from '@mui/material'
 import { postDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Title from 'src/common/Title'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -155,7 +155,7 @@ export default function NewDeploymentAssessment() {
       disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
     >
       <LabelledInput fullWidth label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
-        <TextField
+        <LimitedTextField
           fullWidth
           size='small'
           id='deployment-assessment-name'

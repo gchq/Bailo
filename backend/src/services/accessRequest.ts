@@ -226,15 +226,15 @@ export async function updateAccessRequest(
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
-  // Ensure that the AR meets the schema
-  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
-  if (!valid) {
-    throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      errors,
-    })
-  }
-
   if (diff.metadata) {
+    // Validate the incoming content, not what is already stored
+    const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
+    if (!valid) {
+      throw BadReq('Access Request Metadata could not be validated against the schema.', {
+        errors,
+      })
+    }
+
     accessRequest.metadata = diff.metadata
     accessRequest.markModified('metadata')
   }
