@@ -12,6 +12,7 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { ArrowDropDownIcon } from 'node_modules/@mui/x-date-pickers/index.mjs'
 import { useState } from 'react'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import MessageAlert from 'src/MessageAlert'
@@ -24,6 +25,8 @@ interface ReviewPopperProps {
   onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate?: Dayjs | null) => void
   includeDueDate?: boolean
   deploymentAssessmentReview?: boolean
+  reviewComment: string
+  onReviewCommentChange: (value: string) => void
 }
 
 export default function ReviewPopper({
@@ -33,6 +36,8 @@ export default function ReviewPopper({
   errorMessage,
   onSubmit,
   deploymentAssessmentReview = false,
+  reviewComment,
+  onReviewCommentChange,
 }: ReviewPopperProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const theme = useTheme()
@@ -44,7 +49,7 @@ export default function ReviewPopper({
   }
 
   const reviewPopperContent = () => (
-    <Stack spacing={2} sx={{ maxWidth: '100%' }}>
+    <Stack spacing={2} sx={{ width: '100%' }}>
       <ReviewWithComment
         onSubmit={handleSubmit}
         reviews={reviews}
@@ -52,6 +57,8 @@ export default function ReviewPopper({
         includeDueDate={includeDueDate}
         onCancel={() => setAnchorEl(null)}
         deploymentAssessmentReview={deploymentAssessmentReview}
+        reviewComment={reviewComment}
+        onReviewCommentChange={onReviewCommentChange}
       />
       <MessageAlert message={errorMessage} severity='error' />
     </Stack>
@@ -63,6 +70,7 @@ export default function ReviewPopper({
         onClick={(e) => setAnchorEl(e.currentTarget)}
         data-test='openReviewPopperBtn'
         sx={{ height: 'max-content' }}
+        endIcon={<ArrowDropDownIcon />}
       >
         Submit review
       </Button>
@@ -83,10 +91,12 @@ export default function ReviewPopper({
             minWidth: '450px',
             boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
             position: 'fixed !important',
-            left: '80% !important',
             top: '10% !important',
-            right: theme.spacing(4),
-            transform: 'translateX(-50%) !important', // Centre it at the top
+            // Override Popper.js inline positioning so it stays pinned to the right edge
+            left: 'auto !important',
+            right: `${theme.spacing(4)} !important`,
+            transform: 'none !important',
+            maxWidth: `calc(100vw - ${theme.spacing(8)})`,
             zIndex: (theme) => theme.zIndex.tooltip,
           }}
         >
@@ -97,12 +107,11 @@ export default function ReviewPopper({
               borderColor: theme.palette.divider,
               maxHeight: '80vh',
               overflowY: 'auto',
+              width: '100%',
             }}
           >
-            <Stack direction='row' sx={{ p: 2 }}>
-              <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-                {reviewPopperContent()}
-              </Stack>
+            <Stack direction='row' sx={{ p: 2, width: '100%' }}>
+              {reviewPopperContent()}
             </Stack>
           </Paper>
         </Popper>

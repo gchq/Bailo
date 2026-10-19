@@ -44,6 +44,7 @@ export default function Release() {
     semver: `${semver}`,
   })
   const { mutateResponses } = useGetResponses([release ? release._id : '', ...reviews.map((review) => review._id)])
+  const [reviewComment, setReviewComment] = useState('')
 
   const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
     setSplitSchema(newSplitSchema)
@@ -204,6 +205,8 @@ export default function Release() {
                   onSubmit={handleSubmitReview}
                   isLoading={isReviewButtonLoading}
                   errorMessage={reviewErrorMessage}
+                  reviewComment={reviewComment}
+                  onReviewCommentChange={(comment) => setReviewComment(comment)}
                 />
               </Stack>
               {release &&

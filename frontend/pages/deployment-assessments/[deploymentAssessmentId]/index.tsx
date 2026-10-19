@@ -39,6 +39,7 @@ export default function DeploymentAssessment() {
   const [isFormValid, setIsFormValid] = useState<boolean | undefined>(undefined)
   const [showValidation, setShowValidation] = useState(false)
   const [revokeApprovalOpen, setRevokeApprovalOpen] = useState(false)
+  const [reviewComment, setReviewComment] = useState('')
 
   const handleValidityChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid)
@@ -177,6 +178,8 @@ export default function DeploymentAssessment() {
                           isLoading={isReviewButtonLoading}
                           errorMessage={errorMessage}
                           deploymentAssessmentReview
+                          reviewComment={reviewComment}
+                          onReviewCommentChange={(comment) => setReviewComment(comment)}
                         />
                       )}
                     </Stack>

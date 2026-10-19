@@ -26,6 +26,8 @@ type ReviewWithCommentProps = {
   hideRequestChangesButton?: boolean
   deploymentAssessmentReview?: boolean
   onCancel?: () => void
+  reviewComment: string
+  onReviewCommentChange: (value: string) => void
 }
 
 export default function ReviewWithComment({
@@ -36,11 +38,12 @@ export default function ReviewWithComment({
   includeDueDate = false,
   hideRequestChangesButton = false,
   deploymentAssessmentReview = false,
+  reviewComment,
+  onReviewCommentChange,
   onCancel,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
-  const [reviewComment, setReviewComment] = useState('')
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
@@ -102,7 +105,7 @@ export default function ReviewWithComment({
     } else if (!reviewRequest?.role && !deploymentAssessmentReview) {
       setErrorText('Please select a role before submitting your review.')
     } else {
-      setReviewComment('')
+      onReviewCommentChange('')
       onSubmit(selectedDecision, reviewComment, reviewRequest.role, dueDate)
     }
   }
@@ -163,7 +166,7 @@ export default function ReviewWithComment({
             <RichTextEditor
               dataTest='reviewWithCommentTextField'
               value={reviewComment}
-              onChange={(newValue) => setReviewComment(newValue)}
+              onChange={(newValue) => onReviewCommentChange(newValue)}
               alwaysShowToolbar
             />
             <Typography variant='caption' color='error'>
