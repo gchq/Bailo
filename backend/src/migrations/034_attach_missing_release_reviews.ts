@@ -50,13 +50,15 @@ export async function up() {
     { $project: { _id: 1, modelId: 1, semver: '$semverString' } },
   ])
 
-  for (const { modelId, semver } of missingPublishedReleaseReviews) {
-    const model = await ModelModel.findOne({ id: modelId }).lean()
-    const release = await ReleaseModel.findOne({ modelId, semver })
-    if (model && release) {
-      await createReleaseReviews(model, release)
-    }
-  }
+  await Promise.all(
+    missingPublishedReleaseReviews.map(async ({ modelId, semver }) => {
+      const model = await ModelModel.findOne({ id: modelId }).lean()
+      const release = await ReleaseModel.findOne({ modelId, semver })
+      if (model && release) {
+        await createReleaseReviews(model, release)
+      }
+    }),
+  )
 }
 
 export async function down() {
