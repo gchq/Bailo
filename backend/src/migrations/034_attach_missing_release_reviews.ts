@@ -53,7 +53,7 @@ export async function up() {
   await Promise.all(
     missingPublishedReleaseReviews.map(async ({ modelId, semver }) => {
       const model = await ModelModel.findOne({ id: modelId }).lean()
-      const release = await ReleaseModel.findOne({ modelId, semver })
+      const release = await ReleaseModel.findOne({ modelId, semver, minor: false })
       if (model && release) {
         await createReleaseReviews(model, release)
       }
