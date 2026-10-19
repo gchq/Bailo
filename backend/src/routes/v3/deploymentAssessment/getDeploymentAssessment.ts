@@ -48,10 +48,13 @@ export const getDeploymentAssessment = [
     req.audit = AuditInfo.ViewDeploymentAssessment
     const { params } = parse(req, getDeploymentAssessmentSchema)
 
-    const details = await getDeploymentAssessmentDetails(req.user, params.deploymentAssessmentId)
+    const { deploymentAssessment, responses, state } = await getDeploymentAssessmentDetails(
+      req.user,
+      params.deploymentAssessmentId,
+    )
 
-    await audit.onViewDeploymentAssessment(req, details.deploymentAssessment)
+    await audit.onViewDeploymentAssessment(req, deploymentAssessment)
 
-    res.json(details)
+    res.json({ deploymentAssessment, responses, state })
   },
 ]
