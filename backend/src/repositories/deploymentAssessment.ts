@@ -2,7 +2,7 @@ import { escapeRegExp } from 'lodash-es'
 import { QueryFilter } from 'mongoose'
 
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
-import { DecisionKeys, ResponseKind } from '../models/Response.js'
+import { DecisionKeys, ResponseKind, type ResponseReaction } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { ReviewKind } from '../types/enums.js'
 
@@ -145,10 +145,7 @@ export interface DeploymentAssessmentCommentRecord {
   id: string
   entity: string
   comment?: string
-  reactions: Array<{
-    kind: string
-    users: string[]
-  }>
+  reactions: ResponseReaction[]
   commentEditedAt?: string
   createdAt: string
   updatedAt: string
@@ -165,10 +162,7 @@ export interface DeploymentAssessmentReviewRecord {
   entity: string
   decision?: DecisionKeys
   comment?: string
-  reactions: Array<{
-    kind: string
-    users: string[]
-  }>
+  reactions: ResponseReaction[]
   commentEditedAt?: string
   createdAt: string
   updatedAt: string
