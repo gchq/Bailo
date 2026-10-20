@@ -501,13 +501,13 @@ jobs:
 
       - name: Dump docker compose logs
         if: always() && matrix.job_name != 'cross_instance'
-        run: docker compose logs > logs/stack.log
+        run: docker compose -f compose.yaml -f compose.prod.yaml --env-file prod.env logs > logs/stack.log
 
       - name: Dump cross-instance logs
         if: always() && matrix.job_name == 'cross_instance'
         run: |
-          docker compose -p bailo-a logs > logs/instance-a.log 2>&1
-          docker compose -p bailo-b logs > logs/instance-b.log 2>&1
+          INSTANCE_NAME=bailo_a docker compose -f compose.yaml -f .github/resources/compose/compose.instance-a.yaml -p bailo-a logs > logs/instance-a.log 2>&1
+          INSTANCE_NAME=bailo_b docker compose -f compose.yaml -f .github/resources/compose/compose.instance-b.yaml -p bailo-b logs > logs/instance-b.log 2>&1
 
       - name: Docker Compose Logs
         if: always() && matrix.job_name != 'cross_instance'
