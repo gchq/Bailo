@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { Decision, ResponseKind } from '../../src/models/Response.js'
+import ResponseModel, { Decision, ResponseKind } from '../../src/models/Response.js'
+import ReviewModel from '../../src/models/Review.js'
 import {
   findDeploymentAssessmentComments,
   findDeploymentAssessmentReviews,
@@ -265,7 +266,7 @@ describe('repositories > deploymentAssessment', () => {
         },
         {
           $lookup: {
-            from: 'v2_responses',
+            from: ResponseModel.collection.name,
             let: { deploymentAssessmentObjectId: '$_id' },
             pipeline: [
               {
@@ -354,7 +355,7 @@ describe('repositories > deploymentAssessment', () => {
         },
         {
           $lookup: {
-            from: 'v2_reviews',
+            from: ReviewModel.collection.name,
             let: { deploymentAssessmentId: '$id' },
             pipeline: [
               {
@@ -369,7 +370,7 @@ describe('repositories > deploymentAssessment', () => {
               },
               {
                 $lookup: {
-                  from: 'v2_responses',
+                  from: ResponseModel.collection.name,
                   let: { reviewId: '$_id' },
                   pipeline: [
                     {
@@ -432,7 +433,7 @@ describe('repositories > deploymentAssessment', () => {
         },
         {
           $lookup: {
-            from: 'v2_reviews',
+            from: ReviewModel.collection.name,
             let: { deploymentAssessmentId: '$id' },
             pipeline: [
               {
@@ -449,7 +450,7 @@ describe('repositories > deploymentAssessment', () => {
               { $limit: 1 },
               {
                 $lookup: {
-                  from: 'v2_responses',
+                  from: ResponseModel.collection.name,
                   let: { reviewId: '$_id' },
                   pipeline: [
                     {

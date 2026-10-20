@@ -59,6 +59,9 @@ type InstanceType<TDoc> = Partial<TDoc> &
 type ModelMock<TDoc extends { _id?: any }> = MockInstance & {
   new (doc?: Partial<TDoc>): TDoc & InstanceType<TDoc>
 } & Record<MethodNames, MockedFunction<any>> & {
+    collection: {
+      name: string
+    }
     findById: MockedFunction<(id: any) => Promise<TDoc & InstanceType<TDoc>>>
     findOne: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
     findOneAndDelete: MockedFunction<(filter?: any) => Promise<TDoc & InstanceType<TDoc>>>
@@ -147,6 +150,7 @@ function attachResetFunction(
 export function createMongooseModelMock<TDoc extends { _id?: any }>(
   name = 'MockModel',
   toObjectValue: Partial<TDoc> = {},
+  collectionName = name,
 ): ModelMock<TDoc> {
   const chainMocks = createMockFns()
   const queryMocks: Record<string, MockedFunction<any>> = {}
@@ -158,6 +162,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
   }) as unknown as { new (doc?: Partial<TDoc>): TDoc & InstanceType<TDoc> }
 
   Object.defineProperty(Model, 'name', { value: name })
+  Object.defineProperty(Model, 'collection', { value: { name: collectionName } })
 
   // Attach chainable static methods to the model itself
   for (const method of CHAINABLE_METHODS) {
@@ -194,8 +199,8 @@ export const modelMocks = {
   ModelModel: createMongooseModelMock('ModelModel'),
   ModelCardRevisionModel: createMongooseModelMock('ModelCardRevisionModel'),
   ReleaseModel: createMongooseModelMock('ReleaseModel'),
-  ResponseModel: createMongooseModelMock('ResponseModel'),
-  ReviewModel: createMongooseModelMock('ReviewModel'),
+  ResponseModel: createMongooseModelMock('ResponseModel', {}, 'v2_responses'),
+  ReviewModel: createMongooseModelMock('ReviewModel', {}, 'v2_reviews'),
   ReviewRoleModel: createMongooseModelMock('ReviewRoleModel'),
   ScanModel: createMongooseModelMock('ScanModel'),
   SchemaModel: createMongooseModelMock('SchemaModel'),

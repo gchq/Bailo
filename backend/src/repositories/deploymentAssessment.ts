@@ -2,7 +2,7 @@ import { escapeRegExp } from 'lodash-es'
 import { QueryFilter } from 'mongoose'
 
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
-import { DecisionKeys, ResponseKind, type ResponseReaction } from '../models/Response.js'
+import ResponseModel, { DecisionKeys, ResponseKind, type ResponseReaction } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { ReviewKind } from '../types/enums.js'
 
@@ -192,7 +192,7 @@ export async function findDeploymentAssessmentComments(
     },
     {
       $lookup: {
-        from: 'v2_responses',
+        from: ResponseModel.collection.name,
         let: { deploymentAssessmentObjectId: '$_id' },
         pipeline: [
           {
@@ -248,7 +248,7 @@ export async function findDeploymentAssessmentReviews(
     },
     {
       $lookup: {
-        from: 'v2_reviews',
+        from: ReviewModel.collection.name,
         let: { deploymentAssessmentId: '$id' },
         pipeline: [
           {
@@ -263,7 +263,7 @@ export async function findDeploymentAssessmentReviews(
           },
           {
             $lookup: {
-              from: 'v2_responses',
+              from: ResponseModel.collection.name,
               let: { reviewId: '$_id' },
               pipeline: [
                 {
@@ -334,7 +334,7 @@ export async function findDeploymentAssessmentReviews(
     },
     {
       $lookup: {
-        from: 'v2_reviews',
+        from: ReviewModel.collection.name,
         let: { deploymentAssessmentId: '$id' },
         pipeline: [
           {
@@ -355,7 +355,7 @@ export async function findDeploymentAssessmentReviews(
           },
           {
             $lookup: {
-              from: 'v2_responses',
+              from: ResponseModel.collection.name,
               let: { reviewId: '$_id' },
               pipeline: [
                 {
