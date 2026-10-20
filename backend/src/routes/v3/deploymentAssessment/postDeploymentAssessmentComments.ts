@@ -42,7 +42,7 @@ export const postDeploymentAssessmentComments = [
     res.status(201).json({
       id: response._id.toString(),
       entity: response.entity,
-      comment: response.comment ?? body.comment,
+      comment: response.comment!,
       reactions: response.reactions ?? [],
       ...(response.commentEditedAt && { commentEditedAt: response.commentEditedAt }),
       createdAt: response.createdAt,
