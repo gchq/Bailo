@@ -1,8 +1,9 @@
 import Alert from '@mui/material/Alert'
 import Link from 'src/Link'
 
-// Static counterpart of frontend/src/FeatureAvailability.tsx - there is no backend to query for the UI config or scanners here.
-type FeatureKey = 'inference' | 'modelMirrorImport' | 'untrustedModel' | 'llmImport' | 'fileScanning' | 'imageScanning'
+// Static counterpart of frontend/src/FeatureAvailability.tsx - there is no backend to query here.
+type FeatureKey =
+  'inference' | 'modelMirrorImport' | 'untrustedModel' | 'llmImport' | 'fileScanning' | 'imageScanning' | 'federation'
 
 const features: Record<FeatureKey, { name: string; configKey: string }> = {
   inference: { name: 'Inferencing', configKey: 'ui.inference.enabled' },
@@ -11,6 +12,7 @@ const features: Record<FeatureKey, { name: string; configKey: string }> = {
   llmImport: { name: 'LLM import', configKey: 'ui.llmImport.enabled' },
   fileScanning: { name: 'File scanning', configKey: 'connectors.artefactScanners.kinds' },
   imageScanning: { name: 'Image scanning', configKey: 'connectors.artefactScanners.kinds' },
+  federation: { name: 'Federation', configKey: 'federation.state' },
 }
 
 type FeatureAvailabilityProps = {
