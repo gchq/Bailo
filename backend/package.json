@@ -65,7 +65,7 @@
     "mongodb": "^7.6.0",
     "mongoose": "^9.10.2",
     "morgan": "^1.12.1",
-    "nanoid": "^6.0.0",
+    "nanoid": "^6.0.2",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^10.0.12",
