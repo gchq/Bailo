@@ -19,6 +19,7 @@ import {
 } from '../../src/services/deploymentAssessment.js'
 import { getModelsByIdsNoAuth } from '../../src/services/model.js'
 import {
+  notifyCreatorOfDeploymentAssessmentApproval,
   notifyModelOwnersOfDeploymentApproval,
   notifyReviewResponseForDeploymentAssessment,
 } from '../../src/services/smtp/smtp.js'
@@ -49,8 +50,8 @@ vi.mock('../../src/services/schema.js', () => schemaMocks)
 
 const smtpMocks = vi.hoisted(() => ({
   notifyRiskOwnerOfDeploymentAssessment: vi.fn(),
-  notifyModelOwnersOfDeploymentAssessment: vi.fn(),
   notifyReviewResponseForDeploymentAssessment: vi.fn(),
+  notifyCreatorOfDeploymentAssessmentApproval: vi.fn(),
   notifyModelOwnersOfDeploymentApproval: vi.fn(),
   notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked: vi.fn(),
 }))
@@ -175,6 +176,17 @@ describe('services > deploymentAssessment', () => {
       role: 'riskOwners',
     })
     expect(ReviewModelMock.save).toHaveBeenCalled()
+  })
+
+  test('does not notify model owners when a submitted assessment is created', async () => {
+    await createDeploymentAssessment({ dn: 'creator' }, params)
+
+    expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
+      'user:risk-owner',
+      expect.anything(),
+      'Risk Owner',
+    )
+    expect(smtpMocks.notifyModelOwnersOfDeploymentApproval).not.toHaveBeenCalled()
   })
 
   test('creates an incomplete draft without requiring optional fields', async () => {
@@ -578,6 +590,49 @@ describe('services > deploymentAssessment', () => {
       )
     })
 
+    test('notifies the deployment assessment creator when approved', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      vi.mocked(getModelsByIdsNoAuth).mockResolvedValueOnce([])
+
+      await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve)
+
+      expect(notifyCreatorOfDeploymentAssessmentApproval).toHaveBeenCalledWith(assessment, 'user:risk-owner')
+    })
+
+    test.each([Decision.Reject, Decision.RequestChanges])(
+      'does not send approval notifications when the decision is %s',
+      async (decision) => {
+        DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+        ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+
+        await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, decision)
+
+        expect(notifyCreatorOfDeploymentAssessmentApproval).not.toHaveBeenCalled()
+        expect(notifyModelOwnersOfDeploymentApproval).not.toHaveBeenCalled()
+      },
+    )
+
+    test('still notifies model owners when the creator notification fails on approval', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
+      vi.mocked(notifyCreatorOfDeploymentAssessmentApproval).mockRejectedValueOnce(new Error('SMTP example failure'))
+      vi.mocked(getModelsByIdsNoAuth).mockResolvedValueOnce([
+        {
+          id: 'model-1',
+          name: 'Test Model',
+          kind: 'model',
+          collaborators: [{ entity: 'user:model-owner', roles: [SystemRoles.Owner] }],
+        } as ModelDoc,
+      ])
+
+      await expect(
+        reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve),
+      ).resolves.toBeDefined()
+
+      expect(notifyModelOwnersOfDeploymentApproval).toHaveBeenCalled()
+    })
+
     test('no review failure when notification fails', async () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
       ReviewModelMock.findOne.mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(review) })
@@ -741,8 +796,6 @@ describe('services > deploymentAssessment', () => {
     test('notifies stakeholders when a draft is submitted', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-      // the notification lookup uses `.lean()`, unlike the validation lookup
-      ModelModelMock.find.mockResolvedValueOnce([liveModel]).mockReturnValueOnce({ lean: () => [liveModel] })
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
@@ -751,60 +804,16 @@ describe('services > deploymentAssessment', () => {
         deploymentAssessment,
         'Risk Owner',
       )
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
     })
 
-    test('sends one model-owner notification per owner when a submitted assessment contains several models', async () => {
+    test('does not notify model owners when a draft is submitted', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
-      deploymentAssessment.metadata = {
-        ...params.metadata,
-        modelOverview: { modelIds: ['model-one', 'model-two'] },
-      }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-      ModelModelMock.find
-        .mockResolvedValueOnce([
-          liveModel,
-          {
-            ...liveModel,
-            id: 'model-two',
-            collaborators: [
-              { entity: 'user:user', roles: ['owner'] },
-              { entity: 'user:other-owner', roles: ['owner'] },
-            ],
-          },
-        ])
-        .mockReturnValueOnce({
-          lean: () => [
-            liveModel,
-            {
-              ...liveModel,
-              id: 'model-two',
-              collaborators: [
-                { entity: 'user:user', roles: ['owner'] },
-                { entity: 'user:other-owner', roles: ['owner'] },
-              ],
-            },
-          ],
-        })
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalledTimes(2)
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalledWith(
-        ['user:user'],
-        deploymentAssessment,
-        expect.arrayContaining([
-          expect.objectContaining({ id: 'model-one' }),
-          expect.objectContaining({ id: 'model-two' }),
-        ]),
-        'Risk Owner',
-      )
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalledWith(
-        ['user:other-owner'],
-        deploymentAssessment,
-        [expect.objectContaining({ id: 'model-two' })],
-        'Risk Owner',
-      )
+      expect(smtpMocks.notifyModelOwnersOfDeploymentApproval).not.toHaveBeenCalled()
+      expect(getModelsByIdsNoAuth).not.toHaveBeenCalled()
     })
 
     test('notifies each risk owner when a draft with several is submitted', async () => {
@@ -817,8 +826,6 @@ describe('services > deploymentAssessment', () => {
         },
       }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-      // the notification lookup uses `.lean()`, unlike the validation lookup
-      ModelModelMock.find.mockResolvedValueOnce([liveModel]).mockReturnValueOnce({ lean: () => [liveModel] })
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
@@ -842,7 +849,7 @@ describe('services > deploymentAssessment', () => {
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { metadata: params.metadata })
 
       expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentApproval).not.toHaveBeenCalled()
     })
 
     test('does not re-notify stakeholders when an already submitted assessment is edited', async () => {
@@ -860,7 +867,7 @@ describe('services > deploymentAssessment', () => {
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
       expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
+      expect(smtpMocks.notifyModelOwnersOfDeploymentApproval).not.toHaveBeenCalled()
     })
 
     test('does not look up a review when a draft is updated', async () => {

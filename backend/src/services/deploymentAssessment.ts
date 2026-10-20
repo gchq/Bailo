@@ -34,8 +34,6 @@ import { removeResponsesByParentIds } from './response.js'
 import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import {
-  notifyModelOwnersOfDeploymentApproval,
-  notifyModelOwnersOfDeploymentAssessment,
   notifyReviewResponseForDeploymentAssessment,
   notifyRiskOwnerOfDeploymentAssessment,
   notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked,
@@ -141,38 +139,21 @@ async function validateDeploymentAssessment(
   }
 }
 
-async function notifyDeploymentStakeholders(
+async function notifyRiskOwnersOfSubmission(
   riskOwners: string[] = [],
-  modelIds: string[] = [],
   deploymentAssessment: DeploymentAssessmentInterface,
 ): Promise<void> {
-  if (riskOwners.length === 0 && modelIds.length === 0) {
+  if (riskOwners.length === 0) {
     return
   }
 
   try {
-    const models = await ModelModel.find({
-      id: { $in: modelIds },
-    }).lean()
-
     const creator = await authentication.getUserInformation(toEntity('user', deploymentAssessment.createdBy))
     const creatorName = creator.name || deploymentAssessment.createdBy
 
-    const modelsByOwner = new Map<string, typeof models>()
-    for (const model of models) {
-      for (const owner of new Set(getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner])) {
-        modelsByOwner.set(owner, [...(modelsByOwner.get(owner) ?? []), model])
-      }
-    }
-
-    const notifications = [
-      ...riskOwners.map((riskOwner) =>
-        notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
-      ),
-      ...[...modelsByOwner].map(([owner, ownerModels]) =>
-        notifyModelOwnersOfDeploymentAssessment([owner], deploymentAssessment, ownerModels, creatorName),
-      ),
-    ]
+    const notifications = riskOwners.map((riskOwner) =>
+      notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
+    )
 
     const results = await Promise.allSettled(notifications)
 
@@ -360,33 +341,23 @@ async function notifyDeploymentAssessmentReviewed(
   assessmentReviewer: string,
 ): Promise<void> {
   try {
-    switch (decision) {
-      case Decision.Reject:
-      case Decision.RequestChanges:
-        await notifyReviewResponseForDeploymentAssessment(deploymentAssessment, decision, assessmentReviewer)
-        break
+    const models = await getModelsByIdsNoAuth(deploymentAssessment.metadata.modelOverview?.modelIds ?? [])
+    const recipients = [toEntity('user', deploymentAssessment.createdBy)]
 
-      case Decision.Approve: {
-        const models = await getModelsByIdsNoAuth(deploymentAssessment.metadata.modelOverview?.modelIds ?? [])
-        const modelsByOwner = new Map<string, typeof models>()
-        for (const model of models) {
-          for (const owner of new Set(getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner])) {
-            modelsByOwner.set(owner, [...(modelsByOwner.get(owner) ?? []), model])
-          }
-        }
-        await Promise.all(
-          [...modelsByOwner].map(([owner, ownerModels]) =>
-            notifyModelOwnersOfDeploymentApproval(
-              [owner],
-              deploymentAssessment,
-              ownerModels,
-              deploymentAssessment.createdBy,
-            ),
-          ),
-        )
-        break
-      }
+    if (decision === Decision.Approve) {
+      const modelOwners = models.flatMap(
+        (model) => getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner],
+      )
+      recipients.push(...modelOwners)
     }
+
+    await notifyReviewResponseForDeploymentAssessment(
+      [...new Set(recipients)],
+      deploymentAssessment,
+      decision,
+      models,
+      assessmentReviewer,
+    )
   } catch (error) {
     log.warn(
       {
@@ -477,11 +448,7 @@ export async function createDeploymentAssessment(
   }
 
   if (!draft) {
-    await notifyDeploymentStakeholders(
-      metadata.signOff.riskOwners,
-      metadata.modelOverview.modelIds ?? [],
-      deploymentAssessment,
-    )
+    await notifyRiskOwnersOfSubmission(metadata.signOff.riskOwners, deploymentAssessment)
   }
 
   return deploymentAssessment
@@ -570,11 +537,7 @@ export async function updateDeploymentAssessment(
   }
 
   if (isBeingSubmitted) {
-    await notifyDeploymentStakeholders(
-      deploymentAssessment.metadata?.signOff?.riskOwners ?? [],
-      deploymentAssessment.metadata?.modelOverview?.modelIds ?? [],
-      deploymentAssessment,
-    )
+    await notifyRiskOwnersOfSubmission(deploymentAssessment.metadata?.signOff?.riskOwners ?? [], deploymentAssessment)
   }
 
   const review = isBeingSubmitted
