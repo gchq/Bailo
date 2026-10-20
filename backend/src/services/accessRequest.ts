@@ -5,11 +5,12 @@ import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
-import { EntryKind, ModelDoc } from '../models/Model.js'
-import ResponseModel, { ResponseKind } from '../models/Response.js'
+import { EntryKind, ModelDoc, SystemRoles } from '../models/Model.js'
+import ResponseModel, { Decision, DecisionKeys, ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { ReviewKind } from '../types/enums.js'
 import { AccessRequestUserPermissions } from '../types/types.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -219,12 +220,40 @@ export async function updateAccessRequest(
   diff: Partial<UpdateAccessRequestParams>,
 ) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
+
+  //should this be lean?
   const model = await getModelById(user, accessRequest.modelId)
 
   const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
+
+  const latestReview = await ReviewModel.findOne({
+    accessRequestId,
+    kind: ReviewKind.Access,
+  }).sort({ createdAt: -1 })
+
+  const parentIds = latestReview ? [latestReview._id, accessRequest._id] : accessRequest._id
+
+  const responses = await ResponseModel.find({ parentId: parentIds }).sort({
+    createdAt: -1,
+  })
+  //I believe DecisionKeys is the correct type, no new AR-specific type is necessary, like for DAs
+  const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
+    DecisionKeys | undefined
+
+  const newResponse =
+    latestDecision === Decision.Approve && latestReview
+      ? new ResponseModel({
+          entity: toEntity('user', user.dn),
+          kind: ResponseKind.Review,
+          role: SystemRoles.Owner,
+          parentId: latestReview._id,
+          decision: Decision.Undo,
+          comment: "Automatically revoked this Access Request's approval status by making changes",
+        })
+      : undefined
 
   if (diff.metadata) {
     // Validate the incoming content, not what is already stored
@@ -238,8 +267,12 @@ export async function updateAccessRequest(
     accessRequest.metadata = diff.metadata
     accessRequest.markModified('metadata')
   }
-
+  //if not diff.metadata, what is this the point of this?
+  //make transaction of this
   await accessRequest.save()
+  if (newResponse) {
+    await newResponse.save()
+  }
 
   return accessRequest
 }
