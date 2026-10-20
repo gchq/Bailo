@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/astral-sh/uv:python3.14-alpine@sha256:65b922d2241d4c54318c4140d5e380d10e75c608dae409a750c587aa466da077 AS sphinx-docs
+FROM ghcr.io/astral-sh/uv:python3.14-alpine@sha256:0cb69bb18ffcd57db04f045010b0234132a111da70dde5a393d26ad288d38e13 AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
