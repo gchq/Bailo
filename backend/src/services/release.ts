@@ -212,6 +212,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     throw BadReq(`Cannot update a release on a mirrored model.`)
   }
   const release = await getReleaseBySemver(user, model, semver)
+  const isBeingPublished = release.draft && !delta.draft
 
   //Attempt to draft a published release
   if (!release.draft && delta.draft) {
@@ -228,13 +229,14 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
       modelId: modelId,
     })
   }
-  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver }, { $set: release })
+
+  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver }, { $set: release }, { new: true })
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  if (release.draft && !delta.draft) {
+  if (isBeingPublished) {
     try {
       await createReleaseReviews(model, updatedRelease)
     } catch (error) {
