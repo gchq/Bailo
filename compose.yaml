@@ -8,7 +8,7 @@ configs:
 
 services:
   mongo:
-    image: mongodb/mongodb-community-server:8.3.11-ubi9@sha256:bc6d54e492f6b2bc03f6b27fd3645a7da77c89c0a3d8ba5dbf07f1e0af7f6d2a
+    image: mongodb/mongodb-community-server:9.0.2-ubi9@sha256:3b0731b7ede6df6011525ae7e528edbfd3ac9b6ca1848b817efa0b5466d3d9db
     networks:
       internal:
     environment:
