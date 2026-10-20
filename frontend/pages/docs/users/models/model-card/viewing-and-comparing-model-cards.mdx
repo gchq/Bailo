@@ -2,31 +2,79 @@ import Image from 'next/image'
 import Box from '@mui/material/Box'
 import bailoHistory from 'public/docs/model-card-history-compare.png'
 import bailoHistoryCompare from 'public/docs/model-compare-page.png'
+import modelCardViewHistory from 'public/docs/model-card-view-history.png'
+import modelCardViewVersion from 'public/docs/model-card-view-version.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-# Comparing Model Cards
-
-Model card comparison allows you to review the differences between two versions of a model card. You can compare
-versions from the same model or select model cards from different models.
-
-This is useful when reviewing changes to model documentation, checking how models differ, or verifying that updates have
-been recorded correctly.
+# Viewing and Comparing Model Cards
 
 > **Common questions this page answers:**
 >
-> - How do I compare two model cards?
+> - How do I view an earlier version of a model card?
+> - How do I compare two versions of a model card?
 > - Can I compare model cards from different models?
-> - Can I compare different versions of a model card?
-> - How do I view the differences between model cards?
 > - How do I read the highlighted changes on the comparison page?
+
+Each edit to a model card creates a new version. Bailo keeps every version, so you can view the model card exactly as it
+was at an earlier point, or compare two versions to see what changed between them. You can compare versions from the
+same model or select model cards from different models.
+
+This is useful when checking what a model card said at a particular time, reviewing changes to model documentation,
+checking how models differ, or verifying that updates have been recorded correctly.
+
+## Viewing model card history
+
+If you want to see every version of a model card, open its history:
+
+1. Open the model and go to the **Overview** tab
+2. Open the model card actions menu
+3. Select **View History**
+
+The history dialog lists each version, newest first, along with who created it and when.
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='model card actions menu showing the View History option'
+    src={modelCardViewHistory}
+  />
+</Box>
+
+The screenshot above shows the model card actions menu with the **View History** option.
+
+## Viewing a specific version
+
+You can open any single version of a model card in read-only form. To do this, select its row in the history dialog. The
+page shows the model card exactly as it was when that version was created.
+
+An information banner at the top of the page confirms that a single card is being shown. To see how this version differs
+from another, select a version on the **To** side to switch to a comparison.
+
+Each version you view has its own unique URL. You can copy the URL from your browser and share it so that others open
+the same version of the model card.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='a single earlier version of a model card displayed in read-only form'
+    src={modelCardViewVersion}
+  />
+</Box>
+
+The screenshot above shows a version of a model card in read-only form, with the information banner at the top.
 
 ## Selecting model cards to compare
 
-To compare two model cards:
+If you want to see what changed between two versions, select them for comparison:
 
-1. Open the model history or model card comparison page
-2. Select two card versions you wish to compare
+1. Open the model card history dialog, or go directly to the model card comparison page
+2. Tick the **Compare** checkbox for the two versions you wish to compare
 3. Select **Compare revisions**
+
+The older version is always used as the **From** card and the newer version as the **To** card.
+
+Each comparison also has its own unique URL, which records the selected models and versions. You can share this URL so
+that others see the same comparison.
 
 <Box sx={{ maxWidth: '50%', margin: 'auto' }}>
   <Image
@@ -55,15 +103,13 @@ The screenshot above shows the model card comparison page, where the selected mo
 
 ## Reading the differences
 
-Changes are marked in each answer:
+The comparison page marks changes in each answer:
 
-| Marker                           | Meaning                                                           |
-| -------------------------------- | ----------------------------------------------------------------- |
-| **+** with a green highlight     | Content that appears in the **To** card but not the **From** card |
-| **-** with a red highlight       | Content that appears in the **From** card but not the **To** card |
-| No highlight                     | Content that is the same in both cards                            |
-| _Unanswered_ inside a change     | The question had no answer in that card                           |
-| _Unanswered_ without a highlight | The question has no answer in either card                         |
+- **+ with a green highlight** - content that appears in the **To** card but not the **From** card
+- **- with a red highlight** - content that appears in the **From** card but not the **To** card
+- **No highlight** - content that is the same in both cards
+- **_Unanswered_ inside a change** - the question had no answer in that card
+- **_Unanswered_ without a highlight** - the question has no answer in either card
 
 How a change is shown depends on the type of answer:
 
@@ -74,7 +120,7 @@ How a change is shown depends on the type of answer:
   inside a coloured frame
 - **Performance metrics** - changes to metric names and values are highlighted row by row, and metrics that were removed
   are still listed so that you can see what was taken out
-- **Other answers**, such as dates, selections, tags and users - the old and new answers are compared as text
+- **Other answers** - dates, selections, tags and users are compared as text
 
 ## Comparing versions of the same model
 
@@ -87,8 +133,7 @@ For example, you might compare:
 - Two versions created during a review
 - A released model card with its latest draft
 
-Each edit to a model card creates a new version. Comparing versions helps you understand what information was added,
-updated, or removed between those versions.
+Comparing versions helps you understand what information was added, updated, or removed between those versions.
 
 ## Comparing cards from different models
 
@@ -107,7 +152,8 @@ or more suitable than the other.
 
 ## Mirrored models
 
-Mirrored model cards can also be included in model card comparisons.
+Mirrored model cards can also be included in model card comparisons. A mirrored model is a copy of a model from another
+Bailo instance, with a read-only source card and an editable local card.
 
 When comparing a mirrored model with a non-mirrored model, Bailo compares:
 
@@ -125,8 +171,9 @@ changed by the comparison.
 ## Related pages
 
 - [Model Card](model-card) - Filling in the model card and configuring access
-- [Model Card Lifecycle](../../reviews/reviewing/model-lifecycle) - Completing and updating model card lifecycle reviews
-- [Editing Mirrored Model Cards](../../model-mirroring/editing-a-mirrored-model-card) - Editing additional information
+- [Reviewing a Model Card Lifecycle](../../reviews/reviewing/model-lifecycle) - Completing and updating model card
+  lifecycle reviews
+- [Editing a Mirrored Model Card](../../model-mirroring/editing-a-mirrored-model-card) - Editing additional information
   on mirrored model cards
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
