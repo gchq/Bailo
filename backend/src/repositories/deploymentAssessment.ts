@@ -351,7 +351,13 @@ export async function findDeploymentAssessmentReviews(
             $sort: { createdAt: -1 },
           },
           {
-            $limit: 1,
+            $group: {
+              _id: '$role',
+              review: { $first: '$$ROOT' },
+            },
+          },
+          {
+            $replaceRoot: { newRoot: '$review' },
           },
           {
             $lookup: {
