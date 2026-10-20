@@ -1,6 +1,6 @@
 # ArtefactScan REST API
 
-![Python](https://img.shields.io/badge/python-3.12-blue.svg?style=for-the-badge)
+![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
 ![Version](https://img.shields.io/badge/version-4.1.0-orange.svg?style=for-the-badge)
 [![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
@@ -23,7 +23,7 @@ The built ArtefactScan image is published to [GHCR bailo_artefactscan](https://g
 
 ## Quickstart
 
-> **Requires:** Docker, Python 3.12.11+ (local dev only)
+> **Requires:** Docker, Python (version in [`.python-version`](.python-version), installed automatically by uv) and [uv](https://docs.astral.sh/uv/getting-started/installation/) (local dev only)
 
 ### Build and Run via Docker
 
@@ -93,10 +93,17 @@ The following steps are only required for users who wish to extend or develop th
 From within the `lib/artefactscan_api` directory:
 
 ```bash
-python3 -m venv artefactscanvenv
-source artefactscanvenv/bin/activate
-pip install -e ".[dev]"
+uv sync --group dev
 ```
+
+This creates a `.venv` and installs the pinned dependencies from `uv.lock`. Prefix commands with
+`uv run` to use it, or activate it with `source .venv/bin/activate`.
+
+### Dependency Management
+
+As this service ships as a Docker image built from `uv.lock`, Dependabot keeps its direct dependencies at their latest
+versions, raising the `pyproject.toml` floor and relocking in each PR. Transitive dependencies only change when a direct
+upgrade or a security fix needs them. The ruff version comes from `.pre-commit-config.yaml`.
 
 ### Developer Mode via Docker
 
@@ -111,13 +118,13 @@ docker run -v ./bailo_artefactscan_api:/app/bailo_artefactscan_api -p 0.0.0.0:33
 ### Testing
 
 ```bash
-pytest
+uv run pytest
 ```
 
 To run the integration tests (does not require any externally running services):
 
 ```bash
-pytest -m integration
+uv run pytest -m integration
 ```
 
 > **Note:** the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
