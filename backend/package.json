@@ -11,6 +11,7 @@
     "check-style": "prettier --check .",
     "copy-templates": "cd src && find . -name '*.hbs' | cpio -pdm ../dist/src",
     "dev": "nodemon",
+    "generate-config-docs": "npx tsx src/scripts/generateConfigDocs.ts",
     "lint": "eslint --cache --cache-location node_modules/.cache/eslint/ --max-warnings=0",
     "script": "tsx src/scripts/runScript.ts",
     "seed": "tsx src/seeds/index.ts",
