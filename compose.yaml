@@ -16,8 +16,6 @@ services:
       - MONGODB_INITDB_ROOT_PASSWORD=bailoadmin
       - MONGODB_INITDB_REPL_SET_HOST=mongo
       - MONGODB_INITDB_DATABASE=bailo
-      # Disables tcmalloc per-CPU caches, which break on kernel 6.19+ (SERVER-121912)
-      - GLIBC_TUNABLES=glibc.pthread.rseq=1
     volumes:
       - mongoVolume:/data/db
     configs:
