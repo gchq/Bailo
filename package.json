@@ -19,7 +19,7 @@
     "@cspell/dict-docker": "^1.1.17",
     "@cspell/dict-html-symbol-entities": "^4.0.5",
     "@cspell/dict-k8s": "^1.0.13",
-    "@cspell/dict-la": "^1.1.2",
+    "@cspell/dict-la": "^1.1.4",
     "@cspell/dict-lorem-ipsum": "^4.0.5",
     "@cspell/dict-markdown": "^2.0.17",
     "@cspell/dict-python": "^4.5.2",
