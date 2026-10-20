@@ -2,66 +2,23 @@ import Image from 'next/image'
 import Box from '@mui/material/Box'
 import bailoHistory from 'public/docs/model-card-history-compare.png'
 import bailoHistoryCompare from 'public/docs/model-compare-page.png'
-import modelCardViewHistory from 'public/docs/model-card-view-history.png'
-import modelCardViewVersion from 'public/docs/model-card-view-version.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
 
-# Viewing and Comparing Model Cards
+# Comparing Model Cards
 
 > **Common questions this page answers:**
 >
-> - How do I view an earlier version of a model card?
 > - How do I compare two versions of a model card?
 > - Can I compare model cards from different models?
 > - How do I read the highlighted changes on the comparison page?
 
-Each edit to a model card creates a new version. Bailo keeps every version, so you can view the model card exactly as it
-was at an earlier point, or compare two versions to see what changed between them. You can compare versions from the
-same model or select model cards from different models.
+Model card comparison allows you to review the differences between two versions of a model card. You can compare
+versions from the same model or select model cards from different models.
 
-This is useful when checking what a model card said at a particular time, reviewing changes to model documentation,
-checking how models differ, or verifying that updates have been recorded correctly.
+This is useful when reviewing changes to model documentation, checking how models differ, or verifying that updates have
+been recorded correctly.
 
-## Viewing model card history
-
-If you want to see every version of a model card, open its history:
-
-1. Open the model and go to the **Overview** tab
-2. Open the model card actions menu
-3. Select **View History**
-
-The history dialog lists each version, newest first, along with who created it and when.
-
-<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
-  <Image
-    style={{ width: '100%', height: 'auto' }}
-    alt='model card actions menu showing the View History option'
-    src={modelCardViewHistory}
-  />
-</Box>
-
-The screenshot above shows the model card actions menu with the **View History** option.
-
-## Viewing a specific version
-
-You can open any single version of a model card in read-only form. To do this, select its row in the history dialog. The
-page shows the model card exactly as it was when that version was created.
-
-An information banner at the top of the page confirms that a single card is being shown. To see how this version differs
-from another, select a version on the **To** side to switch to a comparison.
-
-Each version you view has its own unique URL. You can copy the URL from your browser and share it so that others open
-the same version of the model card.
-
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image
-    style={{ width: '100%', height: 'auto' }}
-    alt='a single earlier version of a model card displayed in read-only form'
-    src={modelCardViewVersion}
-  />
-</Box>
-
-The screenshot above shows a version of a model card in read-only form, with the information banner at the top.
+See [Filling In the Model Card](model-card) for how to edit a model card, and for how to view a single earlier version.
 
 ## Selecting model cards to compare
 
@@ -170,7 +127,7 @@ changed by the comparison.
 
 ## Related pages
 
-- [Model Card](model-card) - Filling in the model card and configuring access
+- [Model Card](model-card) - Filling in the model card, configuring access, and viewing version history
 - [Reviewing a Model Card Lifecycle](../../reviews/reviewing/model-lifecycle) - Completing and updating model card
   lifecycle reviews
 - [Editing a Mirrored Model Card](../../model-mirroring/editing-a-mirrored-model-card) - Editing additional information
