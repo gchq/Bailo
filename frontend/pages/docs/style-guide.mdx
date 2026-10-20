@@ -192,8 +192,8 @@ Do not use blockquotes for general warnings or tips - integrate these into the b
 
 Pages describing a feature that an administrator enables through UI config should show a `FeatureAvailability` alert
 directly below the H1, instead of a sentence such as "This feature must be enabled by your administrator". In Bailo it
-shows whether the feature is enabled on the current instance. On the static documentation site it shows the config key
-that controls the feature.
+shows whether the feature is enabled on the current instance, based on the UI config or the available artefact scanners.
+On the static documentation site it shows the config key that controls the feature.
 
 ```mdx
 import FeatureAvailability from 'src/FeatureAvailability'
