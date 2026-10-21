@@ -1,8 +1,13 @@
 import { escapeRegExp } from 'lodash-es'
-import { QueryFilter } from 'mongoose'
+import { type PipelineStage, QueryFilter } from 'mongoose'
 
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
-import ResponseModel, { DecisionKeys, ResponseKind, type ResponseReaction } from '../models/Response.js'
+import ResponseModel, {
+  DecisionKeys,
+  ResponseKind,
+  type ResponseKindKeys,
+  type ResponseReaction,
+} from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { ReviewKind } from '../types/enums.js'
 
@@ -81,6 +86,165 @@ export async function findDeploymentAssessments(
   }))
 }
 
+type LookupPipelineStage = Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>
+
+function getResponseMatchStage(parentId: string, kind: ResponseKindKeys): PipelineStage.Match {
+  return {
+    $match: {
+      $expr: {
+        $and: [{ $eq: ['$parentId', parentId] }, { $eq: ['$kind', kind] }],
+      },
+    },
+  }
+}
+
+function getResponseLookup(
+  letVariables: Record<string, string>,
+  parentId: string,
+  kind: ResponseKindKeys,
+  pipeline: LookupPipelineStage[],
+  as: string,
+): PipelineStage.Lookup {
+  return {
+    $lookup: {
+      from: ResponseModel.collection.name,
+      let: letVariables,
+      pipeline: [getResponseMatchStage(parentId, kind), ...pipeline],
+      as,
+    },
+  }
+}
+
+function getResponseHistoryProjection(includeDecision: boolean): PipelineStage.Project {
+  return {
+    $project: {
+      _id: 0,
+      id: { $toString: '$_id' },
+      entity: 1,
+      ...(includeDecision && { decision: 1 }),
+      comment: 1,
+      reactions: { $ifNull: ['$reactions', []] },
+      commentEditedAt: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    },
+  }
+}
+
+function getDeploymentAssessmentCommentLookup(): PipelineStage.Lookup {
+  return getResponseLookup(
+    { deploymentAssessmentObjectId: '$_id' },
+    '$$deploymentAssessmentObjectId',
+    ResponseKind.Comment,
+    [{ $sort: { createdAt: 1 } }, getResponseHistoryProjection(false)],
+    'comments',
+  )
+}
+
+function getLatestReviewResponseLookup(as: string): PipelineStage.Lookup {
+  return getResponseLookup(
+    { reviewId: '$_id' },
+    '$$reviewId',
+    ResponseKind.Review,
+    [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
+    as,
+  )
+}
+
+function getReviewResponseHistoryLookup(): PipelineStage.Lookup {
+  return getResponseLookup(
+    { reviewId: '$_id' },
+    '$$reviewId',
+    ResponseKind.Review,
+    [{ $sort: { createdAt: 1 } }, getResponseHistoryProjection(true)],
+    'reviewResponses',
+  )
+}
+
+function getDeploymentAssessmentReviewMatchStages(): LookupPipelineStage[] {
+  return [
+    {
+      $match: {
+        $expr: {
+          $and: [
+            { $eq: ['$deploymentAssessmentId', '$$deploymentAssessmentId'] },
+            { $eq: ['$kind', ReviewKind.DeploymentAssessment] },
+          ],
+        },
+      },
+    },
+  ]
+}
+
+function getReviewHistoryStages(): LookupPipelineStage[] {
+  return [
+    getReviewResponseHistoryLookup(),
+    {
+      $unwind: '$reviewResponses',
+    },
+    {
+      $sort: { 'reviewResponses.createdAt': -1 },
+    },
+    {
+      $group: {
+        _id: {
+          reviewId: '$_id',
+          entity: '$reviewResponses.entity',
+        },
+        reviewResponses: { $push: '$reviewResponses' },
+      },
+    },
+    {
+      $unwind: {
+        path: '$reviewResponses',
+        includeArrayIndex: 'responseIndex',
+      },
+    },
+    {
+      $set: {
+        'reviewResponses.outdated': { $gt: ['$responseIndex', 0] },
+      },
+    },
+    {
+      $sort: { 'reviewResponses.createdAt': 1 },
+    },
+    {
+      $group: {
+        _id: null,
+        reviews: { $push: '$reviewResponses' },
+      },
+    },
+  ]
+}
+
+function getLatestReviewStatusByRoleStages(): LookupPipelineStage[] {
+  return [
+    {
+      $sort: { createdAt: -1 },
+    },
+    {
+      $group: {
+        _id: '$role',
+        review: { $first: '$$ROOT' },
+      },
+    },
+    {
+      $replaceRoot: { newRoot: '$review' },
+    },
+    getLatestReviewResponseLookup('latestResponse'),
+    {
+      $unwind: '$latestResponse',
+    },
+    {
+      $project: {
+        _id: 0,
+        role: 1,
+        status: '$latestResponse.decision',
+      },
+    },
+  ]
+}
+
 export async function findLatestDecisionsByAssessmentIds(
   assessmentIds: string[],
 ): Promise<Map<string, DecisionKeys | undefined>> {
@@ -98,27 +262,7 @@ export async function findLatestDecisionsByAssessmentIds(
         kind: ReviewKind.DeploymentAssessment,
       },
     },
-    {
-      $lookup: {
-        from: 'v2_responses',
-        let: { reviewId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ['$parentId', '$$reviewId'] },
-              kind: ResponseKind.Review,
-            },
-          },
-          {
-            $sort: { createdAt: -1 },
-          },
-          {
-            $limit: 1,
-          },
-        ],
-        as: 'latestResponse',
-      },
-    },
+    getLatestReviewResponseLookup('latestResponse'),
     {
       $unwind: {
         path: '$latestResponse',
@@ -190,40 +334,7 @@ export async function findDeploymentAssessmentComments(
         id: deploymentAssessmentId,
       },
     },
-    {
-      $lookup: {
-        from: ResponseModel.collection.name,
-        let: { deploymentAssessmentObjectId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ['$parentId', '$$deploymentAssessmentObjectId'] },
-                  { $eq: ['$kind', ResponseKind.Comment] },
-                ],
-              },
-            },
-          },
-          {
-            $sort: { createdAt: 1 },
-          },
-          {
-            $project: {
-              _id: 0,
-              id: { $toString: '$_id' },
-              entity: 1,
-              comment: 1,
-              reactions: { $ifNull: ['$reactions', []] },
-              commentEditedAt: 1,
-              createdAt: 1,
-              updatedAt: 1,
-            },
-          },
-        ],
-        as: 'comments',
-      },
-    },
+    getDeploymentAssessmentCommentLookup(),
     {
       $project: {
         _id: 0,
@@ -250,85 +361,7 @@ export async function findDeploymentAssessmentReviews(
       $lookup: {
         from: ReviewModel.collection.name,
         let: { deploymentAssessmentId: '$id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ['$deploymentAssessmentId', '$$deploymentAssessmentId'] },
-                  { $eq: ['$kind', ReviewKind.DeploymentAssessment] },
-                ],
-              },
-            },
-          },
-          {
-            $lookup: {
-              from: ResponseModel.collection.name,
-              let: { reviewId: '$_id' },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', ResponseKind.Review] }],
-                    },
-                  },
-                },
-                {
-                  $sort: { createdAt: 1 },
-                },
-                {
-                  $project: {
-                    _id: 0,
-                    id: { $toString: '$_id' },
-                    entity: 1,
-                    decision: 1,
-                    comment: 1,
-                    reactions: { $ifNull: ['$reactions', []] },
-                    commentEditedAt: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
-                  },
-                },
-              ],
-              as: 'reviewResponses',
-            },
-          },
-          {
-            $unwind: '$reviewResponses',
-          },
-          {
-            $sort: { 'reviewResponses.createdAt': -1 },
-          },
-          {
-            $group: {
-              _id: {
-                reviewId: '$_id',
-                entity: '$reviewResponses.entity',
-              },
-              reviewResponses: { $push: '$reviewResponses' },
-            },
-          },
-          {
-            $unwind: {
-              path: '$reviewResponses',
-              includeArrayIndex: 'responseIndex',
-            },
-          },
-          {
-            $set: {
-              'reviewResponses.outdated': { $gt: ['$responseIndex', 0] },
-            },
-          },
-          {
-            $sort: { 'reviewResponses.createdAt': 1 },
-          },
-          {
-            $group: {
-              _id: null,
-              reviews: { $push: '$reviewResponses' },
-            },
-          },
-        ],
+        pipeline: [...getDeploymentAssessmentReviewMatchStages(), ...getReviewHistoryStages()],
         as: 'reviewRecords',
       },
     },
@@ -336,62 +369,7 @@ export async function findDeploymentAssessmentReviews(
       $lookup: {
         from: ReviewModel.collection.name,
         let: { deploymentAssessmentId: '$id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ['$deploymentAssessmentId', '$$deploymentAssessmentId'] },
-                  { $eq: ['$kind', ReviewKind.DeploymentAssessment] },
-                ],
-              },
-            },
-          },
-          {
-            $sort: { createdAt: -1 },
-          },
-          {
-            $group: {
-              _id: '$role',
-              review: { $first: '$$ROOT' },
-            },
-          },
-          {
-            $replaceRoot: { newRoot: '$review' },
-          },
-          {
-            $lookup: {
-              from: ResponseModel.collection.name,
-              let: { reviewId: '$_id' },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', ResponseKind.Review] }],
-                    },
-                  },
-                },
-                {
-                  $sort: { createdAt: -1 },
-                },
-                {
-                  $limit: 1,
-                },
-              ],
-              as: 'latestResponse',
-            },
-          },
-          {
-            $unwind: '$latestResponse',
-          },
-          {
-            $project: {
-              _id: 0,
-              role: 1,
-              status: '$latestResponse.decision',
-            },
-          },
-        ],
+        pipeline: [...getDeploymentAssessmentReviewMatchStages(), ...getLatestReviewStatusByRoleStages()],
         as: 'statuses',
       },
     },

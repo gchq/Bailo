@@ -193,8 +193,9 @@ describe('repositories > deploymentAssessment', () => {
             pipeline: [
               {
                 $match: {
-                  $expr: { $eq: ['$parentId', '$$reviewId'] },
-                  kind: ResponseKind.Review,
+                  $expr: {
+                    $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', ResponseKind.Review] }],
+                  },
                 },
               },
               { $sort: { createdAt: -1 } },
