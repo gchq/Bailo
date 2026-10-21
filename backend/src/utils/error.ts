@@ -1,4 +1,4 @@
-import Logger from 'bunyan'
+import { Logger } from 'pino'
 
 import { BailoError, isBailoError } from '../types/error.js'
 import { RegistryError } from '../types/RegistryError.js'
