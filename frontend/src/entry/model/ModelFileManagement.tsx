@@ -75,7 +75,6 @@ export default function Files({ model }: FilesProps) {
               mutateModelFiles={mutateModelFiles}
               initialUploadPath={browsingPath}
               existingFiles={modelFiles}
-              releases={releases}
             />
           </Stack>
           <FileBrowser

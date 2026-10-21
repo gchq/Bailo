@@ -77,21 +77,21 @@ choose what to do.
 For each file you can choose one of two actions:
 
 - **Skip** - leave the existing file untouched and do not upload the new one
-- **Overwrite** - replace the existing file with the new one
+- **Keep both** - upload the new file alongside the existing one, so the model has two files with the same name
 
-Every conflict defaults to **Skip**, so nothing is replaced unless you choose to replace it. You can also use
-**Overwrite All** or **Skip All** to apply one action to every conflict at once.
+Every conflict defaults to **Skip**, so nothing is uploaded unless you choose to upload it. You can also use **Keep Both
+for All** or **Skip All** to apply one action to every conflict at once.
 
 Files that do not conflict are uploaded normally, whichever action you choose for the ones that do.
 
-### Overwriting a file used by a release
+### Files used by a release
 
-Releases reference the files on a model, so overwriting a file changes what those releases contain. If a file you have
-chosen to overwrite is used by one or more releases, the conflict step shows a warning naming each affected release by
-version number.
+Uploading a file never changes an existing file or the releases that use it. If you keep both, any release that uses the
+existing file continues to use it, and the new file is not added to those releases.
 
-Read that warning before you continue. If the releases must keep the original file, upload the new version under a
-different name or into a different destination folder instead of overwriting.
+To use the new file in a release, edit the release and select it. A release cannot contain two files with the same name,
+so the new file replaces the existing one on that release. When you no longer need the existing file, delete it from the
+Files tab. The deletion dialog lists any releases still using it.
 
 ## Adding files to a new release
 
@@ -140,7 +140,7 @@ release.upload("model.bin", upload_name="weights/model.bin")
 Without `upload_name`, the file is uploaded to the root of the model under its own file name.
 
 The Python client does not check for conflicts. Uploading a name that already exists creates a second file with that
-name rather than prompting you to overwrite or skip, so check the model's existing files first if you are re-uploading.
+name, as **Keep both** does in the web interface, so check the model's existing files first if you are re-uploading.
 
 Further examples are available [here](../../python/notebooks/models_and_releases_demo_pytorch.html).
 

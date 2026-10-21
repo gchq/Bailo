@@ -1,11 +1,12 @@
 import { ThemeProvider } from '@mui/material/styles'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useGetFilesForModel } from 'actions/file'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import ReleaseForm, { ReleaseFormData } from 'src/entry/model/releases/ReleaseForm'
 import { lightTheme } from 'src/theme'
+import { FileInterface } from 'types/types'
 import { testUiConfig, testV2Model } from 'utils/test/testModels'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -23,6 +24,15 @@ vi.mock('actions/modelCard', () => ({
 
 vi.mock('src/common/RichTextEditor.tsx', () => ({ default: () => <></> }))
 vi.mock('src/entry/model/ModelImageList.tsx', () => ({ default: () => <></> }))
+
+const uploadedFile = { _id: 'new-file-id', name: 'weights/model.bin' } as FileInterface
+
+// Stands in for a completed upload, so the test drives only what the form does with the result.
+vi.mock('src/entry/model/files/FileUploadDialog.tsx', () => ({
+  default: ({ onFilesUploaded }: { onFilesUploaded: (files: FileInterface[]) => void }) => (
+    <button onClick={() => onFilesUploaded([uploadedFile])}>Complete upload</button>
+  ),
+}))
 
 const emptyFormData: ReleaseFormData = {
   semver: '',
@@ -43,7 +53,7 @@ function mockFilesHook(overrides: Partial<ReturnType<typeof useGetFilesForModel>
   } as ReturnType<typeof useGetFilesForModel>)
 }
 
-function renderReleaseForm() {
+function renderReleaseForm(formData: ReleaseFormData = emptyFormData, onFilesChange = vi.fn()) {
   return render(
     <ThemeProvider theme={lightTheme}>
       <UiConfigContext.Provider value={testUiConfig}>
@@ -51,11 +61,11 @@ function renderReleaseForm() {
           editable
           isEdit
           model={testV2Model}
-          formData={emptyFormData}
+          formData={formData}
           onSemverChange={vi.fn()}
           onReleaseNotesChange={vi.fn()}
           onMinorReleaseChange={vi.fn()}
-          onFilesChange={vi.fn()}
+          onFilesChange={onFilesChange}
           onModelCardVersionChange={vi.fn()}
           onImageListChange={vi.fn()}
           onRegistryError={vi.fn()}
@@ -105,5 +115,26 @@ describe('ReleaseForm', () => {
     renderReleaseForm()
 
     expect(await screen.findByText('Upload new files')).toBeDefined()
+  })
+
+  it('replaces a file of the same name on the release with a newly uploaded file', async () => {
+    const existingFile = { _id: 'existing-file-id', name: 'weights/model.bin' } as FileInterface
+    const otherFile = { _id: 'other-file-id', name: 'config.json' } as FileInterface
+    const onFilesChange = vi.fn()
+
+    renderReleaseForm({ ...emptyFormData, files: [existingFile, otherFile] }, onFilesChange)
+    fireEvent.click(await screen.findByText('Complete upload'))
+
+    expect(onFilesChange).toHaveBeenCalledWith([otherFile, uploadedFile])
+  })
+
+  it('adds a newly uploaded file to the release when no file of that name is on it', async () => {
+    const otherFile = { _id: 'other-file-id', name: 'config.json' } as FileInterface
+    const onFilesChange = vi.fn()
+
+    renderReleaseForm({ ...emptyFormData, files: [otherFile] }, onFilesChange)
+    fireEvent.click(await screen.findByText('Complete upload'))
+
+    expect(onFilesChange).toHaveBeenCalledWith([otherFile, uploadedFile])
   })
 })

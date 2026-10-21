@@ -125,12 +125,15 @@ export default function ReleaseForm({
     [onModelCardVersionChange],
   )
 
+  // A release cannot hold two files of the same name, so an uploaded file takes the place of any
+  // file of that name already on this release. Other releases using the old file are unaffected.
   const handleFilesUploaded = useCallback(
     (uploadedFiles: FileInterface[]) => {
       const existingIds = new Set(formData.files.map((f) => f._id))
       const newFiles = uploadedFiles.filter((f) => !existingIds.has(f._id))
       if (newFiles.length > 0) {
-        onFilesChange([...formData.files, ...newFiles])
+        const newNames = new Set(newFiles.map((f) => f.name))
+        onFilesChange([...formData.files.filter((f) => !newNames.has(f.name)), ...newFiles])
       }
     },
     [formData.files, onFilesChange],
@@ -389,7 +392,6 @@ export default function ReleaseForm({
                   onDialogClose={() => setIsUploadDialogOpen(false)}
                   mutateModelFiles={mutateFiles}
                   existingFiles={modelFiles}
-                  releases={releases}
                   onFilesUploaded={handleFilesUploaded}
                 />
                 {formData.files.length > 0 && (

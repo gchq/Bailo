@@ -230,7 +230,7 @@ describe('FileUploadDialog', () => {
     resolveUpload({ data: { file: { _id: 'abc' } } })
   })
 
-  describe('overwriting an existing file', () => {
+  describe('uploading a file that already exists', () => {
     const existingFile = {
       _id: 'existing-file-id',
       name: 'example.txt',
@@ -238,7 +238,7 @@ describe('FileUploadDialog', () => {
       createdAt: new Date('2026-01-01'),
     } as unknown as FileInterface
 
-    async function overwriteExistingFile() {
+    async function resolveConflictWith(action: 'Skip' | 'Keep both') {
       render(
         <FileUploadDialog
           model={testV2Model}
@@ -252,34 +252,48 @@ describe('FileUploadDialog', () => {
 
       selectFile('example.txt')
       fireEvent.click(await screen.findByText('Upload files'))
-      fireEvent.click(await screen.findByText('Overwrite'))
+      fireEvent.click(await screen.findByText(action))
       fireEvent.click(await screen.findByText('Continue Upload'))
     }
 
-    it('keeps the existing file when the replacement upload fails', async () => {
-      vi.mocked(deleteEntryFile).mockResolvedValue({ ok: true } as Response)
-      vi.mocked(postFileForModelId).mockRejectedValue(new Error('network died mid-transfer'))
+    it('does not offer to overwrite the existing file', async () => {
+      render(
+        <FileUploadDialog
+          model={testV2Model}
+          open
+          onDialogClose={vi.fn()}
+          mutateModelFiles={vi.fn()}
+          initialUploadPath=''
+          existingFiles={[existingFile]}
+        />,
+      )
 
-      await overwriteExistingFile()
+      selectFile('example.txt')
+      fireEvent.click(await screen.findByText('Upload files'))
+
+      expect(await screen.findByText('Keep both')).toBeDefined()
+      expect(screen.queryByText('Overwrite')).toBeNull()
+    })
+
+    it('uploads the new file under the same name and leaves the existing file in place when keeping both', async () => {
+      vi.mocked(postFileForModelId).mockResolvedValue({ data: { file: { _id: 'new-file-id' } } } as never)
+
+      await resolveConflictWith('Keep both')
 
       await waitFor(() => {
-        expect(vi.mocked(postFileForModelId)).toHaveBeenCalled()
+        expect(vi.mocked(postFileForModelId).mock.calls[0][4]).toBe('example.txt')
       })
       expect(vi.mocked(deleteEntryFile)).not.toHaveBeenCalled()
     })
 
-    it('deletes the existing file only after the replacement has uploaded', async () => {
-      vi.mocked(deleteEntryFile).mockResolvedValue({ ok: true } as Response)
-      vi.mocked(postFileForModelId).mockResolvedValue({ data: { file: { _id: 'new-file-id' } } } as never)
-
-      await overwriteExistingFile()
+    it('does not upload the new file when skipping', async () => {
+      await resolveConflictWith('Skip')
 
       await waitFor(() => {
-        expect(vi.mocked(deleteEntryFile)).toHaveBeenCalledWith(testV2Model.id, 'existing-file-id')
+        expect(screen.queryByText('Continue Upload')).toBeNull()
       })
-      expect(vi.mocked(postFileForModelId).mock.invocationCallOrder[0]).toBeLessThan(
-        vi.mocked(deleteEntryFile).mock.invocationCallOrder[0],
-      )
+      expect(vi.mocked(postFileForModelId)).not.toHaveBeenCalled()
+      expect(vi.mocked(deleteEntryFile)).not.toHaveBeenCalled()
     })
   })
 })

@@ -13,7 +13,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { deleteEntryFile } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -24,14 +23,7 @@ import UiConfigContext from 'src/contexts/uiConfigContext'
 import ConflictResolutionList, { ConflictAction } from 'src/entry/model/files/ConflictResolutionList'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import MessageAlert from 'src/MessageAlert'
-import {
-  EntryInterface,
-  EntryKind,
-  FileInterface,
-  FileUploadMetadata,
-  FileUploadWithMetadata,
-  ReleaseInterface,
-} from 'types/types'
+import { EntryInterface, EntryKind, FileInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 import {
   detectFileConflicts,
   FileConflict,
@@ -48,7 +40,6 @@ interface FileUploadDialogProps {
   mutateModelFiles: () => void
   initialUploadPath?: string
   existingFiles?: FileInterface[]
-  releases?: ReleaseInterface[]
   onFilesUploaded?: (files: FileInterface[]) => void
 }
 
@@ -71,7 +62,6 @@ export default function FileUploadDialog({
   mutateModelFiles,
   initialUploadPath = '',
   existingFiles = [],
-  releases = [],
   onFilesUploaded,
 }: FileUploadDialogProps) {
   const uiConfig = useContext(UiConfigContext)
@@ -145,21 +135,6 @@ export default function FileUploadDialog({
     )
   }, [])
 
-  // Returns an error message if the replaced file could not be removed, otherwise undefined. The
-  // replacement is already uploaded by this point, so a failure here leaves both files in place
-  // rather than losing anything.
-  const deleteOverwrittenFile = useCallback(
-    async (existingFile: FileInterface): Promise<string | undefined> => {
-      try {
-        const deleteRes = await deleteEntryFile(model.id, existingFile._id)
-        return deleteRes.ok ? undefined : 'Uploaded, but could not remove the existing file it replaces'
-      } catch (e) {
-        return e instanceof Error ? e.message : 'Uploaded, but could not remove the existing file it replaces'
-      }
-    },
-    [model.id],
-  )
-
   const handleFileUpload = useCallback(
     async (filesToProcess: FileUploadWithMetadata[]) => {
       const failedFiles: FailedFileUpload[] = []
@@ -167,19 +142,7 @@ export default function FileUploadDialog({
       setIsFilesUploading(true)
       setFailedFileUploads([])
 
-      // Build a map of files to overwrite so we can delete the old version first
-      const overwriteMap = new Map<string, FileInterface>()
-      for (const conflict of detectedConflicts) {
-        const name = conflict.fileToUpload.uploadPath || conflict.fileToUpload.file.name
-        if (conflictResolutions.get(name) === 'overwrite') {
-          overwriteMap.set(name, conflict.existingFile)
-        }
-      }
-
       for (const fileItem of filesToProcess) {
-        const uploadName = fileItem.uploadPath || fileItem.file.name
-        const existingFile = overwriteMap.get(uploadName)
-
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -197,16 +160,6 @@ export default function FileUploadDialog({
           )
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
-            // Remove the file being replaced only once its replacement is safely uploaded. Deleting
-            // first means a failed upload destroys the original with nothing to put in its place.
-            if (existingFile) {
-              const deleteError = await deleteOverwrittenFile(existingFile)
-              if (deleteError) {
-                const failed = { fileName: fileItem.file.name, error: deleteError }
-                failedFiles.push(failed)
-                setFailedFileUploads((prev) => [...prev, failed])
-              }
-            }
             successfulFiles.push(fileUploadResponse.data.file)
             setUploadedFiles((prev) => [...prev, fileItem.file.name])
             setStagedFiles((prev) => prev.filter((f) => f.relativePath !== fileItem.relativePath))
@@ -233,15 +186,7 @@ export default function FileUploadDialog({
         setStagedFiles([])
       }
     },
-    [
-      model.id,
-      mutateModelFiles,
-      detectedConflicts,
-      conflictResolutions,
-      onDialogClose,
-      onFilesUploaded,
-      deleteOverwrittenFile,
-    ],
+    [model.id, mutateModelFiles, onDialogClose, onFilesUploaded],
   )
 
   const handleUploadClick = useCallback(() => {
@@ -262,14 +207,16 @@ export default function FileUploadDialog({
 
   const handleConflictsResolved = useCallback(() => {
     const { nonConflicting } = detectFileConflicts(filesToBeUploaded, existingFiles)
-    const overwriteFiles = detectedConflicts
+    // Keeping both uploads the new file as an additional file of the same name, matching how uploads
+    // behaved before conflicts were detected. The existing file, and any release using it, is untouched.
+    const keepBothFiles = detectedConflicts
       .filter((c) => {
         const name = c.fileToUpload.uploadPath || c.fileToUpload.file.name
-        return conflictResolutions.get(name) === 'overwrite'
+        return conflictResolutions.get(name) === 'keepBoth'
       })
       .map((c) => c.fileToUpload)
     setShowConflictStep(false)
-    handleFileUpload([...nonConflicting, ...overwriteFiles])
+    handleFileUpload([...nonConflicting, ...keepBothFiles])
   }, [filesToBeUploaded, existingFiles, detectedConflicts, conflictResolutions, handleFileUpload])
 
   const handleDeleteFileFromUploadList = useCallback((relativePath: string) => {
@@ -375,7 +322,6 @@ export default function FileUploadDialog({
               <ConflictResolutionList
                 conflicts={detectedConflicts}
                 resolutions={conflictResolutions}
-                releases={releases}
                 onResolutionChange={(name, action) => {
                   setConflictResolutions((prev) => new Map(prev).set(name, action))
                 }}
