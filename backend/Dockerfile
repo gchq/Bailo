@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/astral-sh/uv:python3.14-alpine@sha256:65b922d2241d4c54318c4140d5e380d10e75c608dae409a750c587aa466da077 AS sphinx-docs
+FROM ghcr.io/astral-sh/uv:python3.14-alpine@sha256:0cb69bb18ffcd57db04f045010b0234132a111da70dde5a393d26ad288d38e13 AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -29,7 +29,7 @@ COPY docs .
 
 RUN make html
 
-FROM node:26.11.1-alpine@sha256:143494b1da2945f061539253adc65e4f1569ddf07da2d384c022c791a9d90a4a AS node-base
+FROM node:26.12.0-alpine@sha256:6f08a523443ddedf52941874c203475b0ad503e859ad70cb26ab8be9a517dbd5 AS node-base
 
 RUN apk add --no-cache libc6-compat ca-certificates
 
