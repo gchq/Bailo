@@ -117,6 +117,16 @@ export default function ReviewWithComment({
   function onChange(_event: SyntheticEvent<Element, Event>, newValue: ReviewRequestInterface | null) {
     if (newValue) {
       setReviewRequest(newValue)
+      // Persist the selected review role in the URL so it survives remounts
+      // (e.g. when switching between Popper and Dialog on resize, or when closing the component).
+      // Use replace to avoid pushing a new history entry and shallow to avoid re-running data fetching.
+      router.replace(
+        {
+          query: { ...router.query, role: newValue.role },
+        },
+        undefined,
+        { shallow: true },
+      )
     }
   }
 
