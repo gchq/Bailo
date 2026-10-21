@@ -198,17 +198,19 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
-              <Stack direction='row' sx={{ justifyContent: 'space-between' }} spacing={2}>
-                <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
-                <ReviewPopper
-                  reviews={reviews}
-                  onSubmit={handleSubmitReview}
-                  isLoading={isReviewButtonLoading}
-                  errorMessage={reviewErrorMessage}
-                  reviewComment={reviewComment}
-                  onReviewCommentChange={(comment) => setReviewComment(comment)}
-                />
-              </Stack>
+              {!release.draft && (
+                <Stack direction='row' sx={{ justifyContent: 'space-between' }} spacing={2}>
+                  <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
+                  <ReviewPopper
+                    reviews={reviews}
+                    onSubmit={handleSubmitReview}
+                    isLoading={isReviewButtonLoading}
+                    errorMessage={reviewErrorMessage}
+                    reviewComment={reviewComment}
+                    onReviewCommentChange={(comment) => setReviewComment(comment)}
+                  />
+                </Stack>
+              )}
               {release &&
                 (model?.settings.mirror?.sourceModelId ? (
                   <EditableRelease release={release} readOnly />
