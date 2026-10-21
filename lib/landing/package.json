@@ -38,7 +38,7 @@
     "remark-gfm": "4.0.1",
     "shelljs": "^0.10.0",
     "styled-components": "^6.5.3",
-    "swagger-ui-dist": "^5.33.0",
+    "swagger-ui-dist": "^5.33.3",
     "swiper": "^14.3.0"
   },
   "devDependencies": {
