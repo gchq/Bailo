@@ -57,6 +57,7 @@ export default function DeploymentAssessmentReviewHistory({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingItemId, setEditingItemId] = useState<string>()
   const [editedComment, setEditedComment] = useState('')
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
   const [selectedItem, setSelectedItem] = useState<DeploymentAssessmentReviewHistoryItem>()
 
@@ -99,15 +100,24 @@ export default function DeploymentAssessmentReviewHistory({
   }
 
   async function saveEdit(historyItem: DeploymentAssessmentReviewHistoryItem) {
-    setSubmissionError('')
-    const response = await patchResponse(historyItem.item.id, editedComment)
-    if (!response.ok) {
-      setSubmissionError(await getErrorMessage(response))
+    if (isSavingEdit) {
       return
     }
 
-    refreshHistory(historyItem.kind)
-    cancelEditing()
+    setSubmissionError('')
+    setIsSavingEdit(true)
+    try {
+      const response = await patchResponse(historyItem.item.id, editedComment)
+      if (!response.ok) {
+        setSubmissionError(await getErrorMessage(response))
+        return
+      }
+
+      refreshHistory(historyItem.kind)
+      cancelEditing()
+    } finally {
+      setIsSavingEdit(false)
+    }
   }
 
   function replyTo(historyItem: DeploymentAssessmentReviewHistoryItem) {
@@ -199,7 +209,12 @@ export default function DeploymentAssessmentReviewHistory({
                     <RichTextEditor value={editedComment} onChange={setEditedComment} />
                     <Stack direction='row' spacing={1} sx={{ justifyContent: 'flex-end' }}>
                       <Button onClick={cancelEditing}>Cancel</Button>
-                      <Button variant='contained' onClick={() => saveEdit(historyItem)}>
+                      <Button
+                        variant='contained'
+                        onClick={() => saveEdit(historyItem)}
+                        loading={isSavingEdit}
+                        disabled={isSavingEdit}
+                      >
                         Save
                       </Button>
                     </Stack>
