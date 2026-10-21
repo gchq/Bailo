@@ -81,7 +81,7 @@
     "shelljs": "^0.10.0",
     "showdown": "^2.1.0",
     "swagger-ui-express": "^5.0.1",
-    "tar-stream": "^3.2.1",
+    "tar-stream": "^3.2.2",
     "tsx": "^4.23.15",
     "undici": "^8.12.2",
     "utility-types": "^3.11.0",
