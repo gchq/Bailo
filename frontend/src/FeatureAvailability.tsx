@@ -48,15 +48,7 @@ function ConfigFeatureAvailability({ feature }: { feature: ConfigFeatureKey }) {
   const scanners = useContext(ArtefactScanningInfoContext)
   const { name, isEnabled } = features[feature]
 
-  return isEnabled(uiConfig, scanners) ? (
-    <Alert sx={{ my: '20px' }} severity='success'>
-      {name} is enabled on this instance of Bailo.
-    </Alert>
-  ) : (
-    <Alert sx={{ my: '20px' }} severity='warning'>
-      {name} is disabled on this instance of Bailo.
-    </Alert>
-  )
+  return <AvailabilityAlert name={name} isEnabled={isEnabled(uiConfig, scanners)} />
 }
 
 function FederationAvailability() {
@@ -70,24 +62,20 @@ function FederationAvailability() {
     return null
   }
 
-  switch (status?.federation?.state) {
-    case FederationState.ENABLED:
-      return (
-        <Alert sx={{ my: '20px' }} severity='success'>
-          Federation is enabled on this instance of Bailo.
-        </Alert>
-      )
-    case FederationState.READ_ONLY:
-      return (
-        <Alert sx={{ my: '20px' }} severity='info'>
-          Federation is read-only on this instance of Bailo.
-        </Alert>
-      )
-    default:
-      return (
-        <Alert sx={{ my: '20px' }} severity='warning'>
-          Federation is disabled on this instance of Bailo.
-        </Alert>
-      )
-  }
+  const state = status?.federation?.state
+  const isEnabled = state === FederationState.ENABLED || state === FederationState.READ_ONLY
+
+  return <AvailabilityAlert name='Federation' isEnabled={isEnabled} />
+}
+
+function AvailabilityAlert({ name, isEnabled }: { name: string; isEnabled: boolean }) {
+  return isEnabled ? (
+    <Alert sx={{ my: '20px' }} severity='success'>
+      {name} is enabled on this instance of Bailo.
+    </Alert>
+  ) : (
+    <Alert sx={{ my: '20px' }} severity='warning'>
+      {name} is disabled on this instance of Bailo.
+    </Alert>
+  )
 }
