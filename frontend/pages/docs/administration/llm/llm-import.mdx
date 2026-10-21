@@ -12,8 +12,9 @@ import FeatureAvailability from 'src/FeatureAvailability'
 > - What configuration options are available?
 > - How do users interact with the import feature?
 
-Bailo can optionally use a large language model (LLM) to extract model card data from free text, such as HuggingFace
-model cards or system cards. This page explains how to enable and configure the feature.
+Bailo can optionally use a large language model (LLM) to extract model card data from existing written documentation.
+This page explains how to enable and configure the feature. For how users run an import, see
+[Importing a Model Card from Text](../../users/models/model-card/importing-model-card-text).
 
 ## How to enable
 
@@ -46,7 +47,7 @@ For Helm deployments, these values are set in `values.yaml` under `llm` and `con
 
 ## Configuration options
 
-- `ui.llmImport.enabled` - Enables the feature and shows the "Import from Text" button in the model card editor. When
+- `ui.llmImport.enabled` - Enables the feature and shows the **Import from Text** button in the model card editor. When
   `false` (the default), the button is hidden and the backend rejects any import requests
 - `llm.endpoint` - URL of an OpenAI-compatible chat completions endpoint
 - `llm.apiKey` - API key for authenticating with the LLM provider
@@ -57,20 +58,20 @@ For Helm deployments, these values are set in `values.yaml` under `llm` and `con
 - `llm.systemPrompt` - System prompt sent to the LLM. The default prompt instructs the model to extract only explicitly
   stated information and avoid generating placeholder values. You may want to tune this for your specific LLM and schema
 
-## What to expect
+## How it works
 
-Once enabled, users see an **Import from Text** button when editing a model card. Clicking this opens a dialog where
-they can paste free text. Bailo sends the text and the model card schema to the configured LLM, which extracts
-structured data and populates matching fields in the model card.
+When a user runs an import, Bailo sends their text and the model card schema to the configured LLM, using the
+`llm.systemPrompt` instructions. The LLM response is validated against the schema before it reaches the model card form.
+Fields that do not match the schema or contain placeholder values are removed, and users see these as validation
+warnings.
 
-The extracted data is validated against the schema before being applied. Any fields that do not match the schema or
-contain placeholder values are automatically filtered out. Validation warnings are shown to the user so they can review
-the result before saving.
+Pasted text is sent to the configured endpoint, so choose an LLM provider that is approved for the documentation your
+users will import.
 
 ## Related pages
 
-- [Importing Model Card Text](../../users/models/model-card/importing-model-card-text) - User guide for the import
-  feature
+- [Importing a Model Card from Text](../../users/models/model-card/importing-model-card-text) - Using the feature (for
+  users)
 - [App Configuration](../getting-started/app-configuration) - General application configuration
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
