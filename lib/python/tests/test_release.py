@@ -166,9 +166,7 @@ def test_retrieve_release_with_v_in_version(integration_client, example_model):
         "/etc/passwd",
     ],
 )
-def test_download_all_rejects_filenames_escaping_the_target_directory(
-    malicious_name: str, tmp_path, requests_mock
-):
+def test_download_all_rejects_filenames_escaping_the_target_directory(malicious_name: str, tmp_path, requests_mock):
     requests_mock.get(
         "https://example.com/api/v2/model/test_id/release/1.0.0",
         json={"release": {"files": [{"name": malicious_name}]}},
