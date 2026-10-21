@@ -1,27 +1,35 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.14.2-alpine3.23@sha256:31da4cb527055e4e3d7e9e006dffe9329f84ebea79eaca0a1f1c27ce61e40ca5 AS sphinx-docs
+FROM ghcr.io/astral-sh/uv:python3.14-alpine@sha256:0cb69bb18ffcd57db04f045010b0234132a111da70dde5a393d26ad288d38e13 AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy \
+    PATH="/venv/bin:$PATH"
 
 RUN apk add --no-cache pandoc make
 
 WORKDIR /app/docs
 
-COPY docs/pyproject.toml .
 COPY --from=python pyproject.toml /app/python/
 COPY --from=python README.md /app/python/
 COPY --from=python src /app/python/src
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install . -e /app/python
+# `--no-install-project` skips bailo-docs itself which has no modules
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=docs/uv.lock,target=uv.lock \
+    --mount=type=bind,source=docs/pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project && \
+    uv pip install -e /app/python
 
 COPY docs .
 
 RUN make html
 
-FROM node:26.10.0-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS node-base
+FROM node:26.12.0-alpine@sha256:6f08a523443ddedf52941874c203475b0ad503e859ad70cb26ab8be9a517dbd5 AS node-base
 
 RUN apk add --no-cache libc6-compat ca-certificates
 

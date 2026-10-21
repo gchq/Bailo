@@ -5,7 +5,7 @@ import { Registry, RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
+import InlineMarkdownDiff from 'src/common/InlineDiff/InlineMarkdownDiff'
 import LimitedTextField from 'src/common/LimitedTextField'
 import UserDisplay from 'src/common/UserDisplay'
 import getCompareFieldState from 'src/hooks/useCompareField'
@@ -180,7 +180,7 @@ export default function EntitySelector({
           />
         </>
       ) : compare.inMirroredCompare && currentValue.length ? (
-        <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
+        <InlineMarkdownDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
       ) : filteredCurrentValue.length > 0 ? (
         <Box sx={{ overflowX: 'auto', p: 1 }}>
           <Stack spacing={1} direction='row'>
