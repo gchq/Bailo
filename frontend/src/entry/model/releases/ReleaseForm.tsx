@@ -378,6 +378,7 @@ export default function ReleaseForm({
                     sx={{ width: '100%' }}
                     endIcon={<FileUpload />}
                     onClick={() => setIsUploadDialogOpen(true)}
+                    data-test='openFileUploadDialogButton'
                   >
                     Upload new files
                   </Button>

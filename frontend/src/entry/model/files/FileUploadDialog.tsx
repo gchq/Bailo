@@ -433,6 +433,7 @@ export default function FileUploadDialog({
                   variant='contained'
                   color='primary'
                   sx={{ maxWidth: 'fit-content', float: 'right' }}
+                  data-test='confirmFileUploadButton'
                 >
                   Upload files
                 </Button>
