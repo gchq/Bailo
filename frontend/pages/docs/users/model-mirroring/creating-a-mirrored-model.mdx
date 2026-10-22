@@ -1,4 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+import FeatureAvailability from 'src/FeatureAvailability'
 import Box from '@mui/material/Box'
 import Image from 'next/image'
 
@@ -8,6 +9,8 @@ import mirrorSettingsFormImage from 'public/docs/mirror-settings-form.png'
 import tokens from 'public/docs/bailo_tokens.png'
 
 # Creating a mirrored model
+
+<FeatureAvailability feature='modelMirrorImport' />
 
 > **Common questions this page answers:**
 >
@@ -29,7 +32,7 @@ optionally add additional local context to a mirrored model without modifying th
 
 ## How to create a mirrored model
 
-Create a mirrored model from the model creation page if mirroring is enabled for your Bailo instance:
+Create a mirrored model from the model creation page:
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image
