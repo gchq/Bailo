@@ -330,7 +330,12 @@ export async function reviewDeploymentAssessment(
   })
   await response.save()
 
-  await notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer)
+  notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer).catch((error) =>
+    log.warn(
+      { error, deploymentAssessmentId: deploymentAssessment.id },
+      'Error when notifying about deployment assessment review.',
+    ),
+  )
 
   return response
 }
@@ -568,7 +573,12 @@ export async function updateDeploymentAssessment(
   ])
 
   if (response) {
-    await notifyRiskOwnersOfApprovalRevoked(user, deploymentAssessment)
+    notifyRiskOwnersOfApprovalRevoked(user, deploymentAssessment).catch((error) =>
+      log.warn(
+        { error, deploymentAssessmentId: deploymentAssessment.id },
+        'Error when notifying risk owners of revoked approval.',
+      ),
+    )
   }
 
   return deploymentAssessment

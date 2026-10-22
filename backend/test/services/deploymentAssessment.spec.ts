@@ -50,6 +50,15 @@ const smtpMocks = vi.hoisted(() => ({
   notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
+
+const logMock = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  trace: vi.fn(),
+}))
+vi.mock('../../src/services/log.js', () => ({ default: logMock }))
 const modelServiceMocks = vi.hoisted(() => ({
   getModelsByIdsNoAuth: vi.fn(),
 }))
