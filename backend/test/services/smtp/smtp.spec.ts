@@ -375,8 +375,15 @@ describe('services > smtp > smtp', () => {
 
     const [, , , , list] = emailBuilderMock.buildEmail.mock.calls.at(-1) as unknown as any[]
     expect(list.title).toBe('Models')
-    expect(list.items).toHaveLength(5)
-    expect(list.items.map((item: any) => item.detail)).toEqual(['model-0', 'model-1', 'model-2', 'model-3', 'model-4'])
+    expect(list.items).toHaveLength(6)
+    expect(list.items.slice(0, 5).map((item: any) => item.detail)).toEqual([
+      'model-0',
+      'model-1',
+      'model-2',
+      'model-3',
+      'model-4',
+    ])
+    expect(list.items[5]).toEqual({ label: '...' })
   })
 
   test('that the deployment assessment review email names a single model in the singular', async () => {

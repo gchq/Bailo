@@ -132,13 +132,19 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
 function buildModelList(models: ModelInterface[]): EmailList {
   const visibleModels = models.slice(0, MAX_MODELS_IN_EMAIL)
 
+  const items: EmailList['items'] = visibleModels.map((model) => ({
+    label: model.name,
+    detail: model.id,
+    url: `${appBaseUrl}/${entryKindForRedirect(model.kind)}/${encodeURIComponent(model.id)}`,
+  }))
+
+  if (models.length > MAX_MODELS_IN_EMAIL) {
+    items.push({ label: '...' })
+  }
+
   return {
     title: models.length === 1 ? 'Model' : 'Models',
-    items: visibleModels.map((model) => ({
-      label: model.name,
-      detail: model.id,
-      url: `${appBaseUrl}/${entryKindForRedirect(model.kind)}/${encodeURIComponent(model.id)}`,
-    })),
+    items,
   }
 }
 export async function notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(
