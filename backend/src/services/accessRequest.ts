@@ -16,6 +16,7 @@ import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
@@ -217,11 +218,10 @@ export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
 export async function updateAccessRequest(
   user: UserInterface,
   accessRequestId: string,
-  diff: Partial<UpdateAccessRequestParams>,
+  diff: UpdateAccessRequestParams,
 ) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
 
-  //should this be lean?
   const model = await getModelById(user, accessRequest.modelId)
 
   const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
@@ -239,7 +239,7 @@ export async function updateAccessRequest(
   const responses = await ResponseModel.find({ parentId: parentIds }).sort({
     createdAt: -1,
   })
-  //I believe DecisionKeys is the correct type, no new AR-specific type is necessary, like for DAs
+
   const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
     DecisionKeys | undefined
 
@@ -255,24 +255,21 @@ export async function updateAccessRequest(
         })
       : undefined
 
-  if (diff.metadata) {
-    // Validate the incoming content, not what is already stored
-    const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
-    if (!valid) {
-      throw BadReq('Access Request Metadata could not be validated against the schema.', {
-        errors,
-      })
-    }
+  // Validate the incoming content, not what is already stored
+  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
+  if (!valid) {
+    throw BadReq('Access Request Metadata could not be validated against the schema.', {
+      errors,
+    })
+  }
 
-    accessRequest.metadata = diff.metadata
-    accessRequest.markModified('metadata')
-  }
-  //if not diff.metadata, what is this the point of this?
-  //make transaction of this
-  await accessRequest.save()
-  if (newResponse) {
-    await newResponse.save()
-  }
+  accessRequest.metadata = diff.metadata
+  accessRequest.markModified('metadata')
+
+  await useTransaction([
+    (session) => accessRequest.save({ session }),
+    ...(newResponse ? [(session) => newResponse.save({ session })] : []),
+  ])
 
   return accessRequest
 }
