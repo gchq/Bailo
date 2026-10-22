@@ -18,7 +18,7 @@ export default function Deployments() {
 `
 
   return (
-    <Container maxWidth='xl'>
+    <Container maxWidth='xl' data-test='deploymentAssessmentsList'>
       <Paper sx={{ p: 2 }}>
         <Title text='Deployment Assessments' />
         <Stack spacing={2} divider={<Divider flexItem />}>
@@ -46,7 +46,7 @@ export default function Deployments() {
               />
             </Box>
           </Stack>
-          <DeploymentAssessmentsList data-test='deploymentAssessmentsList' />
+          <DeploymentAssessmentsList />
         </Stack>
       </Paper>
     </Container>
