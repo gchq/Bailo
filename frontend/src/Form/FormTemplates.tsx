@@ -5,6 +5,7 @@ import Error from '@mui/icons-material/ErrorOutlineOutlined'
 import Share from '@mui/icons-material/Share'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
+import MuiFieldTemplate from '@rjsf/mui/lib/FieldTemplate/index.js'
 import {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
@@ -63,8 +64,11 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function FieldTemplate({ children, registry, schema, id }: FieldTemplateProps) {
+export function FieldTemplate(props: FieldTemplateProps) {
+  const { registry, schema, id } = props
   const theme = useTheme()
+  // Use the default MUI field template so that inline errors and help text are still rendered
+  const children = <MuiFieldTemplate {...props} />
   const answered = isQuestionAnswered(id, schema, registry.formContext)
   const requiredByState =
     registry.formContext.requiredByModelState &&
@@ -103,7 +107,7 @@ export function FieldTemplate({ children, registry, schema, id }: FieldTemplateP
     )
   }
 
-  return <>{children}</>
+  return children
 }
 
 export function ErrorListTemplate() {

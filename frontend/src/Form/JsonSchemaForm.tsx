@@ -314,6 +314,7 @@ export default function JsonSchemaForm({
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
+            liveValidate='onChange'
             liveOmit
             experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
             formContext={{
@@ -329,23 +330,14 @@ export default function JsonSchemaForm({
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
             }}
-            templates={
-              !canEdit
-                ? {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                  }
-                : {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                    ErrorListTemplate,
-                    FieldTemplate,
-                  }
-            }
+            templates={{
+              DescriptionFieldTemplate,
+              ArrayFieldTemplate,
+              ArrayFieldItemTemplate,
+              ObjectFieldTemplate,
+              ErrorListTemplate,
+              FieldTemplate,
+            }}
           >
             <></>
           </Form>
