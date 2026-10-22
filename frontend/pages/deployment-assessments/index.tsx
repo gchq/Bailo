@@ -46,7 +46,7 @@ export default function Deployments() {
               />
             </Box>
           </Stack>
-          <DeploymentAssessmentsList />
+          <DeploymentAssessmentsList data-test='deploymentAssessmentsList' />
         </Stack>
       </Paper>
     </Container>
