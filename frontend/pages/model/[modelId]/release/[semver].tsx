@@ -162,55 +162,56 @@ export default function Release() {
               errorMessage={putErrorMessage}
               setErrorMessage={setPutErrorMessage}
             />
-            <Stack spacing={2} sx={{ px: 4, py: 2 }}>
-              <Stack
-                direction={{ sm: 'row', xs: 'column' }}
-                spacing={2}
-                divider={<Divider flexItem orientation='vertical' />}
-              >
-                <Link href={`/model/${modelId}?tab=releases`}>
-                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                    Back to model
-                  </Button>
-                </Link>
+            <Stack spacing={2} sx={{ px: 4, py: 2, width: '100%' }}>
+              <Stack direction={{ sm: 'row', xs: 'column' }} sx={{ justifyContent: 'space-between', width: '100%' }}>
                 <Stack
-                  direction='row'
-                  sx={{
-                    overflow: 'hidden',
-                    alignItems: 'center',
-                  }}
+                  direction={{ sm: 'row', xs: 'column' }}
+                  spacing={2}
+                  divider={<Divider flexItem orientation='vertical' />}
                 >
-                  <Typography
-                    variant='h6'
-                    component='h1'
-                    color='primary'
+                  <Link href={`/model/${modelId}?tab=releases`}>
+                    <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                      Back to model
+                    </Button>
+                  </Link>
+                  <Stack
+                    direction='row'
                     sx={{
                       overflow: 'hidden',
-                      textOverflow: 'ellipsis',
+                      alignItems: 'center',
                     }}
                   >
-                    {release ? release.semver : 'Loading...'}
-                  </Typography>
-                  <CopyToClipboardButton
-                    textToCopy={release.semver}
-                    notificationText='Copied release semver to clipboard'
-                    ariaLabel='copy release semver to clipboard'
-                  />
+                    <Typography
+                      variant='h6'
+                      component='h1'
+                      color='primary'
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {release ? release.semver : 'Loading...'}
+                    </Typography>
+                    <CopyToClipboardButton
+                      textToCopy={release.semver}
+                      notificationText='Copied release semver to clipboard'
+                      ariaLabel='copy release semver to clipboard'
+                    />
+                  </Stack>
                 </Stack>
+                <ReviewPopper
+                  reviews={reviews}
+                  onSubmit={handleSubmitReview}
+                  isLoading={isReviewButtonLoading}
+                  errorMessage={reviewErrorMessage}
+                  reviewComment={reviewComment}
+                  onReviewCommentChange={(comment) => setReviewComment(comment)}
+                />
               </Stack>
               {!release.draft && (
-                <Stack direction='row' sx={{ justifyContent: 'space-between' }} spacing={2}>
-                  <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
-                  <ReviewPopper
-                    reviews={reviews}
-                    onSubmit={handleSubmitReview}
-                    isLoading={isReviewButtonLoading}
-                    errorMessage={reviewErrorMessage}
-                    reviewComment={reviewComment}
-                    onReviewCommentChange={(comment) => setReviewComment(comment)}
-                  />
-                </Stack>
+                <ReleaseAccessRequestReviewSummary release={release} includeResponsesSummary={false} />
               )}
+              <Divider flexItem />
               {release &&
                 (model?.settings.mirror?.sourceModelId ? (
                   <EditableRelease release={release} readOnly />

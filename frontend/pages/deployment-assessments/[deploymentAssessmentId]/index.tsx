@@ -163,14 +163,14 @@ export default function DeploymentAssessment() {
                         Back to deployments
                       </Button>
                     </Link>
-                    <Stack
-                      direction='row'
-                      spacing={2}
-                      sx={{ alignItems: 'center' }}
-                      divider={<Divider flexItem orientation='vertical' />}
-                    >
-                      <AssessmentStateChip assessment={deploymentAssessment} />
-                      {!deploymentAssessment.draft && (
+                    {!deploymentAssessment.draft && (
+                      <Stack
+                        direction='row'
+                        spacing={2}
+                        sx={{ alignItems: 'center' }}
+                        divider={<Divider flexItem orientation='vertical' />}
+                      >
+                        <AssessmentStateChip assessment={deploymentAssessment} />
                         <ReviewPopper
                           reviews={reviews}
                           onSubmit={handleSubmit}
@@ -181,8 +181,8 @@ export default function DeploymentAssessment() {
                           reviewComment={reviewComment}
                           onReviewCommentChange={(comment) => setReviewComment(comment)}
                         />
-                      )}
-                    </Stack>
+                      </Stack>
+                    )}
                   </Stack>
                   <Divider flexItem />
                   <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
