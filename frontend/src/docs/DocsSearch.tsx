@@ -118,7 +118,7 @@ export default function DocsSearch({ open, onClose, onOpen, renderDialog = true 
             endAdornment={
               <ShortcutButton
                 type='button'
-                aria-label={`Open search (${isMac ? 'Command K' : 'Control K'})`}
+                aria-label={`${isMac ? '⌘K' : 'Ctrl + K'} open search shortcut`}
                 onClick={(event) => {
                   event.stopPropagation()
                   openDialog()
