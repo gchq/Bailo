@@ -32,6 +32,8 @@ export default function AccessRequest() {
     accessRequestId,
   })
 
+  const latestReviewState = reviews[0].status
+
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
     isReviewsError,
@@ -39,8 +41,6 @@ export default function AccessRequest() {
   if (error) {
     return error
   }
-
-  //todo add latestReviewState const, work out whether memoized
 
   if (isReviewsLoading) {
     return <Loading />
@@ -82,7 +82,7 @@ export default function AccessRequest() {
                   </Stack>
                 </Stack>
                 <ReleaseAccessRequestReviewSummary accessRequest={accessRequest} includeResponsesSummary={false} />
-                {isEdit && reviews[0].status && (
+                {isEdit && latestReviewState && (
                   <MessageAlert
                     message='Saving changes to this access request will revoke the approval status'
                     severity='warning'
@@ -93,7 +93,7 @@ export default function AccessRequest() {
                     accessRequest={accessRequest}
                     isEdit={isEdit}
                     onIsEditChange={setIsEdit}
-                    latestReviewState={reviews[0].status}
+                    latestReviewState={latestReviewState}
                   />
                 )}
                 <ReviewComments
