@@ -248,7 +248,6 @@ data:
 
         deploymentAssessments: {
           deployableModelState: {{ toJson .Values.config.ui.deploymentAssessments.deployableModelState }},
-          signOffDeclaration: {{ toJson .Values.config.ui.deploymentAssessments.signOffDeclaration }},
         },
 
         lifecycle: {

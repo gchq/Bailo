@@ -24,7 +24,6 @@ type ReviewWithCommentProps = {
   modelId?: string
   includeDueDate?: boolean
   hideRequestChangesButton?: boolean
-  deploymentAssessmentReview?: boolean
   onCancel?: () => void
 }
 
@@ -35,7 +34,6 @@ export default function ReviewWithComment({
   modelId,
   includeDueDate = false,
   hideRequestChangesButton = false,
-  deploymentAssessmentReview = false,
   onCancel,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
@@ -49,9 +47,6 @@ export default function ReviewWithComment({
   const uiConfig = useContext(UiConfigContext)
 
   function showUndoButton() {
-    if (deploymentAssessmentReview) {
-      return false
-    }
     if (reviewRequest) {
       const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
         (latestReview) => latestReview.role === reviewRequest.role,
@@ -97,9 +92,7 @@ export default function ReviewWithComment({
 
     if (invalidComment() && selectedDecision === Decision.RequestChanges) {
       setErrorText('You must submit a comment when requesting changes.')
-    } else if (invalidComment() && selectedDecision === Decision.Reject) {
-      setErrorText('You must submit a comment when rejecting.')
-    } else if (!reviewRequest?.role && !deploymentAssessmentReview) {
+    } else if (!reviewRequest?.role) {
       setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')
@@ -134,26 +127,24 @@ export default function ReviewWithComment({
         )}
         {entryRoles.length > 0 && (
           <Stack spacing={2}>
-            {!deploymentAssessmentReview && (
-              <Autocomplete
-                sx={{ pt: 1 }}
-                open={selectOpen}
-                onOpen={() => {
-                  setSelectOpen(true)
-                }}
-                onClose={() => {
-                  setSelectOpen(false)
-                }}
-                isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
-                  option.role === value.role
-                }
-                onChange={onChange}
-                value={reviewRequest}
-                getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
-                options={reviews}
-                renderInput={(params) => <LimitedTextField {...params} label='Select your role' size='small' />}
-              />
-            )}
+            <Autocomplete
+              sx={{ pt: 1 }}
+              open={selectOpen}
+              onOpen={() => {
+                setSelectOpen(true)
+              }}
+              onClose={() => {
+                setSelectOpen(false)
+              }}
+              isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
+                option.role === value.role
+              }
+              onChange={onChange}
+              value={reviewRequest}
+              getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
+              options={reviews}
+              renderInput={(params) => <LimitedTextField {...params} label='Select your role' size='small' />}
+            />
             <RichTextEditor
               data-test='reviewWithCommentTextField'
               value={reviewComment}
@@ -196,21 +187,6 @@ export default function ReviewWithComment({
                   </Typography>
                 </>
               )}
-              {deploymentAssessmentReview && (
-                <>
-                  <FormControlLabel
-                    value={Decision.Reject}
-                    label='Reject'
-                    control={<Radio size='small' sx={{ py: 0 }} />}
-                    slotProps={{
-                      typography: { sx: { fontWeight: 'bold' } },
-                    }}
-                  />
-                  <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
-                    Not acceptable
-                  </Typography>
-                </>
-              )}
               <FormControlLabel
                 value={Decision.Approve}
                 label='Approve'
@@ -221,7 +197,7 @@ export default function ReviewWithComment({
                 data-test='approveReviewButton'
               />
               <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption' color={theme.palette.customTextInput.main}>
-                {deploymentAssessmentReview ? uiConfig.deploymentAssessments.signOffDeclaration : 'Looks good to me'}
+                Looks good to me
               </Typography>
             </RadioGroup>
             <Divider />

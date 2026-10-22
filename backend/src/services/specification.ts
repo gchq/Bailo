@@ -4,7 +4,6 @@ import type { AnyZodObject } from 'zod'
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
-import { DeploymentAssessmentState } from '../models/DeploymentAssessment.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
 import { Decision, ResponseKind } from '../models/Response.js'
@@ -76,10 +75,6 @@ const deploymentAssessmentModelIdsSchema = z
   .array(z.string())
   .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
 export const deploymentAssessmentDraftSchema = z.boolean().openapi({ example: true })
-export const deploymentAssessmentStateSchema = z
-  .nativeEnum(DeploymentAssessmentState)
-  .openapi({ example: DeploymentAssessmentState.NeedsReview })
-
 export const deploymentAssessmentMetadataSchema = z
   .object({
     signOff: z
@@ -112,7 +107,6 @@ export const deploymentAssessmentSummarySchema = z.object({
   draft: deploymentAssessmentDraftSchema,
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
-  state: deploymentAssessmentStateSchema.optional(),
 })
 
 const baseDeploymentAssessmentSchema = z.object({

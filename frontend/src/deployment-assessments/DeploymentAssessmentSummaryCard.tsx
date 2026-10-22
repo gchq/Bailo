@@ -4,7 +4,6 @@ import ChipSelector from 'src/common/ChipSelector'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
-import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import { DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
 import Link from 'src/Link'
 import { DeploymentAssessmentSummary } from 'types/types'
@@ -37,7 +36,6 @@ export default function DeploymentAssessmentSummaryCard({
 
   return (
     <Box data-test={`deploymentAssessmentSummary-${assessment.id}`}>
-      <ReviewBanner deploymentAssessment={assessment} />
       <Box data-test='deploymentAssessmentSummaryCard' sx={{ p: 2 }}>
         <Stack spacing={2}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ justifyContent: 'space-between' }}>

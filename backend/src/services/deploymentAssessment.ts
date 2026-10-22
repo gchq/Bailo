@@ -7,8 +7,6 @@ import { z } from '../lib/zod.js'
 import DeploymentAssessmentModel, {
   DeploymentAssessmentDoc,
   DeploymentAssessmentInterface,
-  DeploymentAssessmentState,
-  DeploymentAssessmentStateKeys,
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
@@ -29,17 +27,10 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
-import { getModelsByIdsNoAuth, getRoleEntities } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
-import {
-  notifyModelOwnersOfDeploymentApproval,
-  notifyModelOwnersOfDeploymentAssessment,
-  notifyReviewResponseForDeploymentAssessment,
-  notifyRiskOwnerOfDeploymentAssessment,
-  notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked,
-} from './smtp/smtp.js'
+import { notifyModelOwnersOfDeploymentAssessment, notifyRiskOwnerOfDeploymentAssessment } from './smtp/smtp.js'
 import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
 
 export const deploymentAssessmentRiskOwnerRole = 'riskOwners'
@@ -49,7 +40,6 @@ export type { SearchDeploymentAssessmentsParams }
 export interface DeploymentAssessmentDetails {
   deploymentAssessment: DeploymentAssessmentDoc
   responses: ResponseInterface[]
-  state?: DeploymentAssessmentStateKeys
   latestReview?: ReviewDoc
 }
 
@@ -220,26 +210,6 @@ export async function getDeploymentAssessmentById(
   return deploymentAssessment
 }
 
-export function deriveDeploymentAssessmentState(
-  deploymentAssessment: Pick<DeploymentAssessmentInterface, 'draft'>,
-  latestDecision?: DecisionKeys,
-): DeploymentAssessmentStateKeys | undefined {
-  if (deploymentAssessment.draft) {
-    return undefined
-  }
-
-  switch (latestDecision) {
-    case Decision.Approve:
-      return DeploymentAssessmentState.Approved
-    case Decision.Reject:
-      return DeploymentAssessmentState.Rejected
-    case Decision.RequestChanges:
-      return DeploymentAssessmentState.ChangesRequested
-    default:
-      return DeploymentAssessmentState.NeedsReview
-  }
-}
-
 /**
  * A risk owner needs to act on assessments awaiting their review, and a creator needs to act on assessments
  * that are still drafts or that have been sent back to them. Approved assessments need no further action.
@@ -247,11 +217,11 @@ export function deriveDeploymentAssessmentState(
 function needsUserAction(
   deploymentAssessment: DeploymentAssessmentInterface,
   user: UserInterface,
-  state?: DeploymentAssessmentStateKeys,
+  latestDecision?: DecisionKeys,
 ) {
   if (
     deploymentAssessment.metadata.signOff?.riskOwners?.includes(toEntity('user', user.dn)) &&
-    state === DeploymentAssessmentState.NeedsReview
+    (latestDecision === undefined || latestDecision === Decision.Undo)
   ) {
     return true
   }
@@ -260,11 +230,7 @@ function needsUserAction(
     return false
   }
 
-  return (
-    deploymentAssessment.draft ||
-    state === DeploymentAssessmentState.Rejected ||
-    state === DeploymentAssessmentState.ChangesRequested
-  )
+  return deploymentAssessment.draft || latestDecision === Decision.Reject || latestDecision === Decision.RequestChanges
 }
 
 export async function getDeploymentAssessmentDetails(
@@ -282,16 +248,9 @@ export async function getDeploymentAssessmentDetails(
     createdAt: -1,
   })
 
-  const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
-    DecisionKeys | undefined
-  const state = deploymentAssessment.draft
-    ? undefined
-    : deriveDeploymentAssessmentState(deploymentAssessment, latestDecision)
-
   return {
     deploymentAssessment,
     responses,
-    state,
     latestReview,
   }
 }
@@ -323,131 +282,6 @@ export async function commentOnDeploymentAssessment(
   })
   await response.save()
   return response
-}
-
-export async function reviewDeploymentAssessment(
-  user: UserInterface,
-  deploymentAssessmentId: string,
-  decision: Exclude<DecisionKeys, 'undo'>,
-  comment?: string,
-) {
-  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-  if (deploymentAssessment.draft) {
-    throw BadReq('Draft deployment assessments cannot be reviewed.', { deploymentAssessmentId })
-  }
-  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
-  }
-
-  const assessmentReviewer = toEntity('user', user.dn)
-  const review = await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
-  const response = new ResponseModel({
-    entity: assessmentReviewer,
-    kind: ResponseKind.Review,
-    role: review.role,
-    parentId: review._id,
-    decision,
-    ...(comment && { comment }),
-  })
-  await response.save()
-
-  notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer).catch((error) =>
-    log.warn(
-      { error, deploymentAssessmentId: deploymentAssessment.id },
-      'Error when notifying about deployment assessment review.',
-    ),
-  )
-
-  return response
-}
-
-async function notifyDeploymentAssessmentReviewed(
-  deploymentAssessment: DeploymentAssessmentInterface,
-  decision: Exclude<DecisionKeys, 'undo'>,
-  assessmentReviewer: string,
-): Promise<void> {
-  try {
-    switch (decision) {
-      case Decision.Reject:
-      case Decision.RequestChanges:
-        await notifyReviewResponseForDeploymentAssessment(deploymentAssessment, decision, assessmentReviewer)
-        break
-
-      case Decision.Approve: {
-        const modelDevelopers = await getModelDevelopers(deploymentAssessment)
-        const results = await Promise.allSettled(
-          modelDevelopers.map(({ model, developers }) =>
-            notifyModelOwnersOfDeploymentApproval(
-              developers,
-              deploymentAssessment,
-              model,
-              deploymentAssessment.createdBy,
-            ),
-          ),
-        )
-
-        for (const result of results) {
-          if (result.status === 'rejected') {
-            log.warn(
-              {
-                error: result.reason,
-                deploymentAssessmentId: deploymentAssessment.id,
-                decision,
-              },
-              'Failed to send deployment assessment approval notification',
-            )
-          }
-        }
-        break
-      }
-    }
-  } catch (error) {
-    log.warn(
-      {
-        error,
-        deploymentAssessmentId: deploymentAssessment.id,
-        decision,
-      },
-      'Failed to send deployment assessment review notification',
-    )
-  }
-}
-
-async function notifyRiskOwnersOfApprovalRevoked(
-  editor: UserInterface,
-  deploymentAssessment: DeploymentAssessmentInterface,
-): Promise<void> {
-  const riskOwners = deploymentAssessment.metadata?.signOff?.riskOwners ?? []
-  if (riskOwners.length === 0) {
-    return
-  }
-
-  try {
-    const editorEntity = toEntity('user', editor.dn)
-    const editorName = (await authentication.getUserInformation(editorEntity)).name || editor.dn
-    await notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(riskOwners, deploymentAssessment, editorName)
-  } catch (error) {
-    log.warn(
-      {
-        error,
-        deploymentAssessmentId: deploymentAssessment.id,
-      },
-      'Failed to send deployment assessment approval revoked notification',
-    )
-  }
-}
-
-async function getModelDevelopers(deploymentAssessment: DeploymentAssessmentInterface) {
-  const modelIds = deploymentAssessment.metadata.modelOverview?.modelIds ?? []
-  const models = await getModelsByIdsNoAuth(modelIds)
-
-  const modelDevelopers = models.map((model) => ({
-    model,
-    developers: getRoleEntities([SystemRoles.Owner], model.collaborators)[SystemRoles.Owner],
-  }))
-
-  return modelDevelopers
 }
 
 export async function createDeploymentAssessment(
@@ -565,10 +399,12 @@ export async function updateDeploymentAssessment(
   deploymentAssessmentId: string,
   diff: Partial<UpdateDeploymentAssessmentParams>,
 ) {
-  const { deploymentAssessment, state, latestReview } = await getDeploymentAssessmentDetails(
+  const { deploymentAssessment, responses, latestReview } = await getDeploymentAssessmentDetails(
     user,
     deploymentAssessmentId,
   )
+  const latestDecision = responses.find((response) => response.kind === ResponseKind.Review)?.decision as
+    DecisionKeys | undefined
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
   if (!auth.success) {
@@ -624,7 +460,7 @@ export async function updateDeploymentAssessment(
 
   // revoke an existing approval if DA is edited
   const response =
-    state === DeploymentAssessmentState.Approved && latestReview
+    latestDecision === Decision.Approve && latestReview
       ? new ResponseModel({
           entity: toEntity('user', user.dn),
           kind: ResponseKind.Review,
@@ -641,15 +477,6 @@ export async function updateDeploymentAssessment(
     ...(response ? [(session) => response.save({ session })] : []),
   ])
 
-  if (response) {
-    notifyRiskOwnersOfApprovalRevoked(user, deploymentAssessment).catch((error) =>
-      log.warn(
-        { error, deploymentAssessmentId: deploymentAssessment.id },
-        'Error when notifying risk owners of revoked approval.',
-      ),
-    )
-  }
-
   return deploymentAssessment
 }
 
@@ -665,14 +492,9 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
 
   const summaries: DeploymentAssessmentSummary[] = authorisedAssessments.reduce<DeploymentAssessmentSummary[]>(
     (acc, assessment) => {
-      const state =
-        assessment.draft !== false
-          ? undefined
-          : deriveDeploymentAssessmentState(assessment, latestDecisionsByAssessmentId.get(assessment.id))
-
+      const latestDecision = latestDecisionsByAssessmentId.get(assessment.id)
       const passesFilter =
-        (params.state === undefined || state === params.state) &&
-        (params.needsAction === undefined || needsUserAction(assessment, user, state) === params.needsAction)
+        params.needsAction === undefined || needsUserAction(assessment, user, latestDecision) === params.needsAction
 
       if (passesFilter) {
         const { riskOwners } = assessment.metadata?.signOff ?? {}
@@ -683,7 +505,6 @@ export async function searchDeploymentAssessments(user: UserInterface, params: S
           name: assessment.name,
           ...(riskOwners && riskOwners.length > 0 && { owner: riskOwners }),
           ...(modelIds && { models: modelIds }),
-          ...(state && { state }),
           draft: assessment.draft,
           createdBy: assessment.createdBy,
           createdAt: assessment.createdAt instanceof Date ? assessment.createdAt.toISOString() : assessment.createdAt,

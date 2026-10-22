@@ -200,7 +200,6 @@ export interface UiConfig {
 
   deploymentAssessments: {
     deployableModelState: string | null
-    signOffDeclaration: string
   }
 
   lifecycle: {

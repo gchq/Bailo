@@ -1,33 +1,13 @@
 import Add from '@mui/icons-material/Add'
-import { useGetDeploymentAssessments } from 'actions/deploymentAssessments'
+import { Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useContext, useMemo } from 'react'
+import HelpDialog from 'src/common/HelpDialog'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
-import UiConfigContext from 'src/contexts/uiConfigContext'
 import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
-import MyAssessments from 'src/deployment-assessments/MyAssessments'
-import NeedsAction from 'src/deployment-assessments/NeedsAction'
 
 export default function Deployments() {
   const router = useRouter()
-  const uiConfig = useContext(UiConfigContext)
-
-  const { deploymentAssessments } = useGetDeploymentAssessments({ needsAction: true })
-
-  const tabs = useMemo(
-    () => [
-      {
-        title: deploymentAssessments.length ? `Needs action (${deploymentAssessments.length})` : 'Needs action',
-        path: 'needs-action',
-        view: <NeedsAction />,
-      },
-      { title: 'My assessments', path: 'my-assessments', view: <MyAssessments /> },
-      { title: 'All assessments', path: 'all-assessments', view: <DeploymentAssessmentsList /> },
-    ],
-    [deploymentAssessments.length],
-  )
 
   const deploymentAssessmentInfo = `
   Deployment assessments are primarily used to record and approve the use of one or more models. Unlike the previous access request process, deployment assessments are not tied to a specific model, and model owners or managers do not necessarily need to be involved in the review process.
@@ -35,25 +15,40 @@ export default function Deployments() {
   ### When to use deployment assessments
   Deployment assessments are used to document and approve the use of one or more models. Under the previous process, users were required to submit an access request for each model and wait for approval from someone responsible for that model. With deployment assessments, multiple models can be included within a single assessment.
 
-  ### How are deployment assessments reviewed?
-  Deployment assessments are reviewed by a single ${uiConfig.roleDisplayNames.riskOwner}. The ${uiConfig.roleDisplayNames.riskOwner} is selected by the person creating the assessment and is responsible for reviewing and approving its use. They do not need to be involved in the ownership or management of any of the models included in the assessment.
 `
 
   return (
-    <>
-      <Title text='Deployment Assessments' />
-      <PageWithTabs
-        title='Deployment Assessments'
-        tabs={tabs}
-        displayActionButton
-        actionButtonTitle='Create deployment assessment'
-        actionButtonOnClick={() => router.push('/deployment-assessments/new')}
-        actionButtonIcon={<Add />}
-        buttonHelpDialog={{
-          title: 'What are deployment assessments?',
-          content: <MarkdownDisplay>{deploymentAssessmentInfo}</MarkdownDisplay>,
-        }}
-      />
-    </>
+    <Container maxWidth='xl'>
+      <Paper sx={{ p: 2 }}>
+        <Title text='Deployment Assessments' />
+        <Stack spacing={2} divider={<Divider flexItem />}>
+          <Stack
+            direction='row'
+            spacing={2}
+            sx={{ alignItems: 'center', justifyContent: 'space-between', px: 2, pb: 2 }}
+          >
+            <Typography component='h1' color='primary' variant='h6'>
+              Deployment Assessments
+            </Typography>
+            <Box>
+              <Button
+                sx={{ minWidth: '154px' }}
+                variant='contained'
+                onClick={() => router.push('/deployment-assessments/new')}
+                startIcon={<Add />}
+                data-test='actionButton'
+              >
+                Create deployment assessment
+              </Button>
+              <HelpDialog
+                title='What are deployment assessments?'
+                content={<MarkdownDisplay>{deploymentAssessmentInfo}</MarkdownDisplay>}
+              />
+            </Box>
+          </Stack>
+          <DeploymentAssessmentsList />
+        </Stack>
+      </Paper>
+    </Container>
   )
 }

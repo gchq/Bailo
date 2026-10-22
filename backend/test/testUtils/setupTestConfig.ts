@@ -51,7 +51,6 @@ const overrides: PartialDeep<Config> = {
     deploymentAssessments: {
       // Required a stricter value than default `null`
       deployableModelState: 'Production',
-      signOffDeclaration: 'I agree to take on responsibility as the Deployment Risk Owner.',
     },
   },
   modelMirror: {
