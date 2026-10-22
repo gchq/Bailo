@@ -6,27 +6,32 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 # Comparing Model Cards
 
+> **Common questions this page answers:**
+>
+> - How do I compare two versions of a model card?
+> - Can I compare model cards from different models?
+> - How do I read the highlighted changes on the comparison page?
+
 Model card comparison allows you to review the differences between two versions of a model card. You can compare
 versions from the same model or select model cards from different models.
 
 This is useful when reviewing changes to model documentation, checking how models differ, or verifying that updates have
 been recorded correctly.
 
-> **Common questions this page answers:**
->
-> - How do I compare two model cards?
-> - Can I compare model cards from different models?
-> - Can I compare different versions of a model card?
-> - How do I view the differences between model cards?
-> - How do I read the highlighted changes on the comparison page?
+See [Filling In the Model Card](model-card) for how to edit a model card, and for how to view a single earlier version.
 
 ## Selecting model cards to compare
 
-To compare two model cards:
+If you want to see what changed between two versions, select them for comparison:
 
-1. Open the model history or model card comparison page
-2. Select two card versions you wish to compare
+1. Open the model card history dialog, or go directly to the model card comparison page
+2. Tick the **Compare** checkbox for the two versions you wish to compare
 3. Select **Compare revisions**
+
+The older version is always used as the **From** card and the newer version as the **To** card.
+
+Each comparison also has its own unique URL, which records the selected models and versions. You can share this URL so
+that others see the same comparison.
 
 <Box sx={{ maxWidth: '50%', margin: 'auto' }}>
   <Image
@@ -55,15 +60,13 @@ The screenshot above shows the model card comparison page, where the selected mo
 
 ## Reading the differences
 
-Changes are marked in each answer:
+The comparison page marks changes in each answer:
 
-| Marker                           | Meaning                                                           |
-| -------------------------------- | ----------------------------------------------------------------- |
-| **+** with a green highlight     | Content that appears in the **To** card but not the **From** card |
-| **-** with a red highlight       | Content that appears in the **From** card but not the **To** card |
-| No highlight                     | Content that is the same in both cards                            |
-| _Unanswered_ inside a change     | The question had no answer in that card                           |
-| _Unanswered_ without a highlight | The question has no answer in either card                         |
+- **+ with a green highlight** - content that appears in the **To** card but not the **From** card
+- **- with a red highlight** - content that appears in the **From** card but not the **To** card
+- **No highlight** - content that is the same in both cards
+- **_Unanswered_ inside a change** - the question had no answer in that card
+- **_Unanswered_ without a highlight** - the question has no answer in either card
 
 How a change is shown depends on the type of answer:
 
@@ -74,7 +77,7 @@ How a change is shown depends on the type of answer:
   inside a coloured frame
 - **Performance metrics** - changes to metric names and values are highlighted row by row, and metrics that were removed
   are still listed so that you can see what was taken out
-- **Other answers**, such as dates, selections, tags and users - the old and new answers are compared as text
+- **Other answers** - dates, selections, tags and users are compared as text
 
 ## Comparing versions of the same model
 
@@ -87,8 +90,7 @@ For example, you might compare:
 - Two versions created during a review
 - A released model card with its latest draft
 
-Each edit to a model card creates a new version. Comparing versions helps you understand what information was added,
-updated, or removed between those versions.
+Comparing versions helps you understand what information was added, updated, or removed between those versions.
 
 ## Comparing cards from different models
 
@@ -107,7 +109,8 @@ or more suitable than the other.
 
 ## Mirrored models
 
-Mirrored model cards can also be included in model card comparisons.
+Mirrored model cards can also be included in model card comparisons. A mirrored model is a copy of a model from another
+Bailo instance, with a read-only source card and an editable local card.
 
 When comparing a mirrored model with a non-mirrored model, Bailo compares:
 
@@ -124,9 +127,10 @@ changed by the comparison.
 
 ## Related pages
 
-- [Model Card](model-card) - Filling in the model card and configuring access
-- [Model Card Lifecycle](../../reviews/reviewing/model-lifecycle) - Completing and updating model card lifecycle reviews
-- [Editing Mirrored Model Cards](../../model-mirroring/editing-a-mirrored-model-card) - Editing additional information
+- [Model Card](model-card) - Filling in the model card, configuring access, and viewing version history
+- [Reviewing a Model Card Lifecycle](../../reviews/reviewing/model-lifecycle) - Completing and updating model card
+  lifecycle reviews
+- [Editing a Mirrored Model Card](../../model-mirroring/editing-a-mirrored-model-card) - Editing additional information
   on mirrored model cards
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
