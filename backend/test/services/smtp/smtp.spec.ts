@@ -4,8 +4,6 @@ import { ReviewInterface } from '../../../src/models/Review.js'
 import { UserInterface } from '../../../src/models/User.js'
 import {
   notifyLifeCycleReview,
-  notifyModelOwnersOfDeploymentApproval,
-  notifyModelOwnersOfDeploymentAssessment,
   notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
   notifyReviewResponseForDeploymentAssessment,
@@ -182,13 +180,6 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
-  test('that an email is not sent to model owners after a deployment assessment is created if disabled in config', async () => {
-    setTestConfig({ smtp: { enabled: false } })
-    await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
-
-    expect(transporterMock.sendMail).not.toHaveBeenCalled()
-  })
-
   test('that an email is sent for Release Reviews', async () => {
     await requestReviewForRelease(['user:user'], review, release)
 
@@ -351,39 +342,103 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
-  test('that an email is sent to all model owners on deployment assessment creation', async () => {
-    getModelByIdMock.mockReturnValue(testModel)
-    await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
+  test('that the deployment assessment review email lists every model once', async () => {
+    const secondModel = { ...testModel, id: 'second-model', name: 'Second Model' }
+    await notifyReviewResponseForDeploymentAssessment(
+      ['user:user1'],
+      testDeploymentAssessment,
+      'approve',
+      [testModel, secondModel],
+      'user:user',
+    )
+
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+    const [, , actions, , list] = emailBuilderMock.buildEmail.mock.calls.at(-1) as unknown as any[]
+    expect(list.items).toHaveLength(2)
+    expect(actions).toHaveLength(2)
   })
 
-  test('that an email is sent to the DA creator when it is reviewed by a DRO', async () => {
-    await notifyReviewResponseForDeploymentAssessment(testDeploymentAssessment, 'reject', 'user:user')
-    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  test('that the deployment assessment review email truncates long model lists', async () => {
+    const models = Array.from({ length: 6 }, (_, index) => ({
+      ...testModel,
+      id: `model-${index}`,
+      name: `Model ${index}`,
+    }))
+
+    await notifyReviewResponseForDeploymentAssessment(
+      ['user:user'],
+      testDeploymentAssessment,
+      'approve',
+      models,
+      'user:user',
+    )
+
+    const [, , , , list] = emailBuilderMock.buildEmail.mock.calls.at(-1) as unknown as any[]
+    expect(list.title).toBe('Models')
+    expect(list.items).toHaveLength(6)
+    expect(list.items.slice(0, 5).map((item: any) => item.detail)).toEqual([
+      'model-0',
+      'model-1',
+      'model-2',
+      'model-3',
+      'model-4',
+    ])
+    expect(list.items[5]).toEqual({ label: '...' })
   })
 
-  test('that an email is not sent to the DA creator when it is reviewed by a DRO when smtp is disabled', async () => {
-    setTestConfig({ smtp: { enabled: false } })
-    await notifyReviewResponseForDeploymentAssessment(testDeploymentAssessment, 'reject', 'user:user')
-    expect(transporterMock.sendMail).not.toHaveBeenCalled()
+  test('that the deployment assessment review email names a single model in the singular', async () => {
+    await notifyReviewResponseForDeploymentAssessment(
+      ['user:user'],
+      testDeploymentAssessment,
+      'approve',
+      [testModel],
+      'user:user',
+    )
+
+    const [, , , , list] = emailBuilderMock.buildEmail.mock.calls.at(-1) as unknown as any[]
+    expect(list.title).toBe('Model')
   })
 
-  test('that an email is sent to all model developers when a DRO approves a DA that contains their models', async () => {
-    await notifyModelOwnersOfDeploymentApproval(
+  test.each([
+    ['approve', 'A deployment assessment has been approved'],
+    ['reject', 'A deployment assessment you own has been rejected'],
+    ['request_changes', 'A deployment assessment you own has had changes requested'],
+  ] as const)('that the deployment assessment review email for %s has the expected title', async (decision, title) => {
+    await notifyReviewResponseForDeploymentAssessment(
+      ['user:user'],
+      testDeploymentAssessment,
+      decision,
+      [testModel],
+      'user:user',
+    )
+
+    const [emailTitle, info] = emailBuilderMock.buildEmail.mock.calls.at(-1) as unknown as any[]
+    expect(emailTitle).toBe(title)
+    expect(info.map((entry: any) => entry.title)).toEqual([
+      'Deployment Assessment Name',
+      'Deployment Assessment ID',
+      'Risk Owner',
+    ])
+  })
+
+  test('that the deployment assessment review email is sent once to every recipient', async () => {
+    await notifyReviewResponseForDeploymentAssessment(
       ['user:user1', 'user:user2'],
       testDeploymentAssessment,
-      testModel,
+      'approve',
+      [testModel],
       'user:user',
     )
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
-  test('that an email is not sent to all model developers when a DRO approves a DA that contains their models when smtp is disabled', async () => {
+  test('that the deployment assessment review email is not sent when smtp is disabled', async () => {
     setTestConfig({ smtp: { enabled: false } })
-    await notifyModelOwnersOfDeploymentApproval(
-      ['user:user1', 'user:user2'],
+    await notifyReviewResponseForDeploymentAssessment(
+      ['user:user'],
       testDeploymentAssessment,
-      testModel,
+      'reject',
+      [testModel],
       'user:user',
     )
     expect(transporterMock.sendMail).not.toHaveBeenCalled()

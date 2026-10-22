@@ -20,6 +20,17 @@ export type actions = {
   url: string
 }
 
+export type EmailListItem = {
+  label: string
+  detail?: string
+  url?: string
+}
+
+export type EmailList = {
+  title: string
+  items: EmailListItem[]
+}
+
 function sanitizeInput<T>(input: T) {
   if (input === null) {
     return null
@@ -48,26 +59,42 @@ export async function buildEmail(
   metadata: Info[],
   actions: actions[],
   actionRequired?: boolean,
+  list?: EmailList,
 ): Promise<EmailContent> {
   title = sanitizeInput(title)
   metadata = sanitizeInput(metadata)
   actions = sanitizeInput(actions)
+  const sanitisedList = list?.items.length ? sanitizeInput(list) : undefined
 
   return {
     subject: actionRequired ? `ACTION REQUIRED: ${title}` : title,
-    text: emailText(title, metadata, actions),
-    html: await emailHtml(title, metadata, actions),
+    text: emailText(title, metadata, actions, sanitisedList),
+    html: await emailHtml(title, metadata, actions, sanitisedList),
   }
 }
 
-function emailText(title: string, reviewMetadata: Info[], reviewActions: actions[]) {
+function emailText(title: string, reviewMetadata: Info[], reviewActions: actions[], list?: EmailList) {
   return dedent(`
     ${title}
 
     ${textMetadata(reviewMetadata)}
 
-    ${textActions(reviewActions)}
+    ${textList(list)}${textActions(reviewActions)}
   `)
+}
+
+function textList(list?: EmailList) {
+  if (!list) {
+    return ''
+  }
+
+  const items = list.items.map((item) => {
+    const detail = item.detail ? ` (${item.detail})` : ''
+    const url = item.url ? `: '${item.url}'` : ''
+    return `- ${item.label}${detail}${url}\n`
+  })
+
+  return `${list.title}:\n${items.join('')}\n`
 }
 
 function textMetadata(reviewMetadata: Info[]) {
@@ -78,8 +105,8 @@ function textActions(actionsList: actions[]) {
   return `${actionsList.map((action) => `${action.name}: '${action.url}'\n`).join('')}`
 }
 
-async function emailHtml(title: string, metadata: Info[], actions: actions[]) {
-  const mjml = emailTemplate({ title, metadata, actions })
+async function emailHtml(title: string, metadata: Info[], actions: actions[], list?: EmailList) {
+  const mjml = emailTemplate({ title, metadata, actions, list })
   const email = await mjml2html(mjml)
   return email.html
 }

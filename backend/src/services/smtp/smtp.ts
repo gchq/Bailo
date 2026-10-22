@@ -19,11 +19,12 @@ import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
 import { checkAccessRequestsApproved } from '../response.js'
-import { buildEmail, EmailContent, Info } from './emailBuilder.js'
+import { buildEmail, EmailContent, EmailList, Info } from './emailBuilder.js'
 
 const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 const transporter = await generateTransporter(config.smtp.transporter)
 const LINE_BREAK = '<br />'
+const MAX_MODELS_IN_EMAIL = 5
 
 /**
  * Generates a Node Mailer Transporter.
@@ -128,6 +129,24 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
   await dispatchEmail([riskOwner], emailContent)
 }
 
+function buildModelList(models: ModelInterface[]): EmailList {
+  const visibleModels = models.slice(0, MAX_MODELS_IN_EMAIL)
+
+  const items: EmailList['items'] = visibleModels.map((model) => ({
+    label: model.name,
+    detail: model.id,
+    url: `${appBaseUrl}/${entryKindForRedirect(model.kind)}/${encodeURIComponent(model.id)}`,
+  }))
+
+  if (models.length > MAX_MODELS_IN_EMAIL) {
+    items.push({ label: '...' })
+  }
+
+  return {
+    title: models.length === 1 ? 'Model' : 'Models',
+    items,
+  }
+}
 export async function notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(
   riskOwners: string[],
   deployment: DeploymentAssessmentInterface,
@@ -158,75 +177,32 @@ export async function notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(
   await dispatchEmail(riskOwners, emailContent)
 }
 
-export async function notifyModelOwnersOfDeploymentAssessment(
-  entities: string[],
-  deployment: DeploymentAssessmentInterface,
-  model: ModelInterface,
-  creatorName: string,
-) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
-
-  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
-
-  const emailContent = await buildEmail(
-    `A deployment assessment has been created for a model you own`,
-    [
-      { title: 'Deployment Assessment ID', data: deployment.id },
-      { title: 'Model Name', data: model.name },
-      { title: 'Model ID', data: model.id },
-      {
-        title: 'Created By',
-        data: creatorName,
-      },
-    ],
-    [
-      {
-        name: 'View Deployment Assessment',
-        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
-      },
-      {
-        name: 'View Deployment Assessments',
-        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
-      },
-      { name: 'Open Model', url: modelUrl },
-    ],
-    false,
-  )
-
-  await dispatchEmail(entities, emailContent)
+const deploymentAssessmentReviewTitles: Record<Exclude<DecisionKeys, 'undo'>, string> = {
+  approve: 'A deployment assessment has been approved',
+  reject: 'A deployment assessment you own has been rejected',
+  request_changes: 'A deployment assessment you own has had changes requested',
 }
 
 export async function notifyReviewResponseForDeploymentAssessment(
+  recipients: string[],
   deployment: DeploymentAssessmentInterface,
-  decision: Extract<DecisionKeys, 'reject' | 'request_changes'>,
-  assessmentReviewer: string,
+  decision: Exclude<DecisionKeys, 'undo'>,
+  models: ModelInterface[],
+  riskOwner: string,
 ) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
 
-  let emailTitle: string
-
-  if (decision === 'reject') {
-    emailTitle = `A deployment assessment you own has been rejected`
-  } else if (decision === 'request_changes') {
-    emailTitle = `A deployment assessment you own has had changes requested`
-  } else {
-    emailTitle = `A deployment assessment has been reviewed with decision: ${decision}`
-  }
-
   const emailContent = await buildEmail(
-    emailTitle,
+    deploymentAssessmentReviewTitles[decision],
     [
       { title: 'Deployment Assessment Name', data: deployment.name },
       { title: 'Deployment Assessment ID', data: deployment.id },
       {
-        title: 'Reviewed By',
-        data: (await authentication.getUserInformation(assessmentReviewer)).name || assessmentReviewer,
+        title: 'Risk Owner',
+        data: (await authentication.getUserInformation(riskOwner)).name || riskOwner,
       },
     ],
     [
@@ -236,51 +212,11 @@ export async function notifyReviewResponseForDeploymentAssessment(
       },
       { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
     ],
-    true,
-  )
-
-  await dispatchEmail([toEntity('user', deployment.createdBy)], emailContent)
-}
-
-export async function notifyModelOwnersOfDeploymentApproval(
-  modelDevelopers: string[],
-  deployment: DeploymentAssessmentInterface,
-  model: ModelInterface,
-  creatorName: string,
-) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
-
-  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
-
-  const emailContent = await buildEmail(
-    `A deployment assessment, containing a model you own, has been approved`,
-    [
-      { title: 'Deployment Assessment ID', data: deployment.id },
-      { title: 'Model Name', data: model.name },
-      { title: 'Model ID', data: model.id },
-      {
-        title: 'Created By',
-        data: (await authentication.getUserInformation(toEntity('user', creatorName))).name || creatorName,
-      },
-    ],
-    [
-      {
-        name: 'View Deployment Assessment',
-        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
-      },
-      {
-        name: 'View Deployment Assessments',
-        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
-      },
-      { name: 'Open Model', url: modelUrl },
-    ],
     false,
+    buildModelList(models),
   )
 
-  await dispatchEmail(modelDevelopers, emailContent)
+  await dispatchEmail(recipients, emailContent)
 }
 
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
