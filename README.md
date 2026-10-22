@@ -186,8 +186,8 @@ See [our user documentation](https://gchq.github.io/Bailo/docs)
 
 ## Contributing
 
-If you'd like to make a contribution then the details for doing all of that are in
-[CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md).
+Anyone can raise a [GitHub issue](https://github.com/gchq/Bailo/issues). Pull requests are only accepted from approved,
+named contributors. See [CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md) for details.
 
 <br />
 

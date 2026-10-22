@@ -3,27 +3,36 @@
 ARG UID=65532
 ARG GID=65532
 
-FROM python:3.12.14-slim-trixie@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f AS build
+FROM ghcr.io/astral-sh/uv:0.13.4@sha256:9f130421e930bfbdc563c00740466603f8723158e90297d07957c2294640262b AS uv
+
+FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS build
+
+COPY --from=uv /uv /bin/uv
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/venv \
-    PATH="/venv/bin:$PATH"
+    PATH="/venv/bin:$PATH" \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy
 
 WORKDIR /build
 
-# Create virtual environment and upgrade packaging tooling
-RUN python -m venv ${VIRTUAL_ENV} && \
-    pip install --upgrade pip setuptools wheel
+# `--no-install-project` keeps layer cached against dependency changes only
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project
 
-# Install Python dependencies with pip cache
-COPY pyproject.toml .
-COPY bailo_artefactscan_api/__init__.py bailo_artefactscan_api/__init__.py
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-compile .
+# `--no-deps` as uv sync already installed the lock
+COPY pyproject.toml ./
+COPY bailo_artefactscan_api ./bailo_artefactscan_api
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --no-deps .
 
 
-FROM python:3.12.14-slim-trixie@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f AS base
+FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS base
 ARG UID
 ARG GID
 
@@ -38,7 +47,7 @@ RUN groupadd --gid ${GID} appuser && \
 
 WORKDIR /app
 
-FROM aquasec/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa AS trivy
+FROM aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 AS trivy
 
 FROM base AS dev
 

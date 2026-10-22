@@ -6,7 +6,7 @@ import { EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
+import InlineTypographyDiff from 'src/common/InlineDiff/InlineTypographyDiff'
 import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import getCompareFieldState from 'src/hooks/useCompareField'
@@ -174,7 +174,7 @@ export default function ModelSelector({
           )}
         />
       ) : compare.inMirroredCompare && currentValue.length > 0 ? (
-        <InlineDiff from={idsToDiffString(compare.compareFromState)} to={idsToDiffString(currentValue)} />
+        <InlineTypographyDiff from={idsToDiffString(compare.compareFromState)} to={idsToDiffString(currentValue)} />
       ) : currentValue.length > 0 ? (
         <Box sx={{ overflowX: 'auto', p: 1 }}>
           <Stack spacing={1} direction='row'>

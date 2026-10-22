@@ -13,5 +13,6 @@ Contributors guide: ./CONTRIBUTING.md
 
 <!-- For completed items, change [ ] to [x]. All items must be checked before merging. -->
 
+- [ ] I am an approved, named contributor and I am submitting this PR from my approved GitHub account.
 - [ ] I have reviewed all code in this PR, and confirm that all content meets the requirements set out in the [contribution guidance](./CONTRIBUTING.md).
 
