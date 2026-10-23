@@ -92,7 +92,6 @@ export interface UiConfig {
 
   deploymentAssessments: {
     deployableModelState: string | null
-    signOffDeclaration: string
   }
 
   lifecycle: {
@@ -1183,14 +1182,6 @@ export interface DeploymentAssessmentMetadata {
   [key: string]: unknown
 }
 
-export const DeploymentAssessmentState = {
-  NeedsReview: 'needs_review',
-  Rejected: 'rejected',
-  ChangesRequested: 'changes_requested',
-  Approved: 'approved',
-} as const
-export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
-
 export interface DeploymentAssessmentInterface {
   _id: string
   id: string
@@ -1198,7 +1189,6 @@ export interface DeploymentAssessmentInterface {
   name: string
   metadata: DeploymentAssessmentMetadata
   draft: boolean
-  state: DeploymentAssessmentStateKeys
   justification: string
   owner: string[]
   createdBy: string
@@ -1218,14 +1208,12 @@ interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBa
   draft: true
   owner?: string[]
   models?: string[]
-  state?: never
 }
 
 interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
   draft: false
   owner: string[]
   models: string[]
-  state: DeploymentAssessmentStateKeys
 }
 
 export type DeploymentAssessmentSummary = DraftDeploymentAssessmentSummary | PublishedDeploymentAssessmentSummary

@@ -1,10 +1,9 @@
 import { useRouter } from 'next/router'
 import { useCallback, useMemo } from 'react'
-import { DeploymentAssessmentState, DeploymentAssessmentStateKeys } from 'types/types'
 
 export const DeploymentAssessmentStatus = {
   Draft: 'draft',
-  ...DeploymentAssessmentState,
+  Published: 'published',
 } as const
 
 export type DeploymentAssessmentStatusKeys =
@@ -102,15 +101,6 @@ export function useDeploymentAssessmentFilters() {
   return { filters, setFilters, resetFilters }
 }
 
-export function statusToApiFilters(status?: DeploymentAssessmentStatusKeys): {
-  draft?: boolean
-  state?: DeploymentAssessmentStateKeys
-} {
-  if (status === DeploymentAssessmentStatus.Draft) {
-    return { draft: true }
-  }
-  if (!status) {
-    return {}
-  }
-  return { state: status as DeploymentAssessmentStateKeys }
+export function statusToApiFilters(status?: DeploymentAssessmentStatusKeys): { draft?: boolean } {
+  return status ? { draft: status === DeploymentAssessmentStatus.Draft } : {}
 }

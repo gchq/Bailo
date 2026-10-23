@@ -2,7 +2,6 @@ import qs from 'querystring'
 import useSWR from 'swr'
 import {
   DeploymentAssessmentInterface,
-  DeploymentAssessmentStateKeys,
   DeploymentAssessmentSummary,
   DeploymentAssessmentUserPermissions,
   ResponseInterface,
@@ -20,7 +19,6 @@ export interface DeploymentAssessmentFilters {
   createdBefore?: string
   draft?: boolean
   search?: string
-  state?: DeploymentAssessmentStateKeys
   needsAction?: boolean
 }
 
@@ -59,10 +57,6 @@ export function buildDeploymentAssessmentsUrl(filters: DeploymentAssessmentFilte
     queryParams.search = filters.search
   }
 
-  if (filters.state) {
-    queryParams.state = filters.state
-  }
-
   if (filters.needsAction !== undefined) {
     queryParams.needsAction = filters.needsAction
   }
@@ -92,7 +86,6 @@ export function useGetDeploymentAssessment(deploymentId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       deploymentAssessment: DeploymentAssessmentInterface
-      state: DeploymentAssessmentStateKeys
       responses?: ResponseInterface[]
     },
     ErrorInfo
@@ -100,7 +93,7 @@ export function useGetDeploymentAssessment(deploymentId?: string) {
 
   return {
     mutateDeploymentAssessment: mutate,
-    deploymentAssessment: data && { ...data?.deploymentAssessment, state: data?.state, responses: data?.responses },
+    deploymentAssessment: data && { ...data.deploymentAssessment, responses: data.responses },
     isDeploymentAssessmentLoading: isLoading,
     isDeploymentAssessmentError: error,
   }

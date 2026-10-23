@@ -296,7 +296,6 @@ module.exports = {
 
     deploymentAssessments: {
       deployableModelState: null,
-      signOffDeclaration: 'I agree to take on responsibility as the Deployment Risk Owner.',
     },
 
     lifecycle: {

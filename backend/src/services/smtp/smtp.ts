@@ -6,7 +6,7 @@ import AccessRequestModel, { AccessRequestDoc } from '../../models/AccessRequest
 import { DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
 import { ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../../models/Release.js'
-import { DecisionKeys, ResponseInterface } from '../../models/Response.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc, ReviewInterface } from '../../models/Review.js'
 import { UserInterface } from '../../models/User.js'
 import { ReviewKind } from '../../types/enums.js'
@@ -128,36 +128,6 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
   await dispatchEmail([riskOwner], emailContent)
 }
 
-export async function notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked(
-  riskOwners: string[],
-  deployment: DeploymentAssessmentInterface,
-  editorName: string,
-) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
-
-  const emailContent = await buildEmail(
-    'A deployment assessment you approved has been edited and needs to be reviewed again',
-    [
-      { title: 'Deployment Assessment Name', data: deployment.name },
-      { title: 'Deployment Assessment ID', data: deployment.id },
-      { title: 'Edited By', data: editorName },
-    ],
-    [
-      {
-        name: 'Open Deployment Assessment',
-        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
-      },
-      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
-    ],
-    true,
-  )
-
-  await dispatchEmail(riskOwners, emailContent)
-}
-
 export async function notifyModelOwnersOfDeploymentAssessment(
   entities: string[],
   deployment: DeploymentAssessmentInterface,
@@ -197,90 +167,6 @@ export async function notifyModelOwnersOfDeploymentAssessment(
   )
 
   await dispatchEmail(entities, emailContent)
-}
-
-export async function notifyReviewResponseForDeploymentAssessment(
-  deployment: DeploymentAssessmentInterface,
-  decision: Extract<DecisionKeys, 'reject' | 'request_changes'>,
-  assessmentReviewer: string,
-) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
-
-  let emailTitle: string
-
-  if (decision === 'reject') {
-    emailTitle = `A deployment assessment you own has been rejected`
-  } else if (decision === 'request_changes') {
-    emailTitle = `A deployment assessment you own has had changes requested`
-  } else {
-    emailTitle = `A deployment assessment has been reviewed with decision: ${decision}`
-  }
-
-  const emailContent = await buildEmail(
-    emailTitle,
-    [
-      { title: 'Deployment Assessment Name', data: deployment.name },
-      { title: 'Deployment Assessment ID', data: deployment.id },
-      {
-        title: 'Reviewed By',
-        data: (await authentication.getUserInformation(assessmentReviewer)).name || assessmentReviewer,
-      },
-    ],
-    [
-      {
-        name: 'Open Deployment Assessment',
-        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
-      },
-      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
-    ],
-    true,
-  )
-
-  await dispatchEmail([toEntity('user', deployment.createdBy)], emailContent)
-}
-
-export async function notifyModelOwnersOfDeploymentApproval(
-  modelDevelopers: string[],
-  deployment: DeploymentAssessmentInterface,
-  model: ModelInterface,
-  creatorName: string,
-) {
-  if (!config.smtp.enabled) {
-    log.info('Not sending email due to SMTP disabled')
-    return
-  }
-
-  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
-
-  const emailContent = await buildEmail(
-    `A deployment assessment, containing a model you own, has been approved`,
-    [
-      { title: 'Deployment Assessment ID', data: deployment.id },
-      { title: 'Model Name', data: model.name },
-      { title: 'Model ID', data: model.id },
-      {
-        title: 'Created By',
-        data: (await authentication.getUserInformation(toEntity('user', creatorName))).name || creatorName,
-      },
-    ],
-    [
-      {
-        name: 'View Deployment Assessment',
-        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
-      },
-      {
-        name: 'View Deployment Assessments',
-        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
-      },
-      { name: 'Open Model', url: modelUrl },
-    ],
-    false,
-  )
-
-  await dispatchEmail(modelDevelopers, emailContent)
 }
 
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {

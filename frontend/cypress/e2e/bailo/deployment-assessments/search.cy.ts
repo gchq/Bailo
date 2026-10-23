@@ -2,7 +2,7 @@ const runId = Date.now().toString()
 const assessmentNames = {
   draft: `Deployment Search ${runId} Draft`,
   needsReview: `Deployment Search ${runId} Review`,
-  approved: `Deployment Search ${runId} Approved`,
+  otherRiskOwner: `Deployment Search ${runId} Other Risk Owner`,
 }
 const modelNames = {
   alpha: `Deployment Search ${runId} Model Alpha`,
@@ -126,17 +126,11 @@ describe('Search deployment assessments', () => {
         })
         createDeploymentAssessment(assessmentNames.needsReview, [betaModelId], false)
         createDeploymentAssessment(
-          assessmentNames.approved,
+          assessmentNames.otherRiskOwner,
           [alphaModelId, betaModelId],
           false,
           alternateRiskOwner,
-        ).then((approvedAssessment) => {
-          cy.request('POST', `/api/v3/deployment-assessments/${approvedAssessment.id}/review`, {
-            decision: 'approve',
-          })
-            .its('status')
-            .should('equal', 201)
-        })
+        )
       })
     })
 
@@ -162,7 +156,6 @@ describe('Search deployment assessments', () => {
           name: assessmentNames.needsReview,
           owner: [riskOwner],
           models: [modelIds[1]],
-          state: 'needs_review',
           draft: false,
           createdBy: 'user',
           createdAt: assessmentCreatedAt[1],
@@ -170,10 +163,9 @@ describe('Search deployment assessments', () => {
         {
           id: assessmentIds[2],
           schemaId: deploymentAssessmentSchemaId,
-          name: assessmentNames.approved,
+          name: assessmentNames.otherRiskOwner,
           owner: [alternateRiskOwner],
           models: [modelIds[0], modelIds[1]],
-          state: 'approved',
           draft: false,
           createdBy: 'user',
           createdAt: assessmentCreatedAt[2],
@@ -202,20 +194,19 @@ describe('Search deployment assessments', () => {
   })
 
   it('filters assessments using all status, basic and advanced fields and resets filters', () => {
-    ;[
-      ['Draft', assessmentNames.draft],
-      ['Needs review', assessmentNames.needsReview],
-      ['Approved', assessmentNames.approved],
-    ].forEach(([status, assessmentName]) => {
-      selectFilterOption('[data-test=deploymentAssessmentStatusFilter]', status)
-      assertOnlyAssessment(assessmentName)
-      resetFilters()
-    })
+    selectFilterOption('[data-test=deploymentAssessmentStatusFilter]', 'Draft')
+    assertOnlyAssessment(assessmentNames.draft)
+    resetFilters()
+
+    selectFilterOption('[data-test=deploymentAssessmentStatusFilter]', 'Published')
+    cy.contains('2 assessments found')
+    cy.contains(assessmentNames.draft).should('not.exist')
+    resetFilters()
 
     selectFilterOption('[data-test=deploymentAssessmentModelFilter]', modelNames.alpha)
     cy.contains('2 assessments found')
     cy.contains(assessmentNames.draft).should('be.visible')
-    cy.contains(assessmentNames.approved).should('be.visible')
+    cy.contains(assessmentNames.otherRiskOwner).should('be.visible')
     cy.contains(assessmentNames.needsReview).should('not.exist')
     resetFilters()
 
@@ -223,7 +214,7 @@ describe('Search deployment assessments', () => {
     cy.contains('2 assessments found')
     cy.contains(assessmentNames.draft).should('be.visible')
     cy.contains(assessmentNames.needsReview).should('be.visible')
-    cy.contains(assessmentNames.approved).should('not.exist')
+    cy.contains(assessmentNames.otherRiskOwner).should('not.exist')
     resetFilters()
 
     openAdvancedFilters()

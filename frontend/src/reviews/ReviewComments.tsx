@@ -61,11 +61,6 @@ export default function ReviewComments({
           return {}
         }
         return { accessRequestId: identifier }
-      case ReviewKind.DEPLOYMENTS:
-        if (!identifier) {
-          return {}
-        }
-        return { deploymentAssessmentId: identifier }
       default:
         return {}
     }

@@ -10,7 +10,6 @@ import {
   findReviews,
   findReviewsForAccessRequests,
   removeAccessRequestReviews,
-  removeDeploymentAssessmentReviews,
   removeReviewRole,
   updateReviewRole,
 } from '../../src/services/review.js'
@@ -167,46 +166,6 @@ describe('services > review', () => {
     await expect(() => removeAccessRequestReviews('')).rejects.toThrow(
       /^The requested access request review could not be deleted./,
     )
-  })
-
-  test('removeDeploymentAssessmentReviews > deletes the reviews and returns them', async () => {
-    const reviews = [{ _id: 'review' }]
-    ReviewModelMock.find.mockResolvedValueOnce(reviews)
-
-    const result = await removeDeploymentAssessmentReviews('deploymentAssessmentId')
-
-    expect(ReviewModelMock.find).toHaveBeenCalledWith({ deploymentAssessmentId: 'deploymentAssessmentId' }, undefined, {
-      session: undefined,
-    })
-    expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith(
-      { deploymentAssessmentId: 'deploymentAssessmentId' },
-      undefined,
-    )
-    expect(result).toBe(reviews)
-  })
-
-  test('removeDeploymentAssessmentReviews > passes the transaction session through', async () => {
-    const session = {} as any
-    ReviewModelMock.find.mockResolvedValueOnce([])
-
-    await removeDeploymentAssessmentReviews('deploymentAssessmentId', session)
-
-    expect(ReviewModelMock.find).toHaveBeenCalledWith({ deploymentAssessmentId: 'deploymentAssessmentId' }, undefined, {
-      session,
-    })
-    expect(ReviewModelMock.deleteMany).toHaveBeenCalledWith(
-      { deploymentAssessmentId: 'deploymentAssessmentId' },
-      session,
-    )
-  })
-
-  test('removeDeploymentAssessmentReviews > no reviews to delete', async () => {
-    ReviewModelMock.find.mockResolvedValueOnce([])
-
-    const result = await removeDeploymentAssessmentReviews('deploymentAssessmentId')
-
-    expect(ReviewModelMock.deleteMany).toHaveBeenCalled()
-    expect(result).toStrictEqual([])
   })
 
   test('getReviewRoles > returns array of review roles', async () => {

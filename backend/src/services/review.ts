@@ -34,7 +34,6 @@ export async function findReviews(
   semver?: string,
   reviewId?: string,
   accessRequestId?: string,
-  deploymentAssessmentId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface; latestReviewResponses?: DecisionKeys })[]> {
   if (reviewId && !Types.ObjectId.isValid(reviewId)) {
@@ -44,10 +43,9 @@ export async function findReviews(
   const stages: PipelineStage[] = [
     {
       $match: {
-        ...(kind !== ReviewKind.DeploymentAssessment && modelId && { modelId }),
+        ...(modelId && { modelId }),
         ...(semver && { semver }),
         ...(accessRequestId && { accessRequestId }),
-        ...(deploymentAssessmentId && { deploymentAssessmentId }),
         ...(reviewId && { _id: new Types.ObjectId(reviewId) }),
         ...(kind && { kind }),
       },
@@ -56,46 +54,9 @@ export async function findReviews(
       $sort: { createdAt: -1 },
     },
 
-    ...(kind !== ReviewKind.DeploymentAssessment
-      ? [
-          {
-            $lookup: {
-              from: 'v2_models',
-              localField: 'modelId',
-              foreignField: 'id',
-              as: 'model',
-            },
-          },
-          {
-            $unwind: {
-              path: '$model',
-            },
-          },
-        ]
-      : [
-          {
-            $lookup: {
-              from: 'v3_deployment_assessments',
-              localField: 'deploymentAssessmentId',
-              foreignField: 'id',
-              as: 'deploymentAssessment',
-            },
-          },
-          {
-            $unwind: {
-              path: '$deploymentAssessment',
-            },
-          },
-        ]),
-
-    {
-      $match: {
-        ...(mine &&
-          (kind === ReviewKind.DeploymentAssessment
-            ? await matchUserToDro(user)
-            : await findUserInCollaborators(user))),
-      },
-    },
+    { $lookup: { from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' } },
+    { $unwind: { path: '$model' } },
+    { $match: { ...(mine && (await findUserInCollaborators(user))) } },
 
     {
       $lookup: {
@@ -172,17 +133,13 @@ export async function findReviews(
 
   const reviews = await ReviewModel.aggregate(stages)
 
-  if (kind == ReviewKind.DeploymentAssessment) {
-    return reviews
-  } else {
-    const auths = await authorisation.models(
-      user,
-      reviews.map((review) => review.model),
-      ModelAction.View,
-    )
+  const auths = await authorisation.models(
+    user,
+    reviews.map((review) => review.model),
+    ModelAction.View,
+  )
 
-    return reviews.filter((_, i) => auths[i].success)
-  }
+  return reviews.filter((_, i) => auths[i].success)
 }
 
 export async function getResponses(parentId) {
@@ -316,17 +273,6 @@ export async function removeReleaseReviews(
   return reviews
 }
 
-export async function removeDeploymentAssessmentReviews(
-  deploymentAssessmentId: string,
-  session?: ClientSession,
-): Promise<ReviewDoc[]> {
-  const reviews = await ReviewModel.find({ deploymentAssessmentId }, undefined, { session })
-
-  await ReviewModel.deleteMany({ deploymentAssessmentId }, session)
-
-  return reviews
-}
-
 export async function findReviewForResponse(
   user: UserInterface,
   modelId: string,
@@ -404,23 +350,6 @@ export async function findUserInCollaborators(user: UserInterface) {
                 ],
               },
             },
-          },
-        },
-        0,
-      ],
-    },
-  }
-}
-
-export async function matchUserToDro(user: UserInterface) {
-  const entities = await authentication.getEntities(user)
-
-  return {
-    $expr: {
-      $gt: [
-        {
-          $size: {
-            $setIntersection: [{ $ifNull: ['$deploymentAssessment.metadata.signOff.riskOwners', []] }, entities],
           },
         },
         0,
