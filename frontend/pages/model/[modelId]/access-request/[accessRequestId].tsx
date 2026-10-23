@@ -32,7 +32,7 @@ export default function AccessRequest() {
     accessRequestId,
   })
 
-  const latestReviewState = reviews[0].status
+  const latestReviewState = reviews[0] ? reviews[0].status : undefined
 
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
