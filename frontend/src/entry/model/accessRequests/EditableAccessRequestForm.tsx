@@ -8,7 +8,7 @@ import {
   useGetAccessRequest,
   useGetAccessRequestsForModelId,
 } from 'actions/accessRequest'
-import { useGetReviewRequestsForUser } from 'actions/review'
+import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useContext, useEffect, useState } from 'react'
@@ -19,7 +19,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { AccessRequestInterface, SplitSchemaNoRender } from 'types/types'
+import { AccessRequestInterface, DecisionKeys, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
 
@@ -28,6 +28,7 @@ type EditableAccessRequestFormProps = {
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
+  latestReviewState?: DecisionKeys
 }
 
 export default function EditableAccessRequestForm({
@@ -35,17 +36,23 @@ export default function EditableAccessRequestForm({
   isEdit,
   onIsEditChange,
   readOnly = false,
+  latestReviewState,
 }: EditableAccessRequestFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [open, setOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [revokeApprovalOpen, setRevokeApprovalOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
   const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(accessRequest.modelId)
-  const { mutateReviews } = useGetReviewRequestsForUser()
+  const { mutateReviews } = useGetReviewRequestsForModel({
+    modelId: accessRequest.modelId,
+    accessRequestId: accessRequest.id,
+  })
+  const { mutateReviews: mutateUserReviews } = useGetReviewRequestsForUser()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -77,8 +84,8 @@ export default function EditableAccessRequestForm({
       setDeleteErrorMessage(await getErrorMessage(res))
     } else {
       mutateAccessRequests()
-      mutateReviews()
-      setOpen(false)
+      mutateUserReviews()
+      setDeleteOpen(false)
       router.push(`/model/${accessRequest.modelId}?tab=access`)
     }
   }
@@ -104,6 +111,7 @@ export default function EditableAccessRequestForm({
       } else {
         onIsEditChange(false)
         mutateAccessRequest()
+        mutateReviews()
       }
       setIsLoading(false)
     }
@@ -120,7 +128,11 @@ export default function EditableAccessRequestForm({
   }
 
   function handleEdit() {
-    onIsEditChange(true)
+    if (latestReviewState) {
+      setRevokeApprovalOpen(true)
+    } else {
+      onIsEditChange(true)
+    }
   }
 
   function handleCancel() {
@@ -129,7 +141,7 @@ export default function EditableAccessRequestForm({
   }
 
   function handleDelete() {
-    setOpen(true)
+    setDeleteOpen(true)
   }
 
   useEffect(() => {
@@ -193,12 +205,23 @@ export default function EditableAccessRequestForm({
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
         <ConfirmationDialogue
-          open={open}
+          open={deleteOpen}
           title='Delete Access Request'
           onConfirm={handleDeleteConfirm}
-          onCancel={() => setOpen(false)}
+          onCancel={() => setDeleteOpen(false)}
           errorMessage={deleteErrorMessage}
           dialogMessage={'Are you sure you want to delete this access request?'}
+        />
+        <ConfirmationDialogue
+          open={revokeApprovalOpen}
+          title='Remove approval status'
+          onConfirm={() => {
+            setRevokeApprovalOpen(false)
+            onIsEditChange(true)
+          }}
+          onCancel={() => setRevokeApprovalOpen(false)}
+          errorMessage={deleteErrorMessage}
+          dialogMessage={"Editing this form will revoke this access request's approval status. Is this what you want?"}
         />
         {isEdit && (
           <Stack

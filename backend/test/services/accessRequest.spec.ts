@@ -1,7 +1,8 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { EntryKind } from '../../src/models/Model.js'
+import { EntryKind, SystemRoles } from '../../src/models/Model.js'
+import { Decision, ResponseKind } from '../../src/models/Response.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
@@ -14,6 +15,7 @@ import {
   removeAccessRequests,
   updateAccessRequest,
 } from '../../src/services/accessRequest.js'
+import { ReviewKind } from '../../src/types/enums.js'
 import { AccessRequestUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -314,21 +316,12 @@ describe('services > accessRequest', () => {
 
   test('updateAccessRequest > success', async () => {
     const user = { dn: 'testUser' } as any
-
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'mockedId' })
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
-    await updateAccessRequest(user, 'test', {})
+    await updateAccessRequest(user, 'test', { metadata: { overview: { name: 'name', entities: user } } })
 
     expect(AccessRequestModelMock.save).toHaveBeenCalledOnce()
-  })
-
-  test('updateAccessRequest > with metadata', async () => {
-    const user = { dn: 'testUser' } as any
-
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
-    await updateAccessRequest(user, 'test', { metadata: { overview: { name: 'test', entities: user } } })
-
-    expect(AccessRequestModelMock.markModified).toHaveBeenCalledOnce()
   })
 
   test('updateAccessRequest > no permission', async () => {
@@ -346,6 +339,7 @@ describe('services > accessRequest', () => {
 
   test('updateAccessRequest > validation error', async () => {
     schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'mockedId' })
 
     await expect(() =>
       updateAccessRequest({} as any, 'test', { metadata: { overview: { name: 'test', entities: [] } } } as any),
@@ -359,12 +353,100 @@ describe('services > accessRequest', () => {
       markModified: vi.fn(),
       save: vi.fn(),
     }
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'mockedId' })
     AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
     const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
 
     await updateAccessRequest({} as any, 'test', diff as any)
 
     expect(schemaMocks.validateContentAgainstSchema).toHaveBeenCalledWith('example-schema', diff.metadata)
+  })
+
+  test('updateAccessRequest > no review found', async () => {
+    const user = { dn: 'testUser' } as any
+    const stored = {
+      _id: 'accessRequestObjectId',
+      schemaId: 'example-schema',
+      metadata: { overview: { name: 'stored', entities: ['user:testUser'] } },
+      markModified: vi.fn(),
+      save: vi.fn(),
+    }
+    AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
+    ReviewModelMock.sort.mockResolvedValue(undefined)
+    ResponseModelMock.sort.mockResolvedValue([{ kind: ResponseKind.Comment, comment: 'comment' }])
+    const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
+
+    await updateAccessRequest(user, 'test', diff)
+
+    expect(ReviewModelMock.findOne).toHaveBeenCalledWith({ accessRequestId: 'test', kind: ReviewKind.Access })
+    expect(ResponseModelMock.find).toHaveBeenCalledWith({ parentId: 'accessRequestObjectId' })
+    expect(ResponseModelMock).not.toHaveBeenCalled()
+    expect(ResponseModelMock.save).not.toHaveBeenCalled()
+    expect(stored.metadata).toEqual(diff.metadata)
+    expect(stored.markModified).toHaveBeenCalledWith('metadata')
+    expect(stored.save).toHaveBeenCalledOnce()
+  })
+
+  test('updateAccessRequest > not approved', async () => {
+    const user = { dn: 'testUser' } as any
+    const stored = {
+      _id: 'accessRequestObjectId',
+      schemaId: 'example-schema',
+      metadata: { overview: { name: 'stored', entities: ['user:testUser'] } },
+      markModified: vi.fn(),
+      save: vi.fn(),
+    }
+    AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'reviewObjectId' })
+    ResponseModelMock.sort.mockResolvedValue([
+      { kind: ResponseKind.Comment, comment: 'comment' },
+      { kind: ResponseKind.Review, decision: Decision.RequestChanges },
+      { kind: ResponseKind.Review, decision: Decision.Approve },
+    ])
+    const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
+
+    await updateAccessRequest(user, 'test', diff)
+
+    expect(ReviewModelMock.findOne).toHaveBeenCalledWith({ accessRequestId: 'test', kind: ReviewKind.Access })
+    expect(ResponseModelMock.find).toHaveBeenCalledWith({ parentId: ['reviewObjectId', 'accessRequestObjectId'] })
+    expect(ResponseModelMock).not.toHaveBeenCalled()
+    expect(ResponseModelMock.save).not.toHaveBeenCalled()
+    expect(stored.metadata).toEqual(diff.metadata)
+    expect(stored.save).toHaveBeenCalledOnce()
+  })
+
+  test('updateAccessRequest > approved success', async () => {
+    const user = { dn: 'testUser' } as any
+    const stored = {
+      _id: 'accessRequestObjectId',
+      schemaId: 'example-schema',
+      metadata: { overview: { name: 'stored', entities: ['user:testUser'] } },
+      markModified: vi.fn(),
+      save: vi.fn(),
+    }
+    AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'reviewObjectId' })
+    ResponseModelMock.sort.mockResolvedValue([
+      { kind: ResponseKind.Comment, comment: 'comment' },
+      { kind: ResponseKind.Review, decision: Decision.Approve },
+      { kind: ResponseKind.Review, decision: Decision.RequestChanges },
+    ])
+    const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
+
+    await updateAccessRequest(user, 'test', diff)
+
+    expect(ResponseModelMock.find).toHaveBeenCalledWith({ parentId: ['reviewObjectId', 'accessRequestObjectId'] })
+    expect(ResponseModelMock).toHaveBeenCalledWith({
+      entity: 'user:testUser',
+      kind: ResponseKind.Review,
+      role: SystemRoles.Owner,
+      parentId: 'reviewObjectId',
+      decision: Decision.Undo,
+      comment: "Automatically revoked this Access Request's approval status by making changes",
+    })
+    expect(ResponseModelMock.save).toHaveBeenCalledOnce()
+    expect(stored.metadata).toEqual(diff.metadata)
+    expect(stored.save).toHaveBeenCalledOnce()
   })
 
   test('newAccessRequestComment > success', async () => {
