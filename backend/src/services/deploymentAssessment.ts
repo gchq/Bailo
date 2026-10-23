@@ -283,6 +283,7 @@ export async function createDeploymentAssessment(
     createdBy: user.dn,
   })
 
+  //here
   const review = draft
     ? undefined
     : new ReviewModel({
@@ -339,11 +340,7 @@ export async function removeDeploymentAssessment(
   }
 
   // Delete children before DA so that a failure part way through leaves DA so deletion safe to retry
-  const reviews = await ReviewModel.find({ deploymentAssessmentId }, undefined, { session })
-  await removeResponsesByParentIds(
-    [deploymentAssessment._id.toString(), ...reviews.map((review) => review._id.toString())],
-    session,
-  )
+  await removeResponsesByParentIds([deploymentAssessment._id.toString()], session)
   await removeDeploymentAssessmentReviews(deploymentAssessmentId, session)
   await deploymentAssessment.delete(session)
 

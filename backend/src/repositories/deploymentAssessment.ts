@@ -15,7 +15,6 @@ export interface SearchDeploymentAssessmentsParams {
   createdBefore?: string
   draft?: boolean
   search?: string
-  needsAction?: boolean
 }
 
 export async function findDeploymentAssessments(

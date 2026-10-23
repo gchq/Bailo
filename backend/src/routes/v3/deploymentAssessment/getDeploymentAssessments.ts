@@ -18,7 +18,6 @@ export const getDeploymentAssessmentsSchema = z.object({
       createdBefore: z.string().date().optional(),
       draft: strictCoerceBoolean(z.boolean()).optional(),
       search: z.string().min(1).optional(),
-      needsAction: strictCoerceBoolean(z.boolean()).optional(),
     })
     .strict()
     .refine(
