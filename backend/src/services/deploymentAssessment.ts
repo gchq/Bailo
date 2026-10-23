@@ -10,10 +10,9 @@ import DeploymentAssessmentModel, {
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
 import ResponseModel, { ResponseInterface, ResponseKind } from '../models/Response.js'
-import ReviewModel, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { findDeploymentAssessments, SearchDeploymentAssessmentsParams } from '../repositories/deploymentAssessment.js'
-import { ReviewKind, SchemaKind } from '../types/enums.js'
+import { SchemaKind } from '../types/enums.js'
 import { DeploymentAssessmentUserPermissions } from '../types/types.js'
 import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
@@ -24,19 +23,15 @@ import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
-import { removeDeploymentAssessmentReviews } from './review.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyModelOwnersOfDeploymentAssessment, notifyRiskOwnerOfDeploymentAssessment } from './smtp/smtp.js'
 import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
-
-export const deploymentAssessmentRiskOwnerRole = 'riskOwners'
 
 export type { SearchDeploymentAssessmentsParams }
 
 export interface DeploymentAssessmentDetails {
   deploymentAssessment: DeploymentAssessmentDoc
   responses: ResponseInterface[]
-  latestReview?: ReviewDoc
 }
 
 // Allow partial metadata when updating to support draft updates where sections may be missing
@@ -212,33 +207,14 @@ export async function getDeploymentAssessmentDetails(
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
 
-  // Drafts have no review document yet, so skip that lookup and query by DA id only
-  const latestReview = deploymentAssessment.draft
-    ? undefined
-    : await getLatestDeploymentAssessmentReview(deploymentAssessmentId)
-  const parentIds = latestReview ? [latestReview._id, deploymentAssessment._id] : deploymentAssessment._id
-  const responses = await ResponseModel.find({ parentId: parentIds }).sort({
+  const responses = await ResponseModel.find({ parentId: deploymentAssessment._id }).sort({
     createdAt: -1,
   })
 
   return {
     deploymentAssessment,
     responses,
-    latestReview,
   }
-}
-
-async function getLatestDeploymentAssessmentReview(deploymentAssessmentId: string) {
-  const review = await ReviewModel.findOne({
-    deploymentAssessmentId,
-    kind: ReviewKind.DeploymentAssessment,
-  }).sort({ createdAt: -1 })
-
-  if (!review) {
-    throw NotFound('The deployment assessment does not have a review.', { deploymentAssessmentId })
-  }
-
-  return review
 }
 
 export async function commentOnDeploymentAssessment(
@@ -283,25 +259,13 @@ export async function createDeploymentAssessment(
     createdBy: user.dn,
   })
 
-  //here
-  const review = draft
-    ? undefined
-    : new ReviewModel({
-        kind: ReviewKind.DeploymentAssessment,
-        deploymentAssessmentId,
-        role: deploymentAssessmentRiskOwnerRole,
-      })
-
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Create)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
   }
 
   try {
-    await useTransaction([
-      (session) => deploymentAssessment.save({ session }),
-      ...(review ? [(session) => review.save({ session })] : []),
-    ])
+    await deploymentAssessment.save()
   } catch (error) {
     if (isMongoServerError(error) && error.code === 11000) {
       throw Conflict('A deployment assessment with this ID already exists.', {
@@ -341,7 +305,6 @@ export async function removeDeploymentAssessment(
 
   // Delete children before DA so that a failure part way through leaves DA so deletion safe to retry
   await removeResponsesByParentIds([deploymentAssessment._id.toString()], session)
-  await removeDeploymentAssessmentReviews(deploymentAssessmentId, session)
   await deploymentAssessment.delete(session)
 
   return deploymentAssessment

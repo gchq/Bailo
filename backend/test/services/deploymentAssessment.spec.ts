@@ -570,7 +570,7 @@ describe('services > deploymentAssessment', () => {
     const assessmentId = new Types.ObjectId()
 
     // The assessment's children are removed before the assessment itself. `ReviewModel.find` is called twice - once
-    // to collect the parent IDs for the responses, and again inside `removeDeploymentAssessmentReviews`.
+    // to collect the parent IDs for the responses.
     const mockAssessmentWithChildren = () => {
       const deploymentAssessment = { id: 'da-id', _id: assessmentId, draft: false, delete: vi.fn() }
 
