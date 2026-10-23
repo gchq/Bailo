@@ -1,50 +1,30 @@
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Stack, Typography } from '@mui/material'
-import { memoize } from 'lodash-es'
 import { useContext, useState } from 'react'
-import Paginate from 'src/common/Paginate'
-import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import UiConfigContext from 'src/contexts/uiConfigContext'
-import FileDisplay from 'src/entry/model/files/FileDisplay'
+import FileBrowser from 'src/entry/model/files/FileBrowser'
 import CodeLine from 'src/entry/model/registry/CodeLine'
-import { ArtefactKind, EntryInterface, ReleaseInterface } from 'types/types'
+import { EntryInterface, ReleaseInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 export interface ReleaseAssetsAccordionProps {
   model: EntryInterface
   release: ReleaseInterface
-  mode: 'readonly' | 'interactive'
   hideFileDownloads?: boolean
 }
 
 export default function ReleaseAssetsAccordion({
   model,
   release,
-  mode,
   hideFileDownloads = false,
 }: ReleaseAssetsAccordionProps) {
   const [expanded, setExpanded] = useState<'files' | 'images' | false>(false)
 
-  const scanners = useContext(ArtefactScanningInfoContext)
   const uiConfig = useContext(UiConfigContext)
 
   const handleAccordionChange = (panel: 'files' | 'images') => (_: unknown, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false)
   }
-
-  const FileRowItem = memoize(({ data }) => (
-    <FileDisplay
-      key={data.name}
-      file={data}
-      modelId={model.id}
-      releases={[release]}
-      showMenuItems={
-        mode === 'interactive'
-          ? { rescanFile: scanners.some((scanner) => scanner.artefactKind === ArtefactKind.FILE) }
-          : {}
-      }
-    />
-  ))
 
   return (
     <Stack spacing={1}>
@@ -65,29 +45,13 @@ export default function ReleaseAssetsAccordion({
           </AccordionSummary>
           <AccordionDetails>
             {expanded === 'files' && (
-              <Paginate
-                list={release.files}
-                defaultSortProperty='createdAt'
-                searchFilterProperty='name'
-                searchPlaceholderText='Search by filename'
-                emptyListText='No files found'
-                sortingProperties={[
-                  { value: 'name', title: 'Name', iconKind: 'text' },
-                  { value: 'size', title: 'Size', iconKind: 'size' },
-                  {
-                    value: 'createdAt',
-                    title: 'Date uploaded',
-                    iconKind: 'date',
-                  },
-                  {
-                    value: 'updatedAt',
-                    title: 'Date updated',
-                    iconKind: 'date',
-                  },
-                ]}
-              >
-                {FileRowItem}
-              </Paginate>
+              <FileBrowser
+                files={release.files}
+                modelId={model.id}
+                modelKind={model.kind}
+                releases={[release]}
+                readOnly
+              />
             )}
           </AccordionDetails>
         </Accordion>
