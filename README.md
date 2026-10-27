@@ -39,14 +39,29 @@ sharing.
 
 ## Getting Started
 
-### Running Locally with Docker
+### Running Locally with Docker or Podman
 
 #### Requirements
 
 Follow the instructions below to get a local development environment running. You will need:
 
 - [Node v26](https://nodejs.org/en/download/current)
-- [Docker / Docker Compose](https://www.docker.com/get-started/)
+- [Docker / Docker Compose](https://www.docker.com/get-started/), or [Podman](https://podman.io/) 5.x with a compose
+  provider
+
+#### Choosing a container engine
+
+The compose files work with both `docker compose` and `podman compose`. Every command below can be run with either -
+substitute `podman compose` for `docker compose` throughout.
+
+`podman compose` is only a thin wrapper: it delegates to the first external compose provider it finds on your `PATH`.
+Install [podman-compose](https://github.com/containers/podman-compose), or point `compose_providers` in
+`containers.conf` at a `docker-compose` v2 binary. Without a provider installed, `podman compose` will not run.
+
+<!-- prettier-ignore -->
+> [!NOTE]
+> The `--progress` and `--parallel` flags are Docker-only. `podman-compose` rejects
+> `--progress` outright and fails on `--parallel=-1`, so omit both when using Podman.
 
 #### Development Build
 
@@ -54,7 +69,7 @@ To run in development mode (modified files on your host machine will be reloaded
 
 <!-- prettier-ignore -->
 > [!NOTE]
-> Ensure Docker and Docker Compose are installed before running these commands.
+> Ensure Docker and Docker Compose (or Podman and a compose provider) are installed before running these commands.
 
 ```bash
 git clone https://github.com/gchq/Bailo.git && cd Bailo
@@ -63,6 +78,8 @@ npm run certs
 
 # This builds all the Bailo images, rerun it when you update dependencies.
 docker compose build --parallel
+# Podman: omit --parallel, which it does not support.
+# podman compose build
 
 # Then run the development instance of Bailo.
 docker compose up -d

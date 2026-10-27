@@ -1,11 +1,5 @@
 name: bailo
 
-configs:
-  mongod_conf:
-    file: infrastructure/mongodb/mongod_docker_compose.conf
-  mongod_keyfile:
-    content: abcdef1234567890
-
 services:
   mongo:
     image: mongodb/mongodb-community-server:8.3.11-ubi9@sha256:f1d79801f0d840b4dcb70d1f9aae7990da12cadfb6c1028568d4ff6c9416fddd
@@ -16,19 +10,18 @@ services:
       - MONGODB_INITDB_ROOT_PASSWORD=bailoadmin
       - MONGODB_INITDB_REPL_SET_HOST=mongo
       - MONGODB_INITDB_DATABASE=bailo
+      - MONGO_KEYFILE_CONTENT=abcdef1234567890
     volumes:
       - mongoVolume:/data/db
-    configs:
-      - source: mongod_conf
-        target: /etc/mongod.conf
-      - source: mongod_keyfile
-        target: /etc/mongod.keyfile
-        mode: 0400
-        uid: '999'
-        gid: '999'
-    command:
-      - '-f'
-      - '/etc/mongod.conf'
+      - ./infrastructure/mongodb/mongod_docker_compose.conf:/etc/mongod.conf:ro
+    # Keyfile is written at startup (not mounted) so no host file needs 0400 permissions.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        printf '%s' "$$MONGO_KEYFILE_CONTENT" > /tmp/mongod.keyfile
+        chmod 400 /tmp/mongod.keyfile
+        exec python3 /usr/local/bin/docker-entrypoint.py mongod -f /etc/mongod.conf
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
