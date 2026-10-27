@@ -25,6 +25,7 @@ describe('Mirrored Model tests', () => {
     instanceBUrl = Cypress.expose('instanceBUrl')
     containerCli = Cypress.expose('containerCli')
     cy.exec(`${containerCli} version`, { failOnNonZeroExit: false }).then(({ stdout }) => {
+      expect(stdout, `${containerCli} version produced no output`).to.have.length.greaterThan(0)
       tlsFlag = /podman/i.test(stdout) ? '--tls-verify=false' : ''
     })
 

@@ -15,6 +15,7 @@ describe('Make and approve an access request', () => {
   before(() => {
     containerCli = Cypress.expose('containerCli')
     cy.exec(`${containerCli} version`, { failOnNonZeroExit: false }).then(({ stdout }) => {
+      expect(stdout, `${containerCli} version produced no output`).to.have.length.greaterThan(0)
       isPodman = /podman/i.test(stdout)
       tlsFlag = isPodman ? '--tls-verify=false' : ''
       insecureManifestFlag = isPodman ? '--tls-verify=false' : '--insecure'
@@ -125,7 +126,9 @@ describe('Make and approve an access request', () => {
     cy.exec(`${containerCli} manifest inspect ${insecureManifestFlag} ${registryImage}`, {
       timeout: 60000,
     }).then(({ stdout }) => {
-      const platforms = JSON.parse(stdout).manifests.map(({ platform }) => `${platform.os}/${platform.architecture}`)
+      const platforms = JSON.parse(stdout).manifests.map(
+        ({ platform }: { platform: { os: string; architecture: string } }) => `${platform.os}/${platform.architecture}`,
+      )
       expect(platforms).to.include('linux/amd64')
       expect(platforms).to.include('linux/arm64')
     })
