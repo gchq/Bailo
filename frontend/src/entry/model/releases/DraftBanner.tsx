@@ -95,7 +95,7 @@ export function DraftBanner({
                 onConfirm={handleSubmitForReview}
                 onCancel={() => [setOpen(false), setErrorMessage('')]}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to submit this for review? This is irreversible.'}
+                dialogMessage={'Are you sure you wish to proceed? Publishing a draft is irreversible.'}
                 confirmLoading={isLoading}
               />
             </>
