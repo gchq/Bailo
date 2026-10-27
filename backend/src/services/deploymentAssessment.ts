@@ -137,10 +137,9 @@ async function notifyDeploymentStakeholders(
 
     const creator = await authentication.getUserInformation(toEntity('user', deploymentAssessment.createdBy))
     const creatorName = creator.name || deploymentAssessment.createdBy
-
     const notifications = [
       ...riskOwners
-        .filter((riskOwner) => riskOwner !== creatorName)
+        .filter((riskOwner) => riskOwner !== toEntity('user', deploymentAssessment.createdBy))
         .map((additionalRiskOwner) =>
           notifyRiskOwnerOfDeploymentAssessment(additionalRiskOwner, deploymentAssessment, creatorName),
         ),
