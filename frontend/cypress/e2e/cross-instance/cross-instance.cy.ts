@@ -12,6 +12,9 @@ const testFile = 'test.txt'
 describe('Mirrored Model tests', () => {
   let instanceAUrl: string
   let instanceBUrl: string
+  // Set in before(): Podman is often installed as a `docker` alias, so detect at runtime.
+  let containerCli = 'docker'
+  let tlsFlag = ''
 
   let instanceASourceModelId: string
   let instanceBDestinationModelId: string
@@ -20,6 +23,11 @@ describe('Mirrored Model tests', () => {
     // Must get `let` vars in `before` otherwise they may not exist in subsequent tests
     instanceAUrl = Cypress.expose('instanceAUrl')
     instanceBUrl = Cypress.expose('instanceBUrl')
+    containerCli = Cypress.expose('containerCli')
+    cy.exec(`${containerCli} version`, { failOnNonZeroExit: false }).then(({ stdout }) => {
+      expect(stdout, `${containerCli} version produced no output`).to.have.length.greaterThan(0)
+      tlsFlag = /podman/i.test(stdout) ? '--tls-verify=false' : ''
+    })
 
     cy.task('ensureExportsBucket')
 
@@ -82,14 +90,16 @@ describe('Mirrored Model tests', () => {
           const accessKey = response.body.token.accessKey
           const secretKey = response.body.token.secretKey
 
-          cy.exec(`docker login ${instanceAUrl} -u ${accessKey} -p ${secretKey}`, { timeout: 60000 })
-          const testDockerImageName = `${testDockerImage}:${testDockerImageTag}`
-          const testDockerImageFull = `${instanceAUrl.replace('http://', '')}/${instanceASourceModelId}/${testDockerImageName}`
-          cy.exec(`docker build --tag ${testDockerImage} cypress/fixtures/docker-image`, { timeout: 60000 })
-          cy.exec(`docker tag ${testDockerImage} "${testDockerImageFull}"`, {
+          cy.exec(`${containerCli} login ${tlsFlag} ${instanceAUrl} -u ${accessKey} -p ${secretKey}`, {
             timeout: 60000,
           })
-          cy.exec(`docker push "${testDockerImageFull}"`, {
+          const testDockerImageName = `${testDockerImage}:${testDockerImageTag}`
+          const testDockerImageFull = `${instanceAUrl.replace('http://', '')}/${instanceASourceModelId}/${testDockerImageName}`
+          cy.exec(`${containerCli} build --tag ${testDockerImage} cypress/fixtures/docker-image`, { timeout: 60000 })
+          cy.exec(`${containerCli} tag ${testDockerImage} "${testDockerImageFull}"`, {
+            timeout: 60000,
+          })
+          cy.exec(`${containerCli} push ${tlsFlag} "${testDockerImageFull}"`, {
             timeout: 60000,
           })
 
