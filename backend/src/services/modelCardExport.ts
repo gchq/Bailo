@@ -1,6 +1,5 @@
 import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
-import { outdent } from 'outdent'
 import { resolve } from 'path'
 import showdown from 'showdown'
 
@@ -11,6 +10,7 @@ import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
+import { outdent } from '../utils/string.js'
 import { getModelById, getModelCard, getRoleEntities } from './model.js'
 import { getSchemaById } from './schema.js'
 
