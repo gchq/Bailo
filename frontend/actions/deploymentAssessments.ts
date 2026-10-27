@@ -19,7 +19,6 @@ export interface DeploymentAssessmentFilters {
   createdBefore?: string
   draft?: boolean
   search?: string
-  needsAction?: boolean
 }
 
 export function buildDeploymentAssessmentsUrl(filters: DeploymentAssessmentFilters = {}): string {
@@ -55,10 +54,6 @@ export function buildDeploymentAssessmentsUrl(filters: DeploymentAssessmentFilte
 
   if (filters.search) {
     queryParams.search = filters.search
-  }
-
-  if (filters.needsAction !== undefined) {
-    queryParams.needsAction = filters.needsAction
   }
 
   const queryString = qs.stringify(queryParams)

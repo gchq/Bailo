@@ -11,7 +11,7 @@ function renderDraftBanner(validateBeforeSubmitForReview: () => boolean) {
       text='This is a draft'
       draft
       showButton
-      dialogTitle='Confirm submission for review'
+      dialogTitle='Publish'
       disableButton={false}
       isLoading={false}
       setErrorMessage={vi.fn()}
@@ -28,7 +28,7 @@ describe('DraftBanner', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Submit for Review' }))
 
-    expect(screen.queryByText('Confirm submission for review')).toBe(null)
+    expect(screen.queryByText('Publish')).toBe(null)
     expect(handleSubmitForReview).not.toHaveBeenCalled()
   })
 
@@ -37,6 +37,6 @@ describe('DraftBanner', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Submit for Review' }))
 
-    expect(screen.getByText('Confirm submission for review')).toBeDefined()
+    expect(screen.getByText('Publish')).toBeDefined()
   })
 })

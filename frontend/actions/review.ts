@@ -196,12 +196,3 @@ export async function postNotifyReviewer(reviewId: string) {
     headers: { 'Content-Type': 'application/json' },
   })
 }
-
-export async function postDeploymentAssessmentReviewComment(deploymentAssessmentId: string, comment: string) {
-  const safeDeploymentAssessmentId = toSafePathId(deploymentAssessmentId)
-  return fetch(`/api/v3/deployment-assessments/${safeDeploymentAssessmentId}/comments`, {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ comment }),
-  })
-}

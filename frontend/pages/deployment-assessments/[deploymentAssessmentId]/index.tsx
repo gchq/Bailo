@@ -4,7 +4,6 @@ import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
-import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
@@ -13,9 +12,6 @@ import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
-import ReviewComments from 'src/reviews/ReviewComments'
-import { ReviewKind } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function DeploymentAssessment() {
@@ -34,7 +30,6 @@ export default function DeploymentAssessment() {
   const [patchErrorMessage, setPatchErrorMessage] = useState('')
   const [isFormValid, setIsFormValid] = useState<boolean | undefined>(undefined)
   const [showValidation, setShowValidation] = useState(false)
-  const [revokeApprovalOpen, setRevokeApprovalOpen] = useState(false)
 
   const handleValidityChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid)
@@ -83,19 +78,6 @@ export default function DeploymentAssessment() {
     }
   }
 
-  function handleIsEditChange(isEdit: boolean) {
-    if (isEdit && deploymentAssessment?.draft === false) {
-      setRevokeApprovalOpen(true)
-    } else {
-      setIsEdit(isEdit)
-    }
-  }
-
-  function handleRevokeApprovalConfirm() {
-    setIsEdit(true)
-    setRevokeApprovalOpen(false)
-  }
-
   const isLoadingDeploymentAssessment = !router.isReady || isDeploymentAssessmentLoading || !deploymentAssessment
 
   return (
@@ -116,7 +98,7 @@ export default function DeploymentAssessment() {
                   validateBeforeSubmitForReview={validateBeforeSubmitForReview}
                   draft={deploymentAssessment.draft}
                   text='This is a draft deployment assessment'
-                  dialogTitle='Confirm submission for review'
+                  dialogTitle='Publish'
                   showButton
                 />
                 <Stack spacing={2} sx={{ p: 4 }}>
@@ -143,39 +125,26 @@ export default function DeploymentAssessment() {
                   <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
                     {deploymentAssessment && (
                       <Box sx={{ width: '100%' }}>
-                        {isEdit && deploymentAssessment.draft === false && (
-                          <MessageAlert
-                            message='Saving changes to this deployment assessment will revoke its published status'
-                            severity='warning'
-                          />
-                        )}
                         <EditableDeploymentAssessmentForm
                           deploymentAssessment={deploymentAssessment}
                           mutate={mutateDeploymentAssessment}
                           isEdit={isEdit}
-                          onIsEditChange={handleIsEditChange}
+                          onIsEditChange={(isEditable) => setIsEdit(isEditable)}
                           showValidation={showValidation}
                           onValidityChange={handleValidityChange}
                         />
                       </Box>
                     )}
                   </Stack>
-                  <ConfirmationDialogue
-                    open={revokeApprovalOpen}
-                    title='Revoke Approval Status'
-                    onConfirm={handleRevokeApprovalConfirm}
-                    onCancel={() => setRevokeApprovalOpen(false)}
-                    dialogMessage='This deployment assessment is currently approved. Making any changes will revoke the approval status. Are you sure you want to edit this deployment assessment?'
-                  />
-                  <ReviewComments
+                  {/** todo - add this back in so we can comment on DAs without reviews */}
+                  {/* <ReviewComments
                     identifier={deploymentAssessment.id}
                     parentId={deploymentAssessment._id}
-                    kind={ReviewKind.DEPLOYMENTS}
                     isEdit={isEdit}
                     mutator={mutateDeploymentAssessment}
                     entryId=''
                     responseList={deploymentAssessment.responses}
-                  />
+                  /> */}
                 </Stack>
               </>
             )}

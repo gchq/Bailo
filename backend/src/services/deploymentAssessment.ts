@@ -20,7 +20,6 @@ import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
-import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
@@ -140,9 +139,11 @@ async function notifyDeploymentStakeholders(
     const creatorName = creator.name || deploymentAssessment.createdBy
 
     const notifications = [
-      ...riskOwners.map((riskOwner) =>
-        notifyRiskOwnerOfDeploymentAssessment(riskOwner, deploymentAssessment, creatorName),
-      ),
+      ...riskOwners
+        .filter((riskOwner) => riskOwner !== creatorName)
+        .map((additionalRiskOwner) =>
+          notifyRiskOwnerOfDeploymentAssessment(additionalRiskOwner, deploymentAssessment, creatorName),
+        ),
       ...models.flatMap((model) => {
         const owners = [
           ...new Set(
@@ -206,7 +207,6 @@ export async function getDeploymentAssessmentDetails(
   deploymentAssessmentId: string,
 ): Promise<DeploymentAssessmentDetails> {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
-
   const responses = await ResponseModel.find({ parentId: deploymentAssessment._id }).sort({
     createdAt: -1,
   })
@@ -364,6 +364,8 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('draft')
   }
 
+  await deploymentAssessment.save()
+
   if (isBeingSubmitted) {
     notifyDeploymentStakeholders(
       deploymentAssessment.metadata?.signOff?.riskOwners ?? [],
@@ -376,8 +378,6 @@ export async function updateDeploymentAssessment(
       ),
     )
   }
-
-  await useTransaction([(session) => deploymentAssessment.save({ session })])
 
   return deploymentAssessment
 }

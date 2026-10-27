@@ -7,11 +7,11 @@ import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
-import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
+import { DecisionKeys, ResponseInterface } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptionsKeys, ReviewKind } from '../types/enums.js'
+import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { Fragment, recursiveRender } from '../utils/export.js'
 import { getDeploymentAssessmentById } from './deploymentAssessment.js'
 import { getModelById, getModelCard, getRoleEntities } from './model.js'
@@ -33,19 +33,6 @@ type MarkdownTableDefinition<T> = {
     heading: string
     value: (row: T) => unknown
   }>
-}
-
-function decisionDisplay(decision: DecisionKeys | undefined) {
-  switch (decision) {
-    case Decision.Approve:
-      return 'Approved'
-    case Decision.Reject:
-      return 'Rejected'
-    case Decision.RequestChanges:
-      return 'Changes requested'
-    default:
-      return 'Awaiting review'
-  }
 }
 
 export async function getModelCardHtml(
@@ -192,53 +179,15 @@ function renderMarkdownTable<T>(rows: T[], definition: MarkdownTableDefinition<T
 export async function getDeploymentAssessmentHtml(user: UserInterface, deploymentAssessmentId: string) {
   const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
   const schema = await getSchemaById(deploymentAssessment.schemaId)
-  // Find latest deployment assessment review, then fetch the latest response by that review's _id
-  const latestReview = await ReviewModel.findOne({
-    deploymentAssessmentId: deploymentAssessment.id,
-    kind: ReviewKind.DeploymentAssessment,
-  }).sort({ createdAt: -1 })
-  const latestResponse = latestReview
-    ? await ResponseModel.findOne({ parentId: latestReview._id, kind: ResponseKind.Review }).sort({ createdAt: -1 })
-    : null
   let output = outdent`
       # ${deploymentAssessment.name}\n
       ### Created by
       ${deploymentAssessment.createdBy}\n
   `
-  if (latestResponse && latestReview) {
-    const reviewTable = renderMarkdownTable(
-      [
-        {
-          collaborator: latestResponse.entity,
-          role: 'Risk owner',
-          decision: decisionDisplay(latestResponse.decision),
-          comment: latestResponse.comment ?? 'No comment',
-          updatedAt: latestResponse.updatedAt,
-        },
-      ],
-      {
-        title: 'Review status',
-        columns: [
-          { heading: 'Collaborator', value: (review) => review.collaborator },
-          { heading: 'Role', value: (review) => review.role },
-          { heading: 'Decision', value: (review) => review.decision },
-          {
-            heading: 'Comment',
-            value: (review) => review.comment?.replace(/(\r\n|\n|\r)/gm, ' '),
-          },
-          { heading: 'Last Updated', value: (review) => review.updatedAt },
-        ],
-      },
-    )
-    output += outdent`
-      ${reviewTable}
-    `
-  } else {
-    output += outdent`
+  output += outdent`
       ### Review status
       ${deploymentAssessment.draft ? 'Draft' : 'Awaiting review'}\n
     `
-  }
 
   output += '\n\n---\n'
 

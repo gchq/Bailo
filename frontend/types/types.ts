@@ -620,7 +620,6 @@ export const ReviewKind = {
   ACCESS: 'access',
   RELEASE: 'release',
   LIFECYCLE: 'lifecycle',
-  DEPLOYMENTS: 'deployment_assessment',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
@@ -657,14 +656,6 @@ export type ReviewRequestInterface =
       accessRequestId?: never
       deploymentAssessment?: never
       deploymentAssessmentId?: never
-    } & PartialReviewRequestInterface)
-  | ({
-      kind: 'deployment_assessment'
-      dueDate?: never
-      semver?: never
-      accessRequestId?: never
-      deploymentAssessmentId: string
-      deploymentAssessment: DeploymentAssessmentInterface
     } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {

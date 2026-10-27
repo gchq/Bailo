@@ -84,7 +84,6 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
     'draft=invalid',
     'search=',
     'state=invalid',
-    'needsAction=invalid',
     'unknown=value',
   ])('rejects the malformed query %s', async (query) => {
     const res = await testGet(`/api/v3/deployment-assessments?${query}`)

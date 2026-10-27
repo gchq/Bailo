@@ -13,7 +13,6 @@ import { ReviewKind } from '../../types/enums.js'
 import config, { TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
-import { getModelReview } from '../../utils/review.js'
 import { entryKindForRedirect } from '../../utils/routerUtils.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
@@ -106,7 +105,7 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
   }
 
   const emailContent = await buildEmail(
-    `A deployment assessment is ready for your review`,
+    `You have been allocated as a risk owner for a deployment assessment`,
     [
       { title: 'Deployment Assessment Name', data: deployment.name },
       { title: 'Deployment Assessment ID', data: deployment.id },
@@ -354,9 +353,7 @@ async function notifyRole(review: ReviewInterface, title: string, fields: Info[]
     { name: 'Open item', url: actionUrl },
     { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
   ])
-
-  const modelReview = getModelReview(review)
-  await dispatchEmailToModelRole(modelReview.modelId, modelReview.role, emailContent)
+  await dispatchEmailToModelRole(review.modelId as string, review.role, emailContent)
 }
 
 export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {

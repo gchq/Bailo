@@ -293,8 +293,6 @@ describe('Create, read, update and delete deployment assessments', () => {
       'not.exist',
     )
     cy.get('[data-test=confirmButton]').should('be.visible').click()
-
-    cy.contains('Needs review')
     cy.get('[data-test=draftBanner]').should('not.exist')
   })
 })

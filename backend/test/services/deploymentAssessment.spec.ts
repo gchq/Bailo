@@ -21,7 +21,6 @@ import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const repositoryMocks = vi.hoisted(() => ({
   findDeploymentAssessments: vi.fn(),
-  findLatestDecisionsByAssessmentIds: vi.fn(),
 }))
 vi.mock('../../src/repositories/deploymentAssessment.js', () => repositoryMocks)
 
@@ -553,17 +552,6 @@ describe('services > deploymentAssessment', () => {
       expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
       expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
     })
-
-    test('does not re-notify stakeholders when an already submitted assessment is edited', async () => {
-      const deploymentAssessment = existingDeploymentAssessment()
-      deploymentAssessment.draft = false
-      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
-
-      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
-
-      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).not.toHaveBeenCalled()
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).not.toHaveBeenCalled()
-    })
   })
 
   describe('removeDeploymentAssessment', () => {
@@ -573,8 +561,8 @@ describe('services > deploymentAssessment', () => {
     // to collect the parent IDs for the responses.
     const mockAssessmentWithChildren = () => {
       const deploymentAssessment = { id: 'da-id', _id: assessmentId, draft: false, delete: vi.fn() }
-
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      ResponseModelMock.find.mockResolvedValueOnce([{ _id: new Types.ObjectId() }])
 
       return { deploymentAssessment }
     }
@@ -663,7 +651,6 @@ describe('services > deploymentAssessment', () => {
   describe('searchDeploymentAssessments', () => {
     beforeEach(() => {
       repositoryMocks.findDeploymentAssessments.mockResolvedValue([])
-      repositoryMocks.findLatestDecisionsByAssessmentIds.mockResolvedValue(new Map())
     })
 
     test('passes parameters to the repository and returns authorised results', async () => {
@@ -717,6 +704,21 @@ describe('services > deploymentAssessment', () => {
       await searchDeploymentAssessments({ dn: 'creator' }, searchParams)
 
       expect(repositoryMocks.findDeploymentAssessments).toHaveBeenCalledWith(searchParams)
+    })
+
+    test('does not expose review state on assessment summaries', async () => {
+      const approved = { id: 'approved-assessment', draft: false }
+      const rejected = { id: 'rejected-assessment', draft: false }
+      repositoryMocks.findDeploymentAssessments.mockResolvedValueOnce([approved, rejected])
+      vi.mocked(authorisation.deploymentAssessments).mockResolvedValueOnce([
+        { success: true, id: approved.id },
+        { success: true, id: rejected.id },
+      ])
+
+      const result = await searchDeploymentAssessments({ dn: 'creator' }, {})
+
+      expect(result).toHaveLength(2)
+      expect(result[0]).not.toHaveProperty('state')
     })
   })
 })
