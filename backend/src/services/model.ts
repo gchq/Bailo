@@ -23,11 +23,11 @@ import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../t
 import { isBailoError } from '../types/error.js'
 import {
   EntityKind,
-  EntrySearchOptionsParams,
-  EntrySearchResultWithErrors,
-  EntryUserPermissions,
-  MirrorImportLogData,
-  Optional,
+  type EntrySearchOptionsParams,
+  type EntrySearchResultWithErrors,
+  type EntryUserPermissions,
+  type MirrorImportLogData,
+  type Optional,
 } from '../types/types.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
