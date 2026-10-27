@@ -105,7 +105,7 @@ type additionalParameters =
   | {
       semver?: never
       accessRequestId?: never
-      reviewId: string
+      reviewId?: string
     }
 
 type GetReviewRequestsForModelQuery = {
