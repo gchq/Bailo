@@ -1,13 +1,12 @@
 import Add from '@mui/icons-material/Add'
-import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
+import { Button, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useContext, useState } from 'react'
-import Paginate from 'src/common/Paginate'
 import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
-import FileDisplay from 'src/entry/model/files/FileDisplay'
+import FileBrowser from 'src/entry/model/files/FileBrowser'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import { EntryInterface, EntryKind } from 'types/types'
 
@@ -19,28 +18,8 @@ export default function Files({ model }: FilesProps) {
   const scanners = useContext(ArtefactScanningInfoContext)
   const { modelFiles, isModelFilesLoading, isModelFilesError, mutateModelFiles } = useGetModelFiles(model.id)
   const [isFileUploadDialogOpen, setIsFileUploadDialogOpen] = useState(false)
-  const [activeFileTag, setActiveFileTag] = useState('')
-
+  const [browsingPath, setBrowsingPath] = useState('')
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
-
-  const EntryListItem = ({ data }) => (
-    <Box key={data._id} sx={{ width: '100%' }}>
-      <Stack
-        spacing={1}
-        sx={{
-          p: 2,
-        }}
-      >
-        <FileDisplay
-          showMenuItems={{ associatedReleases: true, deleteFile: model.kind == EntryKind.MODEL, rescanFile: true }}
-          file={data}
-          modelId={model.id}
-          mutator={mutateModelFiles}
-          releases={releases}
-        />
-      </Stack>
-    </Box>
-  )
 
   const queryState = renderQueryState([isModelFilesError, isReleasesError], isModelFilesLoading || isReleasesLoading)
   if (queryState) {
@@ -94,39 +73,18 @@ export default function Files({ model }: FilesProps) {
               open={isFileUploadDialogOpen}
               onDialogClose={() => setIsFileUploadDialogOpen(false)}
               mutateModelFiles={mutateModelFiles}
+              initialUploadPath={browsingPath}
+              existingFiles={modelFiles}
             />
           </Stack>
-          {activeFileTag !== '' && (
-            <Stack
-              direction='row'
-              spacing={1}
-              sx={{
-                justifyContent: 'flex-start',
-                alignItems: 'center',
-                width: '100%',
-              }}
-            >
-              <Typography>Active filter:</Typography>
-              <Chip label={activeFileTag} onDelete={() => setActiveFileTag('')} />
-            </Stack>
-          )}
-          <Paginate
-            list={modelFiles.map((entryFile) => {
-              return { key: entryFile._id, ...entryFile }
-            })}
-            emptyListText={`No files found for model ${model.name}`}
-            searchFilterProperty='name'
-            sortingProperties={[
-              { value: 'name', title: 'Name', iconKind: 'text' },
-              { value: 'size', title: 'Size', iconKind: 'size' },
-              { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-              { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-            ]}
-            searchPlaceholderText='Search by file name'
-            defaultSortProperty='createdAt'
-          >
-            {EntryListItem}
-          </Paginate>
+          <FileBrowser
+            files={modelFiles}
+            modelId={model.id}
+            modelKind={model.kind}
+            releases={releases}
+            mutator={mutateModelFiles}
+            onPathChange={setBrowsingPath}
+          />
         </Stack>
       </Container>
     </>

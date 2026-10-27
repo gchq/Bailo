@@ -27,6 +27,9 @@ infrastructure/helm/bailo/local.yaml
 mlartifacts/
 mlruns/
 
+# Local dev overrides
+compose.local.yaml
+
 # Agents
 .agents/
 .claude/

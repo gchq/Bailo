@@ -3,7 +3,7 @@ import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { MirrorImportLogData } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
-import { createFilePath, isFileWithScanResultsInterface } from '../../utils/fileUtils.js'
+import { createFilePath, isFileWithScanResultsInterface, validateFileName } from '../../utils/fileUtils.js'
 import log from '../log.js'
 import { isModelCardRevisionDoc } from '../model.js'
 import { isReleaseDoc } from '../release.js'
@@ -84,6 +84,27 @@ export async function parseFile(
   log.info({ file })
   if (!isFileWithScanResultsInterface(file)) {
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, ...logData })
+  }
+
+  if (typeof file.name !== 'string') {
+    throw InternalError('Compressed file contains a file whose name is not a string.', {
+      file,
+      mirroredModelId,
+      sourceModelId,
+      ...logData,
+    })
+  }
+
+  try {
+    file.name = validateFileName(file.name)
+  } catch (error) {
+    throw InternalError('Compressed file contains a file with an invalid name.', {
+      name: file.name,
+      mirroredModelId,
+      sourceModelId,
+      error,
+      ...logData,
+    })
   }
 
   file.path = createFilePath(mirroredModelId, file._id.toString())

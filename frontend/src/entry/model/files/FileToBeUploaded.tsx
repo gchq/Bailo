@@ -9,8 +9,8 @@ import { FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 interface FileToBeUploadedProps {
   fileWithMetadata: FileUploadWithMetadata
   showMetaDataInput?: boolean
-  onFileMetadataChange: (metadata: FileUploadMetadata, fileName: string) => void
-  onDelete: (fileName: string) => void
+  onFileMetadataChange: (metadata: FileUploadMetadata, relativePath: string) => void
+  onDelete: (relativePath: string) => void
 }
 
 export default function FileToBeUploaded({
@@ -28,10 +28,10 @@ export default function FileToBeUploaded({
           text: event.target.value,
           tags: fileWithMetadata.metadata ? fileWithMetadata.metadata.tags.filter((newTag) => newTag !== '') : [],
         },
-        fileWithMetadata.file.name,
+        fileWithMetadata.relativePath,
       )
     },
-    [onFileMetadataChange, fileWithMetadata.file.name, fileWithMetadata.metadata],
+    [onFileMetadataChange, fileWithMetadata.relativePath, fileWithMetadata.metadata],
   )
 
   const handleFileTagSelectorOnChange = useCallback(
@@ -41,10 +41,10 @@ export default function FileToBeUploaded({
           text: fileWithMetadata.metadata ? fileWithMetadata.metadata.text : '',
           tags: newTags.filter((newTag) => newTag !== ''),
         },
-        fileWithMetadata.file.name,
+        fileWithMetadata.relativePath,
       )
     },
-    [fileWithMetadata.file.name, fileWithMetadata.metadata, onFileMetadataChange],
+    [fileWithMetadata.relativePath, fileWithMetadata.metadata, onFileMetadataChange],
   )
 
   return (
@@ -61,11 +61,11 @@ export default function FileToBeUploaded({
           textOverflow: 'ellipsis',
         }}
       >
-        <Tooltip title={fileWithMetadata.file.name}>
+        <Tooltip title={fileWithMetadata.uploadPath || fileWithMetadata.file.name}>
           <Chip
             color='primary'
-            label={fileWithMetadata.file.name}
-            onDelete={() => onDelete(fileWithMetadata.file.name)}
+            label={fileWithMetadata.uploadPath || fileWithMetadata.file.name}
+            onDelete={() => onDelete(fileWithMetadata.relativePath)}
           />
         </Tooltip>
       </Grid>
