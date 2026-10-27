@@ -1,4 +1,5 @@
-import qs from 'qs'
+import querystring from 'node:querystring'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
@@ -24,7 +25,7 @@ describe('routes > metrics > getEntryVolume', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getEntryVolumeSchema)
 
-    const res = await testGet(`/api/v3/metrics/entryVolume?${qs.stringify(fixture.query)}`)
+    const res = await testGet(`/api/v3/metrics/entryVolume?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -33,7 +34,7 @@ describe('routes > metrics > getEntryVolume', () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(getEntryVolumeSchema)
 
-    const res = await testGet(`/api/v3/metrics/entryVolume?${qs.stringify(fixture.query)}`)
+    const res = await testGet(`/api/v3/metrics/entryVolume?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewMetric).toHaveBeenCalled()
