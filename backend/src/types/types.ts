@@ -1,5 +1,4 @@
 import { ProxyAgentOptions } from 'proxy-agent'
-import { Optional } from 'utility-types'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
 import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
@@ -16,6 +15,9 @@ import { ImageMirrorInformation, ImageMirrorMetadata } from '../services/mirrore
 import { getEnumValues } from '../utils/enum.js'
 import { coerceArray, strictCoerceBoolean } from '../utils/validate.js'
 import { BailoError } from './error.js'
+
+/** Makes the keys `K` of `T` optional, or every key when `K` is omitted. */
+export type Optional<T extends object, K extends keyof T = keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 export type PartialDeep<T> = T extends object
   ? {

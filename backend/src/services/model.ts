@@ -1,6 +1,5 @@
 import * as _ from 'lodash-es'
 import { ProjectionType } from 'mongoose'
-import { Optional } from 'utility-types'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
@@ -24,10 +23,11 @@ import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../t
 import { isBailoError } from '../types/error.js'
 import {
   EntityKind,
-  EntrySearchOptionsParams,
-  EntrySearchResultWithErrors,
-  EntryUserPermissions,
-  MirrorImportLogData,
+  type EntrySearchOptionsParams,
+  type EntrySearchResultWithErrors,
+  type EntryUserPermissions,
+  type MirrorImportLogData,
+  type Optional,
 } from '../types/types.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
