@@ -21,7 +21,7 @@ export interface DeploymentAssessmentPageFilters {
 }
 
 export function buildDeploymentAssessmentListHref(filters: DeploymentAssessmentPageFilters): string {
-  const query = new URLSearchParams({ tab: 'all-assessments' })
+  const query = new URLSearchParams()
 
   if (filters.search) {
     query.set('search', filters.search)
@@ -46,7 +46,8 @@ export function buildDeploymentAssessmentListHref(filters: DeploymentAssessmentP
     query.set('createdBefore', filters.createdBefore)
   }
 
-  return `/deployment-assessments?${query.toString()}`
+  const queryString = query.toString()
+  return queryString ? `/deployment-assessments?${queryString}` : '/deployment-assessments'
 }
 
 function readString(value: string | string[] | undefined) {
@@ -93,9 +94,7 @@ export function useDeploymentAssessmentFilters() {
   )
 
   const resetFilters = useCallback(() => {
-    router.replace({ pathname: '/deployment-assessments', query: { tab: 'all-assessments' } }, undefined, {
-      shallow: true,
-    })
+    router.replace({ pathname: '/deployment-assessments' }, undefined, { shallow: true })
   }, [router])
 
   return { filters, setFilters, resetFilters }

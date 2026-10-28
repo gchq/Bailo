@@ -353,7 +353,7 @@ export async function updateDeploymentAssessment(
     deploymentAssessment.markModified('metadata')
   }
 
-  const isBeingSubmitted = deploymentAssessment.draft && diff.draft === false
+  const isBeingPublished = deploymentAssessment.draft && diff.draft === false
 
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
@@ -365,7 +365,7 @@ export async function updateDeploymentAssessment(
 
   await deploymentAssessment.save()
 
-  if (isBeingSubmitted) {
+  if (isBeingPublished) {
     notifyDeploymentStakeholders(
       deploymentAssessment.metadata?.signOff?.riskOwners ?? [],
       deploymentAssessment.metadata?.modelOverview?.modelIds ?? [],
