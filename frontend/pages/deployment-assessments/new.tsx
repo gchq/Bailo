@@ -153,6 +153,8 @@ export default function NewDeploymentAssessment() {
       onSaveDraft={onSaveDraft}
       draftButtonLoading={draftButtonLoading}
       disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
+      // Drafts can be saved with unanswered questions, so only validate when submitted for review
+      liveValidation={false}
     >
       <LabelledInput fullWidth label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
         <LimitedTextField

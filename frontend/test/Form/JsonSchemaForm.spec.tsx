@@ -363,6 +363,26 @@ describe('JsonSchemaForm', () => {
       expect(await screen.findByText(/must NOT have fewer than 5 characters/)).toBeDefined()
     })
 
+    it('does not display errors as the user types when live validation is disabled', async () => {
+      const steps = getStepsFromSchema(textSchema, {}, [], {})
+      for (const step of steps) {
+        step.steps = steps
+      }
+      renderWithTheme(
+        <JsonSchemaForm
+          splitSchema={{ reference: textSchema.id, steps }}
+          setSplitSchema={vi.fn()}
+          canEdit
+          liveValidation={false}
+        />,
+      )
+
+      fireEvent.change(await screen.findByLabelText('text input field for Name'), { target: { value: 'abc' } })
+
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      expect(screen.queryByText(/must NOT have fewer than 5 characters/)).toBe(null)
+    })
+
     it('displays errors inline when highlighting fields required by a model state', async () => {
       mockRouter.setCurrentUrl('/?requiredByModelState=Development')
       renderTextForm()

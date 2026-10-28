@@ -66,6 +66,7 @@ export default function JsonSchemaForm({
   stateList,
   currentState,
   showValidation = false,
+  liveValidation = true,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -78,6 +79,8 @@ export default function JsonSchemaForm({
   stateList?: string[]
   currentState?: string
   showValidation?: boolean
+  /** Validate while the user types, e.g. disabled for drafts that can be saved with unanswered questions */
+  liveValidation?: boolean
 }) {
   const theme = useTheme()
   const router = useRouter()
@@ -334,7 +337,7 @@ export default function JsonSchemaForm({
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
-            liveValidate='onChange'
+            liveValidate={showValidation || liveValidation ? 'onChange' : undefined}
             liveOmit
             showErrorList={showValidation ? 'top' : false}
             transformErrors={rewordRJSFErrors}
