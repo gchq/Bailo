@@ -1,6 +1,6 @@
 import './instrumentation.js'
 
-import shelljs from 'shelljs'
+import { spawnSync } from 'node:child_process'
 
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
@@ -11,7 +11,7 @@ import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
 import { registerSigTerminate } from './utils/signals.js'
 // Update certificates based on mount
-shelljs.exec('update-ca-certificates', { fatal: false, async: false })
+spawnSync('update-ca-certificates', { stdio: 'inherit' })
 
 if (config.s3.automaticallyCreateBuckets) {
   const bucketNames = [config.s3.buckets.uploads, config.s3.buckets.registry]
