@@ -70,7 +70,7 @@ describe('routes > files > getDownloadFile', () => {
 
       expect(res.statusCode).toBe(200)
       expect(res.headers['content-disposition']).toBe(
-        `attachment; filename="cafÃ© ??.bin"; filename*=UTF-8''caf%C3%A9%20%F0%9F%9A%80.bin`,
+        `attachment; filename="caf? ??.bin"; filename*=UTF-8''caf%C3%A9%20%F0%9F%9A%80.bin`,
       )
       expect(res.headers['content-type']).toBe('text/plain; charset=utf-8')
     })
