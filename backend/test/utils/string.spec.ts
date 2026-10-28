@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { bytesToUuid, plural, toTitleCase } from '../../src/utils/string.js'
+import { bytesToUuid, outdent, plural, toTitleCase } from '../../src/utils/string.js'
 
 describe('utils > string', () => {
   test('plural', () => {
@@ -28,5 +28,36 @@ describe('utils > string', () => {
 
   test('bytesToUuid > wrong length', () => {
     expect(() => bytesToUuid(new Uint8Array(15))).toThrow('A UUID needs exactly 16 bytes, received 15')
+  })
+
+  test('outdent > removes first line indentation and surrounding newlines', () => {
+    const result = outdent`
+      # Title
+
+        indented
+      ${'value'}
+    `
+
+    expect(result).toEqual('# Title\n\n  indented\nvalue')
+  })
+
+  test('outdent > does not re-indent interpolated values', () => {
+    const result = outdent`
+      ${'first\n    second'}
+    `
+
+    expect(result).toEqual('first\n    second')
+  })
+
+  test('outdent > keeps explicit escaped newlines', () => {
+    const result = outdent`\n\n
+        ## ${'Title'}
+    `
+
+    expect(result).toEqual('\n\n## Title')
+  })
+
+  test('outdent > single line is unchanged', () => {
+    expect(outdent`no newline ${1}`).toEqual('no newline 1')
   })
 })
