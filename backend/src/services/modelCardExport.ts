@@ -3,6 +3,7 @@ import Handlebars from 'handlebars'
 import { Marked } from 'marked'
 import { outdent } from 'outdent'
 import { resolve } from 'path'
+import sanitizeHtml from 'sanitize-html'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
@@ -166,7 +167,8 @@ export async function renderToHtml(
   reviewExports: ReviewExport[],
 ) {
   const markdown = await renderToMarkdown(model, modelCardRevision, reviewExports)
-  const body = await markdownConverter.parse(markdown)
+  const html = await markdownConverter.parse(markdown)
+  const body = sanitizeHtml(html)
 
   return modelCardTemplate({ body })
 }
