@@ -83,7 +83,7 @@ export default function Release() {
               text='This is a draft release'
               dialogTitle='Confirm release submission for review'
               draft={release.draft}
-              handleSubmitForReview={handleSubmitReleaseForReview}
+              handleSubmit={handleSubmitReleaseForReview}
               showButton
               disableButton={isEdit}
               isLoading={isLoading}

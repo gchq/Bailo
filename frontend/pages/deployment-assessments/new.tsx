@@ -82,7 +82,7 @@ export default function NewDeploymentAssessment() {
     setFormValidationErrorState(false)
 
     if (!schemaId) {
-      setErrorText('Please wait until the page has finished loading before attempting to submit.')
+      setErrorText('Please wait until the page has finished loading before attempting to publish.')
       setSubmitButtonLoading(false)
       return
     }
@@ -147,6 +147,7 @@ export default function NewDeploymentAssessment() {
       backHref='/deployment-assessments/new'
       backLabel='Select a different schema'
       onSubmit={onSubmit}
+      submitButtonText='Publish'
       submitButtonLoading={submitButtonLoading}
       formValidationErrorState={formValidationErrorState}
       errorText={errorText}

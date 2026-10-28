@@ -1,10 +1,4 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/image'
-import Box from '@mui/material/Box'
-
-import modelOverview from 'public/docs/bailo_model_overview.png'
-import selectAccessRequestSchema from 'public/docs/bailo_select_access_request_schema.png'
-import createAccessRequest from 'public/docs/bailo_create_access_request.png'
 
 # Using Deployment Assessments
 
@@ -12,12 +6,16 @@ import createAccessRequest from 'public/docs/bailo_create_access_request.png'
 >
 > - What are deployment assessments?
 > - How do I create a deployment assessment?
+> - How do I publish a deployment assessment?
 
 ## What are deployment assessments?
 
 Deployment assessments are used to document the use of one or more models. Unlike the previous access request process,
 deployment assessments are not tied to individual models, and model owners or managers do not necessarily need to be
 involved.
+
+The author of a deployment assessment is responsible for its contents as the risk owner. There is no separate review or
+approval step.
 
 ## Creating a deployment assessment
 
@@ -27,6 +25,21 @@ To create a deployment assessment:
 2. Select **Create deployment assessment**.
 3. Choose the appropriate assessment schema.
 4. Complete the assessment form, providing all required information. Required fields are clearly marked.
-5. Select **Submit** to create and submit the assessment.
+5. Select **Save draft** to keep working on the assessment later, or **Publish** to create and publish it immediately.
+
+## Drafts and publishing
+
+A draft deployment assessment can be edited as many times as needed. Required fields do not need to be completed while
+the assessment is a draft.
+
+When the assessment is complete, open it and select **Publish** in the draft banner. All required fields must be
+completed before an assessment can be published. Publishing cannot be undone - a published assessment cannot be returned
+to a draft.
+
+Any additional risk owners and the owners of the included models are notified by email when an assessment is published.
+
+## Commenting on a deployment assessment
+
+Comments can be added at the bottom of a deployment assessment page to discuss its contents.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

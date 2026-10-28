@@ -636,24 +636,18 @@ export type ReviewRequestInterface =
       dueDate?: never
       semver?: never
       accessRequestId: string
-      deploymentAssessment?: never
-      deploymentAssessmentId?: never
     } & PartialReviewRequestInterface)
   | ({
       kind: 'release'
       dueDate?: never
       semver: string
       accessRequestId?: never
-      deploymentAssessment?: never
-      deploymentAssessmentId?: never
     } & PartialReviewRequestInterface)
   | ({
       kind: 'lifecycle'
       dueDate: Date
       semver?: never
       accessRequestId?: never
-      deploymentAssessment?: never
-      deploymentAssessmentId?: never
     } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {

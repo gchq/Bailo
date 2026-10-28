@@ -16,6 +16,7 @@ type SchemaFormPageProps = {
   backHref: string
   backLabel: string
   onSubmit: () => void
+  submitButtonText?: string
   submitButtonLoading: boolean
   formValidationErrorState: boolean
   errorText: string
@@ -37,6 +38,7 @@ export default function SchemaFormPage({
   backHref,
   backLabel,
   onSubmit,
+  submitButtonText = 'Submit for review',
   submitButtonLoading,
   formValidationErrorState,
   errorText,
@@ -98,7 +100,7 @@ export default function SchemaFormPage({
                           disabled={draftButtonLoading || actionsDisabled}
                           data-test='submitDeploymentAssessmentButton'
                         >
-                          Submit for review
+                          {submitButtonText}
                         </Button>
                       </span>
                     </Tooltip>

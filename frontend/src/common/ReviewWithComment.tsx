@@ -24,7 +24,6 @@ type ReviewWithCommentProps = {
   modelId?: string
   includeDueDate?: boolean
   hideRequestChangesButton?: boolean
-  onCancel?: () => void
 }
 
 export default function ReviewWithComment({
@@ -34,7 +33,6 @@ export default function ReviewWithComment({
   modelId,
   includeDueDate = false,
   hideRequestChangesButton = false,
-  onCancel,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
@@ -232,7 +230,6 @@ export default function ReviewWithComment({
                 >
                   Submit
                 </Button>
-                {onCancel && <Button onClick={onCancel}>Cancel</Button>}
               </Stack>
             </Stack>
           </Stack>

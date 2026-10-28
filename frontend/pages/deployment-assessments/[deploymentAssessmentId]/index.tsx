@@ -21,7 +21,7 @@ export default function DeploymentAssessment() {
     typeof returnTo === 'string' &&
     (returnTo === '/deployment-assessments' || returnTo.startsWith('/deployment-assessments?'))
       ? returnTo
-      : '/deployment-assessments?tab=all-assessments'
+      : '/deployment-assessments'
 
   const sendNotification = useNotification()
 
@@ -52,19 +52,19 @@ export default function DeploymentAssessment() {
     return error
   }
 
-  function validateBeforeSubmitForReview() {
+  function validateBeforeSubmit() {
     if (isFormValid) {
       return true
     }
     setShowValidation(true)
     sendNotification({
-      msg: 'Please make sure that all required fields are appropriately filled out before submitting for review.',
+      msg: 'Please make sure that all required fields are appropriately filled out before publishing.',
       variant: 'error',
     })
     return false
   }
 
-  async function handleSubmitForReview() {
+  async function handlePublish() {
     if (deploymentAssessment) {
       setIsLoading(true)
       const response = await patchDeploymentAssessment(deploymentAssessment.id, undefined, false)
@@ -72,7 +72,7 @@ export default function DeploymentAssessment() {
         setPatchErrorMessage(await getErrorMessage(response))
       } else {
         mutateDeploymentAssessment()
-        sendNotification({ msg: 'Deployment Assessment successfully submitted for review.', variant: 'success' })
+        sendNotification({ msg: 'Deployment assessment successfully published.', variant: 'success' })
       }
       setIsLoading(false)
     }
@@ -94,11 +94,13 @@ export default function DeploymentAssessment() {
                   setErrorMessage={setPatchErrorMessage}
                   disableButton={isEdit || isFormValid === undefined}
                   isLoading={isLoading}
-                  handleSubmitForReview={handleSubmitForReview}
-                  validateBeforeSubmitForReview={validateBeforeSubmitForReview}
+                  handleSubmit={handlePublish}
+                  validateBeforeSubmit={validateBeforeSubmit}
                   draft={deploymentAssessment.draft}
                   text='This is a draft deployment assessment'
-                  dialogTitle='Publish'
+                  dialogTitle='Publish deployment assessment'
+                  dialogMessage='Are you sure you want to publish this deployment assessment? Published deployment assessments cannot be returned to draft.'
+                  buttonText='Publish'
                   showButton
                 />
                 <Stack spacing={2} sx={{ p: 4 }}>
@@ -109,7 +111,7 @@ export default function DeploymentAssessment() {
                   >
                     <Link href={backHref}>
                       <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                        Back to deployments
+                        Back to deployment assessments
                       </Button>
                     </Link>
                     <Stack
