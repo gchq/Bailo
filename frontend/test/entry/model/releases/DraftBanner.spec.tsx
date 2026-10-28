@@ -4,7 +4,10 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { DraftBanner } from '../../../../src/entry/model/releases/DraftBanner'
 
-function renderDraftBanner(validateBeforeSubmit: () => boolean, overrides: { buttonText?: string; dialogMessage?: string } = {}) {
+function renderDraftBanner(
+  validateBeforeSubmit: () => boolean,
+  overrides: { buttonText?: string; dialogMessage?: string } = {},
+) {
   const handleSubmit = vi.fn()
   render(
     <DraftBanner

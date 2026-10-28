@@ -166,7 +166,7 @@ describe('Create, read, update and delete deployment assessments', () => {
     cy.get('[data-test=modelSelector] .MuiChip-root').should('contain.text', modelName)
 
     cy.intercept('POST', '**/api/v3/deployment-assessments').as('submitDeploymentAssessment')
-    cy.get('[data-test=submitDeploymentAssessmentButton]').should('be.enabled').click()
+    cy.get('[data-test=submitDeploymentAssessmentButton]').should('contain.text', 'Publish').and('be.enabled').click()
     cy.contains('Please make sure that all sections have been completed.').should('not.exist')
     cy.wait('@submitDeploymentAssessment').then(({ response }) => {
       expect(response?.statusCode).to.equal(201)
@@ -288,11 +288,26 @@ describe('Create, read, update and delete deployment assessments', () => {
     cy.get('[data-test=saveEditFormButton]').should('be.enabled').click()
     cy.wait('@saveDraftDeploymentAssessment').its('response.statusCode').should('equal', 200)
     cy.get('[data-test=editFormButton]').should('be.visible')
-    cy.get('[data-test=draftBanner] [data-test=publishDraftButton]').should('be.enabled').click()
+    cy.get('[data-test=draftBanner] [data-test=publishDraftButton]')
+      .should('contain.text', 'Publish')
+      .and('be.enabled')
+      .click()
     cy.contains('Please make sure that all required fields are appropriately filled out before publishing.').should(
       'not.exist',
     )
+    cy.contains('Publish deployment assessment').should('be.visible')
+    cy.contains('Published deployment assessments cannot be returned to draft.').should('be.visible')
     cy.get('[data-test=confirmButton]').should('be.visible').click()
+    cy.contains('Deployment assessment successfully published.')
     cy.get('[data-test=draftBanner]').should('not.exist')
+    cy.get('[data-test=deploymentAssessmentStateChip]').should('contain.text', 'Published')
+
+    cy.log('Commenting on the published deployment assessment')
+    const comment = `Published assessment comment ${Date.now()}`
+    cy.intercept('POST', '**/api/v3/deployment-assessments/*/comments').as('postDeploymentAssessmentComment')
+    cy.get('[data-test=deploymentAssessmentComments] textarea').type(comment)
+    cy.get('[data-test=addDeploymentAssessmentCommentButton]').click()
+    cy.wait('@postDeploymentAssessmentComment').its('response.statusCode').should('equal', 201)
+    cy.get('[data-test=deploymentAssessmentComments]').should('contain.text', comment)
   })
 })
