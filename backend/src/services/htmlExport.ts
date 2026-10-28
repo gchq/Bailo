@@ -185,8 +185,8 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
       ${deploymentAssessment.createdBy}\n
   `
   output += outdent`
-      ### Review status
-      ${deploymentAssessment.draft ? 'Draft' : 'Awaiting review'}\n
+      ### Status
+      ${deploymentAssessment.draft ? 'Draft' : 'Published'}\n
     `
 
   output += '\n\n---\n'

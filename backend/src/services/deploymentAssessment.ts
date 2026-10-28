@@ -357,7 +357,7 @@ export async function updateDeploymentAssessment(
 
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
-      throw BadReq('Cannot convert a submitted deployment assessment back to a draft.')
+      throw BadReq('Cannot convert a published deployment assessment back to a draft.')
     }
     deploymentAssessment.draft = diff.draft
     deploymentAssessment.markModified('draft')

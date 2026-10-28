@@ -6,7 +6,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
 import ModelModel, { ModelDoc, ModelInterface } from '../models/Model.js'
 import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
-import ResponseModel, { Decision, DecisionKeys, ResponseInterface, ResponseKind } from '../models/Response.js'
+import { Decision, DecisionKeys } from '../models/Response.js'
 import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
@@ -91,12 +91,6 @@ export async function findReviews(
                   branches: [
                     {
                       case: {
-                        $in: [Decision.Reject, '$decisions'],
-                      },
-                      then: Decision.Reject,
-                    },
-                    {
-                      case: {
                         $in: [Decision.RequestChanges, '$decisions'],
                       },
                       then: Decision.RequestChanges,
@@ -140,38 +134,6 @@ export async function findReviews(
   )
 
   return reviews.filter((_, i) => auths[i].success)
-}
-
-export async function getResponses(parentId) {
-  const [comments, reviews] = await Promise.all([
-    ResponseModel.find({ parentId, kind: ResponseKind.Comment }),
-    ReviewModel.aggregate<{ responses: ResponseInterface[] }>([
-      { $match: { parentId } },
-      {
-        $lookup: {
-          from: 'v2_responses',
-          let: { reviewId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ['$parentId', '$$reviewId'] },
-                kind: ResponseKind.Review,
-              },
-            },
-            { $sort: { createdAt: -1 } },
-          ],
-          as: 'responses',
-        },
-      },
-      { $project: { responses: 1, _id: 0 } },
-    ]),
-  ])
-
-  const responses = [...comments, ...reviews.flatMap(({ responses: reviewResponses }) => reviewResponses)].sort(
-    (first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime(),
-  )
-
-  return responses
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {

@@ -88,7 +88,6 @@ describe('services > deploymentAssessment', () => {
     schemaMocks.getSchemaById.mockResolvedValue({
       kind: SchemaKind.DeploymentAssessment,
       hidden: false,
-      reviewRoles: ['configured-dro'],
     })
     schemaMocks.validateContentAgainstSchema.mockResolvedValue({ valid: true, errors: [] })
     ModelModelMock.find.mockResolvedValue([liveModel])
@@ -488,13 +487,13 @@ describe('services > deploymentAssessment', () => {
       expect(deploymentAssessment.save).toHaveBeenCalled()
     })
 
-    test('rejects switching released DA back to a draft', async () => {
+    test('rejects switching a published DA back to a draft', async () => {
       const deploymentAssessment = existingDeploymentAssessment()
       deploymentAssessment.draft = false
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
 
       await expect(updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: true })).rejects.toThrow(
-        'Cannot convert a submitted deployment assessment back to a draft.',
+        'Cannot convert a published deployment assessment back to a draft.',
       )
       expect(deploymentAssessment.save).not.toHaveBeenCalled()
     })
@@ -507,12 +506,14 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
-        'user:risk-owner',
-        deploymentAssessment,
-        'Risk Owner',
-      )
-      expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
+      await vi.waitFor(() => {
+        expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
+          'user:risk-owner',
+          deploymentAssessment,
+          'Risk Owner',
+        )
+        expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
+      })
     })
 
     test('notifies each risk owner when a draft with several is submitted', async () => {
@@ -530,12 +531,40 @@ describe('services > deploymentAssessment', () => {
 
       await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
 
-      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledTimes(2)
-      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
-        'user:risk-owner',
-        deploymentAssessment,
-        'Risk Owner',
-      )
+      await vi.waitFor(() => {
+        expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledTimes(2)
+        expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
+          'user:risk-owner',
+          deploymentAssessment,
+          'Risk Owner',
+        )
+        expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
+          'user:other-owner',
+          deploymentAssessment,
+          'Risk Owner',
+        )
+      })
+    })
+
+    test('does not notify the creator when they are also a risk owner', async () => {
+      const deploymentAssessment = existingDeploymentAssessment()
+      deploymentAssessment.metadata = {
+        ...params.metadata,
+        signOff: {
+          ...params.metadata.signOff,
+          riskOwners: ['user:creator', 'user:other-owner'],
+        },
+      }
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
+      // the notification lookup uses `.lean()`, unlike the validation lookup
+      ModelModelMock.find.mockResolvedValueOnce([liveModel]).mockReturnValueOnce({ lean: () => [liveModel] })
+
+      await updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: false })
+
+      await vi.waitFor(() => {
+        expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
+      })
+      expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledTimes(1)
       expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:other-owner',
         deploymentAssessment,
@@ -557,8 +586,7 @@ describe('services > deploymentAssessment', () => {
   describe('removeDeploymentAssessment', () => {
     const assessmentId = new Types.ObjectId()
 
-    // The assessment's children are removed before the assessment itself. `ReviewModel.find` is called twice - once
-    // to collect the parent IDs for the responses.
+    // The assessment's comments are removed before the assessment itself
     const mockAssessmentWithChildren = () => {
       const deploymentAssessment = { id: 'da-id', _id: assessmentId, draft: false, delete: vi.fn() }
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)

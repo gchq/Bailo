@@ -172,7 +172,7 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
-  test('that an email is not sent to a DRO after a deployment assessment is created if disabled in config', async () => {
+  test('that an email is not sent to a risk owner after a deployment assessment is created if disabled in config', async () => {
     setTestConfig({ smtp: { enabled: false } })
     await notifyRiskOwnerOfDeploymentAssessment('user:test', testDeploymentAssessment, 'user:user')
 
@@ -317,7 +317,7 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
-  test('that an email is sent to a DRO on deployment assessment creation', async () => {
+  test('that an email is sent to a risk owner on deployment assessment creation', async () => {
     getModelByIdMock.mockReturnValue(testModel)
     await notifyRiskOwnerOfDeploymentAssessment('user:user', testDeploymentAssessment, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)

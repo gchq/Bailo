@@ -22,13 +22,6 @@ export type ReviewInterface =
       semver?: undefined
       accessRequestId?: undefined
     } & PartialReviewInterface)
-  | ({
-      kind: 'deployment_assessment'
-      deploymentAssessmentId: string
-      dueDate?: undefined
-      semver?: undefined
-      accessRequestId?: undefined
-    } & PartialReviewInterface)
 
 type PartialReviewInterface = {
   _id: Types.ObjectId
@@ -89,7 +82,6 @@ const ReviewSchema = new Schema<ReviewDoc>(
 )
 
 ReviewSchema.plugin(softDeletionPlugin)
-ReviewSchema.index({ deploymentAssessmentId: 1, kind: 1, createdAt: -1 })
 
 const ReviewModel = model<ReviewDoc>('v2_Review', ReviewSchema)
 

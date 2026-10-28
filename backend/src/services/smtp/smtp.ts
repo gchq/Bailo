@@ -121,7 +121,6 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
       },
       { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
     ],
-    true,
   )
 
   await dispatchEmail([riskOwner], emailContent)
@@ -353,7 +352,7 @@ async function notifyRole(review: ReviewInterface, title: string, fields: Info[]
     { name: 'Open item', url: actionUrl },
     { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
   ])
-  await dispatchEmailToModelRole(review.modelId as string, review.role, emailContent)
+  await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
 }
 
 export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, review: ReviewInterface) {
