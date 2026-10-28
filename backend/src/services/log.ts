@@ -1,7 +1,8 @@
+import { randomUUID } from 'node:crypto'
+
 import { Request } from 'express'
 import pino from 'pino'
 import { pinoHttp } from 'pino-http'
-import { v4 } from 'uuid'
 
 import config from '../utils/config.js'
 
@@ -82,7 +83,7 @@ export const httpLog = pinoHttp({
     if (existingID) {
       return existingID
     }
-    const id = v4()
+    const id = randomUUID()
     res.setHeader('x-request-id', id)
     return id
   },
