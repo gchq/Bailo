@@ -25,8 +25,6 @@ vi.mock('express-session', () => ({
 
 vi.mock('connect-mongo', () => ({ default: { create: vi.fn() } }))
 
-vi.mock('body-parser', () => ({ default: { urlencoded: vi.fn(() => 'body parser middleware') } }))
-
 vi.mock('grant', () => ({ default: { default: { express: vi.fn(() => 'grant middleware') } } }))
 
 const user = { dn: 'user-dn' } as UserInterface

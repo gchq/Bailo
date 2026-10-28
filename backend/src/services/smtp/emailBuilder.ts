@@ -1,4 +1,3 @@
-import dedent from 'dedent-js'
 import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
 import mjml2html from 'mjml'
@@ -61,13 +60,7 @@ export async function buildEmail(
 }
 
 function emailText(title: string, reviewMetadata: Info[], reviewActions: actions[]) {
-  return dedent(`
-    ${title}
-
-    ${textMetadata(reviewMetadata)}
-
-    ${textActions(reviewActions)}
-  `)
+  return [title, '', textMetadata(reviewMetadata), '', textActions(reviewActions)].join('\n')
 }
 
 function textMetadata(reviewMetadata: Info[]) {

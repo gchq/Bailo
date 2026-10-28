@@ -1,6 +1,5 @@
 import * as _ from 'lodash-es'
 import { type ProjectionType } from 'mongoose'
-import { type Optional } from 'utility-types'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
@@ -28,6 +27,7 @@ import {
   type EntrySearchResultWithErrors,
   type EntryUserPermissions,
   type MirrorImportLogData,
+  type Optional,
 } from '../types/types.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'

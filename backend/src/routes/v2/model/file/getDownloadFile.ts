@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto'
 import { pipeline } from 'node:stream'
 
-import { create } from 'content-disposition'
 import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
@@ -177,7 +176,7 @@ export const getDownloadFile = [
       headersCommitted = true
 
       // Required to support utf-8 file names
-      res.set(HttpHeader.CONTENT_DISPOSITION, create(file.name, { type: 'attachment' }))
+      res.attachment(file.name)
       res.set(HttpHeader.CONTENT_TYPE, file.mime)
       res.status(fetchRange ? 206 : 200)
     })
