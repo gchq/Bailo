@@ -1,7 +1,7 @@
 const runId = Date.now().toString()
 const assessmentNames = {
   draft: `Deployment Search ${runId} Draft`,
-  needsReview: `Deployment Search ${runId} Review`,
+  published: `Deployment Search ${runId} Published`,
   otherRiskOwner: `Deployment Search ${runId} Other Risk Owner`,
 }
 const modelNames = {
@@ -75,13 +75,13 @@ function assertOnlyAssessment(name: string) {
 
 function resetFilters() {
   cy.get('[data-test=deploymentAssessmentResetFilters]').click()
-  cy.location('search').should('equal', '?tab=all-assessments')
+  cy.location('search').should('equal', '')
   cy.get(searchInputSelector).should('have.value', '')
   cy.get('[data-test=deploymentAssessmentStatusFilter]').should('not.contain.text', 'Draft')
   cy.get('[data-test=deploymentAssessmentModelFilter]').find('[role=button]').should('have.length', 0)
   cy.contains(/assessments? found/)
 
-  cy.visit(`/deployment-assessments?tab=all-assessments&search=${encodeURIComponent(searchTerm)}`)
+  cy.visit(`/deployment-assessments?search=${encodeURIComponent(searchTerm)}`)
   cy.contains('3 assessments found')
   cy.get('[data-test=deploymentAssessmentSummaryCard]').should('have.length', 3)
   Object.values(assessmentNames).forEach((name) => cy.contains(name).should('be.visible'))
@@ -124,7 +124,7 @@ describe('Search deployment assessments', () => {
         createDeploymentAssessment(assessmentNames.draft, [alphaModelId], true).then((draftAssessment) => {
           createdDate = draftAssessment.createdAt.slice(0, 10)
         })
-        createDeploymentAssessment(assessmentNames.needsReview, [betaModelId], false)
+        createDeploymentAssessment(assessmentNames.published, [betaModelId], false)
         createDeploymentAssessment(
           assessmentNames.otherRiskOwner,
           [alphaModelId, betaModelId],
@@ -153,7 +153,7 @@ describe('Search deployment assessments', () => {
         {
           id: assessmentIds[1],
           schemaId: deploymentAssessmentSchemaId,
-          name: assessmentNames.needsReview,
+          name: assessmentNames.published,
           owner: [riskOwner],
           models: [modelIds[1]],
           draft: false,
@@ -184,7 +184,7 @@ describe('Search deployment assessments', () => {
   })
 
   beforeEach(() => {
-    cy.visit(`/deployment-assessments?tab=all-assessments&search=${encodeURIComponent(searchTerm)}`)
+    cy.visit(`/deployment-assessments?search=${encodeURIComponent(searchTerm)}`)
     cy.contains('3 assessments found')
   })
 
@@ -207,13 +207,13 @@ describe('Search deployment assessments', () => {
     cy.contains('2 assessments found')
     cy.contains(assessmentNames.draft).should('be.visible')
     cy.contains(assessmentNames.otherRiskOwner).should('be.visible')
-    cy.contains(assessmentNames.needsReview).should('not.exist')
+    cy.contains(assessmentNames.published).should('not.exist')
     resetFilters()
 
     selectEntity('[data-test=deploymentAssessmentRiskOwnerFilter]')
     cy.contains('2 assessments found')
     cy.contains(assessmentNames.draft).should('be.visible')
-    cy.contains(assessmentNames.needsReview).should('be.visible')
+    cy.contains(assessmentNames.published).should('be.visible')
     cy.contains(assessmentNames.otherRiskOwner).should('not.exist')
     resetFilters()
 

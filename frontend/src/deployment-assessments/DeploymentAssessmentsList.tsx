@@ -45,10 +45,7 @@ export default function DeploymentAssessmentsList() {
   const debouncedSearch = useDebounce(search.trim(), 300)
   useEffect(() => setSearch(filters.search ?? ''), [filters.search])
   useEffect(() => {
-    // Only update the URL when the search has changed, so mounting does not override other navigation
-    if (debouncedSearch !== (filters.search ?? '')) {
-      setFilters({ search: debouncedSearch || undefined })
-    }
+    setFilters({ search: debouncedSearch || undefined })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
   const creationWindowError = Boolean(

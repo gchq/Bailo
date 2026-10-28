@@ -87,8 +87,11 @@ export function useDeploymentAssessmentFilters() {
 
   const setFilters = useCallback(
     (updates: Partial<DeploymentAssessmentPageFilters>) => {
-      const next = { ...filters, ...updates }
-      router.replace(buildDeploymentAssessmentListHref(next), undefined, { shallow: true })
+      const href = buildDeploymentAssessmentListHref({ ...filters, ...updates })
+      // Avoid a redundant navigation, which could override a navigation away from this page
+      if (href !== router.asPath) {
+        router.replace(href, undefined, { shallow: true })
+      }
     },
     [filters, router],
   )
