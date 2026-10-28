@@ -21,7 +21,7 @@ const backend = process.env.BACKEND_SERVICE ?? defaultBackend
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  transpilePackages: ['nanoid', 'lodash-es'],
+  transpilePackages: ['lodash-es'],
 
   modularizeImports: {
     '@mui/material': {

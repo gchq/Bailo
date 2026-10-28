@@ -222,7 +222,7 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Stack>
+    <Stack sx={{ minWidth: 0 }}>
       {displayStats && (
         <Box>
           <Box sx={{ mb: 1 }}>
@@ -280,7 +280,7 @@ export default function JsonSchemaForm({
             </List>
           </Stepper>
         </Grid>
-        <Grid size={{ xs: 12, md: 10 }} ref={ref}>
+        <Grid size={{ xs: 12, md: 10 }} ref={ref} sx={{ minWidth: 0 }}>
           {displayStats && (
             <Box>
               <Box>
@@ -334,8 +334,8 @@ export default function JsonSchemaForm({
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
+            liveValidate='onChange'
             liveOmit
-            liveValidate={showValidation ? 'onChange' : undefined}
             showErrorList={showValidation ? 'top' : false}
             transformErrors={rewordRJSFErrors}
             customValidate={blankValueValidator}
@@ -352,23 +352,14 @@ export default function JsonSchemaForm({
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
             }}
-            templates={
-              !canEdit && !showValidation
-                ? {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                  }
-                : {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                    ErrorListTemplate,
-                    FieldTemplate,
-                  }
-            }
+            templates={{
+              DescriptionFieldTemplate,
+              ArrayFieldTemplate,
+              ArrayFieldItemTemplate,
+              ObjectFieldTemplate,
+              ErrorListTemplate,
+              FieldTemplate,
+            }}
           >
             <></>
           </Form>

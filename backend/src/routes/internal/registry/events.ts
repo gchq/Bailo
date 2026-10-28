@@ -1,5 +1,4 @@
-import bodyParser from 'body-parser'
-import { Request, Response } from 'express'
+import express, { Request, Response } from 'express'
 import { clone } from 'lodash-es'
 
 import { AuditInfo, AuditInfoKeys } from '../../../connectors/audit/Base.js'
@@ -53,7 +52,7 @@ export const registryEventsSchema = z.object({
 })
 
 export const handleRegistryEvents = [
-  bodyParser.json({ type: ['application/vnd.docker.distribution.events.v2+json'] }),
+  express.json({ type: ['application/vnd.docker.distribution.events.v2+json'] }),
   async (req: Request, res: Response<void>): Promise<void> => {
     const {
       body: { events },

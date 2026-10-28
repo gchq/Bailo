@@ -1,4 +1,5 @@
-import qs from 'qs'
+import querystring from 'node:querystring'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
@@ -31,7 +32,7 @@ describe('routes > accessRequest > getAccessRequests', () => {
     responseMock.findResponses.mockResolvedValue([testAccessRequest])
 
     const fixture = createFixture(GetAccessRequestsSchema)
-    const res = await testGet(`/api/v2/access-requests/search?${qs.stringify(fixture.query)}`)
+    const res = await testGet(`/api/v2/access-requests/search?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -43,7 +44,7 @@ describe('routes > accessRequest > getAccessRequests', () => {
     responseMock.findResponses.mockResolvedValue([testAccessRequest])
 
     const fixture = createFixture(GetAccessRequestsSchema)
-    const res = await testGet(`/api/v2/access-requests/search?${qs.stringify(fixture.query)}`)
+    const res = await testGet(`/api/v2/access-requests/search?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewAccessRequests).toHaveBeenCalled()

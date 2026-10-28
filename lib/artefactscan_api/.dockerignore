@@ -13,6 +13,7 @@ Dockerfile
 
 # Python venv
 artefactscanvenv/
+.venv/
 
 # Test files
 .pytest_cache/
@@ -21,7 +22,6 @@ tests/
 # Misc
 README.md
 .pre-commit-config.yaml
-requirements-dev.txt
 
 # Environment files
 .env*

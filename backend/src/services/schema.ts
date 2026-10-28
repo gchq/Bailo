@@ -1,6 +1,5 @@
 import traverse from 'json-schema-traverse'
 import { Schema as JsonSchema, Validator } from 'jsonschema'
-import _ from 'lodash'
 import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
@@ -20,10 +19,15 @@ const jsonSchemaValidator = new Validator()
 const schemaCacheTtlSeconds = 60 * 60 // 1 hour
 const schemaCache = new NodeCache({ stdTTL: schemaCacheTtlSeconds })
 export interface DefaultSchema {
+  /** Name of the schema that appears */
   name: string
+  /** Unique identifier for the schema */
   id: string
+  /** Description of the schemas functions */
   description: string
+  /** The file to mount the contents of each schema eg. `require('../src/scripts/example_schemas/minimal_model_schema.json')` */
   jsonSchema: JsonSchema
+  /** Roles required to review  */
   reviewRoles?: string[]
 }
 
