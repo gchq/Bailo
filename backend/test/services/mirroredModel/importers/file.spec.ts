@@ -1,9 +1,9 @@
 import { PassThrough } from 'node:stream'
 
-import { Header } from 'tar-stream'
+import { type Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { FileImporter, FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
+import { FileImporter, type FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
 import config from '../../../../src/utils/config.js'
 import { getTypedModelMock } from '../../../testUtils/setupMongooseModelMocks.js'
 

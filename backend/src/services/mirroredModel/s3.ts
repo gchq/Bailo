@@ -1,8 +1,8 @@
-import { Readable } from 'node:stream'
+import { type Readable } from 'node:stream'
 
 import { sign } from '../../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../../clients/s3.js'
-import { MirrorExportLogData, MirrorImportLogData } from '../../types/types.js'
+import { type MirrorExportLogData, type MirrorImportLogData } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import log from '../log.js'

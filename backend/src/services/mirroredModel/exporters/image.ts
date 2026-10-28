@@ -1,13 +1,13 @@
 import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
-import { ModelDoc } from '../../../models/Model.js'
-import { ReleaseDoc } from '../../../models/Release.js'
-import { UserInterface } from '../../../models/User.js'
-import { MirrorExportLogData, MirrorKind } from '../../../types/types.js'
+import { type ModelDoc } from '../../../models/Model.js'
+import { type ReleaseDoc } from '../../../models/Release.js'
+import { type UserInterface } from '../../../models/User.js'
+import { type MirrorExportLogData, MirrorKind } from '../../../types/types.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { joinDistributionPackageName } from '../../registry.js'
 import { addCompressedRegistryImageComponents } from '../mirroredModel.js'
-import { initialiseTarGzUpload } from '../tarball.js'
+import { type initialiseTarGzUpload } from '../tarball.js'
 import { BaseExporter } from './base.js'
 
 export class ImageExporter extends BaseExporter {

@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import { CollaboratorEntry, EntityKind } from 'types/types'
+import { type CollaboratorEntry, EntityKind } from 'types/types'
 
 type EntityNameDisplayProps = {
   entryCollaborator: CollaboratorEntry

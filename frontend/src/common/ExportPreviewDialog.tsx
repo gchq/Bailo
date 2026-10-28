@@ -2,7 +2,7 @@ import { Button, Dialog, DialogActions, DialogContent, Divider, Stack, Typograph
 import { useTheme } from '@mui/material/styles'
 import Image from 'next/image'
 import logo from 'public/horizontal-dark.png'
-import { ReactNode, useRef } from 'react'
+import { type ReactNode, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { Transition } from 'src/common/Transition'
 

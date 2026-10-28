@@ -1,4 +1,4 @@
-import { ProxyAgent, ProxyAgentOptions } from 'proxy-agent'
+import { ProxyAgent, type ProxyAgentOptions } from 'proxy-agent'
 import { Agent, Dispatcher1Wrapper } from 'undici'
 
 import config from '../utils/config.js'

@@ -1,8 +1,8 @@
-import { Logger } from 'pino'
+import { type Logger } from 'pino'
 
-import { BailoError, isBailoError } from '../types/error.js'
-import { RegistryError } from '../types/RegistryError.js'
-import { RegistryErrorResponseBody } from './registryResponseTypes.js'
+import { type BailoError, isBailoError } from '../types/error.js'
+import { type RegistryError } from '../types/RegistryError.js'
+import { type RegistryErrorResponseBody } from './registryResponseTypes.js'
 
 export function GenericError(code: number, message: string, context?: BailoError['context'], logger?: Logger) {
   const err = Error(message) as BailoError

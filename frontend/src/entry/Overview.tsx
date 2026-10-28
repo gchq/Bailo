@@ -4,8 +4,8 @@ import EntryOverviewDetails from 'src/entry/EntryOverviewDetails'
 import FormEditPage from 'src/entry/overview/FormEditPage'
 import TemplatePage from 'src/entry/overview/TemplatePage'
 import MessageAlert from 'src/MessageAlert'
-import { KeyedMutator } from 'swr'
-import { EntryInterface, EntryKind } from 'types/types'
+import { type KeyedMutator } from 'swr'
+import { type EntryInterface, EntryKind } from 'types/types'
 
 const OverviewPage = {
   FORM: 'form',

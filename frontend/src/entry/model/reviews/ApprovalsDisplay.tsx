@@ -1,10 +1,10 @@
 import Done from '@mui/icons-material/Done'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
-import { ReactElement, useMemo } from 'react'
+import { type ReactElement, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { ResponseInterface } from 'types/types'
+import { type ResponseInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 interface ApprovalsDisplayProps {

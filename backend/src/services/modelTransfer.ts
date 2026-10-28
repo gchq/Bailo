@@ -1,14 +1,14 @@
-import { Types } from 'mongoose'
+import { type Types } from 'mongoose'
 
 import ModelTransferModel, {
-  ModelTransferInterface,
-  TransferArtefactStatus,
+  type ModelTransferInterface,
+  type TransferArtefactStatus,
   TransferStatus,
-  TransferStatusKeys,
+  type TransferStatusKeys,
 } from '../models/ModelTransfer.js'
-import { UserInterface } from '../models/User.js'
+import { type UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
-import { MirrorKind, MirrorKindKeys } from '../types/types.js'
+import { MirrorKind, type MirrorKindKeys } from '../types/types.js'
 import { NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'

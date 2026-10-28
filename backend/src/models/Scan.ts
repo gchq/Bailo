@@ -1,4 +1,4 @@
-import { HydratedDocument, model, Schema, Types } from 'mongoose'
+import { type HydratedDocument, model, Schema, type Types } from 'mongoose'
 
 import type { ModelScanResponse, TrivyScanResultResponse } from '../clients/artefactScan.js'
 import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'

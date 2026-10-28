@@ -1,4 +1,4 @@
-import { Button, Stack, Typography, TypographyProps } from '@mui/material'
+import { Button, Stack, Typography, type TypographyProps } from '@mui/material'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
 interface ExpandableTypographyProps extends Omit<TypographyProps, 'children'> {

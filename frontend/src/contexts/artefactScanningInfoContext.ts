@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { ScanInfoInterface } from 'types/types'
+import { type ScanInfoInterface } from 'types/types'
 
 const ArtefactScanningInfoContext = createContext<ScanInfoInterface[]>([])
 

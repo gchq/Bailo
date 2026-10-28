@@ -2,7 +2,12 @@ import { useGetCurrentUserPermissionsForAccessRequest } from 'actions/accessRequ
 import { useGetCurrentUserPermissionsForEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
-import { AccessRequestUserPermissions, EntryUserPermissions, PermissionDetail, UserPermissions } from 'types/types'
+import {
+  type AccessRequestUserPermissions,
+  type EntryUserPermissions,
+  type PermissionDetail,
+  type UserPermissions,
+} from 'types/types'
 
 export type UserPermissionsHook = {
   userPermissions: UserPermissions

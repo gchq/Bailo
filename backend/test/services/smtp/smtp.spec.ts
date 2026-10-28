@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ReviewInterface } from '../../../src/models/Review.js'
-import { UserInterface } from '../../../src/models/User.js'
+import { type ReviewInterface } from '../../../src/models/Review.js'
+import { type UserInterface } from '../../../src/models/User.js'
 import {
   notifyLifeCycleReview,
   notifyReleaseOnApproval,

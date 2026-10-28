@@ -1,4 +1,4 @@
-import { Options, Schema, ValidationError } from 'jsonschema'
+import { type Options, type Schema, type ValidationError } from 'jsonschema'
 
 /**
  * This has been added to jsonschema library, but not yet released

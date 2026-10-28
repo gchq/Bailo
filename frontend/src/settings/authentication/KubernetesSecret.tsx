@@ -8,7 +8,7 @@ import {
   getKubernetesSecretConfig,
 } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
-import { TokenInterface } from 'types/types'
+import { type TokenInterface } from 'types/types'
 import { downloadFile } from 'utils/fileUtils'
 import { toKebabCase } from 'utils/stringUtils'
 

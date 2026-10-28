@@ -1,7 +1,7 @@
 import { create } from 'xmlbuilder2'
 
 import { sendEvents } from '../clients/stroom.js'
-import StroomEvent, { StroomEventLean, StroomEventObject } from '../models/StroomEvent.js'
+import StroomEvent, { type StroomEventLean, type StroomEventObject } from '../models/StroomEvent.js'
 import config from '../utils/config.js'
 import { longId } from '../utils/id.js'
 import log from './log.js'

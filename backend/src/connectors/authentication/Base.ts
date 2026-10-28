@@ -1,9 +1,9 @@
-import { RequestHandler } from 'express'
+import { type RequestHandler } from 'express'
 import type { PathParams } from 'express-serve-static-core'
 
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import { checkAuthentication, getTokenFromAuthHeader } from '../../routes/middleware/defaultAuthentication.js'
-import { RoleKeys, UserInformation } from './constants.js'
+import { type RoleKeys, type UserInformation } from './constants.js'
 
 export abstract class BaseAuthenticationConnector {
   abstract hasRole(user: UserInterface, role: RoleKeys): Promise<boolean>

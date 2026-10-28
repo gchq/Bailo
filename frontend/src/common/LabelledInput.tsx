@@ -1,6 +1,6 @@
-import { Box, Stack, StackProps, Typography } from '@mui/material'
+import { Box, Stack, type StackProps, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
 interface LabelledInputProps {
   label: string

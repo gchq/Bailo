@@ -1,5 +1,5 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
-import { SyntheticEvent, useContext, useMemo } from 'react'
+import { type SyntheticEvent, useContext, useMemo } from 'react'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 
 type ProcessorTypeListProps = {

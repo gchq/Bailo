@@ -1,7 +1,7 @@
 import useSWRImmutable from 'swr/immutable'
 
-import { UiConfig } from '../types/types'
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type UiConfig } from '../types/types'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetUiConfig() {
   const { data, isLoading, error, mutate } = useSWRImmutable<

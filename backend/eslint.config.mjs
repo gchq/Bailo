@@ -37,6 +37,7 @@ const eslintConfig = [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/consistent-type-imports': ['warn', { fixStyle: 'inline-type-imports' }],
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
       'no-duplicate-imports': 'warn',

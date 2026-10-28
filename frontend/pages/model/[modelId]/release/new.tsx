@@ -3,11 +3,11 @@ import DesignServices from '@mui/icons-material/DesignServices'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
-import { CreateReleaseParams, postRelease } from 'actions/release'
-import { AxiosProgressEvent } from 'axios'
+import { type CreateReleaseParams, postRelease } from 'actions/release'
+import { type AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
-import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import { type FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { type FailedFileUpload, type FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -15,11 +15,11 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
-  FileInterface,
-  FileWithMetadataAndTags,
-  FlattenedModelImage,
+  type FileInterface,
+  type FileWithMetadataAndTags,
+  type FlattenedModelImage,
   isFileInterface,
-  SuccessfulFileUpload,
+  type SuccessfulFileUpload,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver, plural } from 'utils/stringUtils'

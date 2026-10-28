@@ -1,4 +1,4 @@
-import { EntryKind, EntryKindKeys } from '../models/Model.js'
+import { EntryKind, type EntryKindKeys } from '../models/Model.js'
 
 /**
  * Naive utility to pluralise a word. Only covers +s and +es grammar rules.

@@ -1,8 +1,12 @@
-import fetch, { Response } from 'node-fetch'
+import fetch, { type Response } from 'node-fetch'
 
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import { BAILO_ID_HEADER, USER_HEADER } from '../../routes/middleware/userEscalation.js'
-import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
+import {
+  type EntrySearchOptionsParams,
+  type EntrySearchResultWithErrors,
+  type SystemStatus,
+} from '../../types/types.js'
 import config from '../../utils/config.js'
 import { InternalError, toBailoError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'

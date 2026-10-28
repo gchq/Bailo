@@ -1,8 +1,8 @@
-import { SxProps } from '@mui/material/styles'
-import { ReactNode } from 'react'
+import { type SxProps } from '@mui/material/styles'
+import { type ReactNode } from 'react'
 import InlineMarkdownDiff from 'src/common/InlineDiff/InlineMarkdownDiff'
 import InlineTypographyDiff from 'src/common/InlineDiff/InlineTypographyDiff'
-import { CompareFieldState } from 'src/hooks/useCompareField'
+import { type CompareFieldState } from 'src/hooks/useCompareField'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 
 interface CompareFieldProps {

@@ -2,9 +2,9 @@ import {
   createEmotionCache,
   documentGetInitialProps,
   DocumentHeadTags,
-  DocumentHeadTagsProps,
+  type DocumentHeadTagsProps,
 } from '@mui/material-nextjs/v15-pagesRouter'
-import { DocumentProps, Head, Html, Main, NextScript } from 'next/document'
+import { type DocumentProps, Head, Html, Main, NextScript } from 'next/document'
 
 import { lightTheme } from '../src/theme'
 

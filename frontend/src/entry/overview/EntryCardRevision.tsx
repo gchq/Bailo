@@ -1,7 +1,7 @@
 import { Checkbox, Stack, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import UserDisplay from 'src/common/UserDisplay'
-import { EntryKindKeys } from 'types/types'
+import { type EntryKindKeys } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
 
 export type EntryCardSnapshot = {

@@ -15,7 +15,7 @@ import VulnerabilityResult from 'src/entry/model/registry/VulnerabilityResult'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import useNotification from 'src/hooks/useNotification'
-import { ArtefactKind, ImageTagResult, ModelImagesWithOptionalScanResults, SeverityLevel } from 'types/types'
+import { ArtefactKind, type ImageTagResult, type ModelImagesWithOptionalScanResults, SeverityLevel } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 const severities = [

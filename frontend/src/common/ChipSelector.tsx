@@ -3,7 +3,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Stack, Tooltip } from '@
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import { CSSProperties, ReactElement, useState } from 'react'
+import { type CSSProperties, type ReactElement, useState } from 'react'
 
 type PartialChipSelectorProps =
   | {

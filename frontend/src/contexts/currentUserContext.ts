@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { UserV3 } from 'types/types'
+import { type UserV3 } from 'types/types'
 
 const CurrentUserContext = createContext<UserV3>({} as UserV3)
 

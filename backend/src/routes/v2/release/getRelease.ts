@@ -1,10 +1,10 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { FileWithScanResultsAggregate } from '../../../models/File.js'
-import { ReleaseInterface } from '../../../models/Release.js'
+import { type FileWithScanResultsAggregate } from '../../../models/File.js'
+import { type ReleaseInterface } from '../../../models/Release.js'
 import { ResponseKind } from '../../../models/Response.js'
 import { getFilesByIds } from '../../../services/file.js'
 import { getReleaseBySemver } from '../../../services/release.js'

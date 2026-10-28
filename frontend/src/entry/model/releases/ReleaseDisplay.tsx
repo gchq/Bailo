@@ -6,7 +6,7 @@ import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccord
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { type EntryInterface, type ReleaseInterface } from 'types/types'
 
 export interface ReleaseDisplayProps {
   model: EntryInterface

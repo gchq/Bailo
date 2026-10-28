@@ -1,7 +1,7 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
-import { ModelTransferInterface } from '../../../models/ModelTransfer.js'
+import { type ModelTransferInterface } from '../../../models/ModelTransfer.js'
 import { findModelTransfersByModelId } from '../../../services/modelTransfer.js'
 import { modelTransferSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'

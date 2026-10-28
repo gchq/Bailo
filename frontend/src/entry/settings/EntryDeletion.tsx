@@ -16,7 +16,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKindLabel } from 'types/types'
+import { type EntryInterface, EntryKindLabel } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 

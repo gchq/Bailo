@@ -3,7 +3,7 @@ import validator from '@rjsf/validator-ajv8'
 import { useMemo } from 'react'
 import ExportPreviewDialog from 'src/common/ExportPreviewDialog'
 import { ArrayFieldTemplate, DescriptionFieldTemplate, ObjectFieldTemplate } from 'src/Form/FormTemplates'
-import { EntryInterface, SplitSchemaNoRender } from 'types/types'
+import { type EntryInterface, type SplitSchemaNoRender } from 'types/types'
 import { widgets } from 'utils/formUtils'
 
 type ExportEntryCardDialogProps = {

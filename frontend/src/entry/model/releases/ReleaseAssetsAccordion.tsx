@@ -7,7 +7,7 @@ import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContex
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
-import { ArtefactKind, EntryInterface, ReleaseInterface } from 'types/types'
+import { ArtefactKind, type EntryInterface, type ReleaseInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 export interface ReleaseAssetsAccordionProps {

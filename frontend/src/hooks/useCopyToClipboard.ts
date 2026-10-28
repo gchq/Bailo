@@ -1,4 +1,4 @@
-import { SnackbarOrigin } from 'notistack'
+import { type SnackbarOrigin } from 'notistack'
 
 import useNotification from './useNotification'
 

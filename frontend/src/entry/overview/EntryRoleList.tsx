@@ -4,7 +4,7 @@ import { Fragment, useMemo } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryRolesChipSet from 'src/entry/overview/EntryRolesChipSet'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 
 type EntryRoleListProps = {
   entry: EntryInterface

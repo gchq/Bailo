@@ -1,7 +1,7 @@
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
 import { useMemo } from 'react'
-import { CollaboratorEntry } from 'types/types'
+import { type CollaboratorEntry } from 'types/types'
 
 type EntityIconProps = {
   entryCollaborator: CollaboratorEntry
