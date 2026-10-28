@@ -19,7 +19,9 @@ Core principles for changes:
 ## Structure
 
 - **`.`** - monorepo root. Orchestrates backend and frontend builds/tests/lint. Docker Compose quickstart:
-  `npm i && docker compose build --parallel && docker compose up -d`.
+  `npm i && docker compose build --parallel && docker compose up -d`. The compose files also work under `podman compose`
+  (which needs an external provider such as `podman-compose` installed); drop `--parallel`, and note that `--progress`
+  is Docker-only. Avoid `configs:` in the compose files - `podman-compose` ignores it silently.
 - **`backend`** - Express 5 API server (TypeScript ESM). Mongoose for MongoDB, Zod for validation, OpenTelemetry for
   observability.
 - **`frontend`** - Next.js web application (TypeScript, React, MUI). SWR for data fetching.

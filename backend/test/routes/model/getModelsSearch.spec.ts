@@ -1,4 +1,5 @@
-import qs from 'qs'
+import querystring from 'node:querystring'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../src/connectors/audit/__mocks__/index.js'
@@ -16,7 +17,7 @@ vi.mock('../../../src/services/model.js', () => ({
 describe('routes > model > getModelsSearch', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getModelsSearchSchema)
-    const res = await testGet(`/api/v2/models/search?${qs.stringify(fixture)}`)
+    const res = await testGet(`/api/v2/models/search?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -24,7 +25,7 @@ describe('routes > model > getModelsSearch', () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(getModelsSearchSchema)
-    const res = await testGet(`/api/v2/models/search?${qs.stringify(fixture)}`)
+    const res = await testGet(`/api/v2/models/search?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onSearchModel).toHaveBeenCalled()

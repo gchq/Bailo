@@ -1,6 +1,5 @@
 import traverse from 'json-schema-traverse'
 import { Schema as JsonSchema, Validator } from 'jsonschema'
-import _ from 'lodash'
 import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
