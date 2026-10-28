@@ -1,5 +1,5 @@
-import { Response } from '../connectors/authorisation/base.js'
-import { PermissionDetail } from '../types/types.js'
+import { type Response } from '../connectors/authorisation/base.js'
+import { type PermissionDetail } from '../types/types.js'
 
 export const authResponseToUserPermission = (authResponse: Response): PermissionDetail => {
   return authResponse.success

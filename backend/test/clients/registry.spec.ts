@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { beforeEach, describe, expect, Mock, test, vi } from 'vitest'
+import { beforeEach, describe, expect, type Mock, test, vi } from 'vitest'
 
 import {
   deleteManifest,

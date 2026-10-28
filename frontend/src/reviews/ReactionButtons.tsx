@@ -7,10 +7,10 @@ import { IconButton, Popover, Stack } from '@mui/material'
 import { patchResponseReaction } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
 import * as _ from 'lodash-es'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReactionDisplay from 'src/reviews/ReactionDisplay'
-import { ReactionKind, ReactionKindKeys, ResponseInterface } from 'types/types'
+import { ReactionKind, type ReactionKindKeys, type ResponseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface ReactionButtonsProps {

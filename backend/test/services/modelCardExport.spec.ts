@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ModelInterface } from '../../src/models/Model.js'
-import { ModelCardRevisionInterface } from '../../src/models/ModelCardRevision.js'
+import { type ModelInterface } from '../../src/models/Model.js'
+import { type ModelCardRevisionInterface } from '../../src/models/ModelCardRevision.js'
 import { getModelById } from '../../src/services/model.js'
-import { renderToHtml, renderToMarkdown, ReviewExport } from '../../src/services/modelCardExport.js'
+import { renderToHtml, renderToMarkdown, type ReviewExport } from '../../src/services/modelCardExport.js'
 import { getSchemaById } from '../../src/services/schema.js'
 
 vi.mock('../../src/services/schema.js')

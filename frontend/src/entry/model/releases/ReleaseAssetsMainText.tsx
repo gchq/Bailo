@@ -4,7 +4,7 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import ExpandableMarkdown from 'src/common/ExpandableMarkdown'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { type EntryInterface, type ReleaseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { buildModelCardHref } from 'utils/routerUtils'
 

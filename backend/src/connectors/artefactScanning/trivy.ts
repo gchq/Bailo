@@ -4,16 +4,21 @@ import { getCachedArtefactScanInfo, scanImageBlobStream } from '../../clients/ar
 import { getRegistryLayerStream, headLayer } from '../../clients/registry.js'
 import {
   ArtefactKind,
-  ArtefactKindKeys,
-  ArtefactScanSummary,
+  type ArtefactKindKeys,
+  type ArtefactScanSummary,
   SeverityLevel,
-  SeverityLevelKeys,
+  type SeverityLevelKeys,
 } from '../../models/Scan.js'
 import { issueAccessToken } from '../../routes/v1/registryAuth.js'
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector, LayerRefInterface } from './Base.js'
+import {
+  type ArtefactScanResult,
+  ArtefactScanState,
+  BaseArtefactScanningConnector,
+  type LayerRefInterface,
+} from './Base.js'
 
 export class TrivyImageScanningConnector extends BaseArtefactScanningConnector {
   readonly queue: PQueue = new PQueue({ concurrency: config.artefactScanning.artefactscan.concurrency })

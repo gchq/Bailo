@@ -1,5 +1,5 @@
 import { groupBy } from 'lodash-es'
-import { ResponseInterface, ReviewRequestInterface } from 'types/types'
+import { type ResponseInterface, type ReviewRequestInterface } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/arrayUtils'
 
 interface GroupedReviewResponse {

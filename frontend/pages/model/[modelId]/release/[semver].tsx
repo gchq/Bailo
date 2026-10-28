@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
-import { putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
+import { putRelease, type UpdateReleaseParams, useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel, useHeadReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'

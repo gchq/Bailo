@@ -1,6 +1,6 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
-import { ArtefactScanningConnectorInfo } from '../../../connectors/artefactScanning/Base.js'
+import { type ArtefactScanningConnectorInfo } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'

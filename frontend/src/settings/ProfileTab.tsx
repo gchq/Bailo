@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography'
 import { Button, ButtonGroup, Stack } from 'node_modules/@mui/material/index.mjs'
 import { use } from 'react'
 import ThemeModeContext from 'src/contexts/themeModeContext'
-import { User } from 'types/types'
+import { type User } from 'types/types'
 
 type ProfileTabProps = {
   user: User

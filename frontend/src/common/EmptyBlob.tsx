@@ -2,7 +2,7 @@ import { Stack } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import Image from 'next/image'
-import { CSSProperties } from 'react'
+import { type CSSProperties } from 'react'
 
 type EmptyBlobProps = {
   text: string

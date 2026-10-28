@@ -1,16 +1,16 @@
-import { Dayjs } from '@dayjs'
+import { type Dayjs } from '@dayjs'
 import qs from 'querystring'
 import useSWR from 'swr'
 import {
-  AccessRequestInterface,
-  DecisionKeys,
-  EntryInterface,
-  ReleaseInterface,
-  ReviewKindKeys,
-  ReviewRequestInterface,
+  type AccessRequestInterface,
+  type DecisionKeys,
+  type EntryInterface,
+  type ReleaseInterface,
+  type ReviewKindKeys,
+  type ReviewRequestInterface,
 } from 'types/types'
 
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
 

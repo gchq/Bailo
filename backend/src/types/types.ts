@@ -1,20 +1,26 @@
-import { ProxyAgentOptions } from 'proxy-agent'
+import { type ProxyAgentOptions } from 'proxy-agent'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
-import { ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
-import { PeerKindKeys } from '../connectors/peer/index.js'
+import { type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
+import { type PeerKindKeys } from '../connectors/peer/index.js'
 import { z } from '../lib/zod.js'
-import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
-import { ScanInterface, SeverityLevelKeys } from '../models/Scan.js'
 import {
-  DocumentsMirrorMetadata,
-  MongoDocumentMirrorInformation,
+  type CollaboratorEntry,
+  EntryKind,
+  type EntryKindKeys,
+  type EntryVisibilityKeys,
+  type SystemRolesKeys,
+} from '../models/Model.js'
+import { type ScanInterface, type SeverityLevelKeys } from '../models/Scan.js'
+import {
+  type DocumentsMirrorMetadata,
+  type MongoDocumentMirrorInformation,
 } from '../services/mirroredModel/importers/documents.js'
-import { FileMirrorInformation, FileMirrorMetadata } from '../services/mirroredModel/importers/file.js'
-import { ImageMirrorInformation, ImageMirrorMetadata } from '../services/mirroredModel/importers/image.js'
+import { type FileMirrorInformation, type FileMirrorMetadata } from '../services/mirroredModel/importers/file.js'
+import { type ImageMirrorInformation, type ImageMirrorMetadata } from '../services/mirroredModel/importers/image.js'
 import { getEnumValues } from '../utils/enum.js'
 import { coerceArray, strictCoerceBoolean } from '../utils/validate.js'
-import { BailoError } from './error.js'
+import { type BailoError } from './error.js'
 
 /** Makes the keys `K` of `T` optional, or every key when `K` is omitted. */
 export type Optional<T extends object, K extends keyof T = keyof T> = Omit<T, K> & Partial<Pick<T, K>>

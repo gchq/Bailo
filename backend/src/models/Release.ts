@@ -1,7 +1,7 @@
-import { HydratedDocument, model, ObjectId, Schema, Types } from 'mongoose'
+import { type HydratedDocument, model, type ObjectId, Schema, Types } from 'mongoose'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the

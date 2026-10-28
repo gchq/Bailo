@@ -1,7 +1,7 @@
 import { Button, Card, Divider, Link, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import UserDisplay from 'src/common/UserDisplay'
-import { EntryInterface, InferenceInterface } from 'types/types'
+import { type EntryInterface, type InferenceInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 type InferenceDisplayProps = {

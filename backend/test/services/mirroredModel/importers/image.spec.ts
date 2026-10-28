@@ -1,9 +1,9 @@
 import { PassThrough } from 'node:stream'
 
-import { Header } from 'tar-stream'
+import { type Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
+import { ImageImporter, type ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
 import { DockerManifestMediaType } from '../../../../src/utils/registryResponseTypes.js'
 
 const authMocks = vi.hoisted(() => ({

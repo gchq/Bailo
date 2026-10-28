@@ -1,4 +1,4 @@
-import { Registry } from '@rjsf/utils'
+import { type Registry } from '@rjsf/utils'
 import { getCompareFromMirroredState, getCompareFromState, getMirroredState } from 'utils/formUtils'
 
 export interface CompareFieldState<T> {

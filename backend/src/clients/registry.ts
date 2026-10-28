@@ -1,9 +1,9 @@
 import { Readable } from 'node:stream'
 
-import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
+import { type BodyInit, type HeadersInit, type RequestInit } from 'undici-types'
 import type { ZodType, ZodTypeDef } from 'zod'
 
-import { ImageDigestRef, ImageNameRef, ImageRef } from '../models/Release.js'
+import { type ImageDigestRef, type ImageNameRef, type ImageRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -18,7 +18,7 @@ import {
   BlobUploadResponseHeadersSchema,
   CatalogBodyResponseSchema,
   CatalogResponseHeadersSchema,
-  CommonRegistryHeaders,
+  type CommonRegistryHeaders,
   CommonRegistryHeadersSchema,
   DeleteManifestResponseHeadersSchema,
   ManifestResponseBodySchema,

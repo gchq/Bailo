@@ -7,7 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import { Transition } from 'src/common/Transition'
-import { SchemaMigrationInterface } from 'types/types'
+import { type SchemaMigrationInterface } from 'types/types'
 
 type MigrationListDialogProps = {
   open: boolean

@@ -1,5 +1,5 @@
 import ReleaseModel from '../models/Release.js'
-import Review, { ReviewDoc } from '../models/Review.js'
+import Review, { type ReviewDoc } from '../models/Review.js'
 import { removeResponses } from '../services/response.js'
 
 // Fix for 020_2426_remove_orphaned_reviews_responses.ts failing part way through

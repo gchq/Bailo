@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCallback, useMemo } from 'react'
-import { buildEntriesHref, EntriesFilterQuery, filterSelectTypes } from 'utils/metricsUtils'
+import { buildEntriesHref, type EntriesFilterQuery, filterSelectTypes } from 'utils/metricsUtils'
 
 function readFilter(value: string | string[] | undefined): string {
   return typeof value === 'string' ? value : filterSelectTypes.ALL

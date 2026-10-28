@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { ReviewRoleInterface, ReviewRolesFormData } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ReviewRoleInterface, type ReviewRolesFormData } from 'types/types'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyRolesList = []
 

@@ -4,7 +4,7 @@ import { Button, Stack, Typography } from '@mui/material'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ReactionButtons from 'src/reviews/ReactionButtons'
-import { ResponseInterface } from 'types/types'
+import { type ResponseInterface } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
 
 interface EditableReviewCommentProps {

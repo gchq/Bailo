@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
 import { TokenActions } from '../../../models/Token.js'

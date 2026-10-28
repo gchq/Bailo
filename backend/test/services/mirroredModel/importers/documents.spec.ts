@@ -1,12 +1,12 @@
 import { PassThrough } from 'node:stream'
 
 import { ObjectId } from 'mongodb'
-import { Header } from 'tar-stream'
+import { type Header } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import {
   DocumentsImporter,
-  DocumentsMirrorMetadata,
+  type DocumentsMirrorMetadata,
 } from '../../../../src/services/mirroredModel/importers/documents.js'
 
 const authMocks = vi.hoisted(() => ({

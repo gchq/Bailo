@@ -1,7 +1,7 @@
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { type HydratedDocument, model, Schema } from 'mongoose'
 
-import { MirrorKind, MirrorKindKeys } from '../types/types.js'
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { MirrorKind, type MirrorKindKeys } from '../types/types.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TransferStatus = {
   Requested: 'requested',

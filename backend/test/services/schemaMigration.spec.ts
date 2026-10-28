@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind } from '../../src/models/Model.js'
-import { UserInterface } from '../../src/models/User.js'
+import { type UserInterface } from '../../src/models/User.js'
 import {
   createSchemaMigrationPlan,
   runModelSchemaMigration,

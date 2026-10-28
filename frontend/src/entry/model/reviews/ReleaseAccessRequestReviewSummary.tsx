@@ -6,7 +6,7 @@ import { useGetReviewRequestsForModel } from 'actions/review'
 import Loading from 'src/common/Loading'
 import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import { AccessRequestInterface, ReleaseInterface } from 'types/types'
+import { type AccessRequestInterface, type ReleaseInterface } from 'types/types'
 
 export type ReleaseAccessRequestReviewSummaryProps =
   | {

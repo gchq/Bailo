@@ -16,14 +16,14 @@ import {
   Typography,
 } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
-import { UpdateReviewRolesParams } from 'actions/reviewRoles'
-import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react'
+import { type UpdateReviewRolesParams } from 'actions/reviewRoles'
+import { type ChangeEvent, type ReactElement, useCallback, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import renderQueryState from 'src/common/renderQueryState'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind, ReviewRolesFormData } from 'types/types'
+import { EntryKind, type ReviewRolesFormData } from 'types/types'
 
 type ReviewRoleFormContainerProps<ReviewRoleFormData extends UpdateReviewRolesParams | ReviewRolesFormData> = {
   providedData: boolean

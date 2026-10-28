@@ -1,5 +1,5 @@
 import ReleaseModel from '../models/Release.js'
-import { ReviewDoc } from '../models/Review.js'
+import { type ReviewDoc } from '../models/Review.js'
 import { removeResponses } from '../services/response.js'
 import { removeReleaseReviews } from '../services/review.js'
 

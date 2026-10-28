@@ -1,4 +1,4 @@
-import { DescribeKeyCommand, KMSClient, SignCommand, SignCommandOutput } from '@aws-sdk/client-kms'
+import { DescribeKeyCommand, KMSClient, SignCommand, type SignCommandOutput } from '@aws-sdk/client-kms'
 
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'

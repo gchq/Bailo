@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { AccessRequestInterface, AccessRequestUserPermissions } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type AccessRequestInterface, type AccessRequestUserPermissions } from 'types/types'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyAccessRequestList = []
 

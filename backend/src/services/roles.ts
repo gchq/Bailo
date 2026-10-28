@@ -1,6 +1,6 @@
 import ModelModel from '../models/Model.js'
-import { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
-import { UserInterface } from '../models/User.js'
+import { type ReviewRoleDoc, type ReviewRoleInterface } from '../models/ReviewRole.js'
+import { type UserInterface } from '../models/User.js'
 import { RoleKind } from '../types/types.js'
 import config from '../utils/config.js'
 import { BadReq } from '../utils/error.js'

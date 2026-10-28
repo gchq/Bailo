@@ -1,6 +1,6 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseAuthenticationConnector } from './Base.js'
+import { type BaseAuthenticationConnector } from './Base.js'
 import { OauthAuthenticationConnector } from './oauth.js'
 import { SillyAuthenticationConnector } from './silly.js'
 

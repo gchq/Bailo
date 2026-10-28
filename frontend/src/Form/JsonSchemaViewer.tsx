@@ -1,9 +1,9 @@
 import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { RJSFSchema } from '@rjsf/utils'
+import { type RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { type Dispatch, type SetStateAction, useState } from 'react'
 import {
   ArrayFieldTemplateForQuestionViewer,
   DescriptionFieldTemplate,
@@ -13,7 +13,7 @@ import {
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import { setStepState } from 'utils/formUtils'
 
 export interface QuestionSelection {

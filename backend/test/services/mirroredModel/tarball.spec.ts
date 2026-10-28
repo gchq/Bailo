@@ -10,7 +10,7 @@ import {
   extractTarGzStream,
   finaliseTarGzUpload,
   initialiseTarGzUpload,
-  TarEntrySink,
+  type TarEntrySink,
 } from '../../../src/services/mirroredModel/tarball.js'
 import config from '../../../src/utils/config.js'
 

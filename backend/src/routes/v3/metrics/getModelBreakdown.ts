@@ -1,11 +1,11 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import metrics from '../../../connectors/metrics/index.js'
 import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
-import { MetricsEntrySearchOptionsParams, MetricsEntrySearchOptionsSchema } from '../../../types/types.js'
+import { type MetricsEntrySearchOptionsParams, MetricsEntrySearchOptionsSchema } from '../../../types/types.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getModelBreakdownSchema = z.object({
