@@ -4,32 +4,33 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { DraftBanner } from '../../../../src/entry/model/releases/DraftBanner'
 
-function renderDraftBanner(validateBeforeSubmitForReview: () => boolean) {
-  const handleSubmitForReview = vi.fn()
+function renderDraftBanner(validateBeforeSubmit: () => boolean, overrides: { buttonText?: string; dialogMessage?: string } = {}) {
+  const handleSubmit = vi.fn()
   render(
     <DraftBanner
       text='This is a draft'
       draft
       showButton
-      dialogTitle='Publish'
+      dialogTitle='Confirm submission'
       disableButton={false}
       isLoading={false}
       setErrorMessage={vi.fn()}
-      handleSubmitForReview={handleSubmitForReview}
-      validateBeforeSubmitForReview={validateBeforeSubmitForReview}
+      handleSubmit={handleSubmit}
+      validateBeforeSubmit={validateBeforeSubmit}
+      {...overrides}
     />,
   )
-  return handleSubmitForReview
+  return handleSubmit
 }
 
 describe('DraftBanner', () => {
   it('validates before opening the confirmation dialogue', async () => {
-    const handleSubmitForReview = renderDraftBanner(() => false)
+    const handleSubmit = renderDraftBanner(() => false)
 
     await userEvent.click(screen.getByRole('button', { name: 'Submit for Review' }))
 
-    expect(screen.queryByText('Publish')).toBe(null)
-    expect(handleSubmitForReview).not.toHaveBeenCalled()
+    expect(screen.queryByText('Confirm submission')).toBe(null)
+    expect(handleSubmit).not.toHaveBeenCalled()
   })
 
   it('opens the confirmation dialogue when validation passes', async () => {
@@ -37,6 +38,16 @@ describe('DraftBanner', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Submit for Review' }))
 
-    expect(screen.getByText('Publish')).toBeDefined()
+    expect(screen.getByText('Confirm submission')).toBeDefined()
+    expect(screen.getByText('Are you sure you want to submit this for review? This is irreversible.')).toBeDefined()
+  })
+
+  it('uses custom button text and dialogue message when provided', async () => {
+    renderDraftBanner(() => true, { buttonText: 'Publish', dialogMessage: 'Publishing cannot be undone.' })
+
+    expect(screen.queryByRole('button', { name: 'Submit for Review' })).toBe(null)
+    await userEvent.click(screen.getByRole('button', { name: 'Publish' }))
+
+    expect(screen.getByText('Publishing cannot be undone.')).toBeDefined()
   })
 })
