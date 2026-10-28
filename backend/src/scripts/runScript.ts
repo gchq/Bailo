@@ -12,6 +12,13 @@ export default function runScript() {
     process.exit(1)
   }
 
+  // Only allow plain file names so the script cannot be loaded from outside this directory
+  if (!/^[\w-]+$/.test(script)) {
+    // eslint-disable-next-line no-console
+    console.error(`Invalid script name "${script}". Use the file name in src/scripts without the extension.`)
+    process.exit(1)
+  }
+
   const { status } = spawnSync('npx', ['tsx', `src/scripts/${script}.ts`, ...args], { stdio: 'inherit' })
   process.exitCode = status ?? 1
 }
