@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { SchemaMigrationInterface } from '../../../models/SchemaMigration.js'
+import { type SchemaMigrationInterface } from '../../../models/SchemaMigration.js'
 import { createSchemaMigrationPlan } from '../../../services/schemaMigration.js'
 import { registerPath } from '../../../services/specification.js'
 import { SchemaMigrationKind } from '../../../types/enums.js'

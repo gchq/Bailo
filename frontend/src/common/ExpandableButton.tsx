@@ -1,6 +1,6 @@
 import { Box, Stack, Typography } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
-import { CSSProperties, ReactElement } from 'react'
+import { type CSSProperties, type ReactElement } from 'react'
 
 interface ExpandableButtonProps {
   label: string

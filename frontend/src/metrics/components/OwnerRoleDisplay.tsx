@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { EntryRole } from 'types/types'
+import { type EntryRole } from 'types/types'
 
 interface OwnerRoleDisplayProps {
   entryRoles: EntryRole[]

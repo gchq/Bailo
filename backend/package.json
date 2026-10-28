@@ -8,6 +8,8 @@
   "scripts": {
     "build": "tsc && npm run copy-templates",
     "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && tsx src/scripts/generateJWKS.ts",
+    "check-cycles": "madge --circular src",
+    "check-cycles:types": "madge_detectiveOptions__ts__skipTypeImports= madge --circular src",
     "check-style": "prettier --check .",
     "copy-templates": "cd src && find . -name '*.hbs' | cpio -pdm ../dist/src",
     "dev": "nodemon",
@@ -20,7 +22,10 @@
     "test": "vitest"
   },
   "overrides": {
-    "mv": "npm:dry-uninstall"
+    "mv": "npm:dry-uninstall",
+    "madge": {
+      "typescript": "$typescript"
+    }
   },
   "dependencies": {
     "@agendajs/mongo-backend": "^4.0.3",
@@ -119,6 +124,7 @@
     "eslint": "^10.13.0",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "globals": "^17.13.0",
+    "madge": "^8.0.0",
     "nodemon": "^3.1.14",
     "pino-pretty": "^13.2.0",
     "prettier": "^3.9.10",

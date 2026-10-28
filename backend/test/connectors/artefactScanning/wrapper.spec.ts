@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   ArtefactScanState,
   BaseArtefactScanningConnector,
-  LayerRefInterface,
+  type LayerRefInterface,
 } from '../../../src/connectors/artefactScanning/Base.js'
 import { ArtefactScanningWrapper } from '../../../src/connectors/artefactScanning/wrapper.js'
-import { FileInterface } from '../../../src/models/File.js'
+import { type FileInterface } from '../../../src/models/File.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
 import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 

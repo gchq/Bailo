@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { ModelCardInterface } from '../../../../models/Model.js'
+import { type ModelCardInterface } from '../../../../models/Model.js'
 import { getModelCardRevisions as getModelCardRevisionsService } from '../../../../services/model.js'
 import { modelCardInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'

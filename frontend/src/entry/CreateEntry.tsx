@@ -24,7 +24,7 @@ import {
 import { postEntry, useGetEntryRoles } from 'actions/entry'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react'
+import { type SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
@@ -37,11 +37,11 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TagSelector from 'src/MuiForms/TagSelector'
 import {
-  CollaboratorEntry,
+  type CollaboratorEntry,
   EntityKind,
-  EntryForm,
+  type EntryForm,
   EntryKind,
-  EntryKindKeys,
+  type EntryKindKeys,
   EntryKindLabel,
   EntryVisibility,
 } from 'types/types'

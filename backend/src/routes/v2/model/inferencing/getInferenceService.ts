@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { InferenceInterface } from '../../../../models/Inference.js'
+import { type InferenceInterface } from '../../../../models/Inference.js'
 import { getInferenceByImage } from '../../../../services/inference.js'
 import { inferenceInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import config from '../../../../utils/config.js'

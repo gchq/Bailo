@@ -9,7 +9,7 @@ import Restricted from 'src/common/Restricted'
 import ModelImageDisplay from 'src/entry/model/registry/ModelImageDisplay'
 import UploadModelImageDialog from 'src/entry/model/registry/UploadModelImageDialog'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 
 type AccessRequestsProps = {
   model: EntryInterface

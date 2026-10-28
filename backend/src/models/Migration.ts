@@ -1,4 +1,4 @@
-import { Document, HydratedDocument, model, Schema } from 'mongoose'
+import { type Document, type HydratedDocument, model, Schema } from 'mongoose'
 
 export interface MigrationMetadata {
   [key: string]: any

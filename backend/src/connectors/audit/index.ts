@@ -1,6 +1,6 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseAuditConnector } from './Base.js'
+import { type BaseAuditConnector } from './Base.js'
 import { SillyAuditConnector } from './silly.js'
 import { StdoutAuditConnector } from './stdout.js'
 import { StroomAuditConnector } from './stroom.js'

@@ -1,4 +1,4 @@
-import { Request } from 'express'
+import { type Request } from 'express'
 import pino from 'pino'
 import { pinoHttp } from 'pino-http'
 import { v4 } from 'uuid'

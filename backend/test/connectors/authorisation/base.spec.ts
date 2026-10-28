@@ -12,10 +12,10 @@ import {
   SchemaMigrationAction,
 } from '../../../src/connectors/authorisation/actions.js'
 import { BasicAuthorisationConnector, partials } from '../../../src/connectors/authorisation/base.js'
-import { EntryKind, ModelDoc } from '../../../src/models/Model.js'
-import { ReleaseDoc } from '../../../src/models/Release.js'
-import { SchemaDoc } from '../../../src/models/Schema.js'
-import { UserInterface } from '../../../src/models/User.js'
+import { EntryKind, type ModelDoc } from '../../../src/models/Model.js'
+import { type ReleaseDoc } from '../../../src/models/Release.js'
+import { type SchemaDoc } from '../../../src/models/Schema.js'
+import { type UserInterface } from '../../../src/models/User.js'
 import { getTypedModelMock } from '../../testUtils/setupMongooseModelMocks.js'
 import { testReviewerWithOwnerSystemRole, testReviewRole } from '../../testUtils/testModels.js'
 

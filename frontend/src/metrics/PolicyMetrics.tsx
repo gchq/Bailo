@@ -6,7 +6,7 @@ import {
   useGetUnapprovedReleasesPolicyMetrics,
   useLifecyclePolicyMetrics,
 } from 'actions/metrics'
-import { ReactElement, useCallback, useMemo, useState } from 'react'
+import { type ReactElement, useCallback, useMemo, useState } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import PolicyLifecycleMetricsCharts from 'src/metrics/PolicyLifecycleMetricsCharts'
@@ -14,10 +14,10 @@ import PolicyNoReleasesMetricsCharts from 'src/metrics/PolicyNoReleasesMetricsCh
 import PolicyRoleMetricsCharts from 'src/metrics/PolicyRoleMetricsCharts'
 import PolicyUnapprovedReleasesCharts from 'src/metrics/PolicyUnapprovedReleasesCharts'
 import {
-  BaseLifecycleMetrics,
-  BaseNoReleaseMetrics,
-  BaseUnapprovedReleaseMetrics,
-  PolicyRoleMetrics,
+  type BaseLifecycleMetrics,
+  type BaseNoReleaseMetrics,
+  type BaseUnapprovedReleaseMetrics,
+  type PolicyRoleMetrics,
 } from 'types/types'
 
 export const SelectedMetricKind = {

@@ -1,5 +1,5 @@
-import { NextRouter } from 'next/router'
-import { EntryKind, EntryKindKeys } from 'types/types'
+import { type NextRouter } from 'next/router'
+import { EntryKind, type EntryKindKeys } from 'types/types'
 
 export const entryKindForRedirect = (entryKind: EntryKindKeys) => {
   switch (entryKind) {

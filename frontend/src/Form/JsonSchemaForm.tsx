@@ -15,12 +15,12 @@ import {
 } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { RJSFSchema } from '@rjsf/utils'
+import { type RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
-import { RouterQueryParams } from 'src/entry/overview/FormEditPage'
+import { type Dispatch, type SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { type RouterQueryParams } from 'src/entry/overview/FormEditPage'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -34,7 +34,7 @@ import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import {
   getFormStats,
   getOverallCompletionStats,

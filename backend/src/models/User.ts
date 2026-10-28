@@ -2,7 +2,7 @@
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 
-import { TokenDoc } from './Token.js'
+import { type TokenDoc } from './Token.js'
 
 export interface UserInterface {
   // Do not store user role information on this object.  This information

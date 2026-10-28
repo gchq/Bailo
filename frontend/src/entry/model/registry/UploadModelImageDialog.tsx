@@ -17,7 +17,7 @@ import UiConfigContext from 'src/contexts/uiConfigContext'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 
 interface UploadModelImageDialogProps {
   open: boolean

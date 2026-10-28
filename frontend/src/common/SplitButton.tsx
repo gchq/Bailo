@@ -1,6 +1,6 @@
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import { Button, ButtonGroup, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material'
-import { MouseEvent, MouseEventHandler, ReactNode, useRef, useState } from 'react'
+import { type MouseEvent, type MouseEventHandler, type ReactNode, useRef, useState } from 'react'
 
 type SplitButtonProps = {
   options: string[]

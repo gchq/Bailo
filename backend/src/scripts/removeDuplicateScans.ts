@@ -1,4 +1,4 @@
-import { ArtefactScanState, ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
+import { ArtefactScanState, type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import ScanModel from '../models/Scan.js'
 import log from '../services/log.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'

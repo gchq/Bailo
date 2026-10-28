@@ -3,8 +3,8 @@ import Done from '@mui/icons-material/Done'
 import ErrorIcon from '@mui/icons-material/Error'
 import HourglassTop from '@mui/icons-material/HourglassTop'
 import Warning from '@mui/icons-material/Warning'
-import { ReactElement } from 'react'
-import { ArtefactScanState, ArtefactScanStateKeys, ScanResultInterface } from 'types/types'
+import { type ReactElement } from 'react'
+import { ArtefactScanState, type ArtefactScanStateKeys, type ScanResultInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 export interface ChipDetails {

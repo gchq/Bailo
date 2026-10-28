@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { AuditKindKeys, getAuditConnector } from '../../../src/connectors/audit/index.js'
+import { type AuditKindKeys, getAuditConnector } from '../../../src/connectors/audit/index.js'
 import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 describe('connectors > audit', () => {

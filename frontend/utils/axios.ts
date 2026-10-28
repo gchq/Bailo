@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios'
+import axios, { type AxiosError } from 'axios'
 
 export function handleAxiosError(error: AxiosError | unknown) {
   if (axios.isAxiosError(error)) {

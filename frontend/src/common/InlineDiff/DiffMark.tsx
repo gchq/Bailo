@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material'
-import { alpha, Theme } from '@mui/material/styles'
-import { Fragment, ReactNode } from 'react'
-import { DiffChunk } from 'src/common/InlineDiff/diffEngine'
-import { MediaKind } from 'utils/markdownUtils'
+import { alpha, type Theme } from '@mui/material/styles'
+import { Fragment, type ReactNode } from 'react'
+import { type DiffChunk } from 'src/common/InlineDiff/diffEngine'
+import { type MediaKind } from 'utils/markdownUtils'
 
 type Props = {
   operation: 'insert' | 'delete'

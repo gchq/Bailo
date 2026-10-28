@@ -1,8 +1,8 @@
-import { Schema as JsonSchema } from 'jsonschema'
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { type Schema as JsonSchema } from 'jsonschema'
+import { type HydratedDocument, model, Schema } from 'mongoose'
 
-import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { SchemaKind, type SchemaKindKeys } from '../types/enums.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the

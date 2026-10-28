@@ -1,8 +1,8 @@
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { type HydratedDocument, model, Schema } from 'mongoose'
 
-import { RoleKindKeys } from '../types/types.js'
-import { SystemRolesKeys } from './Model.js'
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type RoleKindKeys } from '../types/types.js'
+import { type SystemRolesKeys } from './Model.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export interface ReviewRoleInterface {
   name: string

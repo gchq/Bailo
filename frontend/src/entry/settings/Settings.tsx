@@ -15,7 +15,7 @@ import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDeletion from 'src/entry/settings/EntryDeletion'
 import EntryDetails from 'src/entry/settings/EntryDetails'
-import { EntryInterface, EntryKind } from 'types/types'
+import { type EntryInterface, EntryKind } from 'types/types'
 
 export const SettingsCategory = {
   DETAILS: 'details',

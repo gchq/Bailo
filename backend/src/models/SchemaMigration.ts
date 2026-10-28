@@ -1,6 +1,6 @@
-import { Document, HydratedDocument, model, Schema } from 'mongoose'
+import { type Document, type HydratedDocument, model, Schema } from 'mongoose'
 
-import { SchemaMigrationKind, SchemaMigrationKindKeys } from '../types/enums.js'
+import { SchemaMigrationKind, type SchemaMigrationKindKeys } from '../types/enums.js'
 
 export interface QuestionMigration {
   id: string

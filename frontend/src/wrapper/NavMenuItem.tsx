@@ -1,9 +1,9 @@
 import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement, useContext } from 'react'
+import { type ReactElement, useContext } from 'react'
 import CurrentUserContext from 'src/contexts/currentUserContext'
 import Link from 'src/Link'
-import { RoleKeys } from 'types/types'
+import { type RoleKeys } from 'types/types'
 
 interface NavMenuItemProps {
   menuPage: string

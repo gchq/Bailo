@@ -1,7 +1,7 @@
 import { RuleType } from 'markdown-to-jsx'
 import { alignSequence, diffText } from 'src/common/InlineDiff/diffEngine'
-import { alignByKey, alignByPosition, alignKeyedRows, IndexPair } from 'src/common/InlineDiff/rowAlignment'
-import { ASTNode, getMediaKind, MarkdownAST } from 'utils/markdownUtils'
+import { alignByKey, alignByPosition, alignKeyedRows, type IndexPair } from 'src/common/InlineDiff/rowAlignment'
+import { type ASTNode, getMediaKind, type MarkdownAST } from 'utils/markdownUtils'
 
 export type RichDiff =
   | { kind: 'equal'; node: ASTNode }

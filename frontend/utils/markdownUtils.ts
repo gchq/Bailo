@@ -1,4 +1,4 @@
-import { MarkdownToJSX, parser, RuleType } from 'markdown-to-jsx'
+import { type MarkdownToJSX, parser, RuleType } from 'markdown-to-jsx'
 import { astToMarkdown } from 'markdown-to-jsx/markdown'
 
 export type ASTNode = MarkdownToJSX.ASTNode

@@ -1,4 +1,4 @@
-import ScanModel, { ArtefactScanSummary, ScanSummary, SeverityLevelKeys } from '../models/Scan.js'
+import ScanModel, { type ArtefactScanSummary, type ScanSummary, type SeverityLevelKeys } from '../models/Scan.js'
 
 export async function up() {
   await ScanModel.updateMany(

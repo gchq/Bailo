@@ -1,7 +1,7 @@
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import { fromEntity, toEntity } from '../../utils/entity.js'
 import { BaseAuthenticationConnector } from './Base.js'
-import { RoleKeys, Roles, UserInformation } from './constants.js'
+import { type RoleKeys, Roles, type UserInformation } from './constants.js'
 
 const SillyEntityKind = {
   User: 'user',

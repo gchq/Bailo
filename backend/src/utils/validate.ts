@@ -1,6 +1,6 @@
-import { Request } from 'express'
+import { type Request } from 'express'
 import type { ZodError, ZodSchema } from 'zod'
-import { ErrorMessageOptions, generateErrorMessage } from 'zod-error'
+import { type ErrorMessageOptions, generateErrorMessage } from 'zod-error'
 
 import { z } from '../lib/zod.js'
 import { BadReq } from './error.js'

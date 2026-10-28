@@ -1,6 +1,6 @@
 import { isValidObjectId } from 'mongoose'
 
-import { FileWithScanResultsInterface } from '../models/File.js'
+import { type FileWithScanResultsInterface } from '../models/File.js'
 
 export function isFileWithScanResultsInterface(data: unknown): data is FileWithScanResultsInterface {
   if (typeof data !== 'object' || data === null) {

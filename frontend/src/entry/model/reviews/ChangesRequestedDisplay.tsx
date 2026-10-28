@@ -5,7 +5,7 @@ import { postNotifyReviewer } from 'actions/review'
 import { useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import useNotification from 'src/hooks/useNotification'
-import { ReviewRequestInterface } from 'types/types'
+import { type ReviewRequestInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface ChangesRequestedDisplayProps {

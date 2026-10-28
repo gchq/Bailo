@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { UiConfig } from 'types/types'
+import { type UiConfig } from 'types/types'
 
 const UiConfigContext = createContext<UiConfig>({} as UiConfig)
 

@@ -1,14 +1,14 @@
 import { Box, Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { postEntryExportToS3 } from 'actions/entry'
-import { ChangeEvent, useContext, useState } from 'react'
+import { type ChangeEvent, useContext, useState } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Restricted from 'src/common/Restricted'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import ReleaseSelector from 'src/entry/model/mirroredModels/ReleaseSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { type EntryInterface, type ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ExportModelAgreementProps = {

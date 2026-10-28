@@ -1,22 +1,27 @@
-import { PassThrough, Readable, Writable } from 'node:stream'
+import { PassThrough, type Readable, type Writable } from 'node:stream'
 import { json } from 'node:stream/consumers'
 import { finished, pipeline } from 'node:stream/promises'
 import zlib from 'node:zlib'
 
-import { Extract, extract, Pack, pack } from 'tar-stream'
+import { type Extract, extract, type Pack, pack } from 'tar-stream'
 
 import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import { isBailoError } from '../../types/error.js'
-import { MirrorExportLogData, MirrorImportLogData, MirrorInformation, MirrorMetadata } from '../../types/types.js'
+import {
+  type MirrorExportLogData,
+  type MirrorImportLogData,
+  type MirrorInformation,
+  type MirrorMetadata,
+} from '../../types/types.js'
 import config from '../../utils/config.js'
 import { Forbidden, InternalError, toBailoError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
 import { handleStartEmail } from '../modelTransfer.js'
 import { mirrorMetadataSchema } from '../specification.js'
-import { BaseImporter } from './importers/base.js'
+import { type BaseImporter } from './importers/base.js'
 import { getImporter } from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
 

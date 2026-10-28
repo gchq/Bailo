@@ -1,15 +1,20 @@
-import { ClientSession } from 'mongoose'
+import { type ClientSession } from 'mongoose'
 import semver from 'semver'
-import { Optional } from 'utility-types'
+import { type Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileWithScanResultsAggregate, FileWithScanResultsInterface } from '../models/File.js'
-import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
-import ReleaseModel, { ImageTagRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
+import { type FileWithScanResultsAggregate, type FileWithScanResultsInterface } from '../models/File.js'
+import { EntryKind, type ModelDoc, type ModelInterface } from '../models/Model.js'
+import ReleaseModel, {
+  type ImageTagRef,
+  type ReleaseDoc,
+  type ReleaseInterface,
+  type SemverObject,
+} from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
-import { UserInterface } from '../models/User.js'
+import { type UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
 import { findDuplicates } from '../utils/array.js'

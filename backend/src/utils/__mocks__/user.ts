@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import { type NextFunction, type Request, type Response } from 'express'
 
 export async function getUser(req: Request, _res: Response, next: NextFunction) {
   next()

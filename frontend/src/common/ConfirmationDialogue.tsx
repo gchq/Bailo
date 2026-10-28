@@ -4,7 +4,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
 

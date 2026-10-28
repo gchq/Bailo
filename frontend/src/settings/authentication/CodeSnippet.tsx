@@ -1,6 +1,6 @@
 import { Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import CodeSnippetActions from 'src/settings/authentication/CodeSnippetActions'
 
 type CodeSnippetProps = {
