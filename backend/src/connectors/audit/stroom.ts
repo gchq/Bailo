@@ -1,7 +1,5 @@
 import { Request } from 'express'
-import { ParamsDictionary } from 'express-serve-static-core'
 import os from 'os'
-import { ParsedQs } from 'qs'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
@@ -454,11 +452,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, `${image.repository}/${image.name}:${image.tag}`)
   }
 
-  async onCreateS3Export(
-    req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
-    modelId: string,
-    semvers?: string[] | undefined,
-  ): Promise<void> {
+  async onCreateS3Export(req: Request, modelId: string, semvers?: string[] | undefined): Promise<void> {
     this.auditGenericEvent(req, `${modelId} - ${semvers?.join(', ') ?? 'all'}`)
   }
 

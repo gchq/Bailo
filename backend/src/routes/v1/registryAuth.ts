@@ -1,6 +1,5 @@
-import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
-import { NextFunction, Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
 import type { StringValue } from 'ms'
@@ -277,7 +276,7 @@ function isReadOnlyActions(actions: Action[], includeWildcard: boolean = false) 
 }
 
 export const getDockerRegistryAuth = [
-  bodyParser.urlencoded({ extended: true }),
+  express.urlencoded({ extended: true }),
 
   async (req: Request, res: Response): Promise<void> => {
     const { account, client_id: clientId, offline_token: offlineToken, service, scope } = req.query

@@ -21,3 +21,28 @@ export const toTitleCase = (value: string, delimiter: string = ' '): string => {
 
 export const resolveKindToUrl = (kind: EntryKindKeys): string =>
   kind === EntryKind.DataCard ? EntryKind.DataCard : EntryKind.Model
+
+/**
+ * Template tag that removes the first line's indentation from every line of the literal text, then trims one leading
+ * and one trailing newline. Interpolated values are inserted unchanged.
+ */
+export const outdent = (strings: TemplateStringsArray, ...values: unknown[]): string => {
+  // Width of the indentation on the first non-blank line, e.g. 4 for "\n    # Title"
+  const indentation = strings[0].match(/\r?\n([ \t]*)(?:[^ \t\r\n]|$)/)?.[1].length ?? 0
+  // A newline followed by up to `indentation` spaces or tabs
+  const indentPattern = new RegExp(String.raw`(\r?\n)[ \t]{0,${indentation}}`, 'g')
+  const lastIndex = strings.length - 1
+
+  return strings.reduce((result, literal, index) => {
+    let text = literal.replace(indentPattern, '$1')
+    if (index === 0) {
+      // Drop the newline straight after the opening backtick
+      text = text.replace(/^[ \t]*\r?\n/, '')
+    }
+    if (index === lastIndex) {
+      // Drop the newline and indentation before the closing backtick
+      text = text.replace(/\r?\n[ \t]*$/, '')
+    }
+    return index === lastIndex ? result + text : result + text + String(values[index])
+  }, '')
+}
