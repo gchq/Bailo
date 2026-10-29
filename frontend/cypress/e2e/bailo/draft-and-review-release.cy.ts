@@ -93,6 +93,25 @@ describe('Create and review a model release', () => {
     cy.contains('This is an edit')
   })
 
+  it('does not show the review button for a draft release', () => {
+    const draftVersion = '2.0.0'
+    cy.request('POST', `/api/v2/model/${modelUuidForRelease}/releases`, {
+      modelId: modelUuidForRelease,
+      semver: draftVersion,
+      draft: true,
+      notes: 'This is a draft release',
+      fileIds: [],
+      minor: false,
+      images: [],
+      modelCardVersion: 1,
+    }).then((response) => {
+      expect(response.status).to.eq(200)
+    })
+    cy.visit(`/model/${modelUuidForRelease}/release/${draftVersion}`)
+    cy.contains('This is a draft release')
+    cy.get('[data-test=openReviewPopperBtn]').should('not.exist')
+  })
+
   it('can download a release artefact', () => {
     cy.log('Navigating to the releases tab for a model')
     cy.visit(`/model/${modelUuidForRelease}?tab=releases  `)

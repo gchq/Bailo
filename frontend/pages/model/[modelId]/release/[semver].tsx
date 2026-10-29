@@ -3,7 +3,7 @@ import { Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/
 import { useGetModel } from 'actions/entry'
 import { putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
 import { useGetResponses } from 'actions/response'
-import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
+import { postReviewResponse, useGetReviewRequestsForModel, useHeadReviewRequests } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useEffect, useEffectEvent, useState } from 'react'
@@ -19,9 +19,10 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { DecisionKeys, ReviewKind, SplitSchemaNoRender } from 'types/types'
+import { DecisionKeys, EntryKind, ReviewKind, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
+import { buildModelCardHref } from 'utils/routerUtils'
 
 export default function Release() {
   const router = useRouter()
@@ -44,6 +45,10 @@ export default function Release() {
     semver: `${semver}`,
   })
   const { mutateResponses } = useGetResponses([release ? release._id : '', ...reviews.map((review) => review._id)])
+  const { reviewCountHeader, isReviewsLoading: isReviewCountLoading } = useHeadReviewRequests({
+    modelId,
+    semver,
+  })
   const [reviewComment, setReviewComment] = useState('')
 
   const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
@@ -140,10 +145,14 @@ export default function Release() {
     isReleaseLoading ||
     isModelLoading ||
     isSchemaLoading ||
-    isReviewsLoading
+    isReviewsLoading ||
+    isReviewCountLoading
   ) {
     return <Loading />
   }
+
+  // reviewCountHeader is scoped to the current user's review requests (mine defaults to true)
+  const showReviewButton = !release.draft && model.kind !== EntryKind.MIRRORED_MODEL && reviewCountHeader > 0
 
   return (
     <>
@@ -200,14 +209,16 @@ export default function Release() {
                       />
                     </Stack>
                   </Stack>
-                  <ReviewPopper
-                    reviews={reviews}
-                    onSubmit={handleSubmitReview}
-                    isLoading={isReviewButtonLoading}
-                    errorMessage={reviewErrorMessage}
-                    reviewComment={reviewComment}
-                    onReviewCommentChange={(comment) => setReviewComment(comment)}
-                  />
+                  {showReviewButton && (
+                    <ReviewPopper
+                      reviews={reviews}
+                      onSubmit={handleSubmitReview}
+                      isLoading={isReviewButtonLoading}
+                      errorMessage={reviewErrorMessage}
+                      reviewComment={reviewComment}
+                      onReviewCommentChange={(comment) => setReviewComment(comment)}
+                    />
+                  )}
                 </Stack>
               </Box>
               {!release.draft && (
@@ -228,7 +239,15 @@ export default function Release() {
                   />
                 ))}
               <Divider flexItem />
-              <Typography sx={{ fontWeight: 'bold' }}>Model card version: {release.modelCardVersion}</Typography>
+              <Typography>
+                <Typography component='span' sx={{ fontWeight: 'bold' }}>
+                  Model card version:
+                </Typography>{' '}
+                {release.modelCardVersion} -{' '}
+                <Link href={buildModelCardHref(model.id, model.kind, release.modelCardVersion)}>
+                  <Button size='small'>View and compare model card</Button>
+                </Link>
+              </Typography>
               <Box sx={{ width: '100%' }}>
                 <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
               </Box>
