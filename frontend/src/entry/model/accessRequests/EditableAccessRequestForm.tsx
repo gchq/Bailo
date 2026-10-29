@@ -29,7 +29,7 @@ type EditableAccessRequestFormProps = {
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
   latestReviewState?: DecisionKeys
-  mutateResponses: () => void
+  mutateResponses?: () => void
 }
 
 export default function EditableAccessRequestForm({
@@ -114,7 +114,7 @@ export default function EditableAccessRequestForm({
         onIsEditChange(false)
         mutateAccessRequest()
         mutateReviews()
-        mutateResponses()
+        mutateResponses?.()
       }
       setIsLoading(false)
     }
