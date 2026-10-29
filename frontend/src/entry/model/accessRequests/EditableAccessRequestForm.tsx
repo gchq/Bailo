@@ -19,7 +19,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { AccessRequestInterface, DecisionKeys, SplitSchemaNoRender } from 'types/types'
+import { AccessRequestInterface, Decision, DecisionKeys, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
 
@@ -29,6 +29,7 @@ type EditableAccessRequestFormProps = {
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
   latestReviewState?: DecisionKeys
+  mutateResponses: () => void
 }
 
 export default function EditableAccessRequestForm({
@@ -37,6 +38,7 @@ export default function EditableAccessRequestForm({
   onIsEditChange,
   readOnly = false,
   latestReviewState,
+  mutateResponses,
 }: EditableAccessRequestFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -112,6 +114,7 @@ export default function EditableAccessRequestForm({
         onIsEditChange(false)
         mutateAccessRequest()
         mutateReviews()
+        mutateResponses()
       }
       setIsLoading(false)
     }
@@ -128,7 +131,7 @@ export default function EditableAccessRequestForm({
   }
 
   function handleEdit() {
-    if (latestReviewState) {
+    if (latestReviewState === Decision.Approve) {
       setRevokeApprovalOpen(true)
     } else {
       onIsEditChange(true)

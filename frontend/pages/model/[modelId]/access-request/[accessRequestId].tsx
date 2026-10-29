@@ -1,6 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
+import { useGetResponses } from 'actions/response'
 import { useGetAccessRequestReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -32,17 +33,22 @@ export default function AccessRequest() {
     accessRequestId,
   })
 
+  const { responses, isResponsesLoading, isResponsesError, mutateResponses } = useGetResponses([
+    ...reviews.map((review) => review._id),
+  ])
+
   const latestReviewState = reviews[0] ? reviews[0].status : undefined
 
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
     isReviewsError,
+    isResponsesError,
   })
   if (error) {
     return error
   }
 
-  if (isReviewsLoading) {
+  if (isReviewsLoading || isResponsesLoading) {
     return <Loading />
   }
   return (
@@ -94,6 +100,7 @@ export default function AccessRequest() {
                     isEdit={isEdit}
                     onIsEditChange={setIsEdit}
                     latestReviewState={latestReviewState}
+                    mutateResponses={mutateResponses}
                   />
                 )}
                 <ReviewComments
@@ -103,6 +110,7 @@ export default function AccessRequest() {
                   kind={ReviewKind.ACCESS}
                   isEdit={isEdit}
                   mutator={mutateAccessRequest}
+                  responseList={responses}
                 />
               </Stack>
             </>
