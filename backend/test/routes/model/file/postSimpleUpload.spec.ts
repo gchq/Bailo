@@ -1,4 +1,5 @@
-import qs from 'qs'
+import querystring from 'node:querystring'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
@@ -17,7 +18,10 @@ describe('routes > model > file > postSimpleUpload', () => {
     const fixture = createFixture(postSimpleUploadSchema)
     const modelId = 'example'
 
-    const res = await testPost(`/api/v2/model/${modelId}/files/upload/simple?${qs.stringify(fixture.query)}`, fixture)
+    const res = await testPost(
+      `/api/v2/model/${modelId}/files/upload/simple?${querystring.stringify(fixture.query)}`,
+      fixture,
+    )
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -27,7 +31,10 @@ describe('routes > model > file > postSimpleUpload', () => {
     const fixture = createFixture(postSimpleUploadSchema)
     const modelId = 'example'
 
-    const res = await testPost(`/api/v2/model/${modelId}/files/upload/simple?${qs.stringify(fixture.query)}`, fixture)
+    const res = await testPost(
+      `/api/v2/model/${modelId}/files/upload/simple?${querystring.stringify(fixture.query)}`,
+      fixture,
+    )
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateFile).toHaveBeenCalled()
@@ -41,7 +48,10 @@ describe('routes > model > file > postSimpleUpload', () => {
     // This fixture does not include a name.
     delete fixture.query.name
 
-    const res = await testPost(`/api/v2/model/${modelId}/files/upload/simple?${qs.stringify(fixture.query)}`, fixture)
+    const res = await testPost(
+      `/api/v2/model/${modelId}/files/upload/simple?${querystring.stringify(fixture.query)}`,
+      fixture,
+    )
 
     expect(res.statusCode).toEqual(400)
     expect(res.body).matchSnapshot()

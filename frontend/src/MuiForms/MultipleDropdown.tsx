@@ -3,7 +3,6 @@ import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import { SyntheticEvent, useMemo } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
@@ -127,8 +126,6 @@ export default function MultipleDropdown({
             />
           )}
         />
-      ) : compare.inMirroredCompare && value.length > 0 ? (
-        <InlineDiff from={formatValues(compare.compareFromState)} to={formatValues(value)} />
       ) : value.length > 0 ? (
         value.map((selectedValue) => (
           <Typography
