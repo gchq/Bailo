@@ -1,6 +1,5 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Box, Button, Container, Divider, Paper, Popper, Stack } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Button, Container, Divider, Paper, Stack } from '@mui/material'
 import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
 import { useGetDeploymentAssessment } from 'actions/deploymentAssessments'
 import { postDeploymentAssessmentReviewResponse, useGetReviewsForDeploymentAssessment } from 'actions/review'
@@ -8,12 +7,11 @@ import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
-import ReviewWithComment from 'src/common/ReviewWithComment'
+import ReviewPopper from 'src/common/ReviewPopper'
 import Title from 'src/common/Title'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
-import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
@@ -32,19 +30,16 @@ export default function DeploymentAssessment() {
       : '/deployment-assessments?tab=all-assessments'
 
   const sendNotification = useNotification()
-  const theme = useTheme()
 
   const [isEdit, setIsEdit] = useState(false)
-  const [isReviewPanelShown, setIsReviewPanelShown] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [patchErrorMessage, setPatchErrorMessage] = useState('')
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [isFormValid, setIsFormValid] = useState<boolean | undefined>(undefined)
   const [showValidation, setShowValidation] = useState(false)
-  const reviewPopoverOpen = Boolean(anchorEl)
   const [revokeApprovalOpen, setRevokeApprovalOpen] = useState(false)
+  const [reviewComment, setReviewComment] = useState('')
 
   const handleValidityChange = useCallback((isValid: boolean) => {
     setIsFormValid(isValid)
@@ -81,7 +76,6 @@ export default function DeploymentAssessment() {
     } else {
       setErrorMessage('')
       setIsReviewButtonLoading(false)
-      setIsReviewPanelShown(false)
       mutateReviews()
       mutateDeploymentAssessment()
     }
@@ -158,15 +152,6 @@ export default function DeploymentAssessment() {
                   dialogTitle='Confirm submission for review'
                   showButton
                 />
-                {!deploymentAssessment.draft && (
-                  <ReviewBanner
-                    deploymentAssessment={deploymentAssessment}
-                    onReviewButtonClicked={(anchor) => {
-                      setAnchorEl(anchor)
-                      setIsReviewPanelShown(true)
-                    }}
-                  />
-                )}
                 <Stack spacing={2} sx={{ p: 4 }}>
                   <Stack
                     direction={{ sm: 'row', xs: 'column' }}
@@ -178,14 +163,26 @@ export default function DeploymentAssessment() {
                         Back to deployments
                       </Button>
                     </Link>
-                    <Stack
-                      direction='row'
-                      spacing={2}
-                      sx={{ alignItems: 'center' }}
-                      divider={<Divider flexItem orientation='vertical' />}
-                    >
-                      <AssessmentStateChip assessment={deploymentAssessment} />
-                    </Stack>
+                    {!deploymentAssessment.draft && (
+                      <Stack
+                        direction='row'
+                        spacing={2}
+                        sx={{ alignItems: 'center' }}
+                        divider={<Divider flexItem orientation='vertical' />}
+                      >
+                        <AssessmentStateChip assessment={deploymentAssessment} />
+                        <ReviewPopper
+                          reviews={reviews}
+                          onSubmit={handleSubmit}
+                          includeDueDate={false}
+                          isLoading={isReviewButtonLoading}
+                          errorMessage={errorMessage}
+                          deploymentAssessmentReview
+                          reviewComment={reviewComment}
+                          onReviewCommentChange={(comment) => setReviewComment(comment)}
+                        />
+                      </Stack>
+                    )}
                   </Stack>
                   <Divider flexItem />
                   <Stack direction='row' spacing={2} divider={<Divider flexItem orientation='vertical' />}>
@@ -228,47 +225,6 @@ export default function DeploymentAssessment() {
               </>
             )}
           </Paper>
-          {isReviewPanelShown && (
-            <Popper
-              open={reviewPopoverOpen}
-              anchorEl={anchorEl}
-              sx={{
-                maxWidth: '650px',
-                '&:has(.w-md-editor-fullscreen)': {
-                  transform: 'none !important',
-                },
-                boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-              }}
-              modifiers={[
-                {
-                  name: 'preventOverflow',
-                  enabled: true,
-                  options: {
-                    altAxis: true,
-                    altBoundary: true,
-                    tether: true,
-                    rootBoundary: 'document',
-                    padding: 24,
-                  },
-                },
-              ]}
-            >
-              <Paper sx={{ border: 'solid', borderWidth: 1, borderColor: theme.palette.divider }}>
-                <Stack direction='row' sx={{ p: 2 }}>
-                  <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-                    <ReviewWithComment
-                      onSubmit={handleSubmit}
-                      reviews={reviews}
-                      loading={isReviewButtonLoading}
-                      deploymentAssessmentReview
-                      onCancel={() => setAnchorEl(null)}
-                    />
-                    <MessageAlert message={errorMessage} severity='error' />
-                  </Stack>
-                </Stack>
-              </Paper>
-            </Popper>
-          )}
         </Stack>
       </Container>
     </>

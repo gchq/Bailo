@@ -67,8 +67,8 @@ describe('Create and review a deployment assessment', () => {
     cy.log('Checking the review banner and status chip on the deployment assessment page')
     cy.visit(`/deployment-assessments/${publishedAssessmentId}`)
     cy.get('[data-test=deploymentAssessmentContainer]').within(() => {
-      cy.contains('Ready for review')
-      cy.get('[data-test=reviewButton]').should('be.visible')
+      cy.contains('Submit review')
+      cy.get('[data-test=openReviewPopperBtn]').should('be.visible')
       cy.get('[data-test=deploymentAssessmentStateChip]').should('contain.text', 'Needs review')
     })
 
