@@ -1,4 +1,3 @@
-import getAppRoot from 'app-root-path'
 import { readdir } from 'fs/promises'
 import mongoose, { Types } from 'mongoose'
 import { join } from 'path'
@@ -38,7 +37,7 @@ export async function disconnectFromMongoose() {
 }
 
 export async function runMigrations() {
-  const base = join(getAppRoot.toString(), './src/migrations/')
+  const base = join(import.meta.dirname, '../migrations/')
   const files = await readdir(base)
   files.sort()
 

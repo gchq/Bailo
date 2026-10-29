@@ -1,6 +1,6 @@
 import './instrumentation.js'
 
-import shelljs from 'shelljs'
+import { spawnSync } from 'node:child_process'
 
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
@@ -10,8 +10,16 @@ import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
 import { registerSigTerminate } from './utils/signals.js'
-// Update certificates based on mount
-shelljs.exec('update-ca-certificates', { fatal: false, async: false })
+// Update certificates based on mount. Failure is not fatal, e.g. the command is missing outside the container image
+const updateCertificates = spawnSync('update-ca-certificates', { stdio: 'inherit' })
+if (updateCertificates.error) {
+  log.warn({ error: updateCertificates.error }, 'Unable to run update-ca-certificates')
+} else if (updateCertificates.status !== 0) {
+  log.warn(
+    { status: updateCertificates.status, signal: updateCertificates.signal },
+    'update-ca-certificates exited unsuccessfully',
+  )
+}
 
 if (config.s3.automaticallyCreateBuckets) {
   const bucketNames = [config.s3.buckets.uploads, config.s3.buckets.registry]
