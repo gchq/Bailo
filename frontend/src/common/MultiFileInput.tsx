@@ -1,8 +1,8 @@
 import { Box } from '@mui/material'
 import Button from '@mui/material/Button'
 import { styled } from '@mui/material/styles'
-import { ChangeEvent, useCallback, useMemo } from 'react'
-import { FileInterface, FileWithMetadataAndTags } from 'types/types'
+import { type ChangeEvent, useCallback, useMemo } from 'react'
+import { type FileInterface, type FileWithMetadataAndTags } from 'types/types'
 const Input = styled('input')({
   display: 'none',
 })

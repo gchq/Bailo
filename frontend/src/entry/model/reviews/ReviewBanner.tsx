@@ -7,7 +7,7 @@ import { useHeadReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
-import { AccessRequestInterface, ReleaseInterface } from 'types/types'
+import { type AccessRequestInterface, type ReleaseInterface } from 'types/types'
 
 export type ReviewBannerProps =
   | {

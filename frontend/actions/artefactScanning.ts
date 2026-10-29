@@ -1,6 +1,6 @@
 import useSWR from 'swr'
-import { ImageTagResult, ScanInfoInterface } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ImageTagResult, type ScanInfoInterface } from 'types/types'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyList = []
 

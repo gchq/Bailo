@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { QuestionMigration, SchemaMigrationInterface } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type QuestionMigration, type SchemaMigrationInterface } from 'types/types'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 interface PostSchemaMigrationParams {
   name: string

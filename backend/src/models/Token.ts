@@ -1,16 +1,16 @@
-import { HydratedDocument, model, Schema, Types } from 'mongoose'
+import { type HydratedDocument, model, Schema, type Types } from 'mongoose'
 
 import {
   createArgon2Hash,
   createBcryptHash,
   createSHA256Hash,
   HashType,
-  HashTypeKeys,
+  type HashTypeKeys,
   verifyArgon2Hash,
   verifyBcryptHash,
   verifySHA256Hash,
 } from '../services/hash.js'
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TokenScope = {
   All: 'all',

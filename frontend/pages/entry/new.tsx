@@ -5,7 +5,7 @@ import CurrentUserContext from 'src/contexts/currentUserContext'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import CreateEntry from 'src/entry/CreateEntry'
 import EntryCard from 'src/entry/EntryCard'
-import { EntryKind, EntryKindKeys, Roles } from 'types/types'
+import { EntryKind, type EntryKindKeys, Roles } from 'types/types'
 import { isAuthorisedToCreateUntrustedModel } from 'utils/roles'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 

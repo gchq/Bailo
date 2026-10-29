@@ -2,12 +2,17 @@ import PQueue from 'p-queue'
 
 import { getCachedArtefactScanInfo, scanFileStream } from '../../clients/artefactScan.js'
 import { getObjectStream } from '../../clients/s3.js'
-import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactKind, ArtefactKindKeys, ArtefactScanSummary, SeverityLevelKeys } from '../../models/Scan.js'
+import { type FileInterfaceDoc } from '../../models/File.js'
+import {
+  ArtefactKind,
+  type ArtefactKindKeys,
+  type ArtefactScanSummary,
+  type SeverityLevelKeys,
+} from '../../models/Scan.js'
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
-import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
+import { type ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 const UNSUPPORTED_FILE_TYPE_MESSAGE = 'File type is not compatible with this scanner.'
 const TOOL_NAME = 'ModelScan'

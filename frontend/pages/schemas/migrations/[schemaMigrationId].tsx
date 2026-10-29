@@ -8,7 +8,7 @@ import Loading from 'src/common/Loading'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import Link from 'src/Link'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
-import { CombinedSchema, QuestionMigration } from 'types/types'
+import { type CombinedSchema, type QuestionMigration } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
 export default function SchemaMigrationEditor() {

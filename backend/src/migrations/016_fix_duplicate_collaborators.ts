@@ -1,4 +1,4 @@
-import ModelModel, { CollaboratorEntry } from '../models/Model.js'
+import ModelModel, { type CollaboratorEntry } from '../models/Model.js'
 
 export async function up() {
   const entries = await ModelModel.find({})

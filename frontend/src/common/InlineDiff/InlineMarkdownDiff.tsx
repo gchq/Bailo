@@ -1,13 +1,13 @@
 import { Box, Link } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { MarkdownToJSX, RuleType } from 'markdown-to-jsx'
+import { type MarkdownToJSX, RuleType } from 'markdown-to-jsx'
 import { astToJSX } from 'markdown-to-jsx/react'
-import { cloneElement, Fragment, isValidElement, ReactNode, useId, useMemo } from 'react'
+import { cloneElement, Fragment, isValidElement, type ReactNode, useId, useMemo } from 'react'
 import { diffText } from 'src/common/InlineDiff/diffEngine'
 import DiffMark, { DiffChunks, stackedDiffLayout, WholeValueDiff } from 'src/common/InlineDiff/DiffMark'
-import { diffMarkdown, RichDiff } from 'src/common/InlineDiff/markdownDiff'
+import { diffMarkdown, type RichDiff } from 'src/common/InlineDiff/markdownDiff'
 import MarkdownDisplay, { createMarkdownOptions } from 'src/common/MarkdownDisplay'
-import { ASTNode, getMediaKind, MarkdownAST, parseMarkdown } from 'utils/markdownUtils'
+import { type ASTNode, getMediaKind, type MarkdownAST, parseMarkdown } from 'utils/markdownUtils'
 
 type RenderContext = {
   footnotes: Map<string, ReturnType<typeof diffText>>

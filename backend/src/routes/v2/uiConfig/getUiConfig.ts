@@ -1,8 +1,8 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
 import { registerPath } from '../../../services/specification.js'
-import { UiConfig } from '../../../types/types.js'
+import { type UiConfig } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { NotFound } from '../../../utils/result.js'
 import { parse } from '../../../utils/validate.js'

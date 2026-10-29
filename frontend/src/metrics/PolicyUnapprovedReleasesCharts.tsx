@@ -5,7 +5,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
-import { EntryRole, GlobalUnapprovedReleasesMetrics } from 'types/types'
+import { type EntryRole, type GlobalUnapprovedReleasesMetrics } from 'types/types'
 
 interface PolicyUnapprovedReleasesMetricsProps {
   data: GlobalUnapprovedReleasesMetrics

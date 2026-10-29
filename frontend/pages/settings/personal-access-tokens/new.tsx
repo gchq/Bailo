@@ -1,9 +1,9 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import {
   Autocomplete,
-  AutocompleteChangeDetails,
-  AutocompleteChangeReason,
-  AutocompleteRenderValueGetItemProps,
+  type AutocompleteChangeDetails,
+  type AutocompleteChangeReason,
+  type AutocompleteRenderValueGetItemProps,
   Button,
   Checkbox,
   Chip,
@@ -16,15 +16,15 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult, useListEntries } from 'actions/entry'
+import { type EntrySearchResult, useListEntries } from 'actions/entry'
 import { postUserToken, useGetUserTokenList } from 'actions/user'
-import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { type ChangeEvent, type SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
-import { TokenActionKind, TokenInterface, TokenScope } from 'types/types'
+import { TokenActionKind, type TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 

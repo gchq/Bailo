@@ -1,6 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, IconButton, Stack, TextField, Tooltip } from '@mui/material'
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { type SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import LabelledValue from 'src/common/LabelledValue'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'

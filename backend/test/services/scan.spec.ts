@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
+import { type ArtefactScanResult, ArtefactScanState } from '../../src/connectors/artefactScanning/Base.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
 import {
   rerunFileScan,

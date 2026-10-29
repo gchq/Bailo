@@ -1,13 +1,13 @@
 import { HubApiError, listModels, modelInfo } from '@huggingface/hub'
 
 import { EntryVisibility } from '../../models/Model.js'
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import {
-  EntrySearchOptionsParams,
-  EntrySearchResult,
-  EntrySearchResultWithErrors,
-  SystemStatus,
+  type EntrySearchOptionsParams,
+  type EntrySearchResult,
+  type EntrySearchResultWithErrors,
+  type SystemStatus,
 } from '../../types/types.js'
 import { BadReq, ConfigurationError, NotImplemented } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'

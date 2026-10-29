@@ -1,8 +1,8 @@
 import axios from 'axios'
 import useSWR from 'swr'
-import { EntryCardInterface, EntryCardRevisionInterface } from 'types/types'
+import { type EntryCardInterface, type EntryCardRevisionInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyEntryCardRevisionsList = []
 

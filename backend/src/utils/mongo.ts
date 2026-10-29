@@ -1,4 +1,4 @@
-import { MongoServerError } from 'mongodb'
+import { type MongoServerError } from 'mongodb'
 
 import { BadReq } from './error.js'
 

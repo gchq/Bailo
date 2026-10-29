@@ -1,7 +1,11 @@
-import { UserInterface } from '../../models/User.js'
-import { EntrySearchOptionsParams, EntrySearchResultWithErrors, PeerConfigStatus } from '../../types/types.js'
+import { type UserInterface } from '../../models/User.js'
+import {
+  type EntrySearchOptionsParams,
+  type EntrySearchResultWithErrors,
+  type PeerConfigStatus,
+} from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
-import { BasePeerConnector } from './base.js'
+import { type BasePeerConnector } from './base.js'
 
 export class PeerConnectorWrapper {
   peers: Map<string, BasePeerConnector>

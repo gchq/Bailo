@@ -1,4 +1,4 @@
-import { Callback, ClientSession, Document, PipelineStage, Schema, Types } from 'mongoose'
+import { type Callback, type ClientSession, type Document, type PipelineStage, type Schema, type Types } from 'mongoose'
 
 export interface SoftDeleteDocument extends Omit<Document, 'delete' | 'deleteOne' | 'restore'>, SoftDeleteInterface {
   delete(session?: ClientSession, fn?: Callback<this>): Promise<this>

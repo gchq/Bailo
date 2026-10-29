@@ -1,11 +1,11 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { getModelImageWithScanResults } from '../../../../services/registry.js'
-import { imageTagWithScanResultsSchema, PathConfig, registerPath } from '../../../../services/specification.js'
-import { ImageTagResult } from '../../../../types/types.js'
+import { imageTagWithScanResultsSchema, type PathConfig, registerPath } from '../../../../services/specification.js'
+import { type ImageTagResult } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 const getImageParams = z.object({

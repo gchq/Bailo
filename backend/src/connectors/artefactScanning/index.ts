@@ -1,6 +1,6 @@
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseArtefactScanningConnector } from './Base.js'
+import { type BaseArtefactScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
 import { ModelScanFileScanningConnector } from './modelScan.js'
 import { TrivyImageScanningConnector } from './trivy.js'

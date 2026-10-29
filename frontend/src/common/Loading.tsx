@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { ReactElement } from 'react'
+import { type ReactElement } from 'react'
 
 const StyledBox = styled(Box)(({ theme }) => ({
   position: 'relative',

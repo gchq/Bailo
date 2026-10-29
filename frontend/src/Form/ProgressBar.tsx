@@ -1,4 +1,4 @@
-import { Box, LinearProgress, LinearProgressProps, Typography } from '@mui/material'
+import { Box, LinearProgress, type LinearProgressProps, Typography } from '@mui/material'
 
 type LinearProgressWithLabelProps = LinearProgressProps & {
   value: number

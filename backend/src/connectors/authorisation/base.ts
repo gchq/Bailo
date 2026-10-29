@@ -1,13 +1,13 @@
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface } from '../../models/File.js'
-import { EntryKind, EntryVisibility, ModelDoc } from '../../models/Model.js'
-import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
-import { ResponseDoc } from '../../models/Response.js'
+import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type FileInterface } from '../../models/File.js'
+import { EntryKind, EntryVisibility, type ModelDoc } from '../../models/Model.js'
+import { type ReleaseDoc, type ReleaseInterface } from '../../models/Release.js'
+import { type ResponseDoc } from '../../models/Response.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
-import { SchemaDoc } from '../../models/Schema.js'
-import { SchemaMigrationDoc } from '../../models/SchemaMigration.js'
-import { UserInterface } from '../../models/User.js'
-import { Access } from '../../routes/v1/registryAuth.js'
+import { type SchemaDoc } from '../../models/Schema.js'
+import { type SchemaMigrationDoc } from '../../models/SchemaMigration.js'
+import { type UserInterface } from '../../models/User.js'
+import { type Access } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
 import { getModelSystemRoles } from '../../services/model.js'
 import { checkAccessRequestsApproved } from '../../services/response.js'
@@ -19,23 +19,23 @@ import { Roles } from '../authentication/constants.js'
 import authentication from '../authentication/index.js'
 import {
   AccessRequestAction,
-  AccessRequestActionKeys,
+  type AccessRequestActionKeys,
   ActionLookup,
   FileAction,
-  FileActionKeys,
+  type FileActionKeys,
   ImageAction,
-  ImageActionKeys,
+  type ImageActionKeys,
   ModelAction,
-  ModelActionKeys,
+  type ModelActionKeys,
   ReleaseAction,
-  ReleaseActionKeys,
+  type ReleaseActionKeys,
   ResponseAction,
-  ResponseActionKeys,
+  type ResponseActionKeys,
   ReviewRoleAction,
-  ReviewRoleActionKeys,
-  SchemaActionKeys,
+  type ReviewRoleActionKeys,
+  type SchemaActionKeys,
   SchemaMigrationAction,
-  SchemaMigrationActionKeys,
+  type SchemaMigrationActionKeys,
 } from './actions.js'
 
 export type Response = { id: string; success: true } | { id: string; success: false; info: string }

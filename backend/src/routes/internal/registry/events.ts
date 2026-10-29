@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express'
+import express, { type Request, type Response } from 'express'
 import { clone } from 'lodash-es'
 
-import { AuditInfo, AuditInfoKeys } from '../../../connectors/audit/Base.js'
+import { AuditInfo, type AuditInfoKeys } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { ImageRef } from '../../../models/Release.js'
+import { type ImageRef } from '../../../models/Release.js'
 import log from '../../../services/log.js'
 import { getModelByIdNoAuth } from '../../../services/model.js'
 import { rerunImageScanNoAuth } from '../../../services/scan.js'

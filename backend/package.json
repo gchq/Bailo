@@ -8,6 +8,8 @@
   "scripts": {
     "build": "tsc && npm run copy-templates",
     "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && tsx src/scripts/generateJWKS.ts",
+    "check-cycles": "madge --circular src",
+    "check-cycles:types": "madge_detectiveOptions__ts__skipTypeImports= madge --circular src",
     "check-style": "prettier --check .",
     "copy-templates": "cd src && find . -name '*.hbs' | cpio -pdm ../dist/src",
     "dev": "nodemon",
@@ -20,7 +22,10 @@
     "test": "vitest"
   },
   "overrides": {
-    "mv": "npm:dry-uninstall"
+    "mv": "npm:dry-uninstall",
+    "madge": {
+      "typescript": "$typescript"
+    }
   },
   "dependencies": {
     "@agendajs/mongo-backend": "^4.0.3",
@@ -39,7 +44,6 @@
     "@opentelemetry/sdk-metrics": "^2.10.0",
     "@smithy/node-http-handler": "^4.0.4",
     "agenda": "^6.2.5",
-    "app-root-path": "^3.1.0",
     "bcryptjs": "^3.0.3",
     "bytes": "^3.1.2",
     "clamscan": "^2.4.0",
@@ -61,7 +65,6 @@
     "mjml": "5.4.1",
     "mongodb": "^7.7.0",
     "mongoose": "^9.11.2",
-    "nanoid": "^6.0.2",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^10.1.4",
@@ -77,7 +80,6 @@
     "tar-stream": "^3.2.2",
     "tsx": "^4.23.15",
     "undici": "^8.12.2",
-    "uuid": "^14.0.3",
     "xmlbuilder2": "^4.0.3",
     "yargs": "^18.2.0",
     "zod": "^3.25.67"
@@ -105,6 +107,7 @@
     "eslint": "^10.13.0",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "globals": "^17.13.0",
+    "madge": "^8.0.0",
     "nodemon": "^3.1.14",
     "pino-pretty": "^13.2.0",
     "prettier": "^3.9.10",

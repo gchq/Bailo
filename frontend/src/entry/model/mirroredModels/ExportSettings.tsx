@@ -12,12 +12,12 @@ import {
   Typography,
 } from '@mui/material'
 import { patchEntry } from 'actions/entry'
-import { ChangeEvent, SyntheticEvent, useState } from 'react'
+import { type ChangeEvent, type SyntheticEvent, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import ExportModelAgreement from 'src/entry/model/mirroredModels/ExportModelAgreement'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ExportSettingsProps = {

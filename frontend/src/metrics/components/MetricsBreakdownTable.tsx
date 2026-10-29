@@ -5,7 +5,7 @@ import { EmptyRow } from 'src/common/table/EmptyRow'
 import { LoadingRows } from 'src/common/table/LoadingRows'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
-import { EntryKindLabel, ModelBreakdown } from 'types/types'
+import { EntryKindLabel, type ModelBreakdown } from 'types/types'
 import { entryKindForRedirect } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 

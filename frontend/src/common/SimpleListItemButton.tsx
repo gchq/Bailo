@@ -1,5 +1,5 @@
 import { ListItem, ListItemButton, ListItemIcon } from '@mui/material'
-import { MouseEventHandler, ReactElement, ReactNode } from 'react'
+import { type MouseEventHandler, type ReactElement, type ReactNode } from 'react'
 
 type SimpleListItemButtonProps = {
   selected: boolean

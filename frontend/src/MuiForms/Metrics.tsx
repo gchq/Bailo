@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import DiffMark from 'src/common/InlineDiff/DiffMark'

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ReviewsList from 'src/reviews/ReviewsList'
-import { isReviewKind, ReviewKind, ReviewKindKeys, ReviewListStatusKeys } from 'types/types'
+import { isReviewKind, ReviewKind, type ReviewKindKeys, type ReviewListStatusKeys } from 'types/types'
 
 export interface ReviewsListContainerProps {
   status: ReviewListStatusKeys

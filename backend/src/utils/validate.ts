@@ -1,4 +1,4 @@
-import { Request } from 'express'
+import { type Request } from 'express'
 import type { ZodError, ZodIssue, ZodSchema } from 'zod'
 
 import { z } from '../lib/zod.js'

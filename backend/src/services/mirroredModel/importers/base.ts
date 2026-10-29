@@ -1,9 +1,9 @@
-import { PassThrough, Readable } from 'node:stream'
+import { type PassThrough, type Readable } from 'node:stream'
 
-import { Header } from 'tar-stream'
+import { type Header } from 'tar-stream'
 
 import { isBailoError } from '../../../types/error.js'
-import { MirrorImportLogData } from '../../../types/types.js'
+import { type MirrorImportLogData } from '../../../types/types.js'
 import { InternalError } from '../../../utils/error.js'
 import log from '../../log.js'
 

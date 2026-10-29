@@ -1,7 +1,7 @@
 import { Button, Tooltip } from '@mui/material'
 import { getUserInformation } from 'actions/user'
-import { ReactNode, useEffect, useState } from 'react'
-import { ReactionKindKeys } from 'types/types'
+import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactionKindKeys } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 type ReactionDisplayProps = {

@@ -9,7 +9,7 @@ import Restricted from 'src/common/Restricted'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
-import { EntryInterface, EntryKind } from 'types/types'
+import { type EntryInterface, EntryKind } from 'types/types'
 
 type FilesProps = {
   model: EntryInterface

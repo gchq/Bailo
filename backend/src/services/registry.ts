@@ -1,4 +1,4 @@
-import { ClientSession } from 'mongoose'
+import { type ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
@@ -12,23 +12,28 @@ import {
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
-import { ImageDigestRef, ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
-import { UserInterface } from '../models/User.js'
-import { Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
+import { type ImageDigestRef, type ImageNameRef, type ImageRef, type ImageTagRef } from '../models/Release.js'
+import ScanModel, { ArtefactKind, type ScanInterface, type ScanSummary, SeverityLevel } from '../models/Scan.js'
+import { type UserInterface } from '../models/User.js'
+import { type Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import {
-  ArtefactScanStateCounts,
-  ImageScanResult,
-  ImageTagResult,
-  ModelImages,
-  ModelImagesWithScanResults,
-  SeverityCounts,
+  type ArtefactScanStateCounts,
+  type ImageScanResult,
+  type ImageTagResult,
+  type ModelImages,
+  type ModelImagesWithScanResults,
+  type SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isManifestList } from '../utils/registryResponses.js'
-import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponseTypes.js'
+import {
+  type Descriptors,
+  type ImageManifestV2,
+  type ManifestListV2,
+  OCIEmptyMediaType,
+} from '../utils/registryResponseTypes.js'
 import { platformToString } from '../utils/registryUtils.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getLayersForImage } from './images/getImageLayers.js'
