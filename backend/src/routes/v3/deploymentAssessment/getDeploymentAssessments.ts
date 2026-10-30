@@ -4,11 +4,7 @@ import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
 import { DeploymentAssessmentSummary, searchDeploymentAssessments } from '../../../services/deploymentAssessment.js'
-import {
-  deploymentAssessmentStateSchema,
-  deploymentAssessmentSummarySchema,
-  registerPath,
-} from '../../../services/specification.js'
+import { deploymentAssessmentSummarySchema, registerPath } from '../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getDeploymentAssessmentsSchema = z.object({
@@ -22,8 +18,6 @@ export const getDeploymentAssessmentsSchema = z.object({
       createdBefore: z.string().date().optional(),
       draft: strictCoerceBoolean(z.boolean()).optional(),
       search: z.string().min(1).optional(),
-      state: deploymentAssessmentStateSchema.optional(),
-      needsAction: strictCoerceBoolean(z.boolean()).optional(),
     })
     .strict()
     .refine(

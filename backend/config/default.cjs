@@ -251,7 +251,6 @@ module.exports = {
       owner: 'Owner',
       contributor: 'Contributor',
       consumer: 'Consumer',
-      riskOwner: 'Deployment Risk Owner',
     },
 
     untrustedModel: {
@@ -269,7 +268,6 @@ module.exports = {
 
     deploymentAssessments: {
       deployableModelState: null,
-      signOffDeclaration: 'I agree to take on responsibility as the Deployment Risk Owner.',
     },
 
     lifecycle: {

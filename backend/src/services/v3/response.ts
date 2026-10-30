@@ -7,7 +7,6 @@ import { sendReviewResponseNotification } from '../../services/response.js'
 import { ReviewKind } from '../../types/enums.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
-import { getModelReview } from '../../utils/review.js'
 import { ReviewResponseParams } from '../response.js'
 import { cancelLifecycleReviewJobs } from '../schedule/scheduler.js'
 import { createLifecycleReview, findReviewById, isLifecycleReviewDateValid } from '../v3/review.js'
@@ -19,7 +18,7 @@ export async function respondToReview(
   response: ReviewResponseParams,
   dueDate?: Date,
 ) {
-  const review = getModelReview(await findReviewById(user, reviewId))
+  const review = await findReviewById(user, reviewId)
   if (review.kind === ReviewKind.Lifecycle && response.decision === Decision.Approve && dueDate) {
     if (dueDate.getTime() <= Date.now() || !isLifecycleReviewDateValid(dueDate)) {
       throw BadReq('Due date of next review is invalid.', { dueDate })

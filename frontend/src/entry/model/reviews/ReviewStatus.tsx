@@ -1,4 +1,3 @@
-import CloseIcon from '@mui/icons-material/Close'
 import Done from '@mui/icons-material/Done'
 import { Stack, Typography } from '@mui/material'
 import { useGetEntryRoles } from 'actions/entry'
@@ -11,7 +10,7 @@ import MessageAlert from 'src/MessageAlert'
 import { Decision, ReviewRequestInterface } from 'types/types'
 
 export interface ReviewStatusProps {
-  modelId: string | null
+  modelId: string
   review: ReviewRequestInterface
   showCurrentUserResponses?: boolean
 }
@@ -29,9 +28,6 @@ export default function ReviewStatus({ review, modelId, showCurrentUserResponses
   const roleNameDisplay = () => {
     if (review.role === 'owner') {
       return uiConfig.roleDisplayNames.owner
-    }
-    if (review.role === 'riskOwner') {
-      return uiConfig.roleDisplayNames.riskOwner
     }
     return dynamicRoles.find((role) => role.shortName === review.role)?.name
   }
@@ -64,20 +60,6 @@ export default function ReviewStatus({ review, modelId, showCurrentUserResponses
             showCurrentUserResponses={showCurrentUserResponses}
             decision={review.status}
             icon={<HourglassEmpty color='warning' fontSize='small' />}
-          />
-          <MessageAlert message={errorMessage} severity='error' />
-        </>
-      )}
-      {review.status === Decision.Reject && (
-        <>
-          <ReviewStatusDisplay
-            review={review}
-            key={review._id}
-            roleNameDisplay={roleNameDisplay}
-            setErrorMessage={setErrorMessage}
-            showCurrentUserResponses={showCurrentUserResponses}
-            decision={review.status}
-            icon={<CloseIcon color='warning' fontSize='small' />}
           />
           <MessageAlert message={errorMessage} severity='error' />
         </>

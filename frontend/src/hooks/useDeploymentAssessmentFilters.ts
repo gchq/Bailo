@@ -1,10 +1,9 @@
 import { useRouter } from 'next/router'
 import { useCallback, useMemo } from 'react'
-import { DeploymentAssessmentState, DeploymentAssessmentStateKeys } from 'types/types'
 
 export const DeploymentAssessmentStatus = {
   Draft: 'draft',
-  ...DeploymentAssessmentState,
+  Published: 'published',
 } as const
 
 export type DeploymentAssessmentStatusKeys =
@@ -22,7 +21,7 @@ export interface DeploymentAssessmentPageFilters {
 }
 
 export function buildDeploymentAssessmentListHref(filters: DeploymentAssessmentPageFilters): string {
-  const query = new URLSearchParams({ tab: 'all-assessments' })
+  const query = new URLSearchParams()
 
   if (filters.search) {
     query.set('search', filters.search)
@@ -47,7 +46,8 @@ export function buildDeploymentAssessmentListHref(filters: DeploymentAssessmentP
     query.set('createdBefore', filters.createdBefore)
   }
 
-  return `/deployment-assessments?${query.toString()}`
+  const queryString = query.toString()
+  return queryString ? `/deployment-assessments?${queryString}` : '/deployment-assessments'
 }
 
 function readString(value: string | string[] | undefined) {
@@ -87,30 +87,22 @@ export function useDeploymentAssessmentFilters() {
 
   const setFilters = useCallback(
     (updates: Partial<DeploymentAssessmentPageFilters>) => {
-      const next = { ...filters, ...updates }
-      router.replace(buildDeploymentAssessmentListHref(next), undefined, { shallow: true })
+      const href = buildDeploymentAssessmentListHref({ ...filters, ...updates })
+      // Avoid a redundant navigation, which could override a navigation away from this page
+      if (href !== router.asPath) {
+        router.replace(href, undefined, { shallow: true })
+      }
     },
     [filters, router],
   )
 
   const resetFilters = useCallback(() => {
-    router.replace({ pathname: '/deployment-assessments', query: { tab: 'all-assessments' } }, undefined, {
-      shallow: true,
-    })
+    router.replace({ pathname: '/deployment-assessments' }, undefined, { shallow: true })
   }, [router])
 
   return { filters, setFilters, resetFilters }
 }
 
-export function statusToApiFilters(status?: DeploymentAssessmentStatusKeys): {
-  draft?: boolean
-  state?: DeploymentAssessmentStateKeys
-} {
-  if (status === DeploymentAssessmentStatus.Draft) {
-    return { draft: true }
-  }
-  if (!status) {
-    return {}
-  }
-  return { state: status as DeploymentAssessmentStateKeys }
+export function statusToApiFilters(status?: DeploymentAssessmentStatusKeys): { draft?: boolean } {
+  return status ? { draft: status === DeploymentAssessmentStatus.Draft } : {}
 }

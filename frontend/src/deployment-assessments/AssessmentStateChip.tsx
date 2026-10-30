@@ -1,19 +1,7 @@
 import { Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
-import {
-  DeploymentAssessmentInterface,
-  DeploymentAssessmentState,
-  DeploymentAssessmentStateKeys,
-  DeploymentAssessmentSummary,
-} from 'types/types'
-
-const stateLabels: Record<DeploymentAssessmentStateKeys, string> = {
-  [DeploymentAssessmentState.NeedsReview]: 'Needs review',
-  [DeploymentAssessmentState.Rejected]: 'Rejected',
-  [DeploymentAssessmentState.ChangesRequested]: 'Changes requested',
-  [DeploymentAssessmentState.Approved]: 'Approved',
-}
+import { DeploymentAssessmentInterface, DeploymentAssessmentSummary } from 'types/types'
 
 interface AssessmentStateChipProps {
   assessment: DeploymentAssessmentSummary | DeploymentAssessmentInterface
@@ -53,26 +41,16 @@ export default function AssessmentStateChip({
     )
   }
 
-  const state = assessment.state
-  const isSelected = selectable && selectedState === state
-
-  const palette = {
-    [DeploymentAssessmentState.NeedsReview]: {
-      main: theme.palette.grey[600],
-      contrastText: theme.palette.getContrastText(theme.palette.grey[600]),
-    },
-    [DeploymentAssessmentState.ChangesRequested]: theme.palette.warning,
-    [DeploymentAssessmentState.Rejected]: theme.palette.error,
-    [DeploymentAssessmentState.Approved]: theme.palette.success,
-  }[state]
+  const isSelected = selectable && selectedState === 'published'
+  const palette = theme.palette.success
 
   return (
     <Chip
       data-test='deploymentAssessmentStateChip'
-      label={stateLabels[state]}
+      label='Published'
       size='small'
       clickable={selectable}
-      onClick={selectable ? () => onSelectedStateChange(isSelected ? undefined : state) : undefined}
+      onClick={selectable ? () => onSelectedStateChange(isSelected ? undefined : 'published') : undefined}
       variant={selectable && !isSelected ? 'outlined' : 'filled'}
       sx={{
         backgroundColor: selectable && !isSelected ? 'transparent' : palette.main,

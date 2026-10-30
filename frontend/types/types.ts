@@ -76,7 +76,6 @@ export interface UiConfig {
     owner: string
     contributor: string
     consumer: string
-    riskOwner: string
   }
 
   untrustedModel: {
@@ -92,7 +91,6 @@ export interface UiConfig {
 
   deploymentAssessments: {
     deployableModelState: string | null
-    signOffDeclaration: string
   }
 
   lifecycle: {
@@ -584,7 +582,6 @@ export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
   Undo: 'undo',
-  Reject: 'reject',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
@@ -621,7 +618,6 @@ export const ReviewKind = {
   ACCESS: 'access',
   RELEASE: 'release',
   LIFECYCLE: 'lifecycle',
-  DEPLOYMENTS: 'deployment_assessment',
 } as const
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
@@ -640,32 +636,18 @@ export type ReviewRequestInterface =
       dueDate?: never
       semver?: never
       accessRequestId: string
-      deploymentAssessment?: never
-      deploymentAssessmentId?: never
     } & PartialReviewRequestInterface)
   | ({
       kind: 'release'
       dueDate?: never
       semver: string
       accessRequestId?: never
-      deploymentAssessment?: never
-      deploymentAssessmentId?: never
     } & PartialReviewRequestInterface)
   | ({
       kind: 'lifecycle'
       dueDate: Date
       semver?: never
       accessRequestId?: never
-      deploymentAssessment?: never
-      deploymentAssessmentId?: never
-    } & PartialReviewRequestInterface)
-  | ({
-      kind: 'deployment_assessment'
-      dueDate?: never
-      semver?: never
-      accessRequestId?: never
-      deploymentAssessmentId: string
-      deploymentAssessment: DeploymentAssessmentInterface
     } & PartialReviewRequestInterface)
 
 export interface InferenceInterface {
@@ -1183,14 +1165,6 @@ export interface DeploymentAssessmentMetadata {
   [key: string]: unknown
 }
 
-export const DeploymentAssessmentState = {
-  NeedsReview: 'needs_review',
-  Rejected: 'rejected',
-  ChangesRequested: 'changes_requested',
-  Approved: 'approved',
-} as const
-export type DeploymentAssessmentStateKeys = (typeof DeploymentAssessmentState)[keyof typeof DeploymentAssessmentState]
-
 export interface DeploymentAssessmentInterface {
   _id: string
   id: string
@@ -1198,7 +1172,6 @@ export interface DeploymentAssessmentInterface {
   name: string
   metadata: DeploymentAssessmentMetadata
   draft: boolean
-  state: DeploymentAssessmentStateKeys
   justification: string
   owner: string[]
   createdBy: string
@@ -1218,14 +1191,12 @@ interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBa
   draft: true
   owner?: string[]
   models?: string[]
-  state?: never
 }
 
 interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
   draft: false
   owner: string[]
   models: string[]
-  state: DeploymentAssessmentStateKeys
 }
 
 export type DeploymentAssessmentSummary = DraftDeploymentAssessmentSummary | PublishedDeploymentAssessmentSummary
