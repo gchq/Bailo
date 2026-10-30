@@ -104,12 +104,11 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
           <EntryCardRevision
             key={snapshot.key}
             snapshot={snapshot}
+            href={buildHref(snapshot)}
+            onRowClick={() => router.push(buildHref(snapshot))}
             entryKind={entry.kind}
             isChecked={checked}
             hideCheckbox={hideCheckbox}
-            onRowClick={() => {
-              router.push(buildHref(snapshot))
-            }}
             onCheckToggle={() => toggleSelection(snapshot)}
           />
         )
