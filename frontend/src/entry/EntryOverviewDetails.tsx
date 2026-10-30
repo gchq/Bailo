@@ -14,6 +14,7 @@ import Restricted from 'src/common/Restricted'
 import UserDisplay from 'src/common/UserDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
+import EntryMessageButtons from 'src/entry/EntryMessageButtons'
 import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
@@ -133,9 +134,12 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
           divider={<Divider flexItem />}
           sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}
         >
-          <Typography color='primary' variant='h6' component='h2'>
-            {toSentenceCase(entry.kind)} details
-          </Typography>
+          <Stack direction='row' sx={{ justifyContent: 'space-between' }} spacing={2}>
+            <Typography color='primary' variant='h6' component='h2'>
+              {`${toSentenceCase(entry.kind)} details`}
+            </Typography>
+            <EntryMessageButtons entry={entry} />
+          </Stack>
           <Stack>
             {uiConfig.modelDetails.organisations.length > 0 && (
               <EntrySelect
