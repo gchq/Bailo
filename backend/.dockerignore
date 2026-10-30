@@ -30,6 +30,7 @@ docs/bailo_docs.egg-info
 
 # Python venv
 docs/backenddocsvenv
+docs/.venv
 
 # Byte-compiled / optimized / DLL files
 **/__pycache__/

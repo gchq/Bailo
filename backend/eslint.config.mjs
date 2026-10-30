@@ -11,7 +11,14 @@ const __dirname = path.dirname(__filename)
 
 const eslintConfig = [
   {
-    ignores: ['**/node_modules', '**/dist', '**/docs/_build', '**/docs/python-docs', '**/docs/backenddocsvenv'],
+    ignores: [
+      '**/node_modules',
+      '**/dist',
+      '**/docs/_build',
+      '**/docs/python-docs',
+      '**/docs/backenddocsvenv',
+      '**/docs/.venv',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

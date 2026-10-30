@@ -2,7 +2,13 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.11.0 - dd/mm/yyyy
+## 3.12.0 - dd/mm/yyyy
+
+### Changes
+
+- Add explicit support for Python 3.15
+
+## 3.11.0 - 09/10/2026
 
 ### Changes
 
