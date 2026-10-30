@@ -15,7 +15,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { ReviewKind } from 'types/types'
+import { Decision, ReviewKind } from 'types/types'
 
 export default function AccessRequest() {
   const router = useRouter()
@@ -88,7 +88,7 @@ export default function AccessRequest() {
                   </Stack>
                 </Stack>
                 <ReleaseAccessRequestReviewSummary accessRequest={accessRequest} includeResponsesSummary={false} />
-                {isEdit && latestReviewState && (
+                {isEdit && latestReviewState === Decision.Approve && (
                   <MessageAlert
                     message='Saving changes to this access request will revoke the approval status'
                     severity='warning'
