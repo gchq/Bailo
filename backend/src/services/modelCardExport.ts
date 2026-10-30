@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
+import { Marked } from 'marked'
 import { resolve } from 'path'
-import showdown from 'showdown'
+import sanitizeHtml from 'sanitize-html'
 
 import { type CollaboratorEntry, type ModelInterface } from '../models/Model.js'
 import { type ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
@@ -17,6 +18,8 @@ import { getSchemaById } from './schema.js'
 const modelCardTemplate = Handlebars.compile(
   readFileSync(resolve(import.meta.dirname, 'templates', 'modelCardExport.hbs'), 'utf-8'),
 )
+
+const markdownConverter = new Marked({ gfm: true, breaks: true })
 
 type Common = {
   title: string
@@ -164,9 +167,8 @@ export async function renderToHtml(
   reviewExports: ReviewExport[],
 ) {
   const markdown = await renderToMarkdown(model, modelCardRevision, reviewExports)
-  const converter = new showdown.Converter()
-  converter.setFlavor('github')
-  const body = converter.makeHtml(markdown)
+  const html = await markdownConverter.parse(markdown)
+  const body = sanitizeHtml(html)
 
   return modelCardTemplate({ body })
 }
