@@ -26,6 +26,8 @@ type SchemaFormPageProps = {
   hideForm?: boolean
   /** Tooltip shown on both disabled action buttons. Omit to leave buttons enabled. */
   disableActions?: string
+  /** Validate while the user types. Disable when drafts can be saved with unanswered questions. */
+  liveValidation?: boolean
   /** Optional content rendered inside the Paper before the form (e.g. a warning when no model card exists). */
   children?: ReactNode
 }
@@ -46,6 +48,7 @@ export default function SchemaFormPage({
   draftButtonLoading = false,
   hideForm = false,
   disableActions,
+  liveValidation = true,
   children,
 }: SchemaFormPageProps) {
   const actionsDisabled = Boolean(disableActions)
@@ -71,6 +74,7 @@ export default function SchemaFormPage({
                   canEdit
                   displayLabelValidation={formValidationErrorState}
                   showValidation={formValidationErrorState}
+                  liveValidation={liveValidation}
                 />
                 <Stack spacing={1} sx={{ alignItems: 'flex-end' }}>
                   <Stack direction='row' spacing={2} sx={{ justifyContent: 'flex-end' }}>

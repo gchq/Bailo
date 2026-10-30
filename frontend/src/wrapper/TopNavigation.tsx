@@ -22,6 +22,7 @@ import {
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { alpha, styled, useTheme } from '@mui/material/styles'
+import { visuallyHidden } from '@mui/utils'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
@@ -264,9 +265,12 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                       }}
                       onClick={handleUserMenuClicked}
                       data-test='userMenuButton'
-                      aria-label='User menu dropdown button'
+                      aria-describedby='user-menu-button-description'
                     >
                       <UserDisplay dn={currentUser.dn} hidePopover />
+                      <Box component='span' id='user-menu-button-description' sx={visuallyHidden}>
+                        user menu dropdown button
+                      </Box>
                     </Button>
                     <Menu
                       disableScrollLock

@@ -2,7 +2,7 @@ import EmailIcon from '@mui/icons-material/Email'
 import Error from '@mui/icons-material/Error'
 import Label from '@mui/icons-material/Label'
 import UserIcon from '@mui/icons-material/Person'
-import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
+import { Box, Divider, Link, Popover, Stack, Typography } from '@mui/material'
 import { useGetUserInformation } from 'actions/user'
 import { MouseEvent, useMemo, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -174,7 +174,7 @@ export default function UserDisplay({
                     >
                       Email
                     </Box>
-                    : {userInformation.email}
+                    : <Link href={`mailto:${userInformation.email}`}>{userInformation.email}</Link>
                   </Typography>
                   <CopyToClipboardButton
                     textToCopy={userInformation.email ? userInformation.email : ''}

@@ -11,6 +11,8 @@ export default defineConfig({
     expose: {
       instanceAUrl: process.env.CYPRESS_INSTANCE_A_URL ?? 'http://localhost:8081',
       instanceBUrl: process.env.CYPRESS_INSTANCE_B_URL ?? 'http://localhost:8082',
+      // Podman provides a `docker` alias, but a few registry flags differ.
+      containerCli: process.env.CYPRESS_CONTAINER_CLI ?? 'docker',
     },
 
     defaultCommandTimeout: 10000,
