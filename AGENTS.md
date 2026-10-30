@@ -70,7 +70,7 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 
 Each Python project is an independent [uv](https://docs.astral.sh/uv/) project with its own `uv.lock`. They are
 deliberately not a uv workspace: a workspace forces a single `requires-python` across all members (the intersection here
-is Python 3.12 only), which would break the `bailo` 3.10-3.14 test matrix.
+is Python 3.12 only), which would break the `bailo` 3.10-3.15 test matrix.
 
 Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
 
@@ -193,7 +193,7 @@ Path-filtered (only run when relevant files change):
 
 9. **Python static checks** - ruff format + check via pre-commit (when `lib/python/`, `.pre-commit-config.yaml` or
    `ruff.toml` changes)
-10. **Python unit tests** - pytest across Python 3.10-3.14 (when `lib/python/` changes)
+10. **Python unit tests** - pytest across Python 3.10-3.15 (when `lib/python/` changes)
 11. **ArtefactScan tests** - pytest (when `lib/artefactscan_api/` changes)
 12. **Docs style** - `frontend/scripts/check-docs-style.sh` (when `frontend/pages/docs/**/*.mdx` changes)
 
