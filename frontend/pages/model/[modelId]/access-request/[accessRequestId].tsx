@@ -1,6 +1,8 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
+import { useGetResponses } from 'actions/response'
+import { useGetAccessRequestReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -11,8 +13,9 @@ import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAc
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { ReviewKind } from 'types/types'
+import { Decision, ReviewKind } from 'types/types'
 
 export default function AccessRequest() {
   const router = useRouter()
@@ -25,13 +28,29 @@ export default function AccessRequest() {
     accessRequestId,
   )
 
+  const { reviews, isReviewsLoading, isReviewsError } = useGetAccessRequestReviewRequestsForModel({
+    modelId,
+    accessRequestId,
+  })
+
+  const { responses, isResponsesLoading, isResponsesError, mutateResponses } = useGetResponses([
+    ...reviews.map((review) => review._id),
+  ])
+
+  const latestReviewState = reviews[0] ? reviews[0].status : undefined
+
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
+    isReviewsError,
+    isResponsesError,
   })
   if (error) {
     return error
   }
 
+  if (isReviewsLoading || isResponsesLoading) {
+    return <Loading />
+  }
   return (
     <>
       <Title text={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
@@ -69,8 +88,20 @@ export default function AccessRequest() {
                   </Stack>
                 </Stack>
                 <ReleaseAccessRequestReviewSummary accessRequest={accessRequest} includeResponsesSummary={false} />
+                {isEdit && latestReviewState === Decision.Approve && (
+                  <MessageAlert
+                    message='Saving changes to this access request will revoke the approval status'
+                    severity='warning'
+                  />
+                )}
                 {accessRequest && (
-                  <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
+                  <EditableAccessRequestForm
+                    accessRequest={accessRequest}
+                    isEdit={isEdit}
+                    onIsEditChange={setIsEdit}
+                    latestReviewState={latestReviewState}
+                    mutateResponses={mutateResponses}
+                  />
                 )}
                 <ReviewComments
                   identifier={accessRequest.id}
@@ -79,6 +110,7 @@ export default function AccessRequest() {
                   kind={ReviewKind.ACCESS}
                   isEdit={isEdit}
                   mutator={mutateAccessRequest}
+                  responseList={responses}
                 />
               </Stack>
             </>
