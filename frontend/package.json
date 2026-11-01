@@ -94,7 +94,7 @@
     "cypress": "^15.21.1",
     "cypress-axe": "^1.7.0",
     "eslint": "10.13.0",
-    "eslint-config-next": "16.4.2",
+    "eslint-config-next": "16.4.3",
     "eslint-plugin-cypress": "^7.0.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-simple-import-sort": "^14.0.0",
