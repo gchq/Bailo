@@ -36,7 +36,7 @@
     "@aws-sdk/client-sesv2": "3.1152.0",
     "@aws-sdk/lib-storage": "3.1152.0",
     "@aws-sdk/middleware-flexible-checksums": "^3.974.58",
-    "@huggingface/hub": "^2.17.8",
+    "@huggingface/hub": "^2.17.10",
     "@opentelemetry/auto-instrumentations-node": "^0.81.2",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.223.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.223.0",
