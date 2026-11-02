@@ -21,6 +21,7 @@ dist/
 *env/
 *ENV/
 libpythonvenv/
+.venv/
 
 # Testing
 tests/
