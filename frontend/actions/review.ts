@@ -128,15 +128,42 @@ export function useGetReviewRequestsForModel({
     },
     ErrorInfo
   >(
-    `/api/v2/reviews?${qs.stringify({
-      mine: false,
-      modelId,
-      ...(semver && { semver }),
-      ...(accessRequestId && { accessRequestId }),
-      ...(reviewId && { reviewId }),
-      ...(kind && { kind }),
-      ...(open !== undefined && { open }),
-    })}`,
+    modelId
+      ? `/api/v2/reviews?${qs.stringify({
+          mine: false,
+          modelId,
+          ...(semver && { semver }),
+          ...(accessRequestId && { accessRequestId }),
+          ...(reviewId && { reviewId }),
+          ...(kind && { kind }),
+          ...(open !== undefined && { open }),
+        })}`
+      : null,
+    fetcher,
+  )
+
+  return {
+    reviews: data ? data.reviews : [],
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+    mutateReviews: mutate,
+  }
+}
+
+export function useGetAccessRequestReviewRequestsForModel({ modelId, accessRequestId }) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      reviews: ReviewRequestInterface[]
+    },
+    ErrorInfo
+  >(
+    modelId && accessRequestId
+      ? `/api/v2/reviews?${qs.stringify({
+          mine: false,
+          modelId,
+          accessRequestId,
+        })}`
+      : null,
     fetcher,
   )
 
