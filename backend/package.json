@@ -42,6 +42,7 @@
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.300.0",
     "@opentelemetry/host-metrics": "^0.40.0",
     "@opentelemetry/sdk-metrics": "^3.0.0",
+    "@opentelemetry/sdk-node": "^0.300.0",
     "@smithy/node-http-handler": "^4.0.4",
     "agenda": "^6.2.5",
     "bcryptjs": "^3.0.3",
