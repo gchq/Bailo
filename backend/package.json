@@ -67,7 +67,7 @@
     "mongoose": "^9.11.2",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^10.1.4",
+    "nodemailer": "^10.3.1",
     "p-queue": "^10.0.0",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
