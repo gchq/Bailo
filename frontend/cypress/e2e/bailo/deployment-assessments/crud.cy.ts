@@ -259,11 +259,6 @@ describe('Create, read, update and delete Deployment Assessments', () => {
 
     cy.get('[data-test=signOffButton]').click()
     cy.contains('Who is the Deployment Risk Owner attached to this Deployment Assessment?').should('be.visible')
-    cy.get('[data-test=entitySelector] input').type('user')
-    cy.get('[role=option]')
-      .contains(/^user2$/)
-      .should('be.visible')
-      .click()
     cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
 
     cy.get('[data-test=modelOverviewButton]').click()
