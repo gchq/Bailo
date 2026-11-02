@@ -363,7 +363,7 @@ export class BasicAuthorisationConnector {
             // Only allow GET requests if the DA is not a draft, otherwise restrict to creator or risk owner
             if (deploymentAssessment.draft && !isNamedUser) {
               errorInfo =
-                'You are not the creator or the risk owner of this draft Deployment Assessment, so you do not have permission to view it.'
+                'You are not the creator or the Deployment Risk Owner of this draft Deployment Assessment, so you do not have permission to view it.'
             }
             break
           }

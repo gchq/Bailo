@@ -124,7 +124,7 @@ export default function DeploymentAssessmentSummaryCard({
             </Typography>
             <Typography variant='body2' component='div'>
               <Box component='span' sx={{ fontWeight: 'bold' }}>
-                Risk owner:
+                Deployment Risk Owner:
               </Box>{' '}
               {owners.length ? (
                 <Stack component='span' direction='row' spacing={1} sx={{ display: 'inline-flex', flexWrap: 'wrap' }}>

@@ -69,7 +69,7 @@ export const deploymentAssessmentNameSchema = z
   .openapi({ example: 'Just A Rather Very Intelligent System' })
 const deploymentAssessmentRiskOwnerSchema = z
   .array(z.string().min(1))
-  .min(1, 'You must provide a risk owner')
+  .min(1, 'You must provide a Deployment Risk Owner')
   .openapi({ example: ['user:tony'] })
 const deploymentAssessmentModelIdsSchema = z
   .array(z.string())

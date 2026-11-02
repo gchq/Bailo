@@ -510,7 +510,7 @@ describe('services > deploymentAssessment', () => {
         expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
           'user:risk-owner',
           deploymentAssessment,
-          'Risk Owner',
+          'Deployment Risk Owner',
         )
         expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
       })
@@ -536,12 +536,12 @@ describe('services > deploymentAssessment', () => {
         expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
           'user:risk-owner',
           deploymentAssessment,
-          'Risk Owner',
+          'Deployment Risk Owner',
         )
         expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
           'user:other-owner',
           deploymentAssessment,
-          'Risk Owner',
+          'Deployment Risk Owner',
         )
       })
     })

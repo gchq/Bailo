@@ -145,7 +145,7 @@ describe('Create, read, update and delete deployment assessments', () => {
     enterDate('[data-test=dateSelectorInput]', new Date('2099-06-30T00:00:00.000Z'))
 
     cy.get('[data-test=signOffButton]').click()
-    cy.contains('Who is the risk owner attached to this deployment assessment?')
+    cy.contains('Who is the Deployment Risk Owner attached to this deployment assessment?')
     cy.get('[data-test=entitySelector] input').type('user')
     cy.get('[role=option]')
       .contains(/^user$/)

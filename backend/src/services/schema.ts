@@ -110,7 +110,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         type: 'object',
         properties: {
           riskOwners: {
-            title: 'Who is the risk owner attached to this deployment assessment?',
+            title: 'Who is the Deployment Risk Owner attached to this deployment assessment?',
             type: 'array',
             items: {
               type: 'string',

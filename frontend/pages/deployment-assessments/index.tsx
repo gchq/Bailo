@@ -16,7 +16,7 @@ export default function Deployments() {
   Use a deployment assessment to record how one or more models will be deployed. Under the previous process, users were required to submit an access request for each model and wait for approval from someone responsible for that model. With deployment assessments, multiple models can be included within a single assessment.
 
   ### Drafts and publishing
-  The author of a deployment assessment is responsible for its contents as the risk owner. Assessments can be saved as a draft and edited until they are ready, then published. Publishing cannot be undone, but comments can still be added afterwards.
+  The author of a deployment assessment is responsible for its contents as the Deployment Risk Owner. Assessments can be saved as a draft and edited until they are ready, then published. Publishing cannot be undone, but comments can still be added afterwards.
 `
   return (
     <Container maxWidth='xl' data-test='deploymentAssessmentsList'>

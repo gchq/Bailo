@@ -46,13 +46,13 @@ async function validateRiskOwner(riskOwners: string[]) {
   for (const riskOwner of riskOwners) {
     const { kind, value } = fromEntity(riskOwner)
     if (kind !== 'user' || !value) {
-      throw BadReq('The risk owner must be a valid user entity.', { riskOwner })
+      throw BadReq('The Deployment Risk Owner must be a valid user entity.', { riskOwner })
     }
 
     try {
       await authentication.getUserInformation(riskOwner)
     } catch (error) {
-      throw BadReq('The risk owner could not be found.', { riskOwner, internal: error })
+      throw BadReq('The Deployment Risk Owner could not be found.', { riskOwner, internal: error })
     }
   }
 }
@@ -110,7 +110,7 @@ async function validateDeploymentAssessment(
   const { modelIds } = metadata.modelOverview ?? {}
 
   if (!draft && (!riskOwners || riskOwners.length === 0)) {
-    throw BadReq('Deployment risk owner is required')
+    throw BadReq('Deployment Risk Owner is required')
   }
 
   if (riskOwners && riskOwners.length > 0) {

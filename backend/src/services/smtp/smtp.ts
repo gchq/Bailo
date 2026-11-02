@@ -105,7 +105,7 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
   }
 
   const emailContent = await buildEmail(
-    `You have been allocated as a risk owner for a deployment assessment`,
+    `You have been allocated as a Deployment Risk Owner for a deployment assessment`,
     [
       { title: 'Deployment Assessment Name', data: deployment.name },
       { title: 'Deployment Assessment ID', data: deployment.id },

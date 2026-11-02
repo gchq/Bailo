@@ -116,7 +116,7 @@ export default function DeploymentAssessmentsList() {
           <Box sx={{ width: { xs: '100%', sm: 280 } }}>
             {/* TODO: Add a user only property to the following component. Enforce options based on this */}
             <EntityAutocompleteFilter
-              label='Risk owner'
+              label='Deployment Risk Owner'
               value={filters.riskOwner}
               onChange={(riskOwner) => setFilters({ riskOwner })}
               dataTest='deploymentAssessmentRiskOwnerFilter'

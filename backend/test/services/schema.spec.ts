@@ -118,7 +118,7 @@ describe('services > schema', () => {
         required: ['riskOwners'],
         properties: expect.objectContaining({
           riskOwners: expect.objectContaining({
-            title: 'Who is the risk owner attached to this deployment assessment?',
+            title: 'Who is the Deployment Risk Owner attached to this deployment assessment?',
             type: 'array',
             minItems: 1,
             maxItems: 1,
