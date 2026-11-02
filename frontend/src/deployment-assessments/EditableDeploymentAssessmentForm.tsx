@@ -220,8 +220,8 @@ export default function EditableDeploymentAssessmentForm({
           heading={formHeading}
           editAction='editDeploymentAssessment'
           deleteAction='deleteDeploymentAssessment'
-          editButtonText='Edit deployment assessment'
-          deleteButtonText='Delete deployment assessment'
+          editButtonText='Edit Deployment Assessment'
+          deleteButtonText='Delete Deployment Assessment'
           isEdit={isEdit}
           isLoading={isLoading}
           onEdit={handleEdit}

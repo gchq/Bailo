@@ -17,7 +17,7 @@ registerPath(
     method: 'post',
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/comments',
     tags: ['deployment assessments'],
-    description: 'Comment on a deployment assessment',
+    description: 'Comment on a Deployment Assessment',
     schema: postDeploymentAssessmentCommentSchema,
     responses: {
       201: {

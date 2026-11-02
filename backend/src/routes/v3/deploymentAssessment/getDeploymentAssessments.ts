@@ -35,7 +35,7 @@ registerPath(
     method: 'get',
     path: '/api/v3/deployment-assessments',
     tags: ['deployment assessments'],
-    description: 'Search deployment assessments',
+    description: 'Search Deployment Assessments',
     schema: getDeploymentAssessmentsSchema,
     responses: {
       200: {

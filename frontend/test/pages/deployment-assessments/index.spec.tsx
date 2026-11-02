@@ -11,11 +11,11 @@ vi.mock('next/router', () => ({
 }))
 
 describe('DeploymentAssessments', () => {
-  it('shows the deployment assessment list without tabs', () => {
+  it('shows the Deployment Assessment list without tabs', () => {
     render(<DeploymentAssessments />)
 
     expect(screen.getByTestId('deploymentAssessmentsList')).toBeDefined()
-    expect(screen.getByRole('button', { name: /Create deployment assessment/i })).toBeDefined()
+    expect(screen.getByRole('button', { name: /Create Deployment Assessment/i })).toBeDefined()
     expect(screen.queryByText('All assessments')).toBeNull()
   })
 })
