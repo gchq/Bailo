@@ -28,7 +28,6 @@ export function isLifecycleReviewDateValid(dueDate: Date): boolean {
 }
 
 // v3 function for retrieving a review using the id
-// `requireReviewRole` restricts results to reviews where the user holds the review's role
 export async function findReviewById(
   user: UserInterface,
   reviewId: string,
