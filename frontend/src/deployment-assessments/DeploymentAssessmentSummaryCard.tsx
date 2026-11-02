@@ -53,8 +53,8 @@ export default function DeploymentAssessmentSummaryCard({
               </Link>
               <CopyToClipboardButton
                 textToCopy={assessment.name}
-                notificationText='Copied deployment assessment name to clipboard'
-                ariaLabel='copy deployment assessment name to clipboard'
+                notificationText='Copied Deployment Assessment name to clipboard'
+                ariaLabel='copy Deployment Assessment name to clipboard'
               />
             </Stack>
             <Stack
@@ -100,7 +100,7 @@ export default function DeploymentAssessmentSummaryCard({
                     onChange={onSelectedModelIdsChange}
                     size='small'
                     variant='outlined'
-                    ariaLabel='add model to deployment assessment filters'
+                    ariaLabel='add model to Deployment Assessment filters'
                     style={{ maxWidth: '400px' }}
                   />
                 ) : (

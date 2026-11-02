@@ -191,7 +191,7 @@ export default function DeploymentAssessmentsList() {
         (!isDeploymentAssessmentsLoading || list.length > 0) && (
           <Paginate
             list={list}
-            emptyListText='No deployment assessments found'
+            emptyListText='No Deployment Assessments found'
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
               { value: 'createdAt', title: 'Created date', iconKind: 'date' },

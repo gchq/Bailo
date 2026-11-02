@@ -10,13 +10,13 @@ export default function Deployments() {
   const router = useRouter()
 
   const deploymentAssessmentInfo = `
-  Deployment assessments are used to document the use of one or more models. Unlike the previous access request process, deployment assessments are not tied to a specific model, and model owners or managers do not need to be involved.
+  Deployment assessments are used to document the use of one or more models. Unlike the previous access request process, Deployment Assessments are not tied to a specific model, and model owners or managers do not need to be involved.
 
-  ### When to use deployment assessments
-  Use a deployment assessment to record how one or more models will be deployed. Under the previous process, users were required to submit an access request for each model and wait for approval from someone responsible for that model. With deployment assessments, multiple models can be included within a single assessment.
+  ### When to use Deployment Assessments
+  Use a Deployment Assessment to record how one or more models will be deployed. Under the previous process, users were required to submit an access request for each model and wait for approval from someone responsible for that model. With Deployment Assessments, multiple models can be included within a single assessment.
 
   ### Drafts and publishing
-  The author of a deployment assessment is responsible for its contents as the Deployment Risk Owner. Assessments can be saved as a draft and edited until they are ready, then published. Publishing cannot be undone, but comments can still be added afterwards.
+  The author of a Deployment Assessment is responsible for its contents as the Deployment Risk Owner. Assessments can be saved as a draft and edited until they are ready, then published. Publishing cannot be undone, but comments can still be added afterwards.
 `
   return (
     <Container maxWidth='xl' data-test='deploymentAssessmentsList'>
@@ -39,10 +39,10 @@ export default function Deployments() {
                 startIcon={<Add />}
                 data-test='actionButton'
               >
-                Create deployment assessment
+                Create Deployment Assessment
               </Button>
               <HelpDialog
-                title='What are deployment assessments?'
+                title='What are Deployment Assessments?'
                 content={<MarkdownDisplay>{deploymentAssessmentInfo}</MarkdownDisplay>}
               />
             </Box>

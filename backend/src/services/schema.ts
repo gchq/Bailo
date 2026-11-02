@@ -90,7 +90,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         type: 'object',
         properties: {
           modelIds: {
-            title: 'List all models assigned to this deployment assessment',
+            title: 'List all models assigned to this Deployment Assessment',
             type: 'array',
             items: {
               type: 'string',
@@ -110,7 +110,7 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
         type: 'object',
         properties: {
           riskOwners: {
-            title: 'Who is the Deployment Risk Owner attached to this deployment assessment?',
+            title: 'Who is the Deployment Risk Owner attached to this Deployment Assessment?',
             type: 'array',
             items: {
               type: 'string',

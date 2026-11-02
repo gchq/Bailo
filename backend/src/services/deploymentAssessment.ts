@@ -167,7 +167,7 @@ async function notifyDeploymentStakeholders(
             error: result.reason,
             deploymentAssessmentId: deploymentAssessment.id,
           },
-          'Failed to send deployment assessment notification',
+          'Failed to send Deployment Assessment notification',
         )
       }
     }
@@ -177,7 +177,7 @@ async function notifyDeploymentStakeholders(
         error,
         deploymentAssessmentId: deploymentAssessment.id,
       },
-      'Failed to prepare deployment assessment notifications',
+      'Failed to prepare Deployment Assessment notifications',
     )
   }
 }
@@ -191,7 +191,7 @@ export async function getDeploymentAssessmentById(
     session,
   })
   if (!deploymentAssessment) {
-    throw NotFound('The requested deployment assessment was not found.', { deploymentAssessmentId })
+    throw NotFound('The requested Deployment Assessment was not found.', { deploymentAssessmentId })
   }
 
   const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.View)
@@ -238,10 +238,10 @@ export async function createDeploymentAssessment(
 ) {
   const schema = await getSchemaById(schemaId)
   if (schema.hidden) {
-    throw BadReq('Cannot create a deployment assessment using a hidden schema.', { schemaId })
+    throw BadReq('Cannot create a Deployment Assessment using a hidden schema.', { schemaId })
   }
   if (schema.kind !== SchemaKind.DeploymentAssessment) {
-    throw BadReq('Deployment assessments must use a deployment assessment schema.', { schemaId })
+    throw BadReq('Deployment assessments must use a Deployment Assessment schema.', { schemaId })
   }
 
   if (metadata) {
@@ -267,7 +267,7 @@ export async function createDeploymentAssessment(
     await deploymentAssessment.save()
   } catch (error) {
     if (isMongoServerError(error) && error.code === 11000) {
-      throw Conflict('A deployment assessment with this ID already exists.', {
+      throw Conflict('A Deployment Assessment with this ID already exists.', {
         deploymentAssessmentId: deploymentAssessment.id,
       })
     }
@@ -357,7 +357,7 @@ export async function updateDeploymentAssessment(
 
   if (diff.draft !== undefined) {
     if (!deploymentAssessment.draft && diff.draft) {
-      throw BadReq('Cannot convert a published deployment assessment back to a draft.')
+      throw BadReq('Cannot convert a published Deployment Assessment back to a draft.')
     }
     deploymentAssessment.draft = diff.draft
     deploymentAssessment.markModified('draft')
