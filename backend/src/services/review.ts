@@ -294,6 +294,9 @@ export async function findUserInCollaborators(user: UserInterface) {
                   {
                     $in: ['$$item.entity', await authentication.getEntities(user)],
                   },
+                  {
+                    $in: ['$role', '$$item.roles'],
+                  },
                 ],
               },
             },

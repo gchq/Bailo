@@ -28,23 +28,28 @@ export function isLifecycleReviewDateValid(dueDate: Date): boolean {
 }
 
 // v3 function for retrieving a review using the id
-export async function findReviewById(user: UserInterface, reviewId: string): Promise<ReviewWithModel> {
+// `requireReviewRole` restricts results to reviews where the user holds the review's role
+export async function findReviewById(
+  user: UserInterface,
+  reviewId: string,
+  requireReviewRole = true,
+): Promise<ReviewWithModel> {
   if (!Types.ObjectId.isValid(reviewId)) {
     throw BadReq('Invalid reviewId', { reviewId })
   }
 
-  const review: ReviewWithModel | undefined = (
-    await ReviewModel.aggregate<ReviewWithModel>()
-      .match({
-        _id: new Types.ObjectId(reviewId),
-      })
-      // Populate model entries
-      .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
-      // Populate model as value instead of array
-      .unwind({ path: '$model' })
-      .match(await findUserInCollaborators(user))
-      .limit(1)
-  ).at(0)
+  const aggregate = ReviewModel.aggregate<ReviewWithModel>()
+    .match({
+      _id: new Types.ObjectId(reviewId),
+    })
+    // Populate model entries
+    .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
+    // Populate model as value instead of array
+    .unwind({ path: '$model' })
+  if (requireReviewRole) {
+    aggregate.match(await findUserInCollaborators(user))
+  }
+  const review: ReviewWithModel | undefined = (await aggregate.limit(1)).at(0)
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { reviewId })
   }
@@ -177,7 +182,8 @@ export async function createLifecycleReview(
 }
 
 export async function notifyReviewer(user: UserInterface, reviewId: string) {
-  const review = await findReviewById(user, reviewId)
+  // The requester is may not be a reviewer, so don't require them to hold the review role
+  const review = await findReviewById(user, reviewId, false)
   const model = await getModelByIdNoAuth(review.modelId)
   // `getModelById` would only determine view access to a model, we must make sure the user has write access too
   const auth = await authorisation.model(user, model, ModelAction.Write)
