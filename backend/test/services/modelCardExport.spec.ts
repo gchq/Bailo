@@ -75,4 +75,27 @@ describe('services > export', () => {
 
     expect(result).toContain('<p>Test Description</p>')
   })
+
+  test('renderToHtml > remove script tags from rendered html', async () => {
+    const modelWithScript = {
+      ...mockModel,
+      description: 'Example <script>alert("xss")</script> Text',
+    }
+
+    const result = await renderToHtml(modelWithScript as ModelInterface, mockModelCardRevision, mockreviewExports)
+
+    expect(result).not.toContain('<script>')
+    expect(result).not.toContain('alert("xss")')
+  })
+
+  test('renderToHtml > should preserve markdown formatting', async () => {
+    const modelWithMarkdown = {
+      ...mockModel,
+      description: '**Bold Text**',
+    }
+
+    const result = await renderToHtml(modelWithMarkdown as ModelInterface, mockModelCardRevision, mockreviewExports)
+
+    expect(result).toContain('<strong>Bold Text</strong>')
+  })
 })
