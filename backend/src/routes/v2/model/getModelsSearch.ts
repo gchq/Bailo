@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -7,9 +7,9 @@ import { EntryKind } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
 import {
-  EntrySearchOptionsParams,
+  type EntrySearchOptionsParams,
   EntrySearchOptionsSchema,
-  EntrySearchResultWithErrors,
+  type EntrySearchResultWithErrors,
 } from '../../../types/types.js'
 import { coerceArray, parse } from '../../../utils/validate.js'
 

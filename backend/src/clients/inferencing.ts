@@ -1,4 +1,4 @@
-import fetch, { Response } from 'node-fetch'
+import fetch, { type Response } from 'node-fetch'
 
 import config from '../utils/config.js'
 import { BadReq, InternalError, Unauthorized } from '../utils/error.js'

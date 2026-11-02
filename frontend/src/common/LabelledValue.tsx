@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 
 interface LabelledValueProps {

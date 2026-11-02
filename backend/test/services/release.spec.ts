@@ -2,8 +2,8 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { SemverObject } from '../../src/models/Release.js'
-import { UserInterface } from '../../src/models/User.js'
+import { type SemverObject } from '../../src/models/Release.js'
+import { type UserInterface } from '../../src/models/User.js'
 import { listModelImages } from '../../src/services/registry.js'
 import {
   createRelease,

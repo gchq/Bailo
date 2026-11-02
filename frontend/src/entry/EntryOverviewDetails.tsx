@@ -3,7 +3,7 @@ import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
-import { PickerValue } from '@mui/x-date-pickers/internals'
+import { type PickerValue } from '@mui/x-date-pickers/internals'
 import { patchEntry } from 'actions/entry'
 import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useCallback, useContext, useMemo, useState } from 'react'
@@ -20,7 +20,7 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryCardKindLabel, EntryInterface, EntryKind, ReviewKind } from 'types/types'
+import { EntryCardKindLabel, type EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import {
   formatDateStringAsDayMonthAndYear,
   increaseCurrentDateByHumanInterval,

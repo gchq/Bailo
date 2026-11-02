@@ -1,9 +1,9 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
 import * as _ from 'lodash-es'
-import { SyntheticEvent, useMemo } from 'react'
+import { type SyntheticEvent, useMemo } from 'react'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
-import { CollaboratorEntry, EntryRole, SystemRoleKeys } from 'types/types'
+import { type CollaboratorEntry, type EntryRole, type SystemRoleKeys } from 'types/types'
 import { getRoleDisplayName } from 'utils/roles'
 import { toSentenceCase } from 'utils/stringUtils'
 

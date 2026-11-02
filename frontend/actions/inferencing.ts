@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer'
 import useSWR from 'swr'
-import { InferenceInterface, TokenInterface } from 'types/types'
+import { type InferenceInterface, type TokenInterface } from 'types/types'
 
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyInferencesList = []
 

@@ -1,7 +1,7 @@
-import { Readable } from 'node:stream'
+import { type Readable } from 'node:stream'
 
 import bytes from 'bytes'
-import { ClientSession, Types } from 'mongoose'
+import { type ClientSession, Types } from 'mongoose'
 
 import {
   completeMultipartUpload,
@@ -15,15 +15,15 @@ import {
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import FileModel, {
-  FileInterface,
-  FileInterfaceDoc,
-  FileWithScanResultsAggregate,
-  FileWithScanResultsInterface,
+  type FileInterface,
+  type FileInterfaceDoc,
+  type FileWithScanResultsAggregate,
+  type FileWithScanResultsInterface,
 } from '../models/File.js'
-import { EntryKind, ModelDoc } from '../models/Model.js'
+import { EntryKind, type ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
-import { UserInterface } from '../models/User.js'
-import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
+import { type UserInterface } from '../models/User.js'
+import { type ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { createFilePath } from '../utils/fileUtils.js'

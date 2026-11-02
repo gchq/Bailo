@@ -1,5 +1,5 @@
 import { Alert, Autocomplete, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material'
-import { EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
+import { type EntrySearchResult, useGetEntry, useListEntries } from 'actions/entry'
 import { useGetEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
@@ -8,13 +8,13 @@ import ComparisonSwapButton from 'src/common/ComparisonSwapButton'
 import Loading from 'src/common/Loading'
 import EntryCardSnapshotSelector, {
   buildSnapshots,
-  EntryCardSnapshot,
-  EntryCardSnapshotStream,
+  type EntryCardSnapshot,
+  type EntryCardSnapshotStream,
 } from 'src/entry/overview/EntryCardSnapshotSelector'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useDebounce from 'src/hooks/useDebounce'
-import { EntryKind, EntryKindKeys, EntryKindLabel, MODEL_ENTRY_KINDS, SplitSchemaNoRender } from 'types/types'
+import { EntryKind, type EntryKindKeys, EntryKindLabel, MODEL_ENTRY_KINDS, type SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
 import { entryKindForRedirect, updateQuery } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'

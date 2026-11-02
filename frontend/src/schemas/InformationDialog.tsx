@@ -1,7 +1,7 @@
 import { Stack } from '@mui/material'
 import DisplayDialog from 'src/common/DisplayDialog'
 import LabelledValue from 'src/common/LabelledValue'
-import { SchemaInterface } from 'types/types'
+import { type SchemaInterface } from 'types/types'
 
 type SchemaDialogProps = {
   open: boolean

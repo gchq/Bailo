@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { StroomEventObject } from '../../src/models/StroomEvent.js'
+import { type StroomEventObject } from '../../src/models/StroomEvent.js'
 import { processBatch, saveEvent } from '../../src/services/stroom.js'
 import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'

@@ -6,7 +6,7 @@ import Paginate from 'src/common/Paginate'
 import renderQueryState from 'src/common/renderQueryState'
 import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDisplay'
 import Link from 'src/Link'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 
 type AccessRequestsProps = {
   model: EntryInterface

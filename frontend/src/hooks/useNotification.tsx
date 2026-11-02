@@ -8,7 +8,7 @@
 
 import CloseIcon from '@mui/icons-material/Close'
 import IconButton from '@mui/material/IconButton'
-import { SnackbarKey, SnackbarOrigin, useSnackbar, VariantType } from 'notistack'
+import { type SnackbarKey, type SnackbarOrigin, useSnackbar, type VariantType } from 'notistack'
 import { useEffect, useState } from 'react'
 
 interface SnackbarConfig {

@@ -1,28 +1,28 @@
-import { PassThrough } from 'node:stream'
+import { type PassThrough } from 'node:stream'
 import { json, text } from 'node:stream/consumers'
 
 import { escapeRegExp } from 'lodash-es'
 import { finished } from 'stream/promises'
-import { Header } from 'tar-stream'
+import { type Header } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { TransferStatus } from '../../../models/ModelTransfer.js'
-import { UserInterface } from '../../../models/User.js'
+import { type UserInterface } from '../../../models/User.js'
 import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
-import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
+import { type MirrorImportLogData, MirrorKind, type MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { isManifestList } from '../../../utils/registryResponses.js'
 import {
-  ImageManifestV2,
-  ManifestListV2,
+  type ImageManifestV2,
+  type ManifestListV2,
   ManifestResponseBodySchema,
   OCIEmptyMediaType,
 } from '../../../utils/registryResponseTypes.js'
 import log from '../../log.js'
 import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
-import { BaseImporter, BaseMirrorMetadata } from './base.js'
+import { BaseImporter, type BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {
   importKind: MirrorKindKeys<'Image'>

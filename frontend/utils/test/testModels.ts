@@ -1,19 +1,19 @@
-import { UserInformation } from 'src/common/UserDisplay'
+import { type UserInformation } from 'src/common/UserDisplay'
 import {
-  AccessRequestInterface,
-  EntryCardInterface,
-  EntryInterface,
+  type AccessRequestInterface,
+  type EntryCardInterface,
+  type EntryInterface,
   EntryKind,
-  EntryRole,
+  type EntryRole,
   EntryVisibility,
-  ResponseInterface,
+  type ResponseInterface,
   ResponseKind,
-  ReviewRequestInterface,
-  ReviewRoleInterface,
+  type ReviewRequestInterface,
+  type ReviewRoleInterface,
   RoleKind,
-  SchemaInterface,
-  StepNoRender,
-  UiConfig,
+  type SchemaInterface,
+  type StepNoRender,
+  type UiConfig,
 } from 'types/types'
 
 /******** V2 ********/

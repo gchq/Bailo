@@ -4,7 +4,7 @@ import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { ReviewKind, ReviewListStatusKeys } from 'types/types'
+import { ReviewKind, type ReviewListStatusKeys } from 'types/types'
 
 type ReviewsListProps = {
   kind: 'release' | 'access' | 'lifecycle'

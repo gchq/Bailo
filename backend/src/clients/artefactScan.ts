@@ -1,8 +1,8 @@
-import { Readable } from 'node:stream'
+import { type Readable } from 'node:stream'
 
 import FormData from 'form-data'
 import NodeCache from 'node-cache'
-import fetch, { Response as FetchResponse } from 'node-fetch'
+import fetch, { type Response as FetchResponse } from 'node-fetch'
 
 import { z } from '../lib/zod.js'
 import config from '../utils/config.js'

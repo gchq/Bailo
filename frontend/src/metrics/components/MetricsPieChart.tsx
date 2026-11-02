@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { mangoFusionPaletteDark } from '@mui/x-charts'
-import { DefaultizedPieValueType } from '@mui/x-charts/models'
+import { type DefaultizedPieValueType } from '@mui/x-charts/models'
 import { PieChart, pieClasses } from '@mui/x-charts/PieChart'
 import { sortPieData } from 'utils/metricsUtils'
 

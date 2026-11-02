@@ -1,19 +1,19 @@
-import { PassThrough, Readable } from 'node:stream'
+import { type PassThrough, type Readable } from 'node:stream'
 
 import {
   CompleteMultipartUploadCommand,
   CreateBucketCommand,
-  CreateBucketRequest,
+  type CreateBucketRequest,
   CreateMultipartUploadCommand,
   DeleteObjectCommand,
   GetObjectCommand,
-  GetObjectRequest,
+  type GetObjectRequest,
   HeadBucketCommand,
-  HeadBucketRequest,
+  type HeadBucketRequest,
   HeadObjectCommand,
-  HeadObjectRequest,
+  type HeadObjectRequest,
   S3Client,
-  S3ServiceException,
+  type S3ServiceException,
   UploadPartCommand,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'

@@ -19,7 +19,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
-import { AccessRequestInterface, SplitSchemaNoRender } from 'types/types'
+import { type AccessRequestInterface, type SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
 

@@ -1,6 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { AuthenticationKindKeys, getAuthenticationConnector } from '../../../src/connectors/authentication/index.js'
+import {
+  type AuthenticationKindKeys,
+  getAuthenticationConnector,
+} from '../../../src/connectors/authentication/index.js'
 import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 vi.mock('../../../src/connectors/authentication/Base.js', () => ({ BaseAuthenticationConnector: vi.fn() }))

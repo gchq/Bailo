@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind } from '../../src/models/Model.js'
-import { UserInterface } from '../../src/models/User.js'
+import { type UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
   findAccessRequests,
@@ -14,7 +14,7 @@ import {
   removeAccessRequests,
   updateAccessRequest,
 } from '../../src/services/accessRequest.js'
-import { AccessRequestUserPermissions } from '../../src/types/types.js'
+import { type AccessRequestUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')

@@ -1,6 +1,6 @@
 import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import getCompareFieldState from 'src/hooks/useCompareField'

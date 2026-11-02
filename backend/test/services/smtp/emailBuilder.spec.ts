@@ -17,4 +17,17 @@ describe('services > smtp > emailBuilder', () => {
 
     expect(emailContent.html).not.toContain(badString)
   })
+
+  test('buildEmail > text content', async () => {
+    const emailContent = await buildEmail(
+      'Title',
+      [
+        { title: 'Model', data: 'name' },
+        { title: 'Version', data: '1.0.0' },
+      ],
+      [{ name: 'Open', url: 'https://example.com' }],
+    )
+
+    expect(emailContent.text).toEqual("Title\n\nModel: 'name'\nVersion: '1.0.0'\n\n\nOpen: 'https://example.com'\n")
+  })
 })

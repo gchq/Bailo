@@ -24,6 +24,7 @@ htmlcov/
 *env/
 *ENV/
 libpythonvenv/
+.venv/
 
 # VS Code
 .vscode/

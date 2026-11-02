@@ -4,8 +4,8 @@ import ErrorIcon from '@mui/icons-material/Error'
 import HourglassTop from '@mui/icons-material/HourglassTop'
 import Warning from '@mui/icons-material/Warning'
 import { Chip, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
-import { ReactElement } from 'react'
-import { ArtefactScanState, ClamAVSummary, ModelScanSummary, ScanResultInterface } from 'types/types'
+import { type ReactElement } from 'react'
+import { ArtefactScanState, type ClamAVSummary, type ModelScanSummary, type ScanResultInterface } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
 
 interface ScanResultDetailProps {

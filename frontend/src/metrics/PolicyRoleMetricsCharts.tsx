@@ -23,7 +23,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
-import { EntryRole, PolicyRoleBaseMetrics } from 'types/types'
+import { type EntryRole, type PolicyRoleBaseMetrics } from 'types/types'
 
 interface PolicyMetricsChartsProps {
   data: PolicyRoleBaseMetrics

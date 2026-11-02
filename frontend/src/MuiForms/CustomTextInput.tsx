@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry, RJSFSchema } from '@rjsf/utils'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { useMemo } from 'react'
 import CompareField from 'src/common/CompareField'
 import getCompareFieldState from 'src/hooks/useCompareField'

@@ -7,14 +7,14 @@ import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typograph
 import { alpha, useTheme } from '@mui/material/styles'
 import MuiFieldTemplate from '@rjsf/mui/lib/FieldTemplate/index.js'
 import {
-  ArrayFieldItemTemplateProps,
-  ArrayFieldTemplateProps,
-  FieldTemplateProps,
-  ObjectFieldTemplateProps,
-  RJSFSchema,
-  TitleFieldProps,
+  type ArrayFieldItemTemplateProps,
+  type ArrayFieldTemplateProps,
+  type FieldTemplateProps,
+  type ObjectFieldTemplateProps,
+  type RJSFSchema,
+  type TitleFieldProps,
 } from '@rjsf/utils'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 import { isQuestionAnswered } from 'utils/formUtils'

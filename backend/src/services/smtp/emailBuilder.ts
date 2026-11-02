@@ -1,8 +1,7 @@
-import dedent from 'dedent-js'
 import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
 import mjml2html from 'mjml'
-import Mail from 'nodemailer/lib/mailer/index.js'
+import type Mail from 'nodemailer/lib/mailer/index.js'
 import { resolve } from 'path'
 import sanitizeHtml from 'sanitize-html'
 
@@ -61,13 +60,7 @@ export async function buildEmail(
 }
 
 function emailText(title: string, reviewMetadata: Info[], reviewActions: actions[]) {
-  return dedent(`
-    ${title}
-
-    ${textMetadata(reviewMetadata)}
-
-    ${textActions(reviewActions)}
-  `)
+  return [title, '', textMetadata(reviewMetadata), '', textActions(reviewActions)].join('\n')
 }
 
 function textMetadata(reviewMetadata: Info[]) {

@@ -17,9 +17,9 @@ import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
 import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
-import { buildSnapshots, EntryCardSnapshot } from 'src/entry/overview/EntryCardSnapshotSelector'
+import { buildSnapshots, type EntryCardSnapshot } from 'src/entry/overview/EntryCardSnapshotSelector'
 import MessageAlert from 'src/MessageAlert'
-import { EntryCardKindLabel, EntryInterface, EntryKind } from 'types/types'
+import { EntryCardKindLabel, type EntryInterface, EntryKind } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
 type EntryCardHistoryDialogProps = {

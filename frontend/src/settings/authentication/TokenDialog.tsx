@@ -28,7 +28,7 @@ import KubernetesSecret from 'src/settings/authentication/KubernetesSecret'
 import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken'
 import PodmanLogin from 'src/settings/authentication/PodmanLogin'
 import RocketConfiguration from 'src/settings/authentication/RocketConfiguration'
-import { TokenCategory, TokenCategoryKeys, TokenInterface } from 'types/types'
+import { TokenCategory, type TokenCategoryKeys, type TokenInterface } from 'types/types'
 
 type TokenDialogProps = {
   token: TokenInterface

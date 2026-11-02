@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FieldPathId, Registry, RJSFSchema } from '@rjsf/utils'
+import { type FieldPathId, type Registry, type RJSFSchema } from '@rjsf/utils'
 import CompareField from 'src/common/CompareField'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'

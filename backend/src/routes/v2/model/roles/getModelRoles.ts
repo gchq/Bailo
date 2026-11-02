@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
@@ -6,7 +6,7 @@ import { z } from '../../../../lib/zod.js'
 import { SystemRoles } from '../../../../models/Model.js'
 import { getAllEntryRoles } from '../../../../services/roles.js'
 import { registerPath } from '../../../../services/specification.js'
-import { Role, RoleKind } from '../../../../types/types.js'
+import { type Role, RoleKind } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getModelRolesSchema = z.object({

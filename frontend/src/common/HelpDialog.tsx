@@ -1,6 +1,6 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from '@mui/material'
-import { ReactNode, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { Transition } from 'src/common/Transition'
 
 type HelpDialogProps = {

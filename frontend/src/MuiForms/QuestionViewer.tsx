@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material'
-import { FieldPathId, Registry, RJSFSchema } from '@rjsf/utils'
+import { type FieldPathId, type Registry, type RJSFSchema } from '@rjsf/utils'
 import MessageAlert from 'src/MessageAlert'
 
 interface QuestionViewProps {

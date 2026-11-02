@@ -1,9 +1,17 @@
 import qs from 'querystring'
-import { UserInformation } from 'src/common/UserDisplay'
+import { type UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKeys, User, UserV3 } from 'types/types'
+import {
+  type EntityObject,
+  type EntryInterface,
+  type TokenAction,
+  type TokenInterface,
+  type TokenScopeKeys,
+  type User,
+  type UserV3,
+} from 'types/types'
 
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyEntityList = []
 

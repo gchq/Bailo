@@ -15,7 +15,7 @@ import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useMemo } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import renderQueryState from 'src/common/renderQueryState'
-import { SchemaInterface } from 'types/types'
+import { type SchemaInterface } from 'types/types'
 
 interface SchemaButtonProps {
   schema: SchemaInterface

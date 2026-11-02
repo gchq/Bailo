@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 import { describe, expect, test, vi } from 'vitest'
 
 import { checkAuthentication, getTokenFromAuthHeader } from '../../../src/routes/middleware/defaultAuthentication.js'

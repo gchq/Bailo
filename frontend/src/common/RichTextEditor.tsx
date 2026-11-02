@@ -4,9 +4,9 @@ import '@uiw/react-markdown-preview/markdown.css'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { useTheme } from '@mui/material/styles'
-import { MDEditorProps } from '@uiw/react-md-editor'
+import { type MDEditorProps } from '@uiw/react-md-editor'
 import dynamic from 'next/dynamic'
-import { ReactNode, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 // The MD Editor library uses custom CSS property names which do not correspond to standard CSS naming
 interface MDEditorStyling {
