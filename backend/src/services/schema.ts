@@ -120,7 +120,6 @@ function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
             maxItems: 1,
             uniqueItems: true,
             widget: 'entitySelector',
-            hideDefaultUser: true,
           },
           ...(((jsonSchema as any).properties?.signOff?.properties as object) ?? {}),
         },

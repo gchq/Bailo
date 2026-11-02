@@ -36,7 +36,13 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    const steps = getStepsFromSchema(schema)
+    const defaultState = {
+      signOff: {
+        riskOwners: [`user:${currentUser.dn}`],
+      },
+    }
+
+    const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
       step.steps = steps
     }
