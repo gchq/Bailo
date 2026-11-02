@@ -1,7 +1,7 @@
 import NodeCache from 'node-cache'
 
 import { type UserInterface } from '../../models/User.js'
-import { getHttpsAgent } from '../../services/http.js'
+import { getHttpsDispatcher } from '../../services/http.js'
 import {
   type EntrySearchOptionsParams,
   type EntrySearchResultWithErrors,
@@ -29,19 +29,10 @@ export abstract class BasePeerConnector {
     return this.queryCache
   }
 
-  getHttpsAgent() {
-    const opts = this.config.httpConfig || {}
-    let proxyOpts = {}
-    if (this.getConfig().proxy) {
-      proxyOpts = {
-        getProxyForUrl: () => {
-          return this.config.proxy
-        },
-      }
-    }
-    return getHttpsAgent({
-      ...opts,
-      ...proxyOpts,
+  getHttpsDispatcher() {
+    return getHttpsDispatcher({
+      ...this.config.httpConfig,
+      proxy: this.config.proxy,
     })
   }
 
