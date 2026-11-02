@@ -17,7 +17,6 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
     { category: ReviewKind.ACCESS, title: 'Access requests' },
     { category: ReviewKind.RELEASE, title: 'Releases' },
     { category: ReviewKind.LIFECYCLE, title: 'Model card lifecycle' },
-    { category: ReviewKind.DEPLOYMENTS, title: 'Deployment assessments' },
   ]
 
   const categoryList = () =>

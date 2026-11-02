@@ -116,7 +116,7 @@ export function useGetModel(entryId: string | undefined | null) {
 
 const emptyRolesList = []
 
-export function useGetEntryRoles(entryId?: string | null) {
+export function useGetEntryRoles(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       roles: EntryRole[]

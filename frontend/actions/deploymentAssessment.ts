@@ -1,4 +1,5 @@
 import { DeploymentAssessmentMetadata } from 'types/types'
+import { toSafePathId } from 'utils/stringUtils'
 
 export function postDeploymentAssessment(
   name: string,
@@ -32,5 +33,13 @@ export function patchDeploymentAssessment(
       ...(metadata !== undefined && { metadata }),
       draft,
     }),
+  })
+}
+
+export function postDeploymentAssessmentComment(deploymentAssessmentId: string, comment: string) {
+  return fetch(`/api/v3/deployment-assessments/${toSafePathId(deploymentAssessmentId)}/comments`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
   })
 }

@@ -465,12 +465,6 @@ export const AuditInfo = {
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.DeploymentAssessment,
   },
-  ReviewDeploymentAssessment: {
-    typeId: 'ReviewDeploymentAssessment',
-    description: 'Deployment assessment review decision created',
-    auditKind: AuditKind.Create,
-    resourceKind: ResourceKind.ReviewResponse,
-  },
   CommentOnDeploymentAssessment: {
     typeId: 'CommentOnDeploymentAssessment',
     description: 'Deployment assessment comment created',
@@ -602,7 +596,6 @@ export abstract class BaseAuditConnector {
     deploymentAssessments: DeploymentAssessmentSummary[],
   ): Promise<void>
   abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
-  abstract onReviewDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
   abstract onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
 
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>

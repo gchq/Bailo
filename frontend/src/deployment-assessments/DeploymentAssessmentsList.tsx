@@ -30,16 +30,13 @@ import {
   useDeploymentAssessmentFilters,
 } from 'src/hooks/useDeploymentAssessmentFilters'
 import MessageAlert from 'src/MessageAlert'
-import { DeploymentAssessmentState, DeploymentAssessmentSummary, SchemaKind } from 'types/types'
+import { DeploymentAssessmentSummary, SchemaKind } from 'types/types'
 
 import DeploymentAssessmentSummaryCard from './DeploymentAssessmentSummaryCard'
 
 const statusLabels: Record<DeploymentAssessmentStatusKeys, string> = {
   [DeploymentAssessmentStatus.Draft]: 'Draft',
-  [DeploymentAssessmentState.NeedsReview]: 'Needs review',
-  [DeploymentAssessmentState.ChangesRequested]: 'Changes requested',
-  [DeploymentAssessmentState.Approved]: 'Approved',
-  [DeploymentAssessmentState.Rejected]: 'Rejected',
+  [DeploymentAssessmentStatus.Published]: 'Published',
 }
 
 export default function DeploymentAssessmentsList() {

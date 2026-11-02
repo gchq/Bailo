@@ -3,7 +3,7 @@ import { Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/
 import { useGetModel } from 'actions/entry'
 import { putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
 import { useGetResponses } from 'actions/response'
-import { postReviewResponse, useGetReviewRequestsForModel, useHeadReviewRequests } from 'actions/review'
+import { postReviewResponse, useGetReviewRequestsForModel, useHeadReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useEffect, useEffectEvent, useState } from 'react'
@@ -45,9 +45,9 @@ export default function Release() {
     semver: `${semver}`,
   })
   const { mutateResponses } = useGetResponses([release ? release._id : '', ...reviews.map((review) => review._id)])
-  const { reviewCountHeader, isReviewsLoading: isReviewCountLoading } = useHeadReviewRequests({
-    modelId,
-    semver,
+  const { reviewCountHeader, isReviewsLoading: isReviewCountLoading } = useHeadReviewRequestsForModel({
+    modelId: modelId as string,
+    semver: semver as string,
   })
   const [reviewComment, setReviewComment] = useState('')
 
@@ -167,7 +167,7 @@ export default function Release() {
                   text='This is a draft release'
                   dialogTitle='Confirm release submission for review'
                   draft={release.draft}
-                  handleSubmitForReview={handleSubmitReleaseForReview}
+                  handleSubmit={handleSubmitReleaseForReview}
                   showButton
                   disableButton={isEdit}
                   isLoading={isLoading}

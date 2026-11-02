@@ -24,7 +24,6 @@ interface ReviewPopperProps {
   errorMessage: string
   onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate?: Dayjs | null) => void
   includeDueDate?: boolean
-  deploymentAssessmentReview?: boolean
   reviewComment: string
   onReviewCommentChange: (value: string) => void
 }
@@ -35,7 +34,6 @@ export default function ReviewPopper({
   includeDueDate = false,
   errorMessage,
   onSubmit,
-  deploymentAssessmentReview = false,
   reviewComment,
   onReviewCommentChange,
 }: ReviewPopperProps) {
@@ -56,7 +54,6 @@ export default function ReviewPopper({
         loading={isLoading}
         includeDueDate={includeDueDate}
         onCancel={() => setAnchorEl(null)}
-        deploymentAssessmentReview={deploymentAssessmentReview}
         reviewComment={reviewComment}
         onReviewCommentChange={onReviewCommentChange}
       />

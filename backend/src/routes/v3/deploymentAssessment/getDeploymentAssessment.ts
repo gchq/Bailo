@@ -7,7 +7,6 @@ import { getDeploymentAssessmentDetails } from '../../../services/deploymentAsse
 import {
   deploymentAssessmentInterfaceSchema,
   deploymentAssessmentResponseSchema,
-  deploymentAssessmentStateSchema,
   registerPath,
 } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -32,7 +31,6 @@ registerPath(
           'application/json': {
             schema: z.object({
               deploymentAssessment: deploymentAssessmentInterfaceSchema,
-              state: deploymentAssessmentStateSchema.optional(),
               responses: z.array(deploymentAssessmentResponseSchema),
             }),
           },
@@ -48,13 +46,13 @@ export const getDeploymentAssessment = [
     req.audit = AuditInfo.ViewDeploymentAssessment
     const { params } = parse(req, getDeploymentAssessmentSchema)
 
-    const { deploymentAssessment, responses, state } = await getDeploymentAssessmentDetails(
+    const { deploymentAssessment, responses } = await getDeploymentAssessmentDetails(
       req.user,
       params.deploymentAssessmentId,
     )
 
     await audit.onViewDeploymentAssessment(req, deploymentAssessment)
 
-    res.json({ deploymentAssessment, responses, state })
+    res.json({ deploymentAssessment, responses })
   },
 ]

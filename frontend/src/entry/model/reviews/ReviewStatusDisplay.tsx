@@ -51,8 +51,6 @@ export function ReviewStatusDisplay({
     switch (decision) {
       case Decision.RequestChanges:
         return 'requested changes'
-      case Decision.Reject:
-        return 'rejected'
     }
   }
 
@@ -60,8 +58,6 @@ export function ReviewStatusDisplay({
     switch (decision) {
       case Decision.RequestChanges:
         return 'Changes requested'
-      case Decision.Reject:
-        return 'Rejected'
     }
   }
 

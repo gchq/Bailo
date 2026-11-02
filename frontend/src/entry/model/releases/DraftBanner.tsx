@@ -14,37 +14,43 @@ type DraftBannerProps = {
   | {
       showButton: false
       dialogTitle?: never
+      dialogMessage?: never
+      buttonText?: never
       disableButton?: never
-      handleSubmitForReview?: never
+      handleSubmit?: never
       isLoading?: never
       errorMessage?: never
       setErrorMessage?: never
-      validateBeforeSubmitForReview?: never
+      validateBeforeSubmit?: never
     }
   | {
       showButton: true
       dialogTitle: string
+      dialogMessage?: string
+      buttonText?: string
       disableButton: boolean
-      handleSubmitForReview: () => void
+      handleSubmit: () => void
       isLoading: boolean
       errorMessage?: string
       setErrorMessage: (err: string) => void
-      /** Runs when submission for review is clicked. Returning false stops the confirmation dialogue from opening. */
-      validateBeforeSubmitForReview?: () => boolean
+      /** Runs when the submit button is clicked. Returning false stops the confirmation dialogue from opening. */
+      validateBeforeSubmit?: () => boolean
     }
 )
 
 export function DraftBanner({
   text,
   dialogTitle,
+  dialogMessage = 'Are you sure you want to submit this for review? This is irreversible.',
+  buttonText = 'Submit for Review',
   draft = false,
   isLoading,
   errorMessage = '',
   setErrorMessage,
-  handleSubmitForReview,
+  handleSubmit,
   showButton,
   disableButton,
-  validateBeforeSubmitForReview,
+  validateBeforeSubmit,
 }: DraftBannerProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
@@ -52,8 +58,8 @@ export function DraftBanner({
     return <></>
   }
 
-  function handleSubmitForReviewClick() {
-    if (validateBeforeSubmitForReview && !validateBeforeSubmitForReview()) {
+  function handleSubmitClick() {
+    if (validateBeforeSubmit && !validateBeforeSubmit()) {
       return
     }
     setOpen(true)
@@ -82,20 +88,20 @@ export function DraftBanner({
               <Button
                 variant='outlined'
                 sx={{ borderColor: 'white', color: theme.palette.common.white }}
-                onClick={handleSubmitForReviewClick}
+                onClick={handleSubmitClick}
                 disabled={disableButton}
                 loading={isLoading}
                 data-test='publishDraftButton'
               >
-                <Typography>Submit for Review</Typography>
+                <Typography>{buttonText}</Typography>
               </Button>
               <ConfirmationDialogue
                 open={open}
                 title={dialogTitle}
-                onConfirm={handleSubmitForReview}
+                onConfirm={handleSubmit}
                 onCancel={() => [setOpen(false), setErrorMessage('')]}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to submit this for review? This is irreversible.'}
+                dialogMessage={dialogMessage}
                 confirmLoading={isLoading}
               />
             </>
