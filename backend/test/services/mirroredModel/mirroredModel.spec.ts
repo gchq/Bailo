@@ -26,12 +26,12 @@ const shortIdMock = vi.hoisted(() =>
 )
 vi.mock('../../../src/utils/id.js', () => ({ shortId: shortIdMock }))
 
-const getHttpsAgentMock = vi.hoisted(() =>
+const getHttpsDispatcherMock = vi.hoisted(() =>
   vi.fn(function () {
     return {}
   }),
 )
-vi.mock('../../../src/services/http.js', () => ({ getHttpsAgent: getHttpsAgentMock }))
+vi.mock('../../../src/services/http.js', () => ({ getHttpsDispatcher: getHttpsDispatcherMock }))
 
 const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
@@ -60,7 +60,7 @@ const fetchMock = vi.hoisted(() =>
     return { ok: true, body: Readable.from(['data']), text: vi.fn() } as any
   }),
 )
-vi.mock('node-fetch', () => ({ default: fetchMock }))
+vi.stubGlobal('fetch', fetchMock)
 
 const tarballMocks = vi.hoisted(() => ({
   addEntryToTarGzUpload: vi.fn(),
