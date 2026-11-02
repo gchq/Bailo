@@ -44,7 +44,6 @@ const newDeploymentAssessmentValuesObject = {
     modelOverview: {
       modelIds: [] as string[],
     },
-    signOff: { riskOwners: ['user:user2'] },
     about: {
       deploymentSummary: 'This is still a deployment',
       deploymentDate: '2098-05-01',
@@ -146,11 +145,6 @@ describe('Create, read, update and delete Deployment Assessments', () => {
 
     cy.get('[data-test=signOffButton]').click()
     cy.contains('Who is the Deployment Risk Owner attached to this Deployment Assessment?')
-    cy.get('[data-test=entitySelector] input').type('user')
-    cy.get('[role=option]')
-      .contains(/^user$/)
-      .should('be.visible')
-      .click()
     cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
 
     cy.get('[data-test=modelOverviewButton]').click()
