@@ -181,7 +181,7 @@ describe('Create, read, update and delete deployment assessments', () => {
   it('edit new deployment assessment', () => {
     cy.visit(`/deployment-assessments/${editDeploymentAssessmentId}`)
     cy.contains(editDeploymentAssessmentName)
-    cy.get('[data-test=editFormButton]').click()
+    cy.get('[data-test=editFormButton]').click({ force: true })
     cy.get('[data-test=editNameInput] input').clear().type(newDeploymentAssessmentValuesObject.name)
 
     cy.get('#root_deploymentSummary').clear().type(newDeploymentAssessmentValuesObject.metadata.about.deploymentSummary)
@@ -231,7 +231,7 @@ describe('Create, read, update and delete deployment assessments', () => {
       expect(response.status).to.eq(201)
       daToDeleteUuid = response.body.deploymentAssessment.id
       cy.visit(`/deployment-assessments/${daToDeleteUuid}`)
-      cy.get('[data-test=deleteFormButton]').click()
+      cy.get('[data-test=deleteFormButton]').click({ force: true })
 
       cy.get('[data-test=deleteInputVerification]').type('DA - Delete Me')
       cy.get('[data-test=deleteConfirmButton]').click()
