@@ -1,4 +1,3 @@
-import { type ProxyAgentOptions } from 'proxy-agent'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
 import { type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
@@ -12,6 +11,7 @@ import {
   type SystemRolesKeys,
 } from '../models/Model.js'
 import { type ScanInterface, type SeverityLevelKeys } from '../models/Scan.js'
+import { type HttpsDispatcherOptions } from '../services/http.js'
 import {
   type DocumentsMirrorMetadata,
   type MongoDocumentMirrorInformation,
@@ -99,8 +99,10 @@ export interface RemoteFederationConfig {
   label: string
   /** Either another Bailo instance or hugging face */
   kind: PeerKindKeys
+  /** `http(s)://` proxy URL for requests to this peer. PAC files are not supported. */
   proxy?: string
-  httpConfig?: ProxyAgentOptions
+  /** TLS options for requests to this peer */
+  httpConfig?: HttpsDispatcherOptions
   /** Defines how long search requests should exist for */
   cache?: {
     /** Time to live in seconds */
