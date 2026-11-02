@@ -22,8 +22,9 @@ export function getHttpsDispatcher(opts: HttpsDispatcherOptions = {}) {
   const tls = { ...defaultOpts, ...overrides }
 
   if (!proxy) {
-    // `connect` applies to direct requests and `requestTls` to requests sent through an environment proxy
-    return new EnvHttpProxyAgent({ connect: tls, requestTls: tls } as EnvHttpProxyAgent.Options)
+    // `connect` applies to direct requests and `requestTls` to requests sent through an environment proxy.
+    // undici supports `requestTls` here at runtime but its types omit it, so only that key bypasses type checking.
+    return new EnvHttpProxyAgent({ connect: tls, ...({ requestTls: tls } as object) })
   }
 
   const proxyProtocol = URL.parse(proxy)?.protocol
