@@ -1,6 +1,5 @@
 import { Request } from 'express'
-import type { ZodError, ZodSchema } from 'zod'
-import { ErrorMessageOptions, generateErrorMessage } from 'zod-error'
+import type { ZodError, ZodIssue, ZodSchema } from 'zod'
 
 import { z } from '../lib/zod.js'
 import { BadReq } from './error.js'
@@ -10,16 +9,22 @@ export function parse<T extends ZodSchema>(req: Request, schema: T): z.infer<T> 
     return schema.parse(req)
   } catch (err) {
     const error = err as ZodError
-    const options: ErrorMessageOptions = {
-      delimiter: {
-        component: ' - ',
-      },
-      code: {
-        enabled: false,
-      },
-    }
-    throw BadReq(generateErrorMessage(error.issues, options), { errors: error.issues })
+    throw BadReq(formatZodIssues(error.issues), { errors: error.issues })
   }
+}
+
+/** Formats issues as `Path: a.b[0].c - Message: <message>`, separated by ` | `. */
+export function formatZodIssues(issues: ZodIssue[]) {
+  return issues.map((issue) => `Path: ${formatZodPath(issue.path)} - Message: ${issue.message}`).join(' | ')
+}
+
+function formatZodPath(path: ZodIssue['path']) {
+  return path.reduce<string>((result, key) => {
+    if (typeof key === 'number') {
+      return `${result}[${key}]`
+    }
+    return [result, key].filter(Boolean).join('.')
+  }, '')
 }
 
 export function coerceArray<T extends z.ZodTypeAny>(object: z.ZodArray<T, 'many'>) {

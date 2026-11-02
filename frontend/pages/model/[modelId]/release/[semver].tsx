@@ -94,6 +94,7 @@ export default function Release() {
       setPutErrorMessage(await getErrorMessage(response))
     } else {
       mutateRelease()
+      mutateReviews()
       sendNotification({ msg: 'Release successfully submitted for review.', variant: 'success' })
     }
 

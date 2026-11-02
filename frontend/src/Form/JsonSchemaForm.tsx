@@ -66,6 +66,7 @@ export default function JsonSchemaForm({
   stateList,
   currentState,
   showValidation = false,
+  liveValidation = true,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -78,6 +79,8 @@ export default function JsonSchemaForm({
   stateList?: string[]
   currentState?: string
   showValidation?: boolean
+  /** Validate while the user types, e.g. disabled for drafts that can be saved with unanswered questions */
+  liveValidation?: boolean
 }) {
   const theme = useTheme()
   const router = useRouter()
@@ -222,7 +225,7 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Stack>
+    <Stack sx={{ minWidth: 0 }}>
       {displayStats && (
         <Box>
           <Box sx={{ mb: 1 }}>
@@ -280,7 +283,7 @@ export default function JsonSchemaForm({
             </List>
           </Stepper>
         </Grid>
-        <Grid size={{ xs: 12, md: 10 }} ref={ref}>
+        <Grid size={{ xs: 12, md: 10 }} ref={ref} sx={{ minWidth: 0 }}>
           {displayStats && (
             <Box>
               <Box>
@@ -334,8 +337,8 @@ export default function JsonSchemaForm({
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
+            liveValidate={showValidation || liveValidation ? 'onChange' : undefined}
             liveOmit
-            liveValidate={showValidation ? 'onChange' : undefined}
             showErrorList={showValidation ? 'top' : false}
             transformErrors={rewordRJSFErrors}
             customValidate={blankValueValidator}
@@ -352,23 +355,14 @@ export default function JsonSchemaForm({
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
             }}
-            templates={
-              !canEdit && !showValidation
-                ? {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                  }
-                : {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                    ErrorListTemplate,
-                    FieldTemplate,
-                  }
-            }
+            templates={{
+              DescriptionFieldTemplate,
+              ArrayFieldTemplate,
+              ArrayFieldItemTemplate,
+              ObjectFieldTemplate,
+              ErrorListTemplate,
+              FieldTemplate,
+            }}
           >
             <></>
           </Form>

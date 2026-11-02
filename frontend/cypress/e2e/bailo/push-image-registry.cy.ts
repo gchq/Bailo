@@ -1,4 +1,9 @@
 const BASE_URL = Cypress.config('baseUrl')
+// Set in before(): Podman is often installed as a `docker` alias, so detect at runtime.
+let containerCli = 'docker'
+let isPodman = false
+let tlsFlag = ''
+let insecureManifestFlag = '--insecure'
 let modelUuidForRegistry = ''
 const modelNameForRegistry = 'Test Model'
 let registryUrl = ''
@@ -8,6 +13,14 @@ const testModelMultiplatformImageTag = 'multiplatform'
 
 describe('Make and approve an access request', () => {
   before(() => {
+    containerCli = Cypress.expose('containerCli')
+    cy.exec(`${containerCli} version`, { failOnNonZeroExit: false }).then(({ stdout }) => {
+      expect(stdout, `${containerCli} version produced no output`).to.have.length.greaterThan(0)
+      isPodman = /podman/i.test(stdout)
+      tlsFlag = isPodman ? '--tls-verify=false' : ''
+      insecureManifestFlag = isPodman ? '--tls-verify=false' : '--insecure'
+    })
+
     cy.log('Upload new model and set schema via API')
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
       name: modelNameForRegistry,
@@ -44,13 +57,15 @@ describe('Make and approve an access request', () => {
 
   it('can push a single-platform image to the registry', function () {
     const registryImage = `${registryUrl}/${modelUuidForRegistry}/${testModelImage}:${testModelImageTag}`
-    cy.log('Running all the docker commands to push an image')
-    cy.exec(`docker login ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, { timeout: 60000 })
-    cy.exec(`docker build --tag ${testModelImage} cypress/fixtures/docker-image`, { timeout: 60000 })
-    cy.exec(`docker tag ${testModelImage} ${registryImage}`, {
+    cy.log('Running all the container commands to push an image')
+    cy.exec(`${containerCli} login ${tlsFlag} ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, {
       timeout: 60000,
     })
-    cy.exec(`docker push ${registryImage}`, {
+    cy.exec(`${containerCli} build --tag ${testModelImage} cypress/fixtures/docker-image`, { timeout: 60000 })
+    cy.exec(`${containerCli} tag ${testModelImage} ${registryImage}`, {
+      timeout: 60000,
+    })
+    cy.exec(`${containerCli} push ${tlsFlag} ${registryImage}`, {
       timeout: 60000,
     })
   })
@@ -74,31 +89,48 @@ describe('Make and approve an access request', () => {
     const arm64Image = `${registryUrl}/${modelUuidForRegistry}/${testModelImage}:${testModelMultiplatformImageTag}-arm64`
 
     cy.log('Logging in to the registry')
-    cy.exec(`docker login ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, { timeout: 60000 })
+    cy.exec(`${containerCli} login ${tlsFlag} ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, {
+      timeout: 60000,
+    })
 
     cy.log('Building and pushing platform-specific images')
-    cy.exec(`docker build --label "architecture=amd64" --tag ${amd64Image} cypress/fixtures/docker-image`, {
+    cy.exec(`${containerCli} build --label "architecture=amd64" --tag ${amd64Image} cypress/fixtures/docker-image`, {
       timeout: 60000,
     })
-    cy.exec(`docker push ${amd64Image}`, { timeout: 60000 })
+    cy.exec(`${containerCli} push ${tlsFlag} ${amd64Image}`, { timeout: 60000 })
 
-    cy.exec(`docker build --label "architecture=arm64" --tag ${arm64Image} cypress/fixtures/docker-image`, {
+    cy.exec(`${containerCli} build --label "architecture=arm64" --tag ${arm64Image} cypress/fixtures/docker-image`, {
       timeout: 60000,
     })
-    cy.exec(`docker push ${arm64Image}`, { timeout: 60000 })
+    cy.exec(`${containerCli} push ${tlsFlag} ${arm64Image}`, { timeout: 60000 })
 
     cy.log('Creating and pushing multi-platform manifest list')
-    cy.exec(`docker manifest create --insecure ${registryImage} ${amd64Image} ${arm64Image}`, { timeout: 60000 })
-    cy.exec(`docker manifest annotate ${registryImage} ${amd64Image} --os linux --arch amd64`)
-    cy.exec(`docker manifest annotate ${registryImage} ${arm64Image} --os linux --arch arm64`)
-    cy.exec(`docker manifest push --insecure ${registryImage}`, { timeout: 60000 })
+    if (isPodman) {
+      cy.exec(`${containerCli} manifest create ${registryImage}`, { timeout: 60000 })
+      cy.exec(`${containerCli} manifest add ${tlsFlag} --os linux --arch amd64 ${registryImage} ${amd64Image}`, {
+        timeout: 60000,
+      })
+      cy.exec(`${containerCli} manifest add ${tlsFlag} --os linux --arch arm64 ${registryImage} ${arm64Image}`, {
+        timeout: 60000,
+      })
+    } else {
+      cy.exec(`${containerCli} manifest create --insecure ${registryImage} ${amd64Image} ${arm64Image}`, {
+        timeout: 60000,
+      })
+      cy.exec(`${containerCli} manifest annotate ${registryImage} ${amd64Image} --os linux --arch amd64`)
+      cy.exec(`${containerCli} manifest annotate ${registryImage} ${arm64Image} --os linux --arch arm64`)
+    }
+    cy.exec(`${containerCli} manifest push ${insecureManifestFlag} ${registryImage}`, { timeout: 60000 })
 
     cy.log('Verifying the pushed image contains both target platforms')
-    cy.exec(`docker buildx imagetools inspect ${registryImage}`, {
+    cy.exec(`${containerCli} manifest inspect ${insecureManifestFlag} ${registryImage}`, {
       timeout: 60000,
     }).then(({ stdout }) => {
-      expect(stdout).to.contain('linux/amd64')
-      expect(stdout).to.contain('linux/arm64')
+      const platforms = JSON.parse(stdout).manifests.map(
+        ({ platform }: { platform: { os: string; architecture: string } }) => `${platform.os}/${platform.architecture}`,
+      )
+      expect(platforms).to.include('linux/amd64')
+      expect(platforms).to.include('linux/arm64')
     })
   })
 

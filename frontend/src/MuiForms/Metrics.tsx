@@ -14,7 +14,9 @@ import { useTheme } from '@mui/material/styles'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import InlineDiff from 'src/common/InlineDiff'
+import DiffMark from 'src/common/InlineDiff/DiffMark'
+import InlineTypographyDiff from 'src/common/InlineDiff/InlineTypographyDiff'
+import { alignKeyedRows } from 'src/common/InlineDiff/rowAlignment'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -33,6 +35,21 @@ interface Id {
 
 export type MetricValueWithId = MetricValue & Id
 
+type MetricPair = { from?: MetricValue; to?: MetricValue }
+
+const normaliseMetricValue = (value: number | string | undefined) => String(value ?? '').toLowerCase()
+
+function alignMetrics(from: MetricValue[], to: MetricValue[]): MetricPair[] {
+  return alignKeyedRows(
+    from.map((metric) => normaliseMetricValue(metric.name)),
+    to.map((metric) => normaliseMetricValue(metric.name)),
+    (fromIndex, toIndex) => normaliseMetricValue(from[fromIndex].value) === normaliseMetricValue(to[toIndex].value),
+  ).map(({ from: fromIndex, to: toIndex }) => ({
+    from: fromIndex === undefined ? undefined : from[fromIndex],
+    to: toIndex === undefined ? undefined : to[toIndex],
+  }))
+}
+
 interface MetricsProps {
   onChange: (newValue: MetricValue[]) => void
   value: MetricValue[]
@@ -42,6 +59,28 @@ interface MetricsProps {
   required?: boolean
   schema: RJSFSchema
 }
+
+type MetricCellDiffProps = {
+  pair: MetricPair
+  getText: (metric: MetricValue) => string
+}
+
+function MetricCellDiff({ pair, getText }: MetricCellDiffProps) {
+  if (pair.from && pair.to) {
+    return <InlineTypographyDiff from={getText(pair.from)} to={getText(pair.to)} />
+  }
+
+  const metric = pair.to ?? pair.from
+
+  return (
+    <DiffMark operation={pair.to ? 'insert' : 'delete'}>
+      <Typography component='span'>{metric ? getText(metric) : ''}</Typography>
+    </DiffMark>
+  )
+}
+
+const getMetricName = (metric: MetricValue) => metric.name
+const getMetricValue = (metric: MetricValue) => metric.value.toString()
 
 export default function Metrics({ onChange, value, label, id, registry, required, schema }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
@@ -112,12 +151,18 @@ export default function Metrics({ onChange, value, label, id, registry, required
 
   const compare = getCompareFieldState<MetricValue[]>(id, registry.formContext)
 
-  const metricsTableRows = (metrics: MetricValue[], compareWith?: MetricValue[]) => {
-    if (!metrics) {
+  const metricsTableRows = (metrics?: MetricValue[], compareWith?: MetricValue[]) => {
+    if (!metrics && !compareWith) {
       return undefined
     }
-    return _.zip(metrics, compareWith).map(([metric, compareWith]) => (
-      <TableRow key={metric?.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+
+    // Outside compare mode every row is a plain metric, so there is nothing to pair
+    const pairs: MetricPair[] = compare.inCompareMode
+      ? alignMetrics(compareWith ?? [], metrics ?? [])
+      : (metrics ?? []).map((metric) => ({ to: metric }))
+
+    return pairs.map((pair, index) => (
+      <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell
           component='th'
           scope='row'
@@ -126,27 +171,18 @@ export default function Metrics({ onChange, value, label, id, registry, required
             maxWidth: '500px',
           }}
         >
-          {compare.inCompareMode ? (
-            <InlineDiff from={compareWith?.name} to={metric?.name} direction={'row'} />
-          ) : (
-            metric?.name
-          )}
+          {compare.inCompareMode ? <MetricCellDiff pair={pair} getText={getMetricName} /> : pair.to?.name}
         </TableCell>
         <TableCell align='right'>
-          {compare.inCompareMode ? (
-            <InlineDiff
-              from={compareWith?.value?.toString()}
-              to={metric?.value?.toString()}
-              direction={'row'}
-              align='right'
-            />
-          ) : (
-            metric?.value
-          )}
+          {compare.inCompareMode ? <MetricCellDiff pair={pair} getText={getMetricValue} /> : pair.to?.value}
         </TableCell>
       </TableRow>
     ))
   }
+
+  // In compare mode the table is also shown when only the older version has metrics, so removals are visible
+  const compareFromMetrics = compare.inCompareMode ? (compare.compareFromState ?? []) : []
+  const showTable = value.length > 0 || compareFromMetrics.length > 0
 
   return (
     <AdditionalInformation
@@ -169,7 +205,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
       )}
       {!compare.editMode && (
         <>
-          {!compare.isMirroredModel && value.length === 0 && (
+          {!compare.isMirroredModel && !showTable && (
             <Typography
               sx={{
                 fontStyle: 'italic',
@@ -179,7 +215,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
               Unanswered
             </Typography>
           )}
-          {value.length > 0 && (
+          {showTable && (
             <TableContainer component={Paper}>
               <Table sx={{ maxWidth: 'xs' }} size='small'>
                 <TableHead>

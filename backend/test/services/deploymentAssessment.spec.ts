@@ -55,6 +55,15 @@ const smtpMocks = vi.hoisted(() => ({
   notifyRiskOwnersOfDeploymentAssessmentApprovalRevoked: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMocks)
+
+const logMock = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  trace: vi.fn(),
+}))
+vi.mock('../../src/services/log.js', () => ({ default: logMock }))
 const modelServiceMocks = vi.hoisted(() => ({
   getModelsByIdsNoAuth: vi.fn(),
 }))
@@ -566,13 +575,53 @@ describe('services > deploymentAssessment', () => {
 
       await reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve)
 
-      expect(notifyModelOwnersOfDeploymentApproval).toHaveBeenCalledWith(
-        ['user:model-owner'],
-        assessment,
-        expect.objectContaining({
-          id: 'model-1',
-        }),
-        assessment.createdBy,
+      await vi.waitFor(() =>
+        expect(notifyModelOwnersOfDeploymentApproval).toHaveBeenCalledWith(
+          ['user:model-owner'],
+          assessment,
+          expect.objectContaining({
+            id: 'model-1',
+          }),
+          assessment.createdBy,
+        ),
+      )
+    })
+
+    test('logs each failed approval notification without failing the review', async () => {
+      DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(assessment)
+      ReviewModelMock.findOne.mockReturnValueOnce({
+        sort: vi.fn().mockResolvedValue(review),
+      })
+
+      vi.mocked(getModelsByIdsNoAuth).mockResolvedValueOnce(
+        ['model-1', 'model-2', 'model-3'].map(
+          (id) =>
+            ({
+              id,
+              name: id,
+              kind: 'model',
+              collaborators: [{ entity: `user:${id}-owner`, roles: [SystemRoles.Owner] }],
+            }) as ModelDoc,
+        ),
+      )
+      vi.mocked(notifyModelOwnersOfDeploymentApproval)
+        .mockRejectedValueOnce(new Error('first failure'))
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('second failure'))
+
+      await expect(
+        reviewDeploymentAssessment({ dn: 'risk-owner' }, assessment.id, Decision.Approve),
+      ).resolves.toBeDefined()
+
+      await vi.waitFor(() => expect(logMock.warn).toHaveBeenCalledTimes(2))
+      expect(notifyModelOwnersOfDeploymentApproval).toHaveBeenCalledTimes(3)
+      expect(logMock.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ error: new Error('first failure'), deploymentAssessmentId: assessment.id }),
+        'Failed to send deployment assessment approval notification',
+      )
+      expect(logMock.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ error: new Error('second failure'), deploymentAssessmentId: assessment.id }),
+        'Failed to send deployment assessment approval notification',
       )
     })
 

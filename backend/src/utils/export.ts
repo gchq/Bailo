@@ -1,6 +1,5 @@
-import { outdent } from 'outdent'
-
 import { InternalError } from './error.js'
+import { outdent } from './string.js'
 
 export type Common = {
   title: string

@@ -4,7 +4,6 @@ import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Registry, RJSFSchema } from '@rjsf/utils'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 
@@ -76,8 +75,6 @@ export default function DateSelector({
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
           data-test='dateSelectorInput'
         />
-      ) : compare.inMirroredCompare && value ? (
-        <InlineDiff from={formatDate(compare.compareFromState)} to={formatDate(value)} />
       ) : value ? (
         <Typography
           sx={{

@@ -352,7 +352,12 @@ export async function reviewDeploymentAssessment(
   })
   await response.save()
 
-  await notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer)
+  notifyDeploymentAssessmentReviewed(deploymentAssessment, decision, assessmentReviewer).catch((error) =>
+    log.warn(
+      { error, deploymentAssessmentId: deploymentAssessment.id },
+      'Error when notifying about deployment assessment review.',
+    ),
+  )
 
   return response
 }
@@ -371,7 +376,7 @@ async function notifyDeploymentAssessmentReviewed(
 
       case Decision.Approve: {
         const modelDevelopers = await getModelDevelopers(deploymentAssessment)
-        await Promise.all(
+        const results = await Promise.allSettled(
           modelDevelopers.map(({ model, developers }) =>
             notifyModelOwnersOfDeploymentApproval(
               developers,
@@ -381,6 +386,19 @@ async function notifyDeploymentAssessmentReviewed(
             ),
           ),
         )
+
+        for (const result of results) {
+          if (result.status === 'rejected') {
+            log.warn(
+              {
+                error: result.reason,
+                deploymentAssessmentId: deploymentAssessment.id,
+                decision,
+              },
+              'Failed to send deployment assessment approval notification',
+            )
+          }
+        }
         break
       }
     }
@@ -486,10 +504,15 @@ export async function createDeploymentAssessment(
   }
 
   if (!draft) {
-    await notifyDeploymentStakeholders(
+    notifyDeploymentStakeholders(
       metadata.signOff.riskOwners,
       metadata.modelOverview.modelIds ?? [],
       deploymentAssessment,
+    ).catch((error) =>
+      log.warn(
+        { error, deploymentAssessmentId: deploymentAssessment.id },
+        'Error when notifying deployment stakeholders.',
+      ),
     )
   }
 
@@ -579,10 +602,15 @@ export async function updateDeploymentAssessment(
   }
 
   if (isBeingSubmitted) {
-    await notifyDeploymentStakeholders(
+    notifyDeploymentStakeholders(
       deploymentAssessment.metadata?.signOff?.riskOwners ?? [],
       deploymentAssessment.metadata?.modelOverview?.modelIds ?? [],
       deploymentAssessment,
+    ).catch((error) =>
+      log.warn(
+        { error, deploymentAssessmentId: deploymentAssessment.id },
+        'Error when notifying deployment stakeholders.',
+      ),
     )
   }
 
@@ -614,7 +642,12 @@ export async function updateDeploymentAssessment(
   ])
 
   if (response) {
-    await notifyRiskOwnersOfApprovalRevoked(user, deploymentAssessment)
+    notifyRiskOwnersOfApprovalRevoked(user, deploymentAssessment).catch((error) =>
+      log.warn(
+        { error, deploymentAssessmentId: deploymentAssessment.id },
+        'Error when notifying risk owners of revoked approval.',
+      ),
+    )
   }
 
   return deploymentAssessment

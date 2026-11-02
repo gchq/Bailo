@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { plural, toTitleCase } from '../../src/utils/string.js'
+import { outdent, plural, toTitleCase } from '../../src/utils/string.js'
 
 describe('utils > string', () => {
   test('plural', () => {
@@ -18,5 +18,36 @@ describe('utils > string', () => {
     expect(toTitleCase('hello_world')).toEqual('Hello World')
     expect(toTitleCase('model', '-')).toEqual('Model')
     expect(toTitleCase('data-card', '-')).toEqual('Data card')
+  })
+
+  test('outdent > removes first line indentation and surrounding newlines', () => {
+    const result = outdent`
+      # Title
+
+        indented
+      ${'value'}
+    `
+
+    expect(result).toEqual('# Title\n\n  indented\nvalue')
+  })
+
+  test('outdent > does not re-indent interpolated values', () => {
+    const result = outdent`
+      ${'first\n    second'}
+    `
+
+    expect(result).toEqual('first\n    second')
+  })
+
+  test('outdent > keeps explicit escaped newlines', () => {
+    const result = outdent`\n\n
+        ## ${'Title'}
+    `
+
+    expect(result).toEqual('\n\n## Title')
+  })
+
+  test('outdent > single line is unchanged', () => {
+    expect(outdent`no newline ${1}`).toEqual('no newline 1')
   })
 })

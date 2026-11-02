@@ -22,6 +22,7 @@ export function defineScript<T extends ScriptArgs>(def: ScriptDefinition<T>) {
       .epilogue(
         'Run inside the backend container/pod:\n' +
           `  docker compose exec backend npx tsx src/scripts/${def.name}.ts [options]\n` +
+          `  podman compose exec backend npx tsx src/scripts/${def.name}.ts [options]\n` +
           `  kubectl exec -it deploy/backend -- npx tsx src/scripts/${def.name}.ts [options]`,
       ),
   )

@@ -718,6 +718,10 @@ async function calculateLifecycleComplianceMetrics(
       },
     },
     { $match: { responses: { $size: 0 } } },
+    { $sort: { createdAt: -1 } },
+    // Group so that we have only one model per modelId (most recent review)
+    { $group: { _id: '$modelId', review: { $first: '$$ROOT' } } },
+    { $replaceRoot: { newRoot: '$review' } },
     {
       $lookup: {
         from: 'v2_models',

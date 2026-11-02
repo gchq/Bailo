@@ -1224,6 +1224,49 @@ describe('connectors > metrics > simple > getLifecycleComplianceMetrics', async 
     expect(result.byOrganisation).toHaveLength(3)
   })
 
+  test('only returns the latest overdue review per model', async () => {
+    reviewMocks.aggregate.mockResolvedValue([])
+
+    await connector.getLifecycleComplianceMetrics(mockUser, 2)
+
+    expect(reviewMocks.aggregate).toHaveBeenCalled()
+
+    for (const [pipeline] of reviewMocks.aggregate.mock.calls) {
+      const stageNames = pipeline.map((stage: Record<string, unknown>) => Object.keys(stage)[0])
+
+      const responsesMatchIndex = pipeline.findIndex(
+        (stage: any) => stage.$match?.responses !== undefined && stage.$match.responses.$size === 0,
+      )
+      const sortIndex = pipeline.findIndex((stage: any) => stage.$sort?.createdAt === -1)
+      const groupIndex = pipeline.findIndex((stage: any) => stage.$group !== undefined)
+      const replaceRootIndex = pipeline.findIndex((stage: any) => stage.$replaceRoot !== undefined)
+      const modelLookupIndex = pipeline.findIndex((stage: any) => stage.$lookup?.from === 'v2_models')
+
+      expect(pipeline[groupIndex].$group).toEqual({ _id: '$modelId', review: { $first: '$$ROOT' } })
+      expect(pipeline[replaceRootIndex].$replaceRoot).toEqual({ newRoot: '$review' })
+
+      // Only open reviews are considered, newest first, collapsed to one per model before the model lookup
+      expect(stageNames.filter((name: string) => name === '$group')).toHaveLength(1)
+      expect(responsesMatchIndex).toBeGreaterThan(-1)
+      expect(sortIndex).toBeGreaterThan(responsesMatchIndex)
+      expect(groupIndex).toBeGreaterThan(sortIndex)
+      expect(replaceRootIndex).toBeGreaterThan(groupIndex)
+      expect(modelLookupIndex).toBeGreaterThan(replaceRootIndex)
+    }
+  })
+
+  test('uses the number of unique models as the summary count', async () => {
+    reviewMocks.aggregate.mockResolvedValue([
+      { entryId: 'model-1', dueDate: '2026-01-01T00:00:00.000Z', modelOwners: [] },
+      { entryId: 'model-2', dueDate: '2026-01-02T00:00:00.000Z', modelOwners: [] },
+    ])
+
+    const result = await connector.getLifecycleComplianceMetrics(mockUser, 2)
+
+    expect(result.global.summary.count).toBe(2)
+    expect(result.global.entries.map((entry: { entryId: string }) => entry.entryId)).toEqual(['model-1', 'model-2'])
+  })
+
   test('throws Forbidden if user is not admin', async () => {
     authenticationMocks.hasRole.mockResolvedValue(false)
 

@@ -166,6 +166,9 @@ export default function EditableDeploymentAssessmentForm({
     onValidityChange(splitSchema.steps.every((step) => validateForm(step)))
   }, [splitSchema, onValidityChange])
 
+  // A published assessment must stay complete, so its errors are listed as soon as an edit introduces them
+  const isValidationShown = showValidation || showSaveValidation || (isEdit && !deploymentAssessment.draft)
+
   const formHeading = useMemo(
     () => (
       <>
@@ -232,8 +235,10 @@ export default function EditableDeploymentAssessmentForm({
           splitSchema={splitSchema}
           setSplitSchema={setSplitSchema}
           canEdit={isEdit}
-          showValidation={showValidation || showSaveValidation}
-          displayLabelValidation={showValidation || showSaveValidation}
+          showValidation={isValidationShown}
+          // Drafts can be saved with unanswered questions, so only validate them when submitted for review
+          liveValidation={!deploymentAssessment.draft}
+          displayLabelValidation={isValidationShown}
         />
         <DeletionConfirmationDialogue
           open={open}
