@@ -5,6 +5,10 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     versioning-strategy: increase
     open-pull-requests-limit: 25
 
@@ -13,6 +17,10 @@ updates:
     directory: '/frontend'
     schedule:
       interval: 'monthly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     versioning-strategy: increase
     open-pull-requests-limit: 25
     groups:
@@ -67,6 +75,10 @@ updates:
     directory: '/backend'
     schedule:
       interval: 'monthly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     versioning-strategy: increase
     open-pull-requests-limit: 25
     groups:
@@ -126,6 +138,10 @@ updates:
     directory: '/lib/landing'
     schedule:
       interval: 'monthly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     versioning-strategy: increase
     open-pull-requests-limit: 25
     groups:
@@ -162,6 +178,10 @@ updates:
       - '/lib/artefactscan_api'
     schedule:
       interval: 'weekly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     groups:
       node-images:
         patterns:
@@ -176,6 +196,10 @@ updates:
       - '/'
     schedule:
       interval: 'weekly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
 
   # Helm
   - package-ecosystem: 'helm'
@@ -183,6 +207,10 @@ updates:
       - '/infrastructure/helm/bailo'
     schedule:
       interval: 'weekly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
 
   # Python (uv) - security updates only. `open-pull-requests-limit: 0` disables version updates,
   # but security updates still use this entry's settings. A vulnerable direct dependency has its
@@ -227,6 +255,10 @@ updates:
     directory: '/lib/artefactscan_api'
     schedule:
       interval: 'weekly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     versioning-strategy: increase
     allow:
       - dependency-type: 'direct'
@@ -255,6 +287,10 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     cooldown:
       default-days: 7
 
@@ -263,6 +299,10 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
+    # Skip routine patch bumps. Security updates are unaffected by `update-types`.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
     open-pull-requests-limit: 12
     groups:
       github-actions:
