@@ -11,6 +11,7 @@ import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
+import DeploymentAssessmentEmailButton from 'src/deployment-assessments/DeploymentAssessmentEmailButton'
 import EditableDeploymentAssessmentForm from 'src/deployment-assessments/EditableDeploymentAssessmentForm'
 import { DraftBanner } from 'src/entry/model/releases/DraftBanner'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
@@ -184,6 +185,7 @@ export default function DeploymentAssessment() {
                       sx={{ alignItems: 'center' }}
                       divider={<Divider flexItem orientation='vertical' />}
                     >
+                      <DeploymentAssessmentEmailButton deploymentAssessment={deploymentAssessment} />
                       <AssessmentStateChip assessment={deploymentAssessment} />
                     </Stack>
                   </Stack>
