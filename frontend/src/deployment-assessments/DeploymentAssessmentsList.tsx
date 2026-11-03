@@ -78,8 +78,8 @@ export default function DeploymentAssessmentsList() {
   const returnTo = buildDeploymentAssessmentListHref(filters)
 
   return (
-    <Stack spacing={2}>
-      <Stack spacing={2}>
+    <Stack spacing={1}>
+      <Stack spacing={1}>
         <Stack direction='row' spacing={1} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <LimitedTextField
             data-test='deploymentAssessmentSearchFilter'
@@ -96,7 +96,7 @@ export default function DeploymentAssessmentsList() {
             label='Status'
             value={filters.status ?? ''}
             onChange={(event) => setFilters({ status: event.target.value as DeploymentAssessmentStatusKeys })}
-            sx={{ width: 190 }}
+            sx={{ width: 120 }}
           >
             <MenuItem value=''>
               <em>All</em>
