@@ -1,7 +1,7 @@
 import { Box, Button, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { formatDateTimeString } from 'utils/dateUtils'
-import { FileConflict } from 'utils/fileTreeUtils'
+import { type FileConflict } from 'utils/fileTreeUtils'
 import { plural } from 'utils/stringUtils'
 
 export type ConflictAction = 'keepBoth' | 'skip'

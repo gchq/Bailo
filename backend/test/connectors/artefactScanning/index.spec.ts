@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanKind, ArtefactScanKindKeys } from '../../../src/connectors/artefactScanning/index.js'
+import { ArtefactScanKind, type ArtefactScanKindKeys } from '../../../src/connectors/artefactScanning/index.js'
 import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 vi.mock('../../../src/services/log.js')

@@ -62,6 +62,19 @@ describe('routes > files > getDownloadFile', () => {
       expect(res.headers.etag).toBe('f8a7130e2a7facf456c258e5e5f7b6b2fa02431de15fdf47b5ce0079d275aa54')
     })
 
+    test('200 > utf-8 file name is encoded in content-disposition', async () => {
+      fileMock.getFileById.mockReturnValueOnce({ ...mockFileObject, name: 'café 🚀.bin' })
+      releaseMock.getFileByReleaseFileName.mockReturnValueOnce({ ...mockFileObject, name: 'café 🚀.bin' })
+      const fixture = createFixture(getDownloadFileSchema)
+      const res = await testGet(buildUrl(fixture))
+
+      expect(res.statusCode).toBe(200)
+      expect(res.headers['content-disposition']).toBe(
+        `attachment; filename="caf? ??.bin"; filename*=UTF-8''caf%C3%A9%20%F0%9F%9A%80.bin`,
+      )
+      expect(res.headers['content-type']).toBe('text/plain; charset=utf-8')
+    })
+
     test('audit > expected call', async () => {
       const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture))

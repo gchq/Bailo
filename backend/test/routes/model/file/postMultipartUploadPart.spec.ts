@@ -1,4 +1,5 @@
-import qs from 'qs'
+import querystring from 'node:querystring'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
@@ -17,7 +18,7 @@ describe('routes > model > file > postStartMultipartUpload', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(postMultipartUploadPartSchema)
     const res = await testPost(
-      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${qs.stringify(fixture.query)}`,
+      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${querystring.stringify(fixture.query)}`,
       fixture,
     )
 
@@ -28,7 +29,7 @@ describe('routes > model > file > postStartMultipartUpload', () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(postMultipartUploadPartSchema)
     const res = await testPost(
-      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${qs.stringify(fixture.query)}`,
+      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${querystring.stringify(fixture.query)}`,
       fixture,
     )
 
@@ -43,7 +44,7 @@ describe('routes > model > file > postStartMultipartUpload', () => {
     delete fixture.query.fileId
 
     const res = await testPost(
-      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${qs.stringify(fixture.query)}`,
+      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${querystring.stringify(fixture.query)}`,
       fixture,
     )
 

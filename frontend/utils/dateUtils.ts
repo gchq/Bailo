@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from '@dayjs'
+import dayjs, { type Dayjs } from '@dayjs'
 import humanInterval from 'human-interval'
 import { plural } from 'utils/stringUtils'
 

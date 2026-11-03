@@ -1,9 +1,9 @@
 import log from '../../services/log.js'
-import { FederationState, RemoteFederationConfig } from '../../types/types.js'
+import { FederationState, type RemoteFederationConfig } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
 import { BailoPeerConnector } from './bailo.js'
-import { BasePeerConnector } from './base.js'
+import { type BasePeerConnector } from './base.js'
 import { HuggingFaceHubConnector } from './huggingface.js'
 import { PeerConnectorWrapper } from './wrapper.js'
 

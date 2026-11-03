@@ -14,19 +14,28 @@ import {
   Typography,
 } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
-import { AxiosProgressEvent } from 'axios'
-import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { type AxiosProgressEvent } from 'axios'
+import { type ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
-import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import FileUploadProgressDisplay, {
+  type FailedFileUpload,
+  type FileUploadProgress,
+} from 'src/common/FileUploadProgressDisplay'
 import { Transition } from 'src/common/Transition'
 import UiConfigContext from 'src/contexts/uiConfigContext'
-import ConflictResolutionList, { ConflictAction } from 'src/entry/model/files/ConflictResolutionList'
+import ConflictResolutionList, { type ConflictAction } from 'src/entry/model/files/ConflictResolutionList'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, FileInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import {
+  type EntryInterface,
+  EntryKind,
+  type FileInterface,
+  type FileUploadMetadata,
+  type FileUploadWithMetadata,
+} from 'types/types'
 import {
   detectFileConflicts,
-  FileConflict,
+  type FileConflict,
   getFileUploadName,
   joinUploadPath,
   validateFolderPath,

@@ -19,7 +19,7 @@ import {
   Menu,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Stack,
   TextField,
   Tooltip,
@@ -29,7 +29,7 @@ import { useTheme } from '@mui/material/styles'
 import { useGetFilesForModel } from 'actions/file'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
+import { type ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
 import FolderNavigableList from 'src/common/FolderNavigableList'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
@@ -37,7 +37,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileBrowser from 'src/entry/model/files/FileBrowser'
-import FileDisplay, { MutateReleases } from 'src/entry/model/files/FileDisplay'
+import FileDisplay, { type MutateReleases } from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import { getLatestRelease } from 'src/entry/model/Releases'
@@ -45,7 +45,13 @@ import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, FileInterface, FlattenedModelImage, ReleaseInterface } from 'types/types'
+import {
+  type EntryInterface,
+  EntryKind,
+  type FileInterface,
+  type FlattenedModelImage,
+  type ReleaseInterface,
+} from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
 import { collectAllFiles, type FileTreeNode } from 'utils/fileTreeUtils'

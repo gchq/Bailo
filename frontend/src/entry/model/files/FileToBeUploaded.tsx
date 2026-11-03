@@ -1,10 +1,10 @@
 import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useCallback, useState } from 'react'
+import { type ChangeEvent, useCallback, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
-import { FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import { type FileUploadMetadata, type FileUploadWithMetadata } from 'types/types'
 
 interface FileToBeUploadedProps {
   fileWithMetadata: FileUploadWithMetadata

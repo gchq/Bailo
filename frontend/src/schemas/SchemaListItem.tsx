@@ -8,7 +8,7 @@ import EditableText from 'src/common/EditableText'
 import LabelledValue from 'src/common/LabelledValue'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import UsageListDialog from 'src/schemas/UsageListDialog'
-import { SchemaInterface } from 'types/types'
+import { type SchemaInterface } from 'types/types'
 
 interface SchemaListItemProps {
   schema: SchemaInterface

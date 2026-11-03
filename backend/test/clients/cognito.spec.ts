@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { getGroupMembership, listUsers } from '../../src/clients/cognito.js'
-import config, { Config } from '../../src/utils/config.js'
+import config, { type Config } from '../../src/utils/config.js'
 import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
 const cognitoMock = vi.hoisted(() => {

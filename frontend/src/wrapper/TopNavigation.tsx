@@ -20,17 +20,18 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
+import MuiAppBar, { type AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { alpha, styled, useTheme } from '@mui/material/styles'
+import { visuallyHidden } from '@mui/utils'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
+import { type CSSProperties, type MouseEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import DocsSearch from 'src/docs/DocsSearch'
 import DocsSearchDialog from 'src/docs/DocsSearchDialog'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
-import { User } from '../../types/types'
+import { type User } from '../../types/types'
 import ExpandableButton from '../common/ExpandableButton'
 import Link from '../Link'
 
@@ -264,9 +265,12 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                       }}
                       onClick={handleUserMenuClicked}
                       data-test='userMenuButton'
-                      aria-label='User menu dropdown button'
+                      aria-describedby='user-menu-button-description'
                     >
                       <UserDisplay dn={currentUser.dn} hidePopover />
+                      <Box component='span' id='user-menu-button-description' sx={visuallyHidden}>
+                        user menu dropdown button
+                      </Box>
                     </Button>
                     <Menu
                       disableScrollLock

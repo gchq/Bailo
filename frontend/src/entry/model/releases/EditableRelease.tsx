@@ -3,12 +3,12 @@ import { useGetModel } from 'actions/entry'
 import {
   deleteRelease,
   putRelease,
-  UpdateReleaseParams,
+  type UpdateReleaseParams,
   useGetRelease,
   useGetReleasesForModelId,
 } from 'actions/release'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useState } from 'react'
+import { type Dispatch, type SetStateAction, useCallback, useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
@@ -16,7 +16,7 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
-import { FileInterface, FlattenedModelImage, ReleaseInterface } from 'types/types'
+import { type FileInterface, type FlattenedModelImage, type ReleaseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = { release: ReleaseInterface } & (

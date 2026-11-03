@@ -1,9 +1,8 @@
 import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 
 interface TagEditorProps {
@@ -221,8 +220,6 @@ export default function TagSelector({
           onDelete={handleChipOnDelete}
           emptyPlaceholderText={registry.formContext.emptyPlaceholderText ?? 'No tags'}
         />
-      ) : compare.inMirroredCompare && value.length > 0 ? (
-        <InlineDiff from={formatTagValue(compare.compareFromState)} to={formatTagValue(value)} />
       ) : (
         value.length > 0 && (
           <Box sx={{ overflow: 'auto', p: 1 }}>

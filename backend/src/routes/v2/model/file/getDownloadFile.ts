@@ -1,8 +1,7 @@
 import { createHash } from 'node:crypto'
 import { pipeline } from 'node:stream'
 
-import { create } from 'content-disposition'
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
@@ -11,9 +10,9 @@ import { type FileWithScanResultsAggregate } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import log from '../../../../services/log.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
-import { PathConfig, registerPath } from '../../../../services/specification.js'
+import { type PathConfig, registerPath } from '../../../../services/specification.js'
 import { HttpHeader } from '../../../../types/enums.js'
-import { BailoError } from '../../../../types/error.js'
+import { type BailoError } from '../../../../types/error.js'
 import { getFileBaseName, validateFileName } from '../../../../utils/fileUtils.js'
 import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
@@ -185,7 +184,7 @@ export const getDownloadFile = [
 
       // Required to support utf-8 file names
       // Use basename so browsers suggest "model.bin" not "weights/model.bin"
-      res.set(HttpHeader.CONTENT_DISPOSITION, create(getFileBaseName(file.name), { type: 'attachment' }))
+      res.attachment(getFileBaseName(file.name))
       res.set(HttpHeader.CONTENT_TYPE, file.mime)
       res.status(fetchRange ? 206 : 200)
     })

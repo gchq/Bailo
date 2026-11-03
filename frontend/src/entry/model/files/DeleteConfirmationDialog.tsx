@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
-import { FileInterface, ReleaseInterface } from 'types/types'
+import { type FileInterface, type ReleaseInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 interface DeleteConfirmationDialogProps {

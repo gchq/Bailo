@@ -1,5 +1,3 @@
-declare module 'dev-null'
-
 type callback = (err: string | undefined) => void
 
 declare namespace Express {

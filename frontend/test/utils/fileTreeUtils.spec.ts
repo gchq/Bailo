@@ -1,4 +1,4 @@
-import { FileInterface, FileUploadWithMetadata } from 'types/types'
+import { type FileInterface, type FileUploadWithMetadata } from 'types/types'
 import {
   buildFileTree,
   buildFolderSearchableText,

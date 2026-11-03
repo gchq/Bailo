@@ -1,7 +1,7 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { z } from '../../../../lib/zod.js'
-import { WebhookEvent, WebhookInterface } from '../../../../models/Webhook.js'
+import { WebhookEvent, type WebhookInterface } from '../../../../models/Webhook.js'
 import { registerPath, webhookInterfaceSchema } from '../../../../services/specification.js'
 import { createWebhook } from '../../../../services/webhook.js'
 import { parse } from '../../../../utils/validate.js'

@@ -2,20 +2,20 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import {
-  BailoError,
-  CollaboratorEntry,
-  EntryForm,
-  EntryInterface,
-  EntryKindKeys,
-  EntryRole,
-  EntryUserPermissions,
-  EntryVisibilityKeys,
-  FileInterface,
+  type BailoError,
+  type CollaboratorEntry,
+  type EntryForm,
+  type EntryInterface,
+  type EntryKindKeys,
+  type EntryRole,
+  type EntryUserPermissions,
+  type EntryVisibilityKeys,
+  type FileInterface,
   MODEL_ENTRY_KINDS,
-  ModelImage,
-  ReleaseInterface,
+  type ModelImage,
+  type ReleaseInterface,
 } from '../types/types'
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyEntryList = []
 

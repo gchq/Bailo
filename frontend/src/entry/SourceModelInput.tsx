@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material'
-import { ChangeEvent } from 'react'
+import { type ChangeEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 
 const htmlId = 'entry-source-model-id-input'

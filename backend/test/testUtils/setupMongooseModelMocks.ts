@@ -1,4 +1,4 @@
-import { beforeEach, type MockedFunction, MockInstance, vi } from 'vitest'
+import { beforeEach, type MockedFunction, type MockInstance, vi } from 'vitest'
 
 const CHAINABLE_METHODS = [
   'aggregate',

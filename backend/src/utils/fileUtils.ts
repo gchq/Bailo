@@ -1,6 +1,6 @@
 import { isValidObjectId } from 'mongoose'
 
-import { FileWithScanResultsInterface } from '../models/File.js'
+import { type FileWithScanResultsInterface } from '../models/File.js'
 import { BadReq } from './error.js'
 
 export function isFileWithScanResultsInterface(data: unknown): data is FileWithScanResultsInterface {

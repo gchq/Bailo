@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import z from 'zod'
 
-import { coerceArray, parse, strictCoerceBoolean } from '../../src/utils/validate.js'
+import { coerceArray, formatZodIssues, parse, strictCoerceBoolean } from '../../src/utils/validate.js'
 
 describe('utils > validate', () => {
   test('parse', () => {
@@ -37,5 +37,29 @@ describe('utils > validate', () => {
     expect(() => parse({ a: '' } as any, schema)).toThrow()
     expect(() => parse({ a: '0' } as any, schema)).toThrow()
     expect(() => parse({ a: 'TRUE' } as any, schema)).toThrow()
+  })
+
+  test('parse > error message lists every issue', () => {
+    const schema = z.object({
+      a: z.string(),
+      b: z.string(),
+    })
+
+    expect(() => parse({} as any, schema)).toThrow('Path: a - Message: Required | Path: b - Message: Required')
+  })
+
+  test('formatZodIssues > array and nested paths', () => {
+    const schema = z.object({ items: z.array(z.object({ value: z.number() })) })
+    const result = schema.safeParse({ items: [{ value: 1 }, { value: 'x' }] })
+
+    expect(formatZodIssues(result.error!.issues)).toEqual(
+      'Path: items[1].value - Message: Expected number, received string',
+    )
+  })
+
+  test('formatZodIssues > root level issue', () => {
+    const result = z.string().safeParse(1)
+
+    expect(formatZodIssues(result.error!.issues)).toEqual('Path:  - Message: Expected string, received number')
   })
 })

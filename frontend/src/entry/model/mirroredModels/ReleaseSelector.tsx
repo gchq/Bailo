@@ -26,7 +26,7 @@ import renderQueryState from 'src/common/renderQueryState'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { type EntryInterface, type ReleaseInterface } from 'types/types'
 
 type ReleaseSelectorProps = {
   model: EntryInterface

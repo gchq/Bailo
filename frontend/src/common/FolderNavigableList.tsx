@@ -1,8 +1,8 @@
 import Home from '@mui/icons-material/Home'
 import { Breadcrumbs, Link, Stack, Typography } from '@mui/material'
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
-import Paginate, { SortingDirection, SortingDirectionKeys, SortingProperty } from 'src/common/Paginate'
-import { FileInterface } from 'types/types'
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import Paginate, { SortingDirection, type SortingDirectionKeys, type SortingProperty } from 'src/common/Paginate'
+import { type FileInterface } from 'types/types'
 import {
   buildFileTree,
   buildFolderSearchableText,

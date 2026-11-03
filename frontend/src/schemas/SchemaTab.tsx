@@ -1,8 +1,8 @@
 import Create from '@mui/icons-material/Create'
-import { Box, Button, Link, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
+import { Box, Button, Link, MenuItem, Select, type SelectChangeEvent, Stack } from '@mui/material'
 import { Fragment, useMemo, useState } from 'react'
 import SchemaList from 'src/schemas/SchemaList'
-import { SchemaKind, SchemaKindKeys } from 'types/types'
+import { SchemaKind, type SchemaKindKeys } from 'types/types'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 export default function SchemaTab() {

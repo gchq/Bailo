@@ -1,17 +1,22 @@
-import { ClientSession } from 'mongoose'
+import { type ClientSession } from 'mongoose'
 import semver from 'semver'
-import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileWithScanResultsAggregate, FileWithScanResultsInterface } from '../models/File.js'
-import { EntryKind, ModelDoc, ModelInterface } from '../models/Model.js'
-import ReleaseModel, { ImageTagRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
+import { type FileWithScanResultsAggregate, type FileWithScanResultsInterface } from '../models/File.js'
+import { EntryKind, type ModelDoc, type ModelInterface } from '../models/Model.js'
+import ReleaseModel, {
+  type ImageTagRef,
+  type ReleaseDoc,
+  type ReleaseInterface,
+  type SemverObject,
+} from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
-import { UserInterface } from '../models/User.js'
+import { type UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
+import type { Optional } from '../types/types.js'
 import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -212,6 +217,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     throw BadReq(`Cannot update a release on a mirrored model.`)
   }
   const release = await getReleaseBySemver(user, model, semver)
+  const isBeingPublished = release.draft && !delta.draft
 
   //Attempt to draft a published release
   if (!release.draft && delta.draft) {
@@ -228,13 +234,14 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
       modelId: modelId,
     })
   }
-  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver }, { $set: release })
+
+  const updatedRelease = await ReleaseModel.findOneAndUpdate({ modelId, semver }, { $set: release }, { new: true })
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  if (release.draft && !delta.draft) {
+  if (isBeingPublished) {
     try {
       await createReleaseReviews(model, updatedRelease)
     } catch (error) {

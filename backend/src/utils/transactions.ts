@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from 'mongoose'
+import mongoose, { type ClientSession } from 'mongoose'
 
 import log from '../services/log.js'
 import { isTransactionsEnabled } from './database.js'

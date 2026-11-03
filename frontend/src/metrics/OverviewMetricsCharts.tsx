@@ -4,8 +4,8 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import { MetricsBarChart } from 'src/metrics/components/MetricsBarChart'
 import { noneColour, OverviewPieChart } from 'src/metrics/components/MetricsPieChart'
 import OverviewStatPanel from 'src/metrics/components/OverviewStatPanel'
-import { OverviewBaseMetrics } from 'types/types'
-import { BreakdownQueryType, toPieData } from 'utils/metricsUtils'
+import { type OverviewBaseMetrics } from 'types/types'
+import { type BreakdownQueryType, toPieData } from 'utils/metricsUtils'
 
 interface OverviewMetricsChartsProps {
   data: OverviewBaseMetrics

@@ -188,6 +188,27 @@ Use blockquotes for callouts. Reserve them for:
 
 Do not use blockquotes for general warnings or tips - integrate these into the body text instead.
 
+### Feature availability
+
+Pages describing a feature that an administrator enables through UI config should show a `FeatureAvailability` alert
+directly below the H1, instead of a sentence such as "This feature must be enabled by your administrator". In Bailo it
+shows whether the feature is enabled on the current instance, based on the UI config or the available artefact scanners.
+On the static documentation site it shows the config key that controls the feature.
+
+Do not repeat this anywhere else on the page - avoid wording such as "if your administrator has enabled the feature" or
+"if you cannot see the button, contact your administrator".
+
+```mdx
+import FeatureAvailability from 'src/FeatureAvailability'
+
+# Creating an Inference Service
+
+<FeatureAvailability feature='inference' />
+```
+
+To support a new feature, add it to both `frontend/src/FeatureAvailability.tsx` and
+`lib/landing/src/FeatureAvailability.tsx`.
+
 ---
 
 ## Section endings

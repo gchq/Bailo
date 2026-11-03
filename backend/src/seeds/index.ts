@@ -1,5 +1,5 @@
-import { ObjectId } from 'mongodb'
-import { Model, UpdateQuery } from 'mongoose'
+import { type ObjectId } from 'mongodb'
+import { type Model, type UpdateQuery } from 'mongoose'
 
 import log from '../services/log.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'

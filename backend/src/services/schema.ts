@@ -1,15 +1,15 @@
 import traverse from 'json-schema-traverse'
-import { Schema as JsonSchema, Validator } from 'jsonschema'
+import { type Schema as JsonSchema, Validator } from 'jsonschema'
 import _ from 'lodash'
 import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { CollaboratorEntry } from '../models/Model.js'
+import ModelModel, { type CollaboratorEntry } from '../models/Model.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import SchemaModel, { SchemaDoc, SchemaInterface } from '../models/Schema.js'
-import { UserInterface } from '../models/User.js'
-import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
+import SchemaModel, { type SchemaDoc, type SchemaInterface } from '../models/Schema.js'
+import { type UserInterface } from '../models/User.js'
+import { SchemaKind, type SchemaKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
@@ -20,10 +20,15 @@ const jsonSchemaValidator = new Validator()
 const schemaCacheTtlSeconds = 60 * 60 // 1 hour
 const schemaCache = new NodeCache({ stdTTL: schemaCacheTtlSeconds })
 export interface DefaultSchema {
+  /** Name of the schema that appears */
   name: string
+  /** Unique identifier for the schema */
   id: string
+  /** Description of the schemas functions */
   description: string
+  /** The file to mount the contents of each schema eg. `require('../src/scripts/example_schemas/minimal_model_schema.json')` */
   jsonSchema: JsonSchema
+  /** Roles required to review  */
   reviewRoles?: string[]
 }
 

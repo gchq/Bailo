@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from 'mongoose'
+import mongoose, { type ClientSession } from 'mongoose'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { execute, useTransaction } from '../../src/utils/transactions.js'

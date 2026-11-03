@@ -1,6 +1,6 @@
 import DisplayDialog from 'src/common/DisplayDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
-import { ReleaseInterface } from 'types/types'
+import { type ReleaseInterface } from 'types/types'
 
 type AssociatedReleasesDialogProps = {
   modelId: string

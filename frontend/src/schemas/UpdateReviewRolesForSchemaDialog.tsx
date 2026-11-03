@@ -18,7 +18,7 @@ import { patchSchema } from 'actions/schema'
 import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import renderQueryState from 'src/common/renderQueryState'
-import { SchemaInterface } from 'types/types'
+import { type SchemaInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 

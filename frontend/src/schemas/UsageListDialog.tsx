@@ -5,7 +5,7 @@ import DisplayDialog from 'src/common/DisplayDialog'
 import EmptyBlob from 'src/common/EmptyBlob'
 import renderQueryState from 'src/common/renderQueryState'
 import Link from 'src/Link'
-import { SchemaInterface } from 'types/types'
+import { type SchemaInterface } from 'types/types'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 type SchemaDialogProps = {

@@ -4,7 +4,7 @@ import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import { TokenInterface } from 'types/types'
+import { type TokenInterface } from 'types/types'
 import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 
 type PersonalAccessTokenProps = {

@@ -2,7 +2,7 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
+import { type ArtefactScanResult } from '../../src/connectors/artefactScanning/Base.js'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { ArtefactKind } from '../../src/models/Scan.js'

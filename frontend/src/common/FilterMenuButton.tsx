@@ -1,7 +1,7 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import CheckIcon from '@mui/icons-material/Check'
 import { Button, ListItemIcon, Menu, MenuItem } from '@mui/material'
-import { MouseEvent, useState } from 'react'
+import { type MouseEvent, useState } from 'react'
 
 interface FilterOption {
   value: string

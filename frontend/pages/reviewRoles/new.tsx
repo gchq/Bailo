@@ -2,10 +2,10 @@ import PersonAdd from '@mui/icons-material/PersonAdd'
 import { Stack, Typography } from '@mui/material'
 import { postReviewRole } from 'actions/reviewRoles'
 import router from 'next/router'
-import { ChangeEvent, useState } from 'react'
+import { type ChangeEvent, useState } from 'react'
 import Title from 'src/common/Title'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
-import { ReviewRolesFormData, RoleKind, SystemRole } from 'types/types'
+import { type ReviewRolesFormData, RoleKind, SystemRole } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReviewRolesForm() {

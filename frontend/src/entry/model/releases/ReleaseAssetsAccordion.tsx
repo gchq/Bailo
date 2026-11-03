@@ -4,7 +4,7 @@ import { useContext, useState } from 'react'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileBrowser from 'src/entry/model/files/FileBrowser'
 import CodeLine from 'src/entry/model/registry/CodeLine'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { type EntryInterface, type ReleaseInterface } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 export interface ReleaseAssetsAccordionProps {

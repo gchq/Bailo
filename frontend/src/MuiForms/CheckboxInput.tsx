@@ -1,9 +1,8 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
-import { ChangeEvent } from 'react'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
+import { type ChangeEvent } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
@@ -95,8 +94,6 @@ export default function CheckboxInput({
           <FormControlLabel value={true} control={<Radio data-test={`${id}-yes-option`} />} label='Yes' />
           <FormControlLabel value={false} control={<Radio data-test={`${id}-no-option`} />} label='No' />
         </RadioGroup>
-      ) : compare.inMirroredCompare && value ? (
-        <InlineDiff from={formatBoolean(compare.compareFromState)} to={formatBoolean(value)} />
       ) : (
         value && <Typography>{formatBoolean(value)}</Typography>
       )}

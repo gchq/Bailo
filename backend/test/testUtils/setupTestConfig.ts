@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { Util } from 'config/lib/util.js'
 import { afterEach, vi } from 'vitest'
 
-import { PartialDeep } from '../../src/types/types.js'
+import { type PartialDeep } from '../../src/types/types.js'
 import type { Config } from '../../src/utils/config.js'
 
 // Required directly rather than imported to keep the CJS file away from vite & skip the `config` package's layering, which would pull in the gitignored `config/local.cjs`

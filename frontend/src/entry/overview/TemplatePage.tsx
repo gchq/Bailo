@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Restricted from 'src/common/Restricted'
 import Link from 'src/Link'
-import { EntryCardKindLabel, EntryInterface, EntryKind } from 'types/types'
+import { EntryCardKindLabel, type EntryInterface, EntryKind } from 'types/types'
 import { entryKindForRedirect } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 

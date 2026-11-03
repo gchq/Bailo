@@ -1,5 +1,5 @@
 import { Container } from '@mui/material'
-import { ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import ExportPreviewDialog from 'src/common/ExportPreviewDialog'
 
 interface MetricsExportPreviewProps {

@@ -16,8 +16,8 @@ import {
 import { useTheme } from '@mui/material/styles'
 import prettyBytes from 'pretty-bytes'
 import { useCallback, useState } from 'react'
-import FolderNavigableList, { BrowseListItem } from 'src/common/FolderNavigableList'
-import { EntryInterface, FileInterface, isFileInterface } from 'types/types'
+import FolderNavigableList, { type BrowseListItem } from 'src/common/FolderNavigableList'
+import { type EntryInterface, type FileInterface, isFileInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { collectAllFiles, type FileTreeNode } from 'utils/fileTreeUtils'
 

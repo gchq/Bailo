@@ -6,7 +6,7 @@ import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import { defaultUserPermissions } from 'src/hooks/UserPermissionsHook'
 import { lightTheme } from 'src/theme'
-import { FileInterface } from 'types/types'
+import { type FileInterface } from 'types/types'
 import { testUiConfig, testV2Model } from 'utils/test/testModels'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

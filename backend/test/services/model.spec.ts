@@ -24,7 +24,7 @@ import {
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
-import { EntrySearchOptionsParams, EntryUserPermissions } from '../../src/types/types.js'
+import { type EntrySearchOptionsParams, type EntryUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')

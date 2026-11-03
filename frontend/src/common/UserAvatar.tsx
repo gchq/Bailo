@@ -2,7 +2,7 @@ import Avatar from '@mui/material/Avatar'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
-import { Entity } from 'types/types'
+import { type Entity } from 'types/types'
 
 type Luminosity = 'light' | 'dark'
 

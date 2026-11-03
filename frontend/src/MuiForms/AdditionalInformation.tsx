@@ -1,6 +1,6 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
-import { SxProps, useTheme } from '@mui/material/styles'
-import { ReactNode, useContext } from 'react'
+import { type SxProps, useTheme } from '@mui/material/styles'
+import { type ReactNode, useContext } from 'react'
 import ExpandableTypography from 'src/common/ExpandableTypography'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'

@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 vi.unmock('../../src/models/StroomEvent.ts')
-import StroomEventModel, { StroomEventObject } from '../../src/models/StroomEvent.js'
+import StroomEventModel, { type StroomEventObject } from '../../src/models/StroomEvent.js'
 
 const event = { EventDetail: { TypeId: 'ViewUserToken' } } as unknown as StroomEventObject
 

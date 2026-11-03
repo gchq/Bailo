@@ -1,9 +1,9 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen } from '@testing-library/react'
 import FolderNavigableList from 'src/common/FolderNavigableList'
-import { SortingDirection, SortingDirectionKeys } from 'src/common/Paginate'
+import { SortingDirection, type SortingDirectionKeys } from 'src/common/Paginate'
 import { lightTheme } from 'src/theme'
-import { FileInterface } from 'types/types'
+import { type FileInterface } from 'types/types'
 import { describe, expect, it } from 'vitest'
 
 function testFile(name: string): FileInterface {
