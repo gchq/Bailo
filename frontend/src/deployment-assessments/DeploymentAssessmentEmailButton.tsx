@@ -5,11 +5,11 @@ import useSWR from 'swr'
 import { DeploymentAssessmentInterface } from 'types/types'
 import { fetcher } from 'utils/fetcher'
 
-export function getRiskOwnerEntities(deploymentAssessment: Pick<DeploymentAssessmentInterface, 'metadata'>): string[] {
+function getRiskOwnerEntities(deploymentAssessment: Pick<DeploymentAssessmentInterface, 'metadata'>): string[] {
   return deploymentAssessment.metadata?.signOff?.riskOwners ?? []
 }
 
-export function buildDeploymentAssessmentEmailHref(
+function buildDeploymentAssessmentEmailHref(
   deploymentAssessment: Pick<DeploymentAssessmentInterface, 'id' | 'name'>,
   recipients: string[],
 ): string {
