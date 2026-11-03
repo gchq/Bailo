@@ -17,6 +17,7 @@ export function createMultipartFileUpload(
   stream: Readable,
   fileContentType = 'application/octet-stream',
 ): MultipartFileUpload {
+  // Must not appear in the body: https://www.rfc-editor.org/rfc/rfc7578#section-4.1
   const boundary = `----BailoBoundary${randomBytes(16).toString('hex')}`
 
   return {
@@ -32,6 +33,7 @@ async function* multipartFileBody(
   stream: Readable,
   fileContentType: string,
 ): AsyncGenerator<Buffer> {
+  // Part headers: https://www.rfc-editor.org/rfc/rfc7578#section-4.2 and #section-4.4
   yield Buffer.from(
     [
       `--${boundary}`,
@@ -44,10 +46,12 @@ async function* multipartFileBody(
   for await (const chunk of stream) {
     yield Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
   }
+  // Closing delimiter: https://www.rfc-editor.org/rfc/rfc2046#section-5.1.1
   yield Buffer.from(`\r\n--${boundary}--\r\n`)
 }
 
 /** Percent-encodes characters that would break out of a quoted header parameter. */
 function escapeHeaderParam(value: string) {
+  // As per https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#multipart-form-data
   return value.replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/"/g, '%22')
 }
