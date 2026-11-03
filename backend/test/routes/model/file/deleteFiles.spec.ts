@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { deleteFilesSchema } from '../../../../src/routes/v2/model/file/deleteFiles.js'
+import { removeFiles } from '../../../../src/services/file.js'
 import { createFixture, testDelete } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
@@ -26,6 +27,33 @@ describe('routes > file > deleteFiles', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
+  })
+
+  test('200 > duplicate file IDs are removed once', async () => {
+    const fixture = createFixture(deleteFilesSchema)
+    const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/files`, {
+      body: { fileIds: ['file1', 'file2', 'file1'] },
+    })
+
+    expect(res.statusCode).toBe(200)
+    expect(removeFiles).toHaveBeenCalledWith(
+      expect.anything(),
+      fixture.params.modelId,
+      ['file1', 'file2'],
+      false,
+      false,
+      undefined,
+    )
+  })
+
+  test('400 > empty file ID list', async () => {
+    const fixture = createFixture(deleteFilesSchema)
+    const res = await testDelete(`/api/v2/model/${fixture.params.modelId}/files`, {
+      body: { fileIds: [] },
+    })
+
+    expect(res.statusCode).toBe(400)
+    expect(removeFiles).not.toHaveBeenCalled()
   })
 
   test('audit > expected calls', async () => {

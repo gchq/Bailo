@@ -39,7 +39,7 @@ export async function postFileForModelId(
   }
   try {
     const fileResponse = await axios.post(
-      `/api/v2/model/${modelId}/files/upload/simple?name=${encodeURIComponent(name)}&mime=${mime}&${qs.stringify(queryParams)}`,
+      `/api/v2/model/${modelId}/files/upload/simple?name=${encodeURIComponent(name)}&mime=${encodeURIComponent(mime)}&${qs.stringify(queryParams)}`,
       file,
       { onUploadProgress },
     )

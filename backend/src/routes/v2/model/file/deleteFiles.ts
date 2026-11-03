@@ -13,7 +13,10 @@ export const deleteFilesSchema = z.object({
     modelId: z.string(),
   }),
   body: z.object({
-    fileIds: z.array(z.string()).min(1, 'Must provide at least one file ID'),
+    fileIds: z
+      .array(z.string())
+      .min(1, 'Must provide at least one file ID')
+      .transform((ids) => [...new Set(ids)]),
   }),
 })
 
