@@ -44,7 +44,6 @@
     "@uiw/react-md-editor": "^4.1.6",
     "@vercel/otel": "^2.1.2",
     "axios": "^1.21.0",
-    "clsx": "^2.1.1",
     "dayjs": "^1.11.23",
     "diff": "^9.0.0",
     "github-slugger": "^2.0.0",
