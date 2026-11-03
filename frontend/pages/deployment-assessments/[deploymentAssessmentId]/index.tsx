@@ -46,7 +46,7 @@ export default function DeploymentAssessment() {
     mutateDeploymentAssessment,
   } = useGetDeploymentAssessment(deploymentAssessmentId)
 
-  const error = MultipleErrorWrapper('Unable to load deployment assessment', {
+  const error = MultipleErrorWrapper('Unable to load Deployment Assessment', {
     isDeploymentAssessmentError,
   })
   if (error) {
@@ -98,9 +98,9 @@ export default function DeploymentAssessment() {
                   handleSubmit={handlePublish}
                   validateBeforeSubmit={validateBeforeSubmit}
                   draft={deploymentAssessment.draft}
-                  text='This is a draft deployment assessment'
-                  dialogTitle='Publish deployment assessment'
-                  dialogMessage='Are you sure you want to publish this deployment assessment? Published deployment assessments cannot be returned to draft.'
+                  text='This is a draft Deployment Assessment'
+                  dialogTitle='Publish Deployment Assessment'
+                  dialogMessage='Are you sure you want to publish this Deployment Assessment? Published Deployment Assessments cannot be returned to draft.'
                   buttonText='Publish'
                   showButton
                 />
@@ -112,7 +112,7 @@ export default function DeploymentAssessment() {
                   >
                     <Link href={backHref}>
                       <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                        Back to deployment assessments
+                        Back to Deployment Assessments
                       </Button>
                     </Link>
                     <Stack

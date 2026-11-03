@@ -84,7 +84,7 @@ const liveModel = {
 describe('services > deploymentAssessment', () => {
   beforeEach(() => {
     config.ui.deploymentAssessments.deployableModelState = 'Production'
-    vi.mocked(authentication.getUserInformation).mockResolvedValue({ name: 'Risk Owner' })
+    vi.mocked(authentication.getUserInformation).mockResolvedValue({ name: 'Deployment Risk Owner' })
     schemaMocks.getSchemaById.mockResolvedValue({
       kind: SchemaKind.DeploymentAssessment,
       hidden: false,
@@ -112,7 +112,7 @@ describe('services > deploymentAssessment', () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(undefined)
 
       await expect(() => getDeploymentAssessmentById({ dn: 'creator' }, 'da-id')).rejects.toThrow(
-        /^The requested deployment assessment was not found/,
+        /^The requested Deployment Assessment was not found/,
       )
     })
 
@@ -185,7 +185,7 @@ describe('services > deploymentAssessment', () => {
           metadata: { ...params.metadata, signOff: { ...params.metadata.signOff, riskOwners: ['group:risk'] } },
         },
       ),
-    ).rejects.toThrow('The risk owner must be a valid user entity.')
+    ).rejects.toThrow('The Deployment Risk Owner must be a valid user entity.')
     expect(ModelModelMock.find).not.toHaveBeenCalled()
   })
 
@@ -193,7 +193,7 @@ describe('services > deploymentAssessment', () => {
     vi.mocked(authentication.getUserInformation).mockRejectedValueOnce(new Error('Not found'))
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
-      'The risk owner could not be found.',
+      'The Deployment Risk Owner could not be found.',
     )
     expect(ModelModelMock.find).not.toHaveBeenCalled()
   })
@@ -219,7 +219,7 @@ describe('services > deploymentAssessment', () => {
     schemaMocks.getSchemaById.mockResolvedValueOnce({ kind: SchemaKind.DeploymentAssessment, hidden: true })
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
-      'Cannot create a deployment assessment using a hidden schema.',
+      'Cannot create a Deployment Assessment using a hidden schema.',
     )
     expect(schemaMocks.validateContentAgainstSchema).not.toHaveBeenCalled()
   })
@@ -228,7 +228,7 @@ describe('services > deploymentAssessment', () => {
     schemaMocks.getSchemaById.mockResolvedValueOnce({ kind: SchemaKind.AccessRequest, hidden: false })
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
-      'Deployment assessments must use a deployment assessment schema.',
+      'Deployment assessments must use a Deployment Assessment schema.',
     )
     expect(schemaMocks.validateContentAgainstSchema).not.toHaveBeenCalled()
   })
@@ -493,7 +493,7 @@ describe('services > deploymentAssessment', () => {
       DeploymentAssessmentModelMock.findOne.mockResolvedValueOnce(deploymentAssessment)
 
       await expect(updateDeploymentAssessment({ dn: 'creator' }, 'da-id', { draft: true })).rejects.toThrow(
-        'Cannot convert a published deployment assessment back to a draft.',
+        'Cannot convert a published Deployment Assessment back to a draft.',
       )
       expect(deploymentAssessment.save).not.toHaveBeenCalled()
     })
@@ -510,7 +510,7 @@ describe('services > deploymentAssessment', () => {
         expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
           'user:risk-owner',
           deploymentAssessment,
-          'Risk Owner',
+          'Deployment Risk Owner',
         )
         expect(smtpMocks.notifyModelOwnersOfDeploymentAssessment).toHaveBeenCalled()
       })
@@ -536,12 +536,12 @@ describe('services > deploymentAssessment', () => {
         expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
           'user:risk-owner',
           deploymentAssessment,
-          'Risk Owner',
+          'Deployment Risk Owner',
         )
         expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
           'user:other-owner',
           deploymentAssessment,
-          'Risk Owner',
+          'Deployment Risk Owner',
         )
       })
     })
@@ -568,7 +568,7 @@ describe('services > deploymentAssessment', () => {
       expect(smtpMocks.notifyRiskOwnerOfDeploymentAssessment).toHaveBeenCalledWith(
         'user:other-owner',
         deploymentAssessment,
-        'Risk Owner',
+        'Deployment Risk Owner',
       )
     })
 

@@ -105,7 +105,7 @@ export async function notifyRiskOwnerOfDeploymentAssessment(
   }
 
   const emailContent = await buildEmail(
-    `You have been allocated as a risk owner for a deployment assessment`,
+    `You have been allocated as a Deployment Risk Owner for a Deployment Assessment`,
     [
       { title: 'Deployment Assessment Name', data: deployment.name },
       { title: 'Deployment Assessment ID', data: deployment.id },
@@ -140,7 +140,7 @@ export async function notifyModelOwnersOfDeploymentAssessment(
   const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
 
   const emailContent = await buildEmail(
-    `A deployment assessment has been created for a model you own`,
+    `A Deployment Assessment has been created for a model you own`,
     [
       { title: 'Deployment Assessment ID', data: deployment.id },
       { title: 'Model Name', data: model.name },

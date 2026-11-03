@@ -64,12 +64,12 @@ export const deploymentAssessmentSchemaIdSchema = z
   .openapi({ example: 'stark-deployment-assessment-schema-v1' })
 export const deploymentAssessmentNameSchema = z
   .string()
-  .min(1, 'You must provide a deployment assessment name')
+  .min(1, 'You must provide a Deployment Assessment name')
   .trim()
   .openapi({ example: 'Just A Rather Very Intelligent System' })
 const deploymentAssessmentRiskOwnerSchema = z
   .array(z.string().min(1))
-  .min(1, 'You must provide a risk owner')
+  .min(1, 'You must provide a Deployment Risk Owner')
   .openapi({ example: ['user:tony'] })
 const deploymentAssessmentModelIdsSchema = z
   .array(z.string())
@@ -477,7 +477,7 @@ export const deploymentAssessmentInterfaceSchema = z.object({
     .object({
       name: z
         .string()
-        .min(1, 'You must provide a deployment assessment name')
+        .min(1, 'You must provide a Deployment Assessment name')
         .openapi({ example: 'Just A Rather Very Intelligent System' }),
       modelOverview: deploymentAssessmentModelOverview,
       signOff: deploymentAssessmentSignOff,

@@ -1,5 +1,4 @@
 import { Box, Card, Divider, Stack, Typography } from '@mui/material'
-import { useGetSchema } from 'actions/schema'
 import ChipSelector from 'src/common/ChipSelector'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
@@ -28,8 +27,6 @@ export default function DeploymentAssessmentSummaryCard({
   selectedState,
   onSelectedStateChange,
 }: DeploymentAssessmentSummaryCardProps) {
-  const { schema } = useGetSchema(assessment.schemaId)
-
   const canSelectModels = selectedModelIds !== undefined && onSelectedModelIdsChange !== undefined
 
   const owners = assessment.owner ? (Array.isArray(assessment.owner) ? assessment.owner : [assessment.owner]) : []
@@ -45,6 +42,7 @@ export default function DeploymentAssessmentSummaryCard({
                   pathname: `/deployment-assessments/${assessment.id}`,
                   query: returnTo ? { returnTo } : undefined,
                 }}
+                noLinkStyle
                 sx={{ overflow: 'hidden' }}
               >
                 <Typography component='h2' variant='h6' color='primary' noWrap>
@@ -53,8 +51,8 @@ export default function DeploymentAssessmentSummaryCard({
               </Link>
               <CopyToClipboardButton
                 textToCopy={assessment.name}
-                notificationText='Copied deployment assessment name to clipboard'
-                ariaLabel='copy deployment assessment name to clipboard'
+                notificationText='Copied Deployment Assessment name to clipboard'
+                ariaLabel='copy Deployment Assessment name to clipboard'
               />
             </Stack>
             <Stack
@@ -84,9 +82,9 @@ export default function DeploymentAssessmentSummaryCard({
             {`${formatDateString(assessment.createdAt)} `}
           </Typography>
         </Stack>
-        <Card variant='outlined' sx={{ height: '100%', p: 2 }}>
-          <Typography component='h3' variant='subtitle2' sx={{ mb: 1 }}>
-            <Stack direction='row' spacing={0.5}>
+        <Card variant='outlined' sx={{ height: '100%', p: 1 }}>
+          <Typography component='h3' variant='subtitle2'>
+            <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
               <Box component='span' sx={{ fontWeight: 'bold' }}>
                 Models:
               </Box>
@@ -100,7 +98,7 @@ export default function DeploymentAssessmentSummaryCard({
                     onChange={onSelectedModelIdsChange}
                     size='small'
                     variant='outlined'
-                    ariaLabel='add model to deployment assessment filters'
+                    ariaLabel='add model to Deployment Assessment filters'
                     style={{ maxWidth: '400px' }}
                   />
                 ) : (
@@ -115,28 +113,20 @@ export default function DeploymentAssessmentSummaryCard({
               )}
             </Stack>
           </Typography>
-          <Stack spacing={1}>
-            <Typography variant='body2'>
-              <Box component='span' sx={{ fontWeight: 'bold' }}>
-                Schema:
-              </Box>{' '}
-              {schema?.name ?? assessment.schemaId}
-            </Typography>
-            <Typography variant='body2' component='div'>
-              <Box component='span' sx={{ fontWeight: 'bold' }}>
-                Risk owner:
-              </Box>{' '}
-              {owners.length ? (
-                <Stack component='span' direction='row' spacing={1} sx={{ display: 'inline-flex', flexWrap: 'wrap' }}>
-                  {owners.map((owner) => (
-                    <UserDisplay key={owner} dn={owner} />
-                  ))}
-                </Stack>
-              ) : (
-                <em>Not specified</em>
-              )}
-            </Typography>
-          </Stack>
+          <Typography variant='body2' component='div'>
+            <Box component='span' sx={{ fontWeight: 'bold' }}>
+              Deployment Risk Owner:
+            </Box>{' '}
+            {owners.length ? (
+              <Stack component='span' direction='row' spacing={1} sx={{ display: 'inline-flex', flexWrap: 'wrap' }}>
+                {owners.map((owner) => (
+                  <UserDisplay key={owner} dn={owner} />
+                ))}
+              </Stack>
+            ) : (
+              <em>Not specified</em>
+            )}
+          </Typography>
         </Card>
       </Box>
     </Box>

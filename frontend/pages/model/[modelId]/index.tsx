@@ -70,7 +70,7 @@ export default function Model() {
                 entry.visibility === EntryVisibility.Private
                   ? 'Deployment assessments are not available for private models.'
                   : uiConfig.deploymentAssessments.deployableModelState !== null
-                    ? `This model's state must be set to ${uiConfig.deploymentAssessments.deployableModelState} in order for it to be included in deployment assessments.`
+                    ? `This model's state must be set to ${uiConfig.deploymentAssessments.deployableModelState} in order for it to be included in Deployment Assessments.`
                     : undefined,
             },
             {

@@ -22,11 +22,11 @@ registerPath(
     method: 'get',
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}',
     tags: ['deployment assessments'],
-    description: 'Get a deployment assessment.',
+    description: 'Get a Deployment Assessment.',
     schema: getDeploymentAssessmentSchema,
     responses: {
       200: {
-        description: 'A deployment assessment.',
+        description: 'A Deployment Assessment.',
         content: {
           'application/json': {
             schema: z.object({

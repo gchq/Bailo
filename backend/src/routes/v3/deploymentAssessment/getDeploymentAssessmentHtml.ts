@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 export const getDeploymentAssessmentHtmlSchema = z.object({
   params: z.object({
     deploymentAssessmentId: z.string({
-      required_error: 'Must specify deployment assessment id as param',
+      required_error: 'Must specify Deployment Assessment id as param',
     }),
   }),
 })
@@ -20,7 +20,7 @@ registerPath(
     method: 'get',
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/html',
     tags: ['deployment assessments'],
-    description: 'Get a specific version of a deployment assessment as HTML.',
+    description: 'Get a specific version of a Deployment Assessment as HTML.',
     schema: getDeploymentAssessmentHtmlSchema,
     responses: {
       200: {

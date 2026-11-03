@@ -24,7 +24,7 @@ function createModel(name: string) {
     .request('POST', '/api/v2/models', {
       name,
       kind: 'model',
-      description: 'A model created through the API to test deployment assessment search filters.',
+      description: 'A model created through the API to test Deployment Assessment search filters.',
       state: 'Production',
       visibility: 'public',
     })
@@ -117,7 +117,7 @@ function openAdvancedFilters() {
   })
 }
 
-describe('Search deployment assessments', () => {
+describe('Search Deployment Assessments', () => {
   before(() => {
     createModel(modelNames.alpha).then((alphaModelId) => {
       createModel(modelNames.beta).then((betaModelId) => {

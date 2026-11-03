@@ -78,8 +78,8 @@ export default function DeploymentAssessmentsList() {
   const returnTo = buildDeploymentAssessmentListHref(filters)
 
   return (
-    <Stack spacing={2}>
-      <Stack spacing={2}>
+    <Stack spacing={1}>
+      <Stack spacing={1}>
         <Stack direction='row' spacing={1} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <LimitedTextField
             data-test='deploymentAssessmentSearchFilter'
@@ -96,7 +96,7 @@ export default function DeploymentAssessmentsList() {
             label='Status'
             value={filters.status ?? ''}
             onChange={(event) => setFilters({ status: event.target.value as DeploymentAssessmentStatusKeys })}
-            sx={{ width: 190 }}
+            sx={{ width: 120 }}
           >
             <MenuItem value=''>
               <em>All</em>
@@ -116,7 +116,7 @@ export default function DeploymentAssessmentsList() {
           <Box sx={{ width: { xs: '100%', sm: 280 } }}>
             {/* TODO: Add a user only property to the following component. Enforce options based on this */}
             <EntityAutocompleteFilter
-              label='Risk owner'
+              label='Deployment Risk Owner'
               value={filters.riskOwner}
               onChange={(riskOwner) => setFilters({ riskOwner })}
               dataTest='deploymentAssessmentRiskOwnerFilter'
@@ -191,7 +191,7 @@ export default function DeploymentAssessmentsList() {
         (!isDeploymentAssessmentsLoading || list.length > 0) && (
           <Paginate
             list={list}
-            emptyListText='No deployment assessments found'
+            emptyListText='No Deployment Assessments found'
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
               { value: 'createdAt', title: 'Created date', iconKind: 'date' },

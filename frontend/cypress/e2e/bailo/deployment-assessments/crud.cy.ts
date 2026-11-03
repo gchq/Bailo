@@ -44,7 +44,6 @@ const newDeploymentAssessmentValuesObject = {
     modelOverview: {
       modelIds: [] as string[],
     },
-    signOff: { riskOwners: ['user:user2'] },
     about: {
       deploymentSummary: 'This is still a deployment',
       deploymentDate: '2098-05-01',
@@ -52,7 +51,7 @@ const newDeploymentAssessmentValuesObject = {
   },
 }
 
-describe('Create, read, update and delete deployment assessments', () => {
+describe('Create, read, update and delete Deployment Assessments', () => {
   before(() => {
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
       name: modelName,
@@ -134,7 +133,7 @@ describe('Create, read, update and delete deployment assessments', () => {
     }
   })
 
-  it('create new deployment assessment', () => {
+  it('create new Deployment Assessment', () => {
     cy.visit('/deployment-assessments')
     cy.get('[data-test=actionButton]').click()
     cy.url().should('contain', '/deployment-assessments/new')
@@ -145,12 +144,7 @@ describe('Create, read, update and delete deployment assessments', () => {
     enterDate('[data-test=dateSelectorInput]', new Date('2099-06-30T00:00:00.000Z'))
 
     cy.get('[data-test=signOffButton]').click()
-    cy.contains('Who is the risk owner attached to this deployment assessment?')
-    cy.get('[data-test=entitySelector] input').type('user')
-    cy.get('[role=option]')
-      .contains(/^user$/)
-      .should('be.visible')
-      .click()
+    cy.contains('Who is the Deployment Risk Owner attached to this Deployment Assessment?')
     cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
 
     cy.get('[data-test=modelOverviewButton]').click()
@@ -178,7 +172,7 @@ describe('Create, read, update and delete deployment assessments', () => {
     cy.url().should('contain', '/deployment-assessments/').and('not.contain', '/deployment-assessments/new')
   })
 
-  it('edit new deployment assessment', () => {
+  it('edit new Deployment Assessment', () => {
     cy.visit(`/deployment-assessments/${editDeploymentAssessmentId}`)
     cy.contains(editDeploymentAssessmentName)
     cy.get('[data-test=editFormButton]').click({ force: true })
@@ -221,7 +215,7 @@ describe('Create, read, update and delete deployment assessments', () => {
     cy.contains('Joe Bloggs')
   })
 
-  it('delete new draft deployment assessment', () => {
+  it('delete new draft Deployment Assessment', () => {
     cy.request('POST', '/api/v3/deployment-assessments', {
       name: 'DA - Delete Me',
       schemaId: 'minimal-deployment-assessment-schema-v1',
@@ -238,11 +232,11 @@ describe('Create, read, update and delete deployment assessments', () => {
       cy.location('pathname').should('eq', '/deployment-assessments')
       cy.contains('Deployment assessment deleted')
       cy.visit(`/deployment-assessments/${daToDeleteUuid}`)
-      cy.contains('The requested deployment assessment was not found.')
+      cy.contains('The requested Deployment Assessment was not found.')
     })
   })
 
-  it('Create a draft deployment assessment', () => {
+  it('Create a draft Deployment Assessment', () => {
     cy.visit('/deployment-assessments')
     cy.get('[data-test=actionButton]').click()
     cy.url().should('contain', '/deployment-assessments/new')
@@ -264,12 +258,7 @@ describe('Create, read, update and delete deployment assessments', () => {
     enterDate('[data-test=dateSelectorInput]', new Date('2098-05-01T00:00:00.000Z'))
 
     cy.get('[data-test=signOffButton]').click()
-    cy.contains('Who is the risk owner attached to this deployment assessment?').should('be.visible')
-    cy.get('[data-test=entitySelector] input').type('user')
-    cy.get('[role=option]')
-      .contains(/^user2$/)
-      .should('be.visible')
-      .click()
+    cy.contains('Who is the Deployment Risk Owner attached to this Deployment Assessment?').should('be.visible')
     cy.get('[data-test=entitySelector] .MuiChip-root').should('have.length', 1)
 
     cy.get('[data-test=modelOverviewButton]').click()
@@ -295,14 +284,14 @@ describe('Create, read, update and delete deployment assessments', () => {
     cy.contains('Please make sure that all required fields are appropriately filled out before publishing.').should(
       'not.exist',
     )
-    cy.contains('Publish deployment assessment').should('be.visible')
-    cy.contains('Published deployment assessments cannot be returned to draft.').should('be.visible')
+    cy.contains('Publish Deployment Assessment').should('be.visible')
+    cy.contains('Published Deployment Assessments cannot be returned to draft.').should('be.visible')
     cy.get('[data-test=confirmButton]').should('be.visible').click()
     cy.contains('Deployment assessment successfully published.')
     cy.get('[data-test=draftBanner]').should('not.exist')
     cy.get('[data-test=deploymentAssessmentStateChip]').should('contain.text', 'Published')
 
-    cy.log('Commenting on the published deployment assessment')
+    cy.log('Commenting on the published Deployment Assessment')
     const comment = `Published assessment comment ${Date.now()}`
     cy.intercept('POST', '**/api/v3/deployment-assessments/*/comments').as('postDeploymentAssessmentComment')
     cy.get('[data-test=deploymentAssessmentComments] textarea').type(comment)

@@ -46,11 +46,11 @@ registerPath(
     method: 'patch',
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}',
     tags: ['deployment assessments'],
-    description: 'Patch the values of a deployment assessment.',
+    description: 'Patch the values of a Deployment Assessment.',
     schema: patchDeploymentAssessmentSchema,
     responses: {
       200: {
-        description: 'A deployment assessment.',
+        description: 'A Deployment Assessment.',
         content: {
           'application/json': {
             schema: z.object({

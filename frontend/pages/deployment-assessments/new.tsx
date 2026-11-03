@@ -36,7 +36,13 @@ export default function NewDeploymentAssessment() {
       return
     }
 
-    const steps = getStepsFromSchema(schema)
+    const defaultState = {
+      signOff: {
+        riskOwners: [`user:${currentUser.dn}`],
+      },
+    }
+
+    const steps = getStepsFromSchema(schema, {}, [], defaultState)
     for (const step of steps) {
       step.steps = steps
     }
@@ -121,7 +127,7 @@ export default function NewDeploymentAssessment() {
     }
   }, [schemaId, setUnsavedChanges])
 
-  const error = MultipleErrorWrapper('Unable to load deployment assessment page', {
+  const error = MultipleErrorWrapper('Unable to load Deployment Assessment page', {
     isSchemaError,
     isCurrentUserError,
   })
@@ -153,7 +159,7 @@ export default function NewDeploymentAssessment() {
       errorText={errorText}
       onSaveDraft={onSaveDraft}
       draftButtonLoading={draftButtonLoading}
-      disableActions={!name ? 'Please enter a deployment assessment name' : undefined}
+      disableActions={!name ? 'Please enter a Deployment Assessment name' : undefined}
       // Drafts can be saved with unanswered questions, so only validate when submitted for review
       liveValidation={false}
     >

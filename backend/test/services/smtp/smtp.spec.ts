@@ -172,14 +172,14 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
-  test('that an email is not sent to a risk owner after a deployment assessment is created if disabled in config', async () => {
+  test('that an email is not sent to a Deployment Risk Owner after a Deployment Assessment is created if disabled in config', async () => {
     setTestConfig({ smtp: { enabled: false } })
     await notifyRiskOwnerOfDeploymentAssessment('user:test', testDeploymentAssessment, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
 
-  test('that an email is not sent to model owners after a deployment assessment is created if disabled in config', async () => {
+  test('that an email is not sent to model owners after a Deployment Assessment is created if disabled in config', async () => {
     setTestConfig({ smtp: { enabled: false } })
     await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
 
@@ -317,13 +317,13 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
-  test('that an email is sent to a risk owner on deployment assessment creation', async () => {
+  test('that an email is sent to a Deployment Risk Owner on Deployment Assessment creation', async () => {
     getModelByIdMock.mockReturnValue(testModel)
     await notifyRiskOwnerOfDeploymentAssessment('user:user', testDeploymentAssessment, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 
-  test('that an email is sent to all model owners on deployment assessment creation', async () => {
+  test('that an email is sent to all model owners on Deployment Assessment creation', async () => {
     getModelByIdMock.mockReturnValue(testModel)
     await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
