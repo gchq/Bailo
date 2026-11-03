@@ -240,4 +240,3 @@ def test_download_writes_nested_filename_within_the_working_directory(tmp_path, 
     release.download("weights/model.bin")
 
     assert (tmp_path / "weights" / "model.bin").read_bytes() == b"data"
-
