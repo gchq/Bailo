@@ -41,7 +41,7 @@
     "@rjsf/validator-ajv8": "~6.11.0",
     "@types/js-cookie": "^3.0.6",
     "@uiw/react-markdown-preview": "^5.2.1",
-    "@uiw/react-md-editor": "^4.1.6",
+    "@uiw/react-md-editor": "^4.2.0",
     "@vercel/otel": "^2.2.0",
     "axios": "^1.21.0",
     "dayjs": "^1.11.23",
