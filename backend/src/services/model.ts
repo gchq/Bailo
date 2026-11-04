@@ -1,25 +1,25 @@
 import * as _ from 'lodash-es'
-import { ProjectionType } from 'mongoose'
+import { type ProjectionType } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
+import { ModelAction, type ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
 import ModelModel, {
-  CollaboratorEntry,
+  type CollaboratorEntry,
   EntryKind,
-  EntryKindKeys,
+  type EntryKindKeys,
   EntryVisibility,
-  EntryVisibilityKeys,
-  ModelDoc,
-  ModelInterface,
+  type EntryVisibilityKeys,
+  type ModelDoc,
+  type ModelInterface,
 } from '../models/Model.js'
-import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ModelCardRevisionModel, { type ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
+import { type UserInterface } from '../models/User.js'
+import { GetModelCardVersionOptions, type GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { isBailoError } from '../types/error.js'
 import {
   EntityKind,

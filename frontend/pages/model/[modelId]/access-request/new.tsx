@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaFormPage from 'src/schemas/SchemaFormPage'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
 

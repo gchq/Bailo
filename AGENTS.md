@@ -71,7 +71,7 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 
 Each Python project is an independent [uv](https://docs.astral.sh/uv/) project with its own `uv.lock`. They are
 deliberately not a uv workspace: a workspace forces a single `requires-python` across all members (the intersection here
-is Python 3.12 only), which would break the `bailo` 3.10-3.14 test matrix.
+is Python 3.12 only), which would break the `bailo` 3.10-3.15 test matrix.
 
 Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
 
@@ -79,8 +79,13 @@ Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
   failing `python_test_lowest` CI job. Use a `; python_version >= "3.x"` marker when only newer Pythons need a newer
   version.
 - Dependabot keeps the direct dependencies of `lib/artefactscan_api` (shipped as a Docker image) at their latest
-  versions. `lib/python` and `backend/docs` only get security updates; routine upgrades there are manual
+  minor/major versions. `lib/python` and `backend/docs` only get security updates; routine upgrades there are manual
   (`uv lock --upgrade-package <name>`).
+- Dependabot skips patch-only version bumps in every ecosystem. Security updates of any size are still raised for npm,
+  uv and GitHub Actions, but Dependabot has no security updates for docker, docker-compose, helm or pre-commit, so patch
+  fixes there must be applied manually.
+- npm dependencies must use a `^` or `~` range, never an exact pin. `npm ci` installs exactly what `package-lock.json`
+  records, so new patches only arrive when the lockfile is regenerated (a Dependabot PR or a manual `npm update`).
 - The ruff version comes from the hook `rev` in `.pre-commit-config.yaml`, not from any `uv.lock`.
 
 ### Python client (`lib/python/`)
@@ -198,7 +203,7 @@ Path-filtered (only run when relevant files change):
 
 9. **Python static checks** - ruff format + check via pre-commit (when `lib/python/`, `.pre-commit-config.yaml` or
    `ruff.toml` changes)
-10. **Python unit tests** - pytest across Python 3.10-3.14 (when `lib/python/` changes)
+10. **Python unit tests** - pytest across Python 3.10-3.15 (when `lib/python/` changes)
 11. **ArtefactScan tests** - pytest (when `lib/artefactscan_api/` changes)
 12. **Docs style** - `frontend/scripts/check-docs-style.sh` (when `frontend/pages/docs/**/*.mdx` changes)
 

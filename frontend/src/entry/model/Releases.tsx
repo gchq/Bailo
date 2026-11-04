@@ -8,7 +8,7 @@ import Paginate from 'src/common/Paginate'
 import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { type EntryInterface, type ReleaseInterface } from 'types/types'
 
 type ReleasesProps = {
   model: EntryInterface

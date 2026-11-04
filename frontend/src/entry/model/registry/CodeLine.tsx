@@ -1,7 +1,7 @@
 import CodeIcon from '@mui/icons-material/Code'
 import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 
 interface CodeLineProps {

@@ -1,12 +1,12 @@
 import { Autocomplete, Container, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { type SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import ComparisonSwapButton from 'src/common/ComparisonSwapButton'
 import LimitedTextField from 'src/common/LimitedTextField'
 import renderQueryState from 'src/common/renderQueryState'
-import { SchemaInterface } from 'types/types'
+import { type SchemaInterface } from 'types/types'
 
 export default function SchemaCompare() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()

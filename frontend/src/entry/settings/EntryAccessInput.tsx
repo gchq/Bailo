@@ -1,11 +1,11 @@
 import { Autocomplete, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { useListEntities } from 'actions/user'
 import { debounce } from 'lodash-es'
-import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { type SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
-import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, EntryRole } from 'types/types'
+import { type CollaboratorEntry, EntityKind, type EntityObject, type EntryKindKeys, type EntryRole } from 'types/types'
 import { fromEntity } from 'utils/entityUtils'
 import { toSentenceCase } from 'utils/stringUtils'
 

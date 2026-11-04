@@ -1,8 +1,8 @@
-import { Schema as JsonSchema, Validator } from 'jsonschema'
+import { type Schema as JsonSchema, Validator } from 'jsonschema'
 import NodeCache from 'node-cache'
 
-import { callLlmChatCompletion, ChatMessage, ChatMessageRole } from '../clients/llm.js'
-import { UserInterface } from '../models/User.js'
+import { callLlmChatCompletion, type ChatMessage, ChatMessageRole } from '../clients/llm.js'
+import { type UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq } from '../utils/error.js'
 import log from './log.js'

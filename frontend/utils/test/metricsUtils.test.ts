@@ -1,4 +1,4 @@
-import { SchemaInterface } from 'types/types'
+import { type SchemaInterface } from 'types/types'
 import { buildEntriesTabHref, sortPieData, toPieData } from 'utils/metricsUtils'
 import { expect } from 'vitest'
 

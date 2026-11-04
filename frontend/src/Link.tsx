@@ -1,9 +1,8 @@
-import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link'
+import MuiLink, { type LinkProps as MuiLinkProps } from '@mui/material/Link'
 import { styled } from '@mui/material/styles'
-import clsx from 'clsx'
-import NextLink, { LinkProps as NextLinkProps } from 'next/link'
+import NextLink, { type LinkProps as NextLinkProps } from 'next/link'
 import { useRouter } from 'next/router'
-import { AnchorHTMLAttributes, forwardRef } from 'react'
+import { type AnchorHTMLAttributes, forwardRef } from 'react'
 
 // Add support for the sx prop for consistency with the other branches.
 const Anchor = styled('a')({})
@@ -73,10 +72,9 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
 
   const router = useRouter()
   const pathname = typeof href === 'string' ? href : href.pathname
-  const className = clsx(classNameProps, {
-    [activeClassName]: router.pathname === pathname && activeClassName,
-  })
-
+  const className = [classNameProps, router.pathname === pathname ? activeClassName : undefined]
+    .filter(Boolean)
+    .join(' ')
   const isExternal = typeof href === 'string' && (href.indexOf('http') === 0 || href.indexOf('mailto:') === 0)
 
   if (isExternal) {

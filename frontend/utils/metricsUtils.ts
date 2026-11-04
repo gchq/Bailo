@@ -1,5 +1,5 @@
-import { PieChartData } from 'src/metrics/components/MetricsPieChart'
-import { SchemaInterface } from 'types/types'
+import { type PieChartData } from 'src/metrics/components/MetricsPieChart'
+import { type SchemaInterface } from 'types/types'
 
 export const dateFormat = 'YYYY-MM'
 

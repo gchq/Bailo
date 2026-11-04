@@ -25,13 +25,13 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import SchemaButton from 'src/schemas/SchemaButton'
 import {
-  EntryInterface,
-  EntryKindKeys,
+  type EntryInterface,
+  type EntryKindKeys,
   EntryKindLabel,
   MODEL_ENTRY_KINDS,
-  SchemaInterface,
+  type SchemaInterface,
   SchemaKind,
-  SchemaKindKeys,
+  type SchemaKindKeys,
   SchemaKindLabel,
 } from 'types/types'
 import { entryKindForRedirect } from 'utils/routerUtils'

@@ -6,7 +6,7 @@ import { useCallback, useMemo, useState } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
-import { BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
+import { type BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
 
 export default function OverviewMetrics() {
   const router = useRouter()

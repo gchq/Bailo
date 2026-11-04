@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express'
+import express, { type Request, type Response } from 'express'
 import supertest from 'supertest'
 import { describe, expect, test, vi } from 'vitest'
 
-import { RoleKeys, Roles } from '../../../src/connectors/authentication/constants.js'
+import { type RoleKeys, Roles } from '../../../src/connectors/authentication/constants.js'
 import { OauthAuthenticationConnector } from '../../../src/connectors/authentication/oauth.js'
-import { UserInterface } from '../../../src/models/User.js'
+import { type UserInterface } from '../../../src/models/User.js'
 import config from '../../../src/utils/config.js'
 import { toEntity } from '../../../src/utils/entity.js'
 

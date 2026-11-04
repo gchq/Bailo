@@ -1,8 +1,8 @@
-import { PipelineStage } from 'mongoose'
+import { type PipelineStage } from 'mongoose'
 
-import { CollaboratorEntry, SystemRoles } from '../../models/Model.js'
-import { SemverObject } from '../../models/Release.js'
-import { EntryVolumeInterval } from '../../routes/v3/metrics/getEntryVolume.js'
+import { type CollaboratorEntry, SystemRoles } from '../../models/Model.js'
+import { type SemverObject } from '../../models/Release.js'
+import { type EntryVolumeInterval } from '../../routes/v3/metrics/getEntryVolume.js'
 import { semverObjectToString } from '../../services/release.js'
 
 /**

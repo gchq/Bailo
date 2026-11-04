@@ -8,7 +8,7 @@ import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntryInterface } from 'types/types'
+import { type CollaboratorEntry, type EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 

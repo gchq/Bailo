@@ -1,7 +1,7 @@
-import { HydratedDocument, model, Schema, Types } from 'mongoose'
+import { type HydratedDocument, model, Schema, type Types } from 'mongoose'
 
-import { SoftDeleteDocument, SoftDeleteInterface, softDeletionPlugin } from './plugins/softDeletePlugin.js'
-import { ScanInterface } from './Scan.js'
+import { type SoftDeleteDocument, type SoftDeleteInterface, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type ScanInterface } from './Scan.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the

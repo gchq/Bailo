@@ -1,9 +1,9 @@
 import { getImageTagManifests } from '../../clients/registry.js'
-import { ImageRef } from '../../models/Release.js'
+import { type ImageRef } from '../../models/Release.js'
 import { isRegistryError } from '../../types/RegistryError.js'
 import { InternalError, NotFound } from '../../utils/error.js'
 import { isManifestList } from '../../utils/registryResponses.js'
-import { Descriptors, ImageManifestV2 } from '../../utils/registryResponseTypes.js'
+import { type Descriptors, type ImageManifestV2 } from '../../utils/registryResponseTypes.js'
 
 /**
  * @remarks

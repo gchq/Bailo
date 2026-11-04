@@ -14,14 +14,14 @@ import {
   Typography,
 } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
-import CoreForm from '@rjsf/core'
+import type CoreForm from '@rjsf/core'
 import Form from '@rjsf/mui'
-import { Experimental_DefaultFormStateBehavior, RJSFSchema } from '@rjsf/utils'
+import { type Experimental_DefaultFormStateBehavior, type RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
-import { RouterQueryParams } from 'src/entry/overview/FormEditPage'
+import { type Dispatch, type SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { type RouterQueryParams } from 'src/entry/overview/FormEditPage'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -36,7 +36,7 @@ import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import useScrollToHash from 'src/hooks/useScrollToHash'
 import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import {
   createBlankValueValidator,
   getFormStats,

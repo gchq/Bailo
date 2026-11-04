@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import * as _ from 'lodash-es'
 import { useCallback, useState } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
-import { MetricValueWithId } from 'src/MuiForms/Metrics'
+import { type MetricValueWithId } from 'src/MuiForms/Metrics'
 import { isValidNumber } from 'utils/stringUtils'
 
 interface MetricItemProps {

@@ -6,16 +6,16 @@ import Share from '@mui/icons-material/Share'
 import { Box, Button, ButtonBase, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import {
-  ArrayFieldItemTemplateProps,
-  ArrayFieldTemplateProps,
-  ErrorListProps,
-  FieldTemplateProps,
-  ObjectFieldTemplateProps,
-  RJSFSchema,
-  RJSFValidationError,
-  TitleFieldProps,
+  type ArrayFieldItemTemplateProps,
+  type ArrayFieldTemplateProps,
+  type ErrorListProps,
+  type FieldTemplateProps,
+  type ObjectFieldTemplateProps,
+  type RJSFSchema,
+  type RJSFValidationError,
+  type TitleFieldProps,
 } from '@rjsf/utils'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import Link from 'src/Link'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 import {

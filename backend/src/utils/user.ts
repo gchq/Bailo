@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'crypto'
 
-import { TokenDoc } from '../models/Token.js'
-import { UserInterface } from '../models/User.js'
+import { type TokenDoc } from '../models/Token.js'
+import { type UserInterface } from '../models/User.js'
 import { bailoErrorGuard } from '../routes/middleware/expressErrorHandler.js'
 import { getAdminToken } from '../routes/v1/registryAuth.js'
 import { getTokenFromAuthHeader } from '../services/token.js'

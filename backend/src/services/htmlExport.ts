@@ -1,17 +1,17 @@
 import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
+import { Marked } from 'marked'
 import { resolve } from 'path'
 import sanitizeHtml from 'sanitize-html'
-import showdown from 'showdown'
 
-import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
-import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
-import { DecisionKeys, ResponseInterface } from '../models/Response.js'
+import { type CollaboratorEntry, type ModelInterface } from '../models/Model.js'
+import { type ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
+import { type DecisionKeys, type ResponseInterface } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { Fragment, recursiveRender } from '../utils/export.js'
+import { type UserInterface } from '../models/User.js'
+import { type GetModelCardVersionOptionsKeys } from '../types/enums.js'
+import { type Fragment, recursiveRender } from '../utils/export.js'
 import { outdent } from '../utils/string.js'
 import { getDeploymentAssessmentById } from './deploymentAssessment.js'
 import { getModelById, getModelCard, getRoleEntities } from './model.js'
@@ -21,6 +21,7 @@ export const htmlTemplate = Handlebars.compile(
   readFileSync(resolve(import.meta.dirname, 'templates', 'htmlExport.hbs'), 'utf-8'),
 )
 
+const markdownConverter = new Marked({ gfm: true, breaks: true })
 export type ReviewExport = {
   semver?: string
   collaborator: string
@@ -156,9 +157,8 @@ export async function renderToHtml(
   reviewExports: ReviewExport[],
 ) {
   const markdown = await renderToMarkdown(model, modelCardRevision, reviewExports)
-  const converter = new showdown.Converter()
-  converter.setFlavor('github')
-  const body = converter.makeHtml(markdown)
+  const html = await markdownConverter.parse(markdown)
+  const body = sanitizeHtml(html)
   const sanitisedBody = sanitizeHtml(body)
 
   return htmlTemplate({ body: sanitisedBody })
@@ -192,9 +192,8 @@ export async function getDeploymentAssessmentHtml(user: UserInterface, deploymen
   output += '\n\n---\n'
 
   output = recursiveRender(deploymentAssessment.metadata, schema.jsonSchema as Fragment, output)
-  const converter = new showdown.Converter()
-  converter.setFlavor('github')
-  const body = converter.makeHtml(output)
+  const html = await markdownConverter.parse(output)
+  const body = sanitizeHtml(html)
   const sanitisedBody = sanitizeHtml(body)
 
   return { html: htmlTemplate({ body: sanitisedBody }), deploymentAssessment }

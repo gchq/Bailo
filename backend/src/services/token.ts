@@ -1,8 +1,8 @@
-import { ClientSession } from 'mongoose'
+import { type ClientSession } from 'mongoose'
 
-import { Response } from '../connectors/authorisation/base.js'
-import TokenModel, { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
-import { UserInterface } from '../models/User.js'
+import { type Response } from '../connectors/authorisation/base.js'
+import TokenModel, { type TokenActionsKeys, type TokenDoc, TokenScope, type TokenScopeKeys } from '../models/Token.js'
+import { type UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../utils/error.js'
 import { longAlphabet, shortAlphabet } from '../utils/id.js'
 import { getModelById } from './model.js'

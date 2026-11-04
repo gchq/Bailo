@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { Decision, ResponseInterface } from '../../../models/Response.js'
+import { Decision, type ResponseInterface } from '../../../models/Response.js'
 import { respondToReview } from '../../../services/response.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'

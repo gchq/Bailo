@@ -1,15 +1,12 @@
-import shelljs from 'shelljs'
+import { execSync } from 'node:child_process'
 
 import packageInfo from '../../package.json' with { type: 'json' }
 import packageLock from '../../package-lock.json' with { type: 'json' }
 
-const { exec } = shelljs
-
 // This script requires 'license-checker'
 //   npm i -g license-checker
 export default async function runScript() {
-  const { stdout } = exec('license-checker --json', { silent: true })
-  const licenses = JSON.parse(stdout)
+  const licenses = JSON.parse(execSync('license-checker --json').toString())
 
   const packages = Object.keys(packageInfo.dependencies).concat(Object.keys(packageInfo.devDependencies))
   const dependencies: Record<string, string> = {}

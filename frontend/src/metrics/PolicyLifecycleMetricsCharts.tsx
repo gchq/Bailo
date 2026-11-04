@@ -23,8 +23,8 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import OwnerRoleDisplay from 'src/metrics/components/OwnerRoleDisplay'
-import { WeekFilterOptions, WeekFilterOptionsKeys } from 'src/metrics/PolicyMetrics'
-import { EntryRole, GlobalLifecycleMetrics } from 'types/types'
+import { WeekFilterOptions, type WeekFilterOptionsKeys } from 'src/metrics/PolicyMetrics'
+import { type EntryRole, type GlobalLifecycleMetrics } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, isOverdue } from 'utils/dateUtils'
 
 interface PolicyMetricsChartsProps {

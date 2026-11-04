@@ -3,7 +3,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Transition } from 'src/common/Transition'
 
 type DisplayDialogProps = {

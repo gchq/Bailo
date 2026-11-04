@@ -1,6 +1,6 @@
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { type HydratedDocument, model, Schema } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const EntryVisibility = {
   Private: 'private',

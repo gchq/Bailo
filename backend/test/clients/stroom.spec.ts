@@ -1,4 +1,4 @@
-import { PassThrough, Readable } from 'node:stream'
+import { PassThrough, type Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 

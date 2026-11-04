@@ -1,7 +1,7 @@
-import { ChangeEvent } from 'react'
+import { type ChangeEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import LimitedTextField from 'src/common/LimitedTextField'
-import { EntryKindKeys } from 'types/types'
+import { type EntryKindKeys } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
 const htmlId = 'entry-name-input'

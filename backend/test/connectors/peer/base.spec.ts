@@ -2,7 +2,7 @@ import { ClientRequest } from 'http'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BasePeerConnector } from '../../../src/connectors/peer/base.js'
-import { FederationState, RemoteFederationConfig, SystemStatus } from '../../../src/types/types.js'
+import { FederationState, type RemoteFederationConfig, type SystemStatus } from '../../../src/types/types.js'
 
 vi.mock('node-cache', () => {
   return {

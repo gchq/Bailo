@@ -1,7 +1,7 @@
 import { Tooltip } from '@mui/material'
-import { ReactElement, useContext, useMemo } from 'react'
+import { type ReactElement, useContext, useMemo } from 'react'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
-import { RestrictedActionKeys } from 'types/types'
+import { type RestrictedActionKeys } from 'types/types'
 
 type RestrictedProps = {
   action: RestrictedActionKeys

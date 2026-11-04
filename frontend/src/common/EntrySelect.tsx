@@ -1,12 +1,21 @@
 import EditIcon from '@mui/icons-material/Edit'
 import WarningIcon from '@mui/icons-material/Warning'
-import { FormControl, IconButton, MenuItem, Select, SelectChangeEvent, Stack, Tooltip, Typography } from '@mui/material'
+import {
+  FormControl,
+  IconButton,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import { patchEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EntrySelectField = Extract<keyof EntryInterface, 'organisation' | 'state'>

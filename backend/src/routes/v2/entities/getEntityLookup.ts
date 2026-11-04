@@ -1,6 +1,6 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
-import { UserInformation } from '../../../connectors/authentication/constants.js'
+import { type UserInformation } from '../../../connectors/authentication/constants.js'
 import authentication from '../../../connectors/authentication/index.js'
 import { z } from '../../../lib/zod.js'
 import { registerPath, UserInformationSchema } from '../../../services/specification.js'

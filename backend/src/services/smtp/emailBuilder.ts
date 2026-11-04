@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
 import mjml2html from 'mjml'
-import Mail from 'nodemailer/lib/mailer/index.js'
+import type Mail from 'nodemailer/lib/mailer/index.js'
 import { resolve } from 'path'
 import sanitizeHtml from 'sanitize-html'
 

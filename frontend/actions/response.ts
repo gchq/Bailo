@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
-import { ReactionKindKeys, ResponseInterface } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ReactionKindKeys, type ResponseInterface } from 'types/types'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyResponseList = []
 

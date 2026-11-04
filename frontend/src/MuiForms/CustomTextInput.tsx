@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { useMemo } from 'react'
 import CompareField from 'src/common/CompareField'
 import LimitedTextField from 'src/common/LimitedTextField'
