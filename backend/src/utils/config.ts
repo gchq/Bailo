@@ -340,7 +340,7 @@ export interface Config {
     accessRequests: DefaultSchema[]
     /** Data card schemas that define the data card forms*/
     dataCards: DefaultSchema[]
-    /** Deployment assessment schemas that define the deployment assessment forms */
+    /** Deployment Assessment schemas that define the Deployment Assessment forms */
     deploymentAssessments: DefaultSchema[]
   }
 

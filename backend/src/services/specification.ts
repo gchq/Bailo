@@ -4,7 +4,6 @@ import type { AnyZodObject } from 'zod'
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import { z } from '../lib/zod.js'
-import { DeploymentAssessmentState } from '../models/DeploymentAssessment.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
 import { Decision, ResponseKind } from '../models/Response.js'
@@ -65,21 +64,17 @@ export const deploymentAssessmentSchemaIdSchema = z
   .openapi({ example: 'stark-deployment-assessment-schema-v1' })
 export const deploymentAssessmentNameSchema = z
   .string()
-  .min(1, 'You must provide a deployment assessment name')
+  .min(1, 'You must provide a Deployment Assessment name')
   .trim()
   .openapi({ example: 'Just A Rather Very Intelligent System' })
 const deploymentAssessmentRiskOwnerSchema = z
   .array(z.string().min(1))
-  .min(1, 'You must provide a risk owner')
+  .min(1, 'You must provide a Deployment Risk Owner')
   .openapi({ example: ['user:tony'] })
 const deploymentAssessmentModelIdsSchema = z
   .array(z.string())
   .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
 export const deploymentAssessmentDraftSchema = z.boolean().openapi({ example: true })
-export const deploymentAssessmentStateSchema = z
-  .nativeEnum(DeploymentAssessmentState)
-  .openapi({ example: DeploymentAssessmentState.NeedsReview })
-
 export const deploymentAssessmentMetadataSchema = z
   .object({
     signOff: z
@@ -112,7 +107,6 @@ export const deploymentAssessmentSummarySchema = z.object({
   draft: deploymentAssessmentDraftSchema,
   createdBy: z.string().openapi({ example: 'tony' }),
   createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
-  state: deploymentAssessmentStateSchema.optional(),
 })
 
 const baseDeploymentAssessmentSchema = z.object({
@@ -419,8 +413,6 @@ export const deploymentAssessmentResponseSchema = z.object({
   _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   entity: z.string().openapi({ example: 'user:joe.bloggs' }),
   kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
-  role: z.string().optional().openapi({ example: 'riskOwners' }),
-  decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
   parentId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -485,7 +477,7 @@ export const deploymentAssessmentInterfaceSchema = z.object({
     .object({
       name: z
         .string()
-        .min(1, 'You must provide a deployment assessment name')
+        .min(1, 'You must provide a Deployment Assessment name')
         .openapi({ example: 'Just A Rather Very Intelligent System' }),
       modelOverview: deploymentAssessmentModelOverview,
       signOff: deploymentAssessmentSignOff,

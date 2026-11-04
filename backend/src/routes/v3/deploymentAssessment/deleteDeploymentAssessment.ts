@@ -19,15 +19,15 @@ registerPath(
     method: 'delete',
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}',
     tags: ['deployment assessments'],
-    description: 'Delete a deployment assessment.',
+    description: 'Delete a Deployment Assessment.',
     schema: deleteDeploymentAssessmentSchema,
     responses: {
       200: {
-        description: 'A message confirming the removal of the deployment assessment.',
+        description: 'A message confirming the removal of the Deployment Assessment.',
         content: {
           'application/json': {
             schema: z.object({
-              message: z.string().openapi({ example: 'Successfully removed deployment assessment.' }),
+              message: z.string().openapi({ example: 'Successfully removed Deployment Assessment.' }),
             }),
           },
         },
@@ -55,7 +55,7 @@ export const deleteDeploymentAssessment = [
     await audit.onDeleteDeploymentAssessment(req, deploymentAssessment)
 
     res.json({
-      message: 'Successfully removed deployment assessment.',
+      message: 'Successfully removed Deployment Assessment.',
     })
   },
 ]

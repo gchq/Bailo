@@ -38,13 +38,13 @@ export default function DeploymentAssessments({ model }: DeploymentAssessmentsPr
               data-test='createDeploymentAssessmentButton'
               startIcon={<Create />}
             >
-              Create deployment assessment
+              Create Deployment Assessment
             </Button>
           </Link>
         </Box>
         <Paginate
           list={deploymentAssessments}
-          emptyListText='No deployment assessments found'
+          emptyListText='No Deployment Assessments found'
           sortingProperties={[
             { value: 'name', title: 'Name', iconKind: 'text' },
             { value: 'createdAt', title: 'Created date', iconKind: 'date' },

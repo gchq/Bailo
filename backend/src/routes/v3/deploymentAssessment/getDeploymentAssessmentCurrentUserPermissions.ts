@@ -17,11 +17,11 @@ registerPath(
     method: 'get',
     path: '/api/v3/deployment-assessments/{deploymentAssessmentId}/permissions/mine',
     tags: ['deployment assessments'],
-    description: 'Get all current user permissions for a deployment assessment.',
+    description: 'Get all current user permissions for a Deployment Assessment.',
     schema: getDeploymentAssessmentCurrentUserPermissionsSchema,
     responses: {
       200: {
-        description: `Details about the currently logged in user's permissions for a deployment assessment.`,
+        description: `Details about the currently logged in user's permissions for a Deployment Assessment.`,
         content: {
           'application/json': {
             schema: z.object({

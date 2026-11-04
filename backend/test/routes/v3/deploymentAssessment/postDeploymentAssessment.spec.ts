@@ -29,7 +29,7 @@ const serviceMock = vi.hoisted(() => ({
 vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 
 describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => {
-  test('creates a deployment assessment', async () => {
+  test('creates a Deployment Assessment', async () => {
     serviceMock.createDeploymentAssessment.mockResolvedValueOnce(deploymentAssessment)
     const fixture = {
       body: {
@@ -108,7 +108,7 @@ describe('routes > v3 > deploymentAssessment > postDeploymentAssessment', () => 
     { body: {}, description: 'missing required fields' },
     {
       body: { schemaId: 'deployment-assessment-schema', metadata: { overview: {} } },
-      description: 'missing deployment assessment name',
+      description: 'missing Deployment Assessment name',
     },
     { body: { schemaId: 'deployment-assessment-schema', metadata: 'invalid' }, description: 'non-object metadata' },
     {

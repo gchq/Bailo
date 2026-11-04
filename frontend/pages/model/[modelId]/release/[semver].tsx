@@ -2,7 +2,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { putRelease, UpdateReleaseParams, useGetRelease } from 'actions/release'
-import { useGetReviewRequestsForModel, useHeadReviewRequests } from 'actions/review'
+import { useGetReviewRequestsForModel, useHeadReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -31,7 +31,7 @@ export default function Release() {
 
   const { release, isReleaseLoading, isReleaseError, mutateRelease } = useGetRelease(modelId, semver)
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
-  const { mutateReviews: mutateHeadReviews } = useHeadReviewRequests({
+  const { mutateReviews: mutateHeadReviews } = useHeadReviewRequestsForModel({
     modelId: modelId ?? '',
     semver: semver ?? '',
   })
@@ -91,7 +91,7 @@ export default function Release() {
               text='This is a draft release'
               dialogTitle='Confirm release submission for review'
               draft={release.draft}
-              handleSubmitForReview={handleSubmitReleaseForReview}
+              handleSubmit={handleSubmitReleaseForReview}
               showButton
               disableButton={isEdit}
               isLoading={isLoading}

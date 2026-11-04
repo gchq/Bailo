@@ -2,7 +2,7 @@
 
 exports[`routes > v3 > deploymentAssessment > deleteDeploymentAssessment > 200 > ok 1`] = `
 {
-  "message": "Successfully removed deployment assessment.",
+  "message": "Successfully removed Deployment Assessment.",
 }
 `;
 

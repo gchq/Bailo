@@ -1,15 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { Decision, ResponseKind } from '../../src/models/Response.js'
-import {
-  findDeploymentAssessments,
-  findLatestDecisionsByAssessmentIds,
-} from '../../src/repositories/deploymentAssessment.js'
-import { ReviewKind } from '../../src/types/enums.js'
+import { findDeploymentAssessments } from '../../src/repositories/deploymentAssessment.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
-const ReviewModelMock = getTypedModelMock('ReviewModel')
 
 describe('repositories > deploymentAssessment', () => {
   describe('findDeploymentAssessments', () => {
@@ -136,86 +130,6 @@ describe('repositories > deploymentAssessment', () => {
         draft: true,
         name: { $regex: 'Assessment\\.\\*', $options: 'i' },
       })
-    })
-  })
-
-  describe('findLatestDecisionsByAssessmentIds', () => {
-    test('returns an empty Map without hitting the database when given an empty array', async () => {
-      const result = await findLatestDecisionsByAssessmentIds([])
-
-      expect(ReviewModelMock.aggregate).not.toHaveBeenCalled()
-      expect(result).toStrictEqual(new Map())
-    })
-
-    test('returns a Map keyed by assessment ID with the latest decision', async () => {
-      ReviewModelMock.aggregate.mockResolvedValueOnce([
-        { _id: 'assessment-one', decision: Decision.Approve },
-        { _id: 'assessment-two', decision: Decision.Reject },
-      ])
-
-      const result = await findLatestDecisionsByAssessmentIds(['assessment-one', 'assessment-two'])
-
-      expect(result).toStrictEqual(
-        new Map([
-          ['assessment-one', Decision.Approve],
-          ['assessment-two', Decision.Reject],
-        ]),
-      )
-    })
-
-    test('maps an entry with no decision to undefined', async () => {
-      ReviewModelMock.aggregate.mockResolvedValueOnce([{ _id: 'assessment-one', decision: undefined }])
-
-      const result = await findLatestDecisionsByAssessmentIds(['assessment-one'])
-
-      expect(result.get('assessment-one')).toBeUndefined()
-    })
-
-    test('runs the correct aggregate pipeline shape', async () => {
-      ReviewModelMock.aggregate.mockResolvedValueOnce([])
-
-      await findLatestDecisionsByAssessmentIds(['assessment-one'])
-
-      expect(ReviewModelMock.aggregate).toHaveBeenCalledWith([
-        {
-          $match: {
-            deploymentAssessmentId: { $in: ['assessment-one'] },
-            kind: ReviewKind.DeploymentAssessment,
-          },
-        },
-        {
-          $lookup: {
-            from: 'v2_responses',
-            let: { reviewId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: { $eq: ['$parentId', '$$reviewId'] },
-                  kind: ResponseKind.Review,
-                },
-              },
-              { $sort: { createdAt: -1 } },
-              { $limit: 1 },
-            ],
-            as: 'latestResponse',
-          },
-        },
-        {
-          $unwind: {
-            path: '$latestResponse',
-            preserveNullAndEmptyArrays: false,
-          },
-        },
-        {
-          $sort: { 'latestResponse.createdAt': -1 },
-        },
-        {
-          $group: {
-            _id: '$deploymentAssessmentId',
-            decision: { $first: '$latestResponse.decision' },
-          },
-        },
-      ])
     })
   })
 })

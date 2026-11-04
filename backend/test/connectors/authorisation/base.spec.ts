@@ -1191,7 +1191,7 @@ describe('connectors > authorisation > base', () => {
       expect(result).toStrictEqual({
         id: 'da-1',
         success: false,
-        info: 'You are not the creator or the risk owner of this draft Deployment Assessment, so you do not have permission to view it.',
+        info: 'You are not the creator or the Deployment Risk Owner of this draft Deployment Assessment, so you do not have permission to view it.',
       })
     })
 

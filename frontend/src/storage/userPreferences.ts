@@ -4,12 +4,10 @@
 
 export interface UserPreferences {
   displayFormStats: boolean
-  hiddenDeploymentAssessmentColumns: string[]
 }
 
 const defaultPreferences: UserPreferences = {
   displayFormStats: false,
-  hiddenDeploymentAssessmentColumns: [],
 }
 
 const USER_PREFERENCES_KEY = 'user-preferences'
@@ -31,16 +29,5 @@ export const getDisplayFormStats = (): boolean => {
 export const saveDisplayFormStats = (newValue: boolean) => {
   const preferences: UserPreferences = getUserPreferences() ?? defaultPreferences
   preferences.displayFormStats = newValue
-  saveUserPreferences(preferences)
-}
-
-export const getHiddenDeploymentAssessmentColumns = (userPreferencesKey: string): string[] => {
-  const preferences: UserPreferences = getUserPreferences()
-  return preferences?.[userPreferencesKey] ?? []
-}
-
-export const saveHiddenDeploymentAssessmentColumns = (userPreferencesKey: string, columnKeys: string[]) => {
-  const preferences: UserPreferences = getUserPreferences() ?? defaultPreferences
-  preferences[userPreferencesKey] = columnKeys
   saveUserPreferences(preferences)
 }

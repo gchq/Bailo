@@ -76,7 +76,7 @@ export const testDeploymentAssessment = {
   name: 'My Deployment Assessment',
   metadata: {
     signOff: {
-      riskOwner: ['user:user'],
+      riskOwners: ['user:user'],
     },
     modelOverview: {
       modelIds: ['my-model-123'],

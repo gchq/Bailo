@@ -6,36 +6,26 @@ import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlug
 export type ReviewInterface =
   | ({
       kind: 'access'
-      modelId: string
       dueDate?: undefined
       semver?: undefined
       accessRequestId: string
     } & PartialReviewInterface)
   | ({
       kind: 'release'
-      modelId: string
       dueDate?: undefined
       semver: string
       accessRequestId: undefined
     } & PartialReviewInterface)
   | ({
       kind: 'lifecycle'
-      modelId: string
       dueDate: Date
-      semver?: undefined
-      accessRequestId?: undefined
-    } & PartialReviewInterface)
-  | ({
-      kind: 'deployment_assessment'
-      deploymentAssessmentId: string
-      modelId?: undefined
-      dueDate?: undefined
       semver?: undefined
       accessRequestId?: undefined
     } & PartialReviewInterface)
 
 type PartialReviewInterface = {
   _id: Types.ObjectId
+  modelId: string
   role: string
   createdAt: string
   updatedAt: string
@@ -72,17 +62,9 @@ const ReviewSchema = new Schema<ReviewDoc>(
         throw new Error(`Cannot provide an 'accessRequestId' with '${JSON.stringify({ kind: this.kind })}'`)
       },
     },
-    deploymentAssessmentId: {
-      type: String,
-      required: function (this: ReviewInterface): boolean {
-        return this.kind === ReviewKind.DeploymentAssessment
-      },
-    },
     modelId: {
       type: String,
-      required: function (this: ReviewInterface): boolean {
-        return this.kind !== ReviewKind.DeploymentAssessment
-      },
+      required: true,
     },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
     dueDate: {
@@ -100,7 +82,6 @@ const ReviewSchema = new Schema<ReviewDoc>(
 )
 
 ReviewSchema.plugin(softDeletionPlugin)
-ReviewSchema.index({ deploymentAssessmentId: 1, kind: 1, createdAt: -1 })
 
 const ReviewModel = model<ReviewDoc>('v2_Review', ReviewSchema)
 

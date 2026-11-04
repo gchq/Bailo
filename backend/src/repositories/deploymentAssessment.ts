@@ -2,9 +2,6 @@ import { escapeRegExp } from 'lodash-es'
 import { QueryFilter } from 'mongoose'
 
 import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
-import { DecisionKeys, ResponseKind } from '../models/Response.js'
-import ReviewModel from '../models/Review.js'
-import { ReviewKind } from '../types/enums.js'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string
@@ -15,8 +12,6 @@ export interface SearchDeploymentAssessmentsParams {
   createdBefore?: string
   draft?: boolean
   search?: string
-  state?: string
-  needsAction?: boolean
 }
 
 export async function findDeploymentAssessments(
@@ -79,64 +74,4 @@ export async function findDeploymentAssessments(
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   }))
-}
-
-export async function findLatestDecisionsByAssessmentIds(
-  assessmentIds: string[],
-): Promise<Map<string, DecisionKeys | undefined>> {
-  if (assessmentIds.length === 0) {
-    return new Map()
-  }
-
-  const latestDecisions = await ReviewModel.aggregate<{
-    _id: string
-    decision?: DecisionKeys
-  }>([
-    {
-      $match: {
-        deploymentAssessmentId: { $in: assessmentIds },
-        kind: ReviewKind.DeploymentAssessment,
-      },
-    },
-    {
-      $lookup: {
-        from: 'v2_responses',
-        let: { reviewId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ['$parentId', '$$reviewId'] },
-              kind: ResponseKind.Review,
-            },
-          },
-          {
-            $sort: { createdAt: -1 },
-          },
-          {
-            $limit: 1,
-          },
-        ],
-        as: 'latestResponse',
-      },
-    },
-    {
-      $unwind: {
-        path: '$latestResponse',
-        preserveNullAndEmptyArrays: false,
-      },
-    },
-    {
-      $sort: {
-        'latestResponse.createdAt': -1,
-      },
-    },
-    {
-      $group: {
-        _id: '$deploymentAssessmentId',
-        decision: { $first: '$latestResponse.decision' },
-      },
-    },
-  ])
-
-  return new Map(latestDecisions.map(({ _id, decision }) => [_id, decision]))
 }

@@ -19,11 +19,11 @@ registerPath(
     method: 'post',
     path: '/api/v3/deployment-assessments',
     tags: ['deployment assessments'],
-    description: 'Create a deployment assessment',
+    description: 'Create a Deployment Assessment',
     schema: postDeploymentAssessmentSchema,
     responses: {
       201: {
-        description: 'The created deployment assessment.',
+        description: 'The created Deployment Assessment.',
         content: {
           'application/json': {
             schema: z.object({ deploymentAssessment: deploymentAssessmentInterfaceSchema }),

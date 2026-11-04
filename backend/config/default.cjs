@@ -133,7 +133,7 @@ module.exports = {
       {
         name: 'Minimal Deployment Assessment Schema v1',
         id: 'minimal-deployment-assessment-schema-v1',
-        description: 'A minimal deployment assessment capturing the deployment name and details.',
+        description: 'A minimal Deployment Assessment capturing the deployment name and details.',
         jsonSchema: require('../src/scripts/example_schemas/minimal_deployment_assessment_schema.json'),
       },
     ],
@@ -251,7 +251,6 @@ module.exports = {
       owner: 'Owner',
       contributor: 'Contributor',
       consumer: 'Consumer',
-      riskOwner: 'Deployment Risk Owner',
     },
 
     untrustedModel: {
@@ -269,7 +268,6 @@ module.exports = {
 
     deploymentAssessments: {
       deployableModelState: null,
-      signOffDeclaration: 'I agree to take on responsibility as the Deployment Risk Owner.',
     },
 
     lifecycle: {
