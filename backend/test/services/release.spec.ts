@@ -686,6 +686,20 @@ describe('services > release', () => {
     await expect(result).rejects.toThrow(/^You do not have the necessary permissions to export these releases./)
   })
 
+  test('getReleasesForExport > draft release', async () => {
+    const mockUser: any = { dn: 'test' }
+    const modelId = 'example'
+    const semvers = ['1.0.0', '2.0.0']
+    ReleaseModelMock.find.mockResolvedValueOnce([
+      { semver: '1.0.0', draft: false },
+      { semver: '2.0.0', draft: true },
+    ])
+
+    const result = getReleasesForExport(mockUser, modelId, semvers)
+
+    await expect(result).rejects.toThrow(/^Draft releases cannot be exported./)
+  })
+
   test('getReleasesForExport > return releases', async () => {
     const mockUser: any = { dn: 'test' }
     const modelId = 'example'
