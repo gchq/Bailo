@@ -24,7 +24,6 @@
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.1",
-    "@fontsource/pacifico": "^5.3.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@mui/icons-material": "~9.5.0",
