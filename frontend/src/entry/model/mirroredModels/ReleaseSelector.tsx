@@ -46,6 +46,8 @@ export default function ReleaseSelector({
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
+  const exportableReleases = useMemo(() => releases.filter((release) => !release.draft), [releases])
+
   const selectedSemvers = useMemo(
     () => new Set(selectedReleases.map((selectedRelease) => selectedRelease.semver)),
     [selectedReleases],
@@ -180,7 +182,7 @@ export default function ReleaseSelector({
         <DialogTitle>Select releases for {model.name}</DialogTitle>
         <DialogContent sx={{ p: 1 }}>
           <Paginate
-            list={releases}
+            list={exportableReleases}
             emptyListText='No releases found'
             defaultSortProperty='createdAt'
             searchFilterProperty='semver'
