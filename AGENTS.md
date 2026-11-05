@@ -78,8 +78,13 @@ Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
   failing `python_test_lowest` CI job. Use a `; python_version >= "3.x"` marker when only newer Pythons need a newer
   version.
 - Dependabot keeps the direct dependencies of `lib/artefactscan_api` (shipped as a Docker image) at their latest
-  versions. `lib/python` and `backend/docs` only get security updates; routine upgrades there are manual
+  minor/major versions. `lib/python` and `backend/docs` only get security updates; routine upgrades there are manual
   (`uv lock --upgrade-package <name>`).
+- Dependabot skips patch-only version bumps in every ecosystem. Security updates of any size are still raised for npm,
+  uv and GitHub Actions, but Dependabot has no security updates for docker, docker-compose, helm or pre-commit, so patch
+  fixes there must be applied manually.
+- npm dependencies must use a `^` or `~` range, never an exact pin. `npm ci` installs exactly what `package-lock.json`
+  records, so new patches only arrive when the lockfile is regenerated (a Dependabot PR or a manual `npm update`).
 - The ruff version comes from the hook `rev` in `.pre-commit-config.yaml`, not from any `uv.lock`.
 
 ### Python client (`lib/python/`)

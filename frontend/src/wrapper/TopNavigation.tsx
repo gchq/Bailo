@@ -1,5 +1,3 @@
-import '@fontsource/pacifico'
-
 import Add from '@mui/icons-material/Add'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
