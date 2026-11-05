@@ -15,18 +15,23 @@ export function getEntitiesForRoles(entry: Pick<EntryInterface, 'collaborators'>
     .map((collaborator) => collaborator.entity)
 }
 
+const uniqueEmails = (emails: string[]) => [...new Map(emails.map((email) => [email.toLowerCase(), email])).values()]
+
 export function buildEntryMessageHref(
   entry: Pick<EntryInterface, 'id' | 'name' | 'kind'>,
   to: string[],
   cc: string[],
 ): string {
+  const toEmails = uniqueEmails(to)
+  const toKeys = new Set(toEmails.map((email) => email.toLowerCase()))
+  const ccEmails = uniqueEmails(cc).filter((email) => !toKeys.has(email.toLowerCase()))
   const cardLabel = EntryCardKindLabel[entry.kind]
   const params = [
     `subject=${encodeURIComponent(`Query regarding ${cardLabel.toLowerCase()} for ${entry.name} (${entry.id})`)}`,
-    ...(cc.length > 0 ? [`cc=${encodeURIComponent(cc.join(','))}`] : []),
+    ...(ccEmails.length > 0 ? [`cc=${encodeURIComponent(ccEmails.join(','))}`] : []),
   ].join('&')
 
-  return `mailto:${to.join(',')}?${params}`
+  return `mailto:${toEmails.join(',')}?${params}`
 }
 
 function useRecipientEmails(entities: string[]) {
