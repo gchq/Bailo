@@ -28,14 +28,14 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
       case ReviewKind.RELEASE:
         return `release/${review.semver}`
       case ReviewKind.ACCESS:
-        return `access-request/${review.accessRequestId}`
+        return `access-request/${review.accessRequestId}/review`
       case ReviewKind.LIFECYCLE:
-        return `lifecycle/${review._id}`
+        return `lifecycle/${review._id}/review`
     }
   }
 
   function handleListItemClick() {
-    router.push(`/model/${review.model.id}/${determineReviewPath()}/review?role=${review.role}`)
+    router.push(`/model/${review.model.id}/${determineReviewPath()}?role=${review.role}`)
   }
 
   const editedAdornment = useCallback(() => {

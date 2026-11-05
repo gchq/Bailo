@@ -24,6 +24,9 @@ type ReviewWithCommentProps = {
   modelId?: string
   includeDueDate?: boolean
   hideRequestChangesButton?: boolean
+  onCancel?: () => void
+  reviewComment: string
+  onReviewCommentChange: (value: string) => void
 }
 
 export default function ReviewWithComment({
@@ -33,10 +36,12 @@ export default function ReviewWithComment({
   modelId,
   includeDueDate = false,
   hideRequestChangesButton = false,
+  reviewComment,
+  onReviewCommentChange,
+  onCancel,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
-  const [reviewComment, setReviewComment] = useState('')
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
@@ -93,7 +98,7 @@ export default function ReviewWithComment({
     } else if (!reviewRequest?.role) {
       setErrorText('Please select a role before submitting your review.')
     } else {
-      setReviewComment('')
+      onReviewCommentChange('')
       onSubmit(selectedDecision, reviewComment, reviewRequest.role, dueDate)
     }
   }
@@ -105,6 +110,13 @@ export default function ReviewWithComment({
   function onChange(_event: SyntheticEvent<Element, Event>, newValue: ReviewRequestInterface | null) {
     if (newValue) {
       setReviewRequest(newValue)
+      router.replace(
+        {
+          query: { ...router.query, role: newValue.role },
+        },
+        undefined,
+        { shallow: true },
+      )
     }
   }
 
@@ -138,15 +150,21 @@ export default function ReviewWithComment({
                 option.role === value.role
               }
               onChange={onChange}
+              disableClearable
               value={reviewRequest}
               getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
               options={reviews}
               renderInput={(params) => <LimitedTextField {...params} label='Select your role' size='small' />}
+              slotProps={{
+                popper: {
+                  sx: { zIndex: theme.zIndex.tooltip + 100 },
+                },
+              }}
             />
             <RichTextEditor
-              data-test='reviewWithCommentTextField'
+              dataTest='reviewWithCommentTextField'
               value={reviewComment}
-              onChange={(newValue) => setReviewComment(newValue)}
+              onChange={(newValue) => onReviewCommentChange(newValue)}
               alwaysShowToolbar
             />
             <Typography variant='caption' color='error'>
@@ -230,6 +248,7 @@ export default function ReviewWithComment({
                 >
                   Submit
                 </Button>
+                {onCancel && <Button onClick={onCancel}>Cancel</Button>}
               </Stack>
             </Stack>
           </Stack>

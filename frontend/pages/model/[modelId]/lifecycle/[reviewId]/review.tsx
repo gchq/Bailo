@@ -28,6 +28,7 @@ export default function LifecycleReview() {
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
   const [isModelCardDialogOpen, setIsModelCardDialogOpen] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [reviewComment, setReviewComment] = useState('')
 
   const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
@@ -155,6 +156,8 @@ export default function LifecycleReview() {
                   modelId={modelId as string}
                   includeDueDate
                   hideRequestChangesButton
+                  reviewComment={reviewComment}
+                  onReviewCommentChange={setReviewComment}
                 />
                 <MessageAlert message={errorMessage} severity='error' />
               </>

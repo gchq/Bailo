@@ -1,4 +1,4 @@
-import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
+import { Alert, Box, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
 import {
@@ -105,7 +105,6 @@ function ReadOnlyRelease({ release }: { release: ReleaseInterface }) {
         onSubmit={noop}
         readOnly
       />
-      <Divider />
       <ReleaseForm
         editable
         isEdit={false}
@@ -334,7 +333,7 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack>
       <EditableFormHeading
         heading={
           <Stack
@@ -373,7 +372,7 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
         disableSaveButton={releaseNotes === ''}
       />
       {failedFileUploads.length > 0 && (
-        <Alert severity='error' sx={{ my: 2 }}>
+        <Alert severity='error' sx={{ mt: 2 }}>
           <Stack spacing={1}>
             <Typography>{`Unable to modify release due to issues with the following ${plural(
               failedFileUploads.length,
@@ -383,7 +382,6 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
           </Stack>
         </Alert>
       )}
-      <Divider />
       <ReleaseForm
         editable
         isEdit={isEdit}
