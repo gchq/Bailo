@@ -1,12 +1,11 @@
 import { type Readable } from 'node:stream'
 
-import FormData from 'form-data'
 import NodeCache from 'node-cache'
-import fetch, { type Response as FetchResponse } from 'node-fetch'
 
 import { z } from '../lib/zod.js'
 import config from '../utils/config.js'
 import { GenericError, InternalError } from '../utils/error.js'
+import { createMultipartFileUpload } from '../utils/multipart.js'
 
 const ArtefactScanInfoResponseSchema = z.object({
   apiName: z.string(),
@@ -193,7 +192,7 @@ export const TrivyScanResultResponseSchema = z
   .passthrough()
 export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponseSchema>
 
-async function handleBadResponse(res: FetchResponse, context?: Record<string, unknown>) {
+async function handleBadResponse(res: Response, context?: Record<string, unknown>) {
   const contentType = res.headers.get('content-type') ?? ''
   let responseBody: unknown
 
@@ -213,7 +212,7 @@ async function handleBadResponse(res: FetchResponse, context?: Record<string, un
 
 async function getArtefactScanInfo() {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
-  let res: FetchResponse
+  let res: Response
 
   try {
     res = await fetch(`${url}/info`, {
@@ -232,19 +231,19 @@ async function getArtefactScanInfo() {
 
 async function scanStream(stream: Readable, fileName: string, endpoint: 'file' | 'image') {
   const url = `${config.artefactScanning.artefactscan.protocol}://${config.artefactScanning.artefactscan.host}:${config.artefactScanning.artefactscan.port}`
-  let res: FetchResponse
+  let res: Response
 
   try {
-    const formData = new FormData()
-    formData.append('in_file', stream, { filename: fileName, contentType: 'application/octet-stream' })
+    const upload = createMultipartFileUpload('in_file', fileName, stream)
 
     res = await fetch(`${url}/scan/${endpoint}`, {
       method: 'POST',
       headers: {
-        ...formData.getHeaders(),
+        'content-type': upload.contentType,
         accept: 'application/json',
       },
-      body: formData,
+      body: upload.body,
+      duplex: 'half',
     })
   } catch (err) {
     stream.destroy()
