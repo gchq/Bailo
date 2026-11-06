@@ -249,6 +249,11 @@ openshift:
 
 # Instance Settings
 config:
+  api:
+    # Number of trusted proxy hops in front of the backend, used to find the client IP in X-Forwarded-For for rate limiting.
+    # 1 = the chart's NGINX only. Use 2 when an ingress, route or load balancer sits in front of NGINX and appends to
+    # X-Forwarded-For. Do not set to true, as that lets clients spoof their IP.
+    trustProxy: 1
   log:
     level: trace
   ui:
