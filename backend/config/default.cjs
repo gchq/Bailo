@@ -5,6 +5,8 @@ module.exports = {
     host: '',
     port: 3001,
     rateLimit: true,
+    // Safe default when the backend is directly exposed. Set to the number of proxy hops (or CIDRs) when behind a reverse proxy
+    trustProxy: false,
   },
 
   app: {

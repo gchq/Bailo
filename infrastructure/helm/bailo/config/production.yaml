@@ -1,5 +1,6 @@
 api:
   port: {{ .Values.service.backendPort }}
+  trustProxy: {{ .Values.config.api.trustProxy }}
 app:
   protocol: {{ .Values.config.app.protocol }}
   host: {{ .Values.route.appPublicRoute }}

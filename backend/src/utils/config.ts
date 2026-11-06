@@ -32,7 +32,18 @@ export interface Config {
     host: string
     /** Port number to expose the express backend on (usually 3001) */
     port: number
+    /** Enables the global per-IP rate limiter */
     rateLimit: boolean
+    /**
+     * Express [`trust proxy`](https://expressjs.com/en/guide/behind-proxies.html) setting, used to work out the client IP from `X-Forwarded-For`.
+     *
+     * - `false` - trust no proxy, `req.ip` is the direct peer (use when the backend is exposed directly)
+     * - a number - trust that many proxy hops in front of the backend (e.g. `1` for the bundled NGINX)
+     * - a string or list of strings - trust proxies matching these IPs/CIDRs or Express keywords (e.g. `loopback`)
+     *
+     * `true` is deliberately not allowed, as it trusts every address in the header and lets clients spoof their IP.
+     */
+    trustProxy: false | number | string | string[]
   }
 
   /** ### App
