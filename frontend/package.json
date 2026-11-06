@@ -24,7 +24,6 @@
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.1",
-    "@fontsource/pacifico": "^5.3.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@mui/icons-material": "~9.5.0",
@@ -41,16 +40,14 @@
     "@rjsf/validator-ajv8": "~6.11.0",
     "@types/js-cookie": "^3.0.6",
     "@uiw/react-markdown-preview": "^5.2.1",
-    "@uiw/react-md-editor": "^4.1.6",
+    "@uiw/react-md-editor": "^4.2.0",
     "@vercel/otel": "^2.2.0",
     "axios": "^1.21.0",
-    "clsx": "^2.1.1",
     "dayjs": "^1.11.23",
     "diff": "^9.0.0",
     "github-slugger": "^2.0.0",
     "http-status-codes": "^2.3.0",
     "human-interval": "^2.0.1",
-    "is-docker": "^4.0.0",
     "js-cookie": "^3.0.8",
     "jsonschema": "~1.4.1",
     "lodash-es": "^4.18.1",
@@ -119,6 +116,15 @@
   "overrides": {
     "madge": {
       "typescript": "$typescript"
+    },
+    "eslint-plugin-import": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-react": {
+      "eslint": "$eslint"
     }
   }
 }

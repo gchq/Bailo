@@ -88,6 +88,9 @@ source model:
 
 The screenshot above shows the source model's export settings used to synchronise the mirrored copy.
 
+Draft releases cannot be exported. They are not shown when selecting releases to export, and an export request that
+includes a draft release is rejected. Publish a draft release before exporting it.
+
 Once exported, the mirrored model will be populated with the source model's data and kept in sync on subsequent exports.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
