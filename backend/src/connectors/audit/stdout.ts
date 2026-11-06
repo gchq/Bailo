@@ -1,19 +1,19 @@
-import { Request } from 'express'
+import { type Request } from 'express'
 
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../../models/File.js'
-import { InferenceDoc } from '../../models/Inference.js'
-import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
-import { ResponseInterface } from '../../models/Response.js'
-import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleInterface } from '../../models/ReviewRole.js'
-import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
-import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
-import { TokenDoc } from '../../models/Token.js'
-import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
-import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
+import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type FileInterface, type FileInterfaceDoc, type FileWithScanResultsAggregate } from '../../models/File.js'
+import { type InferenceDoc } from '../../models/Inference.js'
+import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
+import { type ImageTagRef, type ReleaseDoc } from '../../models/Release.js'
+import { type ResponseInterface } from '../../models/Response.js'
+import { type ReviewInterface } from '../../models/Review.js'
+import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
+import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
+import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
+import { type TokenDoc } from '../../models/Token.js'
+import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type BailoError } from '../../types/error.js'
+import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
@@ -55,9 +55,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteModel(req: Request, modelId: string) {
+  async onDeleteModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.DeleteModel, req)
-    const event = this.generateEvent(req, { id: modelId })
+    const event = this.generateEvent(req, { id: model.id })
     req.log.info(event, req.audit.description)
   }
 
@@ -142,9 +142,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteRelease(req: Request, modelId: string, semver: string) {
+  async onDeleteRelease(req: Request, release: ReleaseDoc) {
     this.checkEventType(AuditInfo.DeleteRelease, req)
-    const event = this.generateEvent(req, { modelId, semver })
+    const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })
     req.log.info(event, req.audit.description)
   }
 
@@ -190,9 +190,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteUserToken(req: Request, accessKey: string) {
+  async onDeleteUserToken(req: Request, token: TokenDoc) {
     this.checkEventType(AuditInfo.DeleteUserToken, req)
-    const event = this.generateEvent(req, { accessKey })
+    const event = this.generateEvent(req, { accessKey: token.accessKey })
     req.log.info(event, req.audit.description)
   }
 
@@ -225,9 +225,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteAccessRequest(req: Request, accessRequestId: string) {
+  async onDeleteAccessRequest(req: Request, accessRequest: AccessRequestDoc) {
     this.checkEventType(AuditInfo.DeleteAccessRequest, req)
-    const event = this.generateEvent(req, { accessRequestId })
+    const event = this.generateEvent(req, { accessRequestId: accessRequest.id })
     req.log.info(event, req.audit.description)
   }
 
@@ -271,9 +271,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteSchema(req: Request, schemaId: string) {
+  async onDeleteSchema(req: Request, schema: SchemaDoc) {
     this.checkEventType(AuditInfo.DeleteSchema, req)
-    const event = this.generateEvent(req, { id: schemaId })
+    const event = this.generateEvent(req, { id: schema.id })
     req.log.info(event, req.audit.description)
   }
 
@@ -397,27 +397,32 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+  async onCreateReviewRole(req: Request, reviewRole: ReviewRoleDoc) {
     this.checkEventType(AuditInfo.CreateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
     req.log.info(event, req.audit.description)
   }
 
-  async onViewReviewRoles(req: Request) {
+  async onViewReviewRoles(req: Request, reviewRoles: ReviewRoleDoc[]) {
     this.checkEventType(AuditInfo.ViewReviewRoles, req)
-    const event = this.generateEvent(req, {})
+    const event = this.generateEvent(
+      req,
+      reviewRoles.map((reviewRole) => ({
+        reviewRoleId: reviewRole.id,
+      })),
+    )
     req.log.info(event, req.audit.description)
   }
 
-  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+  async onUpdateReviewRole(req: Request, reviewRole: ReviewRoleDoc) {
     this.checkEventType(AuditInfo.UpdateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
     req.log.info(event, req.audit.description)
   }
 
-  async onDeleteReviewRole(req: Request, reviewRoleId: string) {
+  async onDeleteReviewRole(req: Request, reviewRole: ReviewRoleDoc) {
     this.checkEventType(AuditInfo.DeleteReviewRole, req)
-    const event = this.generateEvent(req, { reviewRoleId: reviewRoleId })
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
     req.log.info(event, req.audit.description)
   }
 
@@ -442,6 +447,24 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   async onNotifyReviewers(req: Request, reviewId: string): Promise<void> {
     this.checkEventType(AuditInfo.NotifyReviewers, req)
     const event = this.generateEvent(req, { reviewId })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImagePulled(req: Request, registryImage: string): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryImagePulled, req)
+    const event = this.generateEvent(req, { registryImage })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImagePushed(req: Request, registryImage: string): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryImagePushed, req)
+    const event = this.generateEvent(req, { registryImage })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
+    this.checkEventType(AuditInfo.RegistryImageDeleted, req)
+    const event = this.generateEvent(req, { registryImage })
     req.log.info(event, req.audit.description)
   }
 

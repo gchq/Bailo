@@ -1,5 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 
 import personalAccessTokens from 'public/docs/bailo_personal_access_tokens.png'
@@ -25,7 +25,11 @@ Create tokens from the Authentication tab in your user settings.
 2. Click **Add Token**
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='Authentication tab listing personal access tokens and add token button' src={personalAccessTokens} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='Authentication tab listing personal access tokens and add token button'
+    src={personalAccessTokens}
+  />
 </Box>
 
 The screenshot above shows the Authentication tab listing existing personal access tokens with their descriptions,
@@ -37,7 +41,7 @@ access keys, and a delete button for each.
    - **Actions** - select the permitted actions this token can perform
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='generate personal token form' src={createPersonalAccessToken} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='generate personal token form' src={createPersonalAccessToken} />
 </Box>
 
 The screenshot above shows the token creation form with fields for description, model scope, and action permissions.

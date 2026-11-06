@@ -1,4 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+import FeatureAvailability from 'src/FeatureAvailability'
 
 # Browsing the Marketplace
 
@@ -44,19 +45,20 @@ Filter models by their development state (e.g. in development, ready for deploym
 
 ### By external sources (Federation)
 
+<FeatureAvailability feature='federation' />
+
 If your Bailo instance is connected to other Bailo instances or external model repositories through federation, you can
-filter to see models from specific external sources. External sources only appear if federation is enabled by your
-administrator.
+filter to see models from specific external sources.
 
 ### By tags
 
 Click a tag to filter the list to models that have been assigned that tag. You can select multiple tags to narrow your
 results further.
 
-### By mirrored models
+### By model kind
 
-Filter the list to show only mirrored models or data cards. Mirrored entries are replicas from external sources and are
-only available if mirroring has been enabled by your administrator.
+Filter the list to show only specific model types, such a Model, Mirrored model and Untrusted model. The listed kinds
+will depend on which have been enabled by your administrator.
 
 ### By roles
 

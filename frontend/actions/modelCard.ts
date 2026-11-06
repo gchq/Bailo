@@ -1,8 +1,8 @@
 import axios from 'axios'
 import useSWR from 'swr'
-import { EntryCardInterface, EntryCardRevisionInterface } from 'types/types'
+import { type EntryCardInterface, type EntryCardRevisionInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyEntryCardRevisionsList = []
 
@@ -42,6 +42,21 @@ export async function putEntryCard(entryId: string, metadata: unknown) {
   }
 }
 
+export async function postImportModelCardText(modelId: string, text: string) {
+  try {
+    const response = await axios({
+      method: 'post',
+      url: `/api/v2/model/${modelId}/import-model-card-text`,
+      headers: { 'Content-Type': 'application/json' },
+      data: { text },
+      timeout: 180000,
+    })
+    return { status: response.status, data: response.data }
+  } catch (error) {
+    return handleAxiosError(error)
+  }
+}
+
 export function useGetEntryCard(entryId?: string, entryCardVersion?: number, mirrored?: boolean) {
   const { data, isLoading, error } = useSWR<
     {
@@ -62,13 +77,13 @@ export function useGetEntryCard(entryId?: string, entryCardVersion?: number, mir
   }
 }
 
-export function useGetEntryCardRevisions(entryId: string) {
+export function useGetEntryCardRevisions(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       modelCardRevisions: EntryCardRevisionInterface[]
     },
     ErrorInfo
-  >(`/api/v2/model/${entryId}/model-card-revisions`, fetcher)
+  >(entryId ? `/api/v2/model/${entryId}/model-card-revisions` : null, fetcher)
 
   return {
     mutateEntryCardRevisions: mutate,

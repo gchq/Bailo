@@ -1,12 +1,12 @@
-import { LocalOffer } from '@mui/icons-material'
+import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useState } from 'react'
+import { type ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
-import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInterface } from 'types/types'
+import { type FileInterface, type FileUploadMetadata, type FileWithMetadataAndTags, isFileInterface } from 'types/types'
 
 interface MultiFileInputDisplayProps {
   file: File | FileInterface
@@ -71,7 +71,14 @@ export default function MultiFileInputFileDisplay({
   }
 
   return (
-    <Grid container spacing={1} alignItems='center' sx={{ width: '100%' }}>
+    <Grid
+      container
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+        width: '100%',
+      }}
+    >
       <Grid size={{ xs: 4 }}>
         <Tooltip title={file.name}>
           <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
@@ -103,7 +110,12 @@ export default function MultiFileInputFileDisplay({
           onChange={handleMetadataChange}
         />
       </Grid>
-      <Grid size={{ xs: 1 }} textAlign='right'>
+      <Grid
+        size={{ xs: 1 }}
+        sx={{
+          textAlign: 'right',
+        }}
+      >
         <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
       </Grid>
     </Grid>

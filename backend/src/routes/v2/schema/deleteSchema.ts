@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -44,8 +44,9 @@ export const deleteSchema = [
     req.audit = AuditInfo.DeleteSchema
     const { params } = parse(req, deleteSchemaSchema)
 
-    await deleteSchemaById(req.user, params.schemaId)
-    await audit.onDeleteSchema(req, params.schemaId)
+    const schema = await deleteSchemaById(req.user, params.schemaId)
+
+    await audit.onDeleteSchema(req, schema)
 
     res.json({
       deleted: true,

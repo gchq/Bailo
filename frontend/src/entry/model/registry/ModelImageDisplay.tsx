@@ -1,10 +1,11 @@
-import { ExpandLess, ExpandMore } from '@mui/icons-material'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import { Accordion, AccordionDetails, AccordionSummary, Card, Stack, Typography } from '@mui/material'
 import { memoize } from 'lodash-es'
 import { useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import ModelImageTagDisplay from 'src/entry/model/registry/ModelImageTagDisplay'
-import { ModelImagesWithOptionalScanResults } from 'types/types'
+import { type ModelImagesWithOptionalScanResults } from 'types/types'
 
 type ModelImageDisplayProps = {
   modelImage: ModelImagesWithOptionalScanResults
@@ -47,7 +48,11 @@ export default function ModelImageDisplay({ modelImage, mutate }: ModelImageDisp
           {modelImage.tags.length >= 10 ? (
             <Accordion expanded={expanded} onChange={toggleExpand}>
               <AccordionSummary expandIcon={expanded ? <ExpandLess /> : <ExpandMore />} sx={{ px: 0 }}>
-                <Typography fontWeight='bold'>
+                <Typography
+                  sx={{
+                    fontWeight: 'bold',
+                  }}
+                >
                   {expanded ? 'Hide' : 'Show'} {modelImage.tags.length} images
                 </Typography>
               </AccordionSummary>

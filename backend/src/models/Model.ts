@@ -1,6 +1,6 @@
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { type HydratedDocument, model, Schema } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const EntryVisibility = {
   Private: 'private',
@@ -14,6 +14,7 @@ export const EntryKind = {
   DataCard: 'data-card',
   MirroredModel: 'mirrored-model',
   UntrustedModel: 'untrusted-model',
+  MirroredDataCard: 'mirrored-data-card',
 } as const
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]

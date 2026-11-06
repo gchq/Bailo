@@ -1,9 +1,9 @@
-import axios, { AxiosProgressEvent } from 'axios'
+import axios, { type AxiosProgressEvent } from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
-import { FileInterface, FileUploadMetadata, FileWithScanResultsInterface } from 'types/types'
+import { type FileInterface, type FileUploadMetadata, type FileWithScanResultsInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyFilesList = []
 
@@ -50,17 +50,23 @@ export async function postFileForModelId(
             ? error.response.data
             : error.response.data?.error?.message || JSON.stringify(error.response.data)
 
-        throw new Error(`${error.response.statusText} for "${file.name}": ${serverMessage}`)
+        throw new Error(`${error.response.statusText} for "${file.name}": ${serverMessage}`, { cause: error })
       }
 
       if (error.request) {
-        throw new Error(`There was a problem with the request whilst attempting to upload file "${file.name}"`)
+        throw new Error(`There was a problem with the request whilst attempting to upload file "${file.name}"`, {
+          cause: error,
+        })
       }
 
-      throw new Error(`Request setup failed while uploading "${file.name}": ${error.message}`)
+      throw new Error(`Request setup failed while uploading "${file.name}": ${error.message}`, {
+        cause: error,
+      })
     }
 
-    throw new Error(`Unknown error whilst attempting to upload file "${file.name}"`)
+    throw new Error(`Unknown error whilst attempting to upload file "${file.name}"`, {
+      cause: error,
+    })
   }
 }
 

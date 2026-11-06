@@ -1,10 +1,21 @@
 import EditIcon from '@mui/icons-material/Edit'
-import { FormControl, IconButton, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
+import WarningIcon from '@mui/icons-material/Warning'
+import {
+  FormControl,
+  IconButton,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import { patchEntry } from 'actions/entry'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EntrySelectField = Extract<keyof EntryInterface, 'organisation' | 'state'>
@@ -17,6 +28,7 @@ type EntrySelectInputProps = {
   entryId: string
   field: EntrySelectField
   mutate: () => void
+  showWarningWhenUnset?: boolean
 }
 
 export default function EntrySelect({
@@ -27,10 +39,12 @@ export default function EntrySelect({
   field,
   mutate,
   editable = true,
+  showWarningWhenUnset = false,
 }: EntrySelectInputProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
+  const theme = useTheme()
 
   const labelLowerCase = label.toLowerCase()
 
@@ -44,21 +58,20 @@ export default function EntrySelect({
     if (!response.ok) {
       if (field === 'state') {
         router.replace({
-          query: { ...router.query, requiredByModelState: event.target.value },
+          query: { ...router.query, requiredByModelState: event.target.value, isEdit: 'true' },
         })
       }
       setErrorMessage(await getErrorMessage(response))
     } else {
-      if (field === 'state') {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { requiredByModelState, ...queryWithoutFiltered } = router.query
-        router.replace({
-          query: queryWithoutFiltered,
-        })
-      }
+      const { ...queries } = router.query
+      delete queries.requiredByModelState
+      router.replace({
+        query: queries,
+      })
+
       mutate()
+      setIsEdit(false)
     }
-    setIsEdit(false)
   }
 
   return (
@@ -76,7 +89,20 @@ export default function EntrySelect({
               value={value ?? ''}
               onChange={handleSelectOption}
               displayEmpty
-              renderValue={(value: any) => (value ? value : <em>Unset</em>)}
+              renderValue={(value: string) =>
+                value ? (
+                  value
+                ) : (
+                  <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+                    <em>Unset</em>
+                    {showWarningWhenUnset && (
+                      <Tooltip title={`No ${labelLowerCase} has been set`}>
+                        <WarningIcon role='alert' color='warning' fontSize='small' />
+                      </Tooltip>
+                    )}
+                  </Stack>
+                )
+              }
             >
               {options.map((option: string) => (
                 <MenuItem key={option} value={option}>
@@ -90,7 +116,29 @@ export default function EntrySelect({
           </FormControl>
         ) : (
           <>
-            {value ? <Typography>{value}</Typography> : <em>Unset</em>}
+            {value ? (
+              <Typography>{value}</Typography>
+            ) : showWarningWhenUnset ? (
+              <Tooltip title={`No ${labelLowerCase} has been set`}>
+                <Stack
+                  direction='row'
+                  spacing={0.5}
+                  sx={{
+                    alignItems: 'center',
+                    backgroundColor: alpha(theme.palette.warning.main, 0.1),
+                    borderRadius: 1,
+                    px: 0.5,
+                  }}
+                >
+                  <em>Unset</em>
+                  <WarningIcon role='alert' color='warning' fontSize='small' />
+                </Stack>
+              </Tooltip>
+            ) : (
+              <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+                <em>Unset</em>
+              </Stack>
+            )}
             {editable && (
               <IconButton onClick={handleEditChange} aria-label={`Edit ${labelLowerCase}`}>
                 <EditIcon fontSize='small' />

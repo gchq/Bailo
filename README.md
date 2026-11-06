@@ -39,16 +39,37 @@ sharing.
 
 ## Getting Started
 
-### Running Locally with Docker
+### Running Locally with Docker or Podman
 
 #### Requirements
 
-- Node v26
-- Docker / Docker Compose
+Follow the instructions below to get a local development environment running. You will need:
+
+- [Node v26](https://nodejs.org/en/download/current)
+- [Docker / Docker Compose](https://www.docker.com/get-started/), or [Podman](https://podman.io/) 5.x with a compose
+  provider
+
+#### Choosing a container engine
+
+The compose files work with both `docker compose` and `podman compose`. Every command below can be run with either -
+substitute `podman compose` for `docker compose` throughout.
+
+`podman compose` is only a thin wrapper: it delegates to the first external compose provider it finds on your `PATH`.
+Install [podman-compose](https://github.com/containers/podman-compose), or point `compose_providers` in
+`containers.conf` at a `docker-compose` v2 binary. Without a provider installed, `podman compose` will not run.
+
+<!-- prettier-ignore -->
+> [!NOTE]
+> The `--progress` and `--parallel` flags are Docker-only. `podman-compose` rejects
+> `--progress` outright and fails on `--parallel=-1`, so omit both when using Podman.
 
 #### Development Build
 
 To run in development mode (modified files on your host machine will be reloaded into the running application):
+
+<!-- prettier-ignore -->
+> [!NOTE]
+> Ensure Docker and Docker Compose (or Podman and a compose provider) are installed before running these commands.
 
 ```bash
 git clone https://github.com/gchq/Bailo.git && cd Bailo
@@ -57,6 +78,8 @@ npm run certs
 
 # This builds all the Bailo images, rerun it when you update dependencies.
 docker compose build --parallel
+# Podman: omit --parallel, which it does not support.
+# podman compose build
 
 # Then run the development instance of Bailo.
 docker compose up -d
@@ -96,7 +119,7 @@ The above `docker compose` approaches are preferred, however we also provide a m
 run in standalone mode, not development mode (http://localhost:8080). Not for production use:
 
 ```bash
-docker build -t "bailo:standalone" -f ./Dockerfile.standalone .
+docker build -t "bailo:standalone" -f ./Dockerfile.standalone --build-context python=./lib/python .
 docker run --name bailo -p 8080:8080 -d bailo:standalone
 ```
 
@@ -131,7 +154,7 @@ You can test out your new deployment using the example models which can be found
 | API             | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![Express.js][Express]](https://expressjs.com/) [![Vitest][Vitest]](#)              |
 | Docker Registry | [![Docker][Docker]](https://www.docker.com/)                                                                                                                                                 |
 | Mongo           | [![MongoDB][Mongo]](https://www.mongodb.com/)                                                                                                                                                |
-| S3              | [![MinIO][Minio]](https://www.min.io/)                                                                                                                                                       |
+| S3              | [![SeaweedFS][SeaweedFS]](https://github.com/seaweedfs/seaweedfs)                                                                                                                            |
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
@@ -180,8 +203,8 @@ See [our user documentation](https://gchq.github.io/Bailo/docs)
 
 ## Contributing
 
-If you'd like to make a contribution then the details for doing all of that are in
-[CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md).
+Anyone can raise a [GitHub issue](https://github.com/gchq/Bailo/issues). Pull requests are only accepted from approved,
+named contributors. See [CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md) for details.
 
 <br />
 
@@ -222,7 +245,7 @@ more information.
 [Express]: https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB
 [Docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff
 [Mongo]: https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white
-[Minio]: https://img.shields.io/badge/MinIO-C72E49?logo=minio&logoColor=fff
+[SeaweedFS]: https://img.shields.io/badge/SeaweedFS-2F80ED
 [NGINX]: https://img.shields.io/badge/nginx-009639?logo=nginx&logoColor=fff
 [Vitest]: https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=fff
 [Typescript]: https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff

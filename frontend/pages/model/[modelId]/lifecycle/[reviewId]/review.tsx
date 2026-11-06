@@ -1,11 +1,10 @@
-import { Dayjs } from '@dayjs'
-import { ArrowBack } from '@mui/icons-material'
+import { type Dayjs } from '@dayjs'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Dialog, DialogContent, Divider, Paper, Stack, Typography } from '@mui/material'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { useGetResponses } from 'actions/response'
 import { postGenericReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -16,7 +15,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { Decision, DecisionKeys, ReviewKind, SplitSchemaNoRender } from 'types/types'
+import { Decision, type DecisionKeys, ReviewKind, type SplitSchemaNoRender } from 'types/types'
 import { formatDateStringAsDayMonthAndYear } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
@@ -30,8 +29,7 @@ export default function LifecycleReview() {
   const [isModelCardDialogOpen, setIsModelCardDialogOpen] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const { reviews, isReviewsLoading, isReviewsError, mutateReviews } = useGetReviewRequestsForModel({
     modelId: modelId as string,
     reviewId: `${reviewId}`,
@@ -106,7 +104,6 @@ export default function LifecycleReview() {
 
   const error = MultipleErrorWrapper('Unable to load release review page', {
     isModelError,
-    isUiConfigError,
     isReviewsError,
     isSchemaError,
     isResponsesError,
@@ -118,12 +115,10 @@ export default function LifecycleReview() {
   if (
     !reviews ||
     !model ||
-    !uiConfig ||
     !schema ||
     !responses ||
     isReviewsLoading ||
     isModelLoading ||
-    isUiConfigLoading ||
     isSchemaLoading ||
     isResponsesLoading
   ) {

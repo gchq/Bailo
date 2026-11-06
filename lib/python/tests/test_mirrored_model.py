@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, Role
-
-# isort: split
-
-from bailo import Client, Datacard, Experiment, MirroredModel, ModelVisibility
+from bailo import Client, MirroredModel, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, Role
 from bailo.core.exceptions import BailoException
-from bailo.core.utils import NestedDict
 
 
 def test_model_card_defaults(local_mirrored_model):
@@ -57,15 +53,126 @@ def test_get_card_latest_with_card_and_mirrored_card(local_mirrored_model, reque
     }
 
 
+@pytest.mark.parametrize(
+    "present_key, expected_warning",
+    [
+        ("card", "does not have any associated model card"),
+        ("mirroredCard", "does not have any associated additional information"),
+    ],
+)
+def test_get_card_latest_warns_about_the_missing_card(
+    present_key, expected_warning, local_mirrored_model, requests_mock
+):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "kind": EntryKind.MIRRORED_MODEL,
+                present_key: {
+                    "schemaId": "minimal-general-v10",
+                    "version": 1,
+                    "metadata": {"overview": {"summary": "present"}},
+                },
+            }
+        },
+    )
+
+    with pytest.warns(UserWarning, match=expected_warning):
+        local_mirrored_model.get_card_latest()
+
+
+def test_update_model_card_defaults_to_additional_information(local_mirrored_model, requests_mock):
+    local_mirrored_model._card = {"overview": {"summary": "read only source card"}}
+    local_mirrored_model._additional_information_card = {"overview": {"summary": "editable"}}
+    put_mock = requests_mock.put(
+        "https://example.com/api/v2/model/test-id/model-cards",
+        json={"card": {"schemaId": "minimal-general-v10", "version": 2, "metadata": {"overview": {}}}},
+    )
+
+    local_mirrored_model.update_model_card()
+
+    assert put_mock.last_request.json()["metadata"] == {"overview": {"summary": "editable"}}
+
+
+def test_update_sends_source_model_id_when_changed(local_mirrored_model, requests_mock):
+    requests_mock.patch(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "name": "test",
+                "description": "test",
+                "visibility": "public",
+            }
+        },
+    )
+    local_mirrored_model.sourceModelId = "new-source-456"
+    local_mirrored_model.update()
+
+    request_body = requests_mock.last_request.json()
+    assert request_body["settings"]["mirror"]["sourceModelId"] == "new-source-456"
+
+
+def test_update_omits_settings_when_source_model_id_unchanged(local_mirrored_model, requests_mock):
+    requests_mock.patch(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "name": "test",
+                "description": "updated description",
+                "visibility": "public",
+            }
+        },
+    )
+    local_mirrored_model.description = "updated description"
+    local_mirrored_model.update()
+
+    request_body = requests_mock.last_request.json()
+    assert "settings" not in request_body
+
+
+def test_unpack_syncs_source_model_id(local_mirrored_model):
+    res = {
+        "id": "test-id",
+        "name": "test",
+        "description": "test",
+        "visibility": "public",
+        "kind": "mirrored-model",
+        "settings": {"mirror": {"sourceModelId": "updated-source-789"}},
+    }
+    local_mirrored_model._unpack(res)
+
+    assert local_mirrored_model.sourceModelId == "updated-source-789"
+    assert local_mirrored_model._original_source_model_id == "updated-source-789"
+
+
 def test_mirrored_model(local_mirrored_model):
     assert isinstance(local_mirrored_model, MirroredModel)
 
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "sourceModelId", "organisation", "tags", "visibility", "collaborators"),
+    (
+        "name",
+        "description",
+        "sourceModelId",
+        "organisation",
+        "tags",
+        "visibility",
+        "collaborators",
+    ),
     [
-        ("test-mirrored-model", "test", "test-1234", None, None, ModelVisibility.PUBLIC, None),
+        (
+            "test-mirrored-model",
+            "test",
+            "test-1234",
+            None,
+            None,
+            ModelVisibility.PUBLIC,
+            None,
+        ),
         (
             "test-mirrored-model",
             "test",
@@ -125,6 +232,74 @@ def test_create_get_from_id_update_and_delete_mirrored_model(
 
 
 @pytest.mark.integration
+def test_update_source_model_id_before_import(integration_client):
+    model = MirroredModel.create(
+        client=integration_client,
+        name="test-source-id-update",
+        description="test",
+        sourceModelId="original-source",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    assert model.sourceModelId == "original-source"
+
+    model.sourceModelId = "corrected-source"
+    model.update()
+
+    with pytest.warns(UserWarning):
+        fetched = MirroredModel.from_id(integration_client, model.model_id)
+
+    assert fetched.sourceModelId == "corrected-source"
+
+    assert model.delete()
+
+
+@pytest.mark.integration
+def test_update_preserves_settings_on_non_source_id_change(integration_client):
+    model = MirroredModel.create(
+        client=integration_client,
+        name="test-settings-preserve",
+        description="original",
+        sourceModelId="source-123",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    model.description = "updated"
+    model.update()
+
+    with pytest.warns(UserWarning):
+        fetched = MirroredModel.from_id(integration_client, model.model_id)
+
+    assert fetched.description == "updated"
+    assert fetched.sourceModelId == "source-123"
+
+    assert model.delete()
+
+
+@pytest.mark.integration
+def test_from_id_hydrates_all_fields(integration_client):
+    model = MirroredModel.create(
+        client=integration_client,
+        name="test-hydrate",
+        description="hydrate test",
+        sourceModelId="hydrate-source",
+        visibility=ModelVisibility.PUBLIC,
+        organisation="Example Organisation",
+        tags=["mirror-tag"],
+    )
+
+    with pytest.warns(UserWarning):
+        fetched = MirroredModel.from_id(integration_client, model.model_id)
+
+    assert fetched.organisation == "Example Organisation"
+    assert fetched.tags == ["mirror-tag"]
+    assert fetched.settings is not None
+    assert fetched.settings["mirror"]["sourceModelId"] == "hydrate-source"
+
+    assert model.delete()
+
+
+@pytest.mark.integration
 def test_search_mirrored_models_specific(integration_client, example_mirrored_model):
     with pytest.warns(UserWarning):
         mirroredModels = MirroredModel.search(client=integration_client, search="FooBarBaz!")
@@ -142,7 +317,7 @@ def test_get_releases(integration_client):
         visibility=ModelVisibility.PUBLIC,
     )
 
-    releases = model.get_releases()
+    model.get_releases()
 
     with pytest.raises(BailoException):
         model.get_latest_release()

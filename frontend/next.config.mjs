@@ -1,6 +1,5 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import nextMDX from '@next/mdx'
-import isDocker from 'is-docker'
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -10,18 +9,18 @@ const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
     remarkPlugins: ['remark-frontmatter', 'remark-gfm'],
-    rehypePlugins: ['rehype-highlight'],
+    rehypePlugins: ['rehype-highlight', 'rehype-slug'],
   },
 })
 
-const defaultBackend = isDocker() ? 'http://backend:3001' : 'http://localhost:3001'
+const defaultBackend = 'http://backend:3001'
 const backend = process.env.BACKEND_SERVICE ?? defaultBackend
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  transpilePackages: ['nanoid', 'lodash-es'],
+  transpilePackages: ['lodash-es'],
 
   modularizeImports: {
     '@mui/material': {

@@ -1,7 +1,7 @@
 import CodeIcon from '@mui/icons-material/Code'
 import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 
 interface CodeLineProps {
@@ -20,7 +20,13 @@ export default function CodeLine({ line, icon = <CodeIcon /> }: CodeLineProps) {
         role='button'
         tabIndex={0}
       >
-        <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           {icon}
           <Typography
             sx={{

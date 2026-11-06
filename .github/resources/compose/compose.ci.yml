@@ -1,0 +1,5 @@
+services:
+  mongo:
+    environment:
+      # Disables tcmalloc per-CPU caches, which break on the runners' kernel 6.19+ (SERVER-121912)
+      GLIBC_TUNABLES: glibc.pthread.rseq=1

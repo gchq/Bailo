@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import bailoFileMenu from 'public/docs/bailo_file_menu.png'
 import bailoDeleteFileConfirm from 'public/docs/bailo_delete_file_confirm.png'
@@ -41,7 +41,7 @@ Delete a file from the File Management tab using the file actions menu:
 5. Select **Delete File**
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='file actions menu with delete option' src={bailoFileMenu} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='file actions menu with delete option' src={bailoFileMenu} />
 </Box>
 
 The screenshot above shows the file actions menu with a Delete File option.
@@ -54,7 +54,11 @@ A confirmation dialog lists affected releases before the file is permanently rem
 - You must explicitly confirm to proceed
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='delete file confirmation dialog showing affected releases' src={bailoDeleteFileConfirm} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='delete file confirmation dialog showing affected releases'
+    src={bailoDeleteFileConfirm}
+  />
 </Box>
 
 The screenshot above shows the delete confirmation dialog listing releases that reference the file.

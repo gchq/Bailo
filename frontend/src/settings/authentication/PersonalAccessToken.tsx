@@ -1,9 +1,10 @@
-import { Visibility, VisibilityOff } from '@mui/icons-material'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import { TokenInterface } from 'types/types'
+import { type TokenInterface } from 'types/types'
 import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 
 type PersonalAccessTokenProps = {
@@ -25,7 +26,13 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
 
   return (
     <>
-      <Grid container spacing={1} alignItems='center'>
+      <Grid
+        container
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Grid size={{ xs: 2 }}>
           <Typography>Access Key</Typography>
         </Grid>

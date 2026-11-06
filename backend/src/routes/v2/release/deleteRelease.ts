@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -46,8 +46,10 @@ export const deleteRelease = [
       params: { modelId, semver },
     } = parse(req, deleteReleaseSchema)
 
-    await useTransaction([(session) => deleteReleaseService(req.user, modelId, semver, undefined, session)])
-    await audit.onDeleteRelease(req, modelId, semver)
+    const transactionResult = await useTransaction([
+      (session) => deleteReleaseService(req.user, modelId, semver, undefined, session),
+    ])
+    await audit.onDeleteRelease(req, transactionResult[0])
 
     res.json({
       message: 'Successfully removed release.',

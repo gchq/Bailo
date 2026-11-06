@@ -1,7 +1,7 @@
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import { Button, Collapse, CSSProperties, Typography } from '@mui/material'
-import Alert, { AlertProps } from '@mui/material/Alert'
+import { Button, Collapse, type CSSProperties, Typography } from '@mui/material'
+import Alert, { type AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import { useEffect, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -106,12 +106,39 @@ export default function MessageAlert({
       }
     >
       <Stack spacing={1}>
-        <Stack direction='row' spacing={1} alignItems='center'>
-          {id && <Typography fontWeight='bold'>{id}</Typography>}
-          {statusCode > 0 && <Typography fontWeight='bold'>{statusCode}</Typography>}
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
+          {id && (
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              {id}
+            </Typography>
+          )}
+          {statusCode > 0 && (
+            <Typography
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
+              {statusCode}
+            </Typography>
+          )}
           <Stack>
             <Typography>{message}</Typography>
-            <Typography fontWeight='bold' variant='caption'>
+            <Typography
+              variant='caption'
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               {subHeading}
             </Typography>
           </Stack>

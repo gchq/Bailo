@@ -5,8 +5,9 @@ import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
 import { HostMetrics } from '@opentelemetry/host-metrics'
 import { resourceFromAttributes } from '@opentelemetry/resources'
+import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs'
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
-import { logs, NodeSDK } from '@opentelemetry/sdk-node'
+import { NodeSDK } from '@opentelemetry/sdk-node'
 import os from 'os'
 
 import { ATTR_SERVICE_NAME, ATTRS_HOST_NAME } from './semconv.js'
@@ -18,7 +19,7 @@ if (config.instrumentation.enabled) {
   }
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: `${config.instrumentation.serviceName}`,
-    [ATTRS_HOST_NAME]: `${os.hostname}`,
+    [ATTRS_HOST_NAME]: os.hostname(),
   })
   const sdk = new NodeSDK({
     traceExporter: new OTLPTraceExporter({
@@ -26,12 +27,12 @@ if (config.instrumentation.enabled) {
       headers: { Authorization: `Bearer ${config.instrumentation.authenticationToken}` },
     }),
     logRecordProcessors: [
-      new logs.SimpleLogRecordProcessor(
-        new OTLPLogExporter({
+      new SimpleLogRecordProcessor({
+        exporter: new OTLPLogExporter({
           url: `${config.instrumentation.endpoint}/v1/logs`,
           headers: { Authorization: `Bearer ${config.instrumentation.authenticationToken}` },
         }),
-      ),
+      }),
     ],
     instrumentations: [
       getNodeAutoInstrumentations({

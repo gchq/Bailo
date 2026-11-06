@@ -1,14 +1,14 @@
-import { PassThrough } from 'node:stream'
-import zlib from 'node:zlib'
+import { type PassThrough } from 'node:stream'
+import type zlib from 'node:zlib'
 
-import { Pack } from 'tar-stream'
+import { type Pack } from 'tar-stream'
 
 import { ModelAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
-import { ModelDoc } from '../../../models/Model.js'
-import { UserInterface } from '../../../models/User.js'
+import { type ModelDoc } from '../../../models/Model.js'
+import { type UserInterface } from '../../../models/User.js'
 import { isBailoError } from '../../../types/error.js'
-import { MirrorExportLogData } from '../../../types/types.js'
+import { type MirrorExportLogData } from '../../../types/types.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import log from '../../log.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
@@ -178,8 +178,7 @@ export abstract class BaseExporter {
    * Provides parameters for `initialiseTarGzUpload()`.
    */
   protected abstract getInitialiseTarGzUploadParams():
-    | Promise<Parameters<typeof initialiseTarGzUpload>>
-    | Parameters<typeof initialiseTarGzUpload>
+    Promise<Parameters<typeof initialiseTarGzUpload>> | Parameters<typeof initialiseTarGzUpload>
 
   protected readonly logData: MirrorExportLogData
   protected readonly user: UserInterface
@@ -317,6 +316,7 @@ export abstract class BaseExporter {
   async finalise() {
     log.trace(this.logData, `Finalising ${this.constructor.name}.`)
 
+    // Non-null assertion operator used due to `withStreams` performing assertion
     await finaliseTarGzUpload(this.tarStream!, this.uploadPromise!)
 
     log.trace(this.logData, `Finished finalising ${this.constructor.name}.`)

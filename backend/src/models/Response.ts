@@ -1,6 +1,6 @@
-import { HydratedDocument, model, Schema, Types } from 'mongoose'
+import { type HydratedDocument, model, Schema, type Types } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const Decision = {
   RequestChanges: 'request_changes',
@@ -69,6 +69,8 @@ const ResponseSchema = new Schema<ResponseDoc>(
     collection: 'v2_responses',
   },
 )
+
+ResponseSchema.index({ parentId: 1, kind: 1, entity: 1, createdAt: -1 })
 
 ResponseSchema.plugin(softDeletionPlugin)
 

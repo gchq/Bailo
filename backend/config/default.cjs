@@ -1,22 +1,17 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-
 /** @type {import('../src/utils/config.js').Config} */
 module.exports = {
   api: {
-    // Publicly accessible host
     host: '',
-    // Port to listen on
     port: 3001,
     rateLimit: true,
   },
 
   app: {
-    // Publicly accessible route to service
     protocol: '',
     host: '',
     port: 3000,
 
-    // Typically generated from `npm run certs`
     privateKey: './certs/key.pem',
     publicKey: './certs/cert.pem',
     jwks: './certs/jwks.json',
@@ -26,40 +21,26 @@ module.exports = {
     defaultOpts: {
       rejectUnauthorized: true,
     },
-    // Default proxy to use for all requests
     proxy: '',
-    // Don't use a proxy for any address in this list
     noProxy: ['localhost', '127.0.0.1'],
   },
 
   mongo: {
-    // A mongo connection URI, can contain replica set information, etc.
-    // See: https://www.mongodb.com/docs/manual/reference/connection-string/
-
-    // This is usually embedded in a config map, so do not put usernames and
-    // passwords in the connection string.
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
-
-    // Authentication details
     user: undefined,
     pass: undefined,
-
-    // Whether to use transactions. Requires a replica set to be enabled
     transactions: false,
   },
 
   registry: {
-    // Registry connection information should be the internal connection to the registry.
     connection: {
       internal: 'https://localhost:5000',
       insecure: true,
     },
 
-    // Service and Issuer must match those set in the registry configuration
     service: 'RegistryAuth',
     issuer: 'RegistryIssuer',
 
-    // Allow self-signed certificates
     insecure: true,
   },
 
@@ -72,8 +53,6 @@ module.exports = {
     enabled: false,
     transporter: 'smtp',
 
-    // Connection information for an SMTP server.  Settings are passed directly to 'node-mailer', see reference for options:
-    // https://nodemailer.com/smtp/#1-single-connection
     connection: {
       host: 'localhost',
       port: 1025,
@@ -160,8 +139,6 @@ module.exports = {
     provider: 'cognito',
 
     grant: {
-      // Grant configuration options, provide any option from:
-      // https://www.npmjs.com/package/grant
       defaults: {
         origin: '',
         prefix: '/api/connect',
@@ -189,6 +166,7 @@ module.exports = {
       userIdAttribute: '',
       adminGroupName: '',
       complianceGroupName: '',
+      untrustedModelGroupName: '',
     },
   },
 
@@ -208,9 +186,7 @@ module.exports = {
     },
   },
 
-  // These settings are PUBLIC and shared with the UI
   ui: {
-    // Show a banner at the top of the screen on all pages
     banner: {
       enabled: true,
       text: 'DEVELOPMENT DEPLOYMENT',
@@ -218,14 +194,12 @@ module.exports = {
       textColor: 'black',
     },
 
-    // Contact details for the support team
     issues: {
       label: 'Bailo Support Team',
       supportHref: 'mailto:hello@example.com?subject=Bailo%20Support',
       contactHref: 'mailto:hello@example.com?subject=Bailo%20Contact',
     },
 
-    // The publicly accessible location of the registry, including host and port
     registry: {
       host: 'localhost:8080',
     },
@@ -273,7 +247,19 @@ module.exports = {
 
     untrustedModel: {
       enabled: false,
-      untrustedModelDescription: 'These are private only models.',
+      untrustedModelLongDescription:
+        'Untrusted models are private-only models with the Registry tab disabled. They have not been verified or validated to the same standard as regular models.',
+      untrustedModelShortDescription:
+        'An untrusted model repository contains all files, history, and information associated with a private model.',
+      fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.',
+    },
+
+    llmImport: {
+      enabled: false,
+    },
+
+    lifecycle: {
+      maxReviewInterval: '',
     },
   },
 
@@ -308,7 +294,7 @@ module.exports = {
       accessKeyId: '',
       secretAccessKey: '',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
@@ -317,7 +303,6 @@ module.exports = {
 
     multipartChunkSize: 5 * 1024 * 1024,
 
-    // Names of buckets that Bailo uses
     buckets: {
       uploads: 'uploads',
       registry: 'registry',
@@ -333,8 +318,7 @@ module.exports = {
   },
 
   stroom: {
-    logOnlyMode: true,
-    feed: 'feed',
+    sendEvents: true,
     url: 'https://url',
     environment: 'local',
     interval: 1000 * 50,
@@ -343,6 +327,10 @@ module.exports = {
     xmlns: 'default-namespace',
     schemaLocation: 'default-namespace file://schema-location.xsd',
     version: '1.0.0',
+    headers: {
+      'Content-Encoding': 'gzip',
+    },
+    batchSizeLimit: 50,
   },
 
   modelMirror: {
@@ -370,7 +358,30 @@ module.exports = {
     authorisationToken: '',
   },
 
-  untrustedModels: {
-    defaultState: 'Production',
+  llm: {
+    endpoint: '',
+    apiKey: '',
+    model: '',
+    maxTokens: 16384,
+    timeoutMs: 120000,
+    temperature: 0,
+    systemPrompt: `You are a data extraction assistant. You will be given a model card text document and a target JSON schema. Extract information from the document into the schema format.
+
+CRITICAL RULES:
+- Only extract information that is EXPLICITLY stated in the source document.
+- If a field cannot be populated from the document, omit it entirely from the output.
+- Do NOT infer, guess, or hallucinate any values.
+- Do NOT generate placeholder text like "Not specified", "N/A", or "Unknown" — leave the field out.
+- Do NOT generate placeholder or example URLs. Only include a URL if it appears verbatim in the source document.
+- Do NOT infer or generate dates. Only populate date fields if an explicit date is clearly stated in the source document for that specific purpose.
+- Return valid JSON matching the schema structure exactly.
+- For string fields, extract the relevant text verbatim or as a close summary.
+- For array fields, extract all matching items found in the document.
+- For enum fields (where allowed values are listed), you MUST use one of the allowed values exactly as written. Match the closest value semantically if the document uses different wording.
+- For number fields, extract numeric values only if explicitly stated.
+- For boolean fields, extract true/false only if the answer is clearly stated.
+- When a field specifies a format (e.g. "date", "date-time", "email", "uri"), output values in the standard format for that type (e.g. YYYY-MM-DD for date, ISO 8601 for date-time).
+- The output JSON must use the exact property names from the schema (the "path" field).
+- When the document contains tabular data, check if the schema has a matching array or nested structure for that data. If so, map the rows into that structure. If the closest matching field is a string or text field, preserve the table in a readable format such as a markdown table or key-value pairs.`,
   },
 }

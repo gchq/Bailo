@@ -1,7 +1,7 @@
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import { fromEntity, toEntity } from '../../utils/entity.js'
 import { BaseAuthenticationConnector } from './Base.js'
-import { RoleKeys, Roles, UserInformation } from './constants.js'
+import { type RoleKeys, Roles, type UserInformation } from './constants.js'
 
 const SillyEntityKind = {
   User: 'user',
@@ -29,13 +29,7 @@ export class SillyAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   async hasRole(_user: UserInterface, role: RoleKeys) {
-    if (role === Roles.Admin) {
-      return true
-    }
-    if (role === Roles.Compliance) {
-      return true
-    }
-    return false
+    return Object.values(Roles).includes(role)
   }
 
   async queryEntities(_query: string) {

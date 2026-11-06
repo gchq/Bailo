@@ -1,11 +1,11 @@
 import { Typography } from '@mui/material'
-import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
+import Autocomplete, { type AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/entry'
-import { SyntheticEvent, useEffect, useMemo } from 'react'
+import { type SyntheticEvent, useEffect, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FlattenedModelImage } from 'types/types'
+import { type EntryInterface, type FlattenedModelImage } from 'types/types'
 import { sortByNameAscending } from 'utils/arrayUtils'
 
 type PartialModelImageListProps =

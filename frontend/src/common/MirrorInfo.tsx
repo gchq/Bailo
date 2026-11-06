@@ -4,13 +4,23 @@ export default function MirrorInfo() {
   return (
     <>
       <Stack spacing={1}>
-        <Typography fontSize={16} fontWeight='bold'>
+        <Typography
+          sx={{
+            fontSize: 16,
+            fontWeight: 'bold',
+          }}
+        >
           Model export
         </Typography>
         <Typography>
           When exporting a model as a mirrored model, only the full model card history is included by default.
         </Typography>
-        <Typography fontSize={16} fontWeight='bold'>
+        <Typography
+          sx={{
+            fontSize: 16,
+            fontWeight: 'bold',
+          }}
+        >
           Releases
         </Typography>
         <Typography>
@@ -19,8 +29,16 @@ export default function MirrorInfo() {
           <br />
           If a release is updated after export, it must be re-exported for those changes to appear on the mirrored
           model.
+          <br />
+          Draft releases cannot be exported and are not available for selection. Publish a draft release before
+          exporting it.
         </Typography>
-        <Typography fontSize={16} fontWeight='bold'>
+        <Typography
+          sx={{
+            fontSize: 16,
+            fontWeight: 'bold',
+          }}
+        >
           Model artefacts
         </Typography>
         <Typography>

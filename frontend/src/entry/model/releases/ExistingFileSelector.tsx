@@ -17,10 +17,9 @@ import { useGetFilesForModel } from 'actions/file'
 import { memoize } from 'lodash-es'
 import prettyBytes from 'pretty-bytes'
 import { useCallback, useState } from 'react'
-import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
-import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, isFileInterface } from 'types/types'
+import renderQueryState from 'src/common/renderQueryState'
+import { type EntryInterface, type FileInterface, isFileInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 interface ExistingFileSelectorProps {
@@ -121,12 +120,9 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
     </ListItem>
   ))
 
-  if (isFilesError) {
-    return <MessageAlert message={isFilesError.info.message} severity='error' />
-  }
-
-  if (isFilesLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isFilesError], isFilesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

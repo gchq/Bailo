@@ -2,18 +2,20 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import {
-  BailoError,
-  EntryForm,
-  EntryInterface,
-  EntryKindKeys,
-  EntryRole,
-  EntryUserPermissions,
-  EntryVisibilityKeys,
-  FileInterface,
-  ModelImage,
-  ReleaseInterface,
+  type BailoError,
+  type CollaboratorEntry,
+  type EntryForm,
+  type EntryInterface,
+  type EntryKindKeys,
+  type EntryRole,
+  type EntryUserPermissions,
+  type EntryVisibilityKeys,
+  type FileInterface,
+  MODEL_ENTRY_KINDS,
+  type ModelImage,
+  type ReleaseInterface,
 } from '../types/types'
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyEntryList = []
 
@@ -24,6 +26,7 @@ export interface EntrySearchResult {
   tags: Array<string>
   kind: EntryKindKeys
   organisation?: string
+  collaborators?: CollaboratorEntry[]
   state?: string
   peerId?: string
   visibility: EntryVisibilityKeys
@@ -38,7 +41,7 @@ export interface ModelExportRequest {
 }
 
 export function useListEntries(
-  kind?: EntryKindKeys,
+  kind?: EntryKindKeys[] | EntryKindKeys,
   roles: string[] = [],
   task = '',
   libraries: string[] = [],
@@ -50,6 +53,7 @@ export function useListEntries(
   schemaId?: string,
   titleOnly?: boolean,
   adminAccess?: boolean,
+  enabled = true,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -71,7 +75,10 @@ export function useListEntries(
       errors: Record<string, BailoError>
     },
     ErrorInfo
-  >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
+  >(
+    enabled && Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null,
+    fetcher,
+  )
 
   return {
     mutateEntries: mutate,
@@ -82,7 +89,7 @@ export function useListEntries(
   }
 }
 
-export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys) {
+export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys[] | EntryKindKeys) {
   const queryParams = {
     ...(kind && { kind }),
   }
@@ -100,6 +107,9 @@ export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys) {
     isEntryLoading: isLoading,
     isEntryError: error,
   }
+}
+export function useGetModel(entryId: string | undefined) {
+  return useGetEntry(entryId, MODEL_ENTRY_KINDS)
 }
 
 const emptyRolesList = []

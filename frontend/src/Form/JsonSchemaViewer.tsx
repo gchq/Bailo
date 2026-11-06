@@ -1,9 +1,9 @@
 import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { RJSFSchema } from '@rjsf/utils'
+import { type RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { type Dispatch, type SetStateAction, useState } from 'react'
 import {
   ArrayFieldTemplateForQuestionViewer,
   DescriptionFieldTemplate,
@@ -13,7 +13,7 @@ import {
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import { setStepState } from 'utils/formUtils'
 
 export interface QuestionSelection {
@@ -91,9 +91,9 @@ export default function JsonSchemaViewer({
                 <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
                   <Typography
                     sx={{
+                      width: '100%',
                       wordBreak: 'break-word',
                     }}
-                    width='100%'
                   >
                     {step.schema.title}
                   </Typography>
@@ -115,6 +115,7 @@ export default function JsonSchemaViewer({
           omitExtraData
           disabled={!canEdit}
           liveOmit
+          experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
           formContext={{
             editMode: canEdit,
             formSchema: currentStep.schema,

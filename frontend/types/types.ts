@@ -1,5 +1,5 @@
-import { UiSchema } from '@rjsf/utils'
-import { Dispatch, JSX, SetStateAction } from 'react'
+import { type UiSchema } from '@rjsf/utils'
+import { type Dispatch, type JSX, type SetStateAction } from 'react'
 
 export interface BailoError extends Error {
   id?: string
@@ -80,7 +80,17 @@ export interface UiConfig {
 
   untrustedModel: {
     enabled: boolean
-    untrustedModelDescription: string
+    untrustedModelLongDescription: string
+    untrustedModelShortDescription: string
+    fileUploadGuidance: string
+  }
+
+  llmImport: {
+    enabled: boolean
+  }
+
+  lifecycle: {
+    maxReviewInterval: string
   }
 }
 
@@ -403,6 +413,8 @@ export interface StepNoRender {
 
   state: any
   mirroredState?: any
+  compareFromState?: any
+  compareFromMirroredState?: any
   index: number
 
   steps?: Array<StepNoRender>
@@ -442,6 +454,7 @@ export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
+  createdAt: string
   mirrored: boolean
   metadata: unknown
 }
@@ -464,8 +477,11 @@ export const EntryKind = {
   DATA_CARD: 'data-card',
   MIRRORED_MODEL: 'mirrored-model',
   UNTRUSTED_MODEL: 'untrusted-model',
+  MIRRORED_DATA_CARD: 'mirrored-data-card',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
+export const MODEL_ENTRY_KINDS = [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL]
 
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
   return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD || value === EntryKind.MIRRORED_MODEL)
@@ -587,6 +603,7 @@ type PartialReviewInterface = {
   _id: string
   modelId: string
   role: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }
@@ -602,6 +619,7 @@ export type PartialReviewRequestInterface = {
   _id: string
   model: EntryInterface
   role: string
+  status?: DecisionKeys
   createdAt: string
   updatedAt: string
 }
@@ -999,7 +1017,7 @@ export interface OverviewMetrics {
   lastUpdated: string
 }
 
-export interface PolicySummaryMetrics {
+export interface PolicyRoleSummaryMetrics {
   roleId: string
   roleName: string
   count: number
@@ -1010,29 +1028,119 @@ export interface PolicyRoleMetric {
   roleName: string
 }
 
-export interface PolicyModelMetrics {
+export interface PolicyModelRoleMetrics {
   entryId: string
   missingRoles: PolicyRoleMetric[]
   modelOwners: string[]
 }
 
-export interface PolicyBaseMetrics {
-  summary: PolicySummaryMetrics[]
-  entries: PolicyModelMetrics[]
+export interface PolicyRoleBaseMetrics {
+  summary: PolicyRoleSummaryMetrics[]
+  entries: PolicyModelRoleMetrics[]
 }
 
-export interface OrganisationPolicyMetrics extends PolicyBaseMetrics {
+export interface OrganisationPolicyMetrics extends PolicyRoleBaseMetrics {
   organisation: string
 }
 
-export interface PolicyMetrics {
-  global: PolicyBaseMetrics
+export interface PolicyRoleMetrics {
+  global: PolicyRoleBaseMetrics
   byOrganisation: OrganisationPolicyMetrics[]
   lastUpdated: string
+}
+
+export interface ModelBreakdown {
+  entryId: string
+  entryName: string
+  entryKind: EntryKindKeys
+  modelOwners: string[]
 }
 
 export const Roles = {
   Admin: 'admin',
   Compliance: 'compliance',
+  UntrustedModel: 'untrusted-model',
 } as const
 export type RoleKeys = (typeof Roles)[keyof typeof Roles]
+
+export interface NoReleasesSummaryMetrics {
+  modelsWithNoReleases: number
+}
+
+export interface ModelsNoReleases {
+  entryId: string
+  organisation: string
+  modelOwners: string[]
+}
+
+export interface GlobalNoReleasesMetrics {
+  summary: NoReleasesSummaryMetrics
+  entries: ModelsNoReleases[]
+}
+
+export interface NoReleaseMetricsByOrg {
+  organisation: string
+  summary: NoReleasesSummaryMetrics
+  entries: ModelsNoReleases[]
+}
+
+export interface BaseNoReleaseMetrics {
+  global: GlobalNoReleasesMetrics
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}
+
+export interface UnapprovedReleasesSummaryMetrics {
+  totalModelsWithUnapprovedReleases: number
+  totalUnapprovedReleases: number
+}
+
+export interface ModelsUnapprovedReleases {
+  entryId: string
+  modelOwners: string[]
+  unapprovedReleases: string[]
+}
+
+export interface GlobalUnapprovedReleasesMetrics {
+  summary: UnapprovedReleasesSummaryMetrics
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface UnapprovedReleaseMetricsByOrg {
+  organisation: string
+  modelsWithUnapprovedReleases: number
+  entries: ModelsUnapprovedReleases[]
+}
+
+export interface BaseUnapprovedReleaseMetrics {
+  global: GlobalUnapprovedReleasesMetrics
+  byOrganisation: UnapprovedReleaseMetricsByOrg[]
+  lastUpdated: string
+}
+
+export interface LifecycleSummaryMetrics {
+  count: number
+}
+
+export interface EntryLifecycleMetrics {
+  entryId: string
+  dueDate: string
+  modelOwners: string[]
+}
+
+export interface GlobalLifecycleMetrics {
+  summary: LifecycleSummaryMetrics
+  entries: EntryLifecycleMetrics[]
+}
+
+export interface LifecycleMetricsByOrg {
+  organisation: string
+  summary: LifecycleSummaryMetrics
+  entries: EntryLifecycleMetrics[]
+}
+
+export interface BaseLifecycleMetrics {
+  global: GlobalLifecycleMetrics
+  byOrganisation: LifecycleMetricsByOrg[]
+  lastUpdated: string
+}

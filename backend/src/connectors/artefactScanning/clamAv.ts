@@ -3,13 +3,13 @@ import NodeClam from 'clamscan'
 import PQueue from 'p-queue'
 
 import { getObjectStream } from '../../clients/s3.js'
-import { FileInterfaceDoc } from '../../models/File.js'
-import { ArtefactKind, ArtefactKindKeys, ClamAVSummary } from '../../models/Scan.js'
+import { type FileInterfaceDoc } from '../../models/File.js'
+import { ArtefactKind, type ArtefactKindKeys, type ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
-import { ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
+import { type ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   // extract 'x.y.z' from 'ClamAV x.y.z/abc'

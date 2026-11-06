@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -7,11 +7,11 @@ import { EntryKind } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
 import {
-  EntrySearchOptionsParams,
+  type EntrySearchOptionsParams,
   EntrySearchOptionsSchema,
-  EntrySearchResultWithErrors,
+  type EntrySearchResultWithErrors,
 } from '../../../types/types.js'
-import { parse } from '../../../utils/validate.js'
+import { coerceArray, parse } from '../../../utils/validate.js'
 
 export const getModelsSearchSchema = z.object({
   query: EntrySearchOptionsSchema,
@@ -35,7 +35,7 @@ registerPath({
                 name: z.string().openapi({ example: 'Yolo v4' }),
                 description: z.string().openapi({ example: 'You only look once' }),
                 tags: z.array(z.string()).openapi({ example: ['tag', 'ml'] }),
-                kind: z.string().openapi({ example: EntryKind.Model }),
+                kind: coerceArray(z.array(z.string().openapi({ example: EntryKind.Model }))),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
                 adminAccess: z.boolean().optional(),

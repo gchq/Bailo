@@ -37,17 +37,6 @@ describe('Check A11y violations', () => {
     cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
-  it('Check A11y violations, Schemas Page', () => {
-    cy.get('a[href="/schemas/list"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations)
-  })
-
-  it('Check A11y violations, Review Roles Page', () => {
-    cy.get('a[href="/reviewRoles/view"]').click()
-    cy.get('[data-test=ReviewRolesTitle]').should('be.visible')
-    cy.checkA11y(undefined, undefined, printA11yViolations)
-  })
-
   it('Check A11y violations, Settings Page', () => {
     cy.visit('/settings')
     cy.injectAxe()

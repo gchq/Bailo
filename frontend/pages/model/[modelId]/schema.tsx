@@ -1,4 +1,4 @@
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -10,7 +10,7 @@ export default function ModelSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
 
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
 
   if (isModelError) {
     return <ErrorWrapper message={isModelError.info.message} />

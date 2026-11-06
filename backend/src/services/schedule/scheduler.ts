@@ -17,28 +17,36 @@ export type LifecycleReviewJobData = {
 
 export const LIFECYCLE_REVIEW_EMAIL_JOB = 'sendLifeCycleReviewEmail'
 
-log.info('Scheduler initialising...')
-const agenda = new Agenda({
-  backend: new MongoBackend({
-    address: getConnectionURI(),
-  }),
-})
-
+let agenda: Agenda | undefined
 let started = false
+
+function getOrCreateAgenda(): Agenda {
+  if (!agenda) {
+    log.info('Scheduler initialising...')
+    agenda = new Agenda({
+      backend: new MongoBackend({
+        address: getConnectionURI(),
+      }),
+    })
+  }
+  return agenda
+}
 
 export async function startScheduler(jobRegistrars: JobRegistrar[] = []) {
   if (started) {
-    return agenda
+    return getOrCreateAgenda()
   }
+
+  const instance = getOrCreateAgenda()
 
   log.info('Scheduler starting up...')
 
-  agenda.on('error', (err) => {
+  instance.on('error', (err) => {
     log.error({ err }, 'Agenda error')
   })
 
   try {
-    await agenda.start()
+    await instance.start()
     started = true
     log.info('Scheduler started')
   } catch (err) {
@@ -47,9 +55,9 @@ export async function startScheduler(jobRegistrars: JobRegistrar[] = []) {
   }
 
   // Assign jobs after agenda has started so that they can use `getScheduler`
-  await Promise.all(jobRegistrars.map((registerJob) => registerJob(agenda)))
+  await Promise.all(jobRegistrars.map((registerJob) => registerJob(instance)))
 
-  return agenda
+  return instance
 }
 
 export function registerLifecycleReviewJob(agenda: Agenda) {
@@ -103,7 +111,7 @@ export async function scheduleLifeCycleReviewEmails(modelId: string, reviewId: s
 }
 
 export function getScheduler(): Agenda {
-  if (!started) {
+  if (!started || !agenda) {
     throw new Error('Scheduler has not been started')
   }
   return agenda

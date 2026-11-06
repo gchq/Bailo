@@ -1,19 +1,19 @@
-import { Request } from 'express'
+import { type Request } from 'express'
 
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileWithScanResultsAggregate } from '../../models/File.js'
-import { InferenceDoc } from '../../models/Inference.js'
-import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
-import { ResponseInterface } from '../../models/Response.js'
-import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleInterface } from '../../models/ReviewRole.js'
-import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
-import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
-import { TokenDoc } from '../../models/Token.js'
-import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
-import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
+import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type FileInterface, type FileWithScanResultsAggregate } from '../../models/File.js'
+import { type InferenceDoc } from '../../models/Inference.js'
+import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
+import { type ImageTagRef, type ReleaseDoc } from '../../models/Release.js'
+import { type ResponseInterface } from '../../models/Response.js'
+import { type ReviewInterface } from '../../models/Review.js'
+import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
+import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
+import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
+import { type TokenDoc } from '../../models/Token.js'
+import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type BailoError } from '../../types/error.js'
+import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
 
 export const AuditKind = {
   Create: 'Create',
@@ -44,6 +44,7 @@ export const ResourceKind = {
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
   User: 'user',
+  Registry: 'registry',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -100,6 +101,12 @@ export const AuditInfo = {
   UpdateModelCard: {
     typeId: 'UpdateModelCard',
     description: 'Model Card Updated',
+    auditKind: AuditKind.Update,
+    resourceKind: ResourceKind.ModelCard,
+  },
+  ImportModelCardText: {
+    typeId: 'ImportModelCardText',
+    description: 'Model Card Text Imported',
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.ModelCard,
   },
@@ -176,19 +183,19 @@ export const AuditInfo = {
     typeId: 'CreateUserToken',
     description: 'Token Created',
     auditKind: AuditKind.Create,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   ViewUserTokens: {
     typeId: 'ViewUserToken',
     description: 'Token Viewed',
     auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   DeleteUserToken: {
     typeId: 'DeleteUserToken',
     description: 'Token Deleted',
     auditKind: AuditKind.Delete,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
 
   CreateAccessRequest: {
@@ -212,7 +219,7 @@ export const AuditInfo = {
   DeleteAccessRequest: {
     typeId: 'UpdateAccessRequest',
     description: 'Access Request Deleted',
-    auditKind: AuditKind.Update,
+    auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.AccessRequest,
   },
   ViewAccessRequests: {
@@ -437,6 +444,24 @@ export const AuditInfo = {
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.Review,
   },
+  RegistryImagePulled: {
+    typeId: 'RegistryImagePulled',
+    description: 'Image has been pulled from the registry',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryImagePushed: {
+    typeId: 'RegistryImagePushed',
+    description: 'Image has been pushed to the registry',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Registry,
+  },
+  RegistryImageDeleted: {
+    typeId: 'RegistryImageDeleted',
+    description: 'Image has been deleted from the registry',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.Registry,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -445,7 +470,7 @@ export abstract class BaseAuditConnector {
   abstract onViewModel(req: Request, model: ModelDoc): Promise<void>
   abstract onSearchModel(req: Request, models: EntrySearchResult[]): Promise<void>
   abstract onUpdateModel(req: Request, model: ModelDoc): Promise<void>
-  abstract onDeleteModel(req: Request, modelId: string): Promise<void>
+  abstract onDeleteModel(req: Request, model: ModelDoc): Promise<void>
 
   abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface): Promise<void>
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface): Promise<void>
@@ -462,7 +487,7 @@ export abstract class BaseAuditConnector {
   abstract onViewRelease(req: Request, release: ReleaseDoc): Promise<void>
   abstract onViewReleases(req: Request, releases: ReleaseDoc[]): Promise<void>
   abstract onUpdateRelease(req: Request, release: ReleaseDoc): Promise<void>
-  abstract onDeleteRelease(req: Request, modelId: string, semver: string): Promise<void>
+  abstract onDeleteRelease(req: Request, release: ReleaseDoc): Promise<void>
 
   abstract onCreateCommentResponse(req: Request, response: ResponseInterface): Promise<void>
   abstract onCreateReviewResponse(req: Request, response: ResponseInterface): Promise<void>
@@ -471,13 +496,13 @@ export abstract class BaseAuditConnector {
 
   abstract onCreateUserToken(req: Request, token: TokenDoc): Promise<void>
   abstract onViewUserTokens(req: Request, tokens: TokenDoc[]): Promise<void>
-  abstract onDeleteUserToken(req: Request, accessKey: string): Promise<void>
+  abstract onDeleteUserToken(req: Request, token: TokenDoc): Promise<void>
 
   abstract onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
   abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
   abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[]): Promise<void>
   abstract onUpdateAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
-  abstract onDeleteAccessRequest(req: Request, accessRequestId: string): Promise<void>
+  abstract onDeleteAccessRequest(req: Request, accessRequest: AccessRequestDoc): Promise<void>
 
   abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[]): Promise<void>
 
@@ -485,7 +510,7 @@ export abstract class BaseAuditConnector {
   abstract onViewSchema(req: Request, schema: SchemaInterface): Promise<void>
   abstract onSearchSchemas(req: Request, schemas: SchemaInterface[]): Promise<void>
   abstract onUpdateSchema(req: Request, schema: SchemaDoc): Promise<void>
-  abstract onDeleteSchema(req: Request, schemaId: string): Promise<void>
+  abstract onDeleteSchema(req: Request, schema: SchemaDoc): Promise<void>
 
   abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void>
   abstract onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface): Promise<void>
@@ -514,22 +539,27 @@ export abstract class BaseAuditConnector {
     importResult: Omit<MirrorInformation, 'metadata'>,
   ): Promise<void>
 
-  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
-  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[]): Promise<void>
-  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface): Promise<void>
-  abstract onDeleteReviewRole(req: Request, reviewRoleId: string): Promise<void>
+  // Only the non-system roles are audited as system roles are not stored in the DB so have no ID
+  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
+  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleDoc[]): Promise<void>
+  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
+  abstract onDeleteReviewRole(req: Request, reviewRole: ReviewRoleDoc): Promise<void>
 
   abstract onViewMetric(req: Request): Promise<void>
 
   abstract onCreateReview(req: Request, modelId: string): Promise<void>
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
-  abstract onNotifyReviewers(req: Request, reviewId: string)
+  abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
+
+  abstract onRegistryImagePulled(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImagePushed(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImageDeleted(req: Request, registryImage: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
-    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
+    if (auditInfo.typeId !== req.audit.typeId || auditInfo.description !== req.audit.description) {
       throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but received '${JSON.stringify(req.audit)}'`)
     }
   }

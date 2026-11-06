@@ -1,6 +1,9 @@
-import { ExpandLess, ExpandMore, Info, Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import HistoryIcon from '@mui/icons-material/History'
+import Info from '@mui/icons-material/Info'
+import MenuIcon from '@mui/icons-material/Menu'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import {
   Box,
@@ -21,14 +24,18 @@ import { getChangedFields } from '@rjsf/utils'
 import { putEntryCard, useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
+import { useGetUiConfig } from 'actions/uiConfig'
 import * as _ from 'lodash-es'
-import React, { ChangeEvent, useContext, useEffect, useEffectEvent, useState } from 'react'
-import Loading from 'src/common/Loading'
+import { useRouter } from 'next/router'
+import React, { type ChangeEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import renderQueryState from 'src/common/renderQueryState'
 import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
+import ImportModelCardTextDialog from 'src/entry/overview/ImportModelCardTextDialog'
 import MigrationListDialog from 'src/entry/overview/MigrationListDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -36,8 +43,14 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import InformationDialog from 'src/schemas/InformationDialog'
 import { getDisplayFormStats, saveDisplayFormStats } from 'src/storage/userPreferences'
-import { KeyedMutator } from 'swr'
-import { EntryCardKindLabel, EntryInterface, EntryKind, EntryKindLabel, SplitSchemaNoRender } from 'types/types'
+import { type KeyedMutator } from 'swr'
+import {
+  EntryCardKindLabel,
+  type EntryInterface,
+  EntryKind,
+  EntryKindLabel,
+  type SplitSchemaNoRender,
+} from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 
@@ -45,15 +58,29 @@ type FormEditPageProps = {
   entry: EntryInterface
   mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
+
+export type RouterQueryParams = {
+  page?: number
+  requiredByModelState?: string
+  isEdit?: boolean
+}
+
 export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) {
-  const [isEdit, setIsEdit] = useState(false)
+  const router = useRouter()
+  const { userPermissions } = useContext(UserPermissionsContext)
+
+  const isEdit = useMemo(
+    () => router.query.isEdit === 'true' && userPermissions.editEntryCard.hasPermission,
+    [router.query.isEdit, userPermissions.editEntryCard.hasPermission],
+  )
+
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const [migrationErrorMessage, setMigrationErrorMessage] = useState('')
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
+  const [importTextDialogOpen, setImportTextDialogOpen] = useState(false)
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -69,8 +96,31 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     entry.card.schemaId,
   )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId, entry.state)
+  const { uiConfig } = useGetUiConfig()
   const sendNotification = useNotification()
   const { mutateEntryCardRevisions } = useGetEntryCardRevisions(entry.id)
+
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: schema ? schema.id : '', steps: [] })
+
+  const updateSplitSchema = useEffectEvent((newValue: SplitSchemaNoRender) => {
+    setSplitSchema(newValue)
+  })
+
+  useEffect(() => {
+    if (schema) {
+      const steps = getStepsFromSchema(
+        schema,
+        {},
+        ['properties.contacts'],
+        entry.card.metadata,
+        entry.mirroredCard?.metadata || {},
+      )
+      for (const step of steps) {
+        step.steps = steps
+      }
+      updateSplitSchema({ reference: schema ? schema.id : '', steps })
+    }
+  }, [entry.card.metadata, entry.mirroredCard?.metadata, schema])
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -81,20 +131,42 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   }
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
+  function removeEmptyValues(value) {
+    if (value === '') {
+      return undefined
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(removeEmptyValues).filter((item) => item !== undefined)
+    }
+
+    if (value !== null && typeof value === 'object') {
+      const cleaned = Object.fromEntries(
+        Object.entries(value)
+          .map(([key, item]) => [key, removeEmptyValues(item)])
+          .filter(([, item]) => item !== undefined),
+      )
+
+      return Object.keys(cleaned).length > 0 ? cleaned : undefined
+    }
+
+    return value
+  }
+
   async function onSubmit() {
     if (schema) {
       setErrorMessage('')
       setLoading(true)
       const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-
       if (getChangedFields(oldData, data).length === 0) {
-        setIsEdit(false)
+        handleChangeEditMode(false)
       } else {
-        const res = await putEntryCard(entry.id, data)
+        const res = await putEntryCard(entry.id, removeEmptyValues(data) || {})
         if (res.status && res.status < 400) {
-          setIsEdit(false)
+          handleChangeEditMode(false)
           mutateEntryCardRevisions()
+          mutateEntry()
         } else {
           setErrorMessage(res.data)
         }
@@ -118,30 +190,9 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         step.steps = steps
       }
       setSplitSchema({ reference: schema.id, steps })
-      setIsEdit(false)
+      handleChangeEditMode(false)
     }
   }
-
-  const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
-    setSplitSchema(newSplitSchema)
-  })
-
-  useEffect(() => {
-    if (!entry || !schema) {
-      return
-    }
-    const steps = getStepsFromSchema(
-      schema,
-      {},
-      ['properties.contacts'],
-      entry.card.metadata,
-      entry.mirroredCard?.metadata || {},
-    )
-    for (const step of steps) {
-      step.steps = steps
-    }
-    onSplitSchemaChange({ reference: schema.id, steps })
-  }, [schema, entry])
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -161,6 +212,33 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
       sendNotification({
         variant: 'error',
         msg: 'Could not update form - please make sure to use valid JSON',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+  }
+
+  function handleImportTextOnSubmit(metadata: Record<string, unknown>, warnings: string[]) {
+    setImportTextDialogOpen(false)
+    try {
+      if (schema) {
+        const steps = getStepsFromSchema(schema, {}, [], metadata)
+        for (const step of steps) {
+          step.steps = steps
+        }
+        setSplitSchema({ reference: schema.id, steps })
+        sendNotification({
+          variant: 'success',
+          msg:
+            warnings.length > 0
+              ? `Model card data imported with ${warnings.length} validation warning(s):\n${warnings.map((warning) => `- ${warning}`).join('\n')}`
+              : 'Model card data imported successfully. Please review the extracted fields.',
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
+      }
+    } catch (_e) {
+      sendNotification({
+        variant: 'error',
+        msg: 'Could not populate form with imported data',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
@@ -198,16 +276,18 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     saveDisplayFormStats(event.target.checked)
   }
 
-  if (isSchemaError) {
-    return <MessageAlert message={isSchemaError.info.message} severity='error' />
+  function handleChangeEditMode(isEdit: boolean) {
+    router.replace({
+      query: { ...router.query, isEdit },
+    })
   }
 
-  if (isSchemaMigrationsError) {
-    return <MessageAlert message={isSchemaMigrationsError.info.message} severity='error' />
-  }
-
-  if (isSchemaMigrationsLoading || isSchemaLoading) {
-    return <Loading />
+  const queryState = renderQueryState(
+    [isSchemaError, isSchemaMigrationsError],
+    isSchemaMigrationsLoading || isSchemaLoading,
+  )
+  if (queryState) {
+    return queryState
   }
 
   return (
@@ -217,7 +297,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           <Box>
             {schemaMigrations.length > 0 && canBeMigrated() && (
               <Restricted action='editEntryCard' fallback={<></>}>
-                <Box sx={{ width: 'fit-content' }}>
+                <Box sx={{ width: 'fit-content', mt: 2 }}>
                   <MessageAlert
                     severity='info'
                     style={{ my: 0 }}
@@ -234,19 +314,19 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             )}
           </Box>
           {!isEdit && (
-            <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' spacing={1}>
+            <Stack direction={{ md: 'row', sm: 'column' }} sx={{ justifyContent: 'space-between' }} spacing={1}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}
-                alignItems='center'
+                sx={{ alignItems: 'center' }}
                 spacing={2}
                 divider={<Divider flexItem orientation='vertical' />}
               >
                 {schema && (
                   <Stack>
-                    <Typography variant='caption' fontWeight='bold' color='primary'>
+                    <Typography variant='caption' sx={{ fontWeight: 'bold' }} color='primary'>
                       Schema:
                     </Typography>
-                    <Stack direction='row' alignItems='center'>
+                    <Stack direction='row' sx={{ alignItems: 'center' }}>
                       <Typography variant='caption'>{schema.name}</Typography>
                       <IconButton onClick={() => setSchemaInformationOpen(true)}>
                         <Info color='primary' fontSize='small' />
@@ -276,7 +356,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                     sx={{ width: 'fit-content', height: 'fit-content' }}
                     onClick={() => {
                       handleActionButtonClose()
-                      setIsEdit(!isEdit)
+                      handleChangeEditMode(!isEdit)
                       setOldSchema(_.cloneDeep(splitSchema))
                     }}
                     data-test='editEntryCardButton'
@@ -338,7 +418,13 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             </Stack>
           )}
           {isEdit && (
-            <Stack direction='row' spacing={1} justifyContent='space-between'>
+            <Stack
+              direction='row'
+              spacing={1}
+              sx={{
+                justifyContent: 'space-between',
+              }}
+            >
               <FormGroup>
                 <FormControlLabel
                   control={<Switch checked={displayFormStats} onChange={handleShowCompletionOnChange} />}
@@ -349,6 +435,8 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                 onCancel={onCancel}
                 onSubmit={onSubmit}
                 openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+                openImportTextDialog={() => setImportTextDialogOpen(true)}
+                showImportFromText={!!uiConfig?.llmImport?.enabled}
                 loading={loading}
                 cancelDataTestId='cancelEditEntryCardButton'
                 saveDataTestId='saveEntryCardButton'
@@ -364,6 +452,8 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
           calculateStats={calculateStats}
           canEdit={isEdit}
           displayStats={displayFormStats}
+          stateList={(schema?.jsonSchema as { stateList?: string[] } | undefined)?.stateList || []}
+          currentState={entry.state}
         />
         {isEdit && (
           <SaveAndCancelButtons
@@ -371,6 +461,8 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
             onSubmit={onSubmit}
             loading={loading}
             openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+            openImportTextDialog={() => setImportTextDialogOpen(true)}
+            showImportFromText={!!uiConfig?.llmImport?.enabled}
           />
         )}
       </Box>
@@ -381,6 +473,12 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
         onSubmit={handleJsonFormOnSubmit}
         helperText={`Paste in raw JSON to fill in the ${EntryCardKindLabel[entry.kind]} form`}
         dialogTitle='Add Raw JSON to Form'
+      />
+      <ImportModelCardTextDialog
+        open={importTextDialogOpen}
+        onClose={() => setImportTextDialogOpen(false)}
+        onSubmit={handleImportTextOnSubmit}
+        modelId={entry.id}
       />
       <ExportEntryCardDialog
         entry={entry}

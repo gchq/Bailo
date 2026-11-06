@@ -1,5 +1,5 @@
 import authentication from '../connectors/authentication/index.js'
-import { MigrationMetadata } from '../models/Migration.js'
+import { type MigrationMetadata } from '../models/Migration.js'
 import ModelModel from '../models/Model.js'
 
 /**

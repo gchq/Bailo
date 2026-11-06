@@ -1,10 +1,10 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
-import { SyntheticEvent, useMemo } from 'react'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
+import { type SyntheticEvent, useMemo } from 'react'
+import CompareField from 'src/common/CompareField'
+import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { getMirroredState } from 'utils/formUtils'
 
 interface MultipleDropdownProps {
   label?: string
@@ -57,26 +57,37 @@ export default function MultipleDropdown({
   /**
    * In some instances where we use mirroredCard data to structure the form, arrays might be initialised
    * as [null]. If this is the case, we need to make sure it is removed from the state.
-   *
    */
   if (value.length === 1 && value[0] === null) {
     onChange([])
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
+
+  const formatValues = (val?: unknown): string | undefined => {
+    const arr = val as string[] | undefined
+    return arr && arr.length ? [...arr].join('\n') : ''
+  }
+
+  const fallbackMirrored = compare.mirroredState ? (
+    <Typography>{compare.mirroredState}</Typography>
+  ) : (
+    <Typography sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>Unanswered</Typography>
+  )
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && value.length > 0 && value[0] !== null}
-      label={label}
+    <CompareField
       id={id}
+      label={label}
       required={required}
-      mirroredModel={registry.formContext.mirroredModel}
       description={schema.description}
+      compare={compare}
+      value={value}
+      formatter={formatValues}
+      hasValue={value.length > 0}
+      fallbackMirroredContent={fallbackMirrored}
     >
-      {registry.formContext.editMode && (
+      {compare.editMode ? (
         <Autocomplete
           multiple
           size='small'
@@ -101,7 +112,7 @@ export default function MultipleDropdown({
           })}
           onChange={handleChange}
           value={value || []}
-          disabled={!registry.formContext.editMode}
+          disabled={!compare.editMode}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -114,33 +125,23 @@ export default function MultipleDropdown({
             />
           )}
         />
+      ) : value.length > 0 ? (
+        value.map((selectedValue) => (
+          <Typography
+            key={selectedValue}
+            sx={{
+              fontStyle: 'unset',
+              color: theme.palette.common.black,
+            }}
+          >
+            {selectedValue}
+          </Typography>
+        ))
+      ) : (
+        <Typography component='span' sx={{ fontStyle: 'italic', color: theme.palette.customTextInput.main }}>
+          Unanswered
+        </Typography>
       )}
-      {!registry.formContext.editMode && (
-        <>
-          {value.length ? (
-            value.map((selectedValue) => (
-              <Typography
-                key={selectedValue}
-                sx={{
-                  fontStyle: 'unset',
-                  color: theme.palette.common.black,
-                }}
-              >
-                {selectedValue}
-              </Typography>
-            ))
-          ) : (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
-        </>
-      )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

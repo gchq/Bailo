@@ -1,4 +1,4 @@
-import { ClientSession } from 'mongoose'
+import { type ClientSession } from 'mongoose'
 
 import {
   deleteManifest,
@@ -12,22 +12,28 @@ import {
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { EntryKind } from '../models/Model.js'
-import { ImageDigestRef, ImageNameRef, ImageRef, ImageTagRef } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ScanInterface, ScanSummary, SeverityLevel } from '../models/Scan.js'
-import { UserInterface } from '../models/User.js'
-import { Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
+import { type ImageDigestRef, type ImageNameRef, type ImageRef, type ImageTagRef } from '../models/Release.js'
+import ScanModel, { ArtefactKind, type ScanInterface, type ScanSummary, SeverityLevel } from '../models/Scan.js'
+import { type UserInterface } from '../models/User.js'
+import { type Action, issueAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import {
-  ArtefactScanStateCounts,
-  ImageScanResult,
-  ImageTagResult,
-  ModelImages,
-  ModelImagesWithScanResults,
-  SeverityCounts,
+  type ArtefactScanStateCounts,
+  type ImageScanResult,
+  type ImageTagResult,
+  type ModelImages,
+  type ModelImagesWithScanResults,
+  type SeverityCounts,
 } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { Descriptors, ImageManifestV2, ManifestListV2, OCIEmptyMediaType } from '../utils/registryResponses.js'
+import { isManifestList } from '../utils/registryResponses.js'
+import {
+  type Descriptors,
+  type ImageManifestV2,
+  type ManifestListV2,
+  OCIEmptyMediaType,
+} from '../utils/registryResponseTypes.js'
 import { platformToString } from '../utils/registryUtils.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getLayersForImage } from './images/getImageLayers.js'
@@ -40,8 +46,7 @@ const imageRegex =
   /^(?:(?<domain>(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)|(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?::\d{1,5})|(?:\d{1,3}\.){3}\d{1,3}|\[(?:[0-9A-Fa-f:.]+)\])(?::\d{1,5})?)\/)?(?<path>[a-z0-9]+(?:(?:[_.]|__|-+)[a-z0-9]+)*(?:\/[a-z0-9]+(?:(?:[_.]|__|-+)[a-z0-9]+)*)*)(?::(?<tag>[\w][\w.-]{0,127}))?(?:@(?<digest>[A-Za-z][A-Za-z0-9]*(?:[+.\-_][A-Za-z][A-Za-z0-9]*)*:[0-9a-fA-F]{32,}))?$/
 
 export type DistributionPackageName =
-  | { domain?: string; path: string; tag: string }
-  | { domain?: string; path: string; digest: string }
+  { domain?: string; path: string; tag: string } | { domain?: string; path: string; digest: string }
 
 export function splitDistributionPackageName(distributionPackageName: string): DistributionPackageName {
   const split = imageRegex.exec(distributionPackageName)
@@ -199,7 +204,7 @@ export async function getModelImageWithScanResults(
   let platform: string | undefined
 
   let layerRef: ImageRef
-  if ('manifests' in body) {
+  if (isManifestList(body)) {
     if (!digest) {
       throw BadReq('Must provide digest for multiplatform image', { imageRef })
     }
@@ -244,7 +249,7 @@ export async function listModelImagesWithScanResults(
               return []
             }
 
-            if ('manifests' in manifestResponse.body) {
+            if (isManifestList(manifestResponse.body)) {
               return Promise.all(
                 manifestResponse.body.manifests.map(async (manifest) => {
                   const layers = await getLayersForImage(repositoryToken, { ...img, digest: manifest.digest })
@@ -325,7 +330,7 @@ async function getTagDigestReferenceMap(
       if (rootDigest) {
         refs.add(rootDigest)
       }
-      if (body && 'manifests' in body) {
+      if (body && isManifestList(body)) {
         for (const manifest of body.manifests) {
           if (manifest.digest) {
             refs.add(manifest.digest)
@@ -442,7 +447,7 @@ async function renameMultiManifest(
       }
 
       const { body: childManifest } = await getImageTagManifests(multiRepositoryToken, digestRef)
-      if (!childManifest || 'manifests' in childManifest) {
+      if (!childManifest || isManifestList(childManifest)) {
         throw InternalError('Platform manifest missing.', { digestRef })
       }
 
@@ -583,7 +588,7 @@ export async function renameImage(user: UserInterface, source: ImageTagRef, dest
     })
   }
 
-  if ('manifests' in manifest.body) {
+  if (isManifestList(manifest.body)) {
     await renameMultiManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)
   } else {
     await renameStandardManifest(source, destination, manifest.body, multiRepositoryToken, sourceDigest)

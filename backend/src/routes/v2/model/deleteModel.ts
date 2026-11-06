@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -44,9 +44,9 @@ export const deleteModel = [
       params: { modelId },
     } = parse(req, deleteModelSchema)
 
-    await removeModel(req.user, modelId)
+    const model = await removeModel(req.user, modelId)
 
-    await audit.onDeleteModel(req, modelId)
+    await audit.onDeleteModel(req, model)
 
     res.json({
       message: 'Successfully removed model.',

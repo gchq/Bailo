@@ -1,14 +1,14 @@
-import { ArrowBack } from '@mui/icons-material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper } from '@mui/material'
 import { useGetSchema } from 'actions/schema'
 import { putSchemaMigration, useGetSchemaMigration } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import Link from 'src/Link'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
-import { CombinedSchema, QuestionMigration } from 'types/types'
+import { type CombinedSchema, type QuestionMigration } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
 export default function SchemaMigrationEditor() {
@@ -29,21 +29,13 @@ export default function SchemaMigrationEditor() {
   } = useGetSchema(schemaMigration ? schemaMigration.targetSchema : '')
 
   const [submitErrorText, setSubmitErrorText] = useState('')
-  const [migrationName, setMigrationName] = useState('')
-  const [migrationDescription, setMigrationDescription] = useState('')
-  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
-
-  const updateMigrationStates = useEffectEvent(() => {
-    if (schemaMigration && schemaMigration.questionMigrations.length !== 0 && questionMigrations.length === 0) {
-      setQuestionMigrations(schemaMigration.questionMigrations)
-      setMigrationName(schemaMigration.name)
-      setMigrationDescription(schemaMigration.description || '')
-    }
-  })
-
-  useEffect(() => {
-    updateMigrationStates()
-  }, [schemaMigration])
+  const [migrationName, setMigrationName] = useState(schemaMigration ? schemaMigration.name : '')
+  const [migrationDescription, setMigrationDescription] = useState(
+    schemaMigration && schemaMigration.description ? schemaMigration.description : '',
+  )
+  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>(
+    schemaMigration ? schemaMigration.questionMigrations : [],
+  )
 
   const sourceSchemaCombined: CombinedSchema | undefined = useMemo(() => {
     if (sourceSchema) {
@@ -90,7 +82,7 @@ export default function SchemaMigrationEditor() {
       if (!res.ok) {
         setSubmitErrorText(await getErrorMessage(res))
       } else {
-        router.push('/schemas/list?tab=migrations')
+        router.push('/admin?section=migration')
       }
     }
   }
@@ -116,7 +108,7 @@ export default function SchemaMigrationEditor() {
       {sourceSchemaCombined && targetSchemaCombined && (
         <Container maxWidth='xl'>
           <Paper sx={{ my: 4, p: 4 }}>
-            <Link href={`/schemas/list?tab=migrations`}>
+            <Link href='/admin?section=migration'>
               <Button
                 size='small'
                 sx={{ width: 'fit-content', pb: 2 }}

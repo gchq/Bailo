@@ -1,16 +1,16 @@
-import { ClientSession, PipelineStage, Types } from 'mongoose'
+import { type ClientSession, type PipelineStage, type Types } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
-import { EntryKind, ModelDoc } from '../models/Model.js'
+import AccessRequestModel, { type AccessRequestDoc, type AccessRequestInterface } from '../models/AccessRequest.js'
+import { EntryKind, type ModelDoc } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
-import { UserInterface } from '../models/User.js'
+import { type UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
-import { AccessRequestUserPermissions } from '../types/types.js'
+import { type AccessRequestUserPermissions } from '../types/types.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
@@ -85,6 +85,7 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
   // Model cache
   const models: Record<string, ModelDoc> = {}
 
+  const accessRequests: AccessRequestDoc[] = []
   for (const accessRequestId of accessRequestIds) {
     const accessRequest = await getAccessRequestById(user, accessRequestId)
     let model: ModelDoc
@@ -109,15 +110,14 @@ export async function removeAccessRequests(user: UserInterface, accessRequestIds
       [...reviewsForAccessRequest.map((review) => review.id), accessRequest._id.toString()],
       session,
     )
+    accessRequests.push(accessRequest)
   }
 
-  return { accessRequestIds }
+  return accessRequests
 }
 
 export async function removeAccessRequest(user: UserInterface, accessRequestId: string, session?: ClientSession) {
-  await removeAccessRequests(user, [accessRequestId], session)
-
-  return { accessRequestId }
+  return (await removeAccessRequests(user, [accessRequestId], session))[0]
 }
 
 export async function getAccessRequestsByModel(user: UserInterface, modelId: string) {
@@ -226,15 +226,15 @@ export async function updateAccessRequest(
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
-  // Ensure that the AR meets the schema
-  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, accessRequest.metadata)
-  if (!valid) {
-    throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      errors,
-    })
-  }
-
   if (diff.metadata) {
+    // Validate the incoming content, not what is already stored
+    const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
+    if (!valid) {
+      throw BadReq('Access Request Metadata could not be validated against the schema.', {
+        errors,
+      })
+    }
+
     accessRequest.metadata = diff.metadata
     accessRequest.markModified('metadata')
   }

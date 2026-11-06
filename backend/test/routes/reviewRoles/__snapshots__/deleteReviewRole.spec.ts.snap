@@ -6,4 +6,4 @@ exports[`routes > reviewRoles > deleteReviewRole > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > reviewRoles > deleteReviewRole > audit > expected call 1`] = `"expedita"`;
+exports[`routes > reviewRoles > deleteReviewRole > audit > expected call 1`] = `undefined`;

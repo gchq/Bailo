@@ -1,19 +1,19 @@
-import { UserInformation } from 'src/common/UserDisplay'
+import { type UserInformation } from 'src/common/UserDisplay'
 import {
-  AccessRequestInterface,
-  EntryCardInterface,
-  EntryInterface,
+  type AccessRequestInterface,
+  type EntryCardInterface,
+  type EntryInterface,
   EntryKind,
-  EntryRole,
+  type EntryRole,
   EntryVisibility,
-  ResponseInterface,
+  type ResponseInterface,
   ResponseKind,
-  ReviewRequestInterface,
-  ReviewRoleInterface,
+  type ReviewRequestInterface,
+  type ReviewRoleInterface,
   RoleKind,
-  SchemaInterface,
-  StepNoRender,
-  UiConfig,
+  type SchemaInterface,
+  type StepNoRender,
+  type UiConfig,
 } from 'types/types'
 
 /******** V2 ********/
@@ -76,6 +76,7 @@ export const testModelCard: EntryCardInterface = {
   metadata: {},
   version: 1,
   createdBy: testEntity,
+  createdAt: new Date().toISOString(),
 }
 
 export const testV2Model: EntryInterface = {
@@ -256,8 +257,18 @@ export const testUiConfig: UiConfig = {
   },
 
   untrustedModel: {
-    untrustedModelDescription: '',
+    untrustedModelLongDescription: '',
+    untrustedModelShortDescription: '',
     enabled: true,
+    fileUploadGuidance: '',
+  },
+
+  llmImport: {
+    enabled: false,
+  },
+
+  lifecycle: {
+    maxReviewInterval: '1 year',
   },
 
   announcement: {

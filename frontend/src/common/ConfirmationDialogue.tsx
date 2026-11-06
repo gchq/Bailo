@@ -4,7 +4,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
 
@@ -32,7 +32,7 @@ export default function ConfirmationDialogue({
   confirmLoading,
 }: ConfirmationDialogProps) {
   return (
-    <Dialog fullWidth open={open} onClose={onCancel} TransitionComponent={Transition}>
+    <Dialog fullWidth open={open} onClose={onCancel} slots={{ transition: Transition }}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>{dialogMessage}</Typography>

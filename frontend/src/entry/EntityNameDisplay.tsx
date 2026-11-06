@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import { useMemo } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import { CollaboratorEntry, EntityKind } from 'types/types'
+import { type CollaboratorEntry, EntityKind } from 'types/types'
 
 type EntityNameDisplayProps = {
   entryCollaborator: CollaboratorEntry
@@ -15,6 +15,12 @@ export default function EntityNameDisplay({ entryCollaborator }: EntityNameDispl
   return entryCollaboratorKind === EntityKind.USER || entryCollaboratorKind === EntityKind.GROUP ? (
     <UserDisplay dn={entryCollaborator.entity} showIcon />
   ) : (
-    <Typography fontWeight='bold'>{entryCollaboratorName}</Typography>
+    <Typography
+      sx={{
+        fontWeight: 'bold',
+      }}
+    >
+      {entryCollaboratorName}
+    </Typography>
   )
 }

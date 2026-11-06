@@ -1,4 +1,4 @@
-import { Save } from '@mui/icons-material'
+import Save from '@mui/icons-material/Save'
 import { Button, Divider, Stack, Typography } from '@mui/material'
 import { patchEntry, useGetCurrentUserPermissionsForEntry, useGetEntry, useGetEntryRoles } from 'actions/entry'
 import { useCallback, useState } from 'react'
@@ -8,7 +8,7 @@ import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntryInterface } from 'types/types'
+import { type CollaboratorEntry, type EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -60,7 +60,13 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   return (
     <Stack spacing={2} sx={{ mt: 2 }}>
       {isEntryRolesLoading && <Loading />}
-      <Stack spacing={1} direction='row' alignItems='center'>
+      <Stack
+        spacing={1}
+        direction='row'
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Typography variant='h6' component='h2' color='primary'>
           {`Manage access`}
         </Typography>

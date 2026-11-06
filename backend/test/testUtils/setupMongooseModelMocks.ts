@@ -1,10 +1,11 @@
-import { beforeEach, type MockedFunction, MockInstance, vi } from 'vitest'
+import { beforeEach, type MockedFunction, type MockInstance, vi } from 'vitest'
 
 const CHAINABLE_METHODS = [
   'aggregate',
   'append',
   'at',
   'bulkWrite',
+  'countDocuments',
   'delete',
   'deleteMany',
   'deleteOne',
@@ -15,6 +16,8 @@ const CHAINABLE_METHODS = [
   'findOneAndDelete',
   'findOneAndUpdate',
   'group',
+  'insertMany',
+  'lean',
   'limit',
   'lookup',
   'match',
@@ -24,6 +27,7 @@ const CHAINABLE_METHODS = [
   'updateMany',
   'updateOne',
   'markModified',
+  'replaceOne',
 ] as const
 
 const QUERY_LIKE_METHODS = [
@@ -40,6 +44,7 @@ const QUERY_LIKE_METHODS = [
   'lookup',
   'map',
   'match',
+  'select',
   'sort',
   'unwind',
 ] as const

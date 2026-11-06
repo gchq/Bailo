@@ -17,9 +17,7 @@ from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 
-# isort: split
-
-import bailo_artefactscan_api.trivy as trivy
+from bailo_artefactscan_api import trivy
 from bailo_artefactscan_api.config import Settings
 from bailo_artefactscan_api.modelscan import extract_supported_file_types, is_valid_pickle
 from bailo_artefactscan_api.openapi.scan_file_responses import SCAN_FILE_RESPONSES
@@ -39,7 +37,7 @@ def get_settings() -> Settings:
 
 
 class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
-    """Wrapper of HTTPException to make ContentSizeLimitMiddleware raise HTTPException status_code 413 which FastAPI can capture and return."""
+    """ContentSizeLimitMiddleware wrapper that raises HTTPException with status 413."""
 
     def __init__(self, detail):
         super().__init__(status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE.value, detail=detail)
@@ -98,7 +96,10 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
 @app.post(
     "/scan/file",
     summary="Scan a file for security threats",
-    description="Upload a file to be analysed using ProtectAI ModelScan. The endpoint returns the results of the threat detection scan.",
+    description=(
+        "Upload a file to be analysed using ProtectAI ModelScan."
+        " The endpoint returns the results of the threat detection scan."
+    ),
     tags=["Scan"],
     status_code=HTTPStatus.OK.value,
     response_description="The result from ModelScan",
@@ -148,8 +149,9 @@ def scan_file(
             # false positive e.g. "license.dat"
             new_file_path = file_path.with_suffix(".txt")
             logger.info(
-                "File %s is not a pickle but extension is in the ModelScan config `scanners.PickleUnsafeOpScan.supported_extensions` "
-                "file extensions. Renaming from %s to %s",
+                "File %s is not a pickle but extension is in the ModelScan config"
+                " `scanners.PickleUnsafeOpScan.supported_extensions`."
+                " Renaming from %s to %s",
                 in_file.filename,
                 file_path,
                 new_file_path,
@@ -190,7 +192,10 @@ def scan_file(
 @app.post(
     "/scan/image",
     summary="Scan a container image layer for vulnerabilities",
-    description="Upload a container image layer to be scanned against the Trivy vulnerability database. The endpoint returns detected vulnerabilities and metadata.",
+    description=(
+        "Upload a container image layer to be scanned against the Trivy vulnerability database."
+        " The endpoint returns detected vulnerabilities and metadata."
+    ),
     tags=["Scan"],
     status_code=HTTPStatus.OK.value,
     response_description="The result from Trivy",

@@ -1,13 +1,25 @@
-import { customAlphabet } from 'nanoid'
-import { v4 as generateUuidv4 } from 'uuid'
+import { randomInt, randomUUID } from 'node:crypto'
 
-export function longId() {
-  return generateUuidv4()
+const uppercaseAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const lowercaseAlphabet = uppercaseAlphabet.toLowerCase()
+const numbers = '0123456789'
+
+const shortAlphabetCharacters = `${numbers}${lowercaseAlphabet}`
+
+/** Returns a cryptographically secure random string of `size` characters picked from `alphabet`. */
+export function randomString(alphabet: string, size: number) {
+  return Array.from({ length: size }, () => alphabet[randomInt(alphabet.length)]).join('')
 }
 
-const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 6)
+export const shortAlphabet = (size: number) => randomString(`${numbers}${uppercaseAlphabet}`, size)
+export const longAlphabet = (size: number) => randomString(`${numbers}${uppercaseAlphabet}${lowercaseAlphabet}`, size)
+
+export function longId() {
+  return randomUUID()
+}
+
 export function shortId() {
-  return nanoid()
+  return randomString(shortAlphabetCharacters, 6)
 }
 
 export function convertStringToId(string: string) {

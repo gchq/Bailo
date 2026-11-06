@@ -1,12 +1,12 @@
 import {
   CognitoIdentityProviderClient,
   ListUsersCommand,
-  ListUsersCommandOutput,
+  type ListUsersCommandOutput,
   ListUsersInGroupCommand,
-  ListUsersInGroupCommandOutput,
+  type ListUsersInGroupCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-import { UserInformation } from '../connectors/authentication/constants.js'
+import { type UserInformation } from '../connectors/authentication/constants.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 

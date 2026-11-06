@@ -1,6 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import bailoDeleteModel from 'public/docs/bailo_delete_model.png'
 import bailoDeleteConfirm from 'public/docs/bailo_delete_model_confirm.png'
@@ -54,7 +54,7 @@ Delete a model from the Settings tab in the Deletion section:
 4. Click **Delete Model**
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='model settings deletion section' src={bailoDeleteModel} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='model settings deletion section' src={bailoDeleteModel} />
 </Box>
 
 The screenshot above shows the model Settings page with the Deletion section and a Delete Model button.
@@ -68,7 +68,7 @@ To prevent accidental deletion, you must type the exact model name to confirm de
 3. Click **Delete** or press **Enter** once the name matches
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='delete model confirmation dialog' src={bailoDeleteConfirm} />
+  <Image style={{ width: '100%', height: 'auto' }} alt='delete model confirmation dialog' src={bailoDeleteConfirm} />
 </Box>
 
 The screenshot above shows the delete confirmation dialog requiring the exact model name to be typed.

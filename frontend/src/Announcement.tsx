@@ -1,14 +1,14 @@
-import { Close } from '@mui/icons-material'
 import CampaignIcon from '@mui/icons-material/Campaign'
+import Close from '@mui/icons-material/Close'
 import { Box, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import ExpandableTypography from 'src/common/ExpandableTypography'
-interface AnnoucementProps {
+interface AnnouncementProps {
   message: string
   onClose: () => void
 }
 
-export default function Announcement({ message, onClose }: AnnoucementProps) {
+export default function Announcement({ message, onClose }: AnnouncementProps) {
   const theme = useTheme()
 
   return (
@@ -21,10 +21,34 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
         p: 0.5,
       }}
     >
-      <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row' width='100%'>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent='center' alignItems='center'>
+      <Stack
+        spacing={1}
+        direction='row'
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={1}
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            py: 1,
+            width: '100%',
+            textAlign: 'center',
+          }}
+        >
           <CampaignIcon color='primary' />
-          <Typography color='primary' fontWeight='bold' sx={{ textAlign: 'center' }}>
+          <Typography
+            color='primary'
+            sx={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+            }}
+          >
             Announcement
           </Typography>
           <CampaignIcon color='primary' />

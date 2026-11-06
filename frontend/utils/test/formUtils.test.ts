@@ -1,4 +1,4 @@
-import { StepNoRender } from 'types/types'
+import { type StepNoRender } from 'types/types'
 import { getFormStats, getOverallCompletionStats } from 'utils/formUtils'
 import { expect } from 'vitest'
 
@@ -698,7 +698,7 @@ test('getFormStats should calculate stats for an incomplete form with lots neste
           description: 'Information about model performance.',
           type: 'object',
           properties: {
-            methodolog: {
+            methodology: {
               title: 'Performance evaluation - summary of methodology',
               description:
                 'How is the performance of your model to be assessed? Include a summarised explanation of the methodology for each of your metrics.',

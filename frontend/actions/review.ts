@@ -1,16 +1,16 @@
-import { Dayjs } from '@dayjs'
+import { type Dayjs } from '@dayjs'
 import qs from 'querystring'
 import useSWR from 'swr'
 import {
-  AccessRequestInterface,
-  DecisionKeys,
-  EntryInterface,
-  ReleaseInterface,
-  ReviewKindKeys,
-  ReviewRequestInterface,
+  type AccessRequestInterface,
+  type DecisionKeys,
+  type EntryInterface,
+  type ReleaseInterface,
+  type ReviewKindKeys,
+  type ReviewRequestInterface,
 } from 'types/types'
 
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
 
@@ -76,6 +76,27 @@ type GetReviewRequestsForModelQuery = {
   kind?: ReviewKindKeys
   open?: boolean
 } & additionalParameters
+
+export function useHeadReviewRequestsForModel({ modelId, semver, accessRequestId }: GetReviewRequestsForModelQuery) {
+  const queryParams = {
+    modelId,
+    ...(semver && { semver }),
+    ...(accessRequestId && { accessRequestId }),
+  }
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      headers: Record<string, string>
+    },
+    ErrorInfo
+  >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcher(url, true))
+
+  return {
+    mutateReviews: mutate,
+    reviewCountHeader: data?.headers['x-count'] ? parseInt(data.headers['x-count']) : 0,
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+  }
+}
 
 export function useGetReviewRequestsForModel({
   modelId,

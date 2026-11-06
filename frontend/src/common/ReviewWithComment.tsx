@@ -1,15 +1,16 @@
-import { Dayjs } from '@dayjs'
+import { type Dayjs } from '@dayjs'
 import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useEffectEvent, useState } from 'react'
-import { increaseCurrentDateInDays } from 'utils/dateUtils'
+import { type SyntheticEvent, useContext, useEffect, useState } from 'react'
+import UiConfigContext from 'src/contexts/uiConfigContext'
+import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetEntryRoles } from '../../actions/entry'
-import { Decision, DecisionKeys, ReviewRequestInterface } from '../../types/types'
+import { Decision, type DecisionKeys, type ReviewRequestInterface } from '../../types/types'
 import { getRoleDisplayName } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
@@ -37,7 +38,22 @@ export default function ReviewWithComment({
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
-  const [showUndoButton, setShowUndoButton] = useState(false)
+
+  const uiConfig = useContext(UiConfigContext)
+
+  function showUndoButton() {
+    if (reviewRequest) {
+      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
+        (latestReview) => latestReview.role === reviewRequest.role,
+      )
+      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
+        return true
+      } else {
+        return false
+      }
+    }
+    return false
+  }
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { entryRoles, isEntryRolesLoading, isEntryRolesError } = useGetEntryRoles(modelId)
@@ -49,23 +65,6 @@ export default function ReviewWithComment({
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
   }
-
-  const updateUndoButton = useEffectEvent((show: boolean) => {
-    setShowUndoButton(show)
-  })
-
-  useEffect(() => {
-    if (reviewRequest) {
-      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
-        (latestReview) => latestReview.role === reviewRequest.role,
-      )
-      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
-        updateUndoButton(true)
-      } else {
-        updateUndoButton(false)
-      }
-    }
-  }, [responses, reviewRequest])
 
   useEffect(() => {
     if (reviewRequest && !router.query.role) {
@@ -143,24 +142,31 @@ export default function ReviewWithComment({
             />
             {includeDueDate && (
               <Stack spacing={0.5}>
-                <Typography fontWeight='bold'>Next review date</Typography>
+                <Typography sx={{ fontWeight: 'bold' }}>Next review date</Typography>
                 <DatePicker
                   value={dueDate}
                   onChange={(newValue) => {
                     setDueDate(newValue)
                   }}
                   minDate={increaseCurrentDateInDays(1)}
+                  maxDate={
+                    uiConfig.lifecycle.maxReviewInterval === ''
+                      ? undefined
+                      : increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)
+                  }
                 />
               </Stack>
             )}
             <Stack
               spacing={2}
               direction={{ sm: 'row', xs: 'column' }}
-              justifyContent='space-between'
-              alignItems='center'
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
               <Stack spacing={1} direction={{ sm: 'row', xs: 'column' }}>
-                {showUndoButton && (
+                {showUndoButton() && (
                   <>
                     <Button
                       onClick={() => submitForm(Decision.Undo)}

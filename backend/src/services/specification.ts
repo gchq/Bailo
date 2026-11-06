@@ -1,4 +1,4 @@
-import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
+import { OpenApiGeneratorV3, OpenAPIRegistry, type RouteConfig } from '@asteasolutions/zod-to-openapi'
 import type { AnyZodObject } from 'zod'
 
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
@@ -7,7 +7,7 @@ import { z } from '../lib/zod.js'
 import { SystemRoles } from '../models/Model.js'
 import { TransferStatus } from '../models/ModelTransfer.js'
 import { Decision, ResponseKind } from '../models/Response.js'
-import { ArtefactKind, SeverityLevel, SeverityLevelKeys } from '../models/Scan.js'
+import { ArtefactKind, SeverityLevel, type SeverityLevelKeys } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState, MirrorKind } from '../types/types.js'
@@ -316,6 +316,8 @@ export const reviewInterfaceSchema = z.object({
 
   responses: z.array(z.string().optional()),
 
+  status: z.nativeEnum(Decision).nullable(),
+
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
@@ -491,9 +493,9 @@ export const webhookInterfaceSchema = z.object({
   uri: z.string().openapi({ example: 'http://host:8080/webhook' }),
   token: z.string().openapi({ example: 'abcd' }),
   insecureSSL: z.boolean().openapi({ example: false }),
-  events: z
-    .array(z.string())
-    .openapi({ example: ['createRelease', 'updateRelease', 'createReviewResponse', 'createAccessRequest'] }),
+  events: z.array(z.string()).openapi({
+    example: ['createRelease', 'updateRelease', 'createReviewResponse', 'createAccessRequest', 'importModel'],
+  }),
   active: z.boolean().openapi({ example: true }),
 
   deleted: z.boolean().openapi({ example: false }),

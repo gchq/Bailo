@@ -1,22 +1,40 @@
-import { Box, Grid, List, ListItem, ListItemButton, Stack, Stepper, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import Error from '@mui/icons-material/ErrorOutlineOutlined'
+import {
+  Box,
+  Chip,
+  Grid,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  Stepper,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { RJSFSchema } from '@rjsf/utils'
+import { type RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { type Dispatch, type SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { type RouterQueryParams } from 'src/entry/overview/FormEditPage'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
   DescriptionFieldTemplate,
+  ErrorListTemplate,
+  FieldTemplate,
   ObjectFieldTemplate,
 } from 'src/Form/FormTemplates'
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
+import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import {
   getFormStats,
   getOverallCompletionStats,
@@ -24,6 +42,7 @@ import {
   setStepState,
   widgets,
 } from 'utils/formUtils'
+import { parseNat, toSentenceCase } from 'utils/stringUtils'
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -34,6 +53,9 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList = false,
   mirroredModel = false,
   displayStats = false,
+  compareMode = false,
+  stateList,
+  currentState,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -43,11 +65,59 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
   mirroredModel?: boolean
   displayStats?: boolean
+  compareMode?: boolean
+  stateList?: string[]
+  currentState?: string
 }) {
-  const [activeStep, setActiveStep] = useState(0)
-  const [sharedSection, setSharedSection] = useState('')
   const theme = useTheme()
   const router = useRouter()
+  const [activeStep, setActiveStep] = useState<number>(
+    router.query && router.query.page !== undefined && typeof router.query.page === 'string'
+      ? parseNat(router.query.page)
+      : 0,
+  )
+  const requiredByModelState = router.query.requiredByModelState as string
+  const [sectionCompletion, setSectionCompletion] = useState<Record<string, number>>(() =>
+    splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+      acc[step.schema.title] = 0
+      return acc
+    }, {}),
+  )
+
+  useEffect(() => {
+    if (!canEdit) {
+      return
+    }
+    if (!requiredByModelState) {
+      setSectionCompletion((prev) => {
+        const resetCompletion = splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+          acc[step.schema.title] = 0
+          return acc
+        }, {})
+        const prevKeys = Object.keys(prev)
+        const nextKeys = Object.keys(resetCompletion)
+        const unchanged =
+          prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key] === resetCompletion[key])
+        return unchanged ? prev : resetCompletion
+      })
+      return
+    }
+    const nextCompletion = splitSchema.steps.reduce<Record<string, number>>((acc, step) => {
+      const { totalQuestions, totalAnswers } = getFormStats(step, mirroredModel, requiredByModelState)
+      acc[step.schema.title] = Math.max(0, totalQuestions - totalAnswers)
+      return acc
+    }, {})
+
+    setSectionCompletion((prev) => {
+      const prevKeys = Object.keys(prev)
+      const nextKeys = Object.keys(nextCompletion)
+      const unchanged =
+        prevKeys.length === nextKeys.length && nextKeys.every((key) => prev[key] === nextCompletion[key])
+      return unchanged ? prev : nextCompletion
+    })
+  }, [splitSchema, mirroredModel, requiredByModelState, canEdit])
+  const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
+
   const ref = useRef<HTMLDivElement | null>(null)
 
   const copyToClipboard = useCopyToClipboard()
@@ -61,31 +131,25 @@ export default function JsonSchemaForm({
 
   const updatedMirroredState = { ...JSON.parse(JSON.stringify(source)), ...JSON.parse(JSON.stringify(target)) }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formStats = useMemo(() => getFormStats(currentStep, mirroredModel), [currentStep, calculateStats])
-
-  const collatedStats = useMemo(
-    () => getOverallCompletionStats(splitSchema.steps, mirroredModel),
+  const formStats = useMemo(
+    () => getFormStats(currentStep, mirroredModel, requiredByModelState || undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [splitSchema, calculateStats, mirroredModel],
+    [currentStep, currentStep?.state, mirroredModel, requiredByModelState],
   )
 
-  // const requiredStatesUsed = useMemo(() => {}, [])
+  const collatedStats = useMemo(
+    () => getOverallCompletionStats(splitSchema.steps, mirroredModel, requiredByModelState || undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [splitSchema, calculateStats, mirroredModel, requiredByModelState],
+  )
 
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
   })
 
-  const updatedSharedStateEvent = useEffectEvent((id: string) => {
-    setSharedSection(id)
-  })
-
   useEffect(() => {
     if (router.query.page !== undefined && typeof router.query.page === 'string') {
       updatePageByRouterQuery(router.query.page)
-    }
-    if (router.asPath.split('#')[1]) {
-      updatedSharedStateEvent(router.asPath.split('#')[1] as string)
     }
   }, [router])
 
@@ -112,20 +176,12 @@ export default function JsonSchemaForm({
   function handleListItemClick(index: number) {
     setActiveStep(index)
     router.replace({
-      query: { ...router.query, page: index },
+      query: { ...router.query, page: index } as RouterQueryParams,
     })
   }
 
-  function ErrorListTemplate() {
-    return (
-      <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
-        Please make sure that all errors listed below have been resolved.
-      </Typography>
-    )
-  }
-
   function onShareSectionOnClick(sectionId: string) {
-    const link = `${window.location.origin}${window.location.pathname}?page=${activeStep}#${sectionId}`
+    const link = `${window.location.origin}${window.location.pathname}${window.location.search}#${sectionId}`
 
     copyToClipboard(link, 'Link saved to clipboard', 'Failed to save link to clipboard', {
       horizontal: 'center',
@@ -133,8 +189,29 @@ export default function JsonSchemaForm({
     })
   }
 
+  const handleHighlightStateClick = (state: string) => {
+    if (state === requiredByModelState) {
+      const { ...queries } = router.query
+      delete queries.requiredByModelState
+      router.replace({ query: queries })
+    } else {
+      router.replace({
+        query: { ...router.query, requiredByModelState: state } as RouterQueryParams,
+      })
+    }
+  }
+
+  if (requiredByModelState && !stateList?.includes(requiredByModelState)) {
+    return (
+      <MessageAlert
+        message={`Invalid query parameter requiredByModelState ("${requiredByModelState}")`}
+        severity='error'
+      />
+    )
+  }
+
   return (
-    <Stack>
+    <Stack sx={{ minWidth: 0 }}>
       {displayStats && (
         <Box>
           <Box sx={{ mb: 1 }}>
@@ -158,21 +235,29 @@ export default function JsonSchemaForm({
                 <ListItem
                   key={step.schema.title}
                   disablePadding
-                  sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}
+                  sx={{
+                    backgroundColor:
+                      canEdit && sectionCompletion[step.schema.title]
+                        ? alpha(theme.palette.error.main, 0.1)
+                        : undefined,
+                  }}
                 >
                   <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                    <Typography
-                      sx={{
-                        wordBreak: 'break-word',
-                        color:
-                          !step.isComplete(step) && displayLabelValidation
-                            ? theme.palette.error.main
-                            : theme.palette.common.black,
-                      }}
-                      width='100%'
-                    >
-                      {step.schema.title}
-                    </Typography>
+                    <ListItemText sx={{ pr: 1 }}>
+                      <Typography
+                        sx={{
+                          wordBreak: 'break-word',
+                          color: !step.isComplete(step) && displayLabelValidation ? 'error' : 'unset',
+                        }}
+                      >
+                        {step.schema.title}
+                      </Typography>
+                    </ListItemText>
+                    {canEdit && sectionCompletion[step.schema.title] ? (
+                      <ListItemIcon sx={{ minWidth: 'auto', flexShrink: 0, ml: 'auto' }}>
+                        <Error color='error' />
+                      </ListItemIcon>
+                    ) : null}
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}
                   </ListItemButton>
                 </ListItem>
@@ -180,20 +265,46 @@ export default function JsonSchemaForm({
             </List>
           </Stepper>
         </Grid>
-        <Grid size={{ xs: 12, md: 10 }} ref={ref}>
+        <Grid size={{ xs: 12, md: 10 }} ref={ref} sx={{ minWidth: 0 }}>
           {displayStats && (
             <Box>
               <Box>
-                Entries Completed: {formStats.totalAnswers}/{formStats.totalQuestions}
+                {toSentenceCase(
+                  `${requiredByModelState ? `${requiredByModelState} ` : ''}fields completed: ${formStats.totalAnswers}/${formStats.totalQuestions}`,
+                )}
               </Box>
               <LinearProgressWithLabel value={formStats.percentageQuestionsComplete} />
             </Box>
           )}
           {canEdit && (
-            <Typography sx={{ pt: 1 }}>
-              Required fields for this state are marked with an asterisk
-              <span style={{ color: theme.palette.error.main }}>*</span>
-            </Typography>
+            <Stack spacing={1}>
+              {stateList && stateList.length > 0 && (
+                <Stack spacing={2} direction='row' sx={{ alignItems: 'center' }}>
+                  <Typography>Highlight fields by: </Typography>
+                  {stateList.map((state) => (
+                    <Tooltip key={state} title={`Highlight questions required for ${state}`}>
+                      <Chip
+                        key={state}
+                        label={state}
+                        onClick={() => handleHighlightStateClick(state)}
+                        color={requiredByModelState === state ? 'primary' : 'default'}
+                      />
+                    </Tooltip>
+                  ))}
+                </Stack>
+              )}
+              <Typography sx={{ pt: 1 }}>
+                Required fields
+                {currentState && (
+                  <>
+                    <span> for the current state</span>
+                    <span style={{ fontWeight: 'bold' }}>{` (${currentState})`}</span>
+                  </>
+                )}{' '}
+                are marked with an asterisk
+                <span style={{ color: theme.palette.error.main }}> *</span>
+              </Typography>
+            </Stack>
           )}
           <Form
             schema={currentStep.schema}
@@ -202,35 +313,31 @@ export default function JsonSchemaForm({
             validator={validator}
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
-            liveValidate
-            omitExtraData
             disabled={!canEdit}
+            liveValidate='onChange'
             liveOmit
+            experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
             formContext={{
               editMode: canEdit,
               formSchema: currentStep.schema,
               defaultCurrentUser: defaultCurrentUserInEntityList,
               mirroredState: currentStep.mirroredState,
               state: currentStep.state,
+              compareFromState: currentStep.compareFromState,
+              compareFromMirroredState: currentStep.compareFromMirroredState,
               mirroredModel,
+              compareMode,
               onShare: onShareSectionOnClick,
+              requiredByModelState: requiredByModelState,
             }}
-            templates={
-              !canEdit
-                ? {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                  }
-                : {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                    ErrorListTemplate,
-                  }
-            }
+            templates={{
+              DescriptionFieldTemplate,
+              ArrayFieldTemplate,
+              ArrayFieldItemTemplate,
+              ObjectFieldTemplate,
+              ErrorListTemplate,
+              FieldTemplate,
+            }}
           >
             <></>
           </Form>

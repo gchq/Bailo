@@ -1,13 +1,13 @@
 import { HubApiError, listModels, modelInfo } from '@huggingface/hub'
 
 import { EntryVisibility } from '../../models/Model.js'
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import {
-  EntrySearchOptionsParams,
-  EntrySearchResult,
-  EntrySearchResultWithErrors,
-  SystemStatus,
+  type EntrySearchOptionsParams,
+  type EntrySearchResult,
+  type EntrySearchResultWithErrors,
+  type SystemStatus,
 } from '../../types/types.js'
 import { BadReq, ConfigurationError, NotImplemented } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
@@ -88,11 +88,11 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     }
 
     // Only supports searching for models, not data cards etc.
-    if (opts.kind && opts.kind != 'model') {
+    if (opts.kind && opts.kind.length === 1 && !opts.kind.includes('model')) {
       return {
         models: [],
         errors: {
-          [this.getId()]: NotImplemented(`HuggingFace does not support ${opts.kind}`, {
+          [this.getId()]: NotImplemented(`HuggingFace does not support ${opts.kind.join(', ')}`, {
             query: opts.search,
             kind: opts.kind,
           }),

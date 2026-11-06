@@ -2,13 +2,13 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry, RJSFSchema } from '@rjsf/utils'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { type KeyboardEvent, type SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import CompareField from 'src/common/CompareField'
 import UserDisplay from 'src/common/UserDisplay'
-import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
-import { EntityObject } from 'types/types'
-import { getMirroredState } from 'utils/formUtils'
+import getCompareFieldState from 'src/hooks/useCompareField'
+import { type EntityObject } from 'types/types'
 
 import { useGetCurrentUser, useListEntities } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -25,6 +25,18 @@ interface EntitySelectorProps {
   schema: RJSFSchema
 }
 
+function formatEntityValue(entities: string[] | undefined): string {
+  if (!entities || entities.length === 0) {
+    return ''
+  }
+  return entities
+    .map((entity) => {
+      const [, entityId] = entity.split(':')
+      return entityId ?? entity
+    })
+    .join('\n')
+}
+
 export default function EntitySelector({
   onChange,
   value: currentValue,
@@ -37,7 +49,6 @@ export default function EntitySelector({
 }: EntitySelectorProps) {
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
-  const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
   const { users, isUsersLoading, isUsersError } = useListEntities(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
@@ -46,25 +57,21 @@ export default function EntitySelector({
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
-  const onSelectedEntitiesChanged = useEffectEvent((newEntities: EntityObject[]) => {
-    setSelectedEntities(newEntities)
-  })
-
-  useEffect(() => {
+  function defaultSelectedEntities(): EntityObject[] {
     if (registry && registry.formContext && registry.formContext.defaultCurrentUser) {
-      onSelectedEntitiesChanged([{ id: currentUserId, kind: 'user' }])
+      return [{ id: currentUserId, kind: 'user' }]
     }
-  }, [currentUserId, registry])
-
-  useEffect(() => {
     if (currentValue) {
       const updatedEntities: EntityObject[] = currentValue.map((value) => {
         const [kind, id] = value.split(':')
         return { kind, id }
       })
-      onSelectedEntitiesChanged(updatedEntities)
+      return updatedEntities
     }
-  }, [currentValue])
+    return []
+  }
+
+  const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>(defaultSelectedEntities())
 
   const handleUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntityObject[]) => {
@@ -96,27 +103,29 @@ export default function EntitySelector({
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const mirroredState = getMirroredState(id, registry.formContext)
+  const compare = getCompareFieldState<string[]>(id, registry.formContext)
+
+  const formatEntity = (val?: unknown): string | undefined => formatEntityValue(val as string[] | undefined)
 
   if (isCurrentUserLoading) {
     return <Loading />
   }
 
   return (
-    <AdditionalInformation
-      editMode={registry.formContext.editMode}
-      mirroredState={mirroredState}
-      display={registry.formContext.mirroredModel && currentValue.length > 0}
-      label={label}
+    <CompareField
       id={id}
-      mirroredModel={registry.formContext.mirroredModel}
+      label={label}
       required={required}
       description={schema.description}
+      compare={compare}
+      value={currentValue}
+      formatter={formatEntity}
+      hasValue={currentValue.length > 0}
     >
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
-      {currentUser && registry.formContext && registry.formContext.editMode && (
+      {currentUser && compare.editMode ? (
         <>
           <Autocomplete<EntityObject, true, true>
             multiple
@@ -154,9 +163,6 @@ export default function EntitySelector({
               <TextField
                 {...params}
                 placeholder='Username or group name'
-                slotProps={{
-                  htmlInput: { ...params.inputProps, 'aria-label': `input field for ${label}` },
-                }}
                 error={rawErrors && rawErrors.length > 0}
                 id={id}
                 onKeyDown={(event: KeyboardEvent) => {
@@ -168,19 +174,8 @@ export default function EntitySelector({
             )}
           />
         </>
-      )}
-      {registry.formContext && !registry.formContext.editMode && (
-        <>
-          {currentValue.length === 0 && (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
+      ) : (
+        currentValue.length > 0 && (
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((entity) => (
@@ -188,8 +183,8 @@ export default function EntitySelector({
               ))}
             </Stack>
           </Box>
-        </>
+        )
       )}
-    </AdditionalInformation>
+    </CompareField>
   )
 }

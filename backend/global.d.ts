@@ -1,5 +1,3 @@
-declare module 'dev-null'
-
 type callback = (err: string | undefined) => void
 
 declare namespace Express {
@@ -14,6 +12,7 @@ declare namespace Express {
     session: {
       destroy: (callback) => void
       grant: any
+      loginRedirect?: string
     }
   }
 

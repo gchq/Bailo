@@ -1,7 +1,7 @@
-import { Readable } from 'node:stream'
+import { type Readable } from 'node:stream'
 
 import bytes from 'bytes'
-import { ClientSession, Types } from 'mongoose'
+import { type ClientSession, Types } from 'mongoose'
 
 import {
   completeMultipartUpload,
@@ -15,15 +15,15 @@ import {
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import FileModel, {
-  FileInterface,
-  FileInterfaceDoc,
-  FileWithScanResultsAggregate,
-  FileWithScanResultsInterface,
+  type FileInterface,
+  type FileInterfaceDoc,
+  type FileWithScanResultsAggregate,
+  type FileWithScanResultsInterface,
 } from '../models/File.js'
-import { EntryKind, ModelDoc } from '../models/Model.js'
+import { EntryKind, type ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
-import { UserInterface } from '../models/User.js'
-import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
+import { type UserInterface } from '../models/User.js'
+import { type ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { createFilePath } from '../utils/fileUtils.js'
@@ -325,7 +325,7 @@ export async function getFilesByIds(
   ])
 
   if (files.length !== fileIds.length) {
-    const notFoundFileIds = fileIds.filter((id) => files.some((file) => file.id === id))
+    const notFoundFileIds = fileIds.filter((id) => !files.some((file) => file.id === id))
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
@@ -349,6 +349,9 @@ export async function removeFiles(
 
   for (const fileId of fileIds) {
     const file = await getFileById(user, fileId)
+    if (file.modelId !== modelId) {
+      throw NotFound('The requested file was not found.', { fileId, modelId })
+    }
     allFiles.push(file)
     const auth = await authorisation.file(user, model, file, FileAction.Delete)
     if (!auth.success) {

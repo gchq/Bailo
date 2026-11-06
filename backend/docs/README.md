@@ -17,6 +17,7 @@
                     <ul>
                         <li><a href="#python setup">Python Setup</a></li>
                         <li><a href="#building">Building</a></li>
+                        <li><a href="#building">Notebook Formatting</a></li>
                     </ul>
                 </li>
             </ul>
@@ -29,7 +30,7 @@
 ## Building Locally
 
 > [!NOTE]
-> **Requires:** Python 3.11 to 3.14, Docker or [Pandoc](https://pandoc.org/installing.html)
+> **Requires:** Python (version in [`.python-version`](.python-version), installed automatically by uv), [uv](https://docs.astral.sh/uv/getting-started/installation/), Docker or [Pandoc](https://pandoc.org/installing.html)
 
 The following steps are only required for users who wish to extend or develop the documentation package locally.
 
@@ -44,11 +45,20 @@ The docs are built and served as part of the `backend` docker image.
 From within the `backend/docs` directory:
 
 ```bash
-python3 -m venv backenddocsvenv
-source backenddocsvenv/bin/activate
-pip install bailo -r requirements.txt
+uv sync --group dev
+uv pip install ../../lib/python
 ```
+
+This creates a `.venv` and installs the pinned dependencies from `uv.lock`. Prefix commands with
+`uv run` to use it, or activate it with `source .venv/bin/activate`.
+
+`pyproject.toml` declares minimum versions only (`>=`, no upper caps) and `uv.lock` pins the exact versions. Dependabot
+only raises PRs for security advisories. Routine upgrades are manual with `uv lock --upgrade-package <name>`.
 
 #### Building
 
-Run either `make html` (Linux & Mac) or `make.bat` (Windows). This will build the docs in the backend directory by default.
+Run either `uv run make html` (Linux & Mac) or `make.bat` (Windows). This will build the docs in the backend directory by default.
+
+#### Notebook Formatting
+
+Notebook files are automatically normalised on commit via a pre-commit hook using ruff. This ensures `source` fields use the canonical array-of-lines format, as well as maintaining consistent styling with `lib/python`.

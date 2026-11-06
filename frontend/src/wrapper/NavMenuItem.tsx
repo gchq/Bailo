@@ -1,9 +1,9 @@
 import { Badge, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ReactElement, useContext } from 'react'
+import { type ReactElement, useContext } from 'react'
 import CurrentUserContext from 'src/contexts/currentUserContext'
 import Link from 'src/Link'
-import { RoleKeys } from 'types/types'
+import { type RoleKeys } from 'types/types'
 
 interface NavMenuItemProps {
   menuPage: string
@@ -38,7 +38,7 @@ export function NavMenuItem({
     <ListItem disablePadding>
       <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%', textDecoration: 'none' }}>
         <ListItemButton selected={selectedPage === menuPage}>
-          <ListItemIcon>
+          <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>
                 <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>

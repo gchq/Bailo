@@ -1,0 +1,149 @@
+import Image from 'next/image'
+import Box from '@mui/material/Box'
+import bailoModelAccess from 'public/docs/bailo_model_access.png'
+import bailoUpdateModelCardForProduction from 'public/docs/bailo_update_model_card_for_production.png'
+import modelCardViewHistory from 'public/docs/model-card-view-history.png'
+import modelCardViewVersion from 'public/docs/model-card-view-version.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Filling In the Model Card
+
+The model card is the structured documentation that describes your model. It captures information like intended use,
+training methodology, performance metrics, and known limitations. The questions you see come from the schema you
+selected when creating the model.
+
+> **Common questions this page answers:**
+>
+> - How do I fill in a model card?
+> - How do I add collaborators to a model?
+> - How do I assign review roles?
+> - What is the model card version history?
+> - How do I view an earlier version of a model card?
+> - What are required model status fields?
+
+## What is a model card?
+
+A model card serves as the authoritative documentation for a machine learning model. It helps:
+
+- **Reviewers** evaluate whether the model is fit for purpose
+- **Consumers** understand what the model does and its limitations
+- **Auditors** verify compliance with organisational policies
+
+## Filling in the form
+
+The model card form is divided into sections displayed as tabs, where you answer questions defined by the selected
+schema.
+
+- **Required fields** are marked and must be completed
+- Your progress is saved only when you click **Save**
+- You can return and edit the model card at any time
+
+Each edit creates a **new version** of the model card. See **Version history** below for how to view previous versions.
+
+### Required by model status fields
+
+Some model cards will require you to fill in specific fields for different points in that model's lifecycle. This helps
+ensure the structured document is up to date and accurate, for consumers.
+
+To update to a new lifecycle status, select an option in status chips. This will highlight fields required by that
+status. Fill in all these fields on all pages.
+
+<Box sx={{ maxWidth: '75%' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='updating a model card for production using required fields'
+    src={bailoUpdateModelCardForProduction}
+  />
+</Box>
+
+The screenshot above shows the model summary on the model card being updated, as a required field for production.
+
+You can now save the model card and update the state on the model details tab.
+
+## Configuring model access
+
+After documenting your model, configure who can access the model and who will review releases and access requests.
+
+1. Open the model and navigate to the **Settings** tab
+2. Select **Access** from the side menu
+3. Use the **Add a user or group to the Model access list** dropdown to add collaborators
+4. Use the **Select roles** dropdown to choose the roles responsible for reviewing and approving the model
+5. **Save** your changes
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image style={{ width: '100%', height: 'auto' }} alt='selecting user model roles' src={bailoModelAccess} />
+</Box>
+
+The screenshot above shows the model Settings tab with the Access section, where users and groups can be added as
+collaborators and assigned system roles and review roles.
+
+The selected roles will be notified when the model or its releases require review.
+
+### System roles
+
+When adding collaborators, assign one of:
+
+- **Owner** - Full control over the model
+- **Contributor** - Edit model card, upload files, create releases
+- **Consumer** - Download files and pull images (with approved access request)
+
+### Review roles
+
+Assign specific people to each review role required by the schema (e.g. Model Technical Reviewer, Model Senior
+Responsible Officer). These people will review releases and access requests.
+
+## Version history
+
+Every edit to the model card creates a new version that is preserved in the model's history.
+
+### Viewing model card history
+
+If you want to see every version of a model card, open its history:
+
+1. Open the model and go to the **Overview** tab
+2. Open the model card actions menu
+3. Select **View History**
+
+The history dialog lists each version, newest first, along with who created it and when.
+
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='model card actions menu showing the View History option'
+    src={modelCardViewHistory}
+  />
+</Box>
+
+The screenshot above shows the model card actions menu with the **View History** option.
+
+### Viewing a specific version
+
+You can open any single version of a model card in read-only form. To do this, select its row in the history dialog. The
+page shows the model card exactly as it was when that version was created.
+
+An information banner at the top of the page confirms that a single card is being shown. To see how this version differs
+from another, select a version on the **To** side to switch to a comparison - see
+[Comparing Model Cards](comparing-model-cards).
+
+Each version you view has its own unique URL. You can copy the URL from your browser and share it so that others open
+the same version of the model card.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='a single earlier version of a model card displayed in read-only form'
+    src={modelCardViewVersion}
+  />
+</Box>
+
+The screenshot above shows a version of a model card in read-only form, with the information banner at the top.
+
+## Related pages
+
+- [Comparing Model Cards](comparing-model-cards) - Reviewing the differences between two versions of a model card
+- [Creating a Model](../creating-a-model) - Setting up a new model
+- [Creating a Release](../creating-a-release) - Versioning your model
+- [Understanding Reviews](../../reviews/understanding-reviews) - The review process
+- [Roles & Permissions](../../../reference/roles-and-permissions) - Detailed role reference
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

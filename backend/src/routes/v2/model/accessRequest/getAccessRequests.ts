@@ -1,19 +1,19 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
+import { type AccessRequestInterface } from '../../../../models/AccessRequest.js'
 import { findAccessRequests } from '../../../../services/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../../utils/validate.js'
 
 export const GetAccessRequestsSchema = z.object({
   query: z.object({
-    modelId: coerceArray(z.array(z.string()).optional().default([])),
+    modelId: coerceArray(z.array(z.string())).optional().default([]),
     schemaId: z.string().optional().default(''),
-    mine: strictCoerceBoolean(z.boolean().optional().default(false)),
-    adminAccess: strictCoerceBoolean(z.boolean().optional().default(false)),
+    mine: strictCoerceBoolean(z.boolean()).optional().default(false),
+    adminAccess: strictCoerceBoolean(z.boolean()).optional().default(false),
   }),
 })
 

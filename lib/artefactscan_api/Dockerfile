@@ -3,26 +3,36 @@
 ARG UID=65532
 ARG GID=65532
 
-FROM python:3.12.13-slim-trixie AS build
+FROM ghcr.io/astral-sh/uv:0.13.7@sha256:96f40d3904aad8d0bd010539001d36c8e2188b981e1334471a90c4a1d93bb490 AS uv
+
+FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS build
+
+COPY --from=uv /uv /bin/uv
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/venv \
-    PATH="/venv/bin:$PATH"
+    PATH="/venv/bin:$PATH" \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy
 
 WORKDIR /build
 
-# Create virtual environment and upgrade packaging tooling
-RUN python -m venv ${VIRTUAL_ENV} && \
-    pip install --upgrade pip setuptools wheel
+# `--no-install-project` keeps layer cached against dependency changes only
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project
 
-# Install Python dependencies with pip cache
-COPY requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-compile -r requirements.txt
+# `--no-deps` as uv sync already installed the lock
+COPY pyproject.toml ./
+COPY bailo_artefactscan_api ./bailo_artefactscan_api
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --no-deps .
 
 
-FROM python:3.12.13-slim-trixie AS base
+FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS base
 ARG UID
 ARG GID
 
@@ -37,7 +47,7 @@ RUN groupadd --gid ${GID} appuser && \
 
 WORKDIR /app
 
-FROM aquasec/trivy:0.71.2 AS trivy
+FROM aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 AS trivy
 
 FROM base AS dev
 

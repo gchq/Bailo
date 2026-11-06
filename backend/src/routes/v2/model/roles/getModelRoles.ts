@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
@@ -6,7 +6,7 @@ import { z } from '../../../../lib/zod.js'
 import { SystemRoles } from '../../../../models/Model.js'
 import { getAllEntryRoles } from '../../../../services/roles.js'
 import { registerPath } from '../../../../services/specification.js'
-import { Role, RoleKind } from '../../../../types/types.js'
+import { type Role, RoleKind } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getModelRolesSchema = z.object({
@@ -52,9 +52,10 @@ export const getModelRoles = [
       query: { modelId },
     } = parse(req, getModelRolesSchema)
 
-    const allRoles = await getAllEntryRoles(req.user, modelId)
+    const { allRoles, reviewRoleDocs } = await getAllEntryRoles(req.user, modelId)
 
-    await audit.onViewReviewRoles(req, allRoles)
+    // only the non-system roles are audited as system roles are not stored in the DB so have no ID
+    await audit.onViewReviewRoles(req, reviewRoleDocs)
 
     res.json({
       roles: allRoles,

@@ -1,27 +1,27 @@
-import { PassThrough } from 'node:stream'
+import { type PassThrough } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
-import { Types } from 'mongoose'
-import { Headers } from 'tar-stream'
+import { type Types } from 'mongoose'
+import { type Header } from 'tar-stream'
 
 import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
-import { ModelDoc } from '../../../models/Model.js'
-import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
+import { type ModelDoc } from '../../../models/Model.js'
+import { type ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
 import ModelTransferModel, { TransferStatus } from '../../../models/ModelTransfer.js'
-import { ReleaseDoc } from '../../../models/Release.js'
-import { UserInterface } from '../../../models/User.js'
-import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
+import { type ReleaseDoc } from '../../../models/Release.js'
+import { type UserInterface } from '../../../models/User.js'
+import { type MirrorImportLogData, MirrorKind, type MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
 import log from '../../log.js'
 import { getModelByIdNoAuth, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
 import { updateArtefactsTransferStatus } from '../../modelTransfer.js'
-import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
+import { type DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
-import { BaseImporter, BaseMirrorMetadata } from './base.js'
+import { BaseImporter, type BaseMirrorMetadata } from './base.js'
 
 export type DocumentsMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'Documents'> }
 export type MongoDocumentMirrorInformation = {
@@ -62,7 +62,7 @@ export class DocumentsImporter extends BaseImporter {
     this.user = user
   }
 
-  async processEntry(entry: Headers, stream: PassThrough) {
+  async processEntry(entry: Header, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
       const fileContentsJson = await json(stream)

@@ -1,18 +1,16 @@
-import {
-  CelebrationTwoTone,
-  FavoriteTwoTone,
-  InsertEmoticon,
-  ThumbDownTwoTone,
-  ThumbUpTwoTone,
-} from '@mui/icons-material'
+import CelebrationTwoTone from '@mui/icons-material/CelebrationTwoTone'
+import FavoriteTwoTone from '@mui/icons-material/FavoriteTwoTone'
+import InsertEmoticon from '@mui/icons-material/InsertEmoticon'
+import ThumbDownTwoTone from '@mui/icons-material/ThumbDownTwoTone'
+import ThumbUpTwoTone from '@mui/icons-material/ThumbUpTwoTone'
 import { IconButton, Popover, Stack } from '@mui/material'
 import { patchResponseReaction } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
 import * as _ from 'lodash-es'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReactionDisplay from 'src/reviews/ReactionDisplay'
-import { ReactionKind, ReactionKindKeys, ResponseInterface } from 'types/types'
+import { ReactionKind, type ReactionKindKeys, type ResponseInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface ReactionButtonsProps {
@@ -107,7 +105,12 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <IconButton aria-label='Add reaction' color='primary' onClick={(event) => setAnchorEl(event.currentTarget)}>
           <InsertEmoticon fontSize='small' />
         </IconButton>

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
@@ -45,9 +45,9 @@ export const deleteAccessRequest = [
       params: { accessRequestId },
     } = parse(req, deleteAccessRequestSchema)
 
-    await removeAccessRequest(req.user, accessRequestId)
+    const accessRequest = await removeAccessRequest(req.user, accessRequestId)
 
-    await audit.onDeleteAccessRequest(req, accessRequestId)
+    await audit.onDeleteAccessRequest(req, accessRequest)
 
     res.json({
       message: 'Successfully removed access request.',

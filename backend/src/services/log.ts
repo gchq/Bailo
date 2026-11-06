@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto'
+
+import { type Request } from 'express'
 import pino from 'pino'
 import { pinoHttp } from 'pino-http'
-import { v4 } from 'uuid'
 
 import config from '../utils/config.js'
 
@@ -12,6 +14,7 @@ if (process.env.NODE_ENV !== 'production') {
     target: 'pino-pretty',
     options: {
       colorize: !process.env.NO_COLOR,
+      singleLine: true,
     },
   })
 } else {
@@ -40,14 +43,21 @@ const log = pino({
 export default log
 
 export const httpLog = pinoHttp({
+  wrapSerializers: false,
   logger: log,
+  // The serializers are bound by the middleware order whereas this function is not.
+  customSuccessObject(req: Request, res, originalLog) {
+    return {
+      ...originalLog,
+      user: req.user,
+    }
+  },
   serializers: {
     req: function customReqSerializer(req) {
       return {
         id: req.id,
         method: req.method,
         url: req.url,
-        user: req.raw.user,
         clientIp: req.headers['x-forwarded-for'] || req.remoteAddress,
         ...(req.headers['user-agent'] && { agent: req.headers['user-agent'] }),
         // trim each value in body to 128 characters maximum
@@ -73,7 +83,7 @@ export const httpLog = pinoHttp({
     if (existingID) {
       return existingID
     }
-    const id = v4()
+    const id = randomUUID()
     res.setHeader('x-request-id', id)
     return id
   },

@@ -1,4 +1,4 @@
-import { Add } from '@mui/icons-material'
+import Add from '@mui/icons-material/Add'
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetModelImages } from 'actions/entry'
 import { useState } from 'react'
@@ -9,7 +9,7 @@ import Restricted from 'src/common/Restricted'
 import ModelImageDisplay from 'src/entry/model/registry/ModelImageDisplay'
 import UploadModelImageDialog from 'src/entry/model/registry/UploadModelImageDialog'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 
 type AccessRequestsProps = {
   model: EntryInterface
@@ -45,8 +45,16 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
         <Stack spacing={4}>
           {!readOnly && (
             <>
-              <Box display='flex'>
-                <Box ml='auto'>
+              <Box
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                <Box
+                  sx={{
+                    ml: 'auto',
+                  }}
+                >
                   <Restricted action='pushModelImage' fallback={<Button disabled>Push image</Button>}>
                     <Button
                       variant='outlined'

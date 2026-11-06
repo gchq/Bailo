@@ -10,43 +10,53 @@
 #       docker compose up
 #       Access UI at localhost:8080
 # Then run your 2nd instance using this file with
-#       docker build . -t second-bailo -f Dockerfile.standalone
+#       docker build . -t second-bailo -f Dockerfile.standalone --build-context python=./lib/python
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 #       Access UI at http://localhost:4318/
 
-FROM python:3.14-trixie AS sphinx-docs
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
-    rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends pandoc
-WORKDIR /app/docs
-COPY backend/docs .
-RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r requirements.txt
-RUN make dirhtml
+FROM chrislusf/seaweedfs:4.50@sha256:c2658820e763294a9e9de7b36c81e59b879e3459148351aee4e31a126ca64860 AS seaweedfs-bin
+FROM registry:3.1.2@sha256:d4032d4cc323c1731c707931ecada07a53076eac38e3b61ae57533f170f2c6c3 AS registry-bin
+FROM marlonb/mailcrab:v1.10.0@sha256:dd0e3933e35200ed9956aeb76bb27fc700dd452bd6586448107ccf8fe411c0a1 AS mailcrab-bin
 
-FROM node:26.4.0-alpine AS backend
-RUN apk add --no-cache libc6-compat && \
-    apk update
+FROM ghcr.io/astral-sh/uv:python3.15-alpine@sha256:f008ab85c84befffaaa8cbde7eb2b749331769df4e18be766269d0c4904deb40 AS sphinx-docs
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy \
+    PATH="/venv/bin:$PATH"
+RUN apk add --no-cache pandoc make
+WORKDIR /app/docs
+COPY --from=python pyproject.toml /app/python/
+COPY --from=python README.md /app/python/
+COPY --from=python src /app/python/src
+# `--no-install-project` skips bailo-docs itself which has no modules
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=backend/docs/uv.lock,target=uv.lock \
+    --mount=type=bind,source=backend/docs/pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project && \
+    uv pip install -e /app/python
+COPY backend/docs .
+RUN make html
+
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS backend
+RUN apk add --no-cache libc6-compat ca-certificates
 WORKDIR /app
 COPY backend/package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY backend .
 RUN npm run build
 
-FROM node:26.4.0-alpine AS frontend
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS frontend
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN apk add --no-cache libc6-compat && \
-    apk update
+RUN apk add --no-cache libc6-compat ca-certificates
 WORKDIR /app
 COPY frontend/package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY frontend .
-RUN --mount=type=cache,target=/cache/npm npm install sharp@0.33.5 --cache=/cache/npm
 RUN npm run build
 
-FROM ubuntu:noble
+FROM ubuntu:noble@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
 ENV DEBIAN_FRONTEND=noninteractive
 # Cache packages with run cache, update system packages, install packages
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
@@ -59,13 +69,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
     apt-get update && \
     apt-get install -y --no-install-recommends nodejs
 
-#ENV MINIO_ROOT_USER=minioadmin
-#ENV MINIO_ROOT_PASSWORD=minioadmin
-VOLUME minio-data
-RUN wget -q https://dl.min.io/server/minio/release/linux-amd64/minio && \
-    wget -q https://dl.min.io/client/mc/release/linux-amd64/mc && \
-    install -m755 minio /usr/local/bin/ && \
-    install -m755 mc /usr/local/bin/
+VOLUME /seaweed-data
+COPY --from=seaweedfs-bin /usr/bin/weed /usr/local/bin/weed
+RUN mkdir -p /etc/seaweedfs /seaweed-data
+COPY infrastructure/seaweedfs/s3_config.json /etc/seaweedfs/s3_config.json
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
     wget -qO - https://pgp.mongodb.com/server-8.0.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-8.0.gpg && \
@@ -76,14 +83,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
 
 COPY infrastructure/standalone/nginx.conf /etc/nginx/nginx.conf
 
-RUN wget -q https://github.com/distribution/distribution/releases/download/v3.0.0/registry_3.0.0_linux_amd64.tar.gz && \
-    tar -xvf registry_3.0.0_linux_amd64.tar.gz registry && \
-    install -m755 registry /usr/local/bin/
+COPY --from=registry-bin /bin/registry /usr/local/bin/registry
 
 ENV REGISTRY_HTTP_TLS_CERTIFICATE=/app/backend/certs/cert.pem \
     REGISTRY_HTTP_TLS_KEY=/app/backend/certs/key.pem \
-    REGISTRY_STORAGE_S3_ACCESSKEY=minioadmin \
-    REGISTRY_STORAGE_S3_SECRETKEY=minioadmin \
+    REGISTRY_STORAGE_S3_ACCESSKEY=bailoadmin \
+    REGISTRY_STORAGE_S3_SECRETKEY=bailoadmin \
     REGISTRY_AUTH=token \
     REGISTRY_AUTH_TOKEN_REALM=http://localhost:3001/api/v1/registry_auth \
     REGISTRY_AUTH_TOKEN_SERVICE=RegistryAuth \
@@ -92,8 +97,9 @@ ENV REGISTRY_HTTP_TLS_CERTIFICATE=/app/backend/certs/cert.pem \
 
 COPY infrastructure/standalone/registry.conf /registry.conf
 
-RUN wget -q https://github.com/tweedegolf/mailcrab/releases/download/v1.6.4/mailcrab-linux-x86-64-gnu-v1.6.4 && \
-    install -m755 mailcrab-linux-x86-64-gnu-v1.6.4 /usr/local/bin/mailcrab
+COPY --from=mailcrab-bin /app/mailcrab /usr/local/bin/mailcrab
+
+COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Backend
 WORKDIR /app/backend
@@ -120,10 +126,8 @@ COPY --from=frontend /app/public ./public
 ENV NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0
 
-COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 WORKDIR /
 
-EXPOSE 8080 9000 27017
+EXPOSE 8080 8333 27017
 
 ENTRYPOINT ["/usr/bin/supervisord"]

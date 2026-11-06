@@ -1,27 +1,28 @@
-import { PassThrough } from 'node:stream'
+import { type PassThrough } from 'node:stream'
 import { json, text } from 'node:stream/consumers'
 
 import { escapeRegExp } from 'lodash-es'
 import { finished } from 'stream/promises'
-import { Headers } from 'tar-stream'
+import { type Header } from 'tar-stream'
 
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { TransferStatus } from '../../../models/ModelTransfer.js'
-import { UserInterface } from '../../../models/User.js'
+import { type UserInterface } from '../../../models/User.js'
 import { issueAccessToken } from '../../../routes/v1/registryAuth.js'
-import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
+import { type MirrorImportLogData, MirrorKind, type MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
+import { isManifestList } from '../../../utils/registryResponses.js'
 import {
-  ImageManifestV2,
-  ManifestListV2,
+  type ImageManifestV2,
+  type ManifestListV2,
   ManifestResponseBodySchema,
   OCIEmptyMediaType,
-} from '../../../utils/registryResponses.js'
+} from '../../../utils/registryResponseTypes.js'
 import log from '../../log.js'
 import { updateArtefactTransferStatus } from '../../modelTransfer.js'
 import { splitDistributionPackageName } from '../../registry.js'
-import { BaseImporter, BaseMirrorMetadata } from './base.js'
+import { BaseImporter, type BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {
   importKind: MirrorKindKeys<'Image'>
@@ -75,7 +76,7 @@ export class ImageImporter extends BaseImporter {
     ;({ path: this.imageName, tag: this.imageTag } = distributionPackageNameObject)
   }
 
-  async processEntry(entry: Headers, stream: PassThrough) {
+  async processEntry(entry: Header, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
       if (ImageImporter.indexRegex.test(entry.name)) {
@@ -200,7 +201,7 @@ export class ImageImporter extends BaseImporter {
         },
       ])
 
-      if ('manifests' in this.manifestBody) {
+      if (isManifestList(this.manifestBody)) {
         // For fat manifests, upload platform-specific manifests first (by digest)
         log.debug(
           { ...this.logData, manifestCount: this.manifestBody.manifests.length },
@@ -258,7 +259,7 @@ export class ImageImporter extends BaseImporter {
       log.debug(
         {
           image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
-          isFatManifest: 'manifests' in this.manifestBody,
+          isFatManifest: isManifestList(this.manifestBody),
           ...this.logData,
         },
         'Completed registry upload',

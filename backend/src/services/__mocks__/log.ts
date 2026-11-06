@@ -1,7 +1,7 @@
-import { vi } from 'vitest'
+import { type Mock, vi } from 'vitest'
 
 // Minimal pino-like logger mock
-const log = {
+const log: Record<string, Mock> = {
   fatal: vi.fn(),
   error: vi.fn(),
   warn: vi.fn(),
@@ -14,7 +14,7 @@ const log = {
 export default log
 
 // Minimal pino-http mock
-export const httpLog = vi.fn(() => (req: any, _res: any, next?: () => void) => {
+export const httpLog: Mock = vi.fn(() => (req: any, _res: any, next?: () => void) => {
   // simulate req.id behaviour
   if (!req.id) {
     req.id = 'test-request-id'

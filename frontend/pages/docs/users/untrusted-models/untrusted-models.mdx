@@ -1,9 +1,12 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
+import FeatureAvailability from 'src/FeatureAvailability'
 
 # Untrusted Models
 
+<FeatureAvailability feature='untrustedModel' />
+
 Untrusted models are a special entry type for models that require additional scrutiny before being fully trusted within
-your organisation. This feature is optional and must be enabled by your administrator.
+your organisation.
 
 > **Common questions this page answers:**
 >
@@ -24,7 +27,7 @@ that explains what untrusted models mean in your context.
 
 ## Creating an untrusted model
 
-Create an untrusted model from the model creation page if the feature is enabled by your administrator:
+Create an untrusted model from the model creation page:
 
 1. Click the **+ Create** button in the navigation bar
 2. Under the **Models** section, select **Untrusted Model**
@@ -45,11 +48,6 @@ include:
 - The container (Docker) registry is disabled for untrusted models
 - Users should exercise additional caution when using artefacts from untrusted models
 - Your organisation may have additional policies governing the use of untrusted models
-
-## Availability
-
-This feature is controlled by your administrator. If you don't see the **Untrusted Model** option when creating a new
-entry, it means the feature is not enabled in your Bailo instance.
 
 ## Related pages
 

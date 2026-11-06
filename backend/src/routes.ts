@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import express from 'express'
 import { rateLimit } from 'express-rate-limit'
 import helmet from 'helmet'
@@ -17,8 +16,14 @@ import config from './utils/config.js'
 
 export const server = express()
 
+const LARGE_BODY_ROUTES = ['/api/v2/model/', '/import-model-card-text']
+const jsonParser = (req, res, next) => {
+  const needsLargeBody = LARGE_BODY_ROUTES.every((segment) => req.path.includes(segment))
+  const limit = needsLargeBody ? '500kb' : '100kb'
+  express.json({ limit })(req, res, next)
+}
 server.use([
-  bodyParser.json(),
+  jsonParser,
   httpLog,
   helmet(),
   ...(config.api.rateLimit
@@ -63,6 +68,6 @@ server.use(
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/html')))
 
 server.use(expressErrorHandler)

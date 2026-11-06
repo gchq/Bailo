@@ -1,14 +1,14 @@
 import NodeCache from 'node-cache'
 
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import { getHttpsAgent } from '../../services/http.js'
 import {
-  EntrySearchOptionsParams,
-  EntrySearchResultWithErrors,
+  type EntrySearchOptionsParams,
+  type EntrySearchResultWithErrors,
   FederationState,
-  FederationStateKeys,
-  RemoteFederationConfig,
-  SystemStatus,
+  type FederationStateKeys,
+  type RemoteFederationConfig,
+  type SystemStatus,
 } from '../../types/types.js'
 
 export abstract class BasePeerConnector {

@@ -2,7 +2,7 @@ import dayjs from '@dayjs'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
-import { useGetEntry } from 'actions/entry'
+import { useGetModel } from 'actions/entry'
 import { useGetSchema } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -13,7 +13,7 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
 
@@ -21,7 +21,7 @@ export default function NewAccessRequest() {
   const router = useRouter()
 
   const { modelId, schemaId }: { modelId?: string; schemaId?: string } = router.query
-  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetEntry(modelId)
+  const { entry: model, isEntryLoading: isModelLoading, isEntryError: isModelError } = useGetModel(modelId)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -133,7 +133,11 @@ export default function NewAccessRequest() {
                   displayLabelValidation={formValidationErrorState}
                   defaultCurrentUserInEntityList
                 />
-                <Stack alignItems='flex-end'>
+                <Stack
+                  sx={{
+                    alignItems: 'flex-end',
+                  }}
+                >
                   <Button
                     sx={{ width: 'fit-content' }}
                     variant='contained'

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { deepFreeze, getPropValue } from '../../src/utils/object.js'
+import { deepFreeze, deepMergePreferFirst, getPropValue } from '../../src/utils/object.js'
 
 describe('utils > object', () => {
   test('deepFreeze', () => {
@@ -39,5 +39,43 @@ describe('utils > object', () => {
     expect(getPropValue(source, 'a.x.c')).toBeUndefined()
     expect(getPropValue(source, '')).toStrictEqual(source)
     expect(getPropValue(source, '   ')).toStrictEqual(source)
+  })
+
+  describe('deepMergePreferFirst', () => {
+    test('first object primitives win over second', () => {
+      expect(deepMergePreferFirst({ a: 'first' }, { a: 'second', b: 'only-second' })).toStrictEqual({
+        a: 'first',
+        b: 'only-second',
+      })
+    })
+
+    test('first object arrays win completely', () => {
+      expect(deepMergePreferFirst({ tags: ['a'] }, { tags: ['b', 'c'] })).toStrictEqual({ tags: ['a'] })
+    })
+
+    test('deeply merges nested objects', () => {
+      expect(
+        deepMergePreferFirst(
+          { overview: { name: 'local' } },
+          { overview: { name: 'mirrored', description: 'mirrored-desc' } },
+        ),
+      ).toStrictEqual({ overview: { name: 'local', description: 'mirrored-desc' } })
+    })
+
+    test('fills in keys missing from first object', () => {
+      expect(deepMergePreferFirst({}, { a: 1, nested: { b: 2 } })).toStrictEqual({ a: 1, nested: { b: 2 } })
+    })
+
+    test('handles null values in first object', () => {
+      expect(deepMergePreferFirst({ a: null }, { a: 'fallback' })).toStrictEqual({ a: null })
+    })
+
+    test('does not mutate input objects', () => {
+      const first = { a: 1 }
+      const second = { b: 2 }
+      deepMergePreferFirst(first, second)
+      expect(first).toStrictEqual({ a: 1 })
+      expect(second).toStrictEqual({ b: 2 })
+    })
   })
 })

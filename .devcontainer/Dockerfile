@@ -1,4 +1,4 @@
-FROM python:3.12-trixie
+FROM python:3.12-trixie@sha256:7ad6d21a25a94b2c00e685e82c2fd298de814353d9ee0e3f7f2cd4fca063df60
 
 LABEL dev.containers.image.node.version="26" \
       dev.containers.image.python.version="3.12"

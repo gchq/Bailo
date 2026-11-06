@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
@@ -43,8 +43,9 @@ export const deleteReviewRole = [
 
     const { params } = parse(req, deleteReviewRoleSchema)
 
-    await removeReviewRole(req.user, params.reviewRoleShortName)
-    await audit.onDeleteReviewRole(req, params.reviewRoleShortName)
+    const reviewRole = await removeReviewRole(req.user, params.reviewRoleShortName)
+
+    await audit.onDeleteReviewRole(req, reviewRole)
 
     res.json({ deleted: true })
   },

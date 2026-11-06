@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
-import { FileWithScanResultsInterface } from '../../../../models/File.js'
+import { type FileWithScanResultsInterface } from '../../../../models/File.js'
 import { uploadFile } from '../../../../services/file.js'
 import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { coerceArray, parse } from '../../../../utils/validate.js'
@@ -15,7 +15,7 @@ export const postSimpleUploadSchema = z.object({
   query: z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
-    tags: coerceArray(z.array(z.string().toLowerCase()).optional()),
+    tags: coerceArray(z.array(z.string().toLowerCase())).optional(),
     metadataText: z.string().optional(),
   }),
 })

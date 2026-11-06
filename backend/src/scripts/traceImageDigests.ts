@@ -3,6 +3,7 @@ import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { isManifestList } from '../utils/registryResponses.js'
 
 const digestsToSearchFor: string[] = []
 
@@ -46,7 +47,7 @@ async function script() {
           tag,
         })
 
-        if (!manifest || 'manifests' in manifest) {
+        if (!manifest || isManifestList(manifest)) {
           continue
         }
 

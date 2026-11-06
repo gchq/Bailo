@@ -12,13 +12,13 @@ module.exports = {
     protocol: 'http',
     host: 'localhost',
     port: 8080,
-    // Typically generated from `npm run certs`
+
     privateKey: '/certs/key.pem',
     publicKey: '/certs/cert.pem',
   },
 
   httpClient: {
-    noProxy: ['localhost', '127.0.0.1', 'registry', 'minio'],
+    noProxy: ['localhost', '127.0.0.1', 'registry', 'seaweedfs'],
     defaultOpts: {
       rejectUnauthorized: false,
     },
@@ -26,10 +26,10 @@ module.exports = {
 
   s3: {
     credentials: {
-      accessKeyId: 'minioadmin',
-      secretAccessKey: 'minioadmin',
+      accessKeyId: 'bailoadmin',
+      secretAccessKey: 'bailoadmin',
     },
-    endpoint: 'http://minio:9000',
+    endpoint: 'http://seaweedfs:8333',
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
@@ -38,7 +38,6 @@ module.exports = {
 
     multipartChunkSize: 5 * 1024 * 1024,
 
-    // Names of buckets that Bailo uses
     buckets: {
       uploads: 'uploads',
       registry: 'registry',

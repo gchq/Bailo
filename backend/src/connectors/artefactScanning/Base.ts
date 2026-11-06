@@ -1,9 +1,9 @@
 import bytes from 'bytes'
-import PQueue from 'p-queue'
+import type PQueue from 'p-queue'
 
-import { FileInterface } from '../../models/File.js'
-import { ImageRef } from '../../models/Release.js'
-import { ArtefactKindKeys, ScanInterface } from '../../models/Scan.js'
+import { type FileInterface } from '../../models/File.js'
+import { type ImageRef } from '../../models/Release.js'
+import { type ArtefactKindKeys, type ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 

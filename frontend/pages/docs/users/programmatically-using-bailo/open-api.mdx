@@ -1,16 +1,26 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 
 import bailoSwaggerDocs from 'public/docs/bailo_swagger_docs.png'
 
 # OpenAPI Documentation
 
+> **Common questions this page answers:**
+>
+> - How do I view the Bailo API specification?
+> - What tools can I use with the OpenAPI specification?
+> - Where do I find the Swagger UI?
+
 Bailo provides an OpenAPI specification for all Bailo endpoints viewable [here](../../../api/docs) on a running Bailo
 instance.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='open api documentation page with example request parameters' src={bailoSwaggerDocs} />
+  <Image
+    style={{ width: '100%', height: 'auto' }}
+    alt='open api documentation page with example request parameters'
+    src={bailoSwaggerDocs}
+  />
 </Box>
 
 The screenshot above shows the Swagger UI interface with grouped API endpoints, request parameters, and response

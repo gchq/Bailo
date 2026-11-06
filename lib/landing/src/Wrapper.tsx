@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import Head from 'next/head'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { ReactElement, ReactNode, useMemo } from 'react'
 import bailoLogo from '../public/logo-horizontal-light.png'
@@ -96,7 +96,7 @@ export default function Wrapper({ title, children }: WrapperProps): ReactElement
             <Box>
               <Box>{children}</Box>
               <Box component='footer' sx={{ borderTop: 1, borderColor: 'divider', py: 3, px: 2, textAlign: 'center' }}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2, justifyContent: 'center' }}>
                   {navigationLinks.map((link) => (
                     <Link key={link.href} href={link.href}>
                       {link.label}
