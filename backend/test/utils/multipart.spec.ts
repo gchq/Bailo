@@ -72,6 +72,15 @@ describe('utils > multipart', () => {
     expect(body.split('\r\n')).toHaveLength(7)
   })
 
+  test.each(['text/plain\r\nX-Injected: yes', 'text/plain\nX-Injected: yes', 'text/plain\rX-Injected: yes'])(
+    'createMultipartFileUpload > rejects a content type containing line breaks (%j)',
+    (fileContentType) => {
+      expect(() => createMultipartFileUpload('in_file', 'a', Readable.from([]), fileContentType)).toThrow(
+        'Multipart file content type must not contain line breaks.',
+      )
+    },
+  )
+
   test('createMultipartFileUpload > uses a new boundary for each upload', () => {
     const first = createMultipartFileUpload('in_file', 'a', Readable.from([]))
     const second = createMultipartFileUpload('in_file', 'a', Readable.from([]))

@@ -1,6 +1,8 @@
 import { randomBytes } from 'node:crypto'
 import { type Readable } from 'node:stream'
 
+import { BadReq } from './error.js'
+
 export interface MultipartFileUpload {
   /** Value for the request's `content-type` header, including the boundary */
   contentType: string
@@ -17,6 +19,11 @@ export function createMultipartFileUpload(
   stream: Readable,
   fileContentType = 'application/octet-stream',
 ): MultipartFileUpload {
+  // Unlike the names, the content type is not to be escaped, so a line break would inject extra part headers
+  if (/[\r\n]/.test(fileContentType)) {
+    throw BadReq('Multipart file content type must not contain line breaks.', { fileContentType })
+  }
+
   // Must not appear in the body: https://www.rfc-editor.org/rfc/rfc7578#section-4.1
   const boundary = `----BailoBoundary${randomBytes(16).toString('hex')}`
 
