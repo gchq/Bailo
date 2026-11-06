@@ -113,6 +113,7 @@ export default function FolderNavigableList({
         <Breadcrumbs sx={{ flex: 1 }}>
           <Link
             component='button'
+            type='button'
             underline='hover'
             onClick={() => setCurrentPath('')}
             sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
@@ -130,6 +131,7 @@ export default function FolderNavigableList({
               <Link
                 key={crumb.fullPath}
                 component='button'
+                type='button'
                 underline='hover'
                 onClick={() => setCurrentPath(crumb.fullPath)}
               >

@@ -1,10 +1,11 @@
 import { ThemeProvider } from '@mui/material/styles'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { type FormEvent } from 'react'
 import FolderNavigableList from 'src/common/FolderNavigableList'
 import { SortingDirection, type SortingDirectionKeys } from 'src/common/Paginate'
 import { lightTheme } from 'src/theme'
 import { type FileInterface } from 'types/types'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 function testFile(name: string): FileInterface {
   return {
@@ -50,5 +51,32 @@ describe('FolderNavigableList', () => {
     const rows = screen.getAllByTestId('row').map((row) => row.textContent)
 
     expect(rows).toEqual(['folder:configs', 'folder:weights', 'file:alpha.txt', 'file:zeta.txt'])
+  })
+
+  it('does not submit a surrounding form when navigating with the breadcrumbs', () => {
+    const onSubmit = vi.fn((event: FormEvent) => event.preventDefault())
+    render(
+      <ThemeProvider theme={lightTheme}>
+        <form onSubmit={onSubmit}>
+          <FolderNavigableList files={[testFile('123/abc/foo.txt')]}>
+            {({ data, onNavigate }) =>
+              data.kind === 'folder' ? (
+                <span onClick={() => onNavigate(data.node.fullPath)}>{data.name}</span>
+              ) : (
+                <span>{data.name}</span>
+              )
+            }
+          </FolderNavigableList>
+        </form>
+      </ThemeProvider>,
+    )
+
+    fireEvent.click(screen.getByText('123'))
+    fireEvent.click(screen.getByText('abc'))
+    fireEvent.click(screen.getByRole('button', { name: '123' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Root' }))
+
+    expect(screen.queryByText('abc')).toBeNull()
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 })
