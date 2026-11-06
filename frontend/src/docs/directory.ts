@@ -1,4 +1,4 @@
-import { DocumentationNavigationEntry, DocumentationNavigationTree } from 'types/docs'
+import { type DocumentationNavigationEntry, type DocumentationNavigationTree } from 'types/docs'
 
 export const flatDirectory: DocumentationNavigationEntry[] = [
   // Main Docs
