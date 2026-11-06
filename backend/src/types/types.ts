@@ -273,6 +273,7 @@ export interface EntrySearchOptions {
   search: string
   task: string
   peers: Array<string>
+  users: Array<string>
   allowTemplating: boolean
   schemaId: string
   adminAccess: boolean
@@ -288,6 +289,7 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   organisations: coerceArray(z.array(z.string())).optional(),
   states: coerceArray(z.array(z.string())).optional(),
   filters: coerceArray(z.array(z.string())).optional(),
+  users: coerceArray(z.array(z.string())).optional(),
   search: z.string().optional(),
   allowTemplating: strictCoerceBoolean(z.boolean()).optional(),
   schemaId: z.string().optional(),
