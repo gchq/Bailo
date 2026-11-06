@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import re
+
 import pytest
 from bailo import Client, Release
 from bailo.core.exceptions import BailoException
 from semantic_version import Version
+
+DOWNLOAD_URL = re.compile(r"https://example\.com/api/v2/model/test_id/release/1\.0\.0/file/.*/download")
 
 
 def test_release():
@@ -156,3 +160,83 @@ def test_retrieve_release_with_v_in_version(integration_client, example_model):
     release = Release.from_version(client=integration_client, model_id=example_model.model_id, version="v2.0.0")
 
     assert str(release.version) == "2.0.0"
+
+
+@pytest.mark.parametrize(
+    "malicious_name",
+    [
+        "../escaped.txt",
+        "weights/../../escaped.txt",
+        "/etc/passwd",
+    ],
+)
+def test_download_all_rejects_filenames_escaping_the_target_directory(malicious_name: str, tmp_path, requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_id/release/1.0.0",
+        json={"release": {"files": [{"name": malicious_name}]}},
+    )
+    client = Client("https://example.com")
+    release = Release(
+        client=client,
+        model_id="test_id",
+        version="1.0.0",
+        model_card_version=1,
+        notes="test",
+    )
+
+    target = tmp_path / "downloads"
+
+    with pytest.raises(BailoException):
+        release.download_all(path=str(target))
+
+    assert not (tmp_path / "escaped.txt").exists()
+
+
+@pytest.mark.parametrize(
+    "malicious_name",
+    [
+        "../escaped.txt",
+        "weights/../../escaped.txt",
+        "/etc/passwd",
+    ],
+)
+def test_download_rejects_filenames_escaping_the_working_directory(
+    malicious_name: str, tmp_path, monkeypatch, requests_mock
+):
+    download = requests_mock.get(DOWNLOAD_URL, content=b"data")
+    client = Client("https://example.com")
+    release = Release(
+        client=client,
+        model_id="test_id",
+        version="1.0.0",
+        model_card_version=1,
+        notes="test",
+    )
+
+    working_dir = tmp_path / "working"
+    working_dir.mkdir()
+    monkeypatch.chdir(working_dir)
+
+    with pytest.raises(BailoException):
+        release.download(malicious_name)
+
+    assert not download.called
+    assert not (tmp_path / "escaped.txt").exists()
+
+
+def test_download_writes_nested_filename_within_the_working_directory(tmp_path, monkeypatch, requests_mock):
+    requests_mock.get(DOWNLOAD_URL, content=b"data")
+    client = Client("https://example.com")
+    release = Release(
+        client=client,
+        model_id="test_id",
+        version="1.0.0",
+        model_card_version=1,
+        notes="test",
+    )
+
+    monkeypatch.chdir(tmp_path)
+
+    release.download("weights/model.bin")
+
+    assert (tmp_path / "weights" / "model.bin").read_bytes() == b"data"

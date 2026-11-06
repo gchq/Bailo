@@ -10,6 +10,7 @@ vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 const fileUtilsMocks = vi.hoisted(() => ({
   isFileWithScanResultsInterface: vi.fn(() => true),
   createFilePath: vi.fn(() => 'beta/model/modelId/files/fileId'),
+  validateFileName: vi.fn((name: string) => name),
 }))
 vi.mock('../../../src/utils/fileUtils.js', () => fileUtilsMocks)
 
@@ -177,6 +178,75 @@ describe('services > parsers > modelParser', () => {
         mockLogData,
       ),
     ).rejects.toThrow('Error checking existence of file in storage.')
+  })
+
+  test('parseFile > name is not a string', async () => {
+    await expect(() =>
+      parseFile(
+        {
+          modelId: 'sourceModelId',
+          name: 123,
+          size: 123,
+          mime: 'text/plain',
+          path: 'foo/file.txt',
+          complete: true,
+          deleted: false,
+          updatedAt: 'timestamp',
+          createdAt: 'timestamp',
+          _id: 'mongoId',
+        },
+        'mirroredModelId',
+        'sourceModelId',
+        mockLogData,
+      ),
+    ).rejects.toThrow('Compressed file contains a file whose name is not a string.')
+  })
+
+  test('parseFile > invalid name is rejected', async () => {
+    fileUtilsMocks.validateFileName.mockImplementationOnce(() => {
+      throw new Error('File name must not contain path traversal segments.')
+    })
+    await expect(() =>
+      parseFile(
+        {
+          modelId: 'sourceModelId',
+          name: '../../escape.txt',
+          size: 123,
+          mime: 'text/plain',
+          path: 'foo/file.txt',
+          complete: true,
+          deleted: false,
+          updatedAt: 'timestamp',
+          createdAt: 'timestamp',
+          _id: 'mongoId',
+        },
+        'mirroredModelId',
+        'sourceModelId',
+        mockLogData,
+      ),
+    ).rejects.toThrow('Compressed file contains a file with an invalid name.')
+  })
+
+  test('parseFile > name is validated before the storage lookup', async () => {
+    await parseFile(
+      {
+        modelId: 'sourceModelId',
+        name: 'folder/file.txt',
+        size: 123,
+        mime: 'text/plain',
+        path: 'foo/file.txt',
+        complete: true,
+        deleted: false,
+        updatedAt: 'timestamp',
+        createdAt: 'timestamp',
+        _id: 'mongoId',
+      },
+      'mirroredModelId',
+      'sourceModelId',
+      mockLogData,
+    )
+
+    expect(fileUtilsMocks.validateFileName).toHaveBeenCalledWith('folder/file.txt')
   })
 
   test('parseFile > bad sourceModelId', async () => {

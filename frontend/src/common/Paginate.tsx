@@ -37,6 +37,8 @@ interface PaginateProps<T> {
   prioritiseItems?: (a: T, b: T) => number
   hideBorders?: boolean
   hideDividers?: boolean
+  groupByProperty?: keyof T
+  onSearchChange?: (query: string) => void
   children: ({ data }: { data: T }) => ReactElement
 }
 
@@ -66,6 +68,8 @@ export default function Paginate<T>({
   prioritiseItems,
   hideBorders = false,
   hideDividers = false,
+  groupByProperty,
+  onSearchChange,
   children,
 }: PaginateProps<T>) {
   const [page, setPage] = useState(1)
@@ -75,6 +79,14 @@ export default function Paginate<T>({
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(defaultSortDirection)
   const [searchFilter, setSearchFilter] = useState('')
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchFilter(value)
+      onSearchChange?.(value)
+    },
+    [onSearchChange],
+  )
 
   const filteredList = list.filter((item: T) => {
     if (!searchFilterProperty) {
@@ -102,12 +114,23 @@ export default function Paginate<T>({
 
   const sortByValue = useMemo(
     () => (a: T, b: T) => {
+      // Group items by a primary key before applying the user-selected sort. Grouping is
+      // deliberately independent of the sort direction: lower group values always come first
+      // (e.g. folders before files, matching Windows Explorer), so reversing the sort reorders
+      // items within each group rather than flipping the groups themselves.
+      if (groupByProperty) {
+        const groupA = a[groupByProperty]
+        const groupB = b[groupByProperty]
+        if (groupA !== groupB) {
+          return groupA < groupB ? -1 : 1
+        }
+      }
       if (ascOrDesc === SortingDirection.ASC) {
         return a[orderByValue] < b[orderByValue] ? -1 : 1
       }
       return a[orderByValue] > b[orderByValue] ? -1 : 1
     },
-    [ascOrDesc, orderByValue],
+    [ascOrDesc, orderByValue, groupByProperty],
   )
 
   const checkMenuOption = useCallback(
@@ -273,7 +296,7 @@ export default function Paginate<T>({
             size='small'
             value={searchFilter}
             label={searchPlaceholderText}
-            onChange={(e) => setSearchFilter(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             sx={{ maxWidth: '200px' }}
           />
         )}
