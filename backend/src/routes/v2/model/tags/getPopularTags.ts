@@ -7,7 +7,7 @@ import { parse } from '../../../../utils/validate.js'
 
 export const getPopularTagsSchema = z.object({
   query: z.object({
-    limit: z.coerce.number().int().positive().max(100).optional(),
+    limit: z.coerce.number().int().positive().max(100).optional().default(10),
   }),
 })
 
