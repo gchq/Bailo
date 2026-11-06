@@ -16,20 +16,29 @@ export const entryKindForRedirect = (entryKind: EntryKindKeys) => {
   }
 }
 
-export function buildModelCardHref(entryId: string, entryKind: EntryKindKeys, version: number): string {
-  const comparePath = entryKind === EntryKind.DATA_CARD ? '/data-card/compare' : '/model-card/compare'
+export const entryCardPath = (entryKind: EntryKindKeys) =>
+  entryKind === EntryKind.DATA_CARD ? '/data-card' : '/model-card'
 
-  const query = new URLSearchParams()
-
-  query.set('fromEntry', entryId)
-
-  if (entryKind === EntryKind.MIRRORED_MODEL) {
-    query.set('fromMirroredVersion', String(version))
-  } else {
-    query.set('fromVersion', String(version))
+export function buildEntryCardVersionHref(
+  entryId: string,
+  entryKind: EntryKindKeys,
+  version?: number,
+  mirroredVersion?: number,
+): string {
+  const query = new URLSearchParams({ entry: entryId })
+  if (version !== undefined) {
+    query.set('version', String(version))
   }
+  if (mirroredVersion !== undefined) {
+    query.set('mirroredVersion', String(mirroredVersion))
+  }
+  return `${entryCardPath(entryKind)}/version?${query.toString()}`
+}
 
-  return `${comparePath}?${query.toString()}`
+export function buildModelCardHref(entryId: string, entryKind: EntryKindKeys, version: number): string {
+  return entryKind === EntryKind.MIRRORED_MODEL
+    ? buildEntryCardVersionHref(entryId, entryKind, undefined, version)
+    : buildEntryCardVersionHref(entryId, entryKind, version)
 }
 
 /** Updates `router.query` based on record. If a key is undefined it will be removed from the query.*/
