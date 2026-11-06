@@ -20,7 +20,8 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
-import { memoize } from 'lodash-es'
+import { memoize, sumBy } from 'lodash-es'
+import prettyBytes from 'pretty-bytes'
 import { type ChangeEvent, useCallback, useContext, useMemo } from 'react'
 import FileUploadProgressDisplay, { type FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
@@ -112,6 +113,7 @@ export default function ReleaseForm({
   const theme = useTheme()
 
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
+  const totalFileSize = useMemo(() => sumBy(formData.files, 'size'), [formData.files])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
   const { entryCardRevisions, isEntryCardRevisionsLoading, isEntryCardRevisionsError } = useGetEntryCardRevisions(
@@ -362,11 +364,18 @@ export default function ReleaseForm({
       <Stack>
         <Accordion defaultExpanded sx={{ p: 0 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >{`Files (${formData.files.length})`}</Typography>
+            <Stack direction='row' spacing={1} sx={{ alignItems: 'baseline' }}>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >{`Files (${formData.files.length})`}</Typography>
+              {formData.files.length > 0 && (
+                <Typography variant='caption' data-test='release-files-total-size'>
+                  {`(${prettyBytes(totalFileSize)} total)`}
+                </Typography>
+              )}
+            </Stack>
           </AccordionSummary>
           <AccordionDetails>
             {!isReadOnly && model.kind === EntryKind.UNTRUSTED_MODEL && (
