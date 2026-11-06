@@ -1,21 +1,21 @@
-import { createHash, X509Certificate } from 'crypto'
-import express, { NextFunction, Request, Response } from 'express'
+import { createHash, randomUUID, X509Certificate } from 'crypto'
+import express, { type NextFunction, type Request, type Response } from 'express'
 import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
 import type { StringValue } from 'ms'
 import NodeCache from 'node-cache'
-import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
-import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
+import { type Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
-import { EntryKind, EntryKindKeys, ModelDoc } from '../../models/Model.js'
-import { UserInterface } from '../../models/User.js'
+import { EntryKind, type EntryKindKeys, type ModelDoc } from '../../models/Model.js'
+import { type UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
 import config from '../../utils/config.js'
 import { getKid, getPublicKey } from '../../utils/registryUtils.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
+import { bytesToUuid } from '../../utils/string.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
 import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
 
@@ -40,7 +40,7 @@ export async function getAdminToken(): Promise<string> {
   hash[6] = (hash[6] & 0x0f) | 0x40
   hash[8] = (hash[8] & 0x3f) | 0x80
 
-  const adminToken = uuidStringify(hash)
+  const adminToken = bytesToUuid(hash)
   cryptoCache.set('adminToken', adminToken)
 
   return adminToken
@@ -90,7 +90,7 @@ async function signJwt<T extends object>(payload: T, expiresIn: StringValue): Pr
     return jwt.sign(
       {
         ...payload,
-        jti: uuidv4(),
+        jti: randomUUID(),
       },
       privateKey,
       {

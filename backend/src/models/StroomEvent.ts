@@ -1,7 +1,7 @@
-import { HydratedDocument, model, Schema, Types } from 'mongoose'
+import { type HydratedDocument, model, Schema, type Types } from 'mongoose'
 
-import { EventDetail } from '../connectors/audit/stroom.js'
-import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+import { type EventDetail } from '../connectors/audit/stroom.js'
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export interface StroomEventObject {
   EventTime: {

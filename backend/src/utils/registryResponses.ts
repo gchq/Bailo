@@ -2,10 +2,10 @@ import type { ZodSchema } from 'zod'
 
 import { InternalError } from './error.js'
 import {
-  ImageManifestV2,
+  type ImageManifestV2,
   ManifestListMediaTypeSchema,
-  ManifestListV2,
-  RegistryErrorResponseBody,
+  type ManifestListV2,
+  type RegistryErrorResponseBody,
   RegistryErrorResponseBodySchema,
 } from './registryResponseTypes.js'
 

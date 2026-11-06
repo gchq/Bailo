@@ -1,10 +1,10 @@
 import Refresh from '@mui/icons-material/Refresh'
 import { Button, Stack, Typography } from '@mui/material'
 import { postNotifyReviewer } from 'actions/review'
-import { ReactElement, useState } from 'react'
+import { type ReactElement, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import useNotification from 'src/hooks/useNotification'
-import { Decision, DecisionKeys, ReviewRequestInterface } from 'types/types'
+import { Decision, type DecisionKeys, type ReviewRequestInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface ReviewStatusDisplayProps {

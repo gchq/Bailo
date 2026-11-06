@@ -5,7 +5,7 @@ import { useCallback, useMemo } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
 import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
-import { ReviewKind, ReviewListStatus, ReviewListStatusKeys, ReviewRequestInterface } from 'types/types'
+import { ReviewKind, ReviewListStatus, type ReviewListStatusKeys, type ReviewRequestInterface } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, timeDifference } from 'utils/dateUtils'
 import { toTitleCase } from 'utils/stringUtils'
 

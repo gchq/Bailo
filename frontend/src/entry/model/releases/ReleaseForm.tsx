@@ -11,7 +11,7 @@ import {
   LinearProgress,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Stack,
   Typography,
 } from '@mui/material'
@@ -19,8 +19,8 @@ import { useTheme } from '@mui/material/styles'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
-import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
-import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import { type ChangeEvent, useCallback, useContext, useMemo } from 'react'
+import FileUploadProgressDisplay, { type FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
 import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
@@ -40,11 +40,11 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
 import {
   ArtefactKind,
-  EntryInterface,
+  type EntryInterface,
   EntryKind,
-  FileInterface,
-  FileWithMetadataAndTags,
-  FlattenedModelImage,
+  type FileInterface,
+  type FileWithMetadataAndTags,
+  type FlattenedModelImage,
   isFileInterface,
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'

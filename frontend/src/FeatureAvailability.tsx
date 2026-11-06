@@ -4,7 +4,7 @@ import { useContext } from 'react'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
-import { ArtefactKind, FederationState, ScanInfoInterface, UiConfig } from 'types/types'
+import { ArtefactKind, FederationState, type ScanInfoInterface, type UiConfig } from 'types/types'
 
 type ConfigFeatureKey =
   'inference' | 'modelMirrorImport' | 'untrustedModel' | 'llmImport' | 'fileScanning' | 'imageScanning'

@@ -5,7 +5,7 @@
  */
 
 import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2'
-import nodemailer, { Transporter } from 'nodemailer'
+import nodemailer, { type Transporter } from 'nodemailer'
 
 import log from '../services/log.js'
 import config from '../utils/config.js'

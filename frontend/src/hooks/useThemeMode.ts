@@ -1,4 +1,4 @@
-import { Theme } from '@mui/material/styles'
+import { type Theme } from '@mui/material/styles'
 import { useCallback, useState } from 'react'
 
 import { darkTheme, lightTheme } from '../theme'

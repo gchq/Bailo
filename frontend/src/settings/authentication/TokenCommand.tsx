@@ -4,7 +4,7 @@ import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
-import { TokenInterface } from 'types/types'
+import { type TokenInterface } from 'types/types'
 
 type TokenCommandProps = {
   token: TokenInterface

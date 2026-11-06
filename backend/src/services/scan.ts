@@ -1,13 +1,17 @@
-import { ClientSession } from 'mongoose'
+import { type ClientSession } from 'mongoose'
 
-import { ArtefactScanResult, ArtefactScanState, LayerRefInterface } from '../connectors/artefactScanning/Base.js'
+import {
+  type ArtefactScanResult,
+  ArtefactScanState,
+  type LayerRefInterface,
+} from '../connectors/artefactScanning/Base.js'
 import scanners from '../connectors/artefactScanning/index.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileInterface } from '../models/File.js'
-import { ImageRef } from '../models/Release.js'
-import ScanModel, { ArtefactKind, ArtefactKindKeys } from '../models/Scan.js'
-import { UserInterface } from '../models/User.js'
+import { type FileInterface } from '../models/File.js'
+import { type ImageRef } from '../models/Release.js'
+import ScanModel, { ArtefactKind, type ArtefactKindKeys } from '../models/Scan.js'
+import { type UserInterface } from '../models/User.js'
 import { issueAccessToken } from '../routes/v1/registryAuth.js'
 import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'

@@ -1,30 +1,35 @@
 import humanInterval from 'human-interval'
-import { Model, PipelineStage, QueryFilter } from 'mongoose'
+import { type Model, type PipelineStage, type QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { EntryKind, ModelInterface } from '../../models/Model.js'
-import ReleaseModel, { SemverObject } from '../../models/Release.js'
+import ModelModel, { EntryKind, type ModelInterface } from '../../models/Model.js'
+import ReleaseModel, { type SemverObject } from '../../models/Release.js'
 import ResponseModel, { Decision } from '../../models/Response.js'
-import ReviewModel, { ReviewInterface } from '../../models/Review.js'
+import ReviewModel, { type ReviewInterface } from '../../models/Review.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import {
-  EntryVolumeDataPoint,
-  EntryVolumeInterval,
-  GetEntryVolumeResponse,
+  type EntryVolumeDataPoint,
+  type EntryVolumeInterval,
+  type GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
-import { GetLifecycleComplianceMetricsResponse } from '../../routes/v3/metrics/getLifecycleComplianceMetrics.js'
-import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
-import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
-import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
-import { GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/getUnapprovedComplianceMetrics.js'
-import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
+import { type GetLifecycleComplianceMetricsResponse } from '../../routes/v3/metrics/getLifecycleComplianceMetrics.js'
+import { type GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
+import { type GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
+import { type GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
+import { type GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/getUnapprovedComplianceMetrics.js'
+import {
+  type BaseMetrics,
+  type GetUsageMetricsResponse,
+  type SchemaInfo,
+  type StateInfo,
+} from '../../routes/v3/metrics/getUsageMetrics.js'
 import { MetricsCacheKeys, ReviewKind } from '../../types/enums.js'
-import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
+import { EntryFilter, type MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import { sortSemvers } from '../../utils/version.js'
@@ -35,8 +40,8 @@ import {
   getActiveRoleSet,
   getApplicableRoleSet,
   getModelOwners,
-  ModelFilter,
-  SchemaRoleMap,
+  type ModelFilter,
+  type SchemaRoleMap,
   semverToString,
 } from './metricUtils.js'
 

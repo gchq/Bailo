@@ -1,8 +1,8 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { escalateUser, isAuthorisedToEscalate } from '../../../src/routes/middleware/userEscalation.js'
-import config, { Config } from '../../../src/utils/config.js'
+import config, { type Config } from '../../../src/utils/config.js'
 import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 const mockTokenService = vi.hoisted(() => ({

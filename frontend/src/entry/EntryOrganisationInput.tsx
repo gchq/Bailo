@@ -1,4 +1,4 @@
-import { MenuItem, Select, SelectChangeEvent } from '@mui/material'
+import { MenuItem, Select, type SelectChangeEvent } from '@mui/material'
 import { useContext, useMemo } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import UiConfigContext from 'src/contexts/uiConfigContext'

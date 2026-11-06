@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import DisplayDialog from 'src/common/DisplayDialog'
 import ReviewComments from 'src/reviews/ReviewComments'
-import { EntryInterface, ReviewKind } from 'types/types'
+import { type EntryInterface, ReviewKind } from 'types/types'
 
 type ReviewHistoryDialogProps = {
   open: boolean

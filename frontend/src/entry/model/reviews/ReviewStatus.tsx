@@ -7,7 +7,7 @@ import renderQueryState from 'src/common/renderQueryState'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { ReviewStatusDisplay } from 'src/entry/model/reviews/ReviewStatusDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { Decision, ReviewRequestInterface } from 'types/types'
+import { Decision, type ReviewRequestInterface } from 'types/types'
 
 export interface ReviewStatusProps {
   modelId: string

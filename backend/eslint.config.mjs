@@ -11,7 +11,14 @@ const __dirname = path.dirname(__filename)
 
 const eslintConfig = [
   {
-    ignores: ['**/node_modules', '**/dist', '**/docs/_build', '**/docs/python-docs', '**/docs/backenddocsvenv'],
+    ignores: [
+      '**/node_modules',
+      '**/dist',
+      '**/docs/_build',
+      '**/docs/python-docs',
+      '**/docs/backenddocsvenv',
+      '**/docs/.venv',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -37,6 +44,7 @@ const eslintConfig = [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/consistent-type-imports': ['warn', { fixStyle: 'inline-type-imports' }],
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
       'no-duplicate-imports': 'warn',

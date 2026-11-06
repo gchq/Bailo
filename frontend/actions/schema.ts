@@ -1,10 +1,10 @@
-import { EntrySearchResult } from 'actions/entry'
+import { type EntrySearchResult } from 'actions/entry'
 import qs from 'querystring'
 import useSWR from 'swr'
 import { camelCasetoKebabCase } from 'utils/stringUtils'
 
-import { AccessRequestInterface, SchemaInterface, SchemaKind, SchemaKindKeys } from '../types/types'
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type AccessRequestInterface, type SchemaInterface, SchemaKind, type SchemaKindKeys } from '../types/types'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptySchemaList = []
 

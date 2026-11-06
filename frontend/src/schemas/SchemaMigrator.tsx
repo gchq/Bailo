@@ -15,17 +15,17 @@ import {
   Menu,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
-import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
+import React, { type Dispatch, type SetStateAction, useCallback, useMemo, useState } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
-import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
-import { CombinedSchema, QuestionMigration } from 'types/types'
+import JsonSchemaViewer, { type QuestionSelection } from 'src/Form/JsonSchemaViewer'
+import { type CombinedSchema, type QuestionMigration } from 'types/types'
 import { truncateText } from 'utils/stringUtils'
 
 interface SchemaMigratorProps {

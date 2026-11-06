@@ -19,7 +19,7 @@ import prettyBytes from 'pretty-bytes'
 import { useCallback, useState } from 'react'
 import Paginate from 'src/common/Paginate'
 import renderQueryState from 'src/common/renderQueryState'
-import { EntryInterface, FileInterface, isFileInterface } from 'types/types'
+import { type EntryInterface, type FileInterface, isFileInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 interface ExistingFileSelectorProps {

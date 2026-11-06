@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'

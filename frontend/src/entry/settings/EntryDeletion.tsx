@@ -3,7 +3,7 @@ import { Button, Divider, Stack, Typography } from '@mui/material'
 import { deleteEntry } from 'actions/entry'
 import { useState } from 'react'
 import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
-import { EntryInterface, EntryKindLabel } from 'types/types'
+import { type EntryInterface, EntryKindLabel } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
 type EntryDeletionProps = {

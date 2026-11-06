@@ -1,7 +1,7 @@
 import useSWRImmutable from 'swr/immutable'
 
-import { PeerConfigStatus, SystemStatus } from '../types/types'
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { type PeerConfigStatus, type SystemStatus } from '../types/types'
+import { type ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetPeers() {
   const { data, isLoading, error, mutate } = useSWRImmutable<

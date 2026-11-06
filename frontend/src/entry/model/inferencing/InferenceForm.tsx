@@ -1,12 +1,12 @@
 import { Slider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ChangeEvent, useMemo } from 'react'
+import { type ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import LimitedTextField from 'src/common/LimitedTextField'
 import ProcessorTypeList from 'src/entry/model/inferencing/ProcessorTypeList'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
-import { EntryInterface, FlattenedModelImage } from 'types/types'
+import { type EntryInterface, type FlattenedModelImage } from 'types/types'
 import { isValidPortNumber } from 'utils/stringUtils'
 
 type InferenceFormData = {

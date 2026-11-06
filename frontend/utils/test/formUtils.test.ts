@@ -1,4 +1,4 @@
-import { StepNoRender } from 'types/types'
+import { type StepNoRender } from 'types/types'
 import { getFormStats, getOverallCompletionStats } from 'utils/formUtils'
 import { expect } from 'vitest'
 

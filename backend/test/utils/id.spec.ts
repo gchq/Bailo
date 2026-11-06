@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { convertStringToId, longId, shortId } from '../../src/utils/id.js'
+import { convertStringToId, longAlphabet, longId, randomString, shortAlphabet, shortId } from '../../src/utils/id.js'
 
 describe('utils > id', () => {
   test('longId', () => {
@@ -13,7 +13,25 @@ describe('utils > id', () => {
   test('shortId', () => {
     const generatedId = shortId()
 
-    expect(generatedId).toMatch(/\w{6}/)
+    expect(generatedId).toMatch(/^[0-9a-z]{6}$/)
+  })
+
+  test('shortAlphabet', () => {
+    expect(shortAlphabet(8)).toMatch(/^[0-9A-Z]{8}$/)
+  })
+
+  test('longAlphabet', () => {
+    expect(longAlphabet(32)).toMatch(/^[0-9A-Za-z]{32}$/)
+  })
+
+  test('randomString > only uses the given alphabet', () => {
+    expect(randomString('ab', 100)).toMatch(/^[ab]{100}$/)
+    expect(randomString('x', 3)).toEqual('xxx')
+    expect(randomString('abc', 0)).toEqual('')
+  })
+
+  test('randomString > uses every character of the alphabet', () => {
+    expect(new Set(randomString('abc', 300))).toEqual(new Set(['a', 'b', 'c']))
   })
 
   test('convertStringToId > general', () => {

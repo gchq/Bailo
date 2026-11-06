@@ -1,6 +1,6 @@
 import useSWR from 'swr'
-import { ReleaseInterface } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ReleaseInterface } from 'types/types'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyReleaseList = []
 

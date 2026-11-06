@@ -10,7 +10,7 @@ import Restricted from 'src/common/Restricted'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type InferenceProps = {

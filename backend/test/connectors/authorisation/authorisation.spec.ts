@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ArtefactScanResult } from '../../../src/connectors/artefactScanning/Base.js'
-import { AuthorisationKindKeys, getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
+import { type ArtefactScanResult } from '../../../src/connectors/artefactScanning/Base.js'
+import { type AuthorisationKindKeys, getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
 import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 

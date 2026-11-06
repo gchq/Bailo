@@ -18,7 +18,7 @@ import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import { Transition } from 'src/common/Transition'
 import UserDisplay from 'src/common/UserDisplay'
-import { EntryCardRevisionInterface } from 'types/types'
+import { type EntryCardRevisionInterface } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
 
 export type EntryCardSnapshot = {

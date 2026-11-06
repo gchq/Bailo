@@ -4,7 +4,7 @@ import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { ReviewKind, ReviewKindKeys, ReviewListStatusKeys } from 'types/types'
+import { ReviewKind, type ReviewKindKeys, type ReviewListStatusKeys } from 'types/types'
 
 type ReviewsListProps = {
   kind: ReviewKindKeys

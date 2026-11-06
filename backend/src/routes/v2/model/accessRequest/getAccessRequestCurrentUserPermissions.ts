@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { z } from '../../../../lib/zod.js'
 import { getCurrentUserPermissionsByAccessRequest } from '../../../../services/accessRequest.js'
 import { accessRequestUserPermissionsSchema, registerPath } from '../../../../services/specification.js'
-import { AccessRequestUserPermissions } from '../../../../types/types.js'
+import { type AccessRequestUserPermissions } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getAccessRequestCurrentUserPermissionsSchema = z.object({

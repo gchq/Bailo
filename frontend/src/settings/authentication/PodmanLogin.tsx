@@ -2,7 +2,7 @@ import { Stack, Typography } from '@mui/material'
 import { useContext } from 'react'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
-import { TokenInterface } from 'types/types'
+import { type TokenInterface } from 'types/types'
 
 type PodmanLoginProps = {
   token: TokenInterface

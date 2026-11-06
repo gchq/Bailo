@@ -1,11 +1,11 @@
-import { TypographyProps } from '@mui/material'
-import Box, { BoxProps } from '@mui/material/Box'
+import { type TypographyProps } from '@mui/material'
+import Box, { type BoxProps } from '@mui/material/Box'
 import { grey } from '@mui/material/colors'
 import Link from '@mui/material/Link'
-import { Theme, useTheme } from '@mui/material/styles'
+import { type Theme, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import ReactMarkdown from 'markdown-to-jsx'
-import { createElement, ReactNode, useMemo } from 'react'
+import { createElement, type ReactNode, useMemo } from 'react'
 
 export type MarkdownDisplayProps = {
   children: string
