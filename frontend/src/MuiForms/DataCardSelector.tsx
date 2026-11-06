@@ -2,13 +2,12 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry, RJSFSchema } from '@rjsf/utils'
-import { EntrySearchResult, useListEntries } from 'actions/entry'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
+import { type EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { type KeyboardEvent, type SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntryKind } from 'types/types'
 
@@ -147,8 +146,6 @@ export default function DataCardSelector({
             />
           )}
         />
-      ) : compare.inMirroredCompare && currentValue.length > 0 ? (
-        <InlineDiff from={idsToDiffString(compare.compareFromState)} to={idsToDiffString(currentValue)} />
       ) : currentValue.length > 0 ? (
         <Box sx={{ overflowX: 'auto', p: 1 }}>
           <Stack spacing={1} direction='row'>

@@ -1,48 +1,23 @@
-import { Request } from 'express'
+import { type Request } from 'express'
 import { describe, expect, test, vi } from 'vitest'
 
 import { StroomAuditConnector } from '../../../src/connectors/audit/stroom.js'
-import { AccessRequestDoc } from '../../../src/models/AccessRequest.js'
-import { FileInterfaceDoc, FileWithScanResultsInterface } from '../../../src/models/File.js'
-import { InferenceDoc } from '../../../src/models/Inference.js'
-import { ModelCardInterface, ModelDoc, ModelInterface } from '../../../src/models/Model.js'
-import { ImageTagRef, ReleaseDoc } from '../../../src/models/Release.js'
-import { ResponseInterface } from '../../../src/models/Response.js'
-import { ReviewInterface } from '../../../src/models/Review.js'
-import { ReviewRoleDoc } from '../../../src/models/ReviewRole.js'
-import { SchemaDoc, SchemaInterface } from '../../../src/models/Schema.js'
-import { SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
-import { TokenDoc } from '../../../src/models/Token.js'
-import { MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
-import { FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
-import { ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
+import { type AccessRequestDoc } from '../../../src/models/AccessRequest.js'
+import { type FileInterfaceDoc, type FileWithScanResultsInterface } from '../../../src/models/File.js'
+import { type InferenceDoc } from '../../../src/models/Inference.js'
+import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../../src/models/Model.js'
+import { type ImageTagRef, type ReleaseDoc } from '../../../src/models/Release.js'
+import { type ResponseInterface } from '../../../src/models/Response.js'
+import { type ReviewInterface } from '../../../src/models/Review.js'
+import { type ReviewRoleDoc } from '../../../src/models/ReviewRole.js'
+import { type SchemaDoc, type SchemaInterface } from '../../../src/models/Schema.js'
+import { type SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
+import { type TokenDoc } from '../../../src/models/Token.js'
+import { type MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
+import { type FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
+import { type ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
+import config from '../../../src/utils/config.js'
 import { InternalError } from '../../../src/utils/error.js'
-
-const configMock = vi.hoisted(() => ({
-  connectors: {
-    audit: {
-      kind: 'stroom',
-    },
-  },
-  stroom: {
-    logOnlyMode: true,
-    feed: 'feed',
-    url: 'https://url',
-    environment: 'local',
-    interval: 1000 * 50,
-    generator: 'Generator',
-  },
-  s3: {
-    buckets: {
-      uploads: 'uploads',
-      registry: 'registry',
-    },
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMock,
-}))
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -56,6 +31,7 @@ vi.mock('../../../src/services/log.js', async () => ({
 
 const mockStroomService = vi.hoisted(() => ({
   saveEvent: vi.fn(),
+  processBatch: vi.fn(async () => {}),
 }))
 vi.mock('../../../src/services/stroom.js', () => mockStroomService)
 
@@ -488,5 +464,13 @@ describe('connectors > audit > stroom', () => {
   test('onError > save expected event for Search error', async () => {
     await connector.onError(searchEventRequest, InternalError('Error'))
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('scheduled batch > logs a failure instead of rejecting unhandled', async () => {
+    mockStroomService.processBatch.mockRejectedValueOnce(new Error('batch failed'))
+
+    await vi.advanceTimersByTimeAsync(config.stroom.interval)
+
+    expect(logMock.error).toHaveBeenCalledWith({ err: expect.any(Error) }, 'Failed to process batch of STROOM events.')
   })
 })

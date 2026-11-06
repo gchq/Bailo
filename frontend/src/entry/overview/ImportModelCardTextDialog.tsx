@@ -3,6 +3,7 @@ import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextF
 import { postImportModelCardText } from 'actions/modelCard'
 import { useState } from 'react'
 import { Transition } from 'src/common/Transition'
+import MessageAlert from 'src/MessageAlert'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface ImportModelCardTextDialogProps {
@@ -78,11 +79,7 @@ export default function ImportModelCardTextDialog({
             '& .MuiInputBase-input': { height: '100% !important', overflow: 'auto !important' },
           }}
         />
-        {errorMessage && (
-          <Alert severity='error' sx={{ mt: 2 }}>
-            {errorMessage}
-          </Alert>
-        )}
+        <MessageAlert message={errorMessage} severity='error' />
       </DialogContent>
       <DialogActions sx={{ pr: 2, pt: 0 }}>
         <Button variant='outlined' onClick={handleClose} disabled={loading}>

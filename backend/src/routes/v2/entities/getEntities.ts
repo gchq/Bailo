@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import authentication from '../../../connectors/authentication/index.js'
 import { z } from '../../../lib/zod.js'

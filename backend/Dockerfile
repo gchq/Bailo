@@ -1,34 +1,37 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.14.2-trixie@sha256:4878b7ad12a3c49e49c775ea617df0d2169605eaffc5ede31977e1c3dd913eae AS sphinx-docs
+FROM ghcr.io/astral-sh/uv:python3.15-alpine@sha256:f008ab85c84befffaaa8cbde7eb2b749331769df4e18be766269d0c4904deb40 AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy \
+    PATH="/venv/bin:$PATH"
 
-# Cache packages with run cache, update system packages, install pandoc
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends pandoc
+RUN apk add --no-cache pandoc make
 
 WORKDIR /app/docs
 
-COPY docs .
-# Only get the required dirs & files (ignore tests etc.)
 COPY --from=python pyproject.toml /app/python/
 COPY --from=python README.md /app/python/
 COPY --from=python src /app/python/src
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
+# `--no-install-project` skips bailo-docs itself which has no modules
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=docs/uv.lock,target=uv.lock \
+    --mount=type=bind,source=docs/pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project && \
+    uv pip install -e /app/python
+
+COPY docs .
 
 RUN make html
 
-FROM node:26.7.0-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS node-base
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS node-base
 
-RUN apk add --no-cache libc6-compat ca-certificates && \
-    apk update
+RUN apk add --no-cache libc6-compat ca-certificates
 
 WORKDIR /app
 

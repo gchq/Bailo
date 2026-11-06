@@ -1,30 +1,35 @@
 import humanInterval from 'human-interval'
-import { Model, PipelineStage, QueryFilter } from 'mongoose'
+import { type Model, type PipelineStage, type QueryFilter } from 'mongoose'
 import NodeCache from 'node-cache'
 
 import { Roles } from '../../connectors/authentication/constants.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel from '../../models/AccessRequest.js'
-import ModelModel, { EntryKind, ModelInterface } from '../../models/Model.js'
-import ReleaseModel, { SemverObject } from '../../models/Release.js'
+import ModelModel, { EntryKind, type ModelInterface } from '../../models/Model.js'
+import ReleaseModel, { type SemverObject } from '../../models/Release.js'
 import ResponseModel, { Decision } from '../../models/Response.js'
-import ReviewModel, { ReviewInterface } from '../../models/Review.js'
+import ReviewModel, { type ReviewInterface } from '../../models/Review.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import SchemaModel from '../../models/Schema.js'
-import { UserInterface } from '../../models/User.js'
+import { type UserInterface } from '../../models/User.js'
 import {
-  EntryVolumeDataPoint,
-  EntryVolumeInterval,
-  GetEntryVolumeResponse,
+  type EntryVolumeDataPoint,
+  type EntryVolumeInterval,
+  type GetEntryVolumeResponse,
 } from '../../routes/v3/metrics/getEntryVolume.js'
-import { GetLifecycleComplianceMetricsResponse } from '../../routes/v3/metrics/getLifecycleComplianceMetrics.js'
-import { GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
-import { GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
-import { GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
-import { GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/getUnapprovedComplianceMetrics.js'
-import { BaseMetrics, GetUsageMetricsResponse, SchemaInfo, StateInfo } from '../../routes/v3/metrics/getUsageMetrics.js'
+import { type GetLifecycleComplianceMetricsResponse } from '../../routes/v3/metrics/getLifecycleComplianceMetrics.js'
+import { type GetModelBreakdownResponse } from '../../routes/v3/metrics/getModelBreakdown.js'
+import { type GetNoReleasesComplianceMetricsResponse } from '../../routes/v3/metrics/getNoReleasesComplianceMetrics.js'
+import { type GetRoleComplianceMetricsResponse } from '../../routes/v3/metrics/getRoleComplianceMetrics.js'
+import { type GetUnapprovedComplianceMetricsResponse } from '../../routes/v3/metrics/getUnapprovedComplianceMetrics.js'
+import {
+  type BaseMetrics,
+  type GetUsageMetricsResponse,
+  type SchemaInfo,
+  type StateInfo,
+} from '../../routes/v3/metrics/getUsageMetrics.js'
 import { MetricsCacheKeys, ReviewKind } from '../../types/enums.js'
-import { EntryFilter, MetricsEntrySearchOptionsParams } from '../../types/types.js'
+import { EntryFilter, type MetricsEntrySearchOptionsParams } from '../../types/types.js'
 import { BadReq, Forbidden } from '../../utils/error.js'
 import { isMongoServerError } from '../../utils/mongo.js'
 import { sortSemvers } from '../../utils/version.js'
@@ -35,8 +40,8 @@ import {
   getActiveRoleSet,
   getApplicableRoleSet,
   getModelOwners,
-  ModelFilter,
-  SchemaRoleMap,
+  type ModelFilter,
+  type SchemaRoleMap,
   semverToString,
 } from './metricUtils.js'
 
@@ -124,7 +129,10 @@ async function calculateTotalEntries(filter: ModelFilter): Promise<number> {
 async function countDistinctEntriesWithRelation(collection: Model<any>, filter: ModelFilter): Promise<number> {
   if (filter.organisation === undefined) {
     const ids = await collection.distinct('modelId')
-    return ids.length
+    if (ids.length === 0) {
+      return 0
+    }
+    return ModelModel.countDocuments({ id: { $in: ids } })
   }
 
   const pipeline: PipelineStage[] = [
@@ -212,8 +220,7 @@ async function calculateSchemaBreakdown(filter: ModelFilter): Promise<SchemaInfo
  * Calculates the full set of usage metrics either globally
  * or scoped to a specific organisation.
  */
-async function calculateUsageMetrics(user: UserInterface, filter: ModelFilter): Promise<BaseMetrics> {
-  await checkUserIsAuthorised(user)
+async function calculateUsageMetrics(filter: ModelFilter): Promise<BaseMetrics> {
   const [totalEntries, stateMetrics, schemaMetrics, totalEntriesWithReleases, totalEntriesWithAccessRequests] =
     await Promise.all([
       calculateTotalEntries(filter),
@@ -716,6 +723,10 @@ async function calculateLifecycleComplianceMetrics(
       },
     },
     { $match: { responses: { $size: 0 } } },
+    { $sort: { createdAt: -1 } },
+    // Group so that we have only one model per modelId (most recent review)
+    { $group: { _id: '$modelId', review: { $first: '$$ROOT' } } },
+    { $replaceRoot: { newRoot: '$review' } },
     {
       $lookup: {
         from: 'v2_models',
@@ -800,62 +811,26 @@ export class BaseMetricsConnector {
       }
     }
 
+    await checkUserIsAuthorised(user)
+
     const organisationIds = await this.getOrganisationIds()
 
-    const byOrganisation = await Promise.all(
-      organisationIds.map(async (orgRaw) => {
-        const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
-
-        const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
-
-        const metrics = await calculateUsageMetrics(user, filter)
-
-        return { organisation, ...metrics }
-      }),
-    )
-
-    const schemaCounts = new Map<string, SchemaInfo>()
-    const stateCounts = new Map<string, StateInfo>()
-
-    let entries = 0
-    let withReleases = 0
-    let withAccessRequest = 0
-
-    // Tally up the metrics for each org to get global metrics
-    for (const org of byOrganisation) {
-      entries += org.entries
-      withReleases += org.withReleases
-      withAccessRequest += org.withAccessRequest
-
-      for (const schema of org.schemaBreakdown ?? []) {
-        const key = String(schema.schemaId)
-        const existing = schemaCounts.get(key)
-
-        if (existing) {
-          existing.count += schema.count
-        } else {
-          schemaCounts.set(key, { ...schema, schemaId: key })
-        }
-      }
-
-      for (const state of org.entryState ?? []) {
-        const existing = stateCounts.get(state.state)
-
-        if (existing) {
-          existing.count += state.count
-        } else {
-          stateCounts.set(state.state, { ...state })
-        }
-      }
-    }
+    const [byOrganisation, globalMetrics, users] = await Promise.all([
+      Promise.all(
+        organisationIds.map(async (orgRaw) => {
+          const organisation = orgRaw && orgRaw.trim() !== '' ? orgRaw : 'unset'
+          const filter: ModelFilter = orgRaw === '' ? { organisation: '' } : { organisation: orgRaw }
+          const metrics = await calculateUsageMetrics(filter)
+          return { organisation, ...metrics }
+        }),
+      ),
+      calculateUsageMetrics({}),
+      calculateTotalUsers(),
+    ])
 
     const global: BaseMetrics = {
-      users: await calculateTotalUsers(),
-      entries,
-      withReleases,
-      withAccessRequest,
-      schemaBreakdown: Array.from(schemaCounts.values()),
-      entryState: Array.from(stateCounts.values()).sort((a, b) => b.count - a.count),
+      ...globalMetrics,
+      users,
     }
 
     const result = { global, byOrganisation }

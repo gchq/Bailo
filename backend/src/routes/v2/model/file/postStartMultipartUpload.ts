@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
@@ -15,7 +15,7 @@ export const postStartMultipartUploadSchema = z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
     size: z.number().positive(),
-    tags: coerceArray(z.array(z.string()).optional()),
+    tags: coerceArray(z.array(z.string())).optional(),
   }),
 })
 

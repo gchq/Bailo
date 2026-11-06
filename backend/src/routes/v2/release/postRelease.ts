@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { ReleaseInterface } from '../../../models/Release.js'
+import { type ReleaseInterface } from '../../../models/Release.js'
 import { createRelease } from '../../../services/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'

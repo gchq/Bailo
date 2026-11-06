@@ -15,7 +15,7 @@ import {
   Menu,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Stack,
   TextField,
   Tooltip,
@@ -23,9 +23,9 @@ import {
 } from '@mui/material'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
-import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
-import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
-import { CombinedSchema, QuestionMigration } from 'types/types'
+import React, { type Dispatch, type SetStateAction, useCallback, useMemo, useState } from 'react'
+import JsonSchemaViewer, { type QuestionSelection } from 'src/Form/JsonSchemaViewer'
+import { type CombinedSchema, type QuestionMigration } from 'types/types'
 import { truncateText } from 'utils/stringUtils'
 
 interface SchemaMigratorProps {
@@ -134,7 +134,7 @@ export default function SchemaMigrator({
             >
               <Close color='error' />
             </IconButton>
-            <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
+            <Typography sx={{ overflow: 'hidden', wordBreak: 'break-word' }}>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> deleted
             </Typography>
           </Stack>

@@ -8,7 +8,7 @@ import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
 import EditableReviewComment from 'src/reviews/EditableReviewComment'
-import { EntityKind, ResponseInterface, User } from 'types/types'
+import { type EntityKind, type ResponseInterface, type User } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 

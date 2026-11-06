@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bailo-docs"
+version = "1.0.0"
+description = "Sphinx documentation for the Bailo Python client"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ipython>=9",
+    "myst-parser>=5",
+    "nbsphinx>=0.9",
+    "sphinx>=9",
+    "sphinx-copybutton>=0.5",
+    "sphinx-rtd-theme>=3",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4",
+]
+
+[tool.setuptools]
+py-modules = []

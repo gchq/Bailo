@@ -1,15 +1,15 @@
 import traverse from 'json-schema-traverse'
-import { Schema as JsonSchema, Validator } from 'jsonschema'
+import { type Schema as JsonSchema, Validator } from 'jsonschema'
 import _ from 'lodash'
 import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { CollaboratorEntry } from '../models/Model.js'
+import ModelModel, { type CollaboratorEntry } from '../models/Model.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import SchemaModel, { SchemaDoc, SchemaInterface } from '../models/Schema.js'
-import { UserInterface } from '../models/User.js'
-import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
+import SchemaModel, { type SchemaDoc, type SchemaInterface } from '../models/Schema.js'
+import { type UserInterface } from '../models/User.js'
+import { SchemaKind, type SchemaKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
@@ -17,13 +17,23 @@ import log from './log.js'
 import { addReviewsForNewRole } from './review.js'
 
 const jsonSchemaValidator = new Validator()
-const schemaCache = new NodeCache()
+const schemaCacheTtlSeconds = 60 * 60 // 1 hour
+const schemaCache = new NodeCache({ stdTTL: schemaCacheTtlSeconds })
 export interface DefaultSchema {
+  /** Name of the schema that appears */
   name: string
+  /** Unique identifier for the schema */
   id: string
+  /** Description of the schemas functions */
   description: string
+  /** The file to mount the contents of each schema eg. `require('../src/scripts/example_schemas/minimal_model_schema.json')` */
   jsonSchema: JsonSchema
+  /** Roles required to review  */
   reviewRoles?: string[]
+}
+
+function deleteCacheKeys(schemaId: string) {
+  schemaCache.del(schemaCache.keys().filter((key) => JSON.parse(key).schemaId === schemaId))
 }
 
 export async function searchSchemas(
@@ -142,6 +152,8 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
 
   await schema.deleteOne()
 
+  deleteCacheKeys(schemaId)
+
   return schema
 }
 
@@ -157,7 +169,12 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 
   if (overwrite) {
-    await SchemaModel.deleteOne({ id: schema.id })
+    await SchemaModel.replaceOne({ id: schema.id }, { ...schema, deleted: false }, { upsert: true })
+    const replaced = await SchemaModel.findOne({ id: schema.id })
+    if (!replaced) {
+      throw NotFound('The schema could not be found after upsert.', { schemaId: schema.id })
+    }
+    return replaced
   }
 
   try {
@@ -197,6 +214,8 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 
   Object.assign(schema, diff)
   await schema.save()
+
+  deleteCacheKeys(schemaId)
 
   if (diff.reviewRoles) {
     const models = await ModelModel.find({ 'card.schemaId': schemaId })
@@ -259,38 +278,29 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 export async function addDefaultSchemas() {
   for (const schema of config.defaultSchemas.modelCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.Model,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
+    await SchemaModel.replaceOne(
+      { id: schema.id },
+      { ...schema, kind: SchemaKind.Model, active: true, hidden: false, deleted: false },
+      { upsert: true },
+    )
   }
 
   for (const schema of config.defaultSchemas.dataCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const dataCardSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.DataCard,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await dataCardSchema.save()
+    await SchemaModel.replaceOne(
+      { id: schema.id },
+      { ...schema, kind: SchemaKind.DataCard, active: true, hidden: false, deleted: false },
+      { upsert: true },
+    )
   }
 
   for (const schema of config.defaultSchemas.accessRequests) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new SchemaModel({
-      ...schema,
-      kind: SchemaKind.AccessRequest,
-      active: true,
-      hidden: false,
-    })
-    await SchemaModel.deleteOne({ id: schema.id })
-    await modelSchema.save()
+    await SchemaModel.replaceOne(
+      { id: schema.id },
+      { ...schema, kind: SchemaKind.AccessRequest, active: true, hidden: false, deleted: false },
+      { upsert: true },
+    )
   }
 }
 

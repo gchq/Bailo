@@ -1,12 +1,12 @@
 import { Box } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { EntrySearchResult } from 'actions/entry'
+import { type EntrySearchResult } from 'actions/entry'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Paginate from 'src/common/Paginate'
 import EntryListRow from 'src/marketplace/EntryListRow'
 import MessageAlert from 'src/MessageAlert'
-import { PeerConfigStatus } from 'types/types'
+import { type PeerConfigStatus } from 'types/types'
 
 interface EntryListProps {
   entries: EntrySearchResult[]

@@ -3,10 +3,10 @@ import Create from '@mui/icons-material/Create'
 import Delete from '@mui/icons-material/Delete'
 import Save from '@mui/icons-material/Save'
 import { Button, Stack } from '@mui/material'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import Restricted from 'src/common/Restricted'
 import MessageAlert from 'src/MessageAlert'
-import { RestrictedActionKeys } from 'types/types'
+import { type RestrictedActionKeys } from 'types/types'
 
 type EditableFormHeadingProps = {
   heading: ReactNode
@@ -79,7 +79,7 @@ export default function EditableFormHeading({
               <Restricted action={deleteAction} fallback={<Button disabled>{deleteButtonText}</Button>}>
                 <Button
                   variant='contained'
-                  color='secondary'
+                  color='error'
                   onClick={onDelete}
                   data-test='deleteFormButton'
                   disabled={isRegistryError}
@@ -101,7 +101,13 @@ export default function EditableFormHeading({
               mb: { xs: 2 },
             }}
           >
-            <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton' startIcon={<Close />}>
+            <Button
+              variant='outlined'
+              loading={isLoading}
+              onClick={onCancel}
+              data-test='cancelEditFormButton'
+              startIcon={<Close />}
+            >
               Cancel
             </Button>
             <Button

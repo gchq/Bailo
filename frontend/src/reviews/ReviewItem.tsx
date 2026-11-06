@@ -2,11 +2,10 @@ import { Box, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo } from 'react'
-import Loading from 'src/common/Loading'
+import renderQueryState from 'src/common/renderQueryState'
 import ReviewStatus from 'src/entry/model/reviews/ReviewStatus'
-import MessageAlert from 'src/MessageAlert'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
-import { ReviewKind, ReviewListStatus, ReviewListStatusKeys, ReviewRequestInterface } from 'types/types'
+import { ReviewKind, ReviewListStatus, type ReviewListStatusKeys, type ReviewRequestInterface } from 'types/types'
 import { formatDateStringAsDayMonthAndYear, timeDifference } from 'utils/dateUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -84,12 +83,9 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
     }
   }, [currentUser, editedAdornment, isArchivedLifecycleReview, review])
 
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isCurrentUserError], isCurrentUserLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

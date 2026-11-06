@@ -1,7 +1,7 @@
-import { Registry, RegistryWidgetsType } from '@rjsf/utils'
+import { type Registry, type RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
-import { Dispatch, SetStateAction } from 'react'
+import { type Dispatch, type SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
 import DataCardSelector from 'src/MuiForms/DataCardSelector'
@@ -14,7 +14,13 @@ import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
 import TagSelector from 'src/MuiForms/TagSelector'
 
-import { FormStats, ModelFormStats, SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
+import {
+  type FormStats,
+  type ModelFormStats,
+  type SplitSchemaNoRender,
+  type StepNoRender,
+  type StepType,
+} from '../types/types'
 import { createUiSchema } from './uiSchemaUtils'
 
 export const widgets: RegistryWidgetsType = {

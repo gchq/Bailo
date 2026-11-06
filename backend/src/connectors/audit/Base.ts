@@ -1,19 +1,19 @@
-import { Request } from 'express'
+import { type Request } from 'express'
 
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileWithScanResultsAggregate } from '../../models/File.js'
-import { InferenceDoc } from '../../models/Inference.js'
-import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
-import { ResponseInterface } from '../../models/Response.js'
-import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleDoc } from '../../models/ReviewRole.js'
-import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
-import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
-import { TokenDoc } from '../../models/Token.js'
-import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
-import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, MirrorInformation, ModelImages } from '../../types/types.js'
+import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type FileInterface, type FileWithScanResultsAggregate } from '../../models/File.js'
+import { type InferenceDoc } from '../../models/Inference.js'
+import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
+import { type ImageTagRef, type ReleaseDoc } from '../../models/Release.js'
+import { type ResponseInterface } from '../../models/Response.js'
+import { type ReviewInterface } from '../../models/Review.js'
+import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
+import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
+import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
+import { type TokenDoc } from '../../models/Token.js'
+import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type BailoError } from '../../types/error.js'
+import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
 
 export const AuditKind = {
   Create: 'Create',
@@ -183,19 +183,19 @@ export const AuditInfo = {
     typeId: 'CreateUserToken',
     description: 'Token Created',
     auditKind: AuditKind.Create,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   ViewUserTokens: {
     typeId: 'ViewUserToken',
     description: 'Token Viewed',
     auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
   DeleteUserToken: {
     typeId: 'DeleteUserToken',
     description: 'Token Deleted',
     auditKind: AuditKind.Delete,
-    resourceKind: ResourceKind.Release,
+    resourceKind: ResourceKind.Token,
   },
 
   CreateAccessRequest: {
@@ -219,7 +219,7 @@ export const AuditInfo = {
   DeleteAccessRequest: {
     typeId: 'UpdateAccessRequest',
     description: 'Access Request Deleted',
-    auditKind: AuditKind.Update,
+    auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.AccessRequest,
   },
   ViewAccessRequests: {
@@ -552,14 +552,14 @@ export abstract class BaseAuditConnector {
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
 
-  abstract onRegistryImagePulled(req: Request, userDn: string): Promise<void>
-  abstract onRegistryImagePushed(req: Request, userDn: string): Promise<void>
-  abstract onRegistryImageDeleted(req: Request, userDn: string): Promise<void>
+  abstract onRegistryImagePulled(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImagePushed(req: Request, registryImage: string): Promise<void>
+  abstract onRegistryImageDeleted(req: Request, registryImage: string): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
-    if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
+    if (auditInfo.typeId !== req.audit.typeId || auditInfo.description !== req.audit.description) {
       throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but received '${JSON.stringify(req.audit)}'`)
     }
   }

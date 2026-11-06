@@ -5,13 +5,13 @@ import {
   Container,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Stack,
   Typography,
 } from '@mui/material'
-import { ReactElement, useCallback, useState } from 'react'
+import { type ReactElement, useCallback, useState } from 'react'
 import MetricsExportPreview from 'src/metrics/MetricsExportPreview'
-import { SelectedMetricKind, SelectedMetricKindKeys } from 'src/metrics/PolicyMetrics'
+import { SelectedMetricKind, type SelectedMetricKindKeys } from 'src/metrics/PolicyMetrics'
 import { formatDateStringWithMinutes } from 'utils/dateUtils'
 import { filterSelectTypes } from 'utils/metricsUtils'
 

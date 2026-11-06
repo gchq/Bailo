@@ -24,9 +24,9 @@ import { patchFile } from 'actions/file'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import {
-  CSSProperties,
+  type CSSProperties,
   Fragment,
-  MouseEvent,
+  type MouseEvent,
   useCallback,
   useContext,
   useEffect,
@@ -42,8 +42,8 @@ import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesL
 import { buildChipDetails, isAnyScanInProgress, isAnyScanResults } from 'src/entry/model/scanning/scanChipUtils'
 import ScanResultDetail from 'src/entry/model/scanning/ScanResultDetail'
 import useNotification from 'src/hooks/useNotification'
-import { KeyedMutator } from 'swr'
-import { ArtefactKind, FileInterface, isFileInterface, ReleaseInterface } from 'types/types'
+import { type KeyedMutator } from 'swr'
+import { ArtefactKind, type FileInterface, isFileInterface, type ReleaseInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'

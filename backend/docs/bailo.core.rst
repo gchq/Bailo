@@ -14,6 +14,13 @@ bailo.core package
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: bailo.core.entry
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+   :exclude-members: _abc_impl
+
 .. automodule:: bailo.core.enums
    :members:
    :undoc-members:

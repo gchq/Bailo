@@ -25,11 +25,12 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import SchemaButton from 'src/schemas/SchemaButton'
 import {
-  EntryInterface,
+  type EntryInterface,
   EntryKindLabel,
-  SchemaInterface,
+  MODEL_ENTRY_KINDS,
+  type SchemaInterface,
   SchemaKind,
-  SchemaKindKeys,
+  type SchemaKindKeys,
   SchemaKindLabel,
 } from 'types/types'
 import { entryKindForRedirect } from 'utils/routerUtils'
@@ -45,7 +46,10 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const { mutateEntry } = useGetEntry(entry.id, entry.kind)
+  // workaround different callers having different SWR cache keys
+  const entryKind = entry.kind in MODEL_ENTRY_KINDS ? MODEL_ENTRY_KINDS : entry.kind
+  // `useGetEntry(entry.id, MODEL_ENTRY_KINDS)` === `useGetModel(entry.id)`
+  const { mutateEntry } = useGetEntry(entry.id, entryKind)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,

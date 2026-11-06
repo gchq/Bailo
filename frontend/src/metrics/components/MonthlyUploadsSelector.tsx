@@ -1,6 +1,6 @@
-import dayjs, { Dayjs } from '@dayjs'
+import dayjs, { type Dayjs } from '@dayjs'
 import { Stack, Typography } from '@mui/material'
-import { alpha, SxProps, Theme } from '@mui/material/styles'
+import { alpha, type SxProps, type Theme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 
 const minimumDate = '1970/01/01'

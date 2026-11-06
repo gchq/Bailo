@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { Roles } from '../../../connectors/authentication/constants.js'
 import authentication from '../../../connectors/authentication/index.js'
 import { z } from '../../../lib/zod.js'
-import { UserInterface } from '../../../models/User.js'
+import { type UserInterface } from '../../../models/User.js'
 import { registerPath, userInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 

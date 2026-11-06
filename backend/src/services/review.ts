@@ -1,16 +1,16 @@
-import { ClientSession, PipelineStage, QueryFilter, Types } from 'mongoose'
+import { type ClientSession, type PipelineStage, type QueryFilter, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
-import ModelModel, { ModelDoc, ModelInterface } from '../models/Model.js'
-import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
-import { Decision, DecisionKeys } from '../models/Response.js'
-import ReviewModel, { ReviewDoc, ReviewInterface } from '../models/Review.js'
-import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
-import { UserInterface } from '../models/User.js'
-import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import AccessRequestModel, { type AccessRequestDoc } from '../models/AccessRequest.js'
+import ModelModel, { type ModelDoc, type ModelInterface } from '../models/Model.js'
+import ReleaseModel, { type ReleaseDoc } from '../models/Release.js'
+import { Decision, type DecisionKeys } from '../models/Response.js'
+import ReviewModel, { type ReviewDoc, type ReviewInterface } from '../models/Review.js'
+import ReviewRoleModel, { type ReviewRoleDoc, type ReviewRoleInterface } from '../models/ReviewRole.js'
+import { type UserInterface } from '../models/User.js'
+import { ReviewKind, type ReviewKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
@@ -260,6 +260,7 @@ export async function findReviewForResponse(
       .match(await findUserInCollaborators(user))
       .limit(1)
   ).at(0)
+
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }
@@ -446,11 +447,11 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
   const reviews = await ReviewModel.find()
 
   for (const release of releases) {
-    const validReviews = reviews.find(
+    const hasValidReview = reviews.some(
       (review) =>
         review.role === newReviewRole.shortName && review.modelId === model.id && review.semver === release.semver,
     )
-    if (!Array.isArray(validReviews) || validReviews.length === 0) {
+    if (!hasValidReview) {
       const review = new ReviewModel({
         semver: release.semver,
         modelId: model.id,
@@ -462,13 +463,13 @@ export async function addReviewsForNewRole(user: UserInterface, newReviewRole: R
   }
 
   for (const accessRequest of accessRequests) {
-    const validReviews = reviews.find(
+    const hasValidReview = reviews.some(
       (review) =>
         review.role === newReviewRole.shortName &&
         review.modelId === model.id &&
         review.accessRequestId === accessRequest.id,
     )
-    if (!Array.isArray(validReviews) || validReviews.length === 0) {
+    if (!hasValidReview) {
       const review = new ReviewModel({
         accessRequestId: accessRequest.id,
         modelId: model.id,

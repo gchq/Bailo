@@ -202,7 +202,7 @@ minio:
 # Registry Dependencies
 registry:
   repository: registry
-  tag: 3.1.1@sha256:1be55279f18a2fe1a74edf2664cac61c1bea305b7b4642dab412e7affdcb3e33
+  tag: 3.1.2@sha256:21078ecfcba8a0cd7e1a384f75b3509899661dd21823bf1da21b5a4674aaceb9
   enabled: true
   protocol: "https"
   #host: "bailo-registry" # service name
@@ -278,11 +278,14 @@ config:
     untrustedModel:
       enabled: false
       untrustedModelLongDescription: 'Untrusted models are private-only models with the Registry tab disabled. They have not been verified or validated to the same standard as regular models.'
-      untrustedModelLongDescription: 'An untrusted model repository contains all files, history, and information associated with a private model.'
+      untrustedModelShortDescription: 'An untrusted model repository contains all files, history, and information associated with a private model.'
       fileUploadGuidance: 'Please be aware that any files uploaded here will be stored on an Untrusted Model.'
 
     llmImport:
       enabled: false
+
+    lifecycle:
+      maxReviewInterval: ''
 
   smtp:
     #host: 'mail' #service name
@@ -326,8 +329,7 @@ instrumentation:
   debug: false
 
 stroom:
-  logOnlyMode: true
-  feed: 'feed'
+  sendEvents: true
   url: 'https://url'
   environment: 'local'
   interval: 1000 * 50
@@ -336,6 +338,9 @@ stroom:
   xmlns: 'default-namespace'
   schemaLocation: 'default-namespace file://schema-location.xsd'
   version: '1.0.0'
+  headers:
+    Content-Encoding: 'gzip'
+  batchSizeLimit: 50
 
 modelMirror:
   import:

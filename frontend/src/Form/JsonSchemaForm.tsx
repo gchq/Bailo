@@ -15,12 +15,12 @@ import {
 } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { RJSFSchema } from '@rjsf/utils'
+import { type RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
-import { RouterQueryParams } from 'src/entry/overview/FormEditPage'
+import { type Dispatch, type SetStateAction, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { type RouterQueryParams } from 'src/entry/overview/FormEditPage'
 import {
   ArrayFieldItemTemplate,
   ArrayFieldTemplate,
@@ -34,7 +34,7 @@ import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
 import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 import {
   getFormStats,
   getOverallCompletionStats,
@@ -55,6 +55,7 @@ export default function JsonSchemaForm({
   displayStats = false,
   compareMode = false,
   stateList,
+  currentState,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -66,6 +67,7 @@ export default function JsonSchemaForm({
   displayStats?: boolean
   compareMode?: boolean
   stateList?: string[]
+  currentState?: string
 }) {
   const theme = useTheme()
   const router = useRouter()
@@ -209,7 +211,7 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Stack>
+    <Stack sx={{ minWidth: 0 }}>
       {displayStats && (
         <Box>
           <Box sx={{ mb: 1 }}>
@@ -263,7 +265,7 @@ export default function JsonSchemaForm({
             </List>
           </Stepper>
         </Grid>
-        <Grid size={{ xs: 12, md: 10 }} ref={ref}>
+        <Grid size={{ xs: 12, md: 10 }} ref={ref} sx={{ minWidth: 0 }}>
           {displayStats && (
             <Box>
               <Box>
@@ -292,7 +294,14 @@ export default function JsonSchemaForm({
                 </Stack>
               )}
               <Typography sx={{ pt: 1 }}>
-                Required fields for this state are marked with an asterisk
+                Required fields
+                {currentState && (
+                  <>
+                    <span> for the current state</span>
+                    <span style={{ fontWeight: 'bold' }}>{` (${currentState})`}</span>
+                  </>
+                )}{' '}
+                are marked with an asterisk
                 <span style={{ color: theme.palette.error.main }}> *</span>
               </Typography>
             </Stack>
@@ -305,7 +314,9 @@ export default function JsonSchemaForm({
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
+            liveValidate='onChange'
             liveOmit
+            experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
             formContext={{
               editMode: canEdit,
               formSchema: currentStep.schema,
@@ -319,23 +330,14 @@ export default function JsonSchemaForm({
               onShare: onShareSectionOnClick,
               requiredByModelState: requiredByModelState,
             }}
-            templates={
-              !canEdit
-                ? {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                  }
-                : {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ArrayFieldItemTemplate,
-                    ObjectFieldTemplate,
-                    ErrorListTemplate,
-                    FieldTemplate,
-                  }
-            }
+            templates={{
+              DescriptionFieldTemplate,
+              ArrayFieldTemplate,
+              ArrayFieldItemTemplate,
+              ObjectFieldTemplate,
+              ErrorListTemplate,
+              FieldTemplate,
+            }}
           >
             <></>
           </Form>

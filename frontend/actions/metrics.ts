@@ -1,16 +1,16 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 import {
-  BaseLifecycleMetrics,
-  BaseNoReleaseMetrics,
-  BaseUnapprovedReleaseMetrics,
-  CollaboratorEntry,
-  EntryKindKeys,
-  ModelVolume,
-  OverviewMetrics,
-  PolicyRoleMetrics,
+  type BaseLifecycleMetrics,
+  type BaseNoReleaseMetrics,
+  type BaseUnapprovedReleaseMetrics,
+  type CollaboratorEntry,
+  type EntryKindKeys,
+  type ModelVolume,
+  type OverviewMetrics,
+  type PolicyRoleMetrics,
 } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetVolumeForModel(interval: string = 'month', startDate?: string, endDate?: string) {
   const queryParams = {

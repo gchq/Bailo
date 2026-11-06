@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { EntryKind, ModelInterface } from '../../../models/Model.js'
+import { EntryKind, type ModelInterface } from '../../../models/Model.js'
 import { getModelById } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'
 import { coerceArray, parse } from '../../../utils/validate.js'

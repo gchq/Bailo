@@ -7,7 +7,8 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 # Creating a Release
 
 A release is a versioned snapshot of your model at a point in time. Releases bundle together files, container images,
-and a reference to a specific model card version. Creating a release triggers the review process.
+and a reference to a specific model card version. You can publish a release immediately or save it as a draft to
+complete later.
 
 > **Common questions this page answers:**
 >
@@ -28,7 +29,7 @@ over time:
 ## Creating a release
 
 You create a release from the Releases tab on your model page by filling in a version number, release notes, and
-attaching files or images:
+attaching files or images. You can either publish the release immediately or save it as a draft:
 
 1. Open your model page and go to the **Releases** tab
 2. Click **Draft new Release**
@@ -49,19 +50,24 @@ The screenshot above shows the Releases tab with no releases yet and a 'Draft ne
    - **Files** - attach uploaded files to this release
    - **Images** - attach container (Docker) images to this release
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+<Box sx={{ maxWidth: '50%', margin: 'auto' }}>
   <Image style={{ width: '100%', height: 'auto' }} alt='draft new release form' src={bailoNewReleaseForm} />
 </Box>
 
 The screenshot above shows the release creation form with fields for version number, release notes, file attachments,
 and container image attachments.
 
-4. Once you have filled in the release details and attached any artefacts, click **Create Release** to submit
+4. Once you have filled in the release details and attached any artefacts, choose one of the following:
+   - **Draft release** - save the release without publishing it. You can edit and publish it later.
+   - **Publish release** - publish the release immediately. Standard releases then enter the review process.
 
 ## Draft vs published releases
 
-Releases are initially created as **drafts**. Draft releases can be edited before they are finalised. Once all required
-reviews are approved, the release is considered published.
+You choose whether to save a release as a **draft** or publish it when you create it. Draft releases are visible as
+drafts and can be edited, deleted, or published later. **Publishing a draft is irreversible**.
+
+Published standard releases enter the review process. A release is available as a published release while its review is
+in progress; reviewers can request changes or approve it according to the model's review workflow.
 
 ## Minor releases
 
@@ -103,6 +109,12 @@ You can update a release's notes, files, and images after creation:
 3. Click **Edit release**
 4. Update the release notes, files, or images
 5. **Save** your changes
+
+To publish a draft:
+
+1. Open the draft release
+2. Click **Publish**
+3. Confirm that you want to publish the release
 
 ## Related pages
 

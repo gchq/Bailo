@@ -1,28 +1,26 @@
-import { Request } from 'express'
-import { ParamsDictionary } from 'express-serve-static-core'
+import { type Request } from 'express'
 import os from 'os'
-import { ParsedQs } from 'qs'
 
-import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc, FileWithScanResultsAggregate } from '../../models/File.js'
-import { InferenceDoc } from '../../models/Inference.js'
-import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ImageTagRef, ReleaseDoc } from '../../models/Release.js'
-import { ResponseInterface } from '../../models/Response.js'
-import { ReviewInterface } from '../../models/Review.js'
-import { ReviewRoleDoc } from '../../models/ReviewRole.js'
-import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
-import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
-import { StroomEventObject } from '../../models/StroomEvent.js'
-import { TokenDoc } from '../../models/Token.js'
-import { GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type FileInterface, type FileInterfaceDoc, type FileWithScanResultsAggregate } from '../../models/File.js'
+import { type InferenceDoc } from '../../models/Inference.js'
+import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
+import { type ImageTagRef, type ReleaseDoc } from '../../models/Release.js'
+import { type ResponseInterface } from '../../models/Response.js'
+import { type ReviewInterface } from '../../models/Review.js'
+import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
+import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
+import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
+import { type StroomEventObject } from '../../models/StroomEvent.js'
+import { type TokenDoc } from '../../models/Token.js'
+import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import log from '../../services/log.js'
-import { MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
-import { FileMirrorInformation } from '../../services/mirroredModel/importers/file.js'
-import { ImageMirrorInformation } from '../../services/mirroredModel/importers/image.js'
+import { type MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
+import { type FileMirrorInformation } from '../../services/mirroredModel/importers/file.js'
+import { type ImageMirrorInformation } from '../../services/mirroredModel/importers/image.js'
 import { processBatch, saveEvent } from '../../services/stroom.js'
-import { BailoError } from '../../types/error.js'
-import { EntrySearchResult, isFileMirrorInformation, isMongoDocumentMirrorInformation } from '../../types/types.js'
+import { type BailoError } from '../../types/error.js'
+import { type EntrySearchResult, isFileMirrorInformation, isMongoDocumentMirrorInformation } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { AuditKind, BaseAuditConnector } from './Base.js'
 
@@ -187,7 +185,9 @@ export class StroomAuditConnector extends BaseAuditConnector {
     super()
     this.hostIP = this.getHostDeviceIP()[0] ?? '0.0.0.0'
     setInterval(() => {
-      processBatch()
+      processBatch().catch((err) => {
+        log.error({ err }, 'Failed to process batch of STROOM events.')
+      })
     }, config.stroom.interval)
   }
 
@@ -450,11 +450,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, `${image.repository}/${image.name}:${image.tag}`)
   }
 
-  async onCreateS3Export(
-    req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
-    modelId: string,
-    semvers?: string[] | undefined,
-  ): Promise<void> {
+  async onCreateS3Export(req: Request, modelId: string, semvers?: string[] | undefined): Promise<void> {
     this.auditGenericEvent(req, `${modelId} - ${semvers?.join(', ') ?? 'all'}`)
   }
 
@@ -504,16 +500,16 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, reviewId)
   }
 
-  async onRegistryImagePulled(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImagePulled(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
-  async onRegistryImagePushed(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImagePushed(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
-  async onRegistryImageDeleted(req: Request, userDn: string): Promise<void> {
-    this.auditGenericEvent(req, userDn)
+  async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
+    this.auditGenericEvent(req, registryImage)
   }
 
   async onError(req: Request, error: BailoError): Promise<void> {
@@ -598,7 +594,7 @@ export class StroomAuditConnector extends BaseAuditConnector {
       },
       EventDetail: eventDetail,
     }
-    if (config.stroom.logOnlyMode) {
+    if (config.stroom.sendEvents) {
       await saveEvent(event)
     } else {
       log.info(

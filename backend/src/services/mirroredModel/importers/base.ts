@@ -1,9 +1,9 @@
-import { PassThrough, Readable } from 'node:stream'
+import { type PassThrough, type Readable } from 'node:stream'
 
-import { Headers } from 'tar-stream'
+import { type Header } from 'tar-stream'
 
 import { isBailoError } from '../../../types/error.js'
-import { MirrorImportLogData } from '../../../types/types.js'
+import { type MirrorImportLogData } from '../../../types/types.js'
 import { InternalError } from '../../../utils/error.js'
 import log from '../../log.js'
 
@@ -29,12 +29,12 @@ export abstract class BaseImporter {
   /**
    * Process a single entry from the tarball stream.
    *
-   * @param entry - Tarball entry headers (metadata about the file within the archive).
+   * @param entry - Tarball entry header (metadata about the file within the archive).
    * @param stream - Stream containing the entry's data payload.
    *                 May be a `PassThrough` or `Readable` instance depending on tar-stream operation.
    * @returns A promise (or void) indicating completion of entry processing.
    */
-  abstract processEntry(entry: Headers, stream: PassThrough | Readable): Promise<void> | void
+  abstract processEntry(entry: Header, stream: PassThrough | Readable): Promise<void> | void
 
   protected readonly metadata: BaseMirrorMetadata
   protected readonly logData: MirrorImportLogData

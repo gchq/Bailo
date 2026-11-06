@@ -1,9 +1,8 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
-import { SyntheticEvent, useMemo } from 'react'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
+import { type SyntheticEvent, useMemo } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
 
@@ -102,8 +101,6 @@ export default function Dropdown({
             />
           )}
         />
-      ) : compare.inMirroredCompare && value ? (
-        <InlineDiff from={compare.compareFromState} to={value} />
       ) : value ? (
         <Typography>{value}</Typography>
       ) : (

@@ -1,18 +1,18 @@
-import { PassThrough } from 'node:stream'
+import { type PassThrough } from 'node:stream'
 
-import { Headers } from 'tar-stream'
+import { type Header } from 'tar-stream'
 
 import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'
 import { TransferStatus } from '../../../models/ModelTransfer.js'
-import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
+import { type MirrorImportLogData, MirrorKind, type MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { createFilePath } from '../../../utils/fileUtils.js'
 import { markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
 import { updateArtefactTransferStatus } from '../../modelTransfer.js'
-import { BaseImporter, BaseMirrorMetadata } from './base.js'
+import { BaseImporter, type BaseMirrorMetadata } from './base.js'
 
 export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }
 export type FileMirrorInformation = {
@@ -41,7 +41,7 @@ export class FileImporter extends BaseImporter {
     this.updatedPath = createFilePath(this.metadata.mirroredModelId, this.metadata.filePath)
   }
 
-  async processEntry(entry: Headers, stream: PassThrough) {
+  async processEntry(entry: Header, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
       if (this.extractedFile) {

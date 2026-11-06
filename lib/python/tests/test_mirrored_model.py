@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, Role
-
-# isort: split
-
-from bailo import Client, Datacard, Experiment, MirroredModel, ModelVisibility
+from bailo import Client, MirroredModel, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, Role
 from bailo.core.exceptions import BailoException
-from bailo.core.utils import NestedDict
 
 
 def test_model_card_defaults(local_mirrored_model):
@@ -55,6 +51,48 @@ def test_get_card_latest_with_card_and_mirrored_card(local_mirrored_model, reque
         "card": 2,
         "additional_information": 1,
     }
+
+
+@pytest.mark.parametrize(
+    "present_key, expected_warning",
+    [
+        ("card", "does not have any associated model card"),
+        ("mirroredCard", "does not have any associated additional information"),
+    ],
+)
+def test_get_card_latest_warns_about_the_missing_card(
+    present_key, expected_warning, local_mirrored_model, requests_mock
+):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test-id",
+        json={
+            "model": {
+                "id": "test-id",
+                "kind": EntryKind.MIRRORED_MODEL,
+                present_key: {
+                    "schemaId": "minimal-general-v10",
+                    "version": 1,
+                    "metadata": {"overview": {"summary": "present"}},
+                },
+            }
+        },
+    )
+
+    with pytest.warns(UserWarning, match=expected_warning):
+        local_mirrored_model.get_card_latest()
+
+
+def test_update_model_card_defaults_to_additional_information(local_mirrored_model, requests_mock):
+    local_mirrored_model._card = {"overview": {"summary": "read only source card"}}
+    local_mirrored_model._additional_information_card = {"overview": {"summary": "editable"}}
+    put_mock = requests_mock.put(
+        "https://example.com/api/v2/model/test-id/model-cards",
+        json={"card": {"schemaId": "minimal-general-v10", "version": 2, "metadata": {"overview": {}}}},
+    )
+
+    local_mirrored_model.update_model_card()
+
+    assert put_mock.last_request.json()["metadata"] == {"overview": {"summary": "editable"}}
 
 
 def test_update_sends_source_model_id_when_changed(local_mirrored_model, requests_mock):
@@ -116,9 +154,25 @@ def test_mirrored_model(local_mirrored_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "sourceModelId", "organisation", "tags", "visibility", "collaborators"),
+    (
+        "name",
+        "description",
+        "sourceModelId",
+        "organisation",
+        "tags",
+        "visibility",
+        "collaborators",
+    ),
     [
-        ("test-mirrored-model", "test", "test-1234", None, None, ModelVisibility.PUBLIC, None),
+        (
+            "test-mirrored-model",
+            "test",
+            "test-1234",
+            None,
+            None,
+            ModelVisibility.PUBLIC,
+            None,
+        ),
         (
             "test-mirrored-model",
             "test",
@@ -263,7 +317,7 @@ def test_get_releases(integration_client):
         visibility=ModelVisibility.PUBLIC,
     )
 
-    releases = model.get_releases()
+    model.get_releases()
 
     with pytest.raises(BailoException):
         model.get_latest_release()

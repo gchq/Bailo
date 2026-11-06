@@ -3,7 +3,7 @@ import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
-import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponses.js'
+import { AcceptManifestMediaTypeHeaderValue } from '../utils/registryResponseTypes.js'
 
 async function script() {
   await connectToMongoose()

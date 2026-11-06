@@ -14,46 +14,49 @@
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 #       Access UI at http://localhost:4318/
 
-FROM chrislusf/seaweedfs:4.41@sha256:43b768cd62b00d132439cda881b93fd1adebf1b315e996e794087743821d771d AS seaweedfs-bin
-FROM distribution/distribution@sha256:bca24727f4002e51f959c18c42e816e4d1078198081a9837e16b8b7d7e43ebf8 AS registry-bin
-FROM marlonb/mailcrab:v1.9.0@sha256:fbe35c063cb4c8c169e32f4d91e09ee44459843a005a567cfd3dc9876779e194 AS mailcrab-bin
+FROM chrislusf/seaweedfs:4.50@sha256:c2658820e763294a9e9de7b36c81e59b879e3459148351aee4e31a126ca64860 AS seaweedfs-bin
+FROM registry:3.1.2@sha256:d4032d4cc323c1731c707931ecada07a53076eac38e3b61ae57533f170f2c6c3 AS registry-bin
+FROM marlonb/mailcrab:v1.10.0@sha256:dd0e3933e35200ed9956aeb76bb27fc700dd452bd6586448107ccf8fe411c0a1 AS mailcrab-bin
 
-FROM python:3.14.2-trixie@sha256:4878b7ad12a3c49e49c775ea617df0d2169605eaffc5ede31977e1c3dd913eae AS sphinx-docs
+FROM ghcr.io/astral-sh/uv:python3.15-alpine@sha256:f008ab85c84befffaaa8cbde7eb2b749331769df4e18be766269d0c4904deb40 AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends pandoc
+    PYTHONUNBUFFERED=1 \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy \
+    PATH="/venv/bin:$PATH"
+RUN apk add --no-cache pandoc make
 WORKDIR /app/docs
-COPY backend/docs .
 COPY --from=python pyproject.toml /app/python/
 COPY --from=python README.md /app/python/
 COPY --from=python src /app/python/src
-RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
+# `--no-install-project` skips bailo-docs itself which has no modules
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=backend/docs/uv.lock,target=uv.lock \
+    --mount=type=bind,source=backend/docs/pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project && \
+    uv pip install -e /app/python
+COPY backend/docs .
 RUN make html
 
-FROM node:26.7.0-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS backend
-RUN apk add --no-cache libc6-compat ca-certificates && \
-    apk update
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS backend
+RUN apk add --no-cache libc6-compat ca-certificates
 WORKDIR /app
 COPY backend/package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY backend .
 RUN npm run build
 
-FROM node:26.7.0-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS frontend
+FROM node:26.13.0-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS frontend
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN apk add --no-cache libc6-compat ca-certificates && \
-    apk update
+RUN apk add --no-cache libc6-compat ca-certificates
 WORKDIR /app
 COPY frontend/package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY frontend .
 RUN npm run build
 
-FROM ubuntu:noble@sha256:561618e2c15bf2397621dd04f96926663a3b5616c189cf7e38db7e82f5c538ea
+FROM ubuntu:noble@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
 ENV DEBIAN_FRONTEND=noninteractive
 # Cache packages with run cache, update system packages, install packages
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
@@ -96,6 +99,8 @@ COPY infrastructure/standalone/registry.conf /registry.conf
 
 COPY --from=mailcrab-bin /app/mailcrab /usr/local/bin/mailcrab
 
+COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 # Backend
 WORKDIR /app/backend
 COPY backend/package*.json ./
@@ -120,8 +125,6 @@ COPY --from=frontend /app/.next/static ./.next/static
 COPY --from=frontend /app/public ./public
 ENV NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0
-
-COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 WORKDIR /
 

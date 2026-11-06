@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { SchemaInterface } from '../../../models/Schema.js'
+import { type SchemaInterface } from '../../../models/Schema.js'
 import { searchSchemas } from '../../../services/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/specification.js'
 import { SchemaKind } from '../../../types/enums.js'
@@ -12,7 +12,7 @@ import { parse, strictCoerceBoolean } from '../../../utils/validate.js'
 export const getSchemasSchema = z.object({
   query: z.object({
     kind: z.nativeEnum(SchemaKind).optional(),
-    hidden: strictCoerceBoolean(z.boolean().optional()),
+    hidden: strictCoerceBoolean(z.boolean()).optional(),
   }),
 })
 

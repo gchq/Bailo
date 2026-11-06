@@ -20,14 +20,13 @@ import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
 import { useCallback, useMemo, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
-import Loading from 'src/common/Loading'
 import MirrorInfo from 'src/common/MirrorInfo'
 import Paginate from 'src/common/Paginate'
+import renderQueryState from 'src/common/renderQueryState'
 import ReleaseAssetsAccordion from 'src/entry/model/releases/ReleaseAssetsAccordion'
 import ReleaseAssetsMainText from 'src/entry/model/releases/ReleaseAssetsMainText'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
-import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, ReleaseInterface } from 'types/types'
+import { type EntryInterface, type ReleaseInterface } from 'types/types'
 
 type ReleaseSelectorProps = {
   model: EntryInterface
@@ -46,6 +45,8 @@ export default function ReleaseSelector({
   const [checkedReleases, setCheckedReleases] = useState<ReleaseInterface[]>([])
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+
+  const exportableReleases = useMemo(() => releases.filter((release) => !release.draft), [releases])
 
   const selectedSemvers = useMemo(
     () => new Set(selectedReleases.map((selectedRelease) => selectedRelease.semver)),
@@ -139,12 +140,9 @@ export default function ReleaseSelector({
     )
   })
 
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
-  }
-
-  if (isReleasesLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isReleasesError], isReleasesLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (
@@ -184,7 +182,7 @@ export default function ReleaseSelector({
         <DialogTitle>Select releases for {model.name}</DialogTitle>
         <DialogContent sx={{ p: 1 }}>
           <Paginate
-            list={releases}
+            list={exportableReleases}
             emptyListText='No releases found'
             defaultSortProperty='createdAt'
             searchFilterProperty='semver'

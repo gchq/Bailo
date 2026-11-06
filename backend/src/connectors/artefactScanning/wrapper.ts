@@ -1,9 +1,13 @@
-import { FileInterface } from '../../models/File.js'
-import { ArtefactKind, ArtefactKindKeys } from '../../models/Scan.js'
+import { type FileInterface } from '../../models/File.js'
+import { ArtefactKind, type ArtefactKindKeys } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { ArtefactScanningConnectorInfo, BaseArtefactScanningConnector, LayerRefInterface } from './Base.js'
+import {
+  type ArtefactScanningConnectorInfo,
+  type BaseArtefactScanningConnector,
+  type LayerRefInterface,
+} from './Base.js'
 
 export class ArtefactScanningWrapper {
   scanners: Set<BaseArtefactScanningConnector> = new Set<BaseArtefactScanningConnector>()

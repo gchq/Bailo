@@ -6,7 +6,7 @@ import { patchEntry } from 'actions/entry'
 import { useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type SourceModelIdFieldProps = {

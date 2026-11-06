@@ -1,32 +1,33 @@
 import * as _ from 'lodash-es'
-import { Optional } from 'utility-types'
+import { type ProjectionType } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
+import { ModelAction, type ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
 import ModelModel, {
-  CollaboratorEntry,
+  type CollaboratorEntry,
   EntryKind,
-  EntryKindKeys,
+  type EntryKindKeys,
   EntryVisibility,
-  EntryVisibilityKeys,
-  ModelDoc,
-  ModelInterface,
+  type EntryVisibilityKeys,
+  type ModelDoc,
+  type ModelInterface,
 } from '../models/Model.js'
-import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ModelCardRevisionModel, { type ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
-import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
+import { type UserInterface } from '../models/User.js'
+import { GetModelCardVersionOptions, type GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { isBailoError } from '../types/error.js'
 import {
   EntityKind,
-  EntrySearchOptionsParams,
-  EntrySearchResultWithErrors,
-  EntryUserPermissions,
-  MirrorImportLogData,
+  type EntrySearchOptionsParams,
+  type EntrySearchResultWithErrors,
+  type EntryUserPermissions,
+  type MirrorImportLogData,
+  type Optional,
 } from '../types/types.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -421,7 +422,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  const projection = {
+  const projection: ProjectionType<ModelDoc> = {
     settings: false,
     card: false,
     deleted: false,
@@ -433,7 +434,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   // Always do a partial match on the model name
   const escapedSearch = opts.search ? opts.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
-  let results = await ModelModel.find(
+  let results = await ModelModel.find<ModelDoc>(
     escapedSearch ? { ...query, name: { $regex: escapedSearch, $options: 'i' } } : query,
     projection,
   ).sort({
@@ -442,7 +443,10 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   //Include all full text matches
   if (opts.search && !opts.titleOnly) {
-    let fullTextOnlyResults = await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
+    let fullTextOnlyResults = await ModelModel.find<ModelDoc>(
+      { ...query, $text: { $search: opts.search } },
+      projection,
+    ).sort({
       score: { $meta: 'textScore' },
     })
     // Remove duplicate items

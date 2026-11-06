@@ -8,13 +8,13 @@ import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { postSchemaMigration } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useCallback, useState } from 'react'
+import { type SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
-import { CombinedSchema, QuestionMigration, SchemaInterface } from 'types/types'
+import { type CombinedSchema, type QuestionMigration, type SchemaInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsFromSchema } from 'utils/formUtils'
 
@@ -247,7 +247,7 @@ export default function SchemaMigrationSelector() {
                   >
                     <MoveDown fontSize='large' color='primary' />
                     <Typography>
-                      {`Questions on an older schema can be mapped to a new question (using the the "Move" action type) so that
+                      {`Questions on an older schema can be mapped to a new question (using the "Move" action type) so that
                   existing data is not lost when a question is moved from one section on the form to another.`}
                     </Typography>
                   </Stack>

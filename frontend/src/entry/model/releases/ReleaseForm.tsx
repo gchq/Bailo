@@ -12,7 +12,7 @@ import {
   LinearProgress,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Stack,
   TextField,
   Typography,
@@ -21,8 +21,8 @@ import { useTheme } from '@mui/material/styles'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
-import { ChangeEvent, useCallback, useContext, useMemo } from 'react'
-import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import { type ChangeEvent, useCallback, useContext, useMemo } from 'react'
+import FileUploadProgressDisplay, { type FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
@@ -34,6 +34,7 @@ import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContex
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
+import { getLatestRelease } from 'src/entry/model/Releases'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
@@ -41,11 +42,11 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
   ArtefactKind,
-  EntryInterface,
+  type EntryInterface,
   EntryKind,
-  FileInterface,
-  FileWithMetadataAndTags,
-  FlattenedModelImage,
+  type FileInterface,
+  type FileWithMetadataAndTags,
+  type FlattenedModelImage,
   isFileInterface,
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
@@ -56,7 +57,7 @@ import { isValidSemver } from 'utils/stringUtils'
 type ReleaseFormData = {
   semver: string
   releaseNotes: string
-  isMinorRelease: boolean
+  isMinorRelease?: boolean
   files: (File | FileInterface)[]
   imageList: FlattenedModelImage[]
   modelCardVersion: number
@@ -117,8 +118,6 @@ export default function ReleaseForm({
     model.id,
   )
   const scanners = useContext(ArtefactScanningInfoContext)
-
-  const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSemverChange(event.target.value)
@@ -230,7 +229,7 @@ export default function ReleaseForm({
           >
             Latest version
           </Typography>
-          <Typography noWrap>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+          <Typography noWrap>{isReleasesLoading ? 'Loading...' : getLatestRelease(releases)}</Typography>
         </Stack>
       )}
       <Stack
@@ -314,10 +313,20 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         {isReadOnly ? (
-          <>
-            {releaseNotesLabel}
-            <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
-          </>
+          <Accordion defaultExpanded sx={{ p: 0 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {releaseNotesLabel}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <MarkdownDisplay>{formData.releaseNotes}</MarkdownDisplay>
+            </AccordionDetails>
+          </Accordion>
         ) : (
           <RichTextEditor
             value={formData.releaseNotes}

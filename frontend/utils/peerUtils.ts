@@ -1,5 +1,5 @@
-import { EntrySearchResult } from 'actions/entry'
-import { PeerConfigStatus, RemoteFederationConfig } from 'types/types'
+import { type EntrySearchResult } from 'actions/entry'
+import { type PeerConfigStatus, type RemoteFederationConfig } from 'types/types'
 
 /**
  * Generates an absolute URL to a given entry

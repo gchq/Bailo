@@ -1,7 +1,3 @@
-#   ---------------------------------------------------------------------------------
-#   Copyright (c) Microsoft Corporation. All rights reserved.
-#   Licensed under the MIT License. See LICENSE in project root for information.
-#   ---------------------------------------------------------------------------------
 """
 This is a configuration file for pytest containing customizations and fixtures.
 
@@ -14,17 +10,14 @@ import random
 
 import mlflow
 import pytest
-from example_schemas import METRICS_JSON_SCHEMA
-from mlflow.tracking import MlflowClient
-
-# isort: split
-
 from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility, SchemaKind
 from bailo.helper.datacard import Datacard
 from bailo.helper.mirroredModel import MirroredModel
 from bailo.helper.model import Model
 from bailo.helper.schema import Schema
+from example_schemas import METRICS_JSON_SCHEMA
+from mlflow.tracking import MlflowClient
 
 BAILO_URL = "http://localhost:8080"
 
@@ -124,7 +117,6 @@ def test_path(tmpdir_factory):
 
 @pytest.fixture(scope="session")
 def test_path_large(tmpdir_factory):
-    weights = "Test"
     fn = tmpdir_factory.mktemp("data").join("test.pth")
 
     f = open(str(fn), "wb")

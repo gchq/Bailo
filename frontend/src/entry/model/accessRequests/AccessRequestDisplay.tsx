@@ -4,7 +4,7 @@ import UserDisplay from 'src/common/UserDisplay'
 import ReleaseAccessRequestReviewSummary from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import Link from 'src/Link'
-import { AccessRequestInterface } from 'types/types'
+import { type AccessRequestInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 type AccessRequestDisplayProps = {

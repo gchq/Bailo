@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express'
+import express, { type Request, type Response } from 'express'
 import supertest from 'supertest'
 import { describe, expect, test, vi } from 'vitest'
 
-import { RoleKeys, Roles } from '../../../src/connectors/authentication/constants.js'
+import { type RoleKeys, Roles } from '../../../src/connectors/authentication/constants.js'
 import { OauthAuthenticationConnector } from '../../../src/connectors/authentication/oauth.js'
-import { UserInterface } from '../../../src/models/User.js'
+import { type UserInterface } from '../../../src/models/User.js'
 import config from '../../../src/utils/config.js'
 import { toEntity } from '../../../src/utils/entity.js'
 
@@ -24,8 +24,6 @@ vi.mock('express-session', () => ({
 }))
 
 vi.mock('connect-mongo', () => ({ default: { create: vi.fn() } }))
-
-vi.mock('body-parser', () => ({ default: { urlencoded: vi.fn(() => 'body parser middleware') } }))
 
 vi.mock('grant', () => ({ default: { default: { express: vi.fn(() => 'grant middleware') } } }))
 
@@ -224,6 +222,28 @@ describe('connectors > authentication > oauth', () => {
     vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce([]).mockResolvedValueOnce([])
 
     const result = await connector.hasRole(user, Roles.Compliance)
+
+    expect(result).toBe(false)
+  })
+
+  test('hasRole > returns true if user is in the UntrustedModel group', async () => {
+    const connector = new OauthAuthenticationConnector()
+    const getEntityMembersSpy = vi
+      .spyOn(connector, 'getEntityMembers')
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([user.dn])
+
+    const result = await connector.hasRole(user, Roles.UntrustedModel)
+
+    expect(result).toBe(true)
+    expect(getEntityMembersSpy).toHaveBeenCalledWith(toEntity('group', config.oauth.cognito.untrustedModelGroupName))
+  })
+
+  test('hasRole > returns false if user is not in the UntrustedModel group', async () => {
+    const connector = new OauthAuthenticationConnector()
+    vi.spyOn(connector, 'getEntityMembers').mockResolvedValueOnce([]).mockResolvedValueOnce([])
+
+    const result = await connector.hasRole(user, Roles.UntrustedModel)
 
     expect(result).toBe(false)
   })

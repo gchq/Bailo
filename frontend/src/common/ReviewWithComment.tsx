@@ -1,15 +1,16 @@
-import { Dayjs } from '@dayjs'
+import { type Dayjs } from '@dayjs'
 import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useState } from 'react'
-import { increaseCurrentDateInDays } from 'utils/dateUtils'
+import { type SyntheticEvent, useContext, useEffect, useState } from 'react'
+import UiConfigContext from 'src/contexts/uiConfigContext'
+import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetEntryRoles } from '../../actions/entry'
-import { Decision, DecisionKeys, ReviewRequestInterface } from '../../types/types'
+import { Decision, type DecisionKeys, type ReviewRequestInterface } from '../../types/types'
 import { getRoleDisplayName } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
@@ -37,6 +38,8 @@ export default function ReviewWithComment({
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
+
+  const uiConfig = useContext(UiConfigContext)
 
   function showUndoButton() {
     if (reviewRequest) {
@@ -146,6 +149,11 @@ export default function ReviewWithComment({
                     setDueDate(newValue)
                   }}
                   minDate={increaseCurrentDateInDays(1)}
+                  maxDate={
+                    uiConfig.lifecycle.maxReviewInterval === ''
+                      ? undefined
+                      : increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)
+                  }
                 />
               </Stack>
             )}

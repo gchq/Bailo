@@ -29,7 +29,7 @@ import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { DecisionKeys } from 'types/types'
+import { type DecisionKeys } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -219,7 +219,7 @@ export default function ReleaseReview() {
           </Stack>
           <Dialog open={isReleaseDialogOpen} onClose={() => setIsReleaseDialogOpen(false)} maxWidth='md' fullWidth>
             <DialogContent sx={{ p: 4 }}>
-              <EditableRelease release={release} isEdit={false} onIsEditChange={() => {}} readOnly={true} />
+              <EditableRelease release={release} readOnly />
             </DialogContent>
           </Dialog>
         </Paper>

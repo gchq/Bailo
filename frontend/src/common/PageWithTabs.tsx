@@ -1,8 +1,8 @@
 import { Box, Button, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useRouter } from 'next/router'
-import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useMemo } from 'react'
+import { type ParsedUrlQuery } from 'querystring'
+import { type ReactElement, type SyntheticEvent, useContext, useMemo } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import ExpandableTypography from 'src/common/ExpandableTypography'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -197,15 +197,17 @@ export default function PageWithTabs({
       </Stack>
       <Box
         sx={{
-          pl: 2,
+          px: 2,
           pb: 1,
           flexGrow: 1,
           minWidth: 0,
-          maxWidth: '900px',
         }}
       >
         {additionalInfo && (
-          <ExpandableTypography sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>
+          <ExpandableTypography
+            sx={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
+            maxLines={2}
+          >
             {additionalInfo}
           </ExpandableTypography>
         )}

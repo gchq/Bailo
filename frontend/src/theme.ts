@@ -1,5 +1,5 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { createTheme, PaletteColor, PaletteColorOptions, ThemeOptions } from '@mui/material/styles'
+import { createTheme, type PaletteColor, type PaletteColorOptions, type ThemeOptions } from '@mui/material/styles'
 import type {} from '@mui/x-date-pickers/themeAugmentation'
 
 declare module '@mui/material/styles' {
@@ -104,15 +104,14 @@ export const lightTheme = createTheme({
     MuiListItemButton: {
       styleOverrides: {
         root: {
+          borderRight: 'solid',
+          borderWidth: '2px',
+          borderColor: 'transparent',
           '&:hover': {
             backgroundColor: '#f5f5f5',
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#f7a4c0',
           },
           '&.Mui-selected': {
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#b5497d',
           },
         },
@@ -211,7 +210,7 @@ export const darkTheme = createTheme({
       main: green.A700,
     },
     background: {
-      paper: '#282828;',
+      paper: '#282828',
       default: '#2d2d2d',
     },
     action: {
@@ -259,15 +258,14 @@ export const darkTheme = createTheme({
     MuiListItemButton: {
       styleOverrides: {
         root: {
+          borderRight: 'solid',
+          borderWidth: '2px',
+          borderColor: 'transparent',
           '&:hover': {
             backgroundColor: '#5c5c5c',
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#cbbfda',
           },
           '&.Mui-selected': {
-            borderRight: 'solid',
-            borderWidth: '2px',
             borderColor: '#b5a0ce',
           },
         },

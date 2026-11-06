@@ -32,6 +32,7 @@ export default defineConfig([
       ],
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/consistent-type-imports': ['warn', { fixStyle: 'inline-type-imports' }],
       'react/jsx-newline': [
         1,
         {

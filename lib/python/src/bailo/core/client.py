@@ -3,10 +3,9 @@ from __future__ import annotations
 from io import BytesIO
 from json import JSONDecodeError
 from typing import Any
+from urllib.parse import quote
 
 import requests
-
-# isort: split
 
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
@@ -529,6 +528,7 @@ class Client:
         :param filename: The filename trying to download from
         :return: Response object
         """
+        filename = quote(filename, safe="")
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
                 f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{filename}/download",
@@ -607,10 +607,7 @@ class Client:
         :param data: File chunk as BytesIO or bytes
         :return: JSON response object containing the ETag for this part
         """
-        if isinstance(data, BytesIO):
-            content_length = data.getbuffer().nbytes
-        else:
-            content_length = len(data)
+        content_length = data.getbuffer().nbytes if isinstance(data, BytesIO) else len(data)
 
         return self._parse_json(
             self.agent.post(

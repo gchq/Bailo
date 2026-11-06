@@ -1,4 +1,4 @@
-import MigrationModel, { MigrationMetadata } from '../models/Migration.js'
+import MigrationModel, { type MigrationMetadata } from '../models/Migration.js'
 
 export async function doesMigrationExist(name: string) {
   const nameWithNoExtension = name.split('.')[0]

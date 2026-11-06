@@ -2,9 +2,9 @@ import Delete from '@mui/icons-material/Delete'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
 import { Box, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
-import { ChangeEvent, useCallback } from 'react'
+import { type ChangeEvent, useCallback } from 'react'
 import TagSelector from 'src/common/TagSelector'
-import { FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
+import { type FileUploadMetadata, type FileUploadWithMetadata } from 'types/types'
 
 interface FileToBeUploadedProps {
   fileWithMetadata: FileUploadWithMetadata

@@ -1,6 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { Roles } from '../../src/connectors/authentication/constants.js'
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { EntryKind, EntryVisibility } from '../../src/models/Model.js'
@@ -25,7 +24,7 @@ import {
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
-import { EntrySearchOptionsParams, EntryUserPermissions } from '../../src/types/types.js'
+import { type EntrySearchOptionsParams, type EntryUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -190,7 +189,8 @@ describe('services > model', () => {
 
       const result = await removeModel({} as any, 'modelId')
 
-      expect(result).toMatchSnapshot()
+      expect(result.id).toBe('mock-id')
+      expect(result.delete).toHaveBeenCalledWith(undefined)
       expect(reviewMock.findReviews).toHaveBeenCalled()
       expect(registryMock.listModelImages).toHaveBeenCalled()
       expect(releaseMock.getModelReleases).toHaveBeenCalled()
@@ -257,7 +257,8 @@ describe('services > model', () => {
 
       const result = await removeModel(user, modelId)
 
-      expect(result).toMatchSnapshot()
+      expect(result.id).toBe('mock-id')
+      expect(result.delete).toHaveBeenCalledWith(undefined)
       expect(reviewMock.findReviews).toHaveBeenCalled()
       expect(registryMock.listModelImages).toHaveBeenCalled()
       expect(releaseMock.getModelReleases).toHaveBeenCalled()

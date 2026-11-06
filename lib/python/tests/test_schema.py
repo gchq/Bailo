@@ -4,9 +4,6 @@ import random
 import string
 
 import pytest
-
-# isort: split
-
 from bailo import Client, Schema, SchemaKind
 from example_schemas import MINIMAL_JSON_SCHEMA
 

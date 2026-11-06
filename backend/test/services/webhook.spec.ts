@@ -80,7 +80,7 @@ describe('services > webhook', () => {
     expect(authorisation.model).toHaveBeenCalled()
   })
 
-  test('createWebhook > no permisson', async () => {
+  test('createWebhook > no permission', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     const result = createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
@@ -90,7 +90,7 @@ describe('services > webhook', () => {
     expect(WebhookModelMock.save).not.toHaveBeenCalled()
   })
 
-  test('updateWebhook > no permisson', async () => {
+  test('updateWebhook > no permission', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     const result = updateWebhook(user, 'modelId', { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
@@ -100,7 +100,7 @@ describe('services > webhook', () => {
     expect(WebhookModelMock.findOneAndUpdate).not.toHaveBeenCalled()
   })
 
-  test('deleteWebhook > no permisson', async () => {
+  test('deleteWebhook > no permission', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     const result = removeWebhook(user, 'model', 'webhook')
@@ -110,7 +110,7 @@ describe('services > webhook', () => {
     expect(WebhookModelMock.findOneAndDelete).not.toHaveBeenCalled()
   })
 
-  test('getWebhooksByModel > no permisson', async () => {
+  test('getWebhooksByModel > no permission', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     const result = getWebhooksByModel(user, 'model')

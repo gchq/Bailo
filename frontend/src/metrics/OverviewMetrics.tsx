@@ -3,11 +3,10 @@ import { useGetOverviewMetrics } from 'actions/metrics'
 import { useGetSchemas } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import renderQueryState from 'src/common/renderQueryState'
 import MetricsHeader from 'src/metrics/components/MetricsHeader'
 import OverviewMetricsCharts from 'src/metrics/OverviewMetricsCharts'
-import { BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
+import { type BreakdownQueryType, buildEntriesHref, buildEntriesTabHref, filterSelectTypes } from 'utils/metricsUtils'
 
 export default function OverviewMetrics() {
   const router = useRouter()
@@ -51,12 +50,9 @@ export default function OverviewMetrics() {
     setSelectedOrganisation(newOrganisation)
   }, [])
 
-  if (isOverviewMetricsError) {
-    return <MessageAlert message={isOverviewMetricsError.info.message} />
-  }
-
-  if (isOverviewMetricsLoading) {
-    return <Loading />
+  const queryState = renderQueryState([isOverviewMetricsError], isOverviewMetricsLoading)
+  if (queryState) {
+    return queryState
   }
 
   return (

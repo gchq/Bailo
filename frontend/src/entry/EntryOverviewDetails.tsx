@@ -1,23 +1,30 @@
+import dayjs from '@dayjs'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
-import { PickerValue } from '@mui/x-date-pickers/internals'
+import { type PickerValue } from '@mui/x-date-pickers/internals'
 import { patchEntry } from 'actions/entry'
 import { postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useCallback, useContext, useMemo, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EntrySelect from 'src/common/EntrySelect'
 import Loading from 'src/common/Loading'
 import TagSelector from 'src/common/TagSelector'
 import UserDisplay from 'src/common/UserDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
+import EntryMessageButtons from 'src/entry/EntryMessageButtons'
 import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryInterface, EntryKind, ReviewKind } from 'types/types'
-import { formatDateStringAsDayMonthAndYear, increaseCurrentDateInDays } from 'utils/dateUtils'
+import { type EntryInterface, EntryKind, ReviewKind } from 'types/types'
+import {
+  formatDateStringAsDayMonthAndYear,
+  increaseCurrentDateByHumanInterval,
+  utcStartOfCurrentDate,
+} from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -31,6 +38,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
   const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
   const [reviewDate, setReviewDate] = useState<PickerValue>()
+  const [reviewConfirmationOpen, setReviewConfirmationOpen] = useState(false)
 
   const sendNotification = useNotification()
 
@@ -92,7 +100,16 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
     } else {
       sendNotification({ msg: await getErrorMessage(res), variant: 'error' })
     }
+    setReviewConfirmationOpen(false)
   }, [entry.id, mutateArchivedReviews, mutateReviews, reviewDate, sendNotification])
+
+  const handleReviewConfirmationModal = useCallback(async () => {
+    if (reviewDate && reviewDate < utcStartOfCurrentDate()) {
+      setReviewConfirmationOpen(true)
+    } else {
+      await handleConfirmReviewDate()
+    }
+  }, [handleConfirmReviewDate, reviewDate])
 
   if (isReviewsLoading || isArchivedReviewsLoading) {
     return <Loading />
@@ -107,127 +124,151 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
   }
 
   return (
-    <Box>
-      <Stack
-        spacing={2}
-        divider={<Divider flexItem />}
-        sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}
-      >
-        <Typography color='primary' variant='h6' component='h2'>
-          {toSentenceCase(entry.kind)} details
-        </Typography>
-        <Stack>
-          {uiConfig.modelDetails.organisations.length > 0 && (
-            <EntrySelect
-              label='Organisation'
-              editable={updateEntryPermission.hasPermission}
-              value={entry.organisation}
-              entryId={entry.id}
-              field='organisation'
-              mutate={mutateEntry}
-              options={uiConfig.modelDetails.organisations}
-            />
-          )}
-          {uiConfig.modelDetails.states.length > 0 && entry.card && (
-            <EntrySelect
-              label='State'
-              editable={updateEntryPermission.hasPermission}
-              value={entry.state}
-              entryId={entry.id}
-              field='state'
-              mutate={mutateEntry}
-              options={uiConfig.modelDetails.states}
-            />
-          )}
-        </Stack>
-        {entry.kind !== EntryKind.DATA_CARD && entry.card && (
-          <Stack spacing={1}>
-            <Typography color='primary' sx={{ fontWeight: 'bold' }}>
-              Model card review
+    <>
+      <Box>
+        <Stack
+          spacing={2}
+          divider={<Divider flexItem />}
+          sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}
+        >
+          <Stack direction='row' sx={{ justifyContent: 'space-between' }} spacing={2}>
+            <Typography color='primary' variant='h6' component='h2'>
+              {`${toSentenceCase(entry.kind)} details`}
             </Typography>
-            {updateEntryPermission.hasPermission && reviews.length === 0 && (
-              <>
-                <DatePicker
-                  value={reviewDate}
-                  sx={{ backgroundColor: 'unset', borderRadius: 1, maxWidth: 'fit-content' }}
-                  onChange={(newValue) => {
-                    setReviewDate(newValue)
-                  }}
-                  minDate={increaseCurrentDateInDays(1)}
-                />
-                <Button disabled={!reviewDate} sx={{ maxWidth: 'fit-content' }} onClick={handleConfirmReviewDate}>
-                  Confirm
-                </Button>
-              </>
-            )}
-            {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>No review date set</em>}
-            <Stack
-              direction={{ md: 'column', lg: 'row' }}
-              spacing={1}
-              sx={{ alignItems: 'center' }}
-              divider={<Divider flexItem orientation='vertical' />}
-            >
-              {reviews.length > 0 && (
-                <Typography>
-                  {reviews[0].dueDate
-                    ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
-                    : 'Invalid date'}
-                </Typography>
-              )}
-              {updateEntryPermission.hasPermission && reviews[0] && (
-                <Button
-                  size='small'
-                  sx={{ width: 'fit-content' }}
-                  href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
-                  variant='outlined'
-                >
-                  Review
-                </Button>
-              )}
-              {archivedReviews.length > 0 && (
-                <Button
-                  size='small'
-                  onClick={() => {
-                    setReviewHistoryOpen(true)
-                  }}
-                  variant='outlined'
-                >
-                  History
-                </Button>
-              )}
-            </Stack>
-            {archivedReviews.length > 0 && <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} />}
+            <EntryMessageButtons entry={entry} />
           </Stack>
-        )}
-        <Stack spacing={1}>
-          <Button
-            size='small'
-            onClick={() => setRolesDialogOpen(true)}
-            sx={{ width: 'max-content', fontWeight: 'bold' }}
-          >
-            View collaborators
-          </Button>
-          {collaboratorList}
+          <Stack>
+            {uiConfig.modelDetails.organisations.length > 0 && (
+              <EntrySelect
+                label='Organisation'
+                editable={updateEntryPermission.hasPermission}
+                value={entry.organisation}
+                entryId={entry.id}
+                field='organisation'
+                mutate={mutateEntry}
+                options={uiConfig.modelDetails.organisations}
+              />
+            )}
+            {uiConfig.modelDetails.states.length > 0 && entry.card && (
+              <EntrySelect
+                label='State'
+                editable={updateEntryPermission.hasPermission}
+                value={entry.state}
+                entryId={entry.id}
+                field='state'
+                mutate={mutateEntry}
+                options={uiConfig.modelDetails.states}
+                showWarningWhenUnset
+              />
+            )}
+          </Stack>
+          {entry.kind !== EntryKind.DATA_CARD && entry.card && (
+            <Stack spacing={1}>
+              <Typography color='primary' sx={{ fontWeight: 'bold' }}>
+                Model card review
+              </Typography>
+              {updateEntryPermission.hasPermission && reviews.length === 0 && (
+                <>
+                  <DatePicker
+                    value={reviewDate}
+                    sx={{ backgroundColor: 'unset', borderRadius: 1, maxWidth: 'fit-content' }}
+                    onChange={(newValue) => {
+                      setReviewDate(newValue)
+                    }}
+                    minDate={dayjs('2000/01/01')}
+                    maxDate={
+                      uiConfig.lifecycle.maxReviewInterval === ''
+                        ? undefined
+                        : increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)
+                    }
+                  />
+                  <Button
+                    disabled={!reviewDate}
+                    sx={{ maxWidth: 'fit-content' }}
+                    onClick={handleReviewConfirmationModal}
+                  >
+                    Confirm
+                  </Button>
+                </>
+              )}
+              {!updateEntryPermission.hasPermission && reviews.length === 0 && <em>No review date set</em>}
+              <Stack
+                direction={{ md: 'column', lg: 'row' }}
+                spacing={1}
+                sx={{ alignItems: 'center' }}
+                divider={<Divider flexItem orientation='vertical' />}
+              >
+                {reviews.length > 0 && (
+                  <Typography>
+                    {reviews[0].dueDate
+                      ? formatDateStringAsDayMonthAndYear(reviews[0].dueDate.toString())
+                      : 'Invalid date'}
+                  </Typography>
+                )}
+                {updateEntryPermission.hasPermission && reviews[0] && (
+                  <Button
+                    size='small'
+                    sx={{ width: 'fit-content' }}
+                    href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
+                    variant='outlined'
+                  >
+                    Review
+                  </Button>
+                )}
+                {archivedReviews.length > 0 && (
+                  <Button
+                    size='small'
+                    onClick={() => {
+                      setReviewHistoryOpen(true)
+                    }}
+                    variant='outlined'
+                  >
+                    History
+                  </Button>
+                )}
+              </Stack>
+              {archivedReviews.length > 0 && <LastReviewOverviewDetails reviewId={archivedReviews[0]._id} />}
+            </Stack>
+          )}
+          <Stack spacing={1}>
+            <Button
+              size='small'
+              onClick={() => setRolesDialogOpen(true)}
+              sx={{ width: 'max-content', fontWeight: 'bold' }}
+            >
+              View collaborators
+            </Button>
+            {collaboratorList}
+          </Stack>
+          <Stack spacing={1}>
+            <Typography>
+              <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Tags: </span>
+            </Typography>
+            <TagSelector
+              onChange={handleEntryTagOnChange}
+              errorText={entryTagUpdateErrorMessage}
+              tags={entry.tags}
+              restrictedToAction={'editEntry'}
+            ></TagSelector>
+          </Stack>
         </Stack>
-        <Box>
-          <Typography>
-            <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Tags: </span>
-          </Typography>
-          <TagSelector
-            onChange={handleEntryTagOnChange}
-            errorText={entryTagUpdateErrorMessage}
-            tags={entry.tags}
-            restrictedToAction={'editEntry'}
-          ></TagSelector>
-        </Box>
-      </Stack>
-      <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
-      <ReviewHistoryDialog
-        open={reviewHistoryOpen}
-        onClose={() => setReviewHistoryOpen(false)}
-        entry={entry}
-        mutateEntry={mutateEntry}
+        <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
+        <ReviewHistoryDialog
+          open={reviewHistoryOpen}
+          onClose={() => setReviewHistoryOpen(false)}
+          entry={entry}
+          mutateEntry={mutateEntry}
+        />
+      </Box>
+      <ConfirmationDialogue
+        open={reviewConfirmationOpen}
+        title='Review date is in the past'
+        onConfirm={handleConfirmReviewDate}
+        onCancel={() => setReviewConfirmationOpen(false)}
+        dialogMessage={
+          'You have selected a date that has already passed. Please confirm whether you want to continue or choose a different review date.'
+        }
       />
-    </Box>
+    </>
   )
 }

@@ -11,7 +11,14 @@ const __dirname = path.dirname(__filename)
 
 const eslintConfig = [
   {
-    ignores: ['**/node_modules', '**/dist', '**/docs/_build', '**/docs/python-docs', '**/docs/backenddocsvenv'],
+    ignores: [
+      '**/node_modules',
+      '**/dist',
+      '**/docs/_build',
+      '**/docs/python-docs',
+      '**/docs/backenddocsvenv',
+      '**/docs/.venv',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -37,6 +44,7 @@ const eslintConfig = [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/consistent-type-imports': ['warn', { fixStyle: 'inline-type-imports' }],
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
       'no-duplicate-imports': 'warn',
@@ -94,6 +102,34 @@ const eslintConfig = [
     files: ['src/lib/zod.ts'],
     rules: {
       'no-restricted-imports': 'off',
+    },
+  },
+  // Enforce the shared config mock in tests
+  {
+    files: ['test/**/*.ts'],
+    ignores: ['test/testUtils/setupTestConfig.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.object.name='vi'][callee.property.name='mock'][arguments.0.value=/utils\\/config\\.js$/]",
+          message:
+            'Do not mock "utils/config.js" per-file. It is mocked globally from "test/testUtils/setupTestConfig.ts"; override values with `setTestConfig()` from the same file.',
+        },
+        {
+          selector:
+            "CallExpression[callee.object.name='vi'][callee.property.name='spyOn'][arguments.0.name=/^[Cc]onfig/]",
+          message:
+            'Do not spy on config properties. Use `setTestConfig()` from "test/testUtils/setupTestConfig.ts", which deep-merges overrides and reverts them after each test.',
+        },
+        {
+          selector:
+            "CallExpression[callee.object.name='vi'][callee.property.name='spyOn'][arguments.0.object.name=/^[Cc]onfig/]",
+          message:
+            'Do not spy on config properties. Use `setTestConfig()` from "test/testUtils/setupTestConfig.ts", which deep-merges overrides and reverts them after each test.',
+        },
+      ],
     },
   },
 ]

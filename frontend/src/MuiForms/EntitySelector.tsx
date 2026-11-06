@@ -2,14 +2,13 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Registry, RJSFSchema } from '@rjsf/utils'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { type KeyboardEvent, type SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
-import InlineDiff from 'src/common/InlineDiff'
 import UserDisplay from 'src/common/UserDisplay'
 import getCompareFieldState from 'src/hooks/useCompareField'
-import { EntityObject } from 'types/types'
+import { type EntityObject } from 'types/types'
 
 import { useGetCurrentUser, useListEntities } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -112,8 +111,6 @@ export default function EntitySelector({
     return <Loading />
   }
 
-  const currentValueString = formatEntityValue(currentValue)
-
   return (
     <CompareField
       id={id}
@@ -177,8 +174,6 @@ export default function EntitySelector({
             )}
           />
         </>
-      ) : compare.inMirroredCompare && currentValue.length ? (
-        <InlineDiff from={formatEntityValue(compare.compareFromState)} to={currentValueString} />
       ) : (
         currentValue.length > 0 && (
           <Box sx={{ overflowX: 'auto', p: 1 }}>

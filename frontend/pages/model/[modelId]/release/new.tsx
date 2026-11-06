@@ -3,11 +3,11 @@ import DesignServices from '@mui/icons-material/DesignServices'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { postFileForModelId } from 'actions/file'
-import { CreateReleaseParams, postRelease } from 'actions/release'
-import { AxiosProgressEvent } from 'axios'
+import { type CreateReleaseParams, postRelease } from 'actions/release'
+import { type AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import { type FormEvent, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { type FailedFileUpload, type FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -15,11 +15,11 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
-  FileInterface,
-  FileWithMetadataAndTags,
-  FlattenedModelImage,
+  type FileInterface,
+  type FileWithMetadataAndTags,
+  type FlattenedModelImage,
   isFileInterface,
-  SuccessfulFileUpload,
+  type SuccessfulFileUpload,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver, plural } from 'utils/stringUtils'
@@ -29,6 +29,7 @@ export default function NewRelease() {
   const [releaseNotes, setReleaseNotes] = useState('')
   const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
+  const draft = useRef(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
@@ -169,9 +170,10 @@ export default function NewRelease() {
     const release: CreateReleaseParams = {
       modelId: model.id,
       semver,
+      draft: draft.current as boolean,
       notes: releaseNotes,
-      minor: isMinorRelease,
       fileIds: successfulFiles.map((file) => file.fileId),
+      minor: isMinorRelease,
       images: imageList,
       modelCardVersion: modelCardVersion,
     }
@@ -187,6 +189,10 @@ export default function NewRelease() {
       router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
     setLoading(false)
+  }
+
+  function handleDraftRelease() {
+    draft.current = true
   }
 
   const error = MultipleErrorWrapper(`Unable to load release page`, {
@@ -218,7 +224,7 @@ export default function NewRelease() {
                   }}
                 >
                   <Typography variant='h6' component='h1' color='primary'>
-                    Draft New Release
+                    Create new release
                   </Typography>
                   <DesignServices color='primary' fontSize='large' />
                   <Typography>
@@ -229,17 +235,17 @@ export default function NewRelease() {
                 <ReleaseForm
                   model={model}
                   formData={{
+                    isMinorRelease,
                     semver,
                     releaseNotes,
-                    isMinorRelease,
                     files,
                     imageList,
                     modelCardVersion,
                   }}
                   onSemverChange={(value) => setSemver(value)}
                   onReleaseNotesChange={(value) => setReleaseNotes(value)}
-                  onMinorReleaseChange={(value) => setIsMinorRelease(value)}
                   onFilesChange={(value) => handleFileOnChange(value)}
+                  onMinorReleaseChange={(value) => setIsMinorRelease(value)}
                   onModelCardVersionChange={(value) => setModelCardVersion(value)}
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
@@ -254,16 +260,28 @@ export default function NewRelease() {
                     alignItems: 'flex-end',
                   }}
                 >
-                  <Button
-                    variant='contained'
-                    loading={loading}
-                    type='submit'
-                    disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
-                    sx={{ width: 'fit-content' }}
-                    data-test='createReleaseButton'
-                  >
-                    Create Release
-                  </Button>
+                  <Stack spacing={1} direction='row'>
+                    <Button
+                      variant='outlined'
+                      loading={loading}
+                      onClick={handleDraftRelease}
+                      type='submit'
+                      disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
+                      sx={{ width: 'fit-content' }}
+                    >
+                      Draft release
+                    </Button>
+                    <Button
+                      variant='contained'
+                      loading={loading}
+                      type='submit'
+                      disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
+                      sx={{ width: 'fit-content' }}
+                      data-test='createReleaseButton'
+                    >
+                      Publish release
+                    </Button>
+                  </Stack>
                   <MessageAlert message={errorMessage} severity='error' />
                 </Stack>
                 {failedFileUploads.length > 0 && (

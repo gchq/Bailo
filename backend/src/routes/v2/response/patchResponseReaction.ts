@@ -1,7 +1,7 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
-import { ReactionKind, ResponseInterface } from '../../../models/Response.js'
+import { ReactionKind, type ResponseInterface } from '../../../models/Response.js'
 import { updateResponseReaction } from '../../../services/response.js'
 import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'

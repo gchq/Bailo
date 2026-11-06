@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/index.js'
-import { ModelCardInterface } from '../../../../src/models/Model.js'
-import { UserInterface } from '../../../../src/models/User.js'
+import { type ModelCardInterface } from '../../../../src/models/Model.js'
+import { type UserInterface } from '../../../../src/models/User.js'
 import { getModelCardHtmlSchema } from '../../../../src/routes/v2/model/modelcard/getModelCardHtml.js'
 import { getModelCardHtml as getModelCardHtmlService } from '../../../../src/services/modelCardExport.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'

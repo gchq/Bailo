@@ -52,7 +52,7 @@ export default function FileUploadProgressDisplay({
           fontWeight: 'bold',
         }}
       >
-        File {uploadedFiles ? uploadedFiles + 1 : '1'} / {totalFilesToUpload} -{currentFileUploadProgress.fileName}
+        File {uploadedFiles ? uploadedFiles + 1 : '1'} / {totalFilesToUpload} - {currentFileUploadProgress.fileName}
       </Typography>
       <Typography>received - waiting for response from server...</Typography>
     </Stack>

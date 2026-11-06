@@ -1,8 +1,8 @@
-import Logger from 'bunyan'
+import { type Logger } from 'pino'
 
-import { BailoError } from '../types/error.js'
-import { RegistryError } from '../types/RegistryError.js'
-import { RegistryErrorResponseBody } from './registryResponses.js'
+import { type BailoError, isBailoError } from '../types/error.js'
+import { type RegistryError } from '../types/RegistryError.js'
+import { type RegistryErrorResponseBody } from './registryResponseTypes.js'
 
 export function GenericError(code: number, message: string, context?: BailoError['context'], logger?: Logger) {
   const err = Error(message) as BailoError
@@ -83,4 +83,13 @@ export function RegistryError(error: RegistryErrorResponseBody, context?: BailoE
   registryError.errors = error.errors
 
   return registryError
+}
+
+export function toBailoError(err: unknown, context?: BailoError['context'], code: number = 500): BailoError {
+  if (isBailoError(err)) {
+    return err
+  } else if (Error.isError(err)) {
+    return InternalError(err.message, { ...context, err })
+  }
+  return GenericError(code, String(err), { ...context, cause: err })
 }

@@ -4,8 +4,8 @@ import ErrorIcon from '@mui/icons-material/Error'
 import HourglassTop from '@mui/icons-material/HourglassTop'
 import Warning from '@mui/icons-material/Warning'
 import { Chip, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
-import { ReactElement } from 'react'
-import { ArtefactScanState, ClamAVSummary, ModelScanSummary, ScanResultInterface } from 'types/types'
+import { type ReactElement } from 'react'
+import { ArtefactScanState, type ClamAVSummary, type ModelScanSummary, type ScanResultInterface } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
 
 interface ScanResultDetailProps {
@@ -90,7 +90,7 @@ export default function ScanResultDetail({ scanResult }: ScanResultDetailProps) 
       )
     }
 
-    if (toolName === 'ModelScan') {
+    if ('vulnerabilityDescription' in vulnerability) {
       const v = vulnerability as ModelScanSummary
       return (
         <ListItem key={v.vulnerabilityDescription} sx={{ display: 'list-item', py: 0 }}>

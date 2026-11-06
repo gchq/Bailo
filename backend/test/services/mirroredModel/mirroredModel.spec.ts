@@ -14,20 +14,7 @@ import {
 import { MirrorKind } from '../../../src/types/types.js'
 import config from '../../../src/utils/config.js'
 import { BadReq, InternalError } from '../../../src/utils/error.js'
-
-vi.mock('../../../src/utils/config.js', async () => {
-  const actual = await vi.importActual<typeof import('../../../src/utils/config.js')>('../../../src/utils/config.js')
-  const mutableConfig = structuredClone(actual.default)
-
-  return { __esModule: true, default: mutableConfig }
-})
-config.ui = {
-  modelMirror: {
-    import: { enabled: true },
-    export: { enabled: true },
-  },
-} as any
-config.modelMirror = { export: { concurrency: 1 }, metadataFile: 'meta.json' } as any
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 const logMock = vi.hoisted(() => ({ info: vi.fn(), debug: vi.fn(), error: vi.fn() }))
 vi.mock('../../../src/services/log.js', () => ({ default: logMock }))
@@ -307,6 +294,7 @@ vi.mock('p-queue', () => ({
 describe('services > mirroredModel', () => {
   beforeEach(() => {
     pendingJobs = []
+    setTestConfig({ ui: { modelMirror: { import: { enabled: true }, export: { enabled: true } } } })
   })
 
   const createManifestBody = (layers: any[] = []) => ({

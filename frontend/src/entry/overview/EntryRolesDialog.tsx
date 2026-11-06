@@ -2,7 +2,7 @@ import { DialogContent, DialogTitle } from '@mui/material'
 import Dialog from '@mui/material/Dialog'
 import { Transition } from 'src/common/Transition'
 import EntryRoleList from 'src/entry/overview/EntryRoleList'
-import { EntryInterface } from 'types/types'
+import { type EntryInterface } from 'types/types'
 
 type EntryRolesDialogProps = {
   entry: EntryInterface

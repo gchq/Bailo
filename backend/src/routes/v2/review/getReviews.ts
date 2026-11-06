@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { ReviewInterface } from '../../../models/Review.js'
+import { type ReviewInterface } from '../../../models/Review.js'
 import { findReviews } from '../../../services/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'
@@ -16,8 +16,8 @@ export const getReviewsSchema = z.object({
     accessRequestId: z.string().optional(),
     reviewId: z.string().optional(),
     kind: z.nativeEnum(ReviewKind).optional(),
-    mine: strictCoerceBoolean(z.boolean().optional().default(true)),
-    open: strictCoerceBoolean(z.boolean().optional()),
+    mine: strictCoerceBoolean(z.boolean()).optional().default(true),
+    open: strictCoerceBoolean(z.boolean()).optional(),
   }),
 })
 

@@ -23,7 +23,7 @@ vi.mock('../../../../src/connectors/authentication/index.js', () => ({
 }))
 
 describe('routes > v3 > entities > getCurrentUser', () => {
-  test('200 > returns user with no systemRoles when user has neither Admin nor Compliance', async () => {
+  test('200 > returns user with no systemRoles when user has no valid role', async () => {
     mockAuth.hasRole.mockResolvedValue(false)
 
     const res = await testGet('/api/v3/entities/me')
@@ -56,14 +56,25 @@ describe('routes > v3 > entities > getCurrentUser', () => {
     })
   })
 
-  test('200 > returns user with both admin and compliance systemRoles when user has both roles', async () => {
+  test('200 > returns user with systemRoles containing compliance when user is UntrustedModel', async () => {
+    mockAuth.hasRole.mockImplementation((_user: any, role: string) => Promise.resolve(role === 'untrusted-model'))
+
+    const res = await testGet('/api/v3/entities/me')
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body).toEqual({
+      user: { dn: 'test-user', systemRoles: ['untrusted-model'] },
+    })
+  })
+
+  test('200 > returns user with all systemRoles when user has all roles', async () => {
     mockAuth.hasRole.mockResolvedValue(true)
 
     const res = await testGet('/api/v3/entities/me')
 
     expect(res.statusCode).toBe(200)
     expect(res.body).toEqual({
-      user: { dn: 'test-user', systemRoles: ['admin', 'compliance'] },
+      user: { dn: 'test-user', systemRoles: ['admin', 'compliance', 'untrusted-model'] },
     })
   })
 
