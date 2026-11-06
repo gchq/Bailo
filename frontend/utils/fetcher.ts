@@ -1,4 +1,4 @@
-import { getReasonPhrase } from 'http-status-codes'
+import { getReasonPhrase } from 'utils/httpStatusCodes'
 import { redirectToLoginPage } from 'utils/loginUtils'
 
 export type ErrorInfo = Error & {
