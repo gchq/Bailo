@@ -4,7 +4,7 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Link from 'next/link'
-import React, { ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 
 interface IntroCardProps {
   title: string

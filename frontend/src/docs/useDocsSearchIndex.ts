@@ -1,18 +1,18 @@
-import { EntrySearchResult, useListEntries } from 'actions/entry'
+import { type EntrySearchResult, useListEntries } from 'actions/entry'
 import { useMemo } from 'react'
 import useDebounce from 'src/hooks/useDebounce'
 import useSWR from 'swr'
 import {
-  DocsSearchCategory as SearchCategory,
-  DocsSearchFilter as SearchFilter,
-  DocsSearchHookResult,
-  DocsSearchIndexEntry,
-  DocsSearchQueryTerms as QueryTerms,
-  DocsSearchResult,
-  IndexedDocsSearchEntry as IndexedEntry,
-  IndexedDocsSearchHeading as IndexedHeading,
+  type DocsSearchCategory as SearchCategory,
+  type DocsSearchFilter as SearchFilter,
+  type DocsSearchHookResult,
+  type DocsSearchIndexEntry,
+  type DocsSearchQueryTerms as QueryTerms,
+  type DocsSearchResult,
+  type IndexedDocsSearchEntry as IndexedEntry,
+  type IndexedDocsSearchHeading as IndexedHeading,
 } from 'types/docs'
-import { EntryKind, EntryKindKeys, MODEL_ENTRY_KINDS } from 'types/types'
+import { EntryKind, type EntryKindKeys, MODEL_ENTRY_KINDS } from 'types/types'
 
 import { flatDirectory } from './directory'
 
