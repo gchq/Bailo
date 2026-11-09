@@ -518,43 +518,41 @@ export default function Marketplace() {
                           />
                         </Box>
                       )}
-                      <Box>
-                        <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
-                          <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                            <Typography component='h2' variant='h6' sx={{ px: 1 }}>
-                              Users/Groups
-                            </Typography>
-                          </AccordionSummary>
-                          <AccordionDetails sx={{ p: 0, pb: 1 }}>
-                            <Autocomplete
-                              multiple
-                              size='small'
-                              noOptionsText='nothing here'
-                              onInputChange={debounceOnInputChange}
-                              value={updatedUsers}
-                              groupBy={(option) => option.kind.toUpperCase()}
-                              getOptionLabel={(option) => option.id}
-                              isOptionEqualToValue={(option, value) => option.id === value.id}
-                              onChange={(_event, newValue) => {
-                                setUpdatedUsers(newValue)
-                              }}
-                              options={users}
-                              filterOptions={(options) =>
-                                options.filter((option) => !updatedUsers.find((user) => _.isEqual(user, option)))
-                              }
-                              loading={isUsersLoading && userListQuery.length >= 3}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  autoFocus
-                                  label={'Search for user/group'}
-                                  slotProps={{ ...params.slotProps }}
-                                />
-                              )}
-                            />
-                          </AccordionDetails>
-                        </Accordion>
-                      </Box>
+                      <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
+                        <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+                          <Typography component='h2' variant='h6' sx={{ px: 1 }}>
+                            Users/Groups
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ p: 0, pb: 1 }}>
+                          <Autocomplete
+                            multiple
+                            size='small'
+                            noOptionsText='nothing here'
+                            onInputChange={debounceOnInputChange}
+                            value={updatedUsers}
+                            groupBy={(option) => option.kind.toUpperCase()}
+                            getOptionLabel={(option) => option.id}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            onChange={(_event, newValue) => {
+                              setUpdatedUsers(newValue)
+                            }}
+                            options={users}
+                            filterOptions={(options) =>
+                              options.filter((option) => !updatedUsers.find((user) => _.isEqual(user, option)))
+                            }
+                            loading={isUsersLoading && userListQuery.length >= 3}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                autoFocus
+                                label={'Search for user/group'}
+                                slotProps={{ ...params.slotProps }}
+                              />
+                            )}
+                          />
+                        </AccordionDetails>
+                      </Accordion>
                       <Box>
                         <ChipSelector
                           label='My roles'
