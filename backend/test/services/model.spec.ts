@@ -1071,8 +1071,9 @@ describe('services > model', () => {
 
   test('popularTagsForEntries > returns a list of tags', async () => {
     ModelModelMock.aggregate.mockResolvedValueOnce([{ _id: 'test-tag' }])
-    const tags = await popularTagsForEntries()
+    const tags = await popularTagsForEntries(10)
     expect(tags).toEqual(['test-tag'])
+    expect(ModelModelMock.aggregate).toHaveBeenCalledWith(expect.arrayContaining([{ $limit: 10 }]))
   })
 
   test('getModelSystemRoles > should handle case-insensitive entity matching', async () => {
