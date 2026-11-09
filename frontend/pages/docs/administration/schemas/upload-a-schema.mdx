@@ -14,8 +14,8 @@ import bailoResetApprovals from '../../../../public/docs/bailo_upload_new_schema
 
 Upload new schemas from the schema management page. You must hold the admin role to manage schemas.
 
-By default Bailo comes with a default schema for each schema type: model card, data card, access request and deployment
-assessment. These are added on startup by `addDefaultSchemas` in `backend/src/services/schema.ts`, using the values in
+By default Bailo comes with a default schema for each schema type: model card, data card, access request and Deployment
+Assessment. These are added on startup by `addDefaultSchemas` in `backend/src/services/schema.ts`, using the values in
 `backend/config/default.cjs`. These contain a small number of questions, and are not expected to be used on a production
 system.
 
@@ -56,7 +56,7 @@ These sections appear after the sections in your uploaded schema. The assessment
 the form, but it is not part of the schema.
 
 These questions are used throughout the application, for example to show an assessment on the model's Deployment
-assessments tab and to notify the relevant people when it is published, so they are provided automatically. This allows
+Assessments tab and to notify the relevant people when it is published, so they are provided automatically. This allows
 schemas provided by Bailo administrators to be otherwise entirely customisable.
 
 **Customising the automatic sections**
