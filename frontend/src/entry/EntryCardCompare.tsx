@@ -60,32 +60,16 @@ export default function EntryCardCompare({
   const { entry: fromEntry } = useGetEntry(fromEntryId, searchKinds)
   const { entry: toEntry } = useGetEntry(toEntryId, searchKinds)
 
-  const { entries: fromEntriesRaw, isEntriesLoading: isFromEntriesLoading } = useListEntries(
-    searchKinds,
-    [],
-    '',
-    [],
-    [],
-    [],
-    [],
-    debouncedFromSearch,
-    undefined,
-    undefined,
-    true,
-  )
-  const { entries: toEntriesRaw, isEntriesLoading: isToEntriesLoading } = useListEntries(
-    searchKinds,
-    [],
-    '',
-    [],
-    [],
-    [],
-    [],
-    debouncedToSearch,
-    undefined,
-    undefined,
-    true,
-  )
+  const { entries: fromEntriesRaw, isEntriesLoading: isFromEntriesLoading } = useListEntries({
+    kind: searchKinds,
+    search: debouncedFromSearch,
+    enabled: true,
+  })
+  const { entries: toEntriesRaw, isEntriesLoading: isToEntriesLoading } = useListEntries({
+    kind: searchKinds,
+    search: debouncedToSearch,
+    enabled: true,
+  })
 
   const fromEntries: EntryOption[] =
     fromEntry && !fromEntriesRaw.some((entry) => entry.id === fromEntry.id)

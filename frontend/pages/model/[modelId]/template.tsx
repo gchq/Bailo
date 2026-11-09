@@ -31,7 +31,7 @@ export default function ModelTemplateSelect() {
     entries: models,
     isEntriesLoading: isModelsLoading,
     isEntriesError: isModelsError,
-  } = useListEntries(EntryKind.MODEL, [], '', [], [], [], [], '', true)
+  } = useListEntries({ kind: EntryKind.MODEL, enabled: true })
 
   const handleChange = (_event: SyntheticEvent, newValue: EntrySearchResult | null) => {
     setSelectedModel(newValue)

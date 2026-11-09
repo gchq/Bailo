@@ -125,19 +125,16 @@ export default function Marketplace() {
 
   const searchFilter = debouncedFilter.length >= 3 ? debouncedFilter : ''
 
-  const { entries, entryErrors, isEntriesError, isEntriesLoading } = useListEntries(
-    [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL, EntryKind.DATA_CARD],
-    selectedRoles,
-    '',
-    selectedTags,
-    selectedOrganisations,
-    selectedStates,
-    selectedPeers,
-    searchFilter,
-    false,
-    '',
+  const { entries, entryErrors, isEntriesError, isEntriesLoading } = useListEntries({
+    kind: [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL, EntryKind.DATA_CARD],
+    roles: selectedRoles,
+    libraries: selectedTags,
+    organisations: selectedOrganisations,
+    states: selectedStates,
+    peers: selectedPeers,
+    search: searchFilter,
     titleOnly,
-  )
+  })
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
   const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
