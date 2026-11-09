@@ -1,6 +1,5 @@
 import { type Readable } from 'node:stream'
 
-import bytes from 'bytes'
 import { type ClientSession, Types } from 'mongoose'
 
 import {
@@ -24,6 +23,7 @@ import { EntryKind, type ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
 import { type UserInterface } from '../models/User.js'
 import { type ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
+import { formatBytes } from '../utils/bytes.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { createFilePath } from '../utils/fileUtils.js'
@@ -202,7 +202,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   const stream = await getObjectStream(file.path, undefined, range)
 
   const totalBytes = file.size
-  const totalPretty = bytes.format(totalBytes)
+  const totalPretty = formatBytes(totalBytes)
   let progress = 0
   let lastLoggedAt = 0
   stream.on('data', function (chunk) {
@@ -218,7 +218,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     lastLoggedAt = now
     log.debug(
       {
-        loaded: bytes.format(progress),
+        loaded: formatBytes(progress),
         loadedBytes: progress,
         total: totalPretty,
         totalBytes,
@@ -232,9 +232,9 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   stream.on('close', () => {
     log.debug(
       {
-        loaded: bytes.format(progress),
+        loaded: formatBytes(progress),
         loadedBytes: progress,
-        total: bytes.format(file.size),
+        total: formatBytes(file.size),
         totalBytes: file.size,
         fileId,
         modelId: model.id,

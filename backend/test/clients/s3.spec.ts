@@ -12,8 +12,6 @@ import {
   startMultipartUpload,
 } from '../../src/clients/s3.js'
 
-vi.mock('bytes')
-
 const s3Mocks = vi.hoisted(() => {
   const send = vi.fn(function () {
     return 'response'

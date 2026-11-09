@@ -1,4 +1,3 @@
-import bytes from 'bytes'
 import NodeClam from 'clamscan'
 import PQueue from 'p-queue'
 
@@ -7,6 +6,7 @@ import { type FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, type ArtefactKindKeys, type ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
+import { parseBytes } from '../../utils/bytes.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import { type ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
@@ -37,7 +37,7 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     const sizeString = config.artefactScanning.clamdscan.streamMaxLength.endsWith('B')
       ? config.artefactScanning.clamdscan.streamMaxLength
       : `${config.artefactScanning.clamdscan.streamMaxLength}B`
-    const streamMaxLength = bytes.parse(sizeString)
+    const streamMaxLength = parseBytes(sizeString)
     if (streamMaxLength === null) {
       throw InternalError('Invalid ClamAV size value.', { sizeString })
     }

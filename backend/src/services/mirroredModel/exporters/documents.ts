@@ -1,5 +1,3 @@
-import bytes from 'bytes'
-
 import { ArtefactScanState } from '../../../connectors/artefactScanning/Base.js'
 import scanners from '../../../connectors/artefactScanning/index.js'
 import { isScanAllowedSkip } from '../../../connectors/artefactScanning/modelScan.js'
@@ -10,6 +8,7 @@ import { type ModelDoc } from '../../../models/Model.js'
 import { type ReleaseDoc } from '../../../models/Release.js'
 import { type UserInterface } from '../../../models/User.js'
 import { type MirrorExportLogData, MirrorKind } from '../../../types/types.js'
+import { formatBytes } from '../../../utils/bytes.js'
 import config from '../../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import { getFilesByIds, getTotalFileSize } from '../../file.js'
@@ -53,7 +52,7 @@ export class DocumentsExporter extends BaseExporter {
         }
         const totalFileSize = await getTotalFileSize(fileIds)
         log.debug(
-          { modelId: this.model.id, semvers, size: bytes.format(totalFileSize) },
+          { modelId: this.model.id, semvers, size: formatBytes(totalFileSize) },
           'Calculated estimated total file size included in export.',
         )
         if (totalFileSize > config.modelMirror.export.maxSize) {
