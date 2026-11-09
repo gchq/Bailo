@@ -16,6 +16,7 @@ vi.mock('actions/file', () => ({
 
 vi.mock('actions/entry', () => ({
   deleteEntryFile: vi.fn(),
+  useGetPopularEntryTags: vi.fn(() => ({ tags: [], isTagsError: undefined })),
 }))
 
 // The tag editor renders AdditionalInformation, which fetches the UI config.
@@ -98,9 +99,7 @@ describe('FileUploadDialog', () => {
       selectFolder(siblings)
       await screen.findByText(siblings[0])
 
-      // Each row renders its path as a deletable Chip.
-      const rowToDelete = screen.getByText(siblings[0]).closest('.MuiChip-root') as HTMLElement
-      fireEvent.click(rowToDelete.querySelector('.MuiChip-deleteIcon') as HTMLElement)
+      fireEvent.click(screen.getByRole('button', { name: `remove ${siblings[0]} from files to upload` }))
 
       await waitFor(() => {
         expect(screen.queryByText(siblings[0])).toBeNull()
@@ -115,14 +114,14 @@ describe('FileUploadDialog', () => {
       selectFolder(siblings)
       await screen.findByText(siblings[0])
 
-      // Open the tag editor belonging to the first file's row.
-      const firstRow = screen.getByText(siblings[0]).closest('.MuiGrid-container') as HTMLElement
-      fireEvent.click(within(firstRow).getByText(/Edit file tags/))
-
-      const addTagButton = await screen.findByText('Add tag')
-      const tagEditor = addTagButton.closest('.MuiPaper-root') as HTMLElement
-      fireEvent.change(within(tagEditor).getByRole('textbox'), { target: { value: 'alpha' } })
-      fireEvent.click(addTagButton)
+      // Each staged file is its own bordered Box (its inner layout uses Stacks), so the nearest
+      // Box above the path text is that file's row, holding its own tag input.
+      const firstRow = screen.getByText(siblings[0]).closest('.MuiBox-root') as HTMLElement
+      const tagInput = within(firstRow).getByRole('combobox')
+      // The Autocomplete only opens its option list once its input has focus.
+      fireEvent.focus(tagInput)
+      fireEvent.change(tagInput, { target: { value: 'alpha' } })
+      fireEvent.click(await screen.findByRole('option', { name: 'alpha' }))
 
       fireEvent.click(await screen.findByText('Upload files'))
 
