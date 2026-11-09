@@ -1,8 +1,8 @@
 import Avatar from '@mui/material/Avatar'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import { randomColor } from 'randomcolor'
 import { type Entity } from 'types/types'
+import { randomColour } from 'utils/colourUtils'
 
 type Luminosity = 'light' | 'dark'
 
@@ -10,11 +10,7 @@ export default function UserAvatar({ entity, luminosity }: { entity: Entity; lum
   const theme = useTheme()
   const fontColour = luminosity === 'dark' ? 'white' : 'black'
 
-  const color = randomColor({
-    seed: entity.id,
-    luminosity: luminosity || theme.palette.mode,
-    format: 'hex',
-  })
+  const color = randomColour(entity.id, luminosity || theme.palette.mode)
 
   return (
     <Avatar
