@@ -263,7 +263,7 @@ export default function NewSchema() {
                 <Typography variant='caption'>{schemaTypeDescription}</Typography>
               </Stack>
               {schemaKind === SchemaKind.DEPLOYMENT_ASSESSMENT && (
-                <MessageAlert message='Please note: mandatory Deployment Assessment questions will be automatically added to those in your uploaded schema. These are: "name" and "Entry list".' />
+                <MessageAlert message='Please note: mandatory Deployment Assessment questions will be automatically added to those in your uploaded schema. These are: the list of models and the Deployment Risk Owner.' />
               )}
               <Button variant='outlined' component='label' aria-label='Schema JSON file upload button'>
                 {fileName !== '' ? fileName : 'Select schema'}

@@ -14,9 +14,10 @@ import bailoResetApprovals from '../../../../public/docs/bailo_upload_new_schema
 
 Upload new schemas from the schema management page. You must hold the admin role to manage schemas.
 
-By default Bailo comes with a default schema for both a model card and an access request. These are added on startup in
-`backend/src/services/v2/schema.ts`. These contain a small number of questions, and are not expected to be used on a
-production system.
+By default Bailo comes with a default schema for each schema type: model card, data card, access request and deployment
+assessment. These are added on startup by `addDefaultSchemas` in `backend/src/services/schema.ts`, using the values in
+`backend/config/default.cjs`. These contain a small number of questions, and are not expected to be used on a production
+system.
 
 1. To add a new schema, click **Schemas** in the left navigation bar on a running Bailo instance.
 2. Click the **Upload a new Schema** button in the top left.
@@ -36,7 +37,7 @@ displaying the Actions button to one side. An **Upload a new Schema** is promine
    - **Id** - A globally unique schema identifier, should include the schema version.
    - **Name** - A user-facing name for the schema, should include the schema version.
    - **Description** - Displayed to the user to help them decide which schema to pick. Can include markdown.
-   - **Schema Type** - Either 'Model' or 'Access Request'.
+   - **Schema Type** - Either 'Model', 'Access Request', 'Data Card' or 'Deployment Assessment'.
    - **Schema** - Select a JSON Schema that includes the questions you require.
 
 From the schema list page you can also convert a schema to inactive by pressing the **make inactive** button in the
@@ -45,14 +46,47 @@ From the schema list page you can also convert a schema to inactive by pressing 
 
 ### Deployment assessment schemas
 
-When uploading a Deployment Assessment schema, mandatory questions will be automatically added to those in your uploaded
-schema. These are:
+Bailo automatically adds two required sections to every Deployment Assessment schema:
 
-- Name
-- Deployment Risk Owner
-- Entry list
+- **Model Overview** - the list of models included in the assessment. At least one model must be selected.
+- **Deployment Sign-Off** - the Deployment Risk Owner. Exactly one user must be selected, and it defaults to the person
+  creating the assessment.
 
-The above questions are used throughout the application, and therefore they are provided automatically as the first page
-of the Deployment Assessment form. This allows schemas provided by Bailo administrators to be entirely customisable.
+These sections appear after the sections in your uploaded schema. The assessment name is also requested at the top of
+the form, but it is not part of the schema.
+
+These questions are used throughout the application, for example to show an assessment on the model's Deployment
+assessments tab and to notify the relevant people when it is published, so they are provided automatically. This allows
+schemas provided by Bailo administrators to be otherwise entirely customisable.
+
+**Customising the automatic sections**
+
+To add your own questions to either section, include a `modelOverview` or `signOff` object in your schema. Their
+properties appear alongside the automatic questions, and any `required` entries are added to the automatic ones. If your
+schema includes one of these sections, it keeps the position you give it. The section titles cannot be changed.
+
+To replace an automatic question, for example to give the Deployment Risk Owner question a custom description, define a
+property with the same name (`modelIds` or `riskOwners`). It replaces the automatic question completely, so it must
+include everything the question needs to work. For example:
+
+```json
+"signOff": {
+  "properties": {
+    "riskOwners": {
+      "title": "Who is the Deployment Risk Owner?",
+      "description": "Your custom guidance for the Deployment Risk Owner.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true,
+      "widget": "entitySelector"
+    }
+  }
+}
+```
+
+Use `"widget": "modelSelector"` and omit `maxItems` when replacing `modelIds`. Bailo does not check that a replacement
+is complete when the schema is uploaded, so test it by creating an assessment.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
