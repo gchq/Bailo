@@ -1,13 +1,17 @@
 import Add from '@mui/icons-material/Add'
-import { Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, Paper, Stack, Tooltip, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import HelpDialog from 'src/common/HelpDialog'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
 import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
+import useDeploymentAssessmentSchemaAvailability, {
+  noDeploymentAssessmentSchemasMessage,
+} from 'src/hooks/useDeploymentAssessmentSchemaAvailability'
 
 export default function Deployments() {
   const router = useRouter()
+  const { isSchemasLoading, noSchemasAvailable } = useDeploymentAssessmentSchemaAvailability()
 
   const deploymentAssessmentInfo = `
   Deployment assessments are used to document the use of one or more models. Unlike the previous access request process, Deployment Assessments are not tied to a specific model, and model owners or managers do not need to be involved.
@@ -32,15 +36,20 @@ export default function Deployments() {
               Deployment Assessments
             </Typography>
             <Box>
-              <Button
-                sx={{ minWidth: '154px' }}
-                variant='contained'
-                onClick={() => router.push('/deployment-assessments/new')}
-                startIcon={<Add />}
-                data-test='actionButton'
-              >
-                Create Deployment Assessment
-              </Button>
+              <Tooltip title={noSchemasAvailable ? noDeploymentAssessmentSchemasMessage : ''}>
+                <span>
+                  <Button
+                    sx={{ minWidth: '154px' }}
+                    variant='contained'
+                    onClick={() => router.push('/deployment-assessments/new')}
+                    startIcon={<Add />}
+                    disabled={isSchemasLoading || noSchemasAvailable}
+                    data-test='actionButton'
+                  >
+                    Create Deployment Assessment
+                  </Button>
+                </span>
+              </Tooltip>
               <HelpDialog
                 title='What are Deployment Assessments?'
                 content={<MarkdownDisplay>{deploymentAssessmentInfo}</MarkdownDisplay>}
