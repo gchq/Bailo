@@ -28,18 +28,10 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
-  const { entries, isEntriesLoading, isEntriesError } = useListEntries(
-    schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
-    [],
-    '',
-    [],
-    [],
-    [],
-    [],
-    '',
-    false,
-    schemaToBeDeleted,
-  )
+  const { entries, isEntriesLoading, isEntriesError } = useListEntries({
+    kind: schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
+    search: schemaToBeDeleted,
+  })
   const [openMenuSchemaId, setOpenMenuSchemaId] = useState<SchemaInterface['id'] | null>(null)
 
   const objectsToDelete = useCallback(() => {
