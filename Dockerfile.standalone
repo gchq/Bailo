@@ -14,7 +14,7 @@
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 #       Access UI at http://localhost:4318/
 
-FROM chrislusf/seaweedfs:4.50@sha256:c2658820e763294a9e9de7b36c81e59b879e3459148351aee4e31a126ca64860 AS seaweedfs-bin
+FROM chrislusf/seaweedfs:4.52@sha256:57877e32bb90073b37dc109b438ba66e84fd5ed9ced5f5c04f56444ef243ce59 AS seaweedfs-bin
 FROM registry:3.1.2@sha256:d4032d4cc323c1731c707931ecada07a53076eac38e3b61ae57533f170f2c6c3 AS registry-bin
 FROM marlonb/mailcrab:v1.10.0@sha256:dd0e3933e35200ed9956aeb76bb27fc700dd452bd6586448107ccf8fe411c0a1 AS mailcrab-bin
 
