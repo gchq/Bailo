@@ -521,7 +521,7 @@ export default function Marketplace() {
                       <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
                         <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
                           <Typography component='h2' variant='h6' sx={{ px: 1 }}>
-                            Users/Groups
+                            Users and groups
                           </Typography>
                         </AccordionSummary>
                         <AccordionDetails sx={{ p: 0, pb: 1 }}>
