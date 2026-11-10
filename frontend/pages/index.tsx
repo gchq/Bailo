@@ -546,7 +546,7 @@ export default function Marketplace() {
                               <TextField
                                 {...params}
                                 autoFocus
-                                label={'Search for user/group'}
+                                label={'Search for user or group'}
                                 slotProps={{ ...params.slotProps }}
                               />
                             )}
