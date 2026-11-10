@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { outdent, plural, toTitleCase } from '../../src/utils/string.js'
+import { bytesToUuid, outdent, plural, toTitleCase } from '../../src/utils/string.js'
 
 describe('utils > string', () => {
   test('plural', () => {
@@ -18,6 +18,16 @@ describe('utils > string', () => {
     expect(toTitleCase('hello_world')).toEqual('Hello World')
     expect(toTitleCase('model', '-')).toEqual('Model')
     expect(toTitleCase('data-card', '-')).toEqual('Data card')
+  })
+
+  test('bytesToUuid', () => {
+    const bytes = Uint8Array.from({ length: 16 }, (_, index) => index * 17)
+
+    expect(bytesToUuid(bytes)).toEqual('00112233-4455-6677-8899-aabbccddeeff')
+  })
+
+  test('bytesToUuid > wrong length', () => {
+    expect(() => bytesToUuid(new Uint8Array(15))).toThrow('A UUID needs exactly 16 bytes, received 15')
   })
 
   test('outdent > removes first line indentation and surrounding newlines', () => {

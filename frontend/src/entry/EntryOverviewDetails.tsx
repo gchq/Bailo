@@ -1,5 +1,4 @@
 import dayjs from '@dayjs'
-import LocalOffer from '@mui/icons-material/LocalOffer'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
@@ -10,17 +9,17 @@ import { useCallback, useContext, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EntrySelect from 'src/common/EntrySelect'
 import Loading from 'src/common/Loading'
-import Restricted from 'src/common/Restricted'
+import TagSelector from 'src/common/TagSelector'
 import UserDisplay from 'src/common/UserDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
+import EntryMessageButtons from 'src/entry/EntryMessageButtons'
 import LastReviewOverviewDetails from 'src/entry/LastReviewOverviewDetails'
-import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { EntryCardKindLabel, type EntryInterface, EntryKind, ReviewKind } from 'types/types'
+import { type EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import {
   formatDateStringAsDayMonthAndYear,
   increaseCurrentDateByHumanInterval,
@@ -36,7 +35,6 @@ interface OrganisationAndStateDetailsProps {
 
 export default function EntryOverviewDetails({ entry, mutateEntry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
   const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
   const [reviewDate, setReviewDate] = useState<PickerValue>()
@@ -133,9 +131,12 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
           divider={<Divider flexItem />}
           sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 1 }}
         >
-          <Typography color='primary' variant='h6' component='h2'>
-            {toSentenceCase(entry.kind)} details
-          </Typography>
+          <Stack direction='row' sx={{ justifyContent: 'space-between' }} spacing={2}>
+            <Typography color='primary' variant='h6' component='h2'>
+              {`${toSentenceCase(entry.kind)} details`}
+            </Typography>
+            <EntryMessageButtons entry={entry} />
+          </Stack>
           <Stack>
             {uiConfig.modelDetails.organisations.length > 0 && (
               <EntrySelect
@@ -239,25 +240,17 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
             </Button>
             {collaboratorList}
           </Stack>
-          <Box>
-            <Restricted action='editEntry' fallback={<></>}>
-              <Button
-                sx={{ width: 'fit-content' }}
-                size='small'
-                startIcon={<LocalOffer />}
-                onClick={(event) => setAnchorEl(event.currentTarget)}
-              >
-                {`Edit ${EntryCardKindLabel[entry.kind]} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
-              </Button>
-            </Restricted>
-            <EntryTagSelector
-              anchorEl={anchorEl}
-              setAnchorEl={setAnchorEl}
+          <Stack spacing={1}>
+            <Typography>
+              <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Tags: </span>
+            </Typography>
+            <TagSelector
               onChange={handleEntryTagOnChange}
-              tags={entry.tags}
               errorText={entryTagUpdateErrorMessage}
-            />
-          </Box>
+              tags={entry.tags}
+              restrictedToAction={'editEntry'}
+            ></TagSelector>
+          </Stack>
         </Stack>
         <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
         <ReviewHistoryDialog

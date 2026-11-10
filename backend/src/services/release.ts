@@ -351,6 +351,14 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
     throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
 
+  const draftReleases = releases.filter((release) => release.draft)
+  if (draftReleases.length > 0) {
+    throw BadReq('Draft releases cannot be exported.', {
+      modelId,
+      releases: draftReleases.map((release) => release.semver),
+    })
+  }
+
   const authResponses = await authorisation.releases(user, model, releases, ReleaseAction.Export)
   const failedReleases = releases.filter((_, i) => !authResponses[i].success)
   if (failedReleases.length > 0) {
