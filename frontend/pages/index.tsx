@@ -528,7 +528,7 @@ export default function Marketplace() {
                           <Autocomplete
                             multiple
                             size='small'
-                            noOptionsText='nothing here'
+                            noOptionsText='No entries found'
                             onInputChange={debounceOnInputChange}
                             value={updatedUsers}
                             groupBy={(option) => option.kind.toUpperCase()}
