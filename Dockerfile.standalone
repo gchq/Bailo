@@ -15,7 +15,7 @@
 #       Access UI at http://localhost:4318/
 
 FROM chrislusf/seaweedfs:4.52@sha256:57877e32bb90073b37dc109b438ba66e84fd5ed9ced5f5c04f56444ef243ce59 AS seaweedfs-bin
-FROM registry:3.1.2@sha256:d4032d4cc323c1731c707931ecada07a53076eac38e3b61ae57533f170f2c6c3 AS registry-bin
+FROM registry:3.1.2@sha256:38907510915c3f1604c7e83d6ab602ab3020d092f73bdaed8696773693ff768c AS registry-bin
 FROM marlonb/mailcrab:v1.10.0@sha256:dd0e3933e35200ed9956aeb76bb27fc700dd452bd6586448107ccf8fe411c0a1 AS mailcrab-bin
 
 FROM ghcr.io/astral-sh/uv:python3.15-alpine@sha256:f008ab85c84befffaaa8cbde7eb2b749331769df4e18be766269d0c4904deb40 AS sphinx-docs
