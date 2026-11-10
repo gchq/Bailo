@@ -2,14 +2,11 @@ import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import Refresh from '@mui/icons-material/Refresh'
 import { Button, Stack, Typography } from '@mui/material'
 import { postNotifyReviewer } from 'actions/review'
-import { useContext, useMemo, useState } from 'react'
-import CurrentUserContext from 'src/contexts/currentUserContext'
+import { useState } from 'react'
+import Restricted from 'src/common/Restricted'
 import useNotification from 'src/hooks/useNotification'
-import { EntityKind, type ReviewRequestInterface, SystemRole } from 'types/types'
-import { toEntity } from 'utils/entityUtils'
+import { type ReviewRequestInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-
-const reReviewRoles: string[] = [SystemRole.Owner, SystemRole.Contributor]
 
 interface ChangesRequestedDisplayProps {
   review: ReviewRequestInterface
@@ -26,15 +23,6 @@ export function ChangesRequestedDisplay({
 }: ChangesRequestedDisplayProps) {
   const [isNotifyButtonLoading, setIsNotifyButtonLoading] = useState(false)
   const sendNotification = useNotification()
-  const currentUser = useContext(CurrentUserContext)
-
-  const canRequestReReview = useMemo(() => {
-    const currentUserEntity = toEntity(EntityKind.USER, currentUser.dn)
-    return review.model.collaborators.some(
-      (collaborator) =>
-        collaborator.entity === currentUserEntity && collaborator.roles.some((role) => reReviewRoles.includes(role)),
-    )
-  }, [currentUser, review.model.collaborators])
 
   const handleNotifyReviewerOnClick = async (reviewId: string) => {
     setIsNotifyButtonLoading(true)
@@ -64,7 +52,7 @@ export function ChangesRequestedDisplay({
           ? `You have requested changes as a ${roleNameDisplay()}`
           : `Changes requested by  ${roleNameDisplay()}`}
       </Typography>
-      {canRequestReReview && (
+      <Restricted action='editEntryCard' fallback={<></>}>
         <Button
           size='small'
           onClick={() => handleNotifyReviewerOnClick(review._id)}
@@ -73,7 +61,7 @@ export function ChangesRequestedDisplay({
         >
           Request re-review
         </Button>
-      )}
+      </Restricted>
     </Stack>
   )
 }
