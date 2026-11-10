@@ -1,7 +1,6 @@
-import bytes from 'bytes'
-
 import FileModel from '../models/File.js'
 import log from '../services/log.js'
+import { formatBytes } from '../utils/bytes.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
 async function main() {
@@ -22,7 +21,7 @@ async function main() {
   }
   // Copy of totalBytes with human readable values
   const totalFormattedBytes = Object.fromEntries(
-    Object.entries(totalBytes).map(([key, value]) => [key, bytes.format(value)]),
+    Object.entries(totalBytes).map(([key, value]) => [key, formatBytes(value)]),
   )
 
   // Print results

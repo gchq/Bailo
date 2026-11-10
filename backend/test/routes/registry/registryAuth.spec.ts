@@ -1,3 +1,4 @@
+import type * as Crypto from 'crypto'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../../src/connectors/authorisation/index.js'
@@ -33,7 +34,7 @@ const userMocks = vi.hoisted(() => ({
 vi.mock('../../../src/utils/user.js', () => userMocks)
 
 vi.mock('crypto', async () => {
-  const actual = await vi.importActual<typeof import('crypto')>('crypto')
+  const actual = await vi.importActual<typeof Crypto>('crypto')
 
   return {
     ...actual,

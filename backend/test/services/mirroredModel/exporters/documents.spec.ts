@@ -10,8 +10,6 @@ import config from '../../../../src/utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 import { setTestConfig } from '../../../testUtils/setupTestConfig.js'
 
-vi.mock('bytes')
-
 const tarballMocks = vi.hoisted(() => ({
   initialiseTarGzUpload: vi.fn(),
   addEntryToTarGzUpload: vi.fn(),
