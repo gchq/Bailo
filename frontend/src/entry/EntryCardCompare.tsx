@@ -63,12 +63,12 @@ export default function EntryCardCompare({
   const { entries: fromEntriesRaw, isEntriesLoading: isFromEntriesLoading } = useListEntries({
     kind: searchKinds,
     search: debouncedFromSearch,
-    enabled: true,
+    titleOnly: true,
   })
   const { entries: toEntriesRaw, isEntriesLoading: isToEntriesLoading } = useListEntries({
     kind: searchKinds,
     search: debouncedToSearch,
-    enabled: true,
+    titleOnly: true,
   })
 
   const fromEntries: EntryOption[] =

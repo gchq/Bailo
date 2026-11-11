@@ -30,7 +30,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
   const { entries, isEntriesLoading, isEntriesError } = useListEntries({
     kind: schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
-    search: schemaToBeDeleted,
+    schemaId: schemaToBeDeleted,
   })
   const [openMenuSchemaId, setOpenMenuSchemaId] = useState<SchemaInterface['id'] | null>(null)
 
