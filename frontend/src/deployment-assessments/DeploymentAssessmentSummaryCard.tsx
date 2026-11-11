@@ -1,0 +1,134 @@
+import { Box, Card, Divider, Stack, Typography } from '@mui/material'
+import ChipSelector from 'src/common/ChipSelector'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
+import UserDisplay from 'src/common/UserDisplay'
+import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
+import { DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
+import Link from 'src/Link'
+import { DeploymentAssessmentSummary } from 'types/types'
+import { formatDateString } from 'utils/dateUtils'
+
+interface DeploymentAssessmentSummaryCardProps {
+  assessment: DeploymentAssessmentSummary
+  returnTo?: string
+
+  selectedModelIds?: string[]
+  onSelectedModelIdsChange?: (modelIds: string[]) => void
+
+  selectedState?: DeploymentAssessmentStatusKeys
+  onSelectedStateChange?: (state?: DeploymentAssessmentStatusKeys) => void
+}
+
+export default function DeploymentAssessmentSummaryCard({
+  assessment,
+  returnTo,
+  selectedModelIds,
+  onSelectedModelIdsChange,
+  selectedState,
+  onSelectedStateChange,
+}: DeploymentAssessmentSummaryCardProps) {
+  const canSelectModels = selectedModelIds !== undefined && onSelectedModelIdsChange !== undefined
+
+  const owners = assessment.owner ? (Array.isArray(assessment.owner) ? assessment.owner : [assessment.owner]) : []
+
+  return (
+    <Box data-test={`deploymentAssessmentSummary-${assessment.id}`}>
+      <Box data-test='deploymentAssessmentSummaryCard' sx={{ p: 2 }}>
+        <Stack spacing={2}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ justifyContent: 'space-between' }}>
+            <Stack direction='row' spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
+              <Link
+                href={{
+                  pathname: `/deployment-assessments/${assessment.id}`,
+                  query: returnTo ? { returnTo } : undefined,
+                }}
+                noLinkStyle
+                sx={{ overflow: 'hidden' }}
+              >
+                <Typography component='h2' variant='h6' color='primary' noWrap>
+                  {assessment.name}
+                </Typography>
+              </Link>
+              <CopyToClipboardButton
+                textToCopy={assessment.name}
+                notificationText='Copied Deployment Assessment name to clipboard'
+                ariaLabel='copy Deployment Assessment name to clipboard'
+              />
+            </Stack>
+            <Stack
+              direction={{ sm: 'column', md: 'row' }}
+              spacing={2}
+              sx={{ alignItems: 'center' }}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              <AssessmentStateChip
+                assessment={assessment}
+                selectedState={selectedState}
+                onSelectedStateChange={onSelectedStateChange}
+              />
+            </Stack>
+          </Stack>
+        </Stack>
+        <Stack direction='row' spacing={0.5}>
+          <Typography variant='caption'>Created by</Typography>
+          <UserDisplay dn={assessment.createdBy} />
+          <Typography>on</Typography>
+          <Typography
+            variant='caption'
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
+            {`${formatDateString(assessment.createdAt)} `}
+          </Typography>
+        </Stack>
+        <Card variant='outlined' sx={{ height: '100%', p: 1 }}>
+          <Typography component='h3' variant='subtitle2'>
+            <Stack direction='row' spacing={0.5} sx={{ alignItems: 'center' }}>
+              <Box component='span' sx={{ fontWeight: 'bold' }}>
+                Models:
+              </Box>
+              {assessment.models?.length ? (
+                canSelectModels ? (
+                  <ChipSelector
+                    chipTooltipTitle='Filter by model'
+                    options={assessment.models}
+                    multiple
+                    selectedChips={selectedModelIds}
+                    onChange={onSelectedModelIdsChange}
+                    size='small'
+                    variant='outlined'
+                    ariaLabel='add model to Deployment Assessment filters'
+                    style={{ maxWidth: '400px' }}
+                  />
+                ) : (
+                  <Typography component='span' variant='body2'>
+                    {assessment.models.join(', ')}
+                  </Typography>
+                )
+              ) : (
+                <Typography variant='body2' component='em'>
+                  No models specified
+                </Typography>
+              )}
+            </Stack>
+          </Typography>
+          <Typography variant='body2' component='div'>
+            <Box component='span' sx={{ fontWeight: 'bold' }}>
+              Deployment Risk Owner:
+            </Box>{' '}
+            {owners.length ? (
+              <Stack component='span' direction='row' spacing={1} sx={{ display: 'inline-flex', flexWrap: 'wrap' }}>
+                {owners.map((owner) => (
+                  <UserDisplay key={owner} dn={owner} />
+                ))}
+              </Stack>
+            ) : (
+              <em>Not specified</em>
+            )}
+          </Typography>
+        </Card>
+      </Box>
+    </Box>
+  )
+}

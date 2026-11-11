@@ -2,8 +2,10 @@ import { StepNoRender } from 'types/types'
 import {
   deepMergePreferFirst,
   getFormStats,
+  getItemIndices,
   isQuestionAnswered,
   setFormDataPropertiesToUndefined,
+  sortFormErrors,
 } from 'utils/formUtils'
 import { describe, expect, it } from 'vitest'
 
@@ -134,6 +136,104 @@ describe('Form utils', () => {
     it('returns false when both local and mirrored arrays are empty', () => {
       const context = makeFormContext({ dataCards: [] }, { dataCards: [] }, true)
       expect(isQuestionAnswered('root_dataCards', { type: 'array', items: { type: 'string' } }, context)).toBe(false)
+    })
+  })
+
+  describe('getItemIndices', () => {
+    it('lists the item numbers of a nested array path', () => {
+      expect(getItemIndices('.riskOwnerGroups.1.riskOwners.0')).toEqual([1, 0])
+    })
+
+    it('returns nothing for a path without items', () => {
+      expect(getItemIndices('.details.name')).toEqual([])
+    })
+  })
+
+  describe('sortFormErrors', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        riskOwners: { type: 'array', title: 'Risk owners', items: { type: 'string' }, minItems: 1 },
+        name: { type: 'string', title: 'Name' },
+        contacts: {
+          type: 'array',
+          title: 'Contacts',
+          items: { type: 'object', properties: { email: { type: 'string', title: 'Email' } } },
+        },
+        riskOwnerGroups: {
+          type: 'array',
+          title: 'Risk owner groups',
+          items: {
+            type: 'object',
+            properties: {
+              riskOwners: { type: 'array', title: 'Group risk owners', items: { type: 'string' } },
+            },
+          },
+        },
+      },
+    }
+
+    const error = (property: string, message: string) => ({ property, message, stack: `${property} ${message}` })
+
+    it('orders errors by the position of their question in the schema', () => {
+      const errors = [error('.name', 'is invalid'), error('.riskOwners', 'is invalid')]
+
+      expect(sortFormErrors(errors, schema).map(({ property }) => property)).toEqual(['.riskOwners', '.name'])
+    })
+
+    it('orders a missing property, which AJV reports without a leading dot, by its question', () => {
+      const errors = [error('.contacts', 'is invalid'), error('name', 'This field is required')]
+
+      expect(sortFormErrors(errors, schema).map(({ property }) => property)).toEqual(['name', '.contacts'])
+    })
+
+    it('orders several errors for the same question by message', () => {
+      const errors = [
+        error('.riskOwners', 'This field is required'),
+        error('.name', 'is invalid'),
+        error('.riskOwners', 'must NOT have fewer than 1 items'),
+      ]
+
+      expect(sortFormErrors(errors, schema).map(({ message }) => message)).toEqual([
+        'must NOT have fewer than 1 items',
+        'This field is required',
+        'is invalid',
+      ])
+    })
+
+    it('orders an array item error with its parent question', () => {
+      const errors = [error('.contacts.0.email', 'is invalid'), error('.name', 'is invalid')]
+
+      expect(sortFormErrors(errors, schema).map(({ property }) => property)).toEqual(['.name', '.contacts.0.email'])
+    })
+
+    it('orders errors for the same question by the array items they belong to', () => {
+      const errors = [
+        error('.riskOwnerGroups.1.riskOwners.0', 'is invalid'),
+        error('.riskOwnerGroups.0.riskOwners.1', 'is invalid'),
+        error('.riskOwnerGroups.1.riskOwners.0', 'always last by message'),
+        error('.riskOwnerGroups.0.riskOwners.0', 'is invalid'),
+      ]
+
+      expect(sortFormErrors(errors, schema).map(({ property, message }) => `${property} ${message}`)).toEqual([
+        '.riskOwnerGroups.0.riskOwners.0 is invalid',
+        '.riskOwnerGroups.0.riskOwners.1 is invalid',
+        '.riskOwnerGroups.1.riskOwners.0 always last by message',
+        '.riskOwnerGroups.1.riskOwners.0 is invalid',
+      ])
+    })
+
+    it('orders an error against an array itself before the errors against its items', () => {
+      const errors = [error('.contacts.0.email', 'is invalid'), error('.contacts', 'must NOT have fewer than 1 items')]
+
+      expect(sortFormErrors(errors, schema).map(({ property }) => property)).toEqual(['.contacts', '.contacts.0.email'])
+    })
+
+    it('puts errors for unknown questions last and does not modify the given array', () => {
+      const errors = [error('.unknown', 'is invalid'), error('.name', 'is invalid')]
+
+      expect(sortFormErrors(errors, schema).map(({ property }) => property)).toEqual(['.name', '.unknown'])
+      expect(errors.map(({ property }) => property)).toEqual(['.unknown', '.name'])
     })
   })
 })

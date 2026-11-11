@@ -180,6 +180,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
+  // TODO: future work to handle how DAs that reference this model are cleaned up
+
   const [
     allModelReviews,
     allModelImages,
@@ -405,6 +407,10 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     query['settings.allowTemplating'] = true
   }
 
+  if (opts.visibility) {
+    query.visibility = opts.visibility
+  }
+
   if (opts.filters && opts.filters.length > 0) {
     if (opts.filters?.includes('mine')) {
       query.collaborators = {
@@ -576,7 +582,9 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, {
+    modelState: model.state,
+  })
   if (!valid) {
     throw BadReq(
       `Model metadata could not be validated against the schema${model.state && `, for ${model.state} state`}.`,
@@ -634,7 +642,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
       model.kind === EntryKind.MirroredModel && model.mirroredCard?.metadata
         ? deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata)
         : model.card.metadata
-    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, modelDiff.state)
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, { modelState: modelDiff.state })
 
     if (!valid) {
       throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)
@@ -959,4 +967,38 @@ export function getRoleEntities<T extends string>(
     },
     {} as Record<T, string[]>,
   )
+}
+
+export async function getModelsByIds(
+  user: UserInterface,
+  modelIds: string[],
+  kinds?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc[]> {
+  const models = await getModelsByIdsNoAuth(modelIds, kinds)
+
+  const auths = await authorisation.models(user, models, ModelAction.View)
+  return models.filter((_, i) => auths[i].success)
+}
+
+export async function getModelsByIdsNoAuth(
+  modelIds: string[],
+  kinds?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc[]> {
+  const kindArray = kinds ? (Array.isArray(kinds) ? kinds : [kinds]) : undefined
+
+  const models = await ModelModel.find({
+    id: { $in: modelIds },
+    ...(kindArray && { kind: { $in: kindArray } }),
+  })
+
+  const foundModelIds = new Set(models.map((model) => model.id))
+  const missingModelIds = modelIds.filter((modelId) => !foundModelIds.has(modelId))
+
+  if (missingModelIds.length > 0) {
+    throw NotFound('Some requested entries were not found.', {
+      missingModelIds,
+    })
+  }
+
+  return models
 }

@@ -16,13 +16,13 @@ import {
   MenuItem,
   Pagination,
   Stack,
-  TextField,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
-import { type MouseEvent, type ReactElement, useCallback, useMemo, useState } from 'react'
+import { type MouseEvent, type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
+import LimitedTextField from 'src/common/LimitedTextField'
 
 interface PaginateProps<T> {
   list: Array<T>
@@ -95,6 +95,11 @@ export default function Paginate<T>({
     () => (isArray(filteredList) ? Math.ceil(filteredList.length / pageSize) : 10),
     [filteredList, pageSize],
   )
+  const currentPage = Math.min(page, Math.max(pageCount, 1))
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, Math.max(pageCount, 1)))
+  }, [pageCount])
 
   const handlePageOnChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
@@ -234,10 +239,10 @@ export default function Paginate<T>({
     let sortedList
     if (orderByValue === 'semver') {
       sortedList = filteredList.sort(compareSemanticVersions)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     } else {
       sortedList = filteredList.sort(sortByValue)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     }
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
@@ -246,7 +251,7 @@ export default function Paginate<T>({
         </div>
       ))
     }
-  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, page, pageSize, children])
+  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, currentPage, pageSize, children])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />
@@ -269,7 +274,7 @@ export default function Paginate<T>({
         {hideSearchInput ? (
           <div style={{ maxWidth: '200px', width: '100%' }}></div>
         ) : (
-          <TextField
+          <LimitedTextField
             size='small'
             value={searchFilter}
             label={searchPlaceholderText}
@@ -332,7 +337,7 @@ export default function Paginate<T>({
         <Pagination
           count={pageCount}
           color='secondary'
-          page={page}
+          page={currentPage}
           onChange={handlePageOnChange}
           aria-label='bottom page pagination navigation'
         />

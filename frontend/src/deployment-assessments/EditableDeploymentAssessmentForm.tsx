@@ -1,0 +1,273 @@
+import Close from '@mui/icons-material/Close'
+import Save from '@mui/icons-material/Save'
+import { Box, Button, Stack, Typography } from '@mui/material'
+import { getChangedFields } from '@rjsf/utils'
+import { patchDeploymentAssessment } from 'actions/deploymentAssessment'
+import { deleteDeploymentAssessment } from 'actions/deploymentAssessments'
+import { useGetSchema } from 'actions/schema'
+import cloneDeep from 'lodash-es/cloneDeep'
+import { useContext, useEffect, useMemo, useState } from 'react'
+import DeletionConfirmationDialogue from 'src/common/DeletionConfirmationDialogue'
+import LabelledInput from 'src/common/LabelledInput'
+import LabelledValue from 'src/common/LabelledValue'
+import LimitedTextField from 'src/common/LimitedTextField'
+import Loading from 'src/common/Loading'
+import UserDisplay from 'src/common/UserDisplay'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import EditableFormHeading from 'src/Form/EditableFormHeading'
+import JsonSchemaForm from 'src/Form/JsonSchemaForm'
+import MessageAlert from 'src/MessageAlert'
+import { KeyedMutator } from 'swr'
+import { DeploymentAssessmentInterface, ResponseInterface, SplitSchemaNoRender } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
+import { getStepsData, getStepsFromSchema, removeEmptyValues, validateForm } from 'utils/formUtils'
+
+type EditableDeploymentAssessmentFormProps = {
+  deploymentAssessment: DeploymentAssessmentInterface
+  mutate: KeyedMutator<{
+    deploymentAssessment: DeploymentAssessmentInterface
+    responses?: ResponseInterface[]
+  }>
+  isEdit: boolean
+  onIsEditChange: (value: boolean) => void
+  readOnly?: boolean
+  showValidation?: boolean
+  onValidityChange?: (isValid: boolean) => void
+}
+
+export default function EditableDeploymentAssessmentForm({
+  deploymentAssessment,
+  mutate,
+  isEdit,
+  onIsEditChange,
+  readOnly = false,
+  showValidation = false,
+  onValidityChange,
+}: EditableDeploymentAssessmentFormProps) {
+  const [originalSplitSchema, setOriginalSplitSchema] = useState<SplitSchemaNoRender>({
+    reference: '',
+    steps: [],
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [open, setOpen] = useState(false)
+  const [newName, setNewName] = useState(deploymentAssessment.name)
+  const [showSaveValidation, setShowSaveValidation] = useState(false)
+
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(deploymentAssessment.schemaId)
+
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({
+    reference: '',
+    steps: [],
+  })
+
+  useEffect(() => {
+    if (!schema || isEdit) {
+      return
+    }
+
+    const steps = getStepsFromSchema(schema, {}, [], deploymentAssessment.metadata)
+
+    for (const step of steps) {
+      step.steps = steps
+    }
+
+    setSplitSchema({ reference: schema.id, steps })
+  }, [schema, deploymentAssessment.metadata, isEdit])
+
+  async function handleSubmit() {
+    if (schema) {
+      setErrorMessage('')
+      setShowSaveValidation(false)
+      setIsLoading(true)
+
+      const oldData = getStepsData(originalSplitSchema, true)
+      const data = getStepsData(splitSchema, true)
+
+      const answersChanged = getChangedFields(oldData, data).length > 0
+      const nameChanged = deploymentAssessment.name !== newName
+      const nothingChanged = !answersChanged && !nameChanged
+
+      if (nothingChanged) {
+        setIsLoading(false)
+        onIsEditChange(false)
+        return
+      }
+
+      if (!deploymentAssessment.draft) {
+        for (const step of splitSchema.steps) {
+          const isValid = validateForm(step)
+
+          if (!isValid) {
+            setErrorMessage('Please make sure that all sections have been completed.')
+            setShowSaveValidation(true)
+            setIsLoading(false)
+            return
+          }
+        }
+      }
+
+      const response = await patchDeploymentAssessment(
+        deploymentAssessment.id,
+        answersChanged ? (removeEmptyValues(data) ?? {}) : undefined,
+        undefined,
+        nameChanged ? newName : undefined,
+      )
+
+      if (!response.ok) {
+        setErrorMessage(await getErrorMessage(response))
+      } else {
+        // Wait for the saved answers before leaving edit mode, otherwise the form is rebuilt from the stale ones
+        await mutate()
+        onIsEditChange(false)
+      }
+    }
+    setIsLoading(false)
+  }
+
+  const resetForm = () => {
+    if (schema) {
+      const steps = getStepsFromSchema(schema, {}, [], deploymentAssessment.metadata)
+      for (const step of steps) {
+        step.steps = steps
+      }
+      setSplitSchema({ reference: schema.id, steps })
+    }
+  }
+
+  function handleEdit() {
+    onIsEditChange(true)
+    setErrorMessage('')
+    setOriginalSplitSchema(cloneDeep(splitSchema))
+  }
+
+  function handleCancel() {
+    onIsEditChange(false)
+    setNewName(deploymentAssessment.name)
+    setErrorMessage('')
+    setShowSaveValidation(false)
+    resetForm()
+  }
+
+  function handleDelete() {
+    setOpen(true)
+  }
+
+  useEffect(() => {
+    setUnsavedChanges(isEdit)
+  }, [isEdit, setUnsavedChanges])
+
+  useEffect(() => {
+    if (!onValidityChange || splitSchema.steps.length === 0) {
+      return
+    }
+    onValidityChange(splitSchema.steps.every((step) => validateForm(step)))
+  }, [splitSchema, onValidityChange])
+
+  // A published assessment must stay complete, so its errors are listed as soon as an edit introduces them
+  const isValidationShown = showValidation || showSaveValidation || (isEdit && !deploymentAssessment.draft)
+
+  const formHeading = useMemo(
+    () => (
+      <>
+        {schema && (
+          <Stack sx={{ overflow: 'hidden' }} spacing={1}>
+            <LabelledInput label='Name' fullWidth required={isEdit}>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'left',
+                }}
+              >
+                {isEdit ? (
+                  <LimitedTextField
+                    value={newName}
+                    fullWidth
+                    onChange={(event) => setNewName(event.target.value)}
+                    size='small'
+                    data-test='editNameInput'
+                  />
+                ) : (
+                  <>
+                    <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }} variant='h6'>
+                      {deploymentAssessment ? deploymentAssessment.name : 'Loading...'}
+                    </Typography>
+                  </>
+                )}
+              </Stack>
+            </LabelledInput>
+            <LabelledValue label='Created by'>
+              <UserDisplay dn={deploymentAssessment.createdBy} />
+            </LabelledValue>
+          </Stack>
+        )}
+      </>
+    ),
+    [deploymentAssessment, isEdit, newName, schema],
+  )
+
+  if (isSchemaError) {
+    return <MessageAlert message={isSchemaError.info.message} severity='error' />
+  }
+
+  return (
+    <>
+      {isSchemaLoading && <Loading />}
+      <Box sx={{ py: 1 }}>
+        <EditableFormHeading
+          heading={formHeading}
+          editAction='editDeploymentAssessment'
+          deleteAction='deleteDeploymentAssessment'
+          editButtonText='Edit Deployment Assessment'
+          deleteButtonText='Delete Deployment Assessment'
+          isEdit={isEdit}
+          isLoading={isLoading}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
+          onDelete={handleDelete}
+          errorMessage={errorMessage}
+          readOnly={readOnly}
+        />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          canEdit={isEdit}
+          showValidation={isValidationShown}
+          // Drafts can be saved with unanswered questions, so only validate them when submitted for review
+          liveValidation={!deploymentAssessment.draft}
+          displayLabelValidation={isValidationShown}
+        />
+        <DeletionConfirmationDialogue
+          open={open}
+          title='Delete Deployment Assessment'
+          onClose={() => setOpen(false)}
+          onDelete={() => deleteDeploymentAssessment(deploymentAssessment.id)}
+          confirmationText={deploymentAssessment.name}
+          successMessage='Deployment assessment deleted'
+          redirectTo='/deployment-assessments'
+        />
+        {isEdit && (
+          <Stack
+            direction='row'
+            spacing={1}
+            sx={{
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              mb: { xs: 2 },
+            }}
+          >
+            <Button variant='outlined' onClick={handleCancel} startIcon={<Close />}>
+              Cancel
+            </Button>
+            <Button variant='contained' loading={isLoading} onClick={handleSubmit} startIcon={<Save />}>
+              Save
+            </Button>
+          </Stack>
+        )}
+      </Box>
+    </>
+  )
+}

@@ -100,12 +100,12 @@ export default function ReviewDecisionDisplay({
     <>
       <Stack
         direction='row'
-        spacing={2}
+        spacing={0.5}
         sx={{
           alignItems: 'flex-start',
         }}
       >
-        <Box sx={{ pt: 2, pl: 2 }}>
+        <Box sx={{ pt: 2.5, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
         <Box
@@ -133,7 +133,7 @@ export default function ReviewDecisionDisplay({
             >
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
-                spacing={1}
+                spacing={0.5}
                 sx={{
                   alignItems: 'center',
                 }}
@@ -173,7 +173,7 @@ export default function ReviewDecisionDisplay({
                 ))}
             </Stack>
           </Stack>
-          <Divider sx={{ mt: 1, mb: 2 }} />
+          <Divider sx={{ mb: 1 }} />
           <EditableReviewComment
             comment={comment}
             onCommentChange={setComment}

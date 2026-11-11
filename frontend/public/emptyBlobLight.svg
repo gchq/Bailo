@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="126.829" height="101.739" viewBox="0 0 126.829 101.739">
   <style>
-    .blob-main { fill: #de3c30; }
-    .blob-stripe { fill: #ef6654; }
-    .blob-highlight { fill: #ef7067; }
+    .blob-main { fill: #8753c7; }
+    .blob-stripe { fill: #B39CD0; }
+    .blob-highlight { fill: #a78bc8; }
     .blob-decoration { fill: #000; }
   </style>
   <g id="Group_437" data-name="Group 437" transform="translate(-792.688 -434.167)" opacity="0.998">

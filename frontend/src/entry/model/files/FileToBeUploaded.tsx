@@ -1,8 +1,10 @@
 import Delete from '@mui/icons-material/Delete'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
-import { Box, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { type ChangeEvent, useCallback } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
+import Restricted from 'src/common/Restricted'
 import TagSelector from 'src/common/TagSelector'
 import { type FileUploadMetadata, type FileUploadWithMetadata } from 'types/types'
 
@@ -96,20 +98,20 @@ export default function FileToBeUploaded({
           </IconButton>
         </Stack>
         {showMetaDataInput && (
-          <TextField
+          <LimitedTextField
             size='small'
-            label='Metadata'
-            placeholder='Enter metadata details...'
-            fullWidth
             value={fileWithMetadata.metadata?.text}
             onChange={handleMetadataTextOnChange}
           />
         )}
-        <TagSelector
-          restrictedToAction='editEntry'
-          onChange={handleFileTagSelectorOnChange}
-          tags={fileWithMetadata.metadata ? fileWithMetadata.metadata?.tags : []}
-        />
+        <Typography variant='caption'>{prettyBytes(fileWithMetadata.file.size)}</Typography>
+        <Restricted action='editEntry' fallback={<></>}>
+          <TagSelector
+            restrictedToAction='editEntry'
+            onChange={handleFileTagSelectorOnChange}
+            tags={fileWithMetadata.metadata ? fileWithMetadata.metadata?.tags : []}
+          />
+        </Restricted>
       </Stack>
     </Box>
   )

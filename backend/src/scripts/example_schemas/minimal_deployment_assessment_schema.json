@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "about": {
+      "title": "About the deployment",
+      "type": "object",
+      "properties": {
+        "deploymentSummary": {
+          "title": "What does the deployment do?",
+          "description": "A description of what the deployment does.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000
+        },
+        "deploymentDate": {
+          "title": "When is this deployment due to start?",
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": ["deploymentSummary", "deploymentDate"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["about"],
+  "additionalProperties": false
+}

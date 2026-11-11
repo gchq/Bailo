@@ -13,33 +13,56 @@ type DraftBannerProps = {
 } & (
   | {
       showButton: false
+      dialogTitle?: never
+      dialogMessage?: never
+      buttonText?: never
       disableButton?: never
-      handlePublish?: never
+      handleSubmit?: never
       isLoading?: never
       errorMessage?: never
+      setErrorMessage?: never
+      validateBeforeSubmit?: never
     }
   | {
       showButton: true
+      dialogTitle: string
+      dialogMessage?: string
+      buttonText?: string
       disableButton: boolean
-      handlePublish: () => void
+      handleSubmit: () => void
       isLoading: boolean
       errorMessage?: string
+      setErrorMessage: (err: string) => void
+      /** Runs when the submit button is clicked. Returning false stops the confirmation dialogue from opening. */
+      validateBeforeSubmit?: () => boolean
     }
 )
 
 export function DraftBanner({
   text,
+  dialogTitle,
+  dialogMessage = 'Are you sure you want to submit this for review? This is irreversible.',
+  buttonText = 'Submit for Review',
   draft = false,
   isLoading,
   errorMessage = '',
-  handlePublish,
+  setErrorMessage,
+  handleSubmit,
   showButton,
   disableButton,
+  validateBeforeSubmit,
 }: DraftBannerProps) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   if (!draft) {
     return <></>
+  }
+
+  function handleSubmitClick() {
+    if (validateBeforeSubmit && !validateBeforeSubmit()) {
+      return
+    }
+    setOpen(true)
   }
   return (
     <>
@@ -53,6 +76,7 @@ export function DraftBanner({
           borderRadius: 0,
           width: '100%',
         }}
+        data-test='draftBanner'
       >
         <Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Stack direction={'row'} spacing={1}>
@@ -64,21 +88,20 @@ export function DraftBanner({
               <Button
                 variant='outlined'
                 sx={{ borderColor: 'white', color: theme.palette.common.white }}
-                onClick={() => {
-                  setOpen(true)
-                }}
+                onClick={handleSubmitClick}
                 disabled={disableButton}
                 loading={isLoading}
+                data-test='publishDraftButton'
               >
-                <Typography>Publish</Typography>
+                <Typography>{buttonText}</Typography>
               </Button>
               <ConfirmationDialogue
                 open={open}
-                title='Delete Release'
-                onConfirm={handlePublish}
-                onCancel={() => setOpen(false)}
+                title={dialogTitle}
+                onConfirm={handleSubmit}
+                onCancel={() => [setOpen(false), setErrorMessage('')]}
                 errorMessage={errorMessage}
-                dialogMessage={'Are you sure you want to publish this release? This is irreversible.'}
+                dialogMessage={dialogMessage}
                 confirmLoading={isLoading}
               />
             </>

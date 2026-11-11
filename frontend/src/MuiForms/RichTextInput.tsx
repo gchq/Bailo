@@ -6,6 +6,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
+import { TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface RichTextInputProps {
   value: string
@@ -63,9 +64,10 @@ export default function RichTextInput({
         <RichTextEditor
           value={value}
           onChange={onChange}
-          textareaProps={{ disabled, id }}
+          textareaProps={{ disabled, id, 'aria-invalid': !!rawErrors && rawErrors.length > 0 }}
           errors={rawErrors}
           key={label}
+          maxLength={TEXT_INPUT_MAX_LENGTH}
         />
       ) : value ? (
         <MarkdownDisplay>{value}</MarkdownDisplay>

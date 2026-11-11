@@ -8,6 +8,7 @@ import {
   type CollaboratorEntry,
   EntryKind,
   type EntryKindKeys,
+  EntryVisibility,
   type EntryVisibilityKeys,
   type SystemRolesKeys,
 } from '../models/Model.js'
@@ -80,6 +81,11 @@ export interface EntryUserPermissions {
 export interface AccessRequestUserPermissions {
   editAccessRequest: PermissionDetail
   deleteAccessRequest: PermissionDetail
+}
+
+export interface DeploymentAssessmentUserPermissions {
+  editDeploymentAssessment: PermissionDetail
+  deleteDeploymentAssessment: PermissionDetail
 }
 
 export const FederationState = {
@@ -237,6 +243,11 @@ export interface UiConfig {
     enabled: boolean
   }
 
+  deploymentAssessments: {
+    /** Only models in this state can be included in a Deployment Assessment. Set to null to allow any state */
+    deployableModelState: string | null
+  }
+
   lifecycle: {
     maxReviewInterval: string
   }
@@ -264,24 +275,7 @@ export interface EntrySearchResultWithErrors {
   errors?: Record<string, BailoError>
 }
 
-export interface EntrySearchOptions {
-  kind: Array<EntryKindKeys>
-  libraries: Array<string>
-  organisations: Array<string>
-  states: Array<string>
-  filters: Array<string>
-  search: string
-  task: string
-  peers: Array<string>
-  allowTemplating: boolean
-  schemaId: string
-  adminAccess: boolean
-  titleOnly: boolean
-}
-
-export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
-
-export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
+export const EntrySearchOptionsSchema = z.object({
   kind: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
   task: z.string().toLowerCase().optional(),
   libraries: coerceArray(z.array(z.string().toLowerCase())).optional(),
@@ -294,7 +288,10 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   adminAccess: strictCoerceBoolean(z.boolean()).optional(),
   peers: coerceArray(z.array(z.string())).optional(),
   titleOnly: strictCoerceBoolean(z.boolean()).optional(),
+  visibility: z.nativeEnum(EntryVisibility).optional(),
 })
+
+export type EntrySearchOptionsParams = z.infer<typeof EntrySearchOptionsSchema>
 
 export const EntryFilter = {
   WITH: 'with',

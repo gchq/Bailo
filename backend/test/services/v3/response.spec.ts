@@ -23,6 +23,7 @@ const reviewV3Mock = vi.hoisted(() => ({
     return [testReleaseReview]
   }),
   createLifecycleReview: vi.fn(),
+  isLifecycleReviewDateValid: vi.fn(() => true),
 }))
 vi.mock('../../../src/services/v3/review.js', () => reviewV3Mock)
 

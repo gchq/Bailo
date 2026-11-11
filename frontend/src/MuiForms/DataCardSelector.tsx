@@ -1,13 +1,13 @@
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
-import TextField from '@mui/material/TextField'
 import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { type EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { type KeyboardEvent, type SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import CompareField from 'src/common/CompareField'
+import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import { EntryKind } from 'types/types'
 
@@ -128,13 +128,16 @@ export default function DataCardSelector({
           options={dataCards || []}
           renderValue={(value, getTagProps) =>
             value.map((option, index) => (
-              <Box key={option.name} sx={{ maxWidth: '200px' }}>
-                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.name} />
-              </Box>
+              <Chip
+                sx={{ textOverflow: 'ellipsis', maxWidth: '200px' }}
+                {...getTagProps({ index })}
+                key={option.name}
+                label={option.name}
+              />
             ))
           }
           renderInput={(params) => (
-            <TextField
+            <LimitedTextField
               {...params}
               placeholder='Data card name'
               error={rawErrors && rawErrors.length > 0}
