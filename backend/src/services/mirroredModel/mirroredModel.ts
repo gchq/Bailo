@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 
-import fetch, { type Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import { type Pack } from 'tar-stream'
 
@@ -25,7 +24,7 @@ import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
 import { isManifestList } from '../../utils/registryResponses.js'
 import { type ManifestListV2 } from '../../utils/registryResponseTypes.js'
-import { getHttpsAgent } from '../http.js'
+import { getHttpsDispatcher } from '../http.js'
 import { getImageLayers } from '../images/getImageLayers.js'
 import log from '../log.js'
 import { getModelById, getModelByIdNoAuth } from '../model.js'
@@ -177,7 +176,7 @@ export async function importModel(
 
   let res: Response
   try {
-    res = await fetch(payloadUrl, { agent: getHttpsAgent() })
+    res = await fetch(payloadUrl, { dispatcher: getHttpsDispatcher() })
   } catch (err) {
     throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
   }
@@ -191,10 +190,7 @@ export async function importModel(
   if (!res.body) {
     throw InternalError('Unable to get the file.', { payloadUrl, importId })
   }
-  // type cast `NodeJS.ReadableStream` to `'stream/web'.ReadableStream`
-  // as per https://stackoverflow.com/questions/63630114/argument-of-type-readablestreamany-is-not-assignable-to-parameter-of-type-r/66629140#66629140
-  // and https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js/74722818#comment133510726_74722818
-  const responseBody = res.body instanceof Readable ? res.body : Readable.fromWeb(res.body as unknown as ReadableStream)
+  const responseBody = Readable.fromWeb(res.body)
 
   log.info({ payloadUrl, importId }, 'Obtained the file from the payload URL.')
 

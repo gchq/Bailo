@@ -19,8 +19,8 @@ import {
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 import bytes from 'bytes'
+import { ProxyAgent } from 'proxy-agent'
 
-import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
@@ -34,7 +34,11 @@ function getS3Client() {
     region: config.s3.region,
     forcePathStyle: config.s3.forcePathStyle,
     requestHandler: new NodeHttpHandler({
-      httpsAgent: getHttpsAgent({ rejectUnauthorized: config.s3.rejectUnauthorized }),
+      // The AWS SDK needs a Node HTTPS agent rather than an undici dispatcher
+      httpsAgent: new ProxyAgent({
+        ...config.httpClient.defaultOpts,
+        rejectUnauthorized: config.s3.rejectUnauthorized,
+      }),
     }),
     ...(config.s3.responseChecksumValidation && { responseChecksumValidation: config.s3.responseChecksumValidation }),
   })

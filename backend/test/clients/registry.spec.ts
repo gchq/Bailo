@@ -23,7 +23,6 @@ import {
 
 const mockHttpService = vi.hoisted(() => {
   return {
-    getHttpsAgent: vi.fn(() => 'mock agent'),
     getHttpsUndiciAgent: vi.fn(() => 'mock agent'),
   }
 })
