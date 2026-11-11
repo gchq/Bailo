@@ -1,5 +1,5 @@
 import { Autocomplete, Typography } from '@mui/material'
-import { EntrySearchResult, useListEntries } from 'actions/entry'
+import { type EntrySearchResult, useListEntries } from 'actions/entry'
 import { useContext, useMemo } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -21,6 +21,7 @@ export default function DeploymentModelFilter({ selectedModelIds, onChange }: De
     uiConfig.deploymentAssessments.deployableModelState
       ? [uiConfig.deploymentAssessments.deployableModelState]
       : undefined,
+    [],
     [],
     '',
     false,
