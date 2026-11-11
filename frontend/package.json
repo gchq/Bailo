@@ -9,7 +9,7 @@
     "check-cycles:types": "madge_detectiveOptions__ts__skipTypeImports= madge_detectiveOptions__tsx__skipTypeImports= madge --circular actions pages src types utils",
     "check-style": "prettier --check .",
     "cy:open": "cypress open",
-    "cy:run": "cypress run --spec \"cypress/e2e/bailo/deployment-assessments/crud.cy.ts\"",
+    "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
     "cy:run-mirror": "cypress run --spec  \"cypress/e2e/cross-instance/**/*\"",
     "predev": "tsx scripts/build-docs-search-index.mjs",
     "dev": "next dev",
