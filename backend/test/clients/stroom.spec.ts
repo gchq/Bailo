@@ -4,10 +4,8 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { sendEvents } from '../../src/clients/stroom.js'
 
-const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(),
-}))
-vi.mock('node-fetch', async () => fetchMock)
+const fetchMock = vi.hoisted(() => vi.fn())
+vi.stubGlobal('fetch', fetchMock)
 
 const fsMock = vi.hoisted(() => ({
   readFile: vi.fn(),
@@ -15,7 +13,7 @@ const fsMock = vi.hoisted(() => ({
 vi.mock('fs/promises', async () => ({ default: fsMock }))
 
 const httpService = vi.hoisted(() => ({
-  getHttpsAgent: vi.fn(),
+  getHttpsDispatcher: vi.fn(),
 }))
 vi.mock('../../src/services/http.js', async () => httpService)
 
@@ -27,7 +25,7 @@ vi.mock('node:zlib', () => ({ default: zlibMock }))
 let requestBody: Readable
 // Stub the next `fetch` call and capture the request body
 function mockFetchResponse(ok: boolean, body: string) {
-  fetchMock.default.mockImplementationOnce((_url: string, init: { body: Readable }) => {
+  fetchMock.mockImplementationOnce((_url: string, init: { body: Readable }) => {
     requestBody = init.body
     return { ok, text: async () => body }
   })
@@ -51,11 +49,11 @@ describe('clients > stroom', () => {
 
     const resp = await sendEvents(events)
 
-    expect(fetchMock.default).toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(resp).toBe('success')
     expect(await readRequestBody()).toBe(events)
     expect(zlibMock.createGzip).toHaveBeenCalled()
-    expect(fetchMock.default.mock.lastCall?.[1].headers).toEqual({ 'Content-Encoding': 'gzip' })
+    expect(fetchMock.mock.lastCall?.[1].headers).toEqual({ 'Content-Encoding': 'gzip' })
   })
 
   test('sendEvents > bad 200 response', async () => {

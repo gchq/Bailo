@@ -4,7 +4,7 @@ import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/entry'
 import { type CreateReleaseParams, postRelease } from 'actions/release'
 import { useRouter } from 'next/router'
-import { type FormEvent, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -20,7 +20,6 @@ export default function NewRelease() {
   const [releaseNotes, setReleaseNotes] = useState('')
   const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
-  const draft = useRef(false)
   const [files, setFiles] = useState<FileInterface[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
@@ -44,9 +43,13 @@ export default function NewRelease() {
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  // Below buttons create a release each setting own draft value. Implicit form
+  // submission is suppressed so that pressing Enter in a text field cannot create one
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+  }
 
+  const createRelease = async (draft: boolean) => {
     if (!model) {
       return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
     }
@@ -65,7 +68,7 @@ export default function NewRelease() {
     const release: CreateReleaseParams = {
       modelId: model.id,
       semver,
-      draft: draft.current as boolean,
+      draft,
       notes: releaseNotes,
       minor: isMinorRelease,
       fileIds: files.map((file) => file._id),
@@ -84,10 +87,6 @@ export default function NewRelease() {
     setLoading(false)
   }
 
-  function handleDraftRelease() {
-    draft.current = true
-  }
-
   const error = MultipleErrorWrapper(`Unable to load release page`, {
     isModelError,
   })
@@ -102,7 +101,7 @@ export default function NewRelease() {
       {model && !isModelLoading && (
         <Container maxWidth='md'>
           <Paper sx={{ my: 4, p: 4 }}>
-            <Box component='form' onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleFormSubmit}>
               <Stack spacing={4}>
                 <Link href={`/model/${modelId}?tab=releases`}>
                   <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
@@ -152,8 +151,7 @@ export default function NewRelease() {
                     <Button
                       variant='outlined'
                       loading={loading}
-                      onClick={handleDraftRelease}
-                      type='submit'
+                      onClick={() => createRelease(true)}
                       disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
                       sx={{ width: 'fit-content' }}
                     >
@@ -162,7 +160,7 @@ export default function NewRelease() {
                     <Button
                       variant='contained'
                       loading={loading}
-                      type='submit'
+                      onClick={() => createRelease(false)}
                       disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
                       sx={{ width: 'fit-content' }}
                       data-test='createReleaseButton'

@@ -1,8 +1,13 @@
 import Add from '@mui/icons-material/Add'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import RestartAlt from '@mui/icons-material/RestartAlt'
 import SubjectIcon from '@mui/icons-material/Subject'
 import TitleIcon from '@mui/icons-material/Title'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Autocomplete,
   Box,
   Button,
   Container,
@@ -15,6 +20,7 @@ import {
   Stack,
   Tab,
   Tabs,
+  TextField,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -24,9 +30,20 @@ import { useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetPeers, useGetStatus } from 'actions/system'
+import { useListEntities } from 'actions/user'
+import _ from 'lodash'
+import { debounce } from 'lodash-es'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { type ChangeEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+  type ChangeEvent,
+  type SyntheticEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -37,7 +54,8 @@ import ErrorWrapper from 'src/errors/ErrorWrapper'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
-import { EntryKind, type EntryKindKeys } from 'types/types'
+import { type EntityObject, EntryKind, type EntryKindKeys } from 'types/types'
+import { fromEntity, toEntity } from 'utils/entityUtils'
 import { isEnabled, isReachable } from 'utils/peerUtils'
 import { toKebabCase, toTitleCase } from 'utils/stringUtils'
 
@@ -61,6 +79,9 @@ export default function Marketplace() {
     return Array.isArray(value) ? [...value] : [value]
   }
 
+  const [userListQuery, setUserListQuery] = useState('')
+  const { users, isUsersLoading, isUsersError } = useListEntities(userListQuery)
+
   const uiConfig = useContext(UiConfigContext)
   const { peers, isPeersLoading, isPeersError } = useGetPeers()
   const { status, isStatusLoading, isStatusError } = useGetStatus()
@@ -68,6 +89,7 @@ export default function Marketplace() {
   const isMirroredModelEnabled = !!uiConfig.modelMirror.import.enabled
   const isUntrustedModelEnabled = !!uiConfig.untrustedModel.enabled
 
+  const [updatedUsers, setUpdatedUsers] = useState<Array<EntityObject>>([])
   const [availableModelKinds, setAvailableModelKinds] = useState<EntryKindKeys[]>([])
   const [selectedKinds, setSelectedKinds] = useState<EntryKindKeys[]>([])
   const [filter, setFilter] = useState('')
@@ -96,6 +118,7 @@ export default function Marketplace() {
       tags: tagsFromQuery,
       titleOnly: titleOnlyFromQuery,
       kinds: kindsFromQuery,
+      users: usersFromQuery,
     } = router.query
 
     setFilter((filterFromQuery as string) || '')
@@ -104,6 +127,7 @@ export default function Marketplace() {
     setSelectedStates(parseQueryArray(statesFromQuery))
     setSelectedTags(parseQueryArray(tagsFromQuery))
     setTitleOnly(titleOnlyFromQuery === 'true')
+    setUpdatedUsers(parseQueryArray(usersFromQuery).map((user) => fromEntity(user)))
     if (kindsFromQuery) {
       setSelectedKinds(parseQueryArray(kindsFromQuery) as EntryKindKeys[])
     }
@@ -133,6 +157,7 @@ export default function Marketplace() {
     selectedOrganisations,
     selectedStates,
     selectedPeers,
+    updatedUsers.map((user) => toEntity(user.kind, user.id)),
     searchFilter,
     false,
     '',
@@ -306,6 +331,10 @@ export default function Marketplace() {
     return errorMessage
   }, [isEntriesError])
 
+  const debounceOnInputChange = debounce((_event: SyntheticEvent<Element, Event>, value: string) => {
+    setUserListQuery(value)
+  }, 500)
+
   if (isReviewRolesLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
@@ -324,6 +353,10 @@ export default function Marketplace() {
 
   if (isTagsError) {
     return <ErrorWrapper message={isTagsError.info.message} />
+  }
+
+  if (isUsersError) {
+    return <ErrorWrapper message={isUsersError.info.message} />
   }
 
   // Only show peer/sources when not actively disabled
@@ -485,6 +518,41 @@ export default function Marketplace() {
                           />
                         </Box>
                       )}
+                      <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
+                        <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+                          <Typography component='h2' variant='h6' sx={{ px: 1 }}>
+                            Users and groups
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails sx={{ p: 0, pb: 1 }}>
+                          <Autocomplete
+                            multiple
+                            size='small'
+                            noOptionsText='No entries found'
+                            onInputChange={debounceOnInputChange}
+                            value={updatedUsers}
+                            groupBy={(option) => option.kind.toUpperCase()}
+                            getOptionLabel={(option) => option.id}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            onChange={(_event, newValue) => {
+                              setUpdatedUsers(newValue)
+                            }}
+                            options={users}
+                            filterOptions={(options) =>
+                              options.filter((option) => !updatedUsers.find((user) => _.isEqual(user, option)))
+                            }
+                            loading={isUsersLoading && userListQuery.length >= 3}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                autoFocus
+                                label={'Search for user or group'}
+                                slotProps={{ ...params.slotProps }}
+                              />
+                            )}
+                          />
+                        </AccordionDetails>
+                      </Accordion>
                       <Box>
                         <ChipSelector
                           label='My roles'

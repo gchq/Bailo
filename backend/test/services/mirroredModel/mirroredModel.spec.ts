@@ -26,12 +26,12 @@ const shortIdMock = vi.hoisted(() =>
 )
 vi.mock('../../../src/utils/id.js', () => ({ shortId: shortIdMock }))
 
-const getHttpsAgentMock = vi.hoisted(() =>
+const getHttpsDispatcherMock = vi.hoisted(() =>
   vi.fn(function () {
     return {}
   }),
 )
-vi.mock('../../../src/services/http.js', () => ({ getHttpsAgent: getHttpsAgentMock }))
+vi.mock('../../../src/services/http.js', () => ({ getHttpsDispatcher: getHttpsDispatcherMock }))
 
 const getModelByIdMock = vi.hoisted(() =>
   vi.fn(function () {
@@ -57,10 +57,10 @@ vi.mock('../../../src/services/model.js', () => ({
 
 const fetchMock = vi.hoisted(() =>
   vi.fn(function () {
-    return { ok: true, body: Readable.from(['data']), text: vi.fn() } as any
+    return { ok: true, body: new Response('data').body, text: vi.fn() } as any
   }),
 )
-vi.mock('node-fetch', () => ({ default: fetchMock }))
+vi.stubGlobal('fetch', fetchMock)
 
 const tarballMocks = vi.hoisted(() => ({
   addEntryToTarGzUpload: vi.fn(),
@@ -405,16 +405,7 @@ describe('services > mirroredModel', () => {
       await expect(importModel({} as any, 'url')).rejects.toThrow(/Unable to get the file/)
     })
 
-    test('success with Readable', async () => {
-      const res = await importModel({} as any, 'url')
-
-      expect(fetchMock).toHaveBeenCalled()
-      expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
-      expect(getModelByIdMock).toHaveBeenCalledWith('dest123')
-      expect(res).toHaveProperty('mirroredModel')
-    })
-
-    test('success with ReadableStream', async () => {
+    test('success', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         body: new ReadableStream({

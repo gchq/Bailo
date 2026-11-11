@@ -2,9 +2,7 @@ import { PassThrough, Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import zlib from 'node:zlib'
 
-import fetch from 'node-fetch'
-
-import { getHttpsAgent } from '../services/http.js'
+import { getHttpsDispatcher } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
 import { GenericError, toBailoError } from '../utils/error.js'
@@ -27,7 +25,8 @@ export async function sendEvents(events: string) {
     headers: {
       ...config.stroom.headers,
     },
-    agent: getHttpsAgent({ rejectUnauthorized: config.stroom.rejectUnauthorized }),
+    duplex: 'half',
+    dispatcher: getHttpsDispatcher({ rejectUnauthorized: config.stroom.rejectUnauthorized }),
   })
 
   // This will ensure any error thrown by pipeline(...).catch(...) is handled in the main thread

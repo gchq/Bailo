@@ -19,7 +19,8 @@ import { Transition } from 'src/common/Transition'
 import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
 import { buildSnapshots, type EntryCardSnapshot } from 'src/entry/overview/EntryCardSnapshotSelector'
 import MessageAlert from 'src/MessageAlert'
-import { EntryCardKindLabel, type EntryInterface, EntryKind } from 'types/types'
+import { EntryCardKindLabel, type EntryInterface } from 'types/types'
+import { buildEntryCardVersionHref, entryCardPath } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 type EntryCardHistoryDialogProps = {
@@ -39,20 +40,16 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
   )
   const [selected, setSelected] = useState<EntryCardSnapshot[]>([])
 
-  const comparePath = entry.kind === EntryKind.DATA_CARD ? '/data-card/compare' : '/model-card/compare'
-
   // Oldest-first snapshot list.
   const snapshotsOldestFirst = useMemo(() => buildSnapshots(entryCardRevisions), [entryCardRevisions])
 
   // Newest-first for display in the table.
   const snapshotsNewestFirst = useMemo(() => [...snapshotsOldestFirst].reverse(), [snapshotsOldestFirst])
 
-  const buildHref = (from: EntryCardSnapshot, to?: EntryCardSnapshot): string => {
+  const buildCompareHref = (from: EntryCardSnapshot, to: EntryCardSnapshot): string => {
     const query = new URLSearchParams()
     query.set('fromEntry', entry.id)
-    if (to) {
-      query.set('toEntry', entry.id)
-    }
+    query.set('toEntry', entry.id)
 
     if (from.local !== undefined) {
       query.set('fromVersion', String(from.local))
@@ -60,14 +57,14 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
     if (from.mirrored !== undefined) {
       query.set('fromMirroredVersion', String(from.mirrored))
     }
-    if (to?.local !== undefined) {
+    if (to.local !== undefined) {
       query.set('toVersion', String(to.local))
     }
-    if (to?.mirrored !== undefined) {
+    if (to.mirrored !== undefined) {
       query.set('toMirroredVersion', String(to.mirrored))
     }
 
-    return `${comparePath}?${query.toString()}`
+    return `${entryCardPath(entry.kind)}/compare?${query.toString()}`
   }
 
   const isSelected = (snapshot: EntryCardSnapshot) => selected.some((s) => s.key === snapshot.key)
@@ -92,7 +89,7 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
       return
     }
     const sorted = [...selected].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    router.push(buildHref(sorted[0], sorted[1]))
+    router.push(buildCompareHref(sorted[0], sorted[1]))
   }
 
   const renderedSnapshots = useMemo(
@@ -104,18 +101,16 @@ export default function EntryCardHistoryDialog({ entry, setOpen }: EntryCardHist
           <EntryCardRevision
             key={snapshot.key}
             snapshot={snapshot}
+            href={buildEntryCardVersionHref(entry.id, entry.kind, snapshot.local, snapshot.mirrored)}
             entryKind={entry.kind}
             isChecked={checked}
             hideCheckbox={hideCheckbox}
-            onRowClick={() => {
-              router.push(buildHref(snapshot))
-            }}
             onCheckToggle={() => toggleSelection(snapshot)}
           />
         )
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [snapshotsNewestFirst, selected, entry.id, entry.kind, router],
+    [snapshotsNewestFirst, selected, entry.id, entry.kind],
   )
 
   if (isEntryCardRevisionsError) {
