@@ -61,7 +61,7 @@ export default function ModelSelector({
     undefined,
     undefined,
     'public',
-    false,
+    true,
   )
 
   const modelsById = useMemo(() => new Map(models.map((model) => [model.id, model])), [models])
