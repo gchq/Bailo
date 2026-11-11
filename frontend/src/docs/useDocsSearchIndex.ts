@@ -507,6 +507,7 @@ export function useDocsSearchIndex(
     EMPTY_FILTER,
     EMPTY_FILTER,
     EMPTY_FILTER,
+    EMPTY_FILTER,
     backendQuery,
     false,
     '',
