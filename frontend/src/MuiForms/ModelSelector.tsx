@@ -1,10 +1,10 @@
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
-import { Registry, RJSFSchema } from '@rjsf/utils'
-import { EntrySearchResult, useListEntries } from 'actions/entry'
+import { type Registry, type RJSFSchema } from '@rjsf/utils'
+import { type EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { type KeyboardEvent, type SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -59,7 +59,9 @@ export default function ModelSelector({
     undefined,
     undefined,
     undefined,
+    undefined,
     'public',
+    false,
   )
 
   const modelsById = useMemo(() => new Map(models.map((model) => [model.id, model])), [models])
