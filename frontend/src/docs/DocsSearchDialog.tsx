@@ -20,19 +20,19 @@ import {
 } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { KeyboardEvent, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
 import {
-  DocsSearchCategory,
-  DocsSearchCategoryOption,
-  DocsSearchDialogProps,
-  DocsSearchDisplayRow as DisplayRow,
-  DocsSearchFilter as SearchFilter,
-  DocsSearchPageRow as PageRow,
-  DocsSearchResult,
-  DocsSearchResultSection as ResultSection,
+  type DocsSearchCategory,
+  type DocsSearchCategoryOption,
+  type DocsSearchDialogProps,
+  type DocsSearchDisplayRow as DisplayRow,
+  type DocsSearchFilter as SearchFilter,
+  type DocsSearchPageRow as PageRow,
+  type DocsSearchResult,
+  type DocsSearchResultSection as ResultSection,
 } from 'types/docs'
 
 import { useDocsSearchIndex } from './useDocsSearchIndex'

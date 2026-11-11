@@ -112,7 +112,9 @@ describe('Create new model', () => {
     cy.contains('View History')
     cy.get('[data-test=viewHistoryButton]').click({ force: true })
     cy.contains('Model Card History')
-    cy.visit(`/model-card/compare?fromEntry=${modelUuid}fromVersion=1`)
+    cy.visit(`/model-card/version?entry=${modelUuid}&version=1`)
+    cy.contains('Compare with latest version')
+    cy.visit(`/model-card/compare?fromEntry=${modelUuid}&fromVersion=1&toEntry=${modelUuid}`)
     cy.contains('Compare Model Cards')
   })
 
