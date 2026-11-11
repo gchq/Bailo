@@ -18,4 +18,14 @@ describe('DeploymentAssessments', () => {
     expect(screen.getByRole('button', { name: /Create Deployment Assessment/i })).toBeDefined()
     expect(screen.queryByText('All assessments')).toBeNull()
   })
+
+  it('links the help icon to the Deployment Assessments documentation in a new tab', () => {
+    render(<DeploymentAssessments />)
+
+    const helpLink = screen.getByRole('link', { name: 'What are Deployment Assessments?' })
+
+    expect(helpLink.getAttribute('href')).toBe('/docs/users/using-a-model/deployment-assessments')
+    expect(helpLink.getAttribute('target')).toBe('_blank')
+    expect(helpLink.getAttribute('rel')).toBe('noopener noreferrer')
+  })
 })

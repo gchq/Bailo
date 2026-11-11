@@ -1,23 +1,13 @@
 import Add from '@mui/icons-material/Add'
-import { Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined'
+import { Box, Button, Container, Divider, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import HelpDialog from 'src/common/HelpDialog'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
 import DeploymentAssessmentsList from 'src/deployment-assessments/DeploymentAssessmentsList'
 
 export default function Deployments() {
   const router = useRouter()
 
-  const deploymentAssessmentInfo = `
-  Deployment assessments are used to document the use of one or more models. Unlike the previous access request process, Deployment Assessments are not tied to a specific model, and model owners or managers do not need to be involved.
-
-  ### When to use Deployment Assessments
-  Use a Deployment Assessment to record how one or more models will be deployed. Under the previous process, users were required to submit an access request for each model and wait for approval from someone responsible for that model. With Deployment Assessments, multiple models can be included within a single assessment.
-
-  ### Drafts and publishing
-  The author of a Deployment Assessment is responsible for its contents as the Deployment Risk Owner. Assessments can be saved as a draft and edited until they are ready, then published. Publishing cannot be undone, but comments can still be added afterwards.
-`
   return (
     <Container maxWidth='xl' data-test='deploymentAssessmentsList'>
       <Paper sx={{ p: 2 }}>
@@ -41,10 +31,17 @@ export default function Deployments() {
               >
                 Create Deployment Assessment
               </Button>
-              <HelpDialog
-                title='What are Deployment Assessments?'
-                content={<MarkdownDisplay>{deploymentAssessmentInfo}</MarkdownDisplay>}
-              />
+              <Tooltip title='What are Deployment Assessments?'>
+                <IconButton
+                  size='small'
+                  component='a'
+                  href='/docs/users/using-a-model/deployment-assessments'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  <HelpOutlinedIcon color='primary' />
+                </IconButton>
+              </Tooltip>
             </Box>
           </Stack>
           <DeploymentAssessmentsList />
