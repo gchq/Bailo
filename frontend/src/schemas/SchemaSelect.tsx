@@ -23,6 +23,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import MessageAlert from 'src/MessageAlert'
 import SchemaButton from 'src/schemas/SchemaButton'
 import {
   type EntryInterface,
@@ -51,6 +52,7 @@ type SchemaSelectProps = SchemaSelectDeploymentAssessmentProps | SchemaSelectEnt
 export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const router = useRouter()
   const [loadingSchemaId, setLoadingSchemaId] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState('')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -90,6 +92,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     }
     return async (newSchema: SchemaInterface) => {
       if (currentUser) {
+        setErrorMessage('')
         setLoadingSchemaId(newSchema.id)
 
         const response = await postFromSchema(entry.id, newSchema.id)
@@ -98,6 +101,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
           await mutateEntry()
           router.push(`/${entryKindForRedirect(entry.kind)}/${entry.id}`)
         } else {
+          setErrorMessage(
+            typeof response.data === 'string' ? response.data : 'Unable to set up the schema. Please try again.',
+          )
           setLoadingSchemaId(null)
         }
       }
@@ -190,6 +196,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                 {` ${SchemaKindLabel[schemaKind]}`} you create. Select from the list below:
               </Typography>
             </Stack>
+            <MessageAlert message={errorMessage} severity='error' data-test='schemaSelectErrorMessage' />
             <Stack
               spacing={2}
               sx={{
