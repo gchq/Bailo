@@ -51,21 +51,14 @@ export async function searchSchemas(
 
   return schemas.map((schema) => {
     if (schema.kind === SchemaKind.DeploymentAssessment) {
-      schema.jsonSchema = prefixDeploymentAssessmentWithSummary(schema.jsonSchema)
+      schema.jsonSchema = addMandatoryDeploymentAssessmentSections(schema.jsonSchema)
     }
     return schema
   })
 }
 
-/**
- * Deployment assessment schemas have some hard-code questions that the application
- * will need to make use of. By appending them using this function, we can keep
- * the actual schema to be purely customisable.
- *
- * @param jsonSchema
- * @returns
- */
-function prefixDeploymentAssessmentWithSummary(jsonSchema: JsonSchema) {
+/** Adds the hard-coded Model Overview and Deployment Sign-Off sections the application relies on, merging them with any matching sections in the schema. */
+function addMandatoryDeploymentAssessmentSections(jsonSchema: JsonSchema) {
   const requiredProperties = Array.isArray((jsonSchema as any).required)
     ? ((jsonSchema as any).required as string[])
     : []
@@ -156,7 +149,7 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
 
   if (schema.kind === SchemaKind.DeploymentAssessment) {
-    schemaObject.jsonSchema = prefixDeploymentAssessmentWithSummary(schemaObject.jsonSchema)
+    schemaObject.jsonSchema = addMandatoryDeploymentAssessmentSections(schemaObject.jsonSchema)
   }
 
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)

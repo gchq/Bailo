@@ -244,6 +244,7 @@ export interface UiConfig {
   }
 
   deploymentAssessments: {
+    /** Only models in this state can be included in a Deployment Assessment. Set to null to allow any state */
     deployableModelState: string | null
   }
 
