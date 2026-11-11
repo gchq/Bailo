@@ -1,4 +1,3 @@
-import { type ProxyAgentOptions } from 'proxy-agent'
 import type { ZodSchema, ZodTypeDef } from 'zod'
 
 import { type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
@@ -13,6 +12,7 @@ import {
   type SystemRolesKeys,
 } from '../models/Model.js'
 import { type ScanInterface, type SeverityLevelKeys } from '../models/Scan.js'
+import { type HttpsDispatcherOptions } from '../services/http.js'
 import {
   type DocumentsMirrorMetadata,
   type MongoDocumentMirrorInformation,
@@ -105,8 +105,10 @@ export interface RemoteFederationConfig {
   label: string
   /** Either another Bailo instance or hugging face */
   kind: PeerKindKeys
+  /** `http(s)://` proxy URL for requests to this peer. PAC files are not supported. */
   proxy?: string
-  httpConfig?: ProxyAgentOptions
+  /** TLS options for requests to this peer */
+  httpConfig?: HttpsDispatcherOptions
   /** Defines how long search requests should exist for */
   cache?: {
     /** Time to live in seconds */
@@ -275,13 +277,33 @@ export interface EntrySearchResultWithErrors {
   errors?: Record<string, BailoError>
 }
 
-export const EntrySearchOptionsSchema = z.object({
+export interface EntrySearchOptions {
+  kind: Array<EntryKindKeys>
+  libraries: Array<string>
+  organisations: Array<string>
+  states: Array<string>
+  filters: Array<string>
+  search: string
+  task: string
+  peers: Array<string>
+  users: Array<string>
+  allowTemplating: boolean
+  schemaId: string
+  adminAccess: boolean
+  titleOnly: boolean
+  visibility: EntryVisibilityKeys
+}
+
+export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
+
+export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
   kind: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
   task: z.string().toLowerCase().optional(),
   libraries: coerceArray(z.array(z.string().toLowerCase())).optional(),
   organisations: coerceArray(z.array(z.string())).optional(),
   states: coerceArray(z.array(z.string())).optional(),
   filters: coerceArray(z.array(z.string())).optional(),
+  users: coerceArray(z.array(z.string())).optional(),
   search: z.string().optional(),
   allowTemplating: strictCoerceBoolean(z.boolean()).optional(),
   schemaId: z.string().optional(),
@@ -290,8 +312,6 @@ export const EntrySearchOptionsSchema = z.object({
   titleOnly: strictCoerceBoolean(z.boolean()).optional(),
   visibility: z.nativeEnum(EntryVisibility).optional(),
 })
-
-export type EntrySearchOptionsParams = z.infer<typeof EntrySearchOptionsSchema>
 
 export const EntryFilter = {
   WITH: 'with',

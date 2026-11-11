@@ -1,5 +1,3 @@
-import fetch, { type HeadersInit } from 'node-fetch'
-
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { type AccessRequestDoc } from '../models/AccessRequest.js'
@@ -10,7 +8,7 @@ import { type UserInterface } from '../models/User.js'
 import WebhookModel, { type WebhookEventKeys, type WebhookInterface } from '../models/Webhook.js'
 import { Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { getHttpsAgent } from './http.js'
+import { getHttpsDispatcher } from './http.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 
@@ -99,7 +97,7 @@ export async function sendWebhooks(
   const webhooks = await WebhookModel.find({ modelId, events: eventKind })
 
   for (const webhook of webhooks) {
-    let headers: HeadersInit | undefined
+    let headers: Record<string, string>
     if (webhook.token) {
       headers = {
         Authorization: `Bearer ${webhook.token}`,
@@ -111,7 +109,7 @@ export async function sendWebhooks(
       const response = await fetch(webhook.uri, {
         method: 'POST',
         body: JSON.stringify({ event: eventKind, description: eventTitle, ...content }),
-        agent: getHttpsAgent({
+        dispatcher: getHttpsDispatcher({
           rejectUnauthorized: webhook.insecureSSL,
         }),
         headers: { 'Content-Type': 'application/json', ...headers },

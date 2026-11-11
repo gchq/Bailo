@@ -411,6 +411,10 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     query.visibility = opts.visibility
   }
 
+  if (opts.users?.length) {
+    query['collaborators.entity'] = { $all: opts.users }
+  }
+
   if (opts.filters && opts.filters.length > 0) {
     if (opts.filters?.includes('mine')) {
       query.collaborators = {
