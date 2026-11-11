@@ -501,7 +501,7 @@ export function useDocsSearchIndex(
     kind: entryKinds,
     search: backendQuery,
     titleOnly: true,
-    enabled: true,
+    enabled: shouldSearchEntries,
   })
 
   const entryResults = useMemo(() => mapEntryResults(entries), [entries])
