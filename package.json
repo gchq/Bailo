@@ -8,7 +8,7 @@
     "cy:open": "npm --prefix ./frontend/ run cy:open",
     "cy:run": "npm --prefix ./frontend/ run cy:run",
     "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/",
-    "lint": "(npm --prefix ./backend run lint 2>&1 | sed 's/^/[backend] /') & (npm --prefix ./frontend run lint 2>&1 | sed 's/^/[frontend] /') & wait",
+    "lint": "bash lib/scripts/lint.sh",
     "prepare": "husky",
     "script": "npm --prefix ./backend/ run script",
     "style": "prettier --write .",
