@@ -1,4 +1,4 @@
-import { type Registry, type RegistryWidgetsType } from '@rjsf/utils'
+import { type Registry, type RegistryWidgetsType, type RJSFValidationError } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { type Dispatch, type SetStateAction } from 'react'
