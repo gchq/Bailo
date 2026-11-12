@@ -61,9 +61,11 @@ smtp:
     host: {{ include "bailo.mail.host" . }}
     port: {{ .Values.config.smtp.port }}
     secure: {{ .Values.config.smtp.secure }}
+    {{- if .Values.config.smtp.user }}
     auth:
-      user: {{ .Values.config.smtp.user }}
-      pass: {{ .Values.config.smtp.pass }}
+      user: {{ .Values.config.smtp.user | quote }}
+      pass: {{ .Values.config.smtp.pass | quote }}
+    {{- end }}
     tls:
       rejectUnauthorized: {{ .Values.config.smtp.rejectUnauthorized }}
   lifecycle:
