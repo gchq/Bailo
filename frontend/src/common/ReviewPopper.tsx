@@ -1,4 +1,4 @@
-import { Dayjs } from '@dayjs'
+import { type Dayjs } from '@dayjs'
 import Close from '@mui/icons-material/Close'
 import {
   Button,
@@ -16,7 +16,7 @@ import { ArrowDropDownIcon } from 'node_modules/@mui/x-date-pickers/index.mjs'
 import { useState } from 'react'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import MessageAlert from 'src/MessageAlert'
-import { DecisionKeys, ReviewRequestInterface } from 'types/types'
+import { type DecisionKeys, type ReviewRequestInterface } from 'types/types'
 
 interface ReviewPopperProps {
   isLoading: boolean

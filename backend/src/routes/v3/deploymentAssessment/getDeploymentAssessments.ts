@@ -1,9 +1,12 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { DeploymentAssessmentSummary, searchDeploymentAssessments } from '../../../services/deploymentAssessment.js'
+import {
+  type DeploymentAssessmentSummary,
+  searchDeploymentAssessments,
+} from '../../../services/deploymentAssessment.js'
 import { deploymentAssessmentSummarySchema, registerPath } from '../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
 

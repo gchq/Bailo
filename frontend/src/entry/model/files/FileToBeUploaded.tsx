@@ -4,7 +4,6 @@ import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { type ChangeEvent, useCallback } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
-import Restricted from 'src/common/Restricted'
 import TagSelector from 'src/common/TagSelector'
 import { type FileUploadMetadata, type FileUploadWithMetadata } from 'types/types'
 
@@ -102,16 +101,16 @@ export default function FileToBeUploaded({
             size='small'
             value={fileWithMetadata.metadata?.text}
             onChange={handleMetadataTextOnChange}
+            label='Metadata'
+            placeholder='Enter metadata details...'
+            fullWidth
           />
         )}
-        <Typography variant='caption'>{prettyBytes(fileWithMetadata.file.size)}</Typography>
-        <Restricted action='editEntry' fallback={<></>}>
-          <TagSelector
-            restrictedToAction='editEntry'
-            onChange={handleFileTagSelectorOnChange}
-            tags={fileWithMetadata.metadata ? fileWithMetadata.metadata?.tags : []}
-          />
-        </Restricted>
+        <TagSelector
+          restrictedToAction='editEntry'
+          onChange={handleFileTagSelectorOnChange}
+          tags={fileWithMetadata.metadata ? fileWithMetadata.metadata?.tags : []}
+        />
       </Stack>
     </Box>
   )

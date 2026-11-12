@@ -1,12 +1,12 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 import {
-  DeploymentAssessmentInterface,
-  DeploymentAssessmentSummary,
-  DeploymentAssessmentUserPermissions,
-  ResponseInterface,
+  type DeploymentAssessmentInterface,
+  type DeploymentAssessmentSummary,
+  type DeploymentAssessmentUserPermissions,
+  type ResponseInterface,
 } from 'types/types'
-import { ErrorInfo, fetcher } from 'utils/fetcher'
+import { type ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyDeploymentAssessmentList: DeploymentAssessmentSummary[] = []
 

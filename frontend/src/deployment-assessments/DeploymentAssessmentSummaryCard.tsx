@@ -3,9 +3,9 @@ import ChipSelector from 'src/common/ChipSelector'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
-import { DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
+import { type DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
 import Link from 'src/Link'
-import { DeploymentAssessmentSummary } from 'types/types'
+import { type DeploymentAssessmentSummary } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 interface DeploymentAssessmentSummaryCardProps {

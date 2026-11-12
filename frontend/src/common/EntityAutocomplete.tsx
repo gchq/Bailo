@@ -1,9 +1,9 @@
 import { Autocomplete, Typography } from '@mui/material'
 import { useListEntities } from 'actions/user'
-import { KeyboardEvent, SyntheticEvent, useState } from 'react'
+import { type KeyboardEvent, type SyntheticEvent, useState } from 'react'
 import LimitedTextField from 'src/common/LimitedTextField'
 import useDebounce from 'src/hooks/useDebounce'
-import { EntityObject } from 'types/types'
+import { type EntityObject } from 'types/types'
 
 interface EntityAutocompleteProps {
   id?: string

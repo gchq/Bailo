@@ -2,7 +2,7 @@ import Email from '@mui/icons-material/Email'
 import { IconButton, Tooltip } from '@mui/material'
 import { type UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { DeploymentAssessmentInterface } from 'types/types'
+import { type DeploymentAssessmentInterface } from 'types/types'
 import { fetcher } from 'utils/fetcher'
 
 function getRiskOwnerEntities(deploymentAssessment: Pick<DeploymentAssessmentInterface, 'metadata'>): string[] {

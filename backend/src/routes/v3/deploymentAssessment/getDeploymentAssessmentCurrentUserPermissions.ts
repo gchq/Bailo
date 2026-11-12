@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { z } from '../../../lib/zod.js'
 import { getCurrentUserPermissionsByDeploymentAssessment } from '../../../services/deploymentAssessment.js'
 import { deploymentAssessmentPermissionsSchema, registerPath } from '../../../services/specification.js'
-import { DeploymentAssessmentUserPermissions } from '../../../types/types.js'
+import { type DeploymentAssessmentUserPermissions } from '../../../types/types.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getDeploymentAssessmentCurrentUserPermissionsSchema = z.object({

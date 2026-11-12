@@ -1,12 +1,12 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Paper, Stack, Tooltip } from '@mui/material'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { SplitSchemaNoRender } from 'types/types'
+import { type SplitSchemaNoRender } from 'types/types'
 
 type SchemaFormPageProps = {
   title: string

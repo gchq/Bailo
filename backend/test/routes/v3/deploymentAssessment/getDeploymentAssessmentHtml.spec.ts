@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/index.js'
-import { DeploymentAssessmentInterface } from '../../../../src/models/DeploymentAssessment.js'
-import { UserInterface } from '../../../../src/models/User.js'
+import { type DeploymentAssessmentInterface } from '../../../../src/models/DeploymentAssessment.js'
+import { type UserInterface } from '../../../../src/models/User.js'
 import { getDeploymentAssessmentHtmlSchema } from '../../../../src/routes/v3/deploymentAssessment/getDeploymentAssessmentHtml.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 

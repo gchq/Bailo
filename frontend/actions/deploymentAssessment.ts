@@ -1,4 +1,4 @@
-import { DeploymentAssessmentMetadata } from 'types/types'
+import { type DeploymentAssessmentMetadata } from 'types/types'
 import { toSafePathId } from 'utils/stringUtils'
 
 export function postDeploymentAssessment(

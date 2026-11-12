@@ -1,7 +1,7 @@
 import { Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
-import { DeploymentAssessmentInterface, DeploymentAssessmentSummary } from 'types/types'
+import { type DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
+import { type DeploymentAssessmentInterface, type DeploymentAssessmentSummary } from 'types/types'
 
 interface AssessmentStateChipProps {
   assessment: DeploymentAssessmentSummary | DeploymentAssessmentInterface

@@ -2,9 +2,9 @@ name: ArtefactScan Python REST API Unit Test
 
 on:
   push:
-    branches: [main, v3]
+    branches: [main]
   pull_request:
-    branches: [main, v3]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

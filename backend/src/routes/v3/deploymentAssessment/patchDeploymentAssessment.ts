@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
+import { type Request, type Response } from 'express'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { z } from '../../../lib/zod.js'
-import { DeploymentAssessmentInterface } from '../../../models/DeploymentAssessment.js'
+import { type DeploymentAssessmentInterface } from '../../../models/DeploymentAssessment.js'
 import { updateDeploymentAssessment } from '../../../services/deploymentAssessment.js'
 import {
   deploymentAssessmentDraftSchema,

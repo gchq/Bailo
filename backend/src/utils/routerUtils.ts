@@ -1,4 +1,4 @@
-import { EntryKind, EntryKindKeys } from '../models/Model.js'
+import { EntryKind, type EntryKindKeys } from '../models/Model.js'
 
 export const entryKindForRedirect = (entryKind: EntryKindKeys) => {
   switch (entryKind) {

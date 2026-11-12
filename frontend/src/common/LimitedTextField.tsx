@@ -1,4 +1,4 @@
-import TextField, { TextFieldProps } from '@mui/material/TextField'
+import { TextField, type TextFieldProps } from '@mui/material'
 import { TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 type LimitedTextFieldProps = TextFieldProps & {

@@ -1,7 +1,7 @@
 import { escapeRegExp } from 'lodash-es'
-import { QueryFilter } from 'mongoose'
+import { type QueryFilter } from 'mongoose'
 
-import DeploymentAssessmentModel, { DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
+import DeploymentAssessmentModel, { type DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
 
 export interface SearchDeploymentAssessmentsParams {
   schemaId?: string

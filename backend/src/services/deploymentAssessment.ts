@@ -1,19 +1,22 @@
-import { ClientSession } from 'mongoose'
+import { type ClientSession } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { DeploymentAssessmentAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { z } from '../lib/zod.js'
+import { type z } from '../lib/zod.js'
 import DeploymentAssessmentModel, {
-  DeploymentAssessmentDoc,
-  DeploymentAssessmentInterface,
+  type DeploymentAssessmentDoc,
+  type DeploymentAssessmentInterface,
 } from '../models/DeploymentAssessment.js'
 import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
-import ResponseModel, { ResponseInterface, ResponseKind } from '../models/Response.js'
-import { UserInterface } from '../models/User.js'
-import { findDeploymentAssessments, SearchDeploymentAssessmentsParams } from '../repositories/deploymentAssessment.js'
+import ResponseModel, { type ResponseInterface, ResponseKind } from '../models/Response.js'
+import { type UserInterface } from '../models/User.js'
+import {
+  findDeploymentAssessments,
+  type SearchDeploymentAssessmentsParams,
+} from '../repositories/deploymentAssessment.js'
 import { SchemaKind } from '../types/enums.js'
-import { DeploymentAssessmentUserPermissions } from '../types/types.js'
+import { type DeploymentAssessmentUserPermissions } from '../types/types.js'
 import config from '../utils/config.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
@@ -24,7 +27,7 @@ import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
 import { getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyModelOwnersOfDeploymentAssessment, notifyRiskOwnerOfDeploymentAssessment } from './smtp/smtp.js'
-import { deploymentAssessmentSchema, deploymentAssessmentSummarySchema } from './specification.js'
+import { type deploymentAssessmentSchema, type deploymentAssessmentSummarySchema } from './specification.js'
 
 export type { SearchDeploymentAssessmentsParams }
 

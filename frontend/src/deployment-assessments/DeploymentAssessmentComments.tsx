@@ -7,7 +7,7 @@ import renderQueryState from 'src/common/renderQueryState'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
-import { ResponseInterface, ResponseKind } from 'types/types'
+import { type ResponseInterface, ResponseKind } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface DeploymentAssessmentCommentsProps {
