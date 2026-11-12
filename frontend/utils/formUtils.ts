@@ -1,5 +1,5 @@
-import { type Registry, type RegistryWidgetsType, type RJSFValidationError } from '@rjsf/utils'
-import { Validator } from 'jsonschema'
+import { type Registry, type RegistryWidgetsType } from '@rjsf/utils'
+import validator from '@rjsf/validator-ajv8'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { type Dispatch, type SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
@@ -300,11 +300,7 @@ export function skipPopulatingPrimitiveArrays(_validator: unknown, schema: any):
 }
 
 export function validateForm(step: StepNoRender) {
-  const validator = new Validator()
-  // Blank answers (e.g. `''` or `['']`) are stripped so that clearing an answer cannot satisfy a required field
-  const sectionErrors = validator.validate(removeEmptyValues(step.state) || {}, step.schema)
-
-  return sectionErrors.errors.length === 0
+  return validator.isValid(step.schema, step.state, step.schema)
 }
 
 function isBlank(value: unknown): boolean {
