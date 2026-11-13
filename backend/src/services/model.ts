@@ -1,4 +1,4 @@
-import * as _ from 'lodash-es'
+import mergeWith from 'lodash-es/mergeWith.js'
 import { type ProjectionType } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
@@ -645,7 +645,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     }
   }
 
-  _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+  mergeWith(model, modelDiff, (a, b) => (Array.isArray(b) ? b : undefined))
 
   // Re-check the authorisation after model has updated
   const recheckAuth = await authorisation.model(user, model, ModelAction.Update)
