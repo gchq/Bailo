@@ -6,6 +6,7 @@ import {
   type CollaboratorEntry,
   type EntryForm,
   type EntryInterface,
+  EntryKind,
   type EntryKindKeys,
   type EntryRole,
   type EntryUserPermissions,
@@ -40,32 +41,50 @@ export interface ModelExportRequest {
   semvers?: ReleaseInterface['semver'][]
 }
 
-export function useListEntries(
-  kind?: EntryKindKeys[] | EntryKindKeys,
-  roles: string[] = [],
-  task = '',
-  libraries: string[] = [],
-  organisations: string[] = [],
-  states: string[] = [],
-  peers: string[] = [],
-  users: string[] = [],
-  search = '',
-  allowTemplating?: boolean,
-  schemaId?: string,
-  titleOnly?: boolean,
-  adminAccess?: boolean,
-  visibility?: EntryVisibilityKeys,
+interface UseListEntriesProps {
+  kind?: EntryKindKeys[] | EntryKindKeys
+  roles?: string[]
+  task?: string
+  libraries?: string[]
+  organisations?: string[]
+  states?: string[]
+  peers?: string[]
+  users?: string[]
+  search?: string
+  allowTemplating?: boolean
+  schemaId?: string
+  titleOnly?: boolean
+  adminAccess?: boolean
+  visibility?: EntryVisibilityKeys
+  enabled?: boolean
+}
+
+export function useListEntries({
+  kind = [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL, EntryKind.DATA_CARD],
+  roles,
+  task,
+  libraries,
+  organisations,
+  states,
+  peers,
+  users,
+  search,
+  allowTemplating,
+  schemaId,
+  titleOnly,
+  visibility,
+  adminAccess,
   enabled = true,
-) {
+}: UseListEntriesProps) {
   const queryParams = {
     ...(kind && { kind }),
-    ...(roles.length > 0 && { filters: roles }),
+    ...(roles && { filters: roles }),
     ...(task && { task }),
-    ...(libraries.length > 0 && { libraries }),
-    ...(organisations.length > 0 && { organisations }),
-    ...(states.length > 0 && { states }),
-    ...(peers.length > 0 && { peers }),
-    ...(users.length > 0 && { users }),
+    ...(libraries && { libraries }),
+    ...(organisations && { organisations }),
+    ...(states && { states }),
+    ...(peers && { peers }),
+    ...(users && { users }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),

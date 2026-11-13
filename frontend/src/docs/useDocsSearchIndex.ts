@@ -18,8 +18,6 @@ import { flatDirectory } from './directory'
 
 export type { DocsSearchResult, SearchFilter }
 
-const EMPTY_FILTER: never[] = []
-
 const MAX_RESULTS = 50
 const MAX_RESULTS_PER_CATEGORY = 20
 const MAX_HEADING_RESULTS_PER_PAGE = 3
@@ -499,23 +497,12 @@ export function useDocsSearchIndex(
     entries = [],
     isEntriesLoading,
     isEntriesError,
-  } = useListEntries(
-    entryKinds,
-    EMPTY_FILTER,
-    '',
-    EMPTY_FILTER,
-    EMPTY_FILTER,
-    EMPTY_FILTER,
-    EMPTY_FILTER,
-    EMPTY_FILTER,
-    backendQuery,
-    false,
-    '',
-    true,
-    false,
-    undefined,
-    shouldSearchEntries,
-  )
+  } = useListEntries({
+    kind: entryKinds,
+    search: backendQuery,
+    titleOnly: true,
+    enabled: shouldSearchEntries,
+  })
 
   const entryResults = useMemo(() => mapEntryResults(entries), [entries])
 
