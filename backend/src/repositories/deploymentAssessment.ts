@@ -1,5 +1,5 @@
 import { escapeRegExp } from 'lodash-es'
-import { type QueryFilter } from 'mongoose'
+import { type ClientSession, type QueryFilter } from 'mongoose'
 
 import DeploymentAssessmentModel, { type DeploymentAssessmentInterface } from '../models/DeploymentAssessment.js'
 
@@ -74,4 +74,12 @@ export async function findDeploymentAssessments(
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   }))
+}
+
+export async function dropModelIdFromDeploymentAssessments(modelId: string, session?: ClientSession) {
+  await DeploymentAssessmentModel.updateMany(
+    { 'metadata.modelOverview.modelIds': modelId },
+    { $pull: { 'metadata.modelOverview.modelIds': modelId } },
+    { session },
+  )
 }

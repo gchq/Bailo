@@ -19,6 +19,7 @@ import ModelCardRevisionModel, { type ModelCardRevisionDoc } from '../models/Mod
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { type UserInterface } from '../models/User.js'
+import { dropModelIdFromDeploymentAssessments } from '../repositories/deploymentAssessment.js'
 import { GetModelCardVersionOptions, type GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { isBailoError } from '../types/error.js'
 import {
@@ -180,8 +181,6 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
-  // TODO: future work to handle how DAs that reference this model are cleaned up
-
   const [
     allModelReviews,
     allModelImages,
@@ -208,7 +207,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     // Initial concurrency has no overlapping Documents.
     (session) =>
       Promise.all([
-        // ModelCardRevision
+        // Model Card Revision
         Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
         // Review
         Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
@@ -226,6 +225,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
           })),
           session,
         ),
+        // Deployment Assessment
+        dropModelIdFromDeploymentAssessments(modelId, session),
       ]),
     // Only delete Releases after deleting Reviews as deleteReleases modifies Release, Review and Response Documents.
     (session) =>
