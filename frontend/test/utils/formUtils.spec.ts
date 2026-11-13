@@ -1,9 +1,10 @@
-import { StepNoRender } from 'types/types'
+import { type StepNoRender } from 'types/types'
 import {
   deepMergePreferFirst,
   getFormStats,
   isQuestionAnswered,
   setFormDataPropertiesToUndefined,
+  validateForm,
 } from 'utils/formUtils'
 import { describe, expect, it } from 'vitest'
 
@@ -134,6 +135,61 @@ describe('Form utils', () => {
     it('returns false when both local and mirrored arrays are empty', () => {
       const context = makeFormContext({ dataCards: [] }, { dataCards: [] }, true)
       expect(isQuestionAnswered('root_dataCards', { type: 'array', items: { type: 'string' } }, context)).toBe(false)
+    })
+  })
+
+  describe('validateForm', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string', minLength: 1 },
+        count: { type: 'number' },
+        reviewDate: { type: 'string', format: 'date' },
+        details: {
+          type: 'object',
+          properties: { owner: { type: 'string' } },
+          required: ['owner'],
+        },
+      },
+      required: ['name'],
+    }
+
+    const makeStep = (state: unknown, stepSchema: unknown = schema) =>
+      ({ schema: stepSchema, state }) as unknown as StepNoRender
+
+    it('returns true when the state matches the schema', () => {
+      expect(
+        validateForm(makeStep({ name: 'Model', count: 3, reviewDate: '2026-11-12', details: { owner: 'a' } })),
+      ).toBe(true)
+    })
+
+    it('returns false when a required property is missing', () => {
+      expect(validateForm(makeStep({ count: 3 }))).toBe(false)
+    })
+
+    it('returns false when a nested required property is missing', () => {
+      expect(validateForm(makeStep({ name: 'Model', details: {} }))).toBe(false)
+    })
+
+    it('returns false when a property has the wrong type', () => {
+      expect(validateForm(makeStep({ name: 'Model', count: 'three' }))).toBe(false)
+    })
+
+    it('returns false when a string does not meet a constraint', () => {
+      expect(validateForm(makeStep({ name: '' }))).toBe(false)
+    })
+
+    it('returns false when a date property has an invalid format', () => {
+      expect(validateForm(makeStep({ name: 'Model', reviewDate: 'not a date' }))).toBe(false)
+    })
+
+    it('returns true for an empty schema', () => {
+      expect(validateForm(makeStep({ anything: 'goes' }, {}))).toBe(true)
+    })
+
+    it('ignores unknown schema keywords', () => {
+      const schemaWithCustomKeyword = { ...schema, widget: 'customWidget' }
+      expect(validateForm(makeStep({ name: 'Model' }, schemaWithCustomKeyword))).toBe(true)
     })
   })
 })

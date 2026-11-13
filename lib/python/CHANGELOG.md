@@ -2,7 +2,14 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.12.0 - dd/mm/yyyy
+## 3.13.0 - dd/mm/yyyy
+
+### Changes
+
+- Drop support for end-of-life Python 3.10
+- `ValuedEnum` now subclasses `enum.StrEnum` (string behaviour unchanged)
+
+## 3.12.0 - 12/11/2026
 
 ### Changes
 

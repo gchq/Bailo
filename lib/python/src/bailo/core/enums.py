@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class ValuedEnum(str, Enum):
-    def __str__(self) -> str:
-        """Return the string representation of this enum's value.
-
-        :return: String value of the enum.
-        """
-        return str(self.value)
+class ValuedEnum(StrEnum):
+    """Base for Bailo enums whose string form is their value."""
 
 
 class ModelVisibility(ValuedEnum):
