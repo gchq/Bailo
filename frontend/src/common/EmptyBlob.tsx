@@ -1,5 +1,4 @@
 import { Stack } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import Image from 'next/image'
 import { type CSSProperties } from 'react'
@@ -10,8 +9,7 @@ type EmptyBlobProps = {
 }
 
 export default function EmptyBlob({ text, style }: EmptyBlobProps) {
-  const theme = useTheme()
-  const src = theme.palette.mode === 'dark' ? '/emptyBlobDark.svg' : '/emptyBlobLight.svg'
+  const src = '/emptyBlobDark.svg'
   return (
     <Stack
       spacing={1}
