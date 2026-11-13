@@ -567,11 +567,6 @@ export interface FlattenedModelImage {
   tag: string
 }
 
-export interface FileWithMetadataAndTags {
-  fileName: string
-  metadata: FileUploadMetadata
-}
-
 export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
@@ -669,11 +664,6 @@ export function isReviewKind(value: unknown): value is ReviewKindKeys {
   return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
 }
 
-export interface SuccessfulFileUpload {
-  fileName: string
-  fileId: string
-}
-
 export type PermissionDetail =
   | {
       hasPermission: true
@@ -708,6 +698,10 @@ export type RestrictedActionKeys = keyof UserPermissions
 export type FileUploadWithMetadata = {
   file: File
   metadata?: FileUploadMetadata
+  uploadPath?: string
+  // Path relative to the selected folder, unique across staged files and used to identify them.
+  // The file name alone is not enough: a folder can hold the same name in several subfolders.
+  relativePath: string
 }
 
 export type FileUploadMetadata = {

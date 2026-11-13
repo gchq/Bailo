@@ -12,6 +12,7 @@ import {
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
+import { getFileBaseName } from '../../utils/fileUtils.js'
 import { type ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
 
 const UNSUPPORTED_FILE_TYPE_MESSAGE = 'File type is not compatible with this scanner.'
@@ -56,7 +57,7 @@ export class ModelScanFileScanningConnector extends BaseArtefactScanningConnecto
     const s3Stream = await getObjectStream(file.path)
 
     try {
-      const scanResults = await scanFileStream(s3Stream, file.name)
+      const scanResults = await scanFileStream(s3Stream, getFileBaseName(file.name))
 
       if (scanResults.errors.length !== 0) {
         return this.buildErrorResult(`This file could not be scanned due to an error caused by ${this.toolName}`, {

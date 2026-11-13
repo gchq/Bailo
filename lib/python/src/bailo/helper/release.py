@@ -19,6 +19,21 @@ BLOCK_SIZE = 1024
 logger = logging.getLogger(__name__)
 
 
+def _resolve_within_directory(directory: str, filename: str) -> str:
+    """Join a file name onto a directory, rejecting names that would resolve outside of it.
+
+    :param directory: Directory the file must stay within
+    :param filename: File name, which may contain subfolders (e.g. "weights/model.bin")
+    :raises BailoException: If the file name would be written outside of the directory.
+    :return: The resolved absolute file path
+    """
+    target_dir = os.path.realpath(directory)
+    file_path = os.path.realpath(os.path.join(target_dir, filename))
+    if os.path.commonpath([target_dir, file_path]) != target_dir or file_path == target_dir:
+        raise BailoException(f"File name {filename!r} would be written outside of the target directory {directory!r}.")
+    return file_path
+
+
 class Release:
     def __init__(
         self,
@@ -176,10 +191,17 @@ class Release:
 
         :param filename: The name of the file to retrieve
         :param write: Bool to determine if writing file to disk, defaults to True
-        :param path: Local path to write file to (if write set to True)
+        :param path: Local path to write file to (if write set to True), defaults to the file name within the current
+            working directory
+        :raises BailoException: If path is not given and the file name would be written outside of the current
+            working directory.
 
         :return: A JSON response object
         """
+        if write and path is None:
+            # File names can come from the server, so reject any that would escape the working directory.
+            path = _resolve_within_directory(os.getcwd(), filename)
+
         res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
         logger.info(
             "Downloading file %s from version %s of %s...",
@@ -189,8 +211,10 @@ class Release:
         )
 
         if write:
-            if path is None:
-                path = filename
+            # Create parent directories for path-like filenames (e.g. "weights/model.bin")
+            parent_dir = os.path.dirname(path)
+            if parent_dir:
+                os.makedirs(parent_dir, exist_ok=True)
             total_size = int(res.headers.get("content-length", 0))
 
             colour = "white" if NO_COLOR else "green"
@@ -263,14 +287,17 @@ class Release:
         )
         os.makedirs(path, exist_ok=True)
         for file in file_names:
-            file_path = os.path.join(path, file)
+            # File names come from the server, so reject any that would escape the target directory.
+            file_path = _resolve_within_directory(path, file)
             self.download(filename=file, path=file_path)
 
-    def upload(self, path: str, data: BytesIO | None = None) -> str:  # type: ignore[reportRedeclaration]
+    def upload(self, path: str, data: BytesIO | None = None, upload_name: str | None = None) -> str:  # type: ignore[reportRedeclaration]
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded
         :param data: A BytesIO object if not loading from disk, defaults to None
+        :param upload_name: Optional name to store the file as on the server (e.g. "weights/model.bin"
+            for hierarchical file organisation), defaults to the basename of path
 
         :return: The unique file ID of the file uploaded
         .. note:: If path provided is a directory, it will be uploaded as a zip
@@ -283,7 +310,7 @@ class Release:
 
         to_close = False
         # If no datastream object provided
-        name = os.path.split(path)[-1]
+        name = upload_name if upload_name else os.path.split(path)[-1]
         if data is None:
             # If we haven't passed in a file object, we must create one from the path.
             # Check if file exists, if it does the zip required
