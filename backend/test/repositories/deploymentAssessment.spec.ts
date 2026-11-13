@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { findDeploymentAssessments } from '../../src/repositories/deploymentAssessment.js'
+import {
+  dropModelIdFromDeploymentAssessments,
+  findDeploymentAssessments,
+} from '../../src/repositories/deploymentAssessment.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
@@ -130,6 +133,20 @@ describe('repositories > deploymentAssessment', () => {
         draft: true,
         name: { $regex: 'Assessment\\.\\*', $options: 'i' },
       })
+    })
+  })
+
+  describe('dropModelIdFromDeploymentAssessments', () => {
+    test('pulls the model ID from every assessment that references it', async () => {
+      const session = {} as any
+
+      await dropModelIdFromDeploymentAssessments('model-one', session)
+
+      expect(DeploymentAssessmentModelMock.updateMany).toHaveBeenCalledWith(
+        { 'metadata.modelOverview.modelIds': 'model-one' },
+        { $pull: { 'metadata.modelOverview.modelIds': 'model-one' } },
+        { session },
+      )
     })
   })
 })
