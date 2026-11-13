@@ -1,4 +1,4 @@
-import { mergeWith } from 'lodash-es'
+import mergeWith from 'lodash-es/mergeWith.js'
 
 export function deepFreeze(object) {
   // Retrieve the property names defined on object
