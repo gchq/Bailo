@@ -34,6 +34,7 @@ vi.mock('../../src/connectors/authorisation/index.js')
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ModelCardRevisionModelMock = getTypedModelMock('ModelCardRevisionModel')
 const ReviewModelMock = getTypedModelMock('ReviewModel')
+const DeploymentAssessmentModelMock = getTypedModelMock('DeploymentAssessmentModel')
 
 const accessRequestMock = vi.hoisted(() => ({
   getAccessRequestsByModel: vi.fn(() => [] as any[]),
@@ -318,6 +319,11 @@ describe('services > model', () => {
       expect(ReviewModelMock.findByIdAndDelete).toHaveBeenCalledTimes(itemsFound)
       expect(ReviewModelMock.findByIdAndDelete.mock.calls.at(0)).toEqual([_id, undefined])
       expect(tokenMock.dropModelIdFromTokens).toHaveBeenCalledWith(user, modelId, Array(itemsFound).fill({}), undefined)
+      expect(DeploymentAssessmentModelMock.updateMany).toHaveBeenCalledWith(
+        { 'metadata.modelOverview.modelIds': modelId },
+        { $pull: { 'metadata.modelOverview.modelIds': modelId } },
+        { session: undefined },
+      )
       expect(webhookMockDelete).toHaveBeenCalledTimes(itemsFound)
       expect(fileMock.removeFiles).toHaveBeenCalledWith(
         user,
