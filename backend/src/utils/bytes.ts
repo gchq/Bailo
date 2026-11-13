@@ -19,9 +19,9 @@ export function parseBytes(value: number | string): number | null {
     return Number.isNaN(value) ? null : value
   }
 
-  const match = value.match(/^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb|pb)$/i)
+  const match = value.match(/^([+-]?\d+(?:\.\d+)?)\s*(b|kb|mb|gb|tb|pb)$/i)
   const number = match ? Number.parseFloat(match[1]) : Number.parseInt(value, 10)
-  const unit = match?.[4].toLowerCase() ?? 'b'
+  const unit = match?.[2].toLowerCase() ?? 'b'
   const multiplier = unitMultipliers.get(unit)
 
   return Number.isNaN(number) || multiplier === undefined ? null : Math.floor(number * multiplier)
