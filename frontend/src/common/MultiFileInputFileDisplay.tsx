@@ -1,8 +1,9 @@
-import { Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
+import { Chip, Grid, Tooltip, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/entry'
 import { patchFile } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
 import { type ChangeEvent, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import TagSelector from 'src/common/TagSelector'
 import { type FileInterface, type FileUploadMetadata, type FileWithMetadataAndTags, isFileInterface } from 'types/types'
 
@@ -86,7 +87,7 @@ export default function MultiFileInputFileDisplay({
           errorText={fileTagErrorMessage}
           restrictedToAction='editEntry'
         />
-        <TextField
+        <LimitedTextField
           size='small'
           placeholder='Optional metadata'
           sx={{ width: '100%', display: 'none' }}

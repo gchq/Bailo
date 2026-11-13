@@ -1,11 +1,11 @@
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
-import TextField from '@mui/material/TextField'
 import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { type KeyboardEvent, type SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UserDisplay from 'src/common/UserDisplay'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import { type EntityObject } from 'types/types'
@@ -30,6 +30,7 @@ function formatEntityValue(entities: string[] | undefined): string {
     return ''
   }
   return entities
+    .filter(Boolean)
     .map((entity) => {
       const [, entityId] = entity.split(':')
       return entityId ?? entity
@@ -62,7 +63,7 @@ export default function EntitySelector({
       return [{ id: currentUserId, kind: 'user' }]
     }
     if (currentValue) {
-      const updatedEntities: EntityObject[] = currentValue.map((value) => {
+      const updatedEntities: EntityObject[] = currentValue.filter(Boolean).map((value) => {
         const [kind, id] = value.split(':')
         return { kind, id }
       })
@@ -110,6 +111,8 @@ export default function EntitySelector({
   if (isCurrentUserLoading) {
     return <Loading />
   }
+
+  const filteredCurrentValue = currentValue.filter(Boolean)
 
   return (
     <CompareField
@@ -160,7 +163,7 @@ export default function EntitySelector({
               ))
             }
             renderInput={(params) => (
-              <TextField
+              <LimitedTextField
                 {...params}
                 placeholder='Username or group name'
                 error={rawErrors && rawErrors.length > 0}
@@ -174,16 +177,23 @@ export default function EntitySelector({
             )}
           />
         </>
+      ) : filteredCurrentValue.length > 0 ? (
+        <Box sx={{ overflowX: 'auto', p: 1 }}>
+          <Stack spacing={1} direction='row'>
+            {filteredCurrentValue.map((entity) => (
+              <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
+            ))}
+          </Stack>
+        </Box>
       ) : (
-        currentValue.length > 0 && (
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {currentValue.map((entity) => (
-                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
-              ))}
-            </Stack>
-          </Box>
-        )
+        <Typography
+          sx={{
+            fontStyle: 'italic',
+            color: theme.palette.customTextInput?.main ?? theme.palette.text.secondary,
+          }}
+        >
+          Unanswered
+        </Typography>
       )}
     </CompareField>
   )

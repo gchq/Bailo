@@ -16,6 +16,7 @@ interface NavMenuItemProps {
   badgeCount?: number
   openLinkInNewTab?: boolean
   requiredRole?: RoleKeys
+  isNew?: boolean
 }
 export function NavMenuItem({
   menuPage,
@@ -28,12 +29,23 @@ export function NavMenuItem({
   badgeCount = 0,
   openLinkInNewTab = false,
   requiredRole,
+  isNew = false,
 }: NavMenuItemProps) {
   const currentUser = useContext(CurrentUserContext)
   const theme = useTheme()
+
   if (requiredRole && !currentUser.systemRoles.includes(requiredRole)) {
     return
   }
+
+  const iconWithBadges = (
+    <Badge badgeContent='New' color='success' invisible={!isNew}>
+      <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
+        {icon}
+      </Badge>
+    </Badge>
+  )
+
   return (
     <ListItem disablePadding>
       <Link href={href} newTab={openLinkInNewTab} style={{ width: '100%', textDecoration: 'none' }}>
@@ -41,16 +53,10 @@ export function NavMenuItem({
           <ListItemIcon sx={{ mr: 2 }}>
             {!drawerOpen ? (
               <Tooltip arrow title={title} placement='right'>
-                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                  {icon}
-                </Badge>
+                {iconWithBadges}
               </Tooltip>
             ) : (
-              <>
-                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                  {icon}
-                </Badge>
-              </>
+              iconWithBadges
             )}
           </ListItemIcon>
           <ListItemText primary={primaryText} sx={{ textDecoration: 'none', color: theme.palette.primary.main }} />

@@ -1,6 +1,7 @@
 import { type Request } from 'express'
 
 import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { type FileInterface, type FileWithScanResultsAggregate } from '../../models/File.js'
 import { type InferenceDoc } from '../../models/Inference.js'
 import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
@@ -12,6 +13,7 @@ import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
 
@@ -45,6 +47,7 @@ export const ResourceKind = {
   Metric: 'metric',
   User: 'user',
   Registry: 'registry',
+  DeploymentAssessment: 'deployment assessment',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -432,6 +435,42 @@ export const AuditInfo = {
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Review,
   },
+  SearchDeploymentAssessments: {
+    typeId: 'SearchDeploymentAssessments',
+    description: 'Deployment assessments searched',
+    auditKind: AuditKind.Search,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
+  CreateDeploymentAssessment: {
+    typeId: 'CreateDeploymentAssessment',
+    description: 'Deployment assessment created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
+  UpdateDeploymentAssessment: {
+    typeId: 'UpdateDeploymentAssessment',
+    description: 'Deployment assessment updated',
+    auditKind: AuditKind.Update,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
+  DeleteDeploymentAssessment: {
+    typeId: 'DeleteDeploymentAssessment',
+    description: 'Deployment assessment deleted',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
+  ViewDeploymentAssessment: {
+    typeId: 'ViewDeploymentAssessment',
+    description: 'Deployment assessment viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.DeploymentAssessment,
+  },
+  CommentOnDeploymentAssessment: {
+    typeId: 'CommentOnDeploymentAssessment',
+    description: 'Deployment assessment comment created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Response,
+  },
   ViewCurrentUserInformation: {
     typeId: 'ViewCurrentUserInformation',
     description: 'Viewed information about the user making the request',
@@ -548,6 +587,17 @@ export abstract class BaseAuditConnector {
   abstract onViewMetric(req: Request): Promise<void>
 
   abstract onCreateReview(req: Request, modelId: string): Promise<void>
+
+  abstract onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onUpdateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onSearchDeploymentAssessments(
+    req: Request,
+    deploymentAssessments: DeploymentAssessmentSummary[],
+  ): Promise<void>
+  abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
+  abstract onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
+
   abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>

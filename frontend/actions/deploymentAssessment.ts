@@ -1,0 +1,45 @@
+import { type DeploymentAssessmentMetadata } from 'types/types'
+import { toSafePathId } from 'utils/stringUtils'
+
+export function postDeploymentAssessment(
+  name: string,
+  schemaId: string,
+  form: Record<string, unknown>,
+  draft: boolean,
+) {
+  return fetch(`/api/v3/deployment-assessments`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      schemaId,
+      ...(form && { metadata: { ...form } }),
+      draft,
+    }),
+  })
+}
+
+export function patchDeploymentAssessment(
+  deploymentAssessmentId: string,
+  metadata?: Partial<DeploymentAssessmentMetadata>,
+  draft?: boolean,
+  name?: string,
+) {
+  return fetch(`/api/v3/deployment-assessments/${deploymentAssessmentId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      ...(metadata !== undefined && { metadata }),
+      draft,
+    }),
+  })
+}
+
+export function postDeploymentAssessmentComment(deploymentAssessmentId: string, comment: string) {
+  return fetch(`/api/v3/deployment-assessments/${toSafePathId(deploymentAssessmentId)}/comments`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
+  })
+}

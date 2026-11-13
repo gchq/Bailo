@@ -1,8 +1,9 @@
-import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { useState } from 'react'
 import CompareField from 'src/common/CompareField'
+import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
 
 interface TagEditorProps {
@@ -11,6 +12,7 @@ interface TagEditorProps {
   newTag: string
   setNewTag: (v: string) => void
   errorText: string
+  hasErrors?: boolean
   label: string
   id: string
   onSubmit: () => void
@@ -24,6 +26,7 @@ function TagEditor({
   newTag,
   setNewTag,
   errorText,
+  hasErrors,
   label,
   id,
   onSubmit,
@@ -57,7 +60,7 @@ function TagEditor({
         sx={{ alignItems: 'center' }}
       >
         <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-          <TextField
+          <LimitedTextField
             size='small'
             value={newTag}
             onKeyUp={(e) => {
@@ -67,6 +70,7 @@ function TagEditor({
             }}
             id={id}
             aria-label={`input field for ${label}`}
+            error={hasErrors || errorText.length > 0}
             onChange={(e) => setNewTag(e.target.value)}
             sx={{ minWidth: '100px' }}
           />
@@ -117,6 +121,7 @@ interface TagSelectorProps {
   required?: boolean
   registry?: Registry
   id: string
+  rawErrors?: string[]
   schema?: RJSFSchema
 }
 
@@ -128,6 +133,7 @@ export default function TagSelector({
   required,
   registry,
   id,
+  rawErrors,
   schema,
 }: TagSelectorProps) {
   const theme = useTheme()
@@ -182,6 +188,7 @@ export default function TagSelector({
           newTag={newTag}
           setNewTag={setNewTag}
           errorText={errorText}
+          hasErrors={!!rawErrors && rawErrors.length > 0}
           label={label}
           id={id}
           onSubmit={handleNewTagSubmit}
@@ -214,6 +221,7 @@ export default function TagSelector({
           newTag={newTag}
           setNewTag={setNewTag}
           errorText={errorText}
+          hasErrors={!!rawErrors && rawErrors.length > 0}
           label={label}
           id={id}
           onSubmit={handleNewTagSubmit}

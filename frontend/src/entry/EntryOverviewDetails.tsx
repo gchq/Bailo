@@ -31,9 +31,14 @@ import { toSentenceCase } from 'utils/stringUtils'
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
   mutateEntry: () => void
+  dialogView?: boolean
 }
 
-export default function EntryOverviewDetails({ entry, mutateEntry }: OrganisationAndStateDetailsProps) {
+export default function EntryOverviewDetails({
+  entry,
+  mutateEntry,
+  dialogView = false,
+}: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
   const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
@@ -80,6 +85,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
   }, [entry])
 
   const updateEntryPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
+  const isEditable = updateEntryPermission.hasPermission && !dialogView
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
     setEntryTagUpdateErrorMessage('')
@@ -141,7 +147,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
             {uiConfig.modelDetails.organisations.length > 0 && (
               <EntrySelect
                 label='Organisation'
-                editable={updateEntryPermission.hasPermission}
+                editable={isEditable}
                 value={entry.organisation}
                 entryId={entry.id}
                 field='organisation'
@@ -152,7 +158,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
             {uiConfig.modelDetails.states.length > 0 && entry.card && (
               <EntrySelect
                 label='State'
-                editable={updateEntryPermission.hasPermission}
+                editable={isEditable}
                 value={entry.state}
                 entryId={entry.id}
                 field='state'
@@ -167,7 +173,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
               <Typography color='primary' sx={{ fontWeight: 'bold' }}>
                 Model card review
               </Typography>
-              {updateEntryPermission.hasPermission && reviews.length === 0 && (
+              {isEditable && reviews.length === 0 && (
                 <>
                   <DatePicker
                     value={reviewDate}
@@ -205,7 +211,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                       : 'Invalid date'}
                   </Typography>
                 )}
-                {updateEntryPermission.hasPermission && reviews[0] && (
+                {isEditable && reviews[0] && (
                   <Button
                     size='small'
                     sx={{ width: 'fit-content' }}
@@ -215,7 +221,7 @@ export default function EntryOverviewDetails({ entry, mutateEntry }: Organisatio
                     Review
                   </Button>
                 )}
-                {archivedReviews.length > 0 && (
+                {!dialogView && archivedReviews.length > 0 && (
                   <Button
                     size='small'
                     onClick={() => {

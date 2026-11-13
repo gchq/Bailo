@@ -57,6 +57,78 @@ export const errorSchemaContent = {
   },
 }
 
+const deploymentAssessmentIdSchema = z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' })
+export const deploymentAssessmentSchemaIdSchema = z
+  .string()
+  .min(1, 'You must provide a schema ID')
+  .openapi({ example: 'stark-deployment-assessment-schema-v1' })
+export const deploymentAssessmentNameSchema = z
+  .string()
+  .min(1, 'You must provide a Deployment Assessment name')
+  .trim()
+  .openapi({ example: 'Just A Rather Very Intelligent System' })
+const deploymentAssessmentRiskOwnerSchema = z
+  .array(z.string().min(1))
+  .min(1, 'You must provide a Deployment Risk Owner')
+  .openapi({ example: ['user:tony'] })
+const deploymentAssessmentModelIdsSchema = z
+  .array(z.string())
+  .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
+export const deploymentAssessmentDraftSchema = z.boolean().openapi({ example: true })
+export const deploymentAssessmentMetadataSchema = z
+  .object({
+    signOff: z
+      .object({
+        riskOwners: deploymentAssessmentRiskOwnerSchema.optional(),
+      })
+      .passthrough()
+      .optional(),
+    modelOverview: z.object({ modelIds: deploymentAssessmentModelIdsSchema.optional() }).passthrough().optional(),
+  })
+  .passthrough()
+
+export const deploymentAssessmentMetadataRequiredSchema = z
+  .object({
+    modelOverview: z
+      .object({
+        modelIds: deploymentAssessmentModelIdsSchema,
+      })
+      .passthrough(),
+    signOff: z.object({ riskOwners: deploymentAssessmentRiskOwnerSchema }).passthrough(),
+  })
+  .passthrough()
+
+export const deploymentAssessmentSummarySchema = z.object({
+  id: deploymentAssessmentIdSchema,
+  schemaId: deploymentAssessmentSchemaIdSchema,
+  name: deploymentAssessmentNameSchema,
+  owner: deploymentAssessmentRiskOwnerSchema.optional(),
+  models: deploymentAssessmentModelIdsSchema.optional(),
+  draft: deploymentAssessmentDraftSchema,
+  createdBy: z.string().openapi({ example: 'tony' }),
+  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+})
+
+const baseDeploymentAssessmentSchema = z.object({
+  name: deploymentAssessmentNameSchema,
+  schemaId: deploymentAssessmentSchemaIdSchema,
+})
+
+export const deploymentAssessmentSchema = z.discriminatedUnion('draft', [
+  baseDeploymentAssessmentSchema
+    .extend({
+      metadata: deploymentAssessmentMetadataRequiredSchema,
+      draft: z.literal(false),
+    })
+    .strict(),
+  baseDeploymentAssessmentSchema
+    .extend({
+      metadata: deploymentAssessmentMetadataSchema.optional(),
+      draft: z.literal(true).optional().default(true),
+    })
+    .strict(),
+])
+
 export const systemStatusSchema = z.object({
   code: z.number().openapi({ example: 200 }),
   ping: z.string().openapi({ example: 'pong' }),
@@ -65,6 +137,9 @@ export const systemStatusSchema = z.object({
     state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
   }),
 })
+
+const schemaId = z.string().min(1, 'You must provide a schema ID')
+const draft = z.boolean().openapi({ example: true })
 
 export const modelTransferSchema = z.object({
   _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
@@ -100,7 +175,7 @@ export const peersConfigStatusSchema = z.object({
 })
 
 export const modelCardInterfaceSchema = z.object({
-  schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),
+  schemaId: schemaId.openapi({ example: 'minimal-general-v10-beta' }),
   version: z.number().openapi({ example: 5 }),
   createdBy: z.string().openapi({ example: 'user' }),
   metadata: z.object({
@@ -110,7 +185,7 @@ export const modelCardInterfaceSchema = z.object({
 
 export const modelCardRevisionInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
-  schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),
+  schemaId: schemaId.openapi({ example: 'minimal-general-v10-beta' }),
 
   version: z.number().openapi({ example: 5 }),
   metadata: z.object({
@@ -282,7 +357,7 @@ export const releaseInterfaceSchema = z.object({
   notes: z.string().openapi({ example: 'An example release' }),
 
   minor: z.boolean().openapi({ example: false }),
-  draft: z.boolean().openapi({ example: false }),
+  draft,
 
   fileIds: z.array(z.string()).openapi({ example: ['507f1f77bcf86cd799439011'] }),
   images: z.array(z.string()).openapi({ example: ['/yolo-v4-abcdef/example:v1.0.0'] }),
@@ -334,11 +409,21 @@ export const responseInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const deploymentAssessmentResponseSchema = z.object({
+  _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  entity: z.string().openapi({ example: 'user:joe.bloggs' }),
+  kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
+  comment: z.string().optional().openapi({ example: 'Looks good!' }),
+  parentId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const accessRequestInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'looking-at-pictures-zyxwvu' }),
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
 
-  schemaId: z.string().openapi({ example: 'minimal-access-request-v1' }),
+  schemaId: schemaId.openapi({ example: 'minimal-access-request-v1' }),
   metadata: z.object({
     overview: z.object({
       name: z.string().openapi({ example: 'Looking at Pictures' }),
@@ -363,6 +448,45 @@ export const accessRequestInterfaceSchema = z.object({
   createdBy: z.string().openapi({ example: 'user' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+const deploymentAssessmentModelOverview = z
+  .object({
+    modelIds: z
+      .array(z.string())
+      .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
+      .optional(),
+  })
+  .passthrough()
+
+const deploymentAssessmentSignOff = z
+  .object({
+    riskOwners: z
+      .array(z.string().min(1))
+      .min(1)
+      .max(1)
+      .openapi({ example: ['user:tony'] })
+      .optional(),
+  })
+  .passthrough()
+
+export const deploymentAssessmentInterfaceSchema = z.object({
+  id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
+  schemaId: schemaId.openapi({ example: 'stark-deployment-assessment-schema-v1' }),
+  metadata: z
+    .object({
+      name: z
+        .string()
+        .min(1, 'You must provide a Deployment Assessment name')
+        .openapi({ example: 'Just A Rather Very Intelligent System' }),
+      modelOverview: deploymentAssessmentModelOverview,
+      signOff: deploymentAssessmentSignOff,
+    })
+    .passthrough(),
+  draft: draft.optional().default(true).openapi({ example: true }),
+  createdBy: z.string().openapi({ example: 'tony' }),
+  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
 })
 
 export const schemaInterfaceSchema = z.object({
@@ -461,6 +585,11 @@ export const entryUserPermissionsSchema = z.object({
 export const accessRequestUserPermissionsSchema = z.object({
   editAccessRequest: permissionDetailSchema,
   deleteAccessRequest: permissionDetailSchema,
+})
+
+export const deploymentAssessmentPermissionsSchema = z.object({
+  editDeploymentAssessment: permissionDetailSchema,
+  deleteDeploymentAssessment: permissionDetailSchema,
 })
 
 export const userTokenSchema = z.object({

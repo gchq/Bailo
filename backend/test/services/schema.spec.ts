@@ -10,7 +10,9 @@ import {
   updateSchema,
   validateContentAgainstSchema,
 } from '../../src/services/schema.js'
+import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -64,6 +66,7 @@ vi.mock('node-cache', () => ({
 
 // Back the cache mock with an in-memory store so that invalidation can be asserted end to end.
 beforeEach(() => {
+  setTestConfig({ instrumentation: { enabled: true } })
   cacheMock.store.clear()
   cacheMock.get.mockImplementation((key: string) => cacheMock.store.get(key))
   cacheMock.set.mockImplementation((key: string, value: unknown) => {
@@ -85,6 +88,63 @@ describe('services > schema', () => {
 
     const result = await searchSchemas('model')
     expect(result).toEqual(['schema-1', 'schema-2'])
+  })
+
+  test('that deployment assessment schemas include summary properties when searched', async () => {
+    const deploymentAssessmentSchema = {
+      kind: SchemaKind.DeploymentAssessment,
+      jsonSchema: {
+        properties: {
+          assessment: {
+            type: 'object',
+          },
+        },
+      },
+    }
+    SchemaModelModelMock.sort.mockResolvedValueOnce([deploymentAssessmentSchema])
+
+    const result = await searchSchemas(SchemaKind.DeploymentAssessment)
+
+    expect(result[0].jsonSchema.properties).toEqual({
+      modelOverview: expect.objectContaining({
+        title: 'Model Overview',
+        required: ['modelIds'],
+        properties: expect.objectContaining({
+          modelIds: expect.objectContaining({ minItems: 1, uniqueItems: true }),
+        }),
+      }),
+      signOff: expect.objectContaining({
+        title: 'Deployment Sign-Off',
+        required: ['riskOwners'],
+        properties: expect.objectContaining({
+          riskOwners: expect.objectContaining({
+            title: 'Who is the Deployment Risk Owner attached to this Deployment Assessment?',
+            type: 'array',
+            minItems: 1,
+            maxItems: 1,
+            items: {
+              minLength: 1,
+              type: 'string',
+            },
+            uniqueItems: true,
+            widget: 'entitySelector',
+          }),
+        }),
+      }),
+      assessment: {
+        type: 'object',
+      },
+    })
+    expect(result[0].jsonSchema.required).toEqual(['signOff', 'modelOverview'])
+  })
+
+  test('that non-deployment assessment schemas are unchanged when searched', async () => {
+    const modelSchema = structuredClone(testModelSchema)
+    SchemaModelModelMock.sort.mockResolvedValueOnce([modelSchema])
+
+    const result = await searchSchemas(SchemaKind.Model)
+
+    expect(result[0].jsonSchema).toEqual(testModelSchema.jsonSchema)
   })
 
   test('a schema can be created', async () => {
@@ -277,6 +337,87 @@ describe('services > schema', () => {
       valid: true,
     })
     expect(validatorMock.validate).toHaveBeenCalled()
+  })
+
+  test('validateContentAgainstSchema > allows fields to be incomplete but preserves draft requirements', async () => {
+    const jsonSchema = {
+      type: 'object',
+      required: ['overview', 'assessment'],
+      properties: {
+        overview: {
+          type: 'object',
+          required: ['name', 'modelIds'],
+          properties: {
+            name: { type: 'string', minLength: 1, requiredForDraft: true },
+            modelIds: { type: 'array', minItems: 1, uniqueItems: true },
+          },
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'draft-schema',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'draft-schema', jsonSchema }),
+    })
+
+    await validateContentAgainstSchema('draft-schema', { overview: { name: 'Draft', modelIds: [] } }, { draft: true })
+
+    expect(validatorMock.validate).toHaveBeenCalledWith(
+      { overview: { name: 'Draft', modelIds: [] } },
+      {
+        type: 'object',
+        properties: {
+          overview: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', minLength: 1, requiredForDraft: true },
+              modelIds: { type: 'array', uniqueItems: true },
+            },
+            required: ['name'],
+          },
+        },
+        required: ['overview'],
+      },
+      { required: true },
+    )
+  })
+
+  test('validateContentAgainstSchema > returns draft validation errors from the transformed schema', async () => {
+    const jsonSchema = {
+      type: 'object',
+      required: ['overview'],
+      properties: {
+        overview: {
+          type: 'object',
+          required: ['name', 'modelIds'],
+          properties: {
+            name: { type: 'string', minLength: 1, requiredForDraft: true },
+            modelIds: { type: 'array', minItems: 1, uniqueItems: true },
+          },
+        },
+      },
+    }
+    SchemaModelModelMock.findOne.mockResolvedValueOnce({
+      id: 'draft-schema',
+      jsonSchema,
+      toObject: vi.fn().mockReturnValue({ id: 'draft-schema', jsonSchema }),
+    })
+    validatorMock.validate.mockReturnValueOnce({ valid: false, errors: [] })
+
+    await expect(validateContentAgainstSchema('draft-schema', { overview: {} }, { draft: true })).resolves.toEqual({
+      valid: false,
+      errors: [],
+    })
+    expect(validatorMock.validate).toHaveBeenCalledWith(
+      { overview: {} },
+      expect.objectContaining({
+        properties: expect.objectContaining({
+          overview: expect.objectContaining({ required: ['name'] }),
+        }),
+        required: ['overview'],
+      }),
+      { required: true },
+    )
   })
 
   test('validateContentAgainstSchema > should throw NotFound when schema does not exist', async () => {

@@ -74,3 +74,10 @@ export const truncateText = (text: string | undefined, limit: number = 100) => {
 
   return text.slice(0, limit) + '\u2026'
 }
+
+export function toSafePathId(value: string): string {
+  if (!/^[A-Za-z0-9-]+$/.test(value)) {
+    throw new Error('Invalid ID')
+  }
+  return encodeURIComponent(value)
+}

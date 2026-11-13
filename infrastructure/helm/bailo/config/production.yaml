@@ -141,6 +141,8 @@ ui:
     untrustedModelLongDescription: {{ .Values.config.ui.untrustedModel.untrustedModelLongDescription }}
     untrustedModelShortDescription: {{ .Values.config.ui.untrustedModel.untrustedModelShortDescription }}
     fileUploadGuidance: {{ .Values.config.ui.untrustedModel.fileUploadGuidance }}
+  deploymentAssessments:
+    deployableModelState: {{ toJson .Values.config.ui.deploymentAssessments.deployableModelState }}
   lifecycle:
     maxReviewInterval: {{ .Values.config.ui.lifecycle.maxReviewInterval }}
 connectors:

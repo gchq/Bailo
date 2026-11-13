@@ -52,7 +52,7 @@ import {
   type SplitSchemaNoRender,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
+import { getStepsData, getStepsFromSchema, removeEmptyValues } from 'utils/formUtils'
 
 type FormEditPageProps = {
   entry: EntryInterface
@@ -84,7 +84,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const [SchemaInformationOpen, setSchemaInformationOpen] = useState(false)
+  const [schemaInformationOpen, setSchemaInformationOpen] = useState(false)
 
   // For displaying the stats around model information completion
   const [calculateStats, setCalculateStats] = useState(0)
@@ -130,28 +130,6 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
     setAnchorEl(null)
   }
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
-
-  function removeEmptyValues(value) {
-    if (value === '') {
-      return undefined
-    }
-
-    if (Array.isArray(value)) {
-      return value.map(removeEmptyValues).filter((item) => item !== undefined)
-    }
-
-    if (value !== null && typeof value === 'object') {
-      const cleaned = Object.fromEntries(
-        Object.entries(value)
-          .map(([key, item]) => [key, removeEmptyValues(item)])
-          .filter(([, item]) => item !== undefined),
-      )
-
-      return Object.keys(cleaned).length > 0 ? cleaned : undefined
-    }
-
-    return value
-  }
 
   async function onSubmit() {
     if (schema) {
@@ -332,7 +310,7 @@ export default function FormEditPage({ entry, mutateEntry }: FormEditPageProps) 
                         <Info color='primary' fontSize='small' />
                       </IconButton>
                       <InformationDialog
-                        open={SchemaInformationOpen}
+                        open={schemaInformationOpen}
                         schema={schema}
                         onClose={() => setSchemaInformationOpen(false)}
                       />

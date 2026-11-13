@@ -111,9 +111,10 @@ function attachQueryLikeMethods(target: any, queryMockSet: Record<string, Mocked
 function attachFinderMethods<TDoc extends { _id?: any }>(
   target: any,
   createInstanceFn: () => InstanceType<TDoc>,
+  queryMockSet: Record<string, MockedFunction<any>>,
 ): void {
   target.findById = vi.fn(async () => createInstanceFn())
-  target.findOne = vi.fn(async () => createInstanceFn())
+  target.findOne = vi.fn(() => Object.assign(Promise.resolve(createInstanceFn()), queryMockSet))
   target.findOneAndUpdate = vi.fn(async () => createInstanceFn())
   target.findOneAndDelete = vi.fn(async () => createInstanceFn())
   target.countDocuments = vi.fn().mockResolvedValue(0) as MockedFunction<(filter?: any) => Promise<number>>
@@ -165,7 +166,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
 
   // Attach query-like and finder methods
   attachQueryLikeMethods(Model, queryMocks)
-  attachFinderMethods(Model, () => createInstanceFn())
+  attachFinderMethods(Model, () => createInstanceFn(), queryMocks)
   attachResetFunction(Model, chainMocks, queryMocks)
 
   return Model as ModelMock<TDoc>
@@ -174,6 +175,7 @@ export function createMongooseModelMock<TDoc extends { _id?: any }>(
 // Sadly, it is not possible to dynamically load and use a programmatic loop here as `vi.mock` is hoisted so runtime variables would not be initialised
 export const modelMocks = {
   AccessRequestModel: createMongooseModelMock('AccessRequest'),
+  DeploymentAssessmentModel: createMongooseModelMock('DeploymentAssessmentModel'),
   FileModel: createMongooseModelMock('FileModel', {
     id: 'mockFileId',
     _id: 'mockFileId',
@@ -206,6 +208,10 @@ export const modelMocks = {
 }
 
 vi.mock('../../src/models/AccessRequest.ts', () => ({ default: modelMocks.AccessRequestModel }))
+vi.mock('../../src/models/DeploymentAssessment.ts', async (importOriginal) => {
+  const actual = (await importOriginal()) as any
+  return { ...actual, default: modelMocks.DeploymentAssessmentModel }
+})
 vi.mock('../../src/models/File.ts', () => ({ default: modelMocks.FileModel }))
 vi.mock('../../src/models/Inference.ts', () => ({ default: modelMocks.InferenceModel }))
 vi.mock('../../src/models/Migration.ts', () => ({ default: modelMocks.MigrationModel }))

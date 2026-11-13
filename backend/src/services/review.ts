@@ -39,6 +39,7 @@ export async function findReviews(
   if (reviewId && !Types.ObjectId.isValid(reviewId)) {
     throw BadReq('Review ID is not a valid object ID')
   }
+
   const stages: PipelineStage[] = [
     {
       $match: {
@@ -52,28 +53,30 @@ export async function findReviews(
     {
       $sort: { createdAt: -1 },
     },
+
     { $lookup: { from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' } },
     { $unwind: { path: '$model' } },
     { $match: { ...(mine && (await findUserInCollaborators(user))) } },
-    // Determine the overall latest decision across all reviewers. Each reviewer's most recent
-    // review response is considered; if any reviewer has requested changes the overall decision
-    // is `request_changes`, otherwise if any reviewer has approved it is `approve`. If neither
-    // applies the field is left unset.
+
     {
       $lookup: {
         from: 'v2_responses',
         let: { reviewId: '$_id' },
         pipeline: [
-          { $match: { $expr: { $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', 'review'] }] } } },
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: ['$parentId', '$$reviewId'] }, { $eq: ['$kind', 'review'] }],
+              },
+            },
+          },
           { $sort: { createdAt: -1 } },
-          // Take the most recent response per reviewer entity.
           {
             $group: {
               _id: '$entity',
               decision: { $first: '$decision' },
             },
           },
-          // Collapse all reviewers into a single decision using priority: request_changes > approve.
           {
             $group: {
               _id: null,
@@ -86,8 +89,18 @@ export async function findReviews(
               decision: {
                 $switch: {
                   branches: [
-                    { case: { $in: [Decision.RequestChanges, '$decisions'] }, then: Decision.RequestChanges },
-                    { case: { $in: [Decision.Approve, '$decisions'] }, then: Decision.Approve },
+                    {
+                      case: {
+                        $in: [Decision.RequestChanges, '$decisions'],
+                      },
+                      then: Decision.RequestChanges,
+                    },
+                    {
+                      case: {
+                        $in: [Decision.Approve, '$decisions'],
+                      },
+                      then: Decision.Approve,
+                    },
                   ],
                   default: null,
                 },
@@ -98,7 +111,6 @@ export async function findReviews(
         as: 'status',
       },
     },
-    // `$lookup` always returns an array; extract the single decision string (or null).
     {
       $set: {
         status: { $ifNull: [{ $first: '$status.decision' }, null] },
@@ -369,7 +381,7 @@ export async function findReviewRole(user: UserInterface, shortName: string) {
 }
 
 export async function findReviewRoles(schemaIds?: string[]): Promise<ReviewRoleDoc[]> {
-  const mongoQuery: QueryFilter<ReviewRoleInterface> = {}
+  const mongoQuery: QueryFilter<ReviewRoleInterface> = { shortName: { $ne: 'dro' } }
 
   if (schemaIds) {
     const schemas = await searchSchemas(undefined, undefined, undefined, schemaIds)

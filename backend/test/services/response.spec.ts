@@ -7,6 +7,7 @@ import {
   checkReleaseApproved,
   findResponseById,
   getResponsesByParentIds,
+  removeResponsesByParentIds,
   respondToReview,
   sendReviewResponseNotification,
   updateResponse,
@@ -123,6 +124,46 @@ describe('services > response', () => {
     await expect(getResponsesByParentIds(['507f1f77bcf86cd799439011'])).rejects.toThrow(
       'The requested response was not found.',
     )
+  })
+
+  test('removeResponsesByParentIds > deletes every response under the given parents in one query', async () => {
+    const firstParentId = new Types.ObjectId()
+    const secondParentId = new Types.ObjectId()
+    const responses = [{ _id: 'first' }, { _id: 'second' }]
+    ResponseModelMock.find.mockResolvedValueOnce(responses)
+
+    const result = await removeResponsesByParentIds([firstParentId.toHexString(), secondParentId.toHexString()])
+
+    const filter = { parentId: { $in: [firstParentId, secondParentId] } }
+    expect(ResponseModelMock.find).toHaveBeenCalledWith(filter, undefined, { session: undefined })
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(filter, undefined)
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledTimes(1)
+    expect(result).toBe(responses)
+  })
+
+  test('removeResponsesByParentIds > passes the transaction session through', async () => {
+    const parentId = new Types.ObjectId()
+    const session = {} as any
+    ResponseModelMock.find.mockResolvedValueOnce([{ _id: 'first' }])
+
+    await removeResponsesByParentIds([parentId.toHexString()], session)
+
+    const filter = { parentId: { $in: [parentId] } }
+    expect(ResponseModelMock.find).toHaveBeenCalledWith(filter, undefined, { session })
+    expect(ResponseModelMock.deleteMany).toHaveBeenCalledWith(filter, session)
+  })
+
+  test('removeResponsesByParentIds > handles parents with no responses', async () => {
+    ResponseModelMock.find.mockResolvedValueOnce([])
+
+    const result = await removeResponsesByParentIds([new Types.ObjectId().toHexString()])
+
+    expect(result).toStrictEqual([])
+  })
+
+  test('removeResponsesByParentIds > rejects an invalid parent ID', async () => {
+    await expect(removeResponsesByParentIds(['not-an-object-id'])).rejects.toThrow()
+    expect(ResponseModelMock.find).not.toHaveBeenCalled()
   })
 
   test('updateResponse > success', async () => {

@@ -14,8 +14,9 @@ import {
   Typography,
 } from '@mui/material'
 import { alpha, useTheme } from '@mui/material/styles'
+import type CoreForm from '@rjsf/core'
 import Form from '@rjsf/mui'
-import { type RJSFSchema } from '@rjsf/utils'
+import { type Experimental_DefaultFormStateBehavior, type RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -32,17 +33,26 @@ import {
 import { LinearProgressWithLabel } from 'src/Form/ProgressBar'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import useCopyToClipboard from 'src/hooks/useCopyToClipboard'
+import useScrollToHash from 'src/hooks/useScrollToHash'
 import MessageAlert from 'src/MessageAlert'
 import Nothing from 'src/MuiForms/Nothing'
 import { type SplitSchemaNoRender } from 'types/types'
 import {
+  createBlankValueValidator,
   getFormStats,
   getOverallCompletionStats,
+  rewordRJSFErrors,
   setFormDataPropertiesToUndefined,
   setStepState,
+  skipPopulatingPrimitiveArrays,
   widgets,
 } from 'utils/formUtils'
 import { parseNat, toSentenceCase } from 'utils/stringUtils'
+
+const defaultFormStateBehavior: Experimental_DefaultFormStateBehavior = {
+  arrayMinItems: { computeSkipPopulate: skipPopulatingPrimitiveArrays },
+  requiredBooleanDefault: 'skip',
+}
 
 export default function JsonSchemaForm({
   splitSchema,
@@ -50,24 +60,27 @@ export default function JsonSchemaForm({
   calculateStats = 0,
   canEdit = false,
   displayLabelValidation = false,
-  defaultCurrentUserInEntityList = false,
   mirroredModel = false,
   displayStats = false,
   compareMode = false,
   stateList,
   currentState,
+  showValidation = false,
+  liveValidation = true,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   calculateStats?: number // a number to be incremented in order to re-run stats
   canEdit?: boolean
   displayLabelValidation?: boolean
-  defaultCurrentUserInEntityList?: boolean
   mirroredModel?: boolean
   displayStats?: boolean
   compareMode?: boolean
   stateList?: string[]
   currentState?: string
+  showValidation?: boolean
+  /** Validate while the user types, e.g. disabled for drafts that can be saved with unanswered questions */
+  liveValidation?: boolean
 }) {
   const theme = useTheme()
   const router = useRouter()
@@ -116,9 +129,11 @@ export default function JsonSchemaForm({
       return unchanged ? prev : nextCompletion
     })
   }, [splitSchema, mirroredModel, requiredByModelState, canEdit])
-  const sharedSection = router.asPath.split('#')[1] ? (router.asPath.split('#')[1] as string) : ''
+
+  useScrollToHash()
 
   const ref = useRef<HTMLDivElement | null>(null)
+  const formRef = useRef<CoreForm | null>(null)
 
   const copyToClipboard = useCopyToClipboard()
 
@@ -143,6 +158,8 @@ export default function JsonSchemaForm({
     [splitSchema, calculateStats, mirroredModel, requiredByModelState],
   )
 
+  const blankValueValidator = useMemo(() => createBlankValueValidator(currentStep?.schema), [currentStep?.schema])
+
   const updatePageByRouterQuery = useEffectEvent((page: string) => {
     setActiveStep(Number(page) || 0)
   })
@@ -153,15 +170,12 @@ export default function JsonSchemaForm({
     }
   }, [router])
 
+  // Force RJSF validation when showing errors, or when the form is remounted by the key below
   useEffect(() => {
-    if (ref && sharedSection) {
-      const section = document.getElementById(sharedSection) as HTMLElement
-      if (!section) {
-        return
-      }
-      section.scrollIntoView({ behavior: 'smooth' })
+    if (showValidation) {
+      formRef.current?.validateForm()
     }
-  }, [ref, sharedSection])
+  }, [showValidation, activeStep, splitSchema.reference])
 
   if (!currentStep) {
     return null
@@ -242,7 +256,11 @@ export default function JsonSchemaForm({
                         : undefined,
                   }}
                 >
-                  <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
+                  <ListItemButton
+                    data-test={`${step.section}Button`}
+                    selected={activeStep === index}
+                    onClick={() => handleListItemClick(index)}
+                  >
                     <ListItemText sx={{ pr: 1 }}>
                       <Typography
                         sx={{
@@ -307,20 +325,27 @@ export default function JsonSchemaForm({
             </Stack>
           )}
           <Form
+            // Page change resets error state so force rerender above; otherwise RJSF keeps the old page's error list and drops inline errors
+            key={`${splitSchema.reference}-${activeStep}-${showValidation}`}
+            ref={formRef}
             schema={currentStep.schema}
             formData={updatedMirroredState}
             onChange={onFormChange}
+            // Errors are rendered by the templates below, so RJSF does not need to log them
+            onError={() => undefined}
             validator={validator}
             widgets={widgets}
             uiSchema={currentStep.uiSchema}
             disabled={!canEdit}
-            liveValidate='onChange'
+            liveValidate={showValidation || liveValidation ? 'onChange' : undefined}
             liveOmit
-            experimental_defaultFormStateBehavior={{ requiredBooleanDefault: 'skip' }}
+            showErrorList={showValidation ? 'top' : false}
+            transformErrors={rewordRJSFErrors}
+            customValidate={blankValueValidator}
+            experimental_defaultFormStateBehavior={defaultFormStateBehavior}
             formContext={{
               editMode: canEdit,
               formSchema: currentStep.schema,
-              defaultCurrentUser: defaultCurrentUserInEntityList,
               mirroredState: currentStep.mirroredState,
               state: currentStep.state,
               compareFromState: currentStep.compareFromState,

@@ -25,6 +25,10 @@ const modelMocks = vi.hoisted(() => ({
 
 vi.mock('../../../src/models/Model.js', () => ({
   default: modelMocks,
+  EntryVisibility: {
+    Public: 'public',
+    Private: 'private',
+  },
   SystemRoles: {
     Owner: 'owner',
     Contributor: 'contributor',

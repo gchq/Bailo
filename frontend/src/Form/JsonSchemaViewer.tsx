@@ -26,7 +26,6 @@ export default function JsonSchemaViewer({
   setSplitSchema,
   canEdit = false,
   displayLabelValidation = false,
-  defaultCurrentUserInEntityList = false,
   onQuestionClick,
   activePath,
 }: {
@@ -34,7 +33,6 @@ export default function JsonSchemaViewer({
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
-  defaultCurrentUserInEntityList?: boolean
   onQuestionClick?: (selection: QuestionSelection) => void
   activePath?: string
 }) {
@@ -57,6 +55,7 @@ export default function JsonSchemaViewer({
     SelectWidget: QuestionViewer,
     multiSelector: QuestionViewer,
     dataCardSelector: QuestionViewer,
+    modelSelector: QuestionViewer,
     metricsWidget: QuestionViewer,
     nothing: Nothing,
   }
@@ -119,7 +118,6 @@ export default function JsonSchemaViewer({
           formContext={{
             editMode: canEdit,
             formSchema: currentStep.schema,
-            defaultCurrentUser: defaultCurrentUserInEntityList,
             onClickListener: handleOnClickListener,
             rootSection: currentStep.section,
             activePath,

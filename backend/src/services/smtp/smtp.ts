@@ -3,7 +3,8 @@ import nodemailer, { type Transporter } from 'nodemailer'
 import { createSesTransporter } from '../../clients/ses.js'
 import authentication from '../../connectors/authentication/index.js'
 import AccessRequestModel, { type AccessRequestDoc } from '../../models/AccessRequest.js'
-import { SystemRoles } from '../../models/Model.js'
+import { type DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
+import { type ModelInterface, SystemRoles } from '../../models/Model.js'
 import ReleaseModel, { type ReleaseDoc } from '../../models/Release.js'
 import { type ResponseInterface } from '../../models/Response.js'
 import { type ReviewDoc, type ReviewInterface } from '../../models/Review.js'
@@ -12,6 +13,7 @@ import { ReviewKind } from '../../types/enums.js'
 import config, { type TransportOption } from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import { BadReq, NotFound } from '../../utils/error.js'
+import { entryKindForRedirect } from '../../utils/routerUtils.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
@@ -92,13 +94,86 @@ export async function getApprovedAccessRequests(modelId: string) {
   return approvedAccessRequests.flatMap((accessRequest) => accessRequest.metadata.overview.entities)
 }
 
+export async function notifyRiskOwnerOfDeploymentAssessment(
+  riskOwner: string,
+  deployment: DeploymentAssessmentInterface,
+  creatorName: string,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = await buildEmail(
+    `You have been allocated as a Deployment Risk Owner for a Deployment Assessment`,
+    [
+      { title: 'Deployment Assessment Name', data: deployment.name },
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      {
+        title: 'Created By',
+        data: creatorName,
+      },
+    ],
+    [
+      {
+        name: 'Open Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      { name: 'View Deployment Assessments', url: `${appBaseUrl}/deployment-assessments` },
+    ],
+  )
+
+  await dispatchEmail([riskOwner], emailContent)
+}
+
+export async function notifyModelOwnersOfDeploymentAssessment(
+  entities: string[],
+  deployment: DeploymentAssessmentInterface,
+  model: ModelInterface,
+  creatorName: string,
+) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const modelUrl = `${appBaseUrl}/${entryKindForRedirect(model.kind)}` + `/${encodeURIComponent(model.id)}`
+
+  const emailContent = await buildEmail(
+    `A Deployment Assessment has been created for a model you own`,
+    [
+      { title: 'Deployment Assessment ID', data: deployment.id },
+      { title: 'Model Name', data: model.name },
+      { title: 'Model ID', data: model.id },
+      {
+        title: 'Created By',
+        data: creatorName,
+      },
+    ],
+    [
+      {
+        name: 'View Deployment Assessment',
+        url: `${appBaseUrl}/deployment-assessments/${encodeURIComponent(deployment.id)}`,
+      },
+      {
+        name: 'View Deployment Assessments',
+        url: `${appBaseUrl}/deployment-assessments?tab=all-assessments&models=${model.id}`,
+      },
+      { name: 'Open Model', url: modelUrl },
+    ],
+    false,
+  )
+
+  await dispatchEmail(entities, emailContent)
+}
+
 export async function requestReviewForRelease(entities: string[], review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
 
-  const emailContent = buildEmail(
+  const emailContent = await buildEmail(
     `Release ${release.semver} for model ${release.modelId} is ready for your review`,
     [
       { title: 'Model ID', data: release.modelId },
@@ -116,7 +191,7 @@ export async function requestReviewForRelease(entities: string[], review: Review
     true,
   )
 
-  await dispatchEmail(entities, await emailContent)
+  await dispatchEmail(entities, emailContent)
 }
 
 const requestingEntitiesText = (value: number) => {
@@ -133,7 +208,7 @@ export async function requestReviewForAccessRequest(
     return
   }
 
-  const emailContent = buildEmail(
+  const emailContent = await buildEmail(
     `${requestingEntitiesText(accessRequest.metadata.overview.entities.length)} requesting access to model ${accessRequest.modelId}`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
@@ -155,7 +230,7 @@ export async function requestReviewForAccessRequest(
     true,
   )
 
-  await dispatchEmail(entities, await emailContent)
+  await dispatchEmail(entities, emailContent)
 }
 
 export async function notifyReviewResponseForRelease(reviewResponse: ResponseInterface, release: ReleaseDoc) {
@@ -179,7 +254,7 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
     return
   }
 
-  const emailContent = buildEmail(
+  const emailContent = await buildEmail(
     `Release ${release.semver} has been reviewed by ${
       (await authentication.getUserInformation(reviewResponse.entity)).name
     }`,
@@ -196,7 +271,7 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
 
   const model = await getModelByIdNoAuth(release.modelId)
   const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
-  await dispatchEmail([toEntity('user', release.createdBy), ...reviewRoleEntities], await emailContent)
+  await dispatchEmail([toEntity('user', release.createdBy), ...reviewRoleEntities], emailContent)
 }
 
 export async function notifyLifeCycleReview(modelId: string, reviewId: string, dueIn?: string) {
@@ -206,7 +281,7 @@ export async function notifyLifeCycleReview(modelId: string, reviewId: string, d
   }
 
   const model = await getModelByIdNoAuth(modelId)
-  const emailContent = buildEmail(
+  const emailContent = await buildEmail(
     dueIn
       ? `A lifecycle review for ${model.name} is due in ${dueIn}`
       : `A lifecycle review for ${model.name} has past it's due date`,
@@ -221,7 +296,7 @@ export async function notifyLifeCycleReview(modelId: string, reviewId: string, d
   )
 
   const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
-  await dispatchEmail(ownerEntities, await emailContent)
+  await dispatchEmail(ownerEntities, emailContent)
 }
 
 export async function notifyReviewResponseForAccess(
@@ -247,7 +322,7 @@ export async function notifyReviewResponseForAccess(
     log.info('response decision not found')
     return
   }
-  const emailContent = buildEmail(
+  const emailContent = await buildEmail(
     `Access request for model ${accessRequest.modelId} has been reviewed by ${
       (await authentication.getUserInformation(reviewResponse.entity)).name
     }`,
@@ -263,7 +338,7 @@ export async function notifyReviewResponseForAccess(
   )
   const model = await getModelByIdNoAuth(accessRequest.modelId)
   const reviewRoleEntities = getRoleEntities([reviewResponse.role], model.collaborators)[reviewResponse.role]
-  await dispatchEmail([toEntity('user', accessRequest.createdBy), ...reviewRoleEntities], await emailContent)
+  await dispatchEmail([toEntity('user', accessRequest.createdBy), ...reviewRoleEntities], emailContent)
 }
 
 export async function dispatchEmailToModelRole(modelId: string, role: string, emailContent: EmailContent) {
@@ -277,7 +352,6 @@ async function notifyRole(review: ReviewInterface, title: string, fields: Info[]
     { name: 'Open item', url: actionUrl },
     { name: 'See Reviews', url: `${appBaseUrl}/review?category=access` },
   ])
-
   await dispatchEmailToModelRole(review.modelId, review.role, emailContent)
 }
 
@@ -329,7 +403,7 @@ export async function startImportNotification(modelId: string) {
   }
 
   const mirroredModel = await getModelByIdNoAuth(modelId)
-  const emailContent = buildEmail(
+  const emailContent = await buildEmail(
     `${mirroredModel.name} has begun importing`,
     [],
     [
@@ -340,7 +414,7 @@ export async function startImportNotification(modelId: string) {
 
   const model = await getModelByIdNoAuth(modelId)
   const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
-  await dispatchEmail(ownerEntities, await emailContent)
+  await dispatchEmail(ownerEntities, emailContent)
 }
 
 export async function notifyReleaseOnApproval(modelId: string, release: ReleaseDoc) {
@@ -349,7 +423,7 @@ export async function notifyReleaseOnApproval(modelId: string, release: ReleaseD
     return
   }
 
-  const emailContent = buildEmail(
+  const emailContent = await buildEmail(
     `A new release has been approved`,
     [
       { title: 'Model ID', data: release.modelId },
@@ -366,7 +440,7 @@ export async function notifyReleaseOnApproval(modelId: string, release: ReleaseD
   )
     .flat()
     .concat(await getApprovedAccessRequests(modelId))
-  await dispatchEmail(entries, await emailContent)
+  await dispatchEmail(entries, emailContent)
 }
 
 export async function transferCompleteNotification(
@@ -401,11 +475,11 @@ export async function transferCompleteNotification(
     actions.push({ name: 'Contact Support', url: config.ui.issues.contactHref })
   }
 
-  const emailContent = buildEmail(title, infoArray, actions)
+  const emailContent = await buildEmail(title, infoArray, actions)
 
   const model = await getModelByIdNoAuth(modelId)
   const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
-  await dispatchEmail(ownerEntities, await emailContent)
+  await dispatchEmail(ownerEntities, emailContent)
 }
 
 function getReleaseUrl(release: ReleaseDoc) {
