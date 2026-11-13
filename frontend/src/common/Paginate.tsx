@@ -274,6 +274,8 @@ export default function Paginate<T>({
             value={searchFilter}
             label={searchPlaceholderText}
             onChange={(e) => setSearchFilter(e.target.value)}
+            // Filtering happens as you type and Enter must not submit an enclosing form
+            onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
             sx={{ maxWidth: '200px' }}
           />
         )}

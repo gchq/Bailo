@@ -49,6 +49,7 @@ interface UseListEntriesProps {
   organisations?: string[]
   states?: string[]
   peers?: string[]
+  users?: string[]
   search?: string
   allowTemplating?: boolean
   schemaId?: string
@@ -65,6 +66,7 @@ export function useListEntries({
   organisations,
   states,
   peers,
+  users,
   search,
   allowTemplating,
   schemaId,
@@ -80,6 +82,7 @@ export function useListEntries({
     ...(organisations && { organisations }),
     ...(states && { states }),
     ...(peers && { peers }),
+    ...(users && { users }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),

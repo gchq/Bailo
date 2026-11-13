@@ -1,5 +1,5 @@
 import { type Registry, type RegistryWidgetsType } from '@rjsf/utils'
-import { Validator } from 'jsonschema'
+import validator from '@rjsf/validator-ajv8'
 import { cloneDeep, dropRight, get, mergeWith, omit, remove } from 'lodash-es'
 import { type Dispatch, type SetStateAction } from 'react'
 import CheckboxInput from 'src/MuiForms/CheckboxInput'
@@ -210,10 +210,7 @@ export function setStepsData(
 }
 
 export function validateForm(step: StepNoRender) {
-  const validator = new Validator()
-  const sectionErrors = validator.validate(step.state, step.schema)
-
-  return sectionErrors.errors.length === 0
+  return validator.isValid(step.schema, step.state, step.schema)
 }
 
 export const getMirroredState = (id: string, formContext: Registry['formContext']) => {
