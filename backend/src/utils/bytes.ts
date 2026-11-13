@@ -9,7 +9,7 @@ export function formatBytes(value: number): string | null {
 
   const magnitude = Math.abs(value)
   const unitIndex = Math.min(Math.floor(Math.log2(Math.max(magnitude, 1)) / 10), units.length - 1)
-  const formatted = (value / 1024 ** unitIndex).toFixed(2).replace(/(?:\.0*|(\.[^0]+)0+)$/, '$1')
+  const formatted = (value / 1000 ** unitIndex).toFixed(2).replace(/(?:\.0*|(\.[^0]+)0+)$/, '$1')
 
   return `${formatted}${units[unitIndex]}`
 }
