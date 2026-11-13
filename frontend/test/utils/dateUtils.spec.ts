@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import dayjs from '@dayjs'
 import {
   formatDate,

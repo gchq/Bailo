@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { randomColour } from 'utils/colourUtils'
 import { describe, expect, test } from 'vitest'
 

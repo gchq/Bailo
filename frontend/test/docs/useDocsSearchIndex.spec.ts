@@ -1,4 +1,6 @@
-import { DocsSearchIndexEntry, DocsSearchResult } from 'types/docs'
+// @vitest-environment node
+
+import { type DocsSearchIndexEntry, type DocsSearchResult } from 'types/docs'
 import { describe, expect, test, vi } from 'vitest'
 
 import {
