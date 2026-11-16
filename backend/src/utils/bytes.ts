@@ -1,6 +1,17 @@
-const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'] as const
+const units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB'] as const
 
-const unitMultipliers = new Map(units.map((unit, index) => [unit.toLowerCase(), 1024 ** index]))
+const unitMultipliers = new Map<string, number>([
+  ...units.map((unit, index) => [unit.toLowerCase(), 1000 ** index] as const),
+  ...units.slice(1).map((unit, index) => [`${unit[0].toLowerCase()}ib`, 1024 ** (index + 1)] as const),
+])
+
+// Accept only ordinary decimal notation with a unit; scientific and hexadecimal notation are intentionally excluded.
+const bytesPattern = /^(0|[1-9]\d{0,15})(?:\.(\d{1,15}))?(B|kB|MB|GB|TB|PB|KiB|MiB|GiB|TiB|PiB)$/i
+
+function exactByteValue(integerPart: string, fractionPart: string, multiplier: number): number | null {
+  const value = (Number(`${integerPart}${fractionPart}`) * multiplier) / 10 ** fractionPart.length
+  return Number.isFinite(value) && value <= Number.MAX_SAFE_INTEGER ? Math.floor(value) : null
+}
 
 export function formatBytes(value: number): string | null {
   if (!Number.isFinite(value)) {
@@ -8,21 +19,29 @@ export function formatBytes(value: number): string | null {
   }
 
   const magnitude = Math.abs(value)
-  const unitIndex = Math.min(Math.floor(Math.log2(Math.max(magnitude, 1)) / 10), units.length - 1)
-  const formatted = (value / 1000 ** unitIndex).toFixed(2).replace(/(?:\.0*|(\.[^0]+)0+)$/, '$1')
-
-  return `${formatted}${units[unitIndex]}`
-}
-
-export function parseBytes(value: number | string): number | null {
-  if (typeof value === 'number') {
-    return Number.isNaN(value) ? null : value
+  let unitIndex = 0
+  let scaled = magnitude
+  while (unitIndex < units.length - 1 && scaled >= 999.995) {
+    scaled /= 1000
+    unitIndex++
   }
 
-  const match = value.match(/^([+-]?\d+(?:\.\d+)?)\s*(b|kb|mb|gb|tb|pb)$/i)
-  const number = match ? Number.parseFloat(match[1]) : Number.parseInt(value, 10)
-  const unit = match?.[2].toLowerCase() ?? 'b'
-  const multiplier = unitMultipliers.get(unit)
+  const formatted = scaled.toFixed(2).replace(/(?:\.0*|(\.[^]+?)0+)$/, '$1')
+  const sign = value < 0 && magnitude !== 0 ? '-' : ''
 
-  return Number.isNaN(number) || multiplier === undefined ? null : Math.floor(number * multiplier)
+  return `${sign}${formatted}${units[unitIndex]}`
+}
+
+export function parseBytes(value: string | number): number | null {
+  if (typeof value === 'number') {
+    return Number.isSafeInteger(value) && value >= 0 ? value : null
+  }
+
+  const match = value.match(bytesPattern)
+  const multiplier = match ? unitMultipliers.get(match[3].toLowerCase()) : undefined
+  if (!match || multiplier === undefined) {
+    return null
+  }
+
+  return exactByteValue(match[1], match[2] ?? '', multiplier)
 }

@@ -34,14 +34,18 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     this.av = await new NodeClam().init({ clamdscan: config.artefactScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
-    const sizeString = config.artefactScanning.clamdscan.streamMaxLength.endsWith('B')
-      ? config.artefactScanning.clamdscan.streamMaxLength
-      : `${config.artefactScanning.clamdscan.streamMaxLength}B`
+    const configuredSize = config.artefactScanning.clamdscan.streamMaxLength
+    // clamd treats K/M/G suffixes as binary multiples, so '2G' means 2GiB.
+    const sizeString = /[kmgtp]$/i.test(configuredSize)
+      ? `${configuredSize}iB`
+      : configuredSize.endsWith('B')
+        ? configuredSize
+        : `${configuredSize}B`
     const streamMaxLength = parseBytes(sizeString)
-    if (streamMaxLength === null) {
+    if (streamMaxLength === null || streamMaxLength > Number.MAX_SAFE_INTEGER) {
       throw InternalError('Invalid ClamAV size value.', { sizeString })
     }
-    this.maxSize = streamMaxLength
+    this.maxSize = Number(streamMaxLength)
     log.debug({ ...this.getConnectorInfo() }, 'Initialised Clam AV scanner')
   }
 
