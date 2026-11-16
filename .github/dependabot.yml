@@ -101,6 +101,7 @@ updates:
           - vitest
           - '@vitest/*'
           - supertest
+          - zod-schema-faker
       mongoose-stack:
         patterns:
           - mongoose

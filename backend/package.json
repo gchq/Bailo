@@ -86,7 +86,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@faker-js/faker": "^10.6.0",
     "@types/bytes": "^3.1.6",
     "@types/clamscan": "^2.4.0",
     "@types/config": "^4.4.0",
