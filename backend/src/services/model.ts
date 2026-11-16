@@ -406,7 +406,17 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
   }
 
   if (opts.users?.length) {
-    query['collaborators.entity'] = { $all: opts.users }
+    const usersAndGroupMembers = (
+      await Promise.all(
+        opts.users.map(async (entity) =>
+          entity.startsWith('group:')
+            ? [entity, ...(await authentication.getEntityMembers(entity))]
+            : authentication.getEntityMembers(entity),
+        ),
+      )
+    ).flat()
+
+    query['collaborators.entity'] = { $all: usersAndGroupMembers }
   }
 
   if (opts.filters && opts.filters.length > 0) {
