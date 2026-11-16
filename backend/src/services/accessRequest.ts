@@ -10,6 +10,7 @@ import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { type UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { SchemaKind } from '../types/enums.js'
 import { type AccessRequestUserPermissions } from '../types/types.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -19,7 +20,7 @@ import log from './log.js'
 import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
-import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { checkSchemaKind, getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { dispatchWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
@@ -41,6 +42,7 @@ export async function createAccessRequest(
   if (schema.hidden) {
     throw BadReq('Cannot create new Access Request using a hidden schema.', { schemaId: accessRequestInfo.schemaId })
   }
+  checkSchemaKind(schema, SchemaKind.AccessRequest)
   const { valid, errors } = await validateContentAgainstSchema(accessRequestInfo.schemaId, accessRequestInfo.metadata)
   if (!valid) {
     throw BadReq('Access Request Metadata could not be validated against the schema.', {
