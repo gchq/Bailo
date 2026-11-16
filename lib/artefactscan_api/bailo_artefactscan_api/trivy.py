@@ -374,7 +374,7 @@ def _read_next_update() -> datetime.datetime | None:
         return None
     dt = datetime.datetime.fromisoformat(ts)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=datetime.timezone.utc)
+        dt = dt.replace(tzinfo=datetime.UTC)
     return dt
 
 
@@ -444,7 +444,7 @@ def scan(upload_file: UploadFile, background_tasks: BackgroundTasks, block_size:
     # metadata read so concurrent scans aren't blocked.
     with _DB_LOCK:
         next_update = _read_next_update()
-    if next_update is not None and next_update < datetime.datetime.now(datetime.timezone.utc):
+    if next_update is not None and next_update < datetime.datetime.now(datetime.UTC):
         background_tasks.add_task(download_database)
 
     return scan_sbom(blob_digest)

@@ -52,19 +52,15 @@ export function ChangesRequestedDisplay({
           ? `You have requested changes as a ${roleNameDisplay()}`
           : `Changes requested by  ${roleNameDisplay()}`}
       </Typography>
-      <Restricted action='editRelease' fallback={<></>}>
-        <>
-          {
-            <Button
-              size='small'
-              onClick={() => handleNotifyReviewerOnClick(review._id)}
-              startIcon={<Refresh />}
-              loading={isNotifyButtonLoading}
-            >
-              Request re-review
-            </Button>
-          }
-        </>
+      <Restricted action='editEntryCard' fallback={<></>}>
+        <Button
+          size='small'
+          onClick={() => handleNotifyReviewerOnClick(review._id)}
+          startIcon={<Refresh />}
+          loading={isNotifyButtonLoading}
+        >
+          Request re-review
+        </Button>
       </Restricted>
     </Stack>
   )

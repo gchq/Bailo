@@ -1,3 +1,5 @@
+import { Agent as HttpsAgent } from 'node:https'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import {
@@ -11,6 +13,7 @@ import {
   putObjectStream,
   startMultipartUpload,
 } from '../../src/clients/s3.js'
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
 vi.mock('bytes')
 
@@ -66,7 +69,32 @@ const s3UploadMocks = vi.hoisted(() => {
 })
 vi.mock('@aws-sdk/lib-storage', () => s3UploadMocks)
 
+const nodeHttpHandlerMocks = vi.hoisted(() => {
+  return {
+    NodeHttpHandler: vi.fn(function (_options: { httpsAgent: HttpsAgent }) {
+      return {}
+    }),
+  }
+})
+vi.mock('@smithy/node-http-handler', () => nodeHttpHandlerMocks)
+
 describe('clients > s3', () => {
+  test('getS3Client > uses a native HTTPS agent with environment proxy settings', async () => {
+    setTestConfig({ s3: { rejectUnauthorized: false } })
+
+    await deleteObject('test-key', 'test-bucket')
+
+    const handlerOptions = nodeHttpHandlerMocks.NodeHttpHandler.mock.lastCall?.[0]
+    expect(handlerOptions?.httpsAgent).toBeInstanceOf(HttpsAgent)
+    expect(handlerOptions?.httpsAgent.options).toMatchObject({
+      rejectUnauthorized: false,
+      proxyEnv: process.env,
+    })
+    expect(s3Mocks.S3Client).toHaveBeenCalledWith(
+      expect.objectContaining({ requestHandler: nodeHttpHandlerMocks.NodeHttpHandler.mock.results.at(-1)?.value }),
+    )
+  })
+
   test('putObjectStream > success', async () => {
     const bucket = 'test-bucket'
     const key = 'test-key'

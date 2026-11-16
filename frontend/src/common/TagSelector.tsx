@@ -5,7 +5,7 @@ import Box from '@mui/material/Box'
 import { useGetPopularEntryTags } from 'actions/entry'
 import { useContext, useState } from 'react'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
-import { RestrictedActionKeys } from 'types/types'
+import { type RestrictedActionKeys } from 'types/types'
 
 interface EntryTagSelectorProps {
   onChange: (newTag: string[]) => void

@@ -70,7 +70,7 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 
 Each Python project is an independent [uv](https://docs.astral.sh/uv/) project with its own `uv.lock`. They are
 deliberately not a uv workspace: a workspace forces a single `requires-python` across all members (the intersection here
-is Python 3.12 only), which would break the `bailo` 3.10-3.15 test matrix.
+is Python 3.12 only), which would break the `bailo` 3.11-3.15 test matrix.
 
 Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
 
@@ -174,6 +174,9 @@ Coverage is only needed for the full CI run.
 ### Frontend (Vitest + Cypress)
 
 - Unit tests: `frontend/test/**/*.spec.tsx` using `@testing-library/react`.
+- The default test environment is `jsdom`, which is slow to create. Specs that never render or touch browser globals
+  (e.g. pure utility tests) must start with `// @vitest-environment node` to skip it. Vitest's end-of-run "jsdom was
+  created N times" line counts every file regardless of environment, so check the time figure instead.
 - E2E tests: `frontend/cypress/e2e/bailo/` using Cypress with `cypress-axe` for accessibility.
 
 ### Python (pytest)
@@ -198,7 +201,7 @@ Path-filtered (only run when relevant files change):
 
 9. **Python static checks** - ruff format + check via pre-commit (when `lib/python/`, `.pre-commit-config.yaml` or
    `ruff.toml` changes)
-10. **Python unit tests** - pytest across Python 3.10-3.15 (when `lib/python/` changes)
+10. **Python unit tests** - pytest across Python 3.11-3.15 (when `lib/python/` changes)
 11. **ArtefactScan tests** - pytest (when `lib/artefactscan_api/` changes)
 12. **Docs style** - `frontend/scripts/check-docs-style.sh` (when `frontend/pages/docs/**/*.mdx` changes)
 

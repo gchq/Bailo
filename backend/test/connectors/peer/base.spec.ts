@@ -1,4 +1,3 @@
-import { ClientRequest } from 'http'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { BasePeerConnector } from '../../../src/connectors/peer/base.js'
@@ -12,12 +11,10 @@ vi.mock('node-cache', () => {
   }
 })
 
-// Required otherwise it will try and reach out to the non-existent remote address
-vi.mock('http', () => {
-  return {
-    ClientRequest: vi.fn(),
-  }
-})
+const httpService = vi.hoisted(() => ({
+  getHttpsDispatcher: vi.fn(() => 'mock dispatcher'),
+}))
+vi.mock('../../../src/services/http.js', () => httpService)
 
 const remoteAddress = 'http://localhost:8080'
 
@@ -27,8 +24,8 @@ const defaultConfig: RemoteFederationConfig = {
   label: 'Test',
   state: FederationState.ENABLED,
   cache: { query: 60 },
-  httpConfig: { host: 'test' },
-  proxy: 'pac+file://test.pac',
+  httpConfig: { rejectUnauthorized: false },
+  proxy: 'http://proxy.example:3128',
 }
 
 const user = { dn: 'alice', id: 1 }
@@ -107,27 +104,18 @@ describe('BasePeerConnector', () => {
     expect(connector.buildCacheKey(user, 'foo')).toBe(`testId:${b64Dn}:${b64Key}`)
   })
 
-  it('getHttpsAgent merges the right configs and returns from getHttpsAgent', () => {
-    const agent = connector.getHttpsAgent()
-    const req = new ClientRequest(remoteAddress)
-    expect(agent.getProxyForUrl(remoteAddress, req)).toBe('pac+file://test.pac')
-  })
-
-  it('getHttpsAgent merges the httpConfig and returns correctly', () => {
-    const agent = connector.getHttpsAgent()
-    expect(agent.options?.host).toEqual('test')
-  })
-
-  it('getHttpsAgent merges the httpConfig and returns correctly', () => {
-    const noHttpConfig = new DummyConnector('id1', { ...defaultConfig, httpConfig: {} })
-    expect(noHttpConfig.getHttpsAgent().options?.host).toBeUndefined()
-
-    const someHttpConfig = new DummyConnector('id2', {
-      ...defaultConfig,
-      httpConfig: {
-        host: 'test',
-      },
+  it('getHttpsDispatcher passes the httpConfig and proxy', () => {
+    expect(connector.getHttpsDispatcher()).toBe('mock dispatcher')
+    expect(httpService.getHttpsDispatcher).toHaveBeenCalledWith({
+      rejectUnauthorized: false,
+      proxy: 'http://proxy.example:3128',
     })
-    expect(someHttpConfig.getHttpsAgent().options?.host).eq('test')
+  })
+
+  it('getHttpsDispatcher works without httpConfig or proxy', () => {
+    const noHttpConfig = new DummyConnector('id1', { ...defaultConfig, httpConfig: undefined, proxy: undefined })
+    noHttpConfig.getHttpsDispatcher()
+
+    expect(httpService.getHttpsDispatcher).toHaveBeenCalledWith({ proxy: undefined })
   })
 })
