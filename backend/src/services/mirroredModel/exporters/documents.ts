@@ -129,6 +129,7 @@ export class DocumentsExporter extends BaseExporter {
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         importKind: MirrorKind.Documents,
         exportId: this.logData.exportId,
+        semvers: this.logData.semvers,
       },
       this.logData,
     ]
