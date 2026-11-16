@@ -85,8 +85,8 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@anatine/zod-mock": "^3.14.0",
     "@eslint/js": "^10.0.1",
+    "@faker-js/faker": "^10.6.0",
     "@types/bytes": "^3.1.6",
     "@types/clamscan": "^2.4.0",
     "@types/config": "^4.4.0",
@@ -110,11 +110,13 @@
     "nodemon": "^3.1.14",
     "pino-pretty": "^13.2.0",
     "prettier": "^3.9.10",
+    "randexp": "^0.6.1",
     "supertest": "^7.3.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^7.3.7",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.2",
+    "zod-schema-faker": "^3.0.1"
   }
 }

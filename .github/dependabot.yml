@@ -100,7 +100,6 @@ updates:
         patterns:
           - vitest
           - '@vitest/*'
-          - '@anatine/zod-mock'
           - supertest
       mongoose-stack:
         patterns:
