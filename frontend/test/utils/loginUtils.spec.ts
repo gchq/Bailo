@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { getLoginUrl } from 'utils/loginUtils'
 import { describe, expect, it } from 'vitest'
 
