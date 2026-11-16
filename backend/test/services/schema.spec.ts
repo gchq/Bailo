@@ -2,14 +2,18 @@ import { MongoServerError } from 'mongodb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { EntryKind } from '../../src/models/Model.js'
 import {
+  checkSchemaKind,
   createSchema,
   deleteSchemaById,
   getSchemaById,
+  getSchemaKindForEntryKind,
   searchSchemas,
   updateSchema,
   validateContentAgainstSchema,
 } from '../../src/services/schema.js'
+import { SchemaKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
@@ -398,5 +402,31 @@ describe('services > schema', () => {
     await deleteSchemaById(testUser, testModelSchema.id)
 
     expect(cacheMock.store.size).toBe(0)
+  })
+
+  test.each([
+    [EntryKind.Model, SchemaKind.Model],
+    [EntryKind.MirroredModel, SchemaKind.Model],
+    [EntryKind.UntrustedModel, SchemaKind.Model],
+    [EntryKind.DataCard, SchemaKind.DataCard],
+    [EntryKind.MirroredDataCard, SchemaKind.DataCard],
+  ])('getSchemaKindForEntryKind > maps %s to %s', (entryKind, schemaKind) => {
+    expect(getSchemaKindForEntryKind(entryKind)).toBe(schemaKind)
+  })
+
+  test('getSchemaKindForEntryKind > throws for an unknown entry kind', () => {
+    expect(() => getSchemaKindForEntryKind('unknown' as any)).toThrow(
+      /^Unable to determine the schema kind for this entry kind./,
+    )
+  })
+
+  test('checkSchemaKind > passes when the kinds match', () => {
+    expect(() => checkSchemaKind({ id: 'schema', kind: SchemaKind.Model }, SchemaKind.Model)).not.toThrow()
+  })
+
+  test('checkSchemaKind > throws when the kinds do not match', () => {
+    expect(() => checkSchemaKind({ id: 'schema', kind: SchemaKind.AccessRequest }, SchemaKind.Model)).toThrow(
+      /^The schema kind does not match the expected kind./,
+    )
   })
 })
