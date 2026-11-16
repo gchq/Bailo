@@ -1,7 +1,7 @@
 import { type PassThrough } from 'node:stream'
 import { json, text } from 'node:stream/consumers'
 
-import { escapeRegExp } from 'lodash-es'
+import escapeRegExp from 'lodash-es/escapeRegExp.js'
 import { finished } from 'stream/promises'
 import { type Header } from 'tar-stream'
 

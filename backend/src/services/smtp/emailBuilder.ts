@@ -1,6 +1,5 @@
 import { readFileSync } from 'fs'
 import Handlebars from 'handlebars'
-import mjml2html from 'mjml'
 import type Mail from 'nodemailer/lib/mailer/index.js'
 import { resolve } from 'path'
 import sanitizeHtml from 'sanitize-html'
@@ -73,6 +72,8 @@ function textActions(actionsList: actions[]) {
 
 async function emailHtml(title: string, metadata: Info[], actions: actions[]) {
   const mjml = emailTemplate({ title, metadata, actions })
+  // Imported on first use as `mjml` is slow to load and only needed when an email is built
+  const { default: mjml2html } = await import('mjml')
   const email = await mjml2html(mjml)
   return email.html
 }

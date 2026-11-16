@@ -1,5 +1,5 @@
 import express, { type Request, type Response } from 'express'
-import { clone } from 'lodash-es'
+import clone from 'lodash-es/clone.js'
 
 import { AuditInfo, type AuditInfoKeys } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
