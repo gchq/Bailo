@@ -240,7 +240,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:v1.6.5@sha256:36fe6d71fdedc7f3ae7a2765b8f4357334cee31c8bd84b69e2f067fa25b33aa4
+  image: marlonb/mailcrab:v1.10.0@sha256:dd0e3933e35200ed9956aeb76bb27fc700dd452bd6586448107ccf8fe411c0a1
 
 # Openshift specific configuration
 openshift:
