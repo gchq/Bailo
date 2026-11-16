@@ -102,6 +102,7 @@ export const flatDirectory: DocumentationNavigationEntry[] = [
   /// Federation
   { title: 'Federation', slug: 'administration/federation', header: true },
   { title: 'Peer Integration', slug: 'administration/federation/peer-integration' },
+  { title: 'Setting Up Federation', slug: 'administration/federation/setting-up-federation' },
 
   /// Microservices
   { title: 'Microservices', slug: 'administration/microservices', header: true },

@@ -7,67 +7,108 @@ import FeatureAvailability from 'src/FeatureAvailability'
 
 > **Common questions this page answers:**
 >
-> - How do I connect Bailo to other instances?
 > - What is federation in Bailo?
-> - What federation states are available?
+> - How do Bailo instances communicate with each other?
+> - What do the federation states mean?
+> - What do users see when federation is turned on?
 
-Federation connects your Bailo instance to other Bailo instances or external model repositories, allowing users to
-discover and mirror models from external sources.
+Federation lets users of one Bailo instance discover models held in other Bailo instances or external model
+repositories. For example, a user on Organisation A's Bailo instance can search the Marketplace and see which models are
+available on Organisation B's Bailo instance, without needing an account on Organisation B's instance or leaving their
+own instance to browse.
+
+Each connected instance or repository is called a **peer**. This page explains how federation works. For step-by-step
+configuration instructions, see [Setting Up Federation](setting-up-federation).
+
+## How federation works
+
+Federation is configured in the backend of each instance. There is no user interface for adding peers.
+
+When a user searches the Marketplace and selects one or more external repositories:
+
+1. Bailo searches the local instance and the selected peers
+2. Each peer returns any matching models that the requesting identity is allowed to see
+3. Bailo combines the results and identifies which peer each remote model came from
+4. Users can then follow links to view remote models on the peer's own instance
+
+The browser never talks to a remote peer's API directly. All federated searches go from one Bailo backend to the other,
+so the local backend must be able to reach each peer over the network.
+
+When a user selects a remote model in the Marketplace, they follow a link to that model on the peer's own website.
+Viewing the model's full details, files and releases happens on the peer, under the peer's own access controls.
+
+### What a remote instance shares
+
+A Bailo peer answers federated searches through its normal search endpoint (`GET /api/v2/models/search`). Only search
+results are shared: name, description, tags, organisation, state and similar summary fields. Model files, images and
+releases are not transferred by federation.
+
+Federated requests are subject to the remote instance's normal authentication and authorisation. The remote instance
+only returns models that the requesting identity is allowed to see. That identity is either the calling instance's
+service identity, or the original user if [user escalation](setting-up-federation#user-escalation) is turned on.
 
 ## Federation states
 
-Your Bailo instance can operate in one of three federation states, controlled by the administrator:
+Each instance has an overall federation state, set in `federation.state`:
 
-- **Disabled** - Federation is turned off. No external sources are visible
-- **Read Only** - Your instance can browse and mirror models from connected peers, but does not share its own models
-- **Enabled** - Full federation: your instance both reads from and shares models with connected peers
+- **`disabled`** - Federation is turned off. No peer connections are created and the Marketplace does not show external
+  sources. This is the default
+- **`readOnly`** - Peer connections are created from the configured peers. Use this for an instance that mainly acts as
+  a source for other instances, such as Organisation B in the example above
+- **`enabled`** - Peer connections are created from the configured peers. Use this for an instance whose users search
+  other instances, such as Organisation A in the example above
 
-The federation state is configured by your administrator in the application configuration.
+`readOnly` and `enabled` currently behave in the same way. The state is reported to other instances through
+`GET /api/v2/system/status` so that peers can see how an instance is configured.
+
+The federation state controls outgoing connections only. It does not stop other instances from querying your instance.
+Incoming requests are controlled by your authentication and authorisation connectors, in the same way as any other API
+request. See [Securing federation](setting-up-federation#securing-federation).
+
+Each peer also has its own `state`, using the same three values. Setting a peer to `disabled` stops this instance from
+checking whether that peer is reachable, without removing its configuration. A disabled peer still appears in the
+**External repositories** filter, so remove it from `federation.peers` if users should not see it.
 
 ## Peer types
 
-Bailo supports connecting to different types of external model sources.
+- **Bailo** (`bailo`) - Another Bailo instance
+- **Hugging Face Hub** (`huggingfacehub`) - The public [Hugging Face Hub](https://huggingface.co) model repository
 
-- **Bailo** - Another Bailo instance
-- **HuggingFace Hub** - The HuggingFace model repository
-
-Additional sources can be set up by your Bailo administrator.
-
-## Configuring peers
-
-Peers are configured in the application's backend configuration. Each peer requires:
-
-- **Base URL**: The URL of the external Bailo instance or repository
-- **Label**: A display name for the peer (shown in the Marketplace filter)
-- **Kind**: The type of peer (Bailo or HuggingFace Hub)
-- **State**: Whether federation with this peer is disabled, read-only, or enabled
-
-Peer configuration is done through the app configuration file - see
-[App Configuration](../getting-started/app-configuration).
+Hugging Face Hub peers only support plain text searches of at least five characters, and only return models, not data
+cards. Searches that use other filters, such as organisation or state, return an error for that peer.
 
 ## How federation appears to users
 
-Users see external models alongside local models in the Marketplace, with filtering by external source.
+When federation is turned on and at least one peer is configured:
 
-When federation is enabled and peers are configured:
+- The Marketplace shows an **External repositories** filter listing each configured peer by its ID (the key used in
+  `federation.peers`)
+- Peers that the local backend cannot currently reach are marked as unreachable in the filter
+- Selecting one or more peers includes their models in the search results alongside local models
+- Each external model shows which peer it came from
+- Selecting an external model opens it on the peer's own website
+- If a peer returns an error for a search, such as an unsupported filter on Hugging Face Hub, the Marketplace shows the
+  error above the results
 
-- Users see a **filter by external sources** option in the Marketplace
-- Models from external sources appear alongside local models
-- Each external model shows its source
-- External models can be clicked to view the source
+If a selected Bailo peer cannot be reached at all, the whole search fails, including local results. Deselect the
+unreachable peer to search again.
 
 ## Checking peer status
 
-Check the reachability of connected peers through the API.
+Bailo provides two system endpoints for federation:
 
-You can check the status of connected peers [via the API](../../../api/docs#/system).
+- **`GET /api/v2/system/status`** - Returns this instance's federation `state` and `id`. Peers call this endpoint to
+  check whether your instance is reachable
+- **`GET /api/v2/system/peers`** - Returns each configured peer, its configuration and whether this instance can
+  currently reach it
 
-Each peer has a reachability status indicating whether Bailo can communicate with it.
+You can call both endpoints [via the API](../../../api/docs#/system).
 
 ## Related pages
 
-- [App Configuration](../getting-started/app-configuration) - Where peers are configured
-- [Creating a Mirrored Model](../../users/model-mirroring/creating-a-mirrored-model) - Mirroring external models
+- [Setting Up Federation](setting-up-federation) - Step-by-step configuration for connecting instances
+- [App Configuration](../getting-started/app-configuration) - Where backend configuration is stored
+- [Creating a Mirrored Model](../../users/model-mirroring/creating-a-mirrored-model) - Copying models between instances
 - [Browsing the Marketplace](../../users/using-a-model/browsing-the-marketplace) - Filtering by external sources
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

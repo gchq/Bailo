@@ -1,0 +1,241 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Setting Up Federation
+
+> **Common questions this page answers:**
+>
+> - How do I connect two Bailo instances so users can see each other's models?
+> - What configuration does each instance need?
+> - How does one instance authenticate to another?
+> - How do I configure federation with Helm?
+> - Why is a peer showing as unreachable?
+
+This page walks through connecting two Bailo instances so that users on one instance can discover models on the other.
+For background on how federation works, see [Federation and Peer Integration](peer-integration).
+
+All configuration on this page lives in the backend configuration of each instance. See
+[App Configuration](../getting-started/app-configuration) for where these files are stored, or
+[Configuring federation with Helm](#configuring-federation-with-helm) if you deploy with Helm. Restart the backend after
+changing federation configuration, because peers are only loaded at start-up.
+
+## Example scenario
+
+The examples on this page use two organisations:
+
+- **Organisation A** - Runs `https://bailo.organisation-a.example`. Its users want to search for models on Organisation
+  B's instance
+- **Organisation B** - Runs `https://bailo.organisation-b.example`. It is willing to let Organisation A's users discover
+  its models
+
+Federation is one-directional. Organisation A connecting to Organisation B does not let Organisation B's users see
+Organisation A's models. For two-way discovery, repeat the steps with the roles swapped so that each instance lists the
+other as a peer.
+
+## Before you start
+
+Check the following with the administrators of both instances:
+
+- **Network access** - Organisation A's backend must be able to make HTTPS requests to Organisation B's public URL,
+  directly or through a proxy. Users' browsers must also be able to open Organisation B's URL, because selecting a
+  remote model opens it on Organisation B's website
+- **TLS trust** - Organisation A's backend must trust the certificate presented by Organisation B. If Organisation B
+  uses a private certificate authority, Organisation A needs a copy of that CA certificate
+- **Service identity** - Organisation B must be able to authenticate requests from Organisation A's backend. This is
+  usually done with a TLS client certificate issued to Organisation A. See
+  [Step 2](#step-2---decide-how-organisation-a-authenticates)
+- **User identities (optional)** - If Organisation B's search results should reflect what each individual user is
+  allowed to see, both instances must identify users in the same way, for example using the same email addresses. See
+  [User escalation](#user-escalation)
+
+## Step 1 - Choose a federation ID for each instance
+
+Every instance taking part in federation needs a unique `federation.id`. Bailo sends this ID with every federated
+request, in the `x-bailo-id` header, so that the receiving instance can tell which peer the request came from.
+
+Choose short, stable IDs and share them between administrators. This page uses `organisation-a` and `organisation-b`.
+
+Use the other instance's ID as the key when you add it to `federation.peers`. User escalation only works when the key
+matches the other instance's `federation.id` exactly. The key is also the name users see in the **External
+repositories** filter.
+
+## Step 2 - Configure Organisation B
+
+Organisation B shares models and does not need to search Organisation A, so it uses the `readOnly` state.
+
+```javascript
+// Organisation B - config/production.cjs
+module.exports = {
+  federation: {
+    state: 'readOnly',
+    id: 'organisation-b',
+    peers: {},
+  },
+}
+```
+
+Always set `peers`, even if it is empty. The backend fails to start if `state` is not `disabled` and `peers` is missing.
+
+This minimal configuration is enough for Organisation A to search Organisation B as Organisation A's service identity.
+To also recognise individual users, follow [User escalation](#user-escalation).
+
+## Step 3 - Configure Organisation A
+
+Organisation A searches Organisation B, so it uses the `enabled` state and lists Organisation B as a peer.
+
+```javascript
+// Organisation A - config/production.cjs
+const fs = require('node:fs')
+
+module.exports = {
+  federation: {
+    state: 'enabled',
+    id: 'organisation-a',
+    peers: {
+      'organisation-b': {
+        state: 'enabled',
+        kind: 'bailo',
+        baseUrl: 'https://bailo.organisation-b.example',
+        label: 'Organisation B',
+      },
+    },
+  },
+}
+```
+
+Set `baseUrl` to the public URL of Organisation B's instance, without a trailing slash and without `/api`. Bailo uses it
+both for backend requests (`<baseUrl>/api/v2/...`) and for the links users follow to remote models.
+
+Restart Organisation A's backend, then [verify the connection](#verifying-the-connection).
+
+## User escalation
+
+Without escalation, Organisation B handles every search from Organisation A as Organisation A's service identity. Every
+Organisation A user sees the same results: whatever that service identity is allowed to see.
+
+With escalation, Organisation A also sends the searching user's identity in the `x-user` header. If Organisation B
+trusts Organisation A, it runs the search as that user, so results reflect that user's own access on Organisation B.
+This only makes sense when both instances identify users in the same way.
+
+Escalation needs configuration on both sides:
+
+1. On Organisation A, set `federation.isEscalationEnabled: true` so the `x-user` header is sent
+2. On Organisation B, set `federation.isEscalationEnabled: true` so the header is honoured
+3. On Organisation B, add Organisation A as a peer, using Organisation A's `federation.id` as the key. Set
+   `allowedSystemUserIds` to the service identities Organisation A authenticates as
+
+```javascript
+// Organisation B - config/production.cjs
+module.exports = {
+  federation: {
+    state: 'readOnly',
+    id: 'organisation-b',
+    isEscalationEnabled: true,
+    peers: {
+      'organisation-a': {
+        // 'disabled' means Organisation B does not search Organisation A
+        state: 'disabled',
+        kind: 'bailo',
+        baseUrl: 'https://bailo.organisation-a.example',
+        label: 'Organisation A',
+        allowedSystemUserIds: ['CN=bailo-organisation-a'],
+      },
+    },
+  },
+}
+```
+
+Organisation B only escalates a request when all of the following are true:
+
+- The request is authenticated as an identity listed in `allowedSystemUserIds`
+- The `x-bailo-id` header matches a key in Organisation B's `federation.peers`
+- That peer entry lists the authenticated identity
+
+If any check fails, the search still runs as Organisation A's service identity, and Organisation B logs a warning
+explaining why.
+
+Escalation applies to requests under `/api/v2/models`, including federated searches.
+
+Only allow escalation from instances you trust. Organisation B accepts the user identity that Organisation A sends
+without any further checks.
+
+## Connecting to Hugging Face Hub
+
+You can add the public Hugging Face Hub as a peer. Hugging Face Hub has no status endpoint, so Bailo checks reachability
+by looking up a known model and comparing its ID.
+
+```javascript
+module.exports = {
+  federation: {
+    state: 'enabled',
+    id: 'organisation-a',
+    peers: {
+      huggingface: {
+        state: 'enabled',
+        kind: 'huggingfacehub',
+        baseUrl: 'https://huggingface.co',
+        label: 'Hugging Face',
+        cache: {
+          query: 60,
+        },
+        extra: {
+          statusModelName: 'openai/whisper-large-v3',
+          statusModelId: '654a84cadff2f49007ce6c37',
+        },
+      },
+    },
+  },
+}
+```
+
+`extra.statusModelName` and `extra.statusModelId` are required for Hugging Face Hub peers. `cache.query` caches search
+results for the given number of seconds, which reduces the number of requests to Hugging Face Hub. Bailo peers ignore
+`cache`.
+
+You can configure Bailo and Hugging Face Hub peers on the same instance.
+
+## Configuration reference
+
+### Instance settings
+
+- **`federation.state`** - `disabled`, `readOnly` or `enabled`. Default: `disabled`
+- **`federation.id`** - Unique ID for this instance, sent to peers in the `x-bailo-id` header. Required when federation
+  is not `disabled`
+- **`federation.isEscalationEnabled`** - Send the user's identity to peers, and honour user identities sent by trusted
+  peers. Default: unset (off)
+- **`federation.peers`** - Map of peer ID to peer settings. Required when federation is not `disabled`; use `{}` if
+  there are no peers
+
+### Peer settings
+
+- **`state`** - `disabled`, `readOnly` or `enabled`. Required
+- **`kind`** - `bailo` or `huggingfacehub`. Required
+- **`baseUrl`** - Public URL of the peer, without a trailing slash. Required
+- **`label`** - Human-readable name for the peer. Required, but not currently shown in the user interface
+- **`httpConfig`** - Node.js HTTPS agent options for requests to this peer, such as a client certificate. Optional
+- **`proxy`** - Proxy URL for requests to this peer. Optional
+- **`allowedSystemUserIds`** - Service identities this peer is allowed to escalate from. Only used when receiving
+  requests. Optional
+- **`cache.query`** - Number of seconds to cache search results. Hugging Face Hub only. Optional
+- **`extra`** - Additional settings for the peer kind. Required for Hugging Face Hub (`statusModelName` and
+  `statusModelId`)
+
+## Verifying the connection
+
+1. On Organisation A, call `GET /api/v2/system/peers`. The response lists `organisation-b` with `status.ping` set to
+   `pong` and no `status.error`
+2. Check that the `status.federation` object shows Organisation B's `state` and `id`
+3. Open the Marketplace on Organisation A. Under **External repositories**, select `organisation-b` and search for a
+   model you know exists on Organisation B
+4. Select a remote model and check that the link opens the model on Organisation B's website
+
+The status check calls Organisation B's `GET /api/v2/system/status` endpoint. A successful status check proves that
+Organisation A can reach Organisation B. It does not prove that searches are authenticated, so always test a search as
+well.
+
+## Related pages
+
+- [Federation and Peer Integration](peer-integration) - How federation works
+- [App Configuration](../getting-started/app-configuration) - Where backend configuration is stored
+- [Creating a Mirrored Model](../../users/model-mirroring/creating-a-mirrored-model) - Copying models between instances
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
