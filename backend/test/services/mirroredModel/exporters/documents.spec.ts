@@ -234,6 +234,15 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
     })
   })
 
+  test('getInitialiseTarGzUploadParams includes semvers', () => {
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], { ...mockLogData, semvers: ['1.0.0', '1.0.1'] })
+
+    // @ts-expect-error calling protected method
+    const params = exporter.getInitialiseTarGzUploadParams()
+
+    expect(params[1]).toMatchObject({ exportId: mockLogData.exportId, semvers: ['1.0.0', '1.0.1'] })
+  })
+
   test('getInitialiseTarGzUploadParams throws if model missing', () => {
     const exporter = new DocumentsExporter(mockUser, undefined as any, [], mockLogData)
 
