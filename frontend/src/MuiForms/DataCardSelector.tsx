@@ -42,7 +42,7 @@ export default function DataCardSelector({
     entries: dataCards,
     isEntriesLoading: isDataCardsLoading,
     isEntriesError: isDataCardsError,
-  } = useListEntries(EntryKind.DATA_CARD)
+  } = useListEntries({ kind: EntryKind.DATA_CARD })
 
   const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
 

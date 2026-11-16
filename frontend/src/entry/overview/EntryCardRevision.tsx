@@ -1,6 +1,7 @@
 import { Checkbox, Stack, TableBody, TableCell, TableRow, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import UserDisplay from 'src/common/UserDisplay'
+import Link from 'src/Link'
 import { type EntryKindKeys } from 'types/types'
 import { formatDateTimeString } from 'utils/dateUtils'
 
@@ -17,7 +18,7 @@ export type EntryCardSnapshot = {
 type EntryCardRevisionProps = {
   snapshot: EntryCardSnapshot
   entryKind: EntryKindKeys
-  onRowClick: () => void
+  href: string
   onCheckToggle: () => void
   isChecked: boolean
   hideCheckbox: boolean
@@ -25,7 +26,7 @@ type EntryCardRevisionProps = {
 
 export default function EntryCardRevision({
   snapshot,
-  onRowClick,
+  href,
   onCheckToggle,
   isChecked,
   hideCheckbox,
@@ -36,23 +37,38 @@ export default function EntryCardRevision({
   const primaryColor = theme.palette.secondary.main
   const mutedColor = theme.palette.text.secondary
 
+  const versionLabel = [
+    snapshot.local !== undefined ? `v${snapshot.local}` : undefined,
+    snapshot.mirrored !== undefined ? `Mirrored v${snapshot.mirrored}` : undefined,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
   const versionStyle = (isChanged: boolean) => ({
     color: isChanged ? primaryColor : mutedColor,
     fontWeight: isChanged ? 'bold' : undefined,
     fontStyle: isChanged ? undefined : 'italic',
   })
 
+  // Only the changed version is a link, so the unchanged one stays plain text
+  const renderVersion = (isChanged: boolean, label: string) =>
+    isChanged ? (
+      <Link href={href} variant='body2' sx={versionStyle(true)}>
+        {label}
+      </Link>
+    ) : (
+      <Typography variant='body2' sx={versionStyle(false)}>
+        {label}
+      </Typography>
+    )
+
   return (
     <TableBody>
-      <TableRow hover selected={isChecked} onClick={onRowClick} sx={{ '&:hover': { cursor: 'pointer' } }}>
+      <TableRow>
         <TableCell>
           <Stack direction='column' spacing={0}>
-            {snapshot.local !== undefined && (
-              <Typography sx={versionStyle(changedIsLocal)}>{`v${snapshot.local}`}</Typography>
-            )}
-            {snapshot.mirrored !== undefined && (
-              <Typography sx={versionStyle(!changedIsLocal)}>{`Mirrored v${snapshot.mirrored}`}</Typography>
-            )}
+            {snapshot.local !== undefined && renderVersion(changedIsLocal, `v${snapshot.local}`)}
+            {snapshot.mirrored !== undefined && renderVersion(!changedIsLocal, `Mirrored v${snapshot.mirrored}`)}
           </Stack>
         </TableCell>
         <TableCell sx={{ color: theme.palette.primary.main }}>
@@ -62,7 +78,7 @@ export default function EntryCardRevision({
         <TableCell sx={{ color: theme.palette.primary.main }}>
           <Checkbox
             checked={isChecked}
-            onClick={(event) => event.stopPropagation()}
+            slotProps={{ input: { 'aria-label': `Select ${versionLabel} for comparison` } }}
             onChange={onCheckToggle}
             disabled={hideCheckbox}
           />

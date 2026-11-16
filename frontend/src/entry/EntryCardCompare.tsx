@@ -16,7 +16,7 @@ import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useDebounce from 'src/hooks/useDebounce'
 import { EntryKind, type EntryKindKeys, EntryKindLabel, MODEL_ENTRY_KINDS, type SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
-import { entryKindForRedirect, updateQuery } from 'utils/routerUtils'
+import { buildEntryCardVersionHref, updateQuery } from 'utils/routerUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 const QueryDiffSide = {
@@ -60,32 +60,16 @@ export default function EntryCardCompare({
   const { entry: fromEntry } = useGetEntry(fromEntryId, searchKinds)
   const { entry: toEntry } = useGetEntry(toEntryId, searchKinds)
 
-  const { entries: fromEntriesRaw, isEntriesLoading: isFromEntriesLoading } = useListEntries(
-    searchKinds,
-    [],
-    '',
-    [],
-    [],
-    [],
-    [],
-    debouncedFromSearch,
-    undefined,
-    undefined,
-    true,
-  )
-  const { entries: toEntriesRaw, isEntriesLoading: isToEntriesLoading } = useListEntries(
-    searchKinds,
-    [],
-    '',
-    [],
-    [],
-    [],
-    [],
-    debouncedToSearch,
-    undefined,
-    undefined,
-    true,
-  )
+  const { entries: fromEntriesRaw, isEntriesLoading: isFromEntriesLoading } = useListEntries({
+    kind: searchKinds,
+    search: debouncedFromSearch,
+    titleOnly: true,
+  })
+  const { entries: toEntriesRaw, isEntriesLoading: isToEntriesLoading } = useListEntries({
+    kind: searchKinds,
+    search: debouncedToSearch,
+    titleOnly: true,
+  })
 
   const fromEntries: EntryOption[] =
     fromEntry && !fromEntriesRaw.some((entry) => entry.id === fromEntry.id)
@@ -143,12 +127,6 @@ export default function EntryCardCompare({
     : undefined
   const effectiveToCard = isMixedModelComparison ? (toIsMirroredModel ? toMirroredCard : toLocalCard) : undefined
 
-  const hasFromCard = !!fromLocalCard || !!fromMirroredCard
-  const hasToCard = !!toLocalCard || !!toMirroredCard
-  const fromOnly = hasFromCard && !hasToCard
-
-  const previewCard = fromLocalCard ?? fromMirroredCard
-
   const mixedSchemaId =
     effectiveFromCard && effectiveToCard && effectiveFromCard.schemaId === effectiveToCard.schemaId
       ? effectiveToCard.schemaId
@@ -162,8 +140,7 @@ export default function EntryCardCompare({
       ? toMirroredCard.schemaId
       : undefined
 
-  const singleSideSchemaId = fromOnly ? previewCard?.schemaId : undefined
-  const chosenSchemaId = mixedSchemaId ?? localSchemaId ?? mirroredSchemaId ?? singleSideSchemaId
+  const chosenSchemaId = mixedSchemaId ?? localSchemaId ?? mirroredSchemaId
 
   const {
     schema: chosenSchema,
@@ -197,26 +174,24 @@ export default function EntryCardCompare({
     const fromState = fromLocalCard?.metadata ?? {}
     const toMirroredState = toMirroredCard?.metadata ?? {}
     const fromMirroredState = fromMirroredCard?.metadata ?? {}
-    const steps = fromOnly
-      ? getStepsFromSchema(chosenSchema, {}, ['properties.contacts'], fromState, fromMirroredState)
-      : isMixedModelComparison
-        ? getStepsFromSchema(
-            chosenSchema,
-            {},
-            ['properties.contacts'],
-            effectiveToCard?.metadata ?? {},
-            {},
-            effectiveFromCard?.metadata ?? {},
-          )
-        : getStepsFromSchema(
-            chosenSchema,
-            {},
-            ['properties.contacts'],
-            toState,
-            toMirroredState,
-            fromState,
-            fromMirroredState,
-          )
+    const steps = isMixedModelComparison
+      ? getStepsFromSchema(
+          chosenSchema,
+          {},
+          ['properties.contacts'],
+          effectiveToCard?.metadata ?? {},
+          {},
+          effectiveFromCard?.metadata ?? {},
+        )
+      : getStepsFromSchema(
+          chosenSchema,
+          {},
+          ['properties.contacts'],
+          toState,
+          toMirroredState,
+          fromState,
+          fromMirroredState,
+        )
     for (const step of steps) {
       step.steps = steps
     }
@@ -225,7 +200,6 @@ export default function EntryCardCompare({
     chosenSchema,
     fromLocalCard?.metadata,
     fromMirroredCard?.metadata,
-    fromOnly,
     isMixedModelComparison,
     effectiveFromCard?.metadata,
     effectiveToCard?.metadata,
@@ -244,7 +218,6 @@ export default function EntryCardCompare({
         toEntryId,
         toLocalCard?.version,
         toMirroredCard?.version,
-        fromOnly ? 'single' : 'diff',
       ].join(':')
     : undefined
 
@@ -407,15 +380,13 @@ export default function EntryCardCompare({
 
   const kindLabel = EntryKindLabel[entryKind]
 
-  const renderGotoEntryButton = (entry?: EntryOption) => {
-    const href = entry ? `/${entryKindForRedirect(entry.kind)}/${entry.id}` : undefined
-
-    return (
-      <Link sx={{ fontWeight: 'bold' }} href={href}>
-        {entry && entry.name}
+  const renderVersionLink = (entry?: EntryOption, version?: number, mirroredVersion?: number) =>
+    entry &&
+    (version !== undefined || mirroredVersion !== undefined) && (
+      <Link sx={{ fontWeight: 'bold' }} href={buildEntryCardVersionHref(entry.id, entryKind, version, mirroredVersion)}>
+        {entry.name}
       </Link>
     )
-  }
 
   const hasAnyVersionFrom = !!fromEntryId && (fromVersion !== undefined || fromMirroredVersion !== undefined)
   const hasAnyVersionTo = !!toEntryId && (toVersion !== undefined || toMirroredVersion !== undefined)
@@ -432,7 +403,7 @@ export default function EntryCardCompare({
 
   const canRenderForm = !loading && !!chosenSchema && splitSchema.steps.length > 0 && !schemasDiverge
 
-  const showSelectPrompt = !loading && !fromOnly && (!hasAnyVersionFrom || !hasAnyVersionTo)
+  const showSelectPrompt = !loading && (!hasAnyVersionFrom || !hasAnyVersionTo)
 
   const flipComparison = () => {
     updateQuery(router, {
@@ -457,7 +428,7 @@ export default function EntryCardCompare({
             <Stack spacing={2} sx={{ flex: 1 }}>
               <Stack spacing={1} direction='row' sx={{ alignItems: 'center' }}>
                 <Typography sx={{ fontWeight: 'bold' }}>From</Typography>
-                {renderGotoEntryButton(fromEntry)}
+                {renderVersionLink(fromEntry, fromVersion, fromMirroredVersion)}
               </Stack>
               <Autocomplete
                 disablePortal
@@ -498,7 +469,7 @@ export default function EntryCardCompare({
             <Stack spacing={2} sx={{ flex: 1 }}>
               <Stack spacing={1} direction='row' sx={{ alignItems: 'center' }}>
                 <Typography sx={{ fontWeight: 'bold' }}>To</Typography>
-                {renderGotoEntryButton(toEntry)}
+                {renderVersionLink(toEntry, toVersion, toMirroredVersion)}
               </Stack>
               <Autocomplete
                 disablePortal
@@ -538,11 +509,6 @@ export default function EntryCardCompare({
               Select a {kindLabel.toLowerCase()} and at least one version on both sides to view a diff.
             </Alert>
           )}
-          {!loading && fromOnly && canRenderForm && (
-            <Alert severity='info' sx={{ mb: 2 }}>
-              Showing a single {kindLabel.toLowerCase()} card. Select a version on the “To” side to compare.
-            </Alert>
-          )}
           {!loading && schemasDiverge && (
             <Alert severity='warning' sx={{ mb: 2 }}>
               The selected revisions use different schemas and cannot be compared.
@@ -553,8 +519,8 @@ export default function EntryCardCompare({
               splitSchema={splitSchema}
               setSplitSchema={setSplitSchema}
               canEdit={false}
-              compareMode={!fromOnly}
-              mirroredModel={fromOnly ? !!fromMirroredCard : !isMixedModelComparison && useMirroredLayout}
+              compareMode
+              mirroredModel={!isMixedModelComparison && useMirroredLayout}
             />
           )}
         </Stack>

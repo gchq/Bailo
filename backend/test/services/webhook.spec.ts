@@ -29,14 +29,14 @@ const modelServiceMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/model.js', () => modelServiceMock)
 
-const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(function () {
+const fetchMock = vi.hoisted(() =>
+  vi.fn(function () {
     return {
       ok: true,
     }
   }),
-}))
-vi.mock('node-fetch', () => fetchMock)
+)
+vi.stubGlobal('fetch', fetchMock)
 
 // Helper to flush pending microtasks/timers so fire-and-forget side
 // effects have a chance to run before we assert on them
@@ -144,31 +144,31 @@ describe('services > webhook', () => {
 
     await sendWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
 
-    expect(fetchMock.default).toHaveBeenCalled()
-    expect(fetchMock.default.mock.calls.length).toBe(webhooks.length)
-    expect(fetchMock.default.mock.calls.at(0)?.at(0)).toBe(webhooks[0].uri)
-    expect(fetchMock.default.mock.calls.at(1)?.at(0)).toBe(webhooks[1].uri)
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls.length).toBe(webhooks.length)
+    expect(fetchMock.mock.calls.at(0)?.at(0)).toBe(webhooks[0].uri)
+    expect(fetchMock.mock.calls.at(1)?.at(0)).toBe(webhooks[1].uri)
   })
 
   test('sendWebhooks > Non 200 response', async () => {
     const webhooks = [{ uri: 'test/uri' }]
     WebhookModelMock.find.mockReturnValueOnce(webhooks)
-    fetchMock.default.mockReturnValueOnce({ ok: false })
+    fetchMock.mockReturnValueOnce({ ok: false })
 
     await sendWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
 
-    expect(fetchMock.default).toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(logMock.error).toHaveBeenCalled()
   })
 
   test('sendWebhooks > fetch error', async () => {
     const webhooks = [{ uri: 'test/uri' }]
     WebhookModelMock.find.mockReturnValueOnce(webhooks)
-    fetchMock.default.mockRejectedValueOnce('Error')
+    fetchMock.mockRejectedValueOnce('Error')
 
     await sendWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)
 
-    expect(fetchMock.default).toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(logMock.error).toHaveBeenCalled()
   })
 
@@ -182,22 +182,22 @@ describe('services > webhook', () => {
     // fetch has not necessarily been called yet - delivery is asynchronous.
     await flushPromises()
 
-    expect(fetchMock.default).toHaveBeenCalled()
-    expect(fetchMock.default.mock.calls.length).toBe(webhooks.length)
-    expect(fetchMock.default.mock.calls.at(0)?.at(0)).toBe(webhooks[0].uri)
-    expect(fetchMock.default.mock.calls.at(1)?.at(0)).toBe(webhooks[1].uri)
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls.length).toBe(webhooks.length)
+    expect(fetchMock.mock.calls.at(0)?.at(0)).toBe(webhooks[0].uri)
+    expect(fetchMock.mock.calls.at(1)?.at(0)).toBe(webhooks[1].uri)
   })
 
   test('dispatchWebhooks > swallows fetch errors during delivery', async () => {
     const webhooks = [{ uri: 'test/uri' }]
     WebhookModelMock.find.mockReturnValueOnce(webhooks)
-    fetchMock.default.mockRejectedValueOnce('Error')
+    fetchMock.mockRejectedValueOnce('Error')
 
     expect(() => dispatchWebhooks('abc', 'createRelease', 'This event happened', { id: '123' } as any)).not.toThrow()
 
     await flushPromises()
 
-    expect(fetchMock.default).toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalled()
     expect(logMock.error).toHaveBeenCalled()
   })
 })

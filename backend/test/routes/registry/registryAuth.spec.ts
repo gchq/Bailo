@@ -1,8 +1,10 @@
 import type * as Crypto from 'crypto'
+import type * as Jwt from 'jsonwebtoken'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../../src/connectors/authorisation/index.js'
 import { EntryKind } from '../../../src/models/Model.js'
+
 import {
   checkAccess,
   getAdminToken,
@@ -56,7 +58,7 @@ vi.mock('crypto', async () => {
 })
 
 vi.mock('jsonwebtoken', async () => {
-  const actual = await vi.importActual<any>('jsonwebtoken')
+  const actual = await vi.importActual<typeof Jwt>('jsonwebtoken')
 
   return {
     ...actual,

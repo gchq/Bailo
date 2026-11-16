@@ -22,6 +22,7 @@ import { processBatch, saveEvent } from '../../services/stroom.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, isFileMirrorInformation, isMongoDocumentMirrorInformation } from '../../types/types.js'
 import config from '../../utils/config.js'
+import { ConfigurationError } from '../../utils/error.js'
 import { AuditKind, BaseAuditConnector } from './Base.js'
 
 export type EventDetail = {
@@ -184,6 +185,11 @@ export class StroomAuditConnector extends BaseAuditConnector {
   constructor() {
     super()
     this.hostIP = this.getHostDeviceIP()[0] ?? '0.0.0.0'
+    if (!Number.isInteger(config.stroom.interval)) {
+      throw ConfigurationError('Unable to initialise Stroom Audit Connector as the interval is not a number.', {
+        interval: config.stroom.interval,
+      })
+    }
     setInterval(() => {
       processBatch().catch((err) => {
         log.error({ err }, 'Failed to process batch of STROOM events.')
