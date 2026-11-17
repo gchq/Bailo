@@ -47,6 +47,8 @@ describe('routes > model > file > postSimpleUpload', () => {
 
     // This fixture does not include a name.
     delete fixture.query.name
+    // An empty generated tags array is serialised as an empty string, which would add a second error.
+    fixture.query.tags = ['tag']
 
     const res = await testPost(
       `/api/v2/model/${modelId}/files/upload/simple?${querystring.stringify(fixture.query)}`,
