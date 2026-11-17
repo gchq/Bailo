@@ -13,6 +13,7 @@ import ModelSelector from 'src/MuiForms/ModelSelector'
 import MultipleDropdown from 'src/MuiForms/MultipleDropdown'
 import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
+import TableWidget from 'src/MuiForms/TableWidget'
 import TagSelector from 'src/MuiForms/TagSelector'
 
 import {
@@ -36,6 +37,7 @@ export const widgets: RegistryWidgetsType = {
   dataCardSelector: DataCardSelector,
   modelSelector: ModelSelector,
   metricsWidget: Metrics,
+  tableWidget: TableWidget,
   nothing: Nothing,
 }
 
