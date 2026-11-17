@@ -34,6 +34,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { deepMergePreferFirst } from '../utils/object.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { FUZZY_MATCH_THRESHOLD, gramSimilarity, toSearchGrams } from '../utils/search.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
 import { getFilesByModel, removeFiles } from './file.js'
@@ -446,17 +447,28 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     deletedAt: false,
   }
 
-  // Always do a partial match on the model name
-  const escapedSearch = opts.search ? opts.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
+  const queryGrams = opts.search ? toSearchGrams(opts.search) : []
   let results = await ModelModel.find<ModelDoc>(
-    escapedSearch ? { ...query, name: { $regex: escapedSearch, $options: 'i' } } : query,
+    queryGrams.length ? { ...query, searchGrams: { $in: queryGrams } } : query,
     projection,
   ).sort({
     updatedAt: -1,
   })
 
-  //Include all full text matches
-  if (opts.search && !opts.titleOnly) {
+  // Fuzzy match: keep entries sharing enough trigrams with the search, best first (stable sort keeps updatedAt order)
+  if (queryGrams.length) {
+    results = results
+      .map((model) => ({
+        model,
+        score: gramSimilarity(queryGrams, toSearchGrams(model.name, model.description, ...(model.tags ?? []))),
+      }))
+      .filter(({ score }) => score >= FUZZY_MATCH_THRESHOLD)
+      .sort((a, b) => b.score - a.score)
+      .map(({ model }) => model)
+  }
+
+  // Include stemmed full text matches, which also cover card contents
+  if (opts.search) {
     let fullTextOnlyResults = await ModelModel.find<ModelDoc>(
       { ...query, $text: { $search: opts.search } },
       projection,

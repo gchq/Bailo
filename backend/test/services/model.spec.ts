@@ -383,6 +383,29 @@ describe('services > model', () => {
     await searchModels(user, searchParams)
   })
 
+  test('searchModels > fuzzy match ranks by similarity and appends full text matches', async () => {
+    const user: any = { dn: 'test' }
+    vi.mocked(authorisation.models).mockImplementation(async (_user, models) =>
+      models.map(() => ({ success: true }) as any),
+    )
+    ModelModelMock.sort
+      .mockResolvedValueOnce([
+        { id: 'unrelated', name: 'Translator', description: 'words', tags: [], settings: { mirror: {} } },
+        { id: 'partial', name: 'Image classification', description: 'cats', tags: [], settings: { mirror: {} } },
+        { id: 'exact', name: 'Image classifier', description: 'cats', tags: [], settings: { mirror: {} } },
+      ])
+      .mockResolvedValueOnce([
+        { id: 'exact', name: 'Image classifier', description: 'cats', tags: [], settings: { mirror: {} } },
+        { id: 'card-only', name: 'Other', description: 'other', tags: [], settings: { mirror: {} } },
+      ])
+
+    const result = await searchModels(user, { search: 'clasifier' })
+
+    expect(ModelModelMock.find.mock.calls[0][0]).toMatchObject({ searchGrams: { $in: expect.any(Array) } })
+    expect(ModelModelMock.find.mock.calls[1][0]).toMatchObject({ $text: { $search: 'clasifier' } })
+    expect(result.models.map((model) => model.id)).toEqual(['exact', 'partial', 'card-only'])
+  })
+
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
     ModelModelMock.sort.mockResolvedValueOnce([])

@@ -1,0 +1,76 @@
+import { type Request, type Response } from 'express'
+
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
+import { EntryKind } from '../../../models/Model.js'
+import { searchModels } from '../../../services/model.js'
+import { type PathConfig, registerPath } from '../../../services/specification.js'
+import {
+  type EntrySearchOptionsParams,
+  EntrySearchOptionsSchema,
+  type EntrySearchResultWithErrors,
+} from '../../../types/types.js'
+import { coerceArray, parse } from '../../../utils/validate.js'
+
+export const getModelsSearchSchema = z.object({
+  query: EntrySearchOptionsSchema,
+})
+
+export const getModelsSearchPathSpec: Omit<PathConfig, 'path'> = {
+  method: 'get',
+  tags: ['model'],
+  description:
+    'Search models and data cards. The search term is fuzzy matched against name, description and tags, and stem matched against all entry content.',
+  schema: getModelsSearchSchema,
+  responses: {
+    200: {
+      description: 'Array with model summaries.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            models: z.array(
+              z.object({
+                id: z.string().openapi({ example: 'yolo-abcdef' }),
+                name: z.string().openapi({ example: 'Yolo v4' }),
+                description: z.string().openapi({ example: 'You only look once' }),
+                tags: z.array(z.string()).openapi({ example: ['tag', 'ml'] }),
+                kind: coerceArray(z.array(z.string().openapi({ example: EntryKind.Model }))),
+                allowTemplating: z.boolean().openapi({ example: true }),
+                schemaId: z.string().optional(),
+                adminAccess: z.boolean().optional(),
+                peerId: z.string().optional(),
+              }),
+            ),
+            errors: z
+              .record(
+                z.string(),
+                z.object({
+                  peerId: z.string().optional(),
+                  message: z.string().optional(),
+                  code: z.number().optional(),
+                }),
+              )
+              .optional(),
+          }),
+        },
+      },
+    },
+  },
+}
+
+registerPath({ ...getModelsSearchPathSpec, path: '/api/v3/models/search' }, 'v3')
+
+export const getModelsSearch = [
+  async (req: Request, res: Response<EntrySearchResultWithErrors>): Promise<void> => {
+    req.audit = AuditInfo.SearchModels
+
+    const opts: { query: EntrySearchOptionsParams } = parse(req, getModelsSearchSchema)
+
+    const results = await searchModels(req.user, opts.query)
+
+    await audit.onSearchModel(req, results.models)
+
+    res.json(results)
+  },
+]

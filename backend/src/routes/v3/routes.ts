@@ -10,6 +10,7 @@ import { getNoReleasesComplianceMetrics } from './metrics/getNoReleasesComplianc
 import { getRoleComplianceMetrics } from './metrics/getRoleComplianceMetrics.js'
 import { getUnapprovedComplianceMetrics } from './metrics/getUnapprovedComplianceMetrics.js'
 import { getUsageMetrics } from './metrics/getUsageMetrics.js'
+import { getModelsSearch } from './model/getModelsSearch.js'
 import { getLatestResponse } from './response/getLatestResponseForReview.js'
 import { postNotifyReviewer } from './review/postNotifyReviewer.js'
 import { postReview } from './review/postReview.js'
@@ -19,6 +20,7 @@ const router = Router()
 
 router.get('/api-docs/swagger.json', (req, res) => res.json(generateV3SwaggerSpec()))
 
+router.get('/models/search', ...getModelsSearch)
 router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
 
 router.get('/metrics/usage', ...getUsageMetrics)
