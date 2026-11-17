@@ -59,8 +59,12 @@ export interface UiConfig {
   }
   announcement: {
     enabled: boolean
+    title?: string
     text: string
+    description?: string
     startTimestamp: string
+    severity?: 'info' | 'warning' | 'error'
+    links?: { label: string; href: string }[]
   }
 
   helpPopoverText: {

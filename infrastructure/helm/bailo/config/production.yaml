@@ -105,8 +105,12 @@ ui:
     textColor: {{ .Values.config.ui.banner.textColor}}
   announcement:
     enabled: {{ .Values.config.ui.announcement.enabled }}
+    title: {{ toJson .Values.config.ui.announcement.title }}
     text: {{ .Values.config.ui.announcement.text }}
+    description: {{ toJson .Values.config.ui.announcement.description }}
     startTimestamp: {{ .Values.config.ui.announcement.startTimestamp }}
+    severity: {{ .Values.config.ui.announcement.severity }}
+    links: {{ toJson .Values.config.ui.announcement.links }}
   issues:
     label: Bailo Support Team
     supportHref: {{ .Values.config.issueLinks.support }}
