@@ -13,6 +13,7 @@ export type BaseMirrorMetadata = {
   mirroredModelId: string
   exporter: string
   exportId: string
+  semvers?: string[]
 }
 
 /**
