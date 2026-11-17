@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { getReasonPhrase } from 'utils/httpStatusCodes'
 import { describe, expect, it } from 'vitest'
 

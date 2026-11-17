@@ -174,6 +174,9 @@ Coverage is only needed for the full CI run.
 ### Frontend (Vitest + Cypress)
 
 - Unit tests: `frontend/test/**/*.spec.tsx` using `@testing-library/react`.
+- The default test environment is `jsdom`, which is slow to create. Specs that never render or touch browser globals
+  (e.g. pure utility tests) must start with `// @vitest-environment node` to skip it. Vitest's end-of-run "jsdom was
+  created N times" line counts every file regardless of environment, so check the time figure instead.
 - E2E tests: `frontend/cypress/e2e/bailo/` using Cypress with `cypress-axe` for accessibility.
 
 ### Python (pytest)

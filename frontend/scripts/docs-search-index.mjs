@@ -1,7 +1,6 @@
 import { mkdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import GithubSlugger from 'github-slugger'
-import { toString } from 'mdast-util-to-string'
 import remarkMdx from 'remark-mdx'
 import remarkParse from 'remark-parse'
 import { unified } from 'unified'
@@ -56,7 +55,7 @@ export function findMdxFile(docsRoot, slug) {
  * @param {Record<string, any>} node
  * @returns {string}
  */
-function textFromNode(node) {
+function toString(node) {
   if (
     node.type === 'code' ||
     node.type === 'html' ||
@@ -79,7 +78,7 @@ function textFromNode(node) {
     return ''
   }
 
-  return node.children.map(textFromNode).filter(Boolean).join(' ')
+  return node.children.map(toString).filter(Boolean).join(' ')
 }
 
 function cleanText(value) {
@@ -150,7 +149,7 @@ export function extractContent(raw, sourcePath = '<MDX source>') {
       continue
     }
 
-    const text = cleanText(textFromNode(node))
+    const text = cleanText(toString(node))
 
     if (!text) {
       continue
