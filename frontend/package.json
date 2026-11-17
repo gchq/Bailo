@@ -69,8 +69,8 @@
     "unified": "^11.0.5"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.1161.0",
-    "@aws-sdk/s3-request-presigner": "^3.1161.0",
+    "@aws-sdk/client-s3": "^3.1169.0",
+    "@aws-sdk/s3-request-presigner": "^3.1169.0",
     "@eslint/js": "~10.0.1",
     "@next/bundle-analyzer": "^16.4.3",
     "@testing-library/react": "^16.3.3",
