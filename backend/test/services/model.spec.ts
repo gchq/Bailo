@@ -101,6 +101,7 @@ vi.mock('../../src/utils/database.js', async () => ({
 
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
+  getEntityMembers: vi.fn((entity: string) => Promise.resolve([entity])),
   getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
   hasRole: vi.fn(function () {
     return {}
@@ -397,6 +398,80 @@ describe('services > model', () => {
     }
 
     await searchModels(user, searchParams)
+  })
+
+  test('searchModels > users filter with users only', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['user:alice', 'user:bob'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:bob')
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({ 'collaborators.entity': { $all: ['user:alice', 'user:bob'] } }),
+      expect.anything(),
+    )
+  })
+
+  test('searchModels > users filter with user and group', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+    authenticationMocks.getEntityMembers.mockImplementation((entity: string) =>
+      Promise.resolve(entity === 'group:devs' ? ['user:bob', 'user:carol'] : [entity]),
+    )
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['user:alice', 'group:devs'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('group:devs')
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'collaborators.entity': { $all: ['user:alice', 'group:devs', 'user:bob', 'user:carol'] },
+      }),
+      expect.anything(),
+    )
+  })
+
+  test('searchModels > users filter throws when group members cannot be retrieved', async () => {
+    const user: any = { dn: 'test' }
+    authenticationMocks.getEntityMembers.mockRejectedValueOnce(new Error('Unable to get members'))
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['group:devs'],
+    }
+
+    await expect(searchModels(user, searchParams)).rejects.toThrow('Unable to get members')
+    expect(ModelModelMock.find).not.toHaveBeenCalled()
   })
 
   test('searchModels > admin access without auth', async () => {
