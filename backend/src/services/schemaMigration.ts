@@ -9,6 +9,7 @@ import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import { getPropValue } from '../utils/object.js'
+import { getSchemaById } from './schema.js'
 
 export async function createSchemaMigrationPlan(
   user: UserInterface,
@@ -28,11 +29,25 @@ export async function createSchemaMigrationPlan(
     })
   }
 
+  await checkMigrationSchemaKindsMatch(schemaMigrationDoc.sourceSchema, schemaMigrationDoc.targetSchema)
+
   try {
     return await schemaMigrationDoc.save()
   } catch (error) {
     handleDuplicateKeys(error)
     throw error
+  }
+}
+
+async function checkMigrationSchemaKindsMatch(sourceSchemaId: string, targetSchemaId: string) {
+  const [sourceSchema, targetSchema] = await Promise.all([getSchemaById(sourceSchemaId), getSchemaById(targetSchemaId)])
+  if (sourceSchema.kind !== targetSchema.kind) {
+    throw BadReq('The source and target schemas of a migration must be the same kind.', {
+      sourceSchemaId,
+      sourceSchemaKind: sourceSchema.kind,
+      targetSchemaId,
+      targetSchemaKind: targetSchema.kind,
+    })
   }
 }
 

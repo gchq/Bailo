@@ -5,7 +5,7 @@ import NodeCache from 'node-cache'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { type CollaboratorEntry } from '../models/Model.js'
+import ModelModel, { type CollaboratorEntry, EntryKind, type EntryKindKeys } from '../models/Model.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import SchemaModel, { type SchemaDoc, type SchemaInterface } from '../models/Schema.js'
 import { type UserInterface } from '../models/User.js'
@@ -312,5 +312,29 @@ export async function validateContentAgainstSchema(schemaId: string, content: un
   return {
     valid: result.valid,
     errors: result.errors,
+  }
+}
+
+export function getSchemaKindForEntryKind(entryKind: EntryKindKeys): SchemaKindKeys {
+  switch (entryKind) {
+    case EntryKind.Model:
+    case EntryKind.MirroredModel:
+    case EntryKind.UntrustedModel:
+      return SchemaKind.Model
+    case EntryKind.DataCard:
+    case EntryKind.MirroredDataCard:
+      return SchemaKind.DataCard
+    default:
+      throw BadReq('Unable to determine the schema kind for this entry kind.', { entryKind })
+  }
+}
+
+export function checkSchemaKind(schema: Pick<SchemaInterface, 'id' | 'kind'>, expectedKind: SchemaKindKeys) {
+  if (schema.kind !== expectedKind) {
+    throw BadReq('The schema kind does not match the expected kind.', {
+      schemaId: schema.id,
+      expectedKind,
+      schemaKind: schema.kind,
+    })
   }
 }

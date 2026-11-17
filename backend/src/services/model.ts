@@ -43,7 +43,7 @@ import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
 import { cancelLifecycleJobsForModel } from './schedule/scheduler.js'
-import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { checkSchemaKind, getSchemaById, getSchemaKindForEntryKind, validateContentAgainstSchema } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
@@ -734,6 +734,7 @@ export async function createModelCardFromSchema(
   if (schema.hidden) {
     throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
   }
+  checkSchemaKind(schema, getSchemaKindForEntryKind(model.kind))
 
   // Check schema review roles for any default entities
   const reviewRolesForSchema = await ReviewRoleModel.find({ shortName: schema.reviewRoles })
@@ -782,6 +783,8 @@ export async function createModelCardFromTemplate(
   if (!template.card?.schemaId) {
     throw BadReq('The template model is missing a model card', { modelId, templateId })
   }
+  const templateSchema = await getSchemaById(template.card.schemaId)
+  checkSchemaKind(templateSchema, getSchemaKindForEntryKind(model.kind))
   const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
   return revision
 }
