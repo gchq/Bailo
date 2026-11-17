@@ -27,7 +27,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
     () =>
       release
         ? [release.modelId, 'release', release.semver, { release }]
-        : [accessRequest.modelId, 'access-request.review', accessRequest.id, { accessRequest }],
+        : [accessRequest.modelId, 'access-request', accessRequest.id, { accessRequest }],
     [release, accessRequest],
   )
   const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForModel(

@@ -2,9 +2,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { Decision } from '../../../../src/models/Response.js'
-import { postReviewResponseSchema } from '../../../../src/routes/v3/review/postReviewResponse.js'
 import { ReviewKind } from '../../../../src/types/enums.js'
-import { createFixture, testPost } from '../../../testUtils/routes.js'
+import { testPost } from '../../../testUtils/routes.js'
 import { testReviewResponse } from '../../../testUtils/testModels.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
@@ -41,8 +40,7 @@ describe('routes > review > postReviewResponse', () => {
   } as any
 
   test('successfully respond to a review', async () => {
-    const fixture = createFixture(postReviewResponseSchema)
-    fixture.body = lifecycleReviewBody
+    const fixture = { params: { reviewId: 'test-123' }, body: lifecycleReviewBody }
     const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(200)
@@ -50,8 +48,7 @@ describe('routes > review > postReviewResponse', () => {
   })
 
   test('audit > expected call', async () => {
-    const fixture = createFixture(postReviewResponseSchema)
-    fixture.body = lifecycleReviewBody
+    const fixture = { params: { reviewId: 'test-123' }, body: lifecycleReviewBody }
     const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(200)
@@ -60,8 +57,7 @@ describe('routes > review > postReviewResponse', () => {
   })
 
   test('missing review decision', async () => {
-    const fixture = createFixture(postReviewResponseSchema)
-    fixture.body = releaseReviewBody
+    const fixture = { params: { reviewId: 'test-123' }, body: releaseReviewBody }
     const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(400)
@@ -69,8 +65,7 @@ describe('routes > review > postReviewResponse', () => {
   })
 
   test('successfully respond to a review without a comment', async () => {
-    const fixture = createFixture(postReviewResponseSchema)
-    fixture.body = lifecycleReviewBody
+    const fixture = { params: { reviewId: 'test-123' }, body: lifecycleReviewBody }
     const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
     expect(res.statusCode).toBe(200)
@@ -78,10 +73,12 @@ describe('routes > review > postReviewResponse', () => {
   })
 
   test('rejects due date in the past', async () => {
-    const fixture = createFixture(postReviewResponseSchema)
-    fixture.body = {
-      ...lifecycleReviewBody,
-      dueDate: new Date('2024-01-01T00:00:00.000Z'),
+    const fixture = {
+      params: { reviewId: 'test-123' },
+      body: {
+        ...lifecycleReviewBody,
+        dueDate: new Date('2024-01-01T00:00:00.000Z'),
+      },
     }
     const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 
@@ -90,10 +87,12 @@ describe('routes > review > postReviewResponse', () => {
   })
 
   test('rejects due date beyond max review interval', async () => {
-    const fixture = createFixture(postReviewResponseSchema)
-    fixture.body = {
-      ...lifecycleReviewBody,
-      dueDate: new Date('2027-01-01T12:00:00.000Z'),
+    const fixture = {
+      params: { reviewId: 'test-123' },
+      body: {
+        ...lifecycleReviewBody,
+        dueDate: new Date('2027-01-01T12:00:00.000Z'),
+      },
     }
     const res = await testPost(`/api/v3/review/test-123/response`, fixture)
 

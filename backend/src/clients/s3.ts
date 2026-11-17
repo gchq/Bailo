@@ -19,10 +19,10 @@ import {
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
-import bytes from 'bytes'
 
 import log from '../services/log.js'
 import { isBailoError } from '../types/error.js'
+import { formatBytes } from '../utils/bytes.js'
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
 
@@ -67,8 +67,8 @@ export async function putObjectStream(
       log.debug(
         {
           ...progress,
-          ...(progress.loaded && { loaded: bytes.format(progress.loaded), loadedBytes: progress.loaded }),
-          ...(progress.total && { total: bytes.format(progress.total), totalBytes: progress.total }),
+          ...(progress.loaded && { loaded: formatBytes(progress.loaded), loadedBytes: progress.loaded }),
+          ...(progress.total && { total: formatBytes(progress.total), totalBytes: progress.total }),
         },
         'Object upload is in progress',
       )

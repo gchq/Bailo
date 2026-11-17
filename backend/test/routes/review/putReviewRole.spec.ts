@@ -20,7 +20,8 @@ describe('routes > review > putReviewRole', () => {
   })
 
   test('validation tests', async () => {
-    const fixtureBad = createFixture(putReviewRoleSchema, { stringMap: { name: () => '' } })
+    const fixtureBad = createFixture(putReviewRoleSchema)
+    fixtureBad.body.name = ''
     const res = await testPut(`/api/v2/review/role/${fixtureBad.params.shortName}`, fixtureBad)
     expect(res.statusCode).toBe(400)
   })

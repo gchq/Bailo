@@ -46,7 +46,6 @@
     "@smithy/node-http-handler": "^4.0.4",
     "agenda": "^6.2.5",
     "bcryptjs": "^3.0.3",
-    "bytes": "^3.1.2",
     "clamscan": "^2.4.0",
     "config": "^5.0.1",
     "connect-mongo": "^6.0.0",
@@ -82,9 +81,7 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@anatine/zod-mock": "^3.14.0",
     "@eslint/js": "^10.0.1",
-    "@types/bytes": "^3.1.6",
     "@types/clamscan": "^2.4.0",
     "@types/config": "^4.4.0",
     "@types/express": "~5.0.6",
@@ -111,6 +108,7 @@
     "typescript-eslint": "^8.72.1",
     "vite": "^7.3.7",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.2",
+    "zod-schema-faker": "^3.0.1"
   }
 }

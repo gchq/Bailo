@@ -14,7 +14,7 @@ exports[`routes > model > putModelCard > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > model > putModelCard > audit > expected call 1`] = `"expedita"`;
+exports[`routes > model > putModelCard > audit > expected call 1`] = `"crEPtIO QuiSqUam anTE vORAgO DecipiO TesTImOniUm ThAlAsSINUs coNtra CuprEss"`;
 
 exports[`routes > model > putModelCard > audit > expected call 2`] = `
 {

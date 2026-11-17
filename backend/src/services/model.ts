@@ -1,4 +1,4 @@
-import * as _ from 'lodash-es'
+import mergeWith from 'lodash-es/mergeWith.js'
 import { type ProjectionType } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
@@ -412,7 +412,17 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
   }
 
   if (opts.users?.length) {
-    query['collaborators.entity'] = { $all: opts.users }
+    const usersAndGroupMembers = (
+      await Promise.all(
+        opts.users.map(async (entity) =>
+          entity.startsWith('group:')
+            ? [entity, ...(await authentication.getEntityMembers(entity))]
+            : authentication.getEntityMembers(entity),
+        ),
+      )
+    ).flat()
+
+    query['collaborators.entity'] = { $all: usersAndGroupMembers }
   }
 
   if (opts.filters && opts.filters.length > 0) {
@@ -653,7 +663,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     }
   }
 
-  _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+  mergeWith(model, modelDiff, (a, b) => (Array.isArray(b) ? b : undefined))
 
   // Re-check the authorisation after model has updated
   const recheckAuth = await authorisation.model(user, model, ModelAction.Update)
