@@ -6,7 +6,7 @@ const unitMultipliers = new Map<string, number>([
 ])
 
 // Accept only ordinary decimal notation with a unit; scientific and hexadecimal notation are intentionally excluded.
-const bytesPattern = /^(0|[1-9]\d{0,15})(?:\.(\d{1,15}))?(B|kB|MB|GB|TB|PB|KiB|MiB|GiB|TiB|PiB)$/i
+const bytesPattern = /^(0|[1-9]\d{0,15})(?:\.(\d{1,15}))?((?:[KMGTP]i?)?B)$/i
 
 function exactByteValue(integerPart: string, fractionPart: string, multiplier: number): number | null {
   const value = (Number(`${integerPart}${fractionPart}`) * multiplier) / 10 ** fractionPart.length
