@@ -98,7 +98,7 @@
     "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^10.15.0",
     "eslint-plugin-simple-import-sort": "^14.0.0",
-    "globals": "^17.13.0",
+    "globals": "^17.14.0",
     "madge": "^8.0.0",
     "nodemon": "^3.1.14",
     "pino-pretty": "^13.2.0",
