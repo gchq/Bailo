@@ -8,6 +8,7 @@ import {
   findModelTransferById,
   findModelTransfersByModelId,
   handleCompleteEmail,
+  handleStartEmail,
   updateModelTransfer,
 } from '../../src/services/modelTransfer.js'
 import { MirrorKind } from '../../src/types/types.js'
@@ -30,6 +31,7 @@ vi.mock('../../src/services/log.js', () => ({
 }))
 
 const smtpMock = vi.hoisted(() => ({
+  startImportNotification: vi.fn(),
   transferCompleteNotification: vi.fn(),
 }))
 vi.mock('../../src/services/smtp/smtp.js', () => smtpMock)
@@ -260,5 +262,59 @@ describe('services > modelTransfer', () => {
     await handleCompleteEmail(validExportId)
     expect(smtpMock.transferCompleteNotification).toHaveBeenCalled()
     expect(webhookMock.dispatchWebhooks).toHaveBeenCalled()
+  })
+
+  describe('handleStartEmail', () => {
+    const metadata = {
+      schemaVersion: 1,
+      sourceModelId: 'source-123',
+      mirroredModelId: 'model-123',
+      exporter: 'user:exporter',
+      exportId: validExportId,
+      semvers: ['1.0.0'],
+    }
+
+    test('upserts the transfer and sends notification for a new transfer', async () => {
+      ModelTransferModelMock.findOneAndUpdate.mockResolvedValueOnce(null)
+      smtpMock.startImportNotification.mockResolvedValueOnce(undefined)
+
+      await handleStartEmail(metadata, 'peer-1')
+
+      expect(ModelTransferModelMock.findOneAndUpdate).toHaveBeenCalledWith(
+        { exportId: validExportId },
+        { exportId: validExportId, modelId: 'model-123', peerId: 'peer-1', createdBy: 'user:exporter' },
+        { upsert: true, setDefaultsOnInsert: true },
+      )
+      expect(smtpMock.startImportNotification).toHaveBeenCalledWith(metadata)
+    })
+
+    test('does not send notification when the transfer already exists', async () => {
+      ModelTransferModelMock.findOneAndUpdate.mockResolvedValueOnce({ exportId: validExportId })
+
+      await handleStartEmail(metadata)
+
+      expect(smtpMock.startImportNotification).not.toHaveBeenCalled()
+    })
+
+    test('does not wait for the notification to be sent', async () => {
+      ModelTransferModelMock.findOneAndUpdate.mockResolvedValueOnce(null)
+      smtpMock.startImportNotification.mockReturnValueOnce(new Promise(() => {}))
+
+      await expect(handleStartEmail(metadata)).resolves.toBeUndefined()
+    })
+
+    test('logs and does not throw when the notification fails', async () => {
+      ModelTransferModelMock.findOneAndUpdate.mockResolvedValueOnce(null)
+      const error = new Error('SMTP failure')
+      smtpMock.startImportNotification.mockRejectedValueOnce(error)
+
+      await expect(handleStartEmail(metadata)).resolves.toBeUndefined()
+      await vi.waitFor(() =>
+        expect(logMock.warn).toHaveBeenCalledWith(
+          { error, exportId: validExportId, modelId: 'model-123' },
+          'Error when sending import start notification.',
+        ),
+      )
+    })
   })
 })

@@ -210,10 +210,40 @@ describe('services > smtp > smtp', () => {
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
   })
 
+  const importMetadata = {
+    schemaVersion: 1,
+    sourceModelId: 'sourceModelId',
+    mirroredModelId: 'modelId',
+    exporter: 'user:exporter',
+    exportId: 'exportId',
+  }
+
   test('that an email is sent after an import has begun', async () => {
-    await startImportNotification('modelId')
+    await startImportNotification({ ...importMetadata, semvers: ['1.0.0', '1.0.1'] })
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
+    expect(emailBuilderMock.buildEmail).toHaveBeenCalledWith(
+      expect.stringContaining('has begun importing'),
+      [
+        { title: 'Export ID', data: 'exportId' },
+        { title: 'Mirrored Model ID', data: 'modelId' },
+        { title: 'Source Model ID', data: 'sourceModelId' },
+        { title: 'Exported By', data: 'user:exporter' },
+        { title: 'Releases', data: '1.0.0<br />1.0.1' },
+      ],
+      expect.anything(),
+    )
+  })
+
+  test('that an import begun email omits releases when there are no semvers', async () => {
+    await startImportNotification(importMetadata)
+
+    expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
+    expect(emailBuilderMock.buildEmail).toHaveBeenCalledWith(
+      expect.stringContaining('has begun importing'),
+      expect.not.arrayContaining([expect.objectContaining({ title: 'Releases' })]),
+      expect.anything(),
+    )
   })
 
   test('that an email is sent after an import has complete', async () => {

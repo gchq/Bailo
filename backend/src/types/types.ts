@@ -395,7 +395,7 @@ export type MirrorKindKeys<T extends keyof typeof MirrorKind | void = void> = T 
 export type MirrorMetadata = DocumentsMirrorMetadata | FileMirrorMetadata | ImageMirrorMetadata
 export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
 
-export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
+export type MirrorExportLogData = Record<string, unknown> & { exportId: string; semvers?: string[] }
 export type MirrorImportLogData = Record<string, unknown> & { importId: string }
 
 export const isMongoDocumentMirrorInformation = (

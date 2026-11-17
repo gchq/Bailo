@@ -548,6 +548,7 @@ const mirrorMetadataBaseSchema = z.object({
   mirroredModelId: z.string(),
   exporter: z.string(),
   exportId: z.string(),
+  semvers: z.array(z.string()).optional(),
 })
 export const mirrorMetadataSchema = z.union([
   mirrorMetadataBaseSchema.extend({ importKind: z.literal(MirrorKind.Documents) }),

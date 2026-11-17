@@ -11,6 +11,7 @@ import { WebhookEvent } from '../models/Webhook.js'
 import { MirrorKind, type MirrorKindKeys } from '../types/types.js'
 import { NotFound } from '../utils/error.js'
 import log from './log.js'
+import { type BaseMirrorMetadata } from './mirroredModel/importers/base.js'
 import { getModelById } from './model.js'
 import { startImportNotification, transferCompleteNotification } from './smtp/smtp.js'
 import { dispatchWebhooks } from './webhook.js'
@@ -217,15 +218,19 @@ export async function deleteModelTransfer(exportId: string): Promise<string> {
   return transfer.exportId
 }
 
-export async function handleStartEmail(exportId: string, modelId: string, createdBy: string, peerId?: string) {
-  const updated = await ModelTransferModel.findOneAndUpdate(
+export async function handleStartEmail(metadata: BaseMirrorMetadata, peerId?: string) {
+  const { exportId, mirroredModelId, exporter } = metadata
+  const existing = await ModelTransferModel.findOneAndUpdate(
     { exportId },
-    { exportId, modelId, peerId, createdBy },
+    { exportId, modelId: mirroredModelId, peerId, createdBy: exporter },
     { upsert: true, setDefaultsOnInsert: true },
   )
 
-  if (!updated) {
-    await startImportNotification(modelId)
+  if (!existing) {
+    // Not `await`ed for fire-and-forget approach
+    startImportNotification(metadata).catch((error) =>
+      log.warn({ error, exportId, modelId: mirroredModelId }, 'Error when sending import start notification.'),
+    )
   }
 }
 

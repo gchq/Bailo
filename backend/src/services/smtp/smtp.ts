@@ -16,6 +16,7 @@ import { BadReq, NotFound } from '../../utils/error.js'
 import { entryKindForRedirect } from '../../utils/routerUtils.js'
 import { resolveKindToUrl, toTitleCase } from '../../utils/string.js'
 import log from '../log.js'
+import { type BaseMirrorMetadata } from '../mirroredModel/importers/base.js'
 import { getModelByIdNoAuth, getRoleEntities } from '../model.js'
 import { checkAccessRequestsApproved } from '../response.js'
 import { buildEmail, type EmailContent, type Info } from './emailBuilder.js'
@@ -396,24 +397,31 @@ export async function notifyReviewRoleOfAdditionalReview(user: UserInterface, re
   return
 }
 
-export async function startImportNotification(modelId: string) {
+export async function startImportNotification(metadata: BaseMirrorMetadata) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
 
-  const mirroredModel = await getModelByIdNoAuth(modelId)
-  const emailContent = await buildEmail(
-    `${mirroredModel.name} has begun importing`,
-    [],
-    [
-      { name: 'See Model', url: `${appBaseUrl}/model/${modelId}` },
-      { name: 'See Releases', url: `${appBaseUrl}/model/${modelId}?tab=releases` },
-    ],
-  )
+  const mirroredModelId = metadata.mirroredModelId
+  const mirroredModel = await getModelByIdNoAuth(mirroredModelId)
 
-  const model = await getModelByIdNoAuth(modelId)
-  const ownerEntities = getRoleEntities(['owner'], model.collaborators).owner
+  const infoArray: Info[] = [
+    { title: 'Export ID', data: metadata.exportId },
+    { title: 'Mirrored Model ID', data: mirroredModelId },
+    { title: 'Source Model ID', data: metadata.sourceModelId },
+    { title: 'Exported By', data: metadata.exporter },
+  ]
+  if (metadata.semvers && metadata.semvers.length > 0) {
+    infoArray.push({ title: 'Releases', data: metadata.semvers.join(LINE_BREAK) })
+  }
+
+  const emailContent = await buildEmail(`${mirroredModel.name} has begun importing`, infoArray, [
+    { name: 'See Model', url: `${appBaseUrl}/model/${mirroredModelId}` },
+    { name: 'See Releases', url: `${appBaseUrl}/model/${mirroredModelId}?tab=releases` },
+  ])
+
+  const ownerEntities = getRoleEntities(['owner'], mirroredModel.collaborators).owner
   await dispatchEmail(ownerEntities, emailContent)
 }
 
