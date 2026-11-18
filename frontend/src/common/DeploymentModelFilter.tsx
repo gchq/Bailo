@@ -12,24 +12,25 @@ interface DeploymentModelFilterProps {
 
 export default function DeploymentModelFilter({ selectedModelIds, onChange }: DeploymentModelFilterProps) {
   const uiConfig = useContext(UiConfigContext)
-  const { entries, isEntriesLoading, isEntriesError } = useListEntries(
-    EntryKind.MODEL,
-    [],
-    '',
-    [],
-    [],
-    uiConfig.deploymentAssessments.deployableModelState
+  const { entries, isEntriesLoading, isEntriesError } = useListEntries({
+    kind: EntryKind.MODEL,
+    roles: [],
+    task: '',
+    libraries: [],
+    organisations: [],
+    states: uiConfig.deploymentAssessments.deployableModelState
       ? [uiConfig.deploymentAssessments.deployableModelState]
       : undefined,
-    [],
-    [],
-    '',
-    false,
-    undefined,
-    true,
-    false,
-    'public',
-  )
+    peers: [],
+    users: [],
+    search: '',
+    allowTemplating: false,
+    schemaId: undefined,
+    titleOnly: true,
+    adminAccess: false,
+    visibility: 'public',
+    enabled: true,
+  })
 
   const options = useMemo(() => {
     const entriesById = new Map(entries.map((entry) => [entry.id, entry]))

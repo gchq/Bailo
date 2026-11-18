@@ -44,25 +44,25 @@ export default function ModelSelector({
     entries: models,
     isEntriesLoading: isModelsLoading,
     isEntriesError: isModelsError,
-  } = useListEntries(
-    [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL],
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    uiConfig.deploymentAssessments.deployableModelState
+  } = useListEntries({
+    kind: [EntryKind.MODEL, EntryKind.MIRRORED_MODEL, EntryKind.UNTRUSTED_MODEL],
+    roles: undefined,
+    task: undefined,
+    libraries: undefined,
+    organisations: undefined,
+    states: uiConfig.deploymentAssessments.deployableModelState
       ? [uiConfig.deploymentAssessments.deployableModelState]
       : undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    'public',
-    true,
-  )
+    peers: undefined,
+    users: undefined,
+    search: undefined,
+    allowTemplating: undefined,
+    schemaId: undefined,
+    titleOnly: undefined,
+    adminAccess: false,
+    visibility: 'public',
+    enabled: true,
+  })
 
   const modelsById = useMemo(() => new Map(models.map((model) => [model.id, model])), [models])
 
