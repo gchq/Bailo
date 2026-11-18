@@ -5,18 +5,17 @@ import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import AccessRequestModel, { type AccessRequestDoc, type AccessRequestInterface } from '../models/AccessRequest.js'
-import { EntryKind, type ModelDoc, SystemRoles } from '../models/Model.js'
-import ResponseModel, { Decision, type DecisionKeys, ResponseKind } from '../models/Response.js'
+import { EntryKind, type ModelDoc } from '../models/Model.js'
+import ResponseModel, { type ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { type UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
-import { ReviewKind, SchemaKind } from '../types/enums.js'
+import { SchemaKind } from '../types/enums.js'
 import { type AccessRequestUserPermissions } from '../types/types.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
-import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
@@ -219,10 +218,9 @@ export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
 export async function updateAccessRequest(
   user: UserInterface,
   accessRequestId: string,
-  diff: UpdateAccessRequestParams,
+  diff: Partial<UpdateAccessRequestParams>,
 ) {
   const accessRequest = await getAccessRequestById(user, accessRequestId)
-
   const model = await getModelById(user, accessRequest.modelId)
 
   const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
@@ -230,47 +228,20 @@ export async function updateAccessRequest(
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
-  const latestReview = await ReviewModel.findOne({
-    accessRequestId,
-    kind: ReviewKind.Access,
-  }).sort({ createdAt: -1 })
+  if (diff.metadata) {
+    // Validate the incoming content, not what is already stored
+    const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
+    if (!valid) {
+      throw BadReq('Access Request Metadata could not be validated against the schema.', {
+        errors,
+      })
+    }
 
-  const parentIds = latestReview ? [latestReview._id, accessRequest._id] : accessRequest._id
-
-  const responses = await ResponseModel.find({ parentId: parentIds }).sort({
-    createdAt: -1,
-  })
-
-  const latestDecision = responses.filter((r) => r.kind === ResponseKind.Review).at(0)?.decision as
-    DecisionKeys | undefined
-
-  const newResponse =
-    latestDecision === Decision.Approve && latestReview
-      ? new ResponseModel({
-          entity: toEntity('user', user.dn),
-          kind: ResponseKind.Review,
-          role: SystemRoles.Owner,
-          parentId: latestReview._id,
-          decision: Decision.Undo,
-          comment: "Automatically revoked this Access Request's approval status by making changes",
-        })
-      : undefined
-
-  // Validate the incoming content, not what is already stored
-  const { valid, errors } = await validateContentAgainstSchema(accessRequest.schemaId, diff.metadata)
-  if (!valid) {
-    throw BadReq('Access Request Metadata could not be validated against the schema.', {
-      errors,
-    })
+    accessRequest.metadata = diff.metadata
+    accessRequest.markModified('metadata')
   }
 
-  accessRequest.metadata = diff.metadata
-  accessRequest.markModified('metadata')
-
-  await useTransaction([
-    (session) => accessRequest.save({ session }),
-    ...(newResponse ? [(session) => newResponse.save({ session })] : []),
-  ])
+  await accessRequest.save()
 
   return accessRequest
 }
