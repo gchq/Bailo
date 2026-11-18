@@ -7,6 +7,7 @@ import {
   type CollaboratorEntry,
   EntryKind,
   type EntryKindKeys,
+  EntryVisibility,
   type EntryVisibilityKeys,
   type SystemRolesKeys,
 } from '../models/Model.js'
@@ -80,6 +81,11 @@ export interface EntryUserPermissions {
 export interface AccessRequestUserPermissions {
   editAccessRequest: PermissionDetail
   deleteAccessRequest: PermissionDetail
+}
+
+export interface DeploymentAssessmentUserPermissions {
+  editDeploymentAssessment: PermissionDetail
+  deleteDeploymentAssessment: PermissionDetail
 }
 
 export const FederationState = {
@@ -239,6 +245,11 @@ export interface UiConfig {
     enabled: boolean
   }
 
+  deploymentAssessments: {
+    /** Only models in this state can be included in a Deployment Assessment. Set to null to allow any state */
+    deployableModelState: string | null
+  }
+
   lifecycle: {
     maxReviewInterval: string
   }
@@ -280,6 +291,7 @@ export interface EntrySearchOptions {
   schemaId: string
   adminAccess: boolean
   titleOnly: boolean
+  visibility: EntryVisibilityKeys
 }
 
 export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
@@ -298,6 +310,7 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   adminAccess: strictCoerceBoolean(z.boolean()).optional(),
   peers: coerceArray(z.array(z.string())).optional(),
   titleOnly: strictCoerceBoolean(z.boolean()).optional(),
+  visibility: z.nativeEnum(EntryVisibility).optional(),
 })
 
 export const EntryFilter = {

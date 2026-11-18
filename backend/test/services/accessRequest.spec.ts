@@ -361,6 +361,7 @@ describe('services > accessRequest', () => {
 
   test('updateAccessRequest > validation error', async () => {
     schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'mockedId' })
 
     await expect(() =>
       updateAccessRequest({} as any, 'test', { metadata: { overview: { name: 'test', entities: [] } } } as any),
@@ -374,6 +375,7 @@ describe('services > accessRequest', () => {
       markModified: vi.fn(),
       save: vi.fn(),
     }
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'mockedId' })
     AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
     const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
 

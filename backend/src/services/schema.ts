@@ -48,7 +48,85 @@ export async function searchSchemas(
     ...(reviewRoles && { reviewRoles }),
     ...(ids && { id: ids }),
   }).sort({ createdAt: -1 })
-  return schemas
+
+  return schemas.map((schema) => {
+    if (schema.kind === SchemaKind.DeploymentAssessment) {
+      schema.jsonSchema = addMandatoryDeploymentAssessmentSections(schema.jsonSchema)
+    }
+    return schema
+  })
+}
+
+/** Adds the hard-coded Model Overview and Deployment Sign-Off sections the application relies on, merging them with any matching sections in the schema. */
+function addMandatoryDeploymentAssessmentSections(jsonSchema: JsonSchema) {
+  const requiredProperties = Array.isArray((jsonSchema as any).required)
+    ? ((jsonSchema as any).required as string[])
+    : []
+
+  const existingModelOverviewRequired: string[] = Array.isArray((jsonSchema as any).properties?.modelOverview?.required)
+    ? (((jsonSchema as any).properties!.modelOverview as any).required as string[])
+    : []
+
+  const mergedModelOverviewRequired = Array.from(new Set<string>(['modelIds', ...existingModelOverviewRequired]))
+
+  const existingSignOffRequired: string[] = Array.isArray((jsonSchema as any).properties?.signOff?.required)
+    ? (((jsonSchema as any).properties!.signOff as any).required as string[])
+    : []
+
+  const mergedSignOffRequired = Array.from(new Set<string>(['riskOwners', ...existingSignOffRequired]))
+
+  return {
+    ...structuredClone(jsonSchema),
+    properties: {
+      ...((jsonSchema as any).properties ?? {}),
+      modelOverview: {
+        title: 'Model Overview',
+        type: 'object',
+        properties: {
+          modelIds: {
+            title: 'List all models assigned to this Deployment Assessment',
+            type: 'array',
+            items: {
+              type: 'string',
+              minLength: 1,
+            },
+            minItems: 1,
+            uniqueItems: true,
+            widget: 'modelSelector',
+          },
+          ...(((jsonSchema as any).properties?.modelOverview?.properties as object) ?? {}),
+        },
+        required: mergedModelOverviewRequired,
+        additionalProperties: false,
+      },
+      signOff: {
+        title: 'Deployment Sign-Off',
+        type: 'object',
+        properties: {
+          riskOwners: {
+            title: 'Who is the Deployment Risk Owner attached to this Deployment Assessment?',
+            type: 'array',
+            items: {
+              type: 'string',
+              minLength: 1,
+            },
+            minItems: 1,
+            maxItems: 1,
+            uniqueItems: true,
+            widget: 'entitySelector',
+          },
+          ...(((jsonSchema as any).properties?.signOff?.properties as object) ?? {}),
+        },
+        required: mergedSignOffRequired,
+        additionalProperties: false,
+      },
+    },
+    required: [
+      'signOff',
+      'modelOverview',
+      ...requiredProperties.filter((property) => !['signOff', 'modelOverview'].includes(property)),
+    ],
+  }
 }
 
 export async function getSchemaById(schemaId: string, modelState?: string): Promise<SchemaInterface> {
@@ -69,6 +147,10 @@ export async function getSchemaById(schemaId: string, modelState?: string): Prom
 
   const schemaObject = schema.toObject()
   schemaObject.jsonSchema = structuredClone(schema.jsonSchema)
+
+  if (schema.kind === SchemaKind.DeploymentAssessment) {
+    schemaObject.jsonSchema = addMandatoryDeploymentAssessmentSections(schemaObject.jsonSchema)
+  }
 
   schemaCache.set(JSON.stringify({ schemaId, modelState }), schemaObject)
   return schemaObject
@@ -275,38 +357,66 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
   return schema
 }
 
-export async function addDefaultSchemas() {
-  for (const schema of config.defaultSchemas.modelCards) {
+async function addSchemas(schemas: DefaultSchema[], kind: SchemaKindKeys) {
+  for (const schema of schemas) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
     await SchemaModel.replaceOne(
       { id: schema.id },
-      { ...schema, kind: SchemaKind.Model, active: true, hidden: false, deleted: false },
-      { upsert: true },
-    )
-  }
-
-  for (const schema of config.defaultSchemas.dataCards) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    await SchemaModel.replaceOne(
-      { id: schema.id },
-      { ...schema, kind: SchemaKind.DataCard, active: true, hidden: false, deleted: false },
-      { upsert: true },
-    )
-  }
-
-  for (const schema of config.defaultSchemas.accessRequests) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    await SchemaModel.replaceOne(
-      { id: schema.id },
-      { ...schema, kind: SchemaKind.AccessRequest, active: true, hidden: false, deleted: false },
+      { ...schema, kind, active: true, hidden: false, deleted: false },
       { upsert: true },
     )
   }
 }
 
-export async function validateContentAgainstSchema(schemaId: string, content: unknown, modelState?: string) {
-  const schema = await getSchemaById(schemaId, modelState)
-  const result = jsonSchemaValidator.validate(content, schema.jsonSchema, {
+export async function addDefaultSchemas() {
+  await addSchemas(config.defaultSchemas.modelCards, SchemaKind.Model)
+  await addSchemas(config.defaultSchemas.dataCards, SchemaKind.DataCard)
+  await addSchemas(config.defaultSchemas.accessRequests, SchemaKind.AccessRequest)
+  await addSchemas(config.defaultSchemas.deploymentAssessments, SchemaKind.DeploymentAssessment)
+}
+
+function makeSchemaOptional(jsonSchema: JsonSchema) {
+  const optionalSchema = structuredClone(jsonSchema)
+  const requiredForDraft = new WeakSet<object>()
+  traverse(optionalSchema, {
+    allKeys: true,
+    cb: (subschema) => {
+      if (subschema && typeof subschema === 'object') {
+        delete subschema.required
+        delete subschema.minItems
+      }
+    },
+  })
+  traverse(optionalSchema, {
+    allKeys: true,
+    cb: {
+      post: (subschema, pointer, _root, _parentPointer, parentKeyword, parentSchema) => {
+        if (!subschema || typeof subschema !== 'object') {
+          return
+        }
+
+        if (subschema.requiredForDraft === true || requiredForDraft.has(subschema)) {
+          addToParentRequired(pointer, requiredForDraft, parentKeyword, parentSchema)
+        }
+      },
+    },
+  })
+  return optionalSchema
+}
+
+interface ValidateContentAgainstSchemaOptions {
+  modelState?: string
+  draft?: boolean
+}
+
+export async function validateContentAgainstSchema(
+  schemaId: string,
+  content: unknown,
+  options: ValidateContentAgainstSchemaOptions = {},
+) {
+  const schema = await getSchemaById(schemaId, options.modelState)
+  const jsonSchema = options.draft ? makeSchemaOptional(schema.jsonSchema) : schema.jsonSchema
+  const result = jsonSchemaValidator.validate(content, jsonSchema, {
     required: true,
   })
   return {

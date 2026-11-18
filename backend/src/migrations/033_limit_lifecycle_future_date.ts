@@ -19,7 +19,9 @@ export async function up() {
     const previousDueDate = review.dueDate as Date
     review.dueDate = maxDate
     await review.save()
-    modifiedReviews.push({ modelId: review.modelId, previousDueDate })
+    if (review.modelId) {
+      modifiedReviews.push({ modelId: review.modelId, previousDueDate })
+    }
   }
 
   return { maxDate, modifiedReviews }

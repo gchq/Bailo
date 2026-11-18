@@ -277,7 +277,7 @@ export default function NewRelease() {
                       sx={{ width: 'fit-content' }}
                       data-test='createReleaseButton'
                     >
-                      Publish release
+                      Submit for review
                     </Button>
                   </Stack>
                   <MessageAlert message={errorMessage} severity='error' />

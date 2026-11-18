@@ -252,6 +252,9 @@ config:
   log:
     level: trace
   ui:
+    deploymentAssessments:
+      deployableModelState: 'Production'
+
     banner:
       enabled: false
       text: "BAILO"

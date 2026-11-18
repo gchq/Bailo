@@ -4,10 +4,12 @@ import { type ReviewInterface } from '../../../src/models/Review.js'
 import { type UserInterface } from '../../../src/models/User.js'
 import {
   notifyLifeCycleReview,
+  notifyModelOwnersOfDeploymentAssessment,
   notifyReleaseOnApproval,
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
   notifyReviewRoleOfAdditionalReview,
+  notifyRiskOwnerOfDeploymentAssessment,
   requestReviewForAccessRequest,
   requestReviewForRelease,
   startImportNotification,
@@ -15,7 +17,13 @@ import {
 } from '../../../src/services/smtp/smtp.js'
 import { fromEntity } from '../../../src/utils/entity.js'
 import { setTestConfig } from '../../testUtils/setupTestConfig.js'
-import { testRelease, testReleaseReview, testReviewResponse } from '../../testUtils/testModels.js'
+import {
+  testDeploymentAssessment,
+  testModel,
+  testRelease,
+  testReleaseReview,
+  testReviewResponse,
+} from '../../testUtils/testModels.js'
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -160,6 +168,20 @@ describe('services > smtp > smtp', () => {
   test('that an email is not sent after a response for a an access request review if disabled in config', async () => {
     setTestConfig({ smtp: { enabled: false } })
     await notifyReviewResponseForAccess(testReviewResponse as any, access)
+
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
+  })
+
+  test('that an email is not sent to a Deployment Risk Owner after a Deployment Assessment is created if disabled in config', async () => {
+    setTestConfig({ smtp: { enabled: false } })
+    await notifyRiskOwnerOfDeploymentAssessment('user:test', testDeploymentAssessment, 'user:user')
+
+    expect(transporterMock.sendMail).not.toHaveBeenCalled()
+  })
+
+  test('that an email is not sent to model owners after a Deployment Assessment is created if disabled in config', async () => {
+    setTestConfig({ smtp: { enabled: false } })
+    await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
 
     expect(transporterMock.sendMail).not.toHaveBeenCalled()
   })
@@ -320,13 +342,20 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent to all stakeholders on release', async () => {
-    getModelByIdMock.mockReturnValue({
-      id: 'modelId',
-      name: 'Test Model',
-      kind: 'model',
-      collaborators: [{ entity: 'user:user', roles: ['owner'] }],
-    } as any)
+    getModelByIdMock.mockReturnValue(testModel)
     await notifyReleaseOnApproval('modelId', release)
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to a Deployment Risk Owner on Deployment Assessment creation', async () => {
+    getModelByIdMock.mockReturnValue(testModel)
+    await notifyRiskOwnerOfDeploymentAssessment('user:user', testDeploymentAssessment, 'user:user')
+    expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
+  })
+
+  test('that an email is sent to all model owners on Deployment Assessment creation', async () => {
+    getModelByIdMock.mockReturnValue(testModel)
+    await notifyModelOwnersOfDeploymentAssessment(['user:user'], testDeploymentAssessment, testModel, 'user:user')
     expect(transporterMock.sendMail).toHaveBeenCalledTimes(1)
   })
 })

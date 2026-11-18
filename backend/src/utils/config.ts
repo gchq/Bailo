@@ -340,6 +340,8 @@ export interface Config {
     accessRequests: DefaultSchema[]
     /** Data card schemas that define the data card forms*/
     dataCards: DefaultSchema[]
+    /** Deployment Assessment schemas that define the Deployment Assessment forms */
+    deploymentAssessments: DefaultSchema[]
   }
 
   /** Roles that can be used after startup */

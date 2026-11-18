@@ -1,0 +1,68 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Using Deployment Assessments
+
+> **Common questions this page answers:**
+>
+> - What are Deployment Assessments?
+> - How do I create a Deployment Assessment?
+> - How do I publish a Deployment Assessment?
+
+## What are Deployment Assessments?
+
+Deployment Assessments are used to document how one or more models will be deployed. They are purely documentation and
+do not grant access to model artefacts.
+
+Deployment Assessments can be viewed on the **Deployment Assessments** page, which lists all assessments, and on the
+**Deployment Assessments** tab of a model, which lists the published assessments that include that model.
+
+## Creating a Deployment Assessment
+
+To create a Deployment Assessment:
+
+1. Navigate to the **Deployment Assessments** page.
+2. Select **Create Deployment Assessment**.
+3. Choose the appropriate assessment schema.
+4. Complete the assessment form, providing all required information. Required fields are clearly marked.
+5. Select **Save draft** to keep working on the assessment later, or **Publish** to create and publish it immediately.
+
+### Which models can be included?
+
+You can only include models that you have permission to view. Deployment Assessments can only include public models, so
+private models are not available for selection. Your administrator may also restrict Deployment Assessments to models in
+a particular state, such as `Production`. If this applies, models in any other state cannot be included.
+
+## Drafts and publishing
+
+A draft Deployment Assessment can be edited as many times as needed. Required fields do not need to be completed while
+the assessment is a draft.
+
+When the assessment is complete, open it and select **Publish** in the draft banner. All required fields must be
+completed before an assessment can be published. Publishing cannot be undone - a published assessment cannot be returned
+to a draft.
+
+The Deployment Risk Owner (if they are not the creator) and the owners of the included models are notified by email when
+an assessment is published.
+
+A published Deployment Assessment can still be edited or deleted by the creator and the Deployment Risk Owners. Draft
+Deployment Assessments are only visible to them, and do not appear in search results for anyone else.
+
+## Who can do what
+
+| Action                                 | Who can do it                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| Create a Deployment Assessment         | Any user                                                                     |
+| View a published Deployment Assessment | Any user                                                                     |
+| View a draft Deployment Assessment     | The creator and the Deployment Risk Owners                                   |
+| Edit or publish an assessment          | The creator and the Deployment Risk Owners                                   |
+| Delete an assessment                   | The creator and the Deployment Risk Owners                                   |
+| Comment on an assessment               | Anyone who can view it - for a draft, the creator and Deployment Risk Owners |
+
+Being an owner or manager of an included model does not grant any additional permissions on a Deployment Assessment.
+
+## Commenting on a Deployment Assessment
+
+Comments can be added at the bottom of a Deployment Assessment page to discuss its contents. Comments can still be added
+after an assessment has been published.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

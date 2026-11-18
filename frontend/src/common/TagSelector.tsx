@@ -1,9 +1,10 @@
 import CancelIcon from '@mui/icons-material/Cancel'
-import { Autocomplete, Chip, Grid, TextField } from '@mui/material'
+import { Autocomplete, Chip, Grid } from '@mui/material'
 import { createFilterOptions } from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import { useGetPopularEntryTags } from 'actions/entry'
 import { useContext, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import { type RestrictedActionKeys } from 'types/types'
 
@@ -64,7 +65,7 @@ export default function TagSelector({
           disabled={!canEdit}
           sx={{ marginBottom: 2, marginTop: 1, maxWidth: 240 }}
           renderInput={(params) => (
-            <TextField
+            <LimitedTextField
               {...params}
               label='Add a tag'
               size='small'

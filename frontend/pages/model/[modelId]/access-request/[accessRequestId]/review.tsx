@@ -32,6 +32,7 @@ export default function AccessRequestReview() {
     modelId: modelId as string,
     accessRequestId: `${accessRequestId}`,
   })
+  const [reviewComment, setReviewComment] = useState('')
 
   async function handleSubmit(decision: DecisionKeys, comment: string, role: string) {
     setErrorMessage('')
@@ -112,6 +113,8 @@ export default function AccessRequestReview() {
               reviews={reviews}
               loading={isReviewButtonLoading}
               modelId={modelId as string}
+              reviewComment={reviewComment}
+              onReviewCommentChange={setReviewComment}
             />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />

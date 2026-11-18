@@ -1,0 +1,200 @@
+import { readFileSync } from 'fs'
+import Handlebars from 'handlebars'
+import { Marked } from 'marked'
+import { resolve } from 'path'
+import sanitizeHtml from 'sanitize-html'
+
+import { type CollaboratorEntry, type ModelInterface } from '../models/Model.js'
+import { type ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
+import { type DecisionKeys, type ResponseInterface } from '../models/Response.js'
+import ReviewModel from '../models/Review.js'
+import ReviewRoleModel from '../models/ReviewRole.js'
+import { type UserInterface } from '../models/User.js'
+import { type GetModelCardVersionOptionsKeys } from '../types/enums.js'
+import { type Fragment, recursiveRender } from '../utils/export.js'
+import { outdent } from '../utils/string.js'
+import { getDeploymentAssessmentById } from './deploymentAssessment.js'
+import { getModelById, getModelCard, getRoleEntities } from './model.js'
+import { getSchemaById } from './schema.js'
+
+export const htmlTemplate = Handlebars.compile(
+  readFileSync(resolve(import.meta.dirname, 'templates', 'htmlExport.hbs'), 'utf-8'),
+)
+
+const markdownConverter = new Marked({ gfm: true, breaks: true })
+export type ReviewExport = {
+  semver?: string
+  collaborator: string
+  decision: string | DecisionKeys
+} & Pick<ResponseInterface, 'role' | 'comment' | 'updatedAt'>
+
+type MarkdownTableDefinition<T> = {
+  title: string
+  columns: Array<{
+    heading: string
+    value: (row: T) => unknown
+  }>
+}
+
+export async function getModelCardHtml(
+  user: UserInterface,
+  modelId: ModelInterface['id'],
+  version: number | GetModelCardVersionOptionsKeys,
+) {
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw new Error('Failed to export model card. Model not found.')
+  }
+
+  const modelCard = await getModelCard(user, modelId, version)
+  if (!modelCard) {
+    throw new Error('Failed to find model card to export.')
+  }
+
+  const reviewExports = await createReleaseReviewExports(modelId)
+
+  const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId, deleted: model.deleted }
+  const html = await renderToHtml(model, modelCardRevision, reviewExports)
+
+  return { html, modelCard }
+}
+
+export async function renderToMarkdown(
+  model: ModelInterface,
+  modelCardRevision: ModelCardRevisionInterface,
+  reviewExports: ReviewExport[],
+) {
+  if (!model.card) {
+    throw new Error('Trying to export model with no corresponding card')
+  }
+
+  const schema = await getSchemaById(modelCardRevision.schemaId)
+  if (!schema) {
+    throw new Error('Trying to export model with no corresponding card')
+  }
+
+  const reviewTable = renderMarkdownTable(reviewExports, {
+    title: 'Review status',
+    columns: [
+      { heading: 'Version', value: (review) => review.semver },
+      { heading: 'Collaborator', value: (review) => review.collaborator },
+      { heading: 'Role', value: (review) => review.role },
+      { heading: 'Decision', value: (review) => review.decision },
+      { heading: 'Comment', value: (review) => review.comment?.replace(/(\r\n|\n|\r)/gm, ' ') },
+      { heading: 'Last Updated', value: (review) => review.updatedAt },
+    ],
+  })
+
+  let output = outdent`
+    # ${model.name}\n
+    ${model.description}\n\n
+    ## Model State\n
+    ${model.state ? model.state : 'State Not Set'}\n\n
+    ## Model Senior Responsible Officers\n
+    ${getEntitiesWithRole('msro', model.collaborators)}\n\n
+    ## Model Technical Reviewers\n
+    ${getEntitiesWithRole('mtr', model.collaborators)}\n
+    ${reviewTable}
+  `
+  const reviewRoles = await ReviewRoleModel.find({ reviewRoles: schema.reviewRoles })
+
+  if (Array.isArray(reviewRoles)) {
+    for (const reviewRole of reviewRoles) {
+      output += `
+      ## ${reviewRole.name}\n
+      ${getEntitiesWithRole(reviewRole.shortName, model.collaborators)}\n\n
+    `
+    }
+  } else {
+    output += `## No reviewers assigned\n\n`
+  }
+
+  // 'Fragment' is a more strictly typed version of 'JsonSchema'.
+  output = recursiveRender(modelCardRevision.metadata, schema.jsonSchema as Fragment, output)
+  return output
+}
+
+function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
+  return getRoleEntities([role], collaborators)[role].join('\n')
+}
+
+async function createReleaseReviewExports(modelId: string) {
+  const reviews = await ReviewModel.aggregate([
+    {
+      $match: {
+        modelId: modelId,
+        kind: 'release',
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'response',
+      },
+    },
+    {
+      $unwind: '$response',
+    },
+  ])
+
+  const reviewExports: ReviewExport[] = reviews.map((review) => ({
+    semver: review.semver,
+    collaborator: review.response.entity,
+    role: review.response.role,
+    decision: review.response.decision,
+    comment: review.response.comment,
+    updatedAt: review.response.updatedAt,
+  }))
+
+  return reviewExports
+}
+
+export async function renderToHtml(
+  model: ModelInterface,
+  modelCardRevision: ModelCardRevisionInterface,
+  reviewExports: ReviewExport[],
+) {
+  const markdown = await renderToMarkdown(model, modelCardRevision, reviewExports)
+  const html = await markdownConverter.parse(markdown)
+  const body = sanitizeHtml(html)
+  const sanitisedBody = sanitizeHtml(body)
+
+  return htmlTemplate({ body: sanitisedBody })
+}
+
+function renderMarkdownTable<T>(rows: T[], definition: MarkdownTableDefinition<T>) {
+  if (!rows || rows.length === 0) {
+    return null
+  }
+
+  const headings = definition.columns.map(({ heading }) => heading).join(' | ')
+  const alignment = definition.columns.map(() => ':-----:').join(' | ')
+  const tableRows = rows.map((row) => `|${definition.columns.map(({ value }) => value(row)).join('|')}|`).join('\n')
+
+  return `### ${definition.title}\n\n| ${headings} |\n| ${alignment} |\n${tableRows}\n`
+}
+
+export async function getDeploymentAssessmentHtml(user: UserInterface, deploymentAssessmentId: string) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const schema = await getSchemaById(deploymentAssessment.schemaId)
+  let output = outdent`
+      # ${deploymentAssessment.name}\n
+      ### Created by
+      ${deploymentAssessment.createdBy}\n
+  `
+  output += outdent`
+      ### Status
+      ${deploymentAssessment.draft ? 'Draft' : 'Published'}\n
+    `
+
+  output += '\n\n---\n'
+
+  output = recursiveRender(deploymentAssessment.metadata, schema.jsonSchema as Fragment, output)
+  const html = await markdownConverter.parse(output)
+  const body = sanitizeHtml(html)
+  const sanitisedBody = sanitizeHtml(body)
+
+  return { html: htmlTemplate({ body: sanitisedBody }), deploymentAssessment }
+}
