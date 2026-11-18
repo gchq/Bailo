@@ -5,6 +5,7 @@ import {
   dropModelIdFromTokens,
   findTokenByAccessKey,
   findUserTokens,
+  getTokenLifetimeMs,
   getTokensForModel,
   removeToken,
 } from '../../src/services/token.js'
@@ -16,6 +17,20 @@ const TokenModelMock = getTypedModelMock('TokenModel')
 
 describe('services > token', () => {
   const testUser = { dn: 'user' } as any
+
+  test('getTokenLifetimeMs > defaults to 90 days', () => {
+    expect(getTokenLifetimeMs()).toBe(90 * 24 * 60 * 60 * 1000)
+  })
+
+  test('createToken > sets expiresAt from the configured lifetime', async () => {
+    const before = Date.now()
+    const token = await createToken(testUser, { description: 'd', scope: 'all', modelIds: [], actions: [] } as any)
+
+    expect(token.expiresAt).toBeInstanceOf(Date)
+    const lifetimeMs = 90 * 24 * 60 * 60 * 1000
+    expect(token.expiresAt!.getTime()).toBeGreaterThanOrEqual(before + lifetimeMs)
+    expect(token.expiresAt!.getTime()).toBeLessThanOrEqual(Date.now() + lifetimeMs)
+  })
 
   test('test that a token cannot create another token', async () => {
     const func = () => createToken({ ...testUser, token: { user: testUser.dn } as any }, {} as any)
