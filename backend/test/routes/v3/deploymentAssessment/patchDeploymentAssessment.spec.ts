@@ -14,6 +14,7 @@ vi.mock('../../../../src/services/deploymentAssessment.js', () => serviceMock)
 describe('routes > v3 > deploymentAssessment > patchDeploymentAssessment', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(patchDeploymentAssessmentSchema)
+    fixture.body = { draft: true }
     const res = await testPatch(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`, fixture)
 
     expect(res.statusCode).toBe(200)
