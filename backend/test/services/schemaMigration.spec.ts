@@ -10,7 +10,7 @@ import {
   searchSchemaMigrations,
   updateSchemaMigrationPlan,
 } from '../../src/services/schemaMigration.js'
-import { SchemaMigrationKind } from '../../src/types/enums.js'
+import { SchemaKind, SchemaMigrationKind } from '../../src/types/enums.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 import { testModelSchema, testSchemaMigration } from '../testUtils/testModels.js'
 
@@ -27,6 +27,11 @@ const mockMongoUtils = vi.hoisted(() => {
   }
 })
 vi.mock('../../utils/mongo.js', () => mockMongoUtils)
+
+const schemaMocks = vi.hoisted(() => ({
+  getSchemaById: vi.fn(() => ({ kind: 'model' })),
+}))
+vi.mock('../../src/services/schema.js', () => schemaMocks)
 
 describe('services > schemaMigration', () => {
   const testUser = { dn: 'user' } as any
@@ -57,6 +62,25 @@ describe('services > schemaMigration', () => {
     const result = await createSchemaMigrationPlan(testUser, testSchemaMigration)
     expect(SchemaMigrationModelMock.save).toHaveBeenCalledTimes(1)
     expect(result).toBe(testSchemaMigration)
+  })
+
+  test('a schema migration plan cannot be created between schemas of different kinds', async () => {
+    schemaMocks.getSchemaById.mockReturnValueOnce({ kind: SchemaKind.Model })
+    schemaMocks.getSchemaById.mockReturnValueOnce({ kind: SchemaKind.AccessRequest })
+
+    await expect(() => createSchemaMigrationPlan(testUser, testSchemaMigration)).rejects.toThrow(
+      /^The source and target schemas of a migration must be the same kind./,
+    )
+    expect(SchemaMigrationModelMock.save).not.toHaveBeenCalled()
+  })
+
+  test('a schema migration plan cannot be created when a schema does not exist', async () => {
+    schemaMocks.getSchemaById.mockRejectedValueOnce(new Error('The requested schema was not found.'))
+
+    await expect(() => createSchemaMigrationPlan(testUser, testSchemaMigration)).rejects.toThrow(
+      /^The requested schema was not found./,
+    )
+    expect(SchemaMigrationModelMock.save).not.toHaveBeenCalled()
   })
 
   test('cannot run a schema migration plan when there is no model', async () => {
