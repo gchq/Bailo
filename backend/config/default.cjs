@@ -135,6 +135,11 @@ module.exports = {
     secret: '',
   },
 
+  personalAccessToken: {
+    // Human-interval string, e.g. '90 days'
+    lifetime: '90 days',
+  },
+
   oauth: {
     provider: 'cognito',
 

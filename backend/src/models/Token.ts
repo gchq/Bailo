@@ -78,6 +78,7 @@ export interface TokenInterface {
   accessKey: string
   secretKey: string
   hashMethod: HashTypeKeys
+  expiresAt?: Date
 
   deleted: boolean
 
@@ -104,6 +105,7 @@ const TokenSchema = new Schema<TokenDoc>(
     accessKey: { type: String, required: true, unique: true, index: true },
     secretKey: { type: String, required: true, select: false },
     hashMethod: { type: String, enum: Object.values(HashType), required: true, default: HashType.ARGON2 },
+    expiresAt: { type: Date },
   },
   {
     timestamps: true,

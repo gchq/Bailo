@@ -1,8 +1,10 @@
+import humanInterval from 'human-interval'
 import { type ClientSession } from 'mongoose'
 
 import { type Response } from '../connectors/authorisation/base.js'
 import TokenModel, { type TokenActionsKeys, type TokenDoc, TokenScope, type TokenScopeKeys } from '../models/Token.js'
 import { type UserInterface } from '../models/User.js'
+import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../utils/error.js'
 import { longAlphabet, shortAlphabet } from '../utils/id.js'
 import { getModelById } from './model.js'
@@ -12,6 +14,14 @@ interface CreateTokenProps {
   scope: TokenScopeKeys
   modelIds: Array<string>
   actions: Array<string>
+}
+
+export function getTokenLifetimeMs(): number {
+  const lifetimeMs = humanInterval(config.personalAccessToken.lifetime)
+  if (!lifetimeMs) {
+    throw new Error(`Invalid personalAccessToken.lifetime: '${config.personalAccessToken.lifetime}'`)
+  }
+  return lifetimeMs
 }
 
 export async function createToken(user: UserInterface, { description, scope, modelIds, actions }: CreateTokenProps) {
@@ -40,6 +50,7 @@ export async function createToken(user: UserInterface, { description, scope, mod
 
     accessKey,
     secretKey,
+    expiresAt: new Date(Date.now() + getTokenLifetimeMs()),
   })
 
   await token.save()
