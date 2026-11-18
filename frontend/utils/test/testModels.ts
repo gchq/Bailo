@@ -279,6 +279,8 @@ export const testUiConfig: UiConfig = {
     enabled: false,
     text: '',
     startTimestamp: '',
+    severity: 'info',
+    links: [],
   },
 
   helpPopoverText: {

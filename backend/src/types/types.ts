@@ -196,10 +196,18 @@ export interface UiConfig {
   announcement: {
     /** Announcement message to appear to the top of the screen */
     enabled: boolean
+    /** Heading of the announcement, defaults to "Announcement" */
+    title?: string
     /** Announcement text to appear at the top of the screen */
     text: string
+    /** Longer markdown description shown when the user selects "Show more" */
+    description?: string
     /** timestamp to start displaying the announcement. Uses standard Date object */
     startTimestamp: number | string
+    /** Colour scheme of the announcement, taken from the theme palette */
+    severity?: 'info' | 'warning' | 'error'
+    /** Links shown as buttons on the announcement, e.g. release notes or docs */
+    links?: { label: string; href: string }[]
   }
   /** ### Help Pop over Text
    * Customisable text on frontend
