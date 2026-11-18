@@ -416,7 +416,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
         }
         return acc
       },
-      Promise.resolve({ users: [], groups: [], groupMembers: [] } as {
+      Promise.resolve({ users: [], groups: [] } as {
         users: string[]
         groups: { entity: string; members: string[] }[]
       }),
