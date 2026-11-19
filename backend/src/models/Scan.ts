@@ -84,12 +84,12 @@ ScanSchema.plugin(softDeletionPlugin)
 // Image index
 ScanSchema.index(
   { artefactKind: 1, layerDigest: 1, toolName: 1 },
-  { unique: true, partialFilterExpression: { artefactKind: 'image', state: 'InProgress' } },
+  { unique: true, partialFilterExpression: { artefactKind: ArtefactKind.IMAGE, state: ArtefactScanState.InProgress } },
 )
 // File index
 ScanSchema.index(
   { artefactKind: 1, fileId: 1, toolName: 1 },
-  { unique: true, partialFilterExpression: { artefactKind: 'file', state: 'InProgress' } },
+  { unique: true, partialFilterExpression: { artefactKind: ArtefactKind.FILE, state: ArtefactScanState.InProgress } },
 )
 
 const ScanModel = model<ScanInterfaceDoc>('v2_Scan', ScanSchema)
