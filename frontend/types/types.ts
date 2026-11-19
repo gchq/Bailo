@@ -34,6 +34,11 @@ export interface UiConfig {
     host: string
   }
 
+  syOps: {
+    enabled: boolean
+    href: string
+  }
+
   development: {
     logUrl: string
   }
