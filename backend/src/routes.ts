@@ -7,12 +7,15 @@ import { fileURLToPath } from 'url'
 import authentication from './connectors/authentication/index.js'
 import internalRouter from './routes/internal/routes.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
+import { configureTrustProxy, createApiRateLimiter } from './routes/middleware/rateLimiter.js'
 import v1Router from './routes/v1/routes.js'
 import v2Router from './routes/v2/routes.js'
 import v3Router from './routes/v3/routes.js'
 import { httpLog } from './services/log.js'
+import config from './utils/config.js'
 
 export const server = express()
+configureTrustProxy(server)
 
 const LARGE_BODY_ROUTES = ['/api/v2/model/', '/import-model-card-text']
 const jsonParser = (req, res, next) => {
@@ -20,7 +23,7 @@ const jsonParser = (req, res, next) => {
   const limit = needsLargeBody ? '500kb' : '100kb'
   express.json({ limit })(req, res, next)
 }
-server.use([jsonParser, httpLog, helmet()])
+server.use([jsonParser, httpLog, helmet(), ...(config.api.rateLimit ? [createApiRateLimiter()] : [])])
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
