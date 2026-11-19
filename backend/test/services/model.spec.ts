@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
@@ -28,10 +28,15 @@ import {
 } from '../../src/services/model.js'
 import type * as SchemaService from '../../src/services/schema.js'
 import { SchemaKind } from '../../src/types/enums.js'
-import { type EntrySearchOptionsParams, type EntryUserPermissions } from '../../src/types/types.js'
+import { type EntryUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
+
+const repositoryMocks = vi.hoisted(() => ({
+  findModels: vi.fn(),
+}))
+vi.mock('../../src/repositories/model.js', () => repositoryMocks)
 
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ModelCardRevisionModelMock = getTypedModelMock('ModelCardRevisionModel')
@@ -371,208 +376,147 @@ describe('services > model', () => {
     })
   })
 
-  test('searchModels > no filters', async () => {
-    const user: any = { dn: 'test' }
-    ModelModelMock.sort.mockResolvedValueOnce([])
+  describe('searchModels', () => {
+    beforeEach(() => {
+      repositoryMocks.findModels.mockResolvedValue([])
+    })
 
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: undefined,
-    }
+    test('passes the filters to the repository', async () => {
+      const user: any = { dn: 'test' }
 
-    await searchModels(user, searchParams)
-  })
+      await searchModels(user, {
+        kind: ['model', 'data-card'],
+        libraries: ['library'],
+        organisations: ['example organisation'],
+        states: ['development'],
+        search: 'search',
+        task: 'task',
+        schemaId: 'schema',
+        allowTemplating: true,
+        visibility: 'public',
+      })
 
-  test('searchModels > multiple kinds', async () => {
-    const user: any = { dn: 'test' }
+      expect(repositoryMocks.findModels).toHaveBeenCalledWith({
+        kind: ['model', 'data-card'],
+        libraries: ['library'],
+        organisations: ['example organisation'],
+        states: ['development'],
+        search: 'search',
+        task: 'task',
+        schemaId: 'schema',
+        allowTemplating: true,
+        visibility: 'public',
+        collaboratorEntities: undefined,
+        collaboratorMatch: undefined,
+      })
+    })
 
-    ModelModelMock.sort.mockResolvedValueOnce([])
-
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model', 'data-card'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: undefined,
-    }
-
-    await searchModels(user, searchParams)
-  })
-
-  test('searchModels > all filters', async () => {
-    const user: any = { dn: 'test' }
-    ModelModelMock.sort.mockResolvedValue([])
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: ['library'],
-      filters: ['mine'],
-      organisations: ['example organisation'],
-      states: ['development'],
-      search: 'search',
-      task: 'task',
-    }
-
-    await searchModels(user, searchParams)
-  })
-
-  test('searchModels > fuzzy match ranks by similarity and appends full text matches', async () => {
-    const user: any = { dn: 'test' }
-    vi.mocked(authorisation.models).mockImplementation(async (_user, models) =>
-      models.map(() => ({ success: true }) as any),
-    )
-    ModelModelMock.sort
-      .mockResolvedValueOnce([
-        { id: 'unrelated', name: 'Translator', description: 'words', tags: [], settings: { mirror: {} } },
-        { id: 'partial', name: 'Image classification', description: 'cats', tags: [], settings: { mirror: {} } },
-        { id: 'exact', name: 'Image classifier', description: 'cats', tags: [], settings: { mirror: {} } },
+    test('maps results to entry summaries', async () => {
+      const user: any = { dn: 'test' }
+      repositoryMocks.findModels.mockResolvedValueOnce([
+        { id: 'a', name: 'A', description: 'desc', tags: ['tag'], settings: { mirror: { sourceModelId: 'source' } } },
       ])
-      .mockResolvedValueOnce([
-        { id: 'exact', name: 'Image classifier', description: 'cats', tags: [], settings: { mirror: {} } },
-        { id: 'card-only', name: 'Other', description: 'other', tags: [], settings: { mirror: {} } },
+      vi.mocked(authorisation.models).mockResolvedValueOnce([{ success: true } as any])
+
+      const result = await searchModels(user, { search: 'a' })
+
+      expect(result.models).toMatchObject([{ id: 'a', name: 'A', tags: ['tag'], sourceModelId: 'source' }])
+    })
+
+    test('removes results the user is not authorised to view', async () => {
+      const user: any = { dn: 'test' }
+      repositoryMocks.findModels.mockResolvedValueOnce([
+        { id: 'allowed', settings: { mirror: {} } },
+        { id: 'denied', settings: { mirror: {} } },
       ])
+      vi.mocked(authorisation.models).mockResolvedValueOnce([{ success: true }, { success: false }] as any)
 
-    const result = await searchModels(user, { search: 'clasifier' })
+      const result = await searchModels(user, {})
 
-    expect(ModelModelMock.find.mock.calls[0][0]).toMatchObject({ searchGrams: { $in: expect.any(Array) } })
-    expect(ModelModelMock.find.mock.calls[1][0]).toMatchObject({ $text: { $search: 'clasifier' } })
-    expect(result.models.map((model) => model.id)).toEqual(['exact', 'partial', 'card-only'])
-  })
+      expect(result.models.map((model) => model.id)).toStrictEqual(['allowed'])
+    })
 
-  test('searchModels > task no library', async () => {
-    const user: any = { dn: 'test' }
-    ModelModelMock.sort.mockResolvedValueOnce([])
+    test('mine filter matches the current user entities with no roles', async () => {
+      const user: any = { dn: 'test' }
+      authenticationMocks.getEntities.mockReturnValueOnce(['user:test', 'group:devs'])
 
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: 'task',
-    }
+      await searchModels(user, { filters: ['mine'] })
 
-    await searchModels(user, searchParams)
-  })
+      expect(repositoryMocks.findModels).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collaboratorMatch: { entities: ['user:test', 'group:devs'], roles: undefined },
+        }),
+      )
+    })
 
-  test('searchModels > users filter with users only', async () => {
-    const user: any = { dn: 'test' }
-    ModelModelMock.sort.mockResolvedValueOnce([])
+    test('role filters match the current user entities holding those roles', async () => {
+      const user: any = { dn: 'test' }
+      authenticationMocks.getEntities.mockReturnValueOnce(['user:test'])
 
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: undefined,
-      users: ['user:alice', 'user:bob'],
-    }
+      await searchModels(user, { filters: ['owner', 'consumer'] })
 
-    await searchModels(user, searchParams)
+      expect(repositoryMocks.findModels).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collaboratorMatch: { entities: ['user:test'], roles: ['owner', 'consumer'] },
+        }),
+      )
+    })
 
-    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
-    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:bob')
-    expect(ModelModelMock.find).toHaveBeenCalledWith(
-      expect.objectContaining({ 'collaborators.entity': { $all: ['user:alice', 'user:bob'] } }),
-      expect.anything(),
-    )
-  })
+    test('users filter with users only', async () => {
+      const user: any = { dn: 'test' }
 
-  test('searchModels > users filter with user and group', async () => {
-    const user: any = { dn: 'test' }
-    ModelModelMock.sort.mockResolvedValueOnce([])
-    authenticationMocks.getEntityMembers.mockImplementation((entity: string) =>
-      Promise.resolve(entity === 'group:devs' ? ['user:bob', 'user:carol'] : [entity]),
-    )
+      await searchModels(user, { users: ['user:alice', 'user:bob'] })
 
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: undefined,
-      users: ['user:alice', 'group:devs'],
-    }
+      expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
+      expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:bob')
+      expect(repositoryMocks.findModels).toHaveBeenCalledWith(
+        expect.objectContaining({ collaboratorEntities: ['user:alice', 'user:bob'] }),
+      )
+    })
 
-    await searchModels(user, searchParams)
+    test('users filter with user and group', async () => {
+      const user: any = { dn: 'test' }
+      authenticationMocks.getEntityMembers.mockImplementation((entity: string) =>
+        Promise.resolve(entity === 'group:devs' ? ['user:bob', 'user:carol'] : [entity]),
+      )
 
-    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
-    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('group:devs')
-    expect(ModelModelMock.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        'collaborators.entity': { $all: ['user:alice', 'group:devs', 'user:bob', 'user:carol'] },
-      }),
-      expect.anything(),
-    )
-  })
+      await searchModels(user, { users: ['user:alice', 'group:devs'] })
 
-  test('searchModels > users filter throws when group members cannot be retrieved', async () => {
-    const user: any = { dn: 'test' }
-    authenticationMocks.getEntityMembers.mockRejectedValueOnce(new Error('Unable to get members'))
+      expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
+      expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('group:devs')
+      expect(repositoryMocks.findModels).toHaveBeenCalledWith(
+        expect.objectContaining({ collaboratorEntities: ['user:alice', 'group:devs', 'user:bob', 'user:carol'] }),
+      )
+    })
 
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: undefined,
-      users: ['group:devs'],
-    }
+    test('users filter throws when group members cannot be retrieved', async () => {
+      const user: any = { dn: 'test' }
+      authenticationMocks.getEntityMembers.mockRejectedValueOnce(new Error('Unable to get members'))
 
-    await expect(searchModels(user, searchParams)).rejects.toThrow('Unable to get members')
-    expect(ModelModelMock.find).not.toHaveBeenCalled()
-  })
+      await expect(searchModels(user, { users: ['group:devs'] })).rejects.toThrow('Unable to get members')
+      expect(repositoryMocks.findModels).not.toHaveBeenCalled()
+    })
 
-  test('searchModels > admin access without auth', async () => {
-    const user = { dn: 'not admin' }
-    const adminAccess = true
-    authenticationMocks.hasRole.mockImplementation(() => false)
+    test('admin access without auth', async () => {
+      const user = { dn: 'not admin' }
+      authenticationMocks.hasRole.mockImplementation(() => false)
 
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: 'task',
-      adminAccess,
-    }
+      await expect(searchModels(user as any, { adminAccess: true })).rejects.toThrow(
+        'You do not have the required role.',
+      )
+      expect(repositoryMocks.findModels).not.toHaveBeenCalled()
+    })
 
-    await expect(searchModels(user, searchParams)).rejects.toThrow('You do not have the required role.')
-  })
+    test('admin access with auth skips the authorisation filter', async () => {
+      const user: any = { dn: 'admin' }
+      authenticationMocks.hasRole.mockImplementation(() => true)
+      repositoryMocks.findModels.mockResolvedValueOnce([{ id: 'a', settings: { mirror: {} } }])
 
-  test('searchModels > admin access with auth', async () => {
-    const user: any = { dn: 'admin' }
-    const adminAccess = true
-    ModelModelMock.sort.mockResolvedValueOnce([])
-    authenticationMocks.hasRole.mockImplementation(() => true)
+      const result = await searchModels(user, { adminAccess: true })
 
-    const searchParams: EntrySearchOptionsParams = {
-      kind: ['model'],
-      libraries: [],
-      filters: [],
-      organisations: [],
-      states: [],
-      search: '',
-      task: 'task',
-      adminAccess,
-    }
-
-    await searchModels(user, searchParams)
+      expect(authorisation.models).not.toHaveBeenCalled()
+      expect(result.models.map((model) => model.id)).toStrictEqual(['a'])
+    })
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {

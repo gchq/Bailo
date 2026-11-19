@@ -1,5 +1,4 @@
 import mergeWith from 'lodash-es/mergeWith.js'
-import { type ProjectionType } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
@@ -19,6 +18,7 @@ import ModelCardRevisionModel, { type ModelCardRevisionDoc } from '../models/Mod
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { type UserInterface } from '../models/User.js'
+import { findModels } from '../repositories/model.js'
 import { GetModelCardVersionOptions, type GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { isBailoError } from '../types/error.js'
 import {
@@ -34,7 +34,6 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { deepMergePreferFirst } from '../utils/object.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
-import { FUZZY_MATCH_THRESHOLD, gramSimilarity, toSearchGrams } from '../utils/search.js'
 import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
 import { getFilesByModel, removeFiles } from './file.js'
@@ -365,8 +364,6 @@ export async function searchModels(
 }
 
 async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsParams): Promise<Array<ModelInterface>> {
-  const query: any = {}
-
   if (opts.adminAccess) {
     if (!(await authentication.hasRole(user, Roles.Admin))) {
       throw Forbidden('You do not have the required role.', {
@@ -376,117 +373,38 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind?.length) {
-    query['kind'] = { $in: opts.kind }
-  }
+  const collaboratorEntities = opts.users?.length
+    ? (
+        await Promise.all(
+          opts.users.map(async (entity) =>
+            entity.startsWith('group:')
+              ? [entity, ...(await authentication.getEntityMembers(entity))]
+              : authentication.getEntityMembers(entity),
+          ),
+        )
+      ).flat()
+    : undefined
 
-  if (opts.organisations?.length) {
-    query.organisation = { $in: opts.organisations }
-  }
-
-  if (opts.states?.length) {
-    query.state = { $in: opts.states }
-  }
-
-  if (opts.libraries?.length) {
-    query.tags = { $all: opts.libraries }
-  }
-
-  if (opts.task) {
-    if (query.tags) {
-      query.tags.$all.push(opts.task)
-    } else {
-      query.tags = { $all: [opts.task] }
-    }
-  }
-
-  if (opts.schemaId) {
-    query['card.schemaId'] = { $all: opts.schemaId }
-  }
-
-  if (opts.allowTemplating) {
-    query['settings.allowTemplating'] = true
-  }
-
-  if (opts.visibility) {
-    query.visibility = opts.visibility
-  }
-
-  if (opts.users?.length) {
-    const usersAndGroupMembers = (
-      await Promise.all(
-        opts.users.map(async (entity) =>
-          entity.startsWith('group:')
-            ? [entity, ...(await authentication.getEntityMembers(entity))]
-            : authentication.getEntityMembers(entity),
-        ),
-      )
-    ).flat()
-
-    query['collaborators.entity'] = { $all: usersAndGroupMembers }
-  }
-
-  if (opts.filters && opts.filters.length > 0) {
-    if (opts.filters?.includes('mine')) {
-      query.collaborators = {
-        $elemMatch: {
-          entity: { $in: await authentication.getEntities(user) },
-        },
+  const collaboratorMatch = opts.filters?.length
+    ? {
+        entities: await authentication.getEntities(user),
+        roles: opts.filters.includes('mine') ? undefined : opts.filters,
       }
-    } else {
-      query.collaborators = {
-        $elemMatch: {
-          roles: { $elemMatch: { $in: opts.filters } },
-          entity: { $in: await authentication.getEntities(user) },
-        },
-      }
-    }
-  }
+    : undefined
 
-  const projection: ProjectionType<ModelDoc> = {
-    settings: false,
-    card: false,
-    deleted: false,
-    _id: false,
-    __v: false,
-    deletedBy: false,
-    deletedAt: false,
-  }
-
-  const queryGrams = opts.search ? toSearchGrams(opts.search) : []
-  let results = await ModelModel.find<ModelDoc>(
-    queryGrams.length ? { ...query, searchGrams: { $in: queryGrams } } : query,
-    projection,
-  ).sort({
-    updatedAt: -1,
+  const results = await findModels({
+    kind: opts.kind,
+    organisations: opts.organisations,
+    states: opts.states,
+    libraries: opts.libraries,
+    task: opts.task,
+    schemaId: opts.schemaId,
+    allowTemplating: opts.allowTemplating,
+    visibility: opts.visibility,
+    collaboratorEntities,
+    collaboratorMatch,
+    search: opts.search,
   })
-
-  // Fuzzy match: keep entries sharing enough trigrams with the search, best first (stable sort keeps updatedAt order)
-  if (queryGrams.length) {
-    results = results
-      .map((model) => ({
-        model,
-        score: gramSimilarity(queryGrams, toSearchGrams(model.name, model.description, ...(model.tags ?? []))),
-      }))
-      .filter(({ score }) => score >= FUZZY_MATCH_THRESHOLD)
-      .sort((a, b) => b.score - a.score)
-      .map(({ model }) => model)
-  }
-
-  // Include stemmed full text matches, which also cover card contents
-  if (opts.search) {
-    let fullTextOnlyResults = await ModelModel.find<ModelDoc>(
-      { ...query, $text: { $search: opts.search } },
-      projection,
-    ).sort({
-      score: { $meta: 'textScore' },
-    })
-    // Remove duplicate items
-    const mask = new Set(results.map((model) => model.id))
-
-    fullTextOnlyResults = fullTextOnlyResults.filter((model) => !mask.has(model.id))
-    results = results.concat(fullTextOnlyResults)
-  }
 
   //Auth already checked, so just need to check if they require admin access
   if (opts.adminAccess) {
