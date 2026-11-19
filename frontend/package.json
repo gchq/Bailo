@@ -107,6 +107,9 @@
     "@next/swc-win32-x64-msvc": "^16.2.6"
   },
   "overrides": {
+    "cypress-axe": {
+      "cypress": "$cypress"
+    },
     "madge": {
       "typescript": "$typescript"
     },
