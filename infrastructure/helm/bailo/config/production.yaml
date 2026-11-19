@@ -76,6 +76,8 @@ log:
   level: {{ .Values.config.log.level }}
 session:
   secret: {{ .Values.cookie.secret }}
+personalAccessToken:
+  lifetime: {{ .Values.config.personalAccessToken.lifetime | quote }}
 oauth:
   provider: cognito
   grant:

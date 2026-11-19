@@ -291,6 +291,12 @@ export interface Config {
     secret: string
   }
 
+  /** ### Personal access tokens */
+  personalAccessToken: {
+    /** How long a token stays valid after it was last renewed, as a human-interval string (e.g. '90 days'). An empty string disables expiry */
+    lifetime: string
+  }
+
   /** ### OAuth/OpenID Connect
    *
    * Defines behaviour for user authorisation if the connector is enabled

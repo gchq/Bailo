@@ -143,6 +143,10 @@ module.exports = {
     secret: '',
   },
 
+  personalAccessToken: {
+    lifetime: '90 days',
+  },
+
   oauth: {
     provider: 'cognito',
 

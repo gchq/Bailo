@@ -251,6 +251,8 @@ openshift:
 config:
   log:
     level: trace
+  personalAccessToken:
+    lifetime: '90 days'
   ui:
     deploymentAssessments:
       deployableModelState: 'Production'
