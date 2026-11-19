@@ -165,6 +165,16 @@ export interface UiConfig {
     host: string
   }
 
+  /** ### SyOps
+   * Optional link to the SyOps system, shown in the user settings menu when enabled
+   */
+  syOps: {
+    /** Show the SyOps link */
+    enabled: boolean
+    /** URL of the SyOps system */
+    href: string
+  }
+
   modelMirror: {
     import: {
       /** Available to import models */

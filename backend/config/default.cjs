@@ -212,6 +212,11 @@ module.exports = {
       host: 'localhost:8080',
     },
 
+    syOps: {
+      enabled: false,
+      href: 'https://syops.example.com',
+    },
+
     inference: {
       enabled: false,
       connection: {
