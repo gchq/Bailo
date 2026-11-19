@@ -252,7 +252,6 @@ config:
   log:
     level: trace
   personalAccessToken:
-    # Human-interval string, e.g. '90 days'
     lifetime: '90 days'
   ui:
     banner:

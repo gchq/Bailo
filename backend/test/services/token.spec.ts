@@ -5,11 +5,14 @@ import {
   dropModelIdFromTokens,
   findTokenByAccessKey,
   findUserTokens,
+  getTokenFromAuthHeader,
   getTokenLifetimeMs,
   getTokensForModel,
+  isTokenExpired,
   removeToken,
 } from '../../src/services/token.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
+import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -18,18 +21,88 @@ const TokenModelMock = getTypedModelMock('TokenModel')
 describe('services > token', () => {
   const testUser = { dn: 'user' } as any
 
-  test('getTokenLifetimeMs > defaults to 90 days', () => {
-    expect(getTokenLifetimeMs()).toBe(90 * 24 * 60 * 60 * 1000)
+  describe('lifetime and expiry', () => {
+    const day = 24 * 60 * 60 * 1000
+
+    test('getTokenLifetimeMs > defaults to 90 days', () => {
+      expect(getTokenLifetimeMs()).toBe(90 * day)
+    })
+
+    test('getTokenLifetimeMs > empty lifetime disables expiry', () => {
+      setTestConfig({ personalAccessToken: { lifetime: '' } })
+      expect(getTokenLifetimeMs()).toBeUndefined()
+    })
+
+    test('getTokenLifetimeMs > invalid lifetime throws', () => {
+      setTestConfig({ personalAccessToken: { lifetime: 'not a duration' } })
+      expect(() => getTokenLifetimeMs()).toThrow(`Invalid personalAccessToken.lifetime: 'not a duration'`)
+    })
+
+    test('createToken > sets lastRenewed and no expiresAt', async () => {
+      const before = Date.now()
+      const token = await createToken(testUser, { description: 'd', scope: 'all', modelIds: [], actions: [] } as any)
+
+      expect(token.lastRenewed).toBeInstanceOf(Date)
+      expect(token.lastRenewed!.getTime()).toBeGreaterThanOrEqual(before)
+      expect(token.lastRenewed!.getTime()).toBeLessThanOrEqual(Date.now())
+      expect(token).not.toHaveProperty('expiresAt')
+    })
+
+    test('isTokenExpired > false within lifetime', () => {
+      expect(isTokenExpired({ lastRenewed: new Date(Date.now() - day) } as any)).toBe(false)
+    })
+
+    test('isTokenExpired > true once lifetime has passed', () => {
+      expect(isTokenExpired({ lastRenewed: new Date(Date.now() - 91 * day) } as any)).toBe(true)
+    })
+
+    test('isTokenExpired > a changed lifetime applies to existing tokens', () => {
+      const token = { lastRenewed: new Date(Date.now() - 100 * day) } as any
+      expect(isTokenExpired(token)).toBe(true)
+
+      setTestConfig({ personalAccessToken: { lifetime: '365 days' } })
+      expect(isTokenExpired(token)).toBe(false)
+    })
+
+    test('isTokenExpired > never expires when lifetime is empty', () => {
+      setTestConfig({ personalAccessToken: { lifetime: '' } })
+      expect(isTokenExpired({ lastRenewed: new Date(0) } as any)).toBe(false)
+    })
+
+    test('isTokenExpired > falls back to createdAt when lastRenewed is missing', () => {
+      expect(isTokenExpired({ createdAt: new Date(Date.now() - 91 * day) } as any)).toBe(true)
+    })
+
+    test('isTokenExpired > fails closed without a reference date', () => {
+      expect(isTokenExpired({} as any)).toBe(true)
+    })
   })
 
-  test('createToken > sets expiresAt from the configured lifetime', async () => {
-    const before = Date.now()
-    const token = await createToken(testUser, { description: 'd', scope: 'all', modelIds: [], actions: [] } as any)
+  describe('getTokenFromAuthHeader > expiry', () => {
+    const day = 24 * 60 * 60 * 1000
+    const header = `Basic ${Buffer.from('BAC_key:BSK_secret').toString('base64')}`
 
-    expect(token.expiresAt).toBeInstanceOf(Date)
-    const lifetimeMs = 90 * 24 * 60 * 60 * 1000
-    expect(token.expiresAt!.getTime()).toBeGreaterThanOrEqual(before + lifetimeMs)
-    expect(token.expiresAt!.getTime()).toBeLessThanOrEqual(Date.now() + lifetimeMs)
+    function mockFoundToken(lastRenewed: Date) {
+      const token = { user: testUser.dn, lastRenewed, compareToken: vi.fn().mockResolvedValue(true) }
+      TokenModelMock.findOne.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          then: (resolve: (val: any) => any) => resolve(token),
+        }),
+      })
+      return token
+    }
+
+    test('accepts a token within its lifetime', async () => {
+      const token = mockFoundToken(new Date(Date.now() - day))
+
+      await expect(getTokenFromAuthHeader(header)).resolves.toEqual(token)
+    })
+
+    test('rejects a token past its lifetime even with a valid secret', async () => {
+      mockFoundToken(new Date(Date.now() - 91 * day))
+
+      await expect(getTokenFromAuthHeader(header)).rejects.toThrow('Token has expired')
+    })
   })
 
   test('test that a token cannot create another token', async () => {

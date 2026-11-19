@@ -293,7 +293,7 @@ export interface Config {
 
   /** ### Personal access tokens */
   personalAccessToken: {
-    /** How long a new token stays valid, as a human-interval string (e.g. '90 days') */
+    /** How long a token stays valid after it was last renewed, as a human-interval string (e.g. '90 days'). An empty string disables expiry */
     lifetime: string
   }
 

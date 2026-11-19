@@ -16,12 +16,31 @@ interface CreateTokenProps {
   actions: Array<string>
 }
 
-export function getTokenLifetimeMs(): number {
-  const lifetimeMs = humanInterval(config.personalAccessToken.lifetime)
+export function getTokenLifetimeMs(): number | undefined {
+  const { lifetime } = config.personalAccessToken
+  if (!lifetime) {
+    // An empty lifetime disables expiry
+    return undefined
+  }
+
+  const lifetimeMs = humanInterval(lifetime)
   if (!lifetimeMs) {
-    throw new Error(`Invalid personalAccessToken.lifetime: '${config.personalAccessToken.lifetime}'`)
+    throw new Error(`Invalid personalAccessToken.lifetime: '${lifetime}'`)
   }
   return lifetimeMs
+}
+
+export function isTokenExpired(token: TokenDoc, now = Date.now()): boolean {
+  const lifetimeMs = getTokenLifetimeMs()
+  if (lifetimeMs === undefined) {
+    return false
+  }
+
+  const lastActive = token.lastRenewed ?? token.createdAt
+  if (!lastActive) {
+    return true
+  }
+  return lastActive.getTime() + lifetimeMs <= now
 }
 
 export async function createToken(user: UserInterface, { description, scope, modelIds, actions }: CreateTokenProps) {
@@ -50,7 +69,7 @@ export async function createToken(user: UserInterface, { description, scope, mod
 
     accessKey,
     secretKey,
-    expiresAt: new Date(Date.now() + getTokenLifetimeMs()),
+    lastRenewed: new Date(),
   })
 
   await token.save()
@@ -150,6 +169,10 @@ export async function getTokenFromAuthHeader(header: string) {
   const token = await findTokenByAccessKey(accessKey, { includeSecretKey: true })
   if (!(await token.compareToken(secretKey))) {
     throw Unauthorized('Invalid secret key', { accessKey })
+  }
+
+  if (isTokenExpired(token)) {
+    throw Unauthorized('Token has expired', { accessKey })
   }
 
   return token

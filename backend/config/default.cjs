@@ -136,7 +136,6 @@ module.exports = {
   },
 
   personalAccessToken: {
-    // Human-interval string, e.g. '90 days'
     lifetime: '90 days',
   },
 

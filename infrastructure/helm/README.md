@@ -387,7 +387,7 @@ The following tables describe selected configuration options available in `value
 | Name | Description | Value |
 | ---- | ----------- | ----- |
 | `cookie.secret` | A randomly generated secret key used to encrypt and sign session cookies, ensuring data security and integrity | `somerandomstring12341234567890AB` |
-| `config.personalAccessToken.lifetime` | How long a personal access token stays valid, as a human-interval string (e.g. `90 days`). Also used to backfill existing tokens | `90 days` |
+| `config.personalAccessToken.lifetime` | How long a personal access token stays valid after it was last renewed, as a human-interval string (e.g. `90 days`). Applies to existing tokens too. An empty string disables expiry | `90 days` |
 | `oauth.enabled` | Currently setup to use Cognito <https://aws.amazon.com/blogs/security/how-to-use-oauth-2-0-in-amazon-cognito-learn-about-the-different-oauth-2-0-grants/> | `false` |
 
 ### Bailo Supporting Service Configurations
