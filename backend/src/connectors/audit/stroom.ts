@@ -2,6 +2,7 @@ import { type Request } from 'express'
 import os from 'os'
 
 import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { type FileInterface, type FileInterfaceDoc, type FileWithScanResultsAggregate } from '../../models/File.js'
 import { type InferenceDoc } from '../../models/Inference.js'
 import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
@@ -14,6 +15,7 @@ import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type StroomEventObject } from '../../models/StroomEvent.js'
 import { type TokenDoc } from '../../models/Token.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import log from '../../services/log.js'
 import { type MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
 import { type FileMirrorInformation } from '../../services/mirroredModel/importers/file.js'
@@ -496,6 +498,36 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   async onCreateReview(req: Request, modelId: string): Promise<void> {
     this.auditGenericEvent(req, `Review created for ${modelId}`)
+  }
+
+  async onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onUpdateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onSearchDeploymentAssessments(
+    req: Request,
+    deploymentAssessments: DeploymentAssessmentSummary[],
+  ): Promise<void> {
+    this.auditSearchEvent(
+      req,
+      deploymentAssessments.map((deploymentAssessment) => ({ Id: deploymentAssessment.id })),
+    )
+  }
+
+  async onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.auditGenericEvent(req, `${response._id}`)
   }
 
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {

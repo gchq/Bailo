@@ -1,10 +1,11 @@
 import { useTheme } from '@mui/material/styles'
-import TextField from '@mui/material/TextField'
 import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { useMemo } from 'react'
 import CompareField from 'src/common/CompareField'
+import LimitedTextField from 'src/common/LimitedTextField'
 import getCompareFieldState from 'src/hooks/useCompareField'
 import MessageAlert from 'src/MessageAlert'
+import { limitText, TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 interface CustomTextInputProps {
   label?: string
@@ -32,9 +33,10 @@ export default function CustomTextInput({
   schema,
 }: CustomTextInputProps) {
   const theme = useTheme()
+  const maxLength = schema.maxLength ?? TEXT_INPUT_MAX_LENGTH
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value)
+    onChange(limitText(event.target.value, maxLength, value))
   }
 
   const disabledWebkitTextFillColor = useMemo(() => {
@@ -61,7 +63,7 @@ export default function CustomTextInput({
       value={value}
     >
       {!compare.inCompareMode && (
-        <TextField
+        <LimitedTextField
           size='small'
           error={rawErrors && rawErrors.length > 0}
           sx={[

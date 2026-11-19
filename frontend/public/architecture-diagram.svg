@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="580" viewBox="0 0 1000 580" role="img" aria-labelledby="title desc">
+  <title id="title">Bailo architecture overview</title>
+  <desc id="desc">A user connects to an NGINX reverse proxy, which routes / to the Next.js frontend, /api to the Express backend and /v2 to the Docker registry. The backend uses MongoDB, SeaweedFS S3 storage, ClamAV and the ArtefactScan service, and optionally email, Stroom and federated peers. The registry stores images in SeaweedFS and sends push events to the backend.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333333"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: "Segoe UI", Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .name { font-size: 15px; font-weight: 600; text-anchor: middle; }
+    .sub { font-size: 12px; text-anchor: middle; fill: #57606a; }
+    .label { font-size: 12px; fill: #57606a; }
+    .heading { font-size: 13px; font-weight: 600; fill: #57606a; }
+    .link { fill: none; stroke: #333333; stroke-width: 1.5; marker-start: url(#arrow); marker-end: url(#arrow); }
+    .one-way { marker-start: none; }
+    .optional { stroke-dasharray: 6 4; }
+  </style>
+
+  <rect width="1000" height="580" fill="#ffffff"/>
+
+  <!-- Deployment boundary -->
+  <rect x="120" y="30" width="670" height="520" rx="6" fill="none" stroke="#555555" stroke-dasharray="6 4"/>
+  <text x="135" y="52" class="heading">Bailo deployment (Kubernetes via Helm, or Docker Compose)</text>
+
+  <!-- User -->
+  <g stroke="#333333" stroke-width="2" fill="none">
+    <circle cx="55" cy="265" r="12" fill="#ffffff"/>
+    <line x1="55" y1="277" x2="55" y2="310"/>
+    <line x1="38" y1="288" x2="72" y2="288"/>
+    <line x1="55" y1="310" x2="40" y2="335"/>
+    <line x1="55" y1="310" x2="70" y2="335"/>
+  </g>
+  <text x="55" y="355" class="name">User</text>
+
+  <!-- Connections -->
+  <path class="link" d="M82,295 L158,295"/>
+  <path class="link one-way" d="M282,275 C305,275 305,115 328,115"/>
+  <text x="300" y="108" class="label">/</text>
+  <path class="link one-way" d="M282,295 L328,295"/>
+  <text x="290" y="287" class="label">/api</text>
+  <path class="link one-way" d="M282,315 C305,315 305,485 328,485"/>
+  <text x="300" y="500" class="label">/v2</text>
+
+  <path class="link" d="M420,332 L420,448"/>
+  <text x="430" y="375" class="label">Registry API</text>
+  <text x="430" y="391" class="label">JWT token auth</text>
+  <text x="430" y="407" class="label">Push events</text>
+
+  <path class="link one-way" d="M512,272 C555,272 555,100 598,100"/>
+  <path class="link one-way" d="M512,284 C555,284 555,190 598,190"/>
+  <path class="link one-way" d="M512,306 C555,306 555,360 598,360"/>
+  <path class="link one-way" d="M512,318 C555,318 555,470 598,470"/>
+  <path class="link one-way" d="M512,490 L598,490"/>
+  <path class="link one-way optional" d="M512,295 L813,295"/>
+
+  <!-- NGINX -->
+  <rect x="160" y="260" width="120" height="70" rx="4" fill="#d5e8d4" stroke="#82b366"/>
+  <text x="220" y="290" class="name">NGINX</text>
+  <text x="220" y="308" class="sub">Reverse proxy</text>
+
+  <!-- Frontend -->
+  <rect x="330" y="80" width="180" height="70" rx="4" fill="#fff2cc" stroke="#d6b656"/>
+  <text x="420" y="110" class="name">Frontend</text>
+  <text x="420" y="128" class="sub">Next.js, React, MUI</text>
+
+  <!-- Backend -->
+  <rect x="330" y="260" width="180" height="70" rx="4" fill="#fff2cc" stroke="#d6b656"/>
+  <text x="420" y="290" class="name">Backend API</text>
+  <text x="420" y="308" class="sub">Express, TypeScript</text>
+
+  <!-- Registry -->
+  <rect x="330" y="450" width="180" height="70" rx="4" fill="#e1d5e7" stroke="#9673a6"/>
+  <text x="420" y="480" class="name">Docker Registry</text>
+  <text x="420" y="498" class="sub">CNCF Distribution</text>
+
+  <!-- MongoDB -->
+  <rect x="600" y="70" width="170" height="60" rx="4" fill="#f8cecc" stroke="#b85450"/>
+  <text x="685" y="96" class="name">MongoDB</text>
+  <text x="685" y="114" class="sub">Metadata</text>
+
+  <!-- ClamAV -->
+  <rect x="600" y="160" width="170" height="60" rx="4" fill="#dae8fc" stroke="#6c8ebf"/>
+  <text x="685" y="186" class="name">ClamAV</text>
+  <text x="685" y="204" class="sub">Virus scanning (optional)</text>
+
+  <!-- ArtefactScan -->
+  <rect x="600" y="330" width="170" height="60" rx="4" fill="#dae8fc" stroke="#6c8ebf"/>
+  <text x="685" y="356" class="name">ArtefactScan</text>
+  <text x="685" y="374" class="sub">ModelScan, Trivy (optional)</text>
+
+  <!-- SeaweedFS -->
+  <rect x="600" y="450" width="170" height="60" rx="4" fill="#f8cecc" stroke="#b85450"/>
+  <text x="685" y="476" class="name">SeaweedFS</text>
+  <text x="685" y="494" class="sub">S3 file and image storage</text>
+
+  <!-- Optional external integrations -->
+  <rect x="815" y="160" width="170" height="210" rx="6" fill="none" stroke="#999999" stroke-dasharray="6 4"/>
+  <text x="900" y="182" class="heading" text-anchor="middle">Optional integrations</text>
+  <rect x="828" y="195" width="144" height="45" rx="4" fill="#f5f5f5" stroke="#999999"/>
+  <text x="900" y="222" class="name">Email (SMTP)</text>
+  <rect x="828" y="255" width="144" height="45" rx="4" fill="#f5f5f5" stroke="#999999"/>
+  <text x="900" y="282" class="name">Stroom audit</text>
+  <rect x="828" y="315" width="144" height="45" rx="4" fill="#f5f5f5" stroke="#999999"/>
+  <text x="900" y="342" class="name">Federated peers</text>
+</svg>

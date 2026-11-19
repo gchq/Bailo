@@ -62,7 +62,10 @@ const ReviewSchema = new Schema<ReviewDoc>(
         throw new Error(`Cannot provide an 'accessRequestId' with '${JSON.stringify({ kind: this.kind })}'`)
       },
     },
-    modelId: { type: String, required: true },
+    modelId: {
+      type: String,
+      required: true,
+    },
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
     dueDate: {
       type: Schema.Types.Date,

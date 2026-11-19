@@ -29,6 +29,15 @@ export const AccessRequestAction = {
 } as const
 export type AccessRequestActionKeys = (typeof AccessRequestAction)[keyof typeof AccessRequestAction]
 
+export const DeploymentAssessmentAction = {
+  Create: 'deployment_assessment:create',
+  View: 'deployment_assessment:view',
+  Update: 'deployment_assessment:update',
+  Delete: 'deployment_assessment:delete',
+} as const
+export type DeploymentAssessmentActionKeys =
+  (typeof DeploymentAssessmentAction)[keyof typeof DeploymentAssessmentAction]
+
 export const SchemaAction = {
   Create: 'schema:create',
   Delete: 'schema:delete',

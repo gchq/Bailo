@@ -2,6 +2,14 @@ import { Router } from 'express'
 
 import { generateV3SwaggerSpec } from '../../services/specification.js'
 import { getImageByDigest } from '../v3/model/images/getImage.js'
+import { deleteDeploymentAssessment } from './deploymentAssessment/deleteDeploymentAssessment.js'
+import { getDeploymentAssessment } from './deploymentAssessment/getDeploymentAssessment.js'
+import { getDeploymentAssessmentCurrentUserPermissions } from './deploymentAssessment/getDeploymentAssessmentCurrentUserPermissions.js'
+import { getDeploymentAssessmentHtml } from './deploymentAssessment/getDeploymentAssessmentHtml.js'
+import { getDeploymentAssessments } from './deploymentAssessment/getDeploymentAssessments.js'
+import { patchDeploymentAssessment } from './deploymentAssessment/patchDeploymentAssessment.js'
+import { postDeploymentAssessment } from './deploymentAssessment/postDeploymentAssessment.js'
+import { postDeploymentAssessmentComment } from './deploymentAssessment/postDeploymentAssessmentComment.js'
 import { getCurrentUser } from './entities/getCurrentUser.js'
 import { getEntryVolume } from './metrics/getEntryVolume.js'
 import { getLifecycleComplianceMetrics } from './metrics/getLifecycleComplianceMetrics.js'
@@ -22,6 +30,18 @@ router.get('/api-docs/swagger.json', (req, res) => res.json(generateV3SwaggerSpe
 
 router.get('/models/search', ...getModelsSearch)
 router.get('/model/:modelId/image/:name/:tag/:digest', ...getImageByDigest)
+
+router.get('/deployment-assessments', ...getDeploymentAssessments)
+router.post('/deployment-assessments', ...postDeploymentAssessment)
+router.get('/deployment-assessments/:deploymentAssessmentId', ...getDeploymentAssessment)
+router.delete('/deployment-assessments/:deploymentAssessmentId', ...deleteDeploymentAssessment)
+router.post('/deployment-assessments/:deploymentAssessmentId/comments', ...postDeploymentAssessmentComment)
+router.get(
+  '/deployment-assessments/:deploymentAssessmentId/permissions/mine',
+  ...getDeploymentAssessmentCurrentUserPermissions,
+)
+router.patch('/deployment-assessments/:deploymentAssessmentId', ...patchDeploymentAssessment)
+router.get('/deployment-assessments/:deploymentAssessmentId/html', ...getDeploymentAssessmentHtml)
 
 router.get('/metrics/usage', ...getUsageMetrics)
 router.get('/metrics/compliance/no-releases', ...getNoReleasesComplianceMetrics)

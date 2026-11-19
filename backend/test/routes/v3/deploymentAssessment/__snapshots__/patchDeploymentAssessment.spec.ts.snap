@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 200 > no draft 1`] = `{}`;
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 200 > ok 1`] = `{}`;
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > 400 > empty body 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "custom",
+          "message": "Body must have at least one property defined.",
+          "path": [
+            "body",
+          ],
+        },
+      ],
+    },
+    "message": "Path: body - Message: Body must have at least one property defined.",
+    "name": "Bailo Error",
+  },
+}
+`;
+
+exports[`routes > v3 > deploymentAssessment > patchDeploymentAssessment > audit > expected call 1`] = `undefined`;
