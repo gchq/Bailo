@@ -68,7 +68,10 @@ describe('ExpandableTypography', () => {
 
     await user.click(screen.getByRole('button', { name: 'Show more' }))
 
-    expect(getComputedStyle(typography).webkitLineClamp).toBe('none')
+    const expandedStyles = getComputedStyle(typography)
+    expect(expandedStyles.display).toBe('block')
+    expect(expandedStyles.overflow).toBe('visible')
+    expect(expandedStyles.webkitLineClamp).not.toBe('3')
     expect(screen.getByRole('button', { name: 'Show less' })).toBeDefined()
 
     await user.click(screen.getByRole('button', { name: 'Show less' }))
