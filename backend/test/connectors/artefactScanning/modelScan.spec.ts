@@ -76,6 +76,28 @@ describe('connectors > artefactScanning > modelScan > ModelScanFileScanningConne
     expect(result.artefactKind).toBe(ArtefactKind.FILE)
   })
 
+  test('scan() passes basename to scanFileStream for path-like filenames', async () => {
+    artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
+      modelscanVersion: '1.0.0',
+    })
+    s3Mocks.getObjectStream.mockResolvedValueOnce(Readable.from('file'))
+    artefactScanClientMocks.scanFileStream.mockResolvedValueOnce({
+      issues: [],
+      errors: [],
+      summary: { skipped: { total_skipped: 0 } },
+    })
+    const connector = new ModelScanFileScanningConnector()
+    await connector.init()
+
+    await connector.scan({
+      id: 'file1',
+      name: 'weights/subdir/model.bin',
+      path: '/bucket/file1',
+    } as any)
+
+    expect(artefactScanClientMocks.scanFileStream).toHaveBeenCalledWith(expect.anything(), 'model.bin')
+  })
+
   test('scan() returns found errors', async () => {
     artefactScanClientMocks.getCachedArtefactScanInfo.mockResolvedValueOnce({
       modelscanVersion: '1.0.0',
