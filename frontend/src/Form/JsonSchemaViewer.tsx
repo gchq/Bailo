@@ -57,6 +57,7 @@ export default function JsonSchemaViewer({
     dataCardSelector: QuestionViewer,
     modelSelector: QuestionViewer,
     metricsWidget: QuestionViewer,
+    tableWidget: QuestionViewer,
     nothing: Nothing,
   }
 
