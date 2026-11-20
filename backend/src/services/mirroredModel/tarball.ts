@@ -242,8 +242,7 @@ export async function extractTarGzStream(
             }
 
             importer = getImporter(metadata, user, logData)
-            const importMetadata = importer.getMetadata()
-            await handleStartEmail(importMetadata.exportId, importMetadata.mirroredModelId, importMetadata.exporter)
+            await handleStartEmail(importer.getMetadata())
             // Drain and continue
             next()
             return

@@ -1,14 +1,14 @@
-import { generateMock, type GenerateMockOptions } from '@anatine/zod-mock'
 import supertest from 'supertest'
 import { type z, type ZodSchema } from 'zod'
+import { fake, install, seed } from 'zod-schema-faker/v3'
 
 import { server } from '../../src/routes.js'
 
-export function createFixture<T extends ZodSchema>(schema: T, options?: GenerateMockOptions): z.infer<T> {
-  return generateMock(schema, {
-    seed: 1337,
-    ...options,
-  })
+install()
+seed(1337)
+
+export function createFixture<T extends ZodSchema>(schema: T): z.infer<T> {
+  return fake(schema)
 }
 
 interface Fixture {

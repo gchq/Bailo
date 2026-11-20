@@ -7,23 +7,19 @@ opensrc-bailols:
     - if: '$CI_COMMIT_BRANCH == "main" && $BFG == "true"'
       when: always
       allow_failure: true
-    - if: '$CI_COMMIT_BRANCH == "v3" && $BFG == "true"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
-    name: openjdk:26-ea-oraclelinux9
+    name: openjdk:28-ea-oraclelinux10
   script:
     - microdnf install -y git wget
     - git clone --mirror "https://$OPENSRC_TOKEN_NAME:$OPENSRC_TOKEN@$OPENSRC_URL"
-    # opting to download bfg-1.14.0.jar from branch instead of maven.org
-    # - wget https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar
+    # opting to download bfg-1.15.0.jar from branch instead of maven.org
+    # - wget https://repo1.maven.org/maven2/com/madgag/bfg/1.15.0/bfg-1.15.0.jar
     - git fetch origin "$JAR"
-    - git show origin/"$JAR":bfg-1.14.0.jar > bfg-1.14.0.jar
-    - java -jar bfg-1.14.0.jar --strip-blobs-bigger-than 40M $OPENSRC_GIT_NAME
+    - git show origin/"$JAR":bfg-1.15.0.jar > bfg-1.15.0.jar
+    - java -jar bfg-1.15.0.jar --strip-blobs-bigger-than 40M $OPENSRC_GIT_NAME
     - cd $OPENSRC_GIT_NAME
     - git reflog expire --expire=now --all && git gc --prune=now --aggressive
     - git remote add $REPO_NAME "https://$LS_TOKEN_NAME:$LS_TOKEN@$LS_URL"
     - git push -u $REPO_NAME main --force
-    - git push -u $REPO_NAME v3 --force

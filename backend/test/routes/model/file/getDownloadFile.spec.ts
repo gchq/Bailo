@@ -3,8 +3,7 @@ import { Readable } from 'node:stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
-import { getDownloadFileSchema } from '../../../../src/routes/v2/model/file/getDownloadFile.js'
-import { createFixture, testGet } from '../../../testUtils/routes.js'
+import { testGet } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 vi.mock('../../../../src/connectors/authorisation/index.js')
@@ -33,7 +32,13 @@ const releaseMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/release.js', () => releaseMock)
 
-type UrlBuilder = (fixture: ReturnType<typeof createFixture>) => string
+// Fixed params: createFixture fakes through the fileName transform, so a random name fails validateFileName
+const fixture = {
+  params: { modelId: 'model-id', semver: '1.0.0', fileName: 'weights/model.bin', fileId: 'file-id' },
+}
+
+type RouteFixture = typeof fixture
+type UrlBuilder = (fixture: RouteFixture) => string
 
 describe('routes > files > getDownloadFile', () => {
   // parametrise tests for both endpoints
@@ -49,7 +54,6 @@ describe('routes > files > getDownloadFile', () => {
     ],
   ])('GET %s', async (name, buildUrl) => {
     test('200 > ok', async () => {
-      const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture))
 
       expect(res.statusCode).toBe(200)
@@ -65,7 +69,6 @@ describe('routes > files > getDownloadFile', () => {
     test('200 > utf-8 file name is encoded in content-disposition', async () => {
       fileMock.getFileById.mockReturnValueOnce({ ...mockFileObject, name: 'café 🚀.bin' })
       releaseMock.getFileByReleaseFileName.mockReturnValueOnce({ ...mockFileObject, name: 'café 🚀.bin' })
-      const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture))
 
       expect(res.statusCode).toBe(200)
@@ -76,7 +79,6 @@ describe('routes > files > getDownloadFile', () => {
     })
 
     test('audit > expected call', async () => {
-      const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture))
 
       expect(res.statusCode).toBe(200)
@@ -93,7 +95,6 @@ describe('routes > files > getDownloadFile', () => {
           },
         }),
       )
-      const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture))
 
       expect(res.statusCode).toBe(500)
@@ -105,7 +106,6 @@ describe('routes > files > getDownloadFile', () => {
     })
 
     test('304 > not modified when If-None-Match matches', async () => {
-      const fixture = createFixture(getDownloadFileSchema)
       const expectedEtag = 'f8a7130e2a7facf456c258e5e5f7b6b2fa02431de15fdf47b5ce0079d275aa54'
       const res = await testGet(buildUrl(fixture), {
         headers: {
@@ -120,7 +120,6 @@ describe('routes > files > getDownloadFile', () => {
 
     test('206 > partial content when range header is provided', async () => {
       rangeMock.parseRangeHeaders.mockReturnValueOnce({ start: 0, end: 9 })
-      const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture), {
         headers: {
           range: 'bytes=0-9',
@@ -134,7 +133,6 @@ describe('routes > files > getDownloadFile', () => {
 
     test('200 > full content when parseRangeHeaders returns undefined', async () => {
       rangeMock.parseRangeHeaders.mockReturnValueOnce(undefined)
-      const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture), {
         headers: { range: 'bytes=0-10' },
       })
@@ -148,7 +146,6 @@ describe('routes > files > getDownloadFile', () => {
       fileMock.getFileById.mockReturnValueOnce(pathLikeFile)
       releaseMock.getFileByReleaseFileName.mockReturnValueOnce(pathLikeFile)
 
-      const fixture = createFixture(getDownloadFileSchema)
       const res = await testGet(buildUrl(fixture))
 
       expect(res.statusCode).toBe(200)

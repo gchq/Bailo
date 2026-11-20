@@ -21,7 +21,6 @@ import {
   Select,
   type SelectChangeEvent,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -32,6 +31,7 @@ import { useGetReleasesForModelId } from 'actions/release'
 import { type ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
 import FolderNavigableList from 'src/common/FolderNavigableList'
 import HelpPopover from 'src/common/HelpPopover'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
@@ -43,7 +43,6 @@ import ModelImageList from 'src/entry/model/ModelImageList'
 import { getLatestRelease } from 'src/entry/model/Releases'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
-import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
   type EntryInterface,
@@ -55,7 +54,6 @@ import {
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
 import { collectAllFiles, type FileTreeNode } from 'utils/fileTreeUtils'
-import { buildModelCardHref } from 'utils/routerUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
 export type ReleaseFormData = {
@@ -243,7 +241,7 @@ export default function ReleaseForm({
           {isReadOnly || isEdit ? (
             <ReadOnlyAnswer value={formData.semver} />
           ) : (
-            <TextField
+            <LimitedTextField
               id='semantic-version-input'
               required
               size='small'
@@ -258,53 +256,40 @@ export default function ReleaseForm({
             />
           )}
         </Stack>
-        <Stack sx={{ width: '100%' }}>
-          <Stack direction='row' spacing={1}>
-            <Typography
-              component='label'
-              htmlFor='model-card-version-input'
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >
-              Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
-            </Typography>
-            {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version.</HelpPopover>}
+        {!isReadOnly && (
+          <Stack sx={{ width: '100%' }}>
+            <Stack direction='row' spacing={1}>
+              <Typography
+                component='label'
+                htmlFor='model-card-version-input'
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
+                Model card version <span style={{ color: theme.palette.error.main }}>*</span>
+              </Typography>
+              <HelpPopover>Leave this as default if you want the latest available version.</HelpPopover>
+            </Stack>
+            {isEntryCardRevisionsLoading && <Loading />}
+            {!isEntryCardRevisionsLoading && (
+              <Select
+                size='small'
+                defaultValue={model.card.version.toString()}
+                value={formData.modelCardVersion ? formData.modelCardVersion.toString() : model.card.version.toString()}
+                onChange={handleModelCardVersionChange}
+                inputProps={{
+                  id: 'model-card-version-input',
+                }}
+              >
+                {modelCardVersionList}
+              </Select>
+            )}
           </Stack>
-          {isReadOnly ? (
-            <Typography>
-              {formData.modelCardVersion} -{' '}
-              <Link href={buildModelCardHref(model.id, model.kind, formData.modelCardVersion)}>
-                <Button size='small'>View Model card</Button>
-              </Link>
-            </Typography>
-          ) : (
-            <>
-              {isEntryCardRevisionsLoading && <Loading />}
-              {!isEntryCardRevisionsLoading && (
-                <>
-                  <Select
-                    size='small'
-                    defaultValue={model.card.version.toString()}
-                    value={
-                      formData.modelCardVersion ? formData.modelCardVersion.toString() : model.card.version.toString()
-                    }
-                    onChange={handleModelCardVersionChange}
-                    inputProps={{
-                      id: 'model-card-version-input',
-                    }}
-                  >
-                    {modelCardVersionList}
-                  </Select>
-                </>
-              )}
-            </>
-          )}
-        </Stack>
+        )}
       </Stack>
       <Stack>
         {isReadOnly ? (
-          <Accordion defaultExpanded sx={{ p: 0 }}>
+          <Accordion sx={{ p: 0 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
               <Typography
                 sx={{

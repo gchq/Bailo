@@ -34,6 +34,11 @@ export interface UiConfig {
     host: string
   }
 
+  syOps: {
+    enabled: boolean
+    href: string
+  }
+
   development: {
     logUrl: string
   }
@@ -87,6 +92,10 @@ export interface UiConfig {
 
   llmImport: {
     enabled: boolean
+  }
+
+  deploymentAssessments: {
+    deployableModelState: string | null
   }
 
   lifecycle: {
@@ -284,6 +293,7 @@ export const SchemaKindLabel = {
   model: 'model',
   accessRequest: 'access request',
   dataCard: 'data card',
+  deploymentAssessment: 'deployment assessment',
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
 
@@ -291,6 +301,7 @@ export const SchemaKind = {
   MODEL: 'model',
   ACCESS_REQUEST: 'accessRequest',
   DATA_CARD: 'dataCard',
+  DEPLOYMENT_ASSESSMENT: 'deploymentAssessment',
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
@@ -691,7 +702,12 @@ export type AccessRequestUserPermissions = {
   deleteAccessRequest: PermissionDetail
 }
 
-export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions
+export type DeploymentAssessmentUserPermissions = {
+  editDeploymentAssessment: PermissionDetail
+  deleteDeploymentAssessment: PermissionDetail
+}
+
+export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions & DeploymentAssessmentUserPermissions
 
 export type RestrictedActionKeys = keyof UserPermissions
 
@@ -1138,3 +1154,51 @@ export interface BaseLifecycleMetrics {
   byOrganisation: LifecycleMetricsByOrg[]
   lastUpdated: string
 }
+
+export interface DeploymentAssessmentMetadata {
+  modelOverview: {
+    modelIds?: string[]
+    [key: string]: unknown
+  }
+  signOff?: {
+    riskOwners?: string[]
+    [key: string]: unknown
+  }
+  [key: string]: unknown
+}
+
+export interface DeploymentAssessmentInterface {
+  _id: string
+  id: string
+  schemaId: string
+  name: string
+  metadata: DeploymentAssessmentMetadata
+  draft: boolean
+  justification: string
+  owner: string[]
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface DeploymentAssessmentSummaryBase {
+  id: string
+  schemaId: string
+  name: string
+  createdBy: string
+  createdAt: string
+}
+
+interface DraftDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: true
+  owner?: string[]
+  models?: string[]
+}
+
+interface PublishedDeploymentAssessmentSummary extends DeploymentAssessmentSummaryBase {
+  draft: false
+  owner: string[]
+  models: string[]
+}
+
+export type DeploymentAssessmentSummary = DraftDeploymentAssessmentSummary | PublishedDeploymentAssessmentSummary

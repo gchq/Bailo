@@ -1,10 +1,12 @@
 import { type Dayjs } from '@dayjs'
-import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Button, Divider, FormControlLabel, Radio, RadioGroup, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { type SyntheticEvent, useContext, useEffect, useState } from 'react'
+import { type ChangeEvent, type SyntheticEvent, useContext, useEffect, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
+import RichTextEditor from 'src/common/RichTextEditor'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import { increaseCurrentDateByHumanInterval, increaseCurrentDateInDays } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
@@ -19,9 +21,12 @@ type ReviewWithCommentProps = {
   onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string, dueDate: Dayjs | null) => void
   loading?: boolean
   reviews: ReviewRequestInterface[]
-  modelId: string
+  modelId?: string
   includeDueDate?: boolean
   hideRequestChangesButton?: boolean
+  onCancel?: () => void
+  reviewComment: string
+  onReviewCommentChange: (value: string) => void
 }
 
 export default function ReviewWithComment({
@@ -31,13 +36,16 @@ export default function ReviewWithComment({
   modelId,
   includeDueDate = false,
   hideRequestChangesButton = false,
+  reviewComment,
+  onReviewCommentChange,
+  onCancel,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const router = useRouter()
-  const [reviewComment, setReviewComment] = useState('')
   const [dueDate, setDueDate] = useState<Dayjs | null>(null)
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
+  const [decision, setDecision] = useState<DecisionKeys | undefined>(undefined)
 
   const uiConfig = useContext(UiConfigContext)
 
@@ -74,22 +82,41 @@ export default function ReviewWithComment({
     }
   }, [router, reviewRequest])
 
-  function submitForm(decision: DecisionKeys) {
-    setErrorText('')
+  function handleSubmitOnClick() {
+    submitForm(decision)
+  }
 
-    if (invalidComment() && decision === Decision.RequestChanges) {
+  function submitForm(selectedDecision: DecisionKeys | undefined) {
+    setErrorText('')
+    if (!selectedDecision) {
+      setErrorText('Unknown decision')
+      return
+    }
+
+    if (invalidComment() && selectedDecision === Decision.RequestChanges) {
       setErrorText('You must submit a comment when requesting changes.')
-    } else if (!reviewRequest || !reviewRequest.role) {
+    } else if (!reviewRequest?.role) {
       setErrorText('Please select a role before submitting your review.')
     } else {
-      setReviewComment('')
-      onSubmit(decision, reviewComment, reviewRequest.role, dueDate)
+      onReviewCommentChange('')
+      onSubmit(selectedDecision, reviewComment, reviewRequest.role, dueDate)
     }
+  }
+
+  const handleRadioChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDecision(event.target.value as DecisionKeys)
   }
 
   function onChange(_event: SyntheticEvent<Element, Event>, newValue: ReviewRequestInterface | null) {
     if (newValue) {
       setReviewRequest(newValue)
+      router.replace(
+        {
+          query: { ...router.query, role: newValue.role },
+        },
+        undefined,
+        { shallow: true },
+      )
     }
   }
 
@@ -123,23 +150,26 @@ export default function ReviewWithComment({
                 option.role === value.role
               }
               onChange={onChange}
+              disableClearable
               value={reviewRequest}
               getOptionLabel={(option) => getRoleDisplayName(option.role, entryRoles)}
               options={reviews}
-              renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
+              renderInput={(params) => <LimitedTextField {...params} label='Select your role' size='small' />}
+              slotProps={{
+                popper: {
+                  sx: { zIndex: theme.zIndex.tooltip + 100 },
+                },
+              }}
             />
-            <TextField
-              size='small'
-              minRows={4}
-              maxRows={8}
-              multiline
-              placeholder='Leave a comment'
-              data-test='reviewWithCommentTextField'
+            <RichTextEditor
+              dataTest='reviewWithCommentTextField'
               value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              error={errorText.length > 0}
-              helperText={errorText}
+              onChange={(newValue) => onReviewCommentChange(newValue)}
+              alwaysShowToolbar
             />
+            <Typography variant='caption' color='error'>
+              {errorText}
+            </Typography>
             {includeDueDate && (
               <Stack spacing={0.5}>
                 <Typography sx={{ fontWeight: 'bold' }}>Next review date</Typography>
@@ -157,51 +187,68 @@ export default function ReviewWithComment({
                 />
               </Stack>
             )}
+            <RadioGroup sx={{ mt: 0 }} defaultValue={undefined} value={decision} onChange={handleRadioChange}>
+              {!hideRequestChangesButton && (
+                <>
+                  <FormControlLabel
+                    value={Decision.RequestChanges}
+                    label='Request changes'
+                    control={<Radio size='small' sx={{ py: 0 }} data-test='requestChangesReviewButton' />}
+                    slotProps={{
+                      typography: { sx: { fontWeight: 'bold' } },
+                    }}
+                  />
+                  <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption'>
+                    Needs some updates
+                  </Typography>
+                </>
+              )}
+              <FormControlLabel
+                value={Decision.Approve}
+                label='Approve'
+                slotProps={{
+                  typography: { sx: { fontWeight: 'bold' } },
+                }}
+                control={<Radio size='small' sx={{ py: 0 }} />}
+                data-test='approveReviewButton'
+              />
+              <Typography sx={{ ml: 3.5, mt: 0 }} variant='caption' color={theme.palette.customTextInput.main}>
+                Looks good to me
+              </Typography>
+            </RadioGroup>
+            <Divider />
             <Stack
               spacing={2}
               direction={{ sm: 'row', xs: 'column' }}
               sx={{
-                justifyContent: 'space-between',
                 alignItems: 'center',
               }}
+              divider={<Divider flexItem orientation='vertical' />}
             >
-              <Stack spacing={1} direction={{ sm: 'row', xs: 'column' }}>
-                {showUndoButton() && (
-                  <>
-                    <Button
-                      onClick={() => submitForm(Decision.Undo)}
-                      loading={loading}
-                      variant='contained'
-                      color='warning'
-                      data-test='undoReviewButton'
-                      size='small'
-                    >
-                      Undo review
-                    </Button>
-                    <Divider flexItem orientation='vertical' />
-                  </>
-                )}
-                {!hideRequestChangesButton && (
+              {showUndoButton() && (
+                <>
                   <Button
-                    variant='outlined'
-                    onClick={() => submitForm(Decision.RequestChanges)}
+                    onClick={() => submitForm(Decision.Undo)}
                     loading={loading}
-                    data-test='requestChangesReviewButton'
+                    variant='contained'
+                    color='warning'
+                    data-test='undoReviewButton'
                     size='small'
                   >
-                    Request changes
+                    Undo review
                   </Button>
-                )}
+                </>
+              )}
+              <Stack direction='row' spacing={1}>
                 <Button
+                  disabled={decision === undefined}
+                  onClick={handleSubmitOnClick}
                   variant='contained'
-                  onClick={() => submitForm(Decision.Approve)}
-                  loading={loading}
-                  data-test='approveReviewButton'
-                  size='small'
-                  disabled={includeDueDate && !dueDate}
+                  data-test='submitReviewButton'
                 >
-                  Approve
+                  Submit
                 </Button>
+                {onCancel && <Button onClick={onCancel}>Cancel</Button>}
               </Stack>
             </Stack>
           </Stack>

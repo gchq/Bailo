@@ -100,8 +100,8 @@ updates:
         patterns:
           - vitest
           - '@vitest/*'
-          - '@anatine/zod-mock'
           - supertest
+          - zod-schema-faker
       mongoose-stack:
         patterns:
           - mongoose
@@ -176,6 +176,8 @@ updates:
       - '/backend'
       - '/frontend'
       - '/lib/artefactscan_api'
+      # Digest-pinned `image:` strings in the chart values
+      - '/infrastructure/helm/bailo'
     schedule:
       interval: 'weekly'
     # Skip routine patch bumps. Security updates are unaffected by `update-types`.
@@ -189,6 +191,9 @@ updates:
       python-images:
         patterns:
           - python
+      mailcrab-images:
+        patterns:
+          - marlonb/mailcrab
 
   # Docker Compose
   - package-ecosystem: 'docker-compose'
@@ -211,6 +216,11 @@ updates:
     ignore:
       - dependency-name: '*'
         update-types: ['version-update:semver-patch']
+      # The Helm updater cannot bump digest-pinned images (`repo:tag@sha256:...`), so this entry only updates
+      # charts. The `docker` entry above updates every image in `values.yaml` instead.
+      - dependency-name: 'marlonb/mailcrab'
+      - dependency-name: 'clamav/clamav'
+      - dependency-name: 'bitnamilegacy/*'
 
   # Python (uv) - security updates only. `open-pull-requests-limit: 0` disables version updates,
   # but security updates still use this entry's settings. A vulnerable direct dependency has its

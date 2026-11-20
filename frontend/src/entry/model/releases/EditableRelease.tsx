@@ -94,7 +94,6 @@ function ReadOnlyRelease({ release }: { release: ReleaseInterface }) {
         onSubmit={noop}
         readOnly
       />
-      <Divider />
       <ReleaseForm
         editable
         isEdit={false}
@@ -211,7 +210,7 @@ function EditableReleaseInner({ release, isEdit, onIsEditChange, isLoading, setI
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack>
       <EditableFormHeading
         heading={
           <Stack

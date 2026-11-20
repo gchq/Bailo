@@ -15,8 +15,6 @@ import {
 } from '../../src/clients/s3.js'
 import { setTestConfig } from '../testUtils/setupTestConfig.js'
 
-vi.mock('bytes')
-
 const s3Mocks = vi.hoisted(() => {
   const send = vi.fn(function () {
     return 'response'

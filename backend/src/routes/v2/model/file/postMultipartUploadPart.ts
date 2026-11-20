@@ -14,10 +14,10 @@ export const postMultipartUploadPartSchema = z.object({
   query: z.object({
     fileId: z.string(),
     uploadId: z.string(),
-    partNumber: z.coerce.number().positive(),
+    partNumber: z.coerce.number().int().positive(),
   }),
   headers: z.object({
-    'content-length': z.coerce.number().positive().openapi({
+    'content-length': z.coerce.number().int().positive().openapi({
       example: 5242880,
       description: 'Exact size in bytes of this file part. Required for S3 multipart uploads.',
     }),

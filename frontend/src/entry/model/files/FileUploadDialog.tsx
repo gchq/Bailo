@@ -1,18 +1,7 @@
 import styled from '@emotion/styled'
 import FileUpload from '@mui/icons-material/FileUpload'
 import FolderOpen from '@mui/icons-material/FolderOpen'
-import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  Divider,
-  LinearProgress,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { type AxiosProgressEvent } from 'axios'
 import { type ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -21,6 +10,7 @@ import FileUploadProgressDisplay, {
   type FailedFileUpload,
   type FileUploadProgress,
 } from 'src/common/FileUploadProgressDisplay'
+import LimitedTextField from 'src/common/LimitedTextField'
 import { Transition } from 'src/common/Transition'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import ConflictResolutionList, { type ConflictAction } from 'src/entry/model/files/ConflictResolutionList'
@@ -265,7 +255,7 @@ export default function FileUploadDialog({
     <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth slots={{ transition: Transition }}>
       <DialogContent>
         <Stack spacing={2}>
-          <TextField
+          <LimitedTextField
             fullWidth
             size='small'
             label='Destination folder'

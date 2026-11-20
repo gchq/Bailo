@@ -77,6 +77,13 @@ const audit: Record<string, Mock> = {
 
   onCreateReview: vi.fn(),
 
+  onCreateDeploymentAssessment: vi.fn(),
+  onUpdateDeploymentAssessment: vi.fn(),
+  onDeleteDeploymentAssessment: vi.fn(),
+  onSearchDeploymentAssessments: vi.fn(),
+  onCommentOnDeploymentAssessment: vi.fn(),
+  onViewDeploymentAssessment: vi.fn(),
+
   onViewCurrentUserInformation: vi.fn(),
 
   onNotifyReviewers: vi.fn(),

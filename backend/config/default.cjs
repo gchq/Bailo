@@ -129,10 +129,22 @@ module.exports = {
         reviewRoles: ['msro'],
       },
     ],
+    deploymentAssessments: [
+      {
+        name: 'Minimal Deployment Assessment Schema v1',
+        id: 'minimal-deployment-assessment-schema-v1',
+        description: 'A minimal Deployment Assessment capturing the deployment name and details.',
+        jsonSchema: require('../src/scripts/example_schemas/minimal_deployment_assessment_schema.json'),
+      },
+    ],
   },
 
   session: {
     secret: '',
+  },
+
+  personalAccessToken: {
+    lifetime: '90 days',
   },
 
   oauth: {
@@ -204,6 +216,11 @@ module.exports = {
       host: 'localhost:8080',
     },
 
+    syOps: {
+      enabled: false,
+      href: 'https://syops.example.com',
+    },
+
     inference: {
       enabled: false,
       connection: {
@@ -256,6 +273,10 @@ module.exports = {
 
     llmImport: {
       enabled: false,
+    },
+
+    deploymentAssessments: {
+      deployableModelState: null,
     },
 
     lifecycle: {

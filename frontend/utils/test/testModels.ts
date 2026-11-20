@@ -217,6 +217,10 @@ export const testManagerRoleInterface: ReviewRoleInterface = {
 }
 
 export const testUiConfig: UiConfig = {
+  deploymentAssessments: {
+    deployableModelState: 'Production',
+  },
+
   banner: {
     enabled: true,
     text: 'DEVELOPMENT DEPLOYMENT',
@@ -234,6 +238,11 @@ export const testUiConfig: UiConfig = {
   // The publicly accessible location of the registry, including host and port
   registry: {
     host: 'localhost:8080',
+  },
+
+  syOps: {
+    enabled: false,
+    href: 'https://syops.example.com',
   },
 
   inference: {

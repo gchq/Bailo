@@ -1,10 +1,10 @@
-import bytes from 'bytes'
 import type PQueue from 'p-queue'
 
 import { type FileInterface } from '../../models/File.js'
 import { type ImageRef } from '../../models/Release.js'
 import { type ArtefactKindKeys, type ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
+import { formatBytes } from '../../utils/bytes.js'
 import config from '../../utils/config.js'
 
 export type ArtefactScanResult = Pick<
@@ -84,8 +84,8 @@ export abstract class BaseArtefactScanningConnector {
   protected buildSizeExceededResult(artefact: ArtefactInterface, artefactSize: number): ArtefactScanResult {
     return this.buildErrorResult('Artefact exceeds configured scanner size limit.', {
       artefact,
-      artefactSize: bytes.format(artefactSize),
-      maxSize: bytes.format(this.maxSize),
+      artefactSize: formatBytes(artefactSize),
+      maxSize: formatBytes(this.maxSize),
     })
   }
 

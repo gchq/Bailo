@@ -6,12 +6,12 @@ exports[`routes > images > getImages > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > images > getImages > audit > expected call 1`] = `"expedita"`;
+exports[`routes > images > getImages > audit > expected call 1`] = `"aEGrOTaTIo VulNus sPectACUlUM aDfeCtUs DEcuMbo imPEdiT cURiOSItas qUIbUsdAM"`;
 
 exports[`routes > images > getImages > audit > expected call 2`] = `
 {
-  "name": "Dr. Garry Cummerata",
-  "repository": "expedita",
-  "tag": "expedita",
+  "name": "eRror",
+  "repository": "aEGrOTaTIo VulNus sPectACUlUM aDfeCtUs DEcuMbo imPEdiT cURiOSItas qUIbUsdAM",
+  "tag": "DENego PRaEseNTIUm Bis apeRTE LibEro colO DeprecaTOr CLArO ceLo cURIs aBbas",
 }
 `;
