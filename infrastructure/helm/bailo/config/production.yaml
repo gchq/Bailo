@@ -104,9 +104,9 @@ oauth:
 ui:
   banner:
     enabled: {{ .Values.config.ui.banner.enabled }}
-    text: {{ .Values.config.ui.banner.text }}
-    colour: {{ .Values.config.ui.banner.colour }}
-    textColor: {{ .Values.config.ui.banner.textColor}}
+    text: {{ .Values.config.ui.banner.text | quote }}
+    colour: {{ .Values.config.ui.banner.colour | quote }}
+    textColor: {{ .Values.config.ui.banner.textColor | quote}}
   announcement:
     enabled: {{ .Values.config.ui.announcement.enabled }}
     text: {{ .Values.config.ui.announcement.text }}
