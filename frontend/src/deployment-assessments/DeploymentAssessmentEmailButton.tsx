@@ -14,7 +14,7 @@ function buildDeploymentAssessmentEmailHref(
   recipients: string[],
 ): string {
   const subject = encodeURIComponent(
-    `Query regarding deployment assessment for ${deploymentAssessment.name} (${deploymentAssessment.id})`,
+    `Query regarding Deployment Assessment for ${deploymentAssessment.name} (${deploymentAssessment.id})`,
   )
     .replaceAll('(', '%28')
     .replaceAll(')', '%29')
@@ -38,14 +38,14 @@ export default function DeploymentAssessmentEmailButton({
       : undefined
 
   return (
-    <Tooltip title='Email risk owners about this deployment assessment'>
+    <Tooltip title='Email Deployment Risk Owner about this Deployment Assessment'>
       <span>
         <IconButton
           color='primary'
           {...(href ? { href } : {})}
           disabled={!href}
           size='small'
-          aria-label='Email risk owners about this deployment assessment'
+          aria-label='Email Deployment Risk Owner about this Deployment Assessment'
         >
           <Email />
         </IconButton>
