@@ -1,5 +1,6 @@
 import { type HydratedDocument, model, Schema } from 'mongoose'
 
+import { toSearchGrams } from '../utils/search.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const EntryVisibility = {
@@ -78,6 +79,9 @@ export interface ModelInterface {
   visibility: EntryVisibilityKeys
   deleted: boolean
 
+  // Trigrams of name, description and tags used for fuzzy search
+  searchGrams?: string[]
+
   createdAt: Date
   updatedAt: Date
 }
@@ -139,6 +143,8 @@ const ModelSchema = new Schema<ModelDoc>(
     },
 
     visibility: { type: String, enum: Object.values(EntryVisibility), default: EntryVisibility.Public },
+
+    searchGrams: { type: [String], select: false },
   },
   {
     timestamps: true,
@@ -146,9 +152,15 @@ const ModelSchema = new Schema<ModelDoc>(
   },
 )
 
+// searchGrams is not selected by default, so always rebuild it rather than relying on isModified
+ModelSchema.pre('save', function modelPreSave() {
+  this.searchGrams = toSearchGrams(this.name, this.description, ...(this.tags ?? []))
+})
+
 ModelSchema.plugin(softDeletionPlugin)
 ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
 ModelSchema.index({ createdAt: 1 })
+ModelSchema.index({ searchGrams: 1 })
 
 const ModelModel = model<ModelDoc>('v2_Model', ModelSchema)
 
