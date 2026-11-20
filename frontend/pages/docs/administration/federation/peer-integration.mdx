@@ -45,7 +45,8 @@ releases are not transferred by federation.
 
 Federated requests are subject to the remote instance's normal authentication and authorisation. The remote instance
 only returns models that the requesting identity is allowed to see. That identity is either the calling instance's
-service identity, or the original user if [user escalation](setting-up-federation#user-escalation) is turned on.
+service identity, or the original user if user escalation is turned on (see
+[Setting Up Federation](setting-up-federation)).
 
 ## Federation states
 
@@ -63,7 +64,7 @@ Each instance has an overall federation state, set in `federation.state`:
 
 The federation state controls outgoing connections only. It does not stop other instances from querying your instance.
 Incoming requests are controlled by your authentication and authorisation connectors, in the same way as any other API
-request. See [Securing federation](setting-up-federation#securing-federation).
+request. See [Setting Up Federation](setting-up-federation) for configuration details.
 
 Each peer also has its own `state`, using the same three values. Setting a peer to `disabled` stops this instance from
 checking whether that peer is reachable, without removing its configuration. A disabled peer still appears in the
@@ -102,7 +103,7 @@ Bailo provides two system endpoints for federation:
 - **`GET /api/v2/system/peers`** - Returns each configured peer, its configuration and whether this instance can
   currently reach it
 
-You can call both endpoints [via the API](../../../api/docs#/system).
+You can call both endpoints [via the API](../../../api/docs).
 
 ## Related pages
 

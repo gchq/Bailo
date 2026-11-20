@@ -14,9 +14,9 @@ This page walks through connecting two Bailo instances so that users on one inst
 For background on how federation works, see [Federation and Peer Integration](peer-integration).
 
 All configuration on this page lives in the backend configuration of each instance. See
-[App Configuration](../getting-started/app-configuration) for where these files are stored, or
-[Configuring federation with Helm](#configuring-federation-with-helm) if you deploy with Helm. Restart the backend after
-changing federation configuration, because peers are only loaded at start-up.
+[App Configuration](../getting-started/app-configuration) for where these files are stored, including how this differs
+if you deploy with Helm. Restart the backend after changing federation configuration, because peers are only loaded at
+start-up.
 
 ## Example scenario
 
@@ -41,11 +41,11 @@ Check the following with the administrators of both instances:
 - **TLS trust** - Organisation A's backend must trust the certificate presented by Organisation B. If Organisation B
   uses a private certificate authority, Organisation A needs a copy of that CA certificate
 - **Service identity** - Organisation B must be able to authenticate requests from Organisation A's backend. This is
-  usually done with a TLS client certificate issued to Organisation A. See
-  [Step 2](#step-2---decide-how-organisation-a-authenticates)
+  usually done with a TLS client certificate issued to Organisation A. See `httpConfig` in the "Configuration reference"
+  section below
 - **User identities (optional)** - If Organisation B's search results should reflect what each individual user is
   allowed to see, both instances must identify users in the same way, for example using the same email addresses. See
-  [User escalation](#user-escalation)
+  the "User escalation" section below
 
 ## Step 1 - Choose a federation ID for each instance
 
@@ -76,7 +76,7 @@ module.exports = {
 Always set `peers`, even if it is empty. The backend fails to start if `state` is not `disabled` and `peers` is missing.
 
 This minimal configuration is enough for Organisation A to search Organisation B as Organisation A's service identity.
-To also recognise individual users, follow [User escalation](#user-escalation).
+To also recognise individual users, follow the "User escalation" section below.
 
 ## Step 3 - Configure Organisation A
 
@@ -105,7 +105,7 @@ module.exports = {
 Set `baseUrl` to the public URL of Organisation B's instance, without a trailing slash and without `/api`. Bailo uses it
 both for backend requests (`<baseUrl>/api/v2/...`) and for the links users follow to remote models.
 
-Restart Organisation A's backend, then [verify the connection](#verifying-the-connection).
+Restart Organisation A's backend, then verify the connection using the "Verifying the connection" section below.
 
 ## User escalation
 
