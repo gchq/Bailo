@@ -1,0 +1,52 @@
+import { type HydratedDocument, model, Schema } from 'mongoose'
+
+import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+
+export interface DeploymentAssessmentMetadata {
+  modelOverview: {
+    modelIds?: string[]
+    [key: string]: unknown
+  }
+  signOff?: {
+    riskOwners?: string[]
+    [key: string]: unknown
+  }
+  [key: string]: unknown
+}
+
+export interface DeploymentAssessmentInterface {
+  id: string
+  name: string
+  schemaId: string
+  metadata: DeploymentAssessmentMetadata
+  draft: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type DeploymentAssessmentDoc = HydratedDocument<DeploymentAssessmentInterface> & SoftDeleteDocument
+
+const DeploymentAssessmentSchema = new Schema<DeploymentAssessmentDoc>(
+  {
+    id: { type: String, unique: true, required: true, index: true },
+    name: { type: String, required: true },
+    schemaId: { type: String, required: true },
+    metadata: { type: Schema.Types.Mixed, default: {} },
+    draft: { type: Boolean, required: true, default: true },
+    createdBy: { type: String, required: true },
+  },
+  {
+    timestamps: true,
+    collection: 'v3_deployment_assessments',
+  },
+)
+
+DeploymentAssessmentSchema.plugin(softDeletionPlugin)
+DeploymentAssessmentSchema.index({ 'metadata.modelOverview.modelIds': 1 })
+DeploymentAssessmentSchema.index({ 'metadata.signOff.riskOwners': 1 })
+DeploymentAssessmentSchema.index({ createdBy: 1 })
+
+const DeploymentAssessmentModel = model<DeploymentAssessmentDoc>('v3_Deployment_Assessment', DeploymentAssessmentSchema)
+
+export default DeploymentAssessmentModel

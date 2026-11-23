@@ -2,82 +2,40 @@
 
 exports[`routes > schema > postSchemaMigration > audit > expected call 1`] = `
 {
-  "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+  "description": undefined,
   "draft": false,
-  "name": "Dr. Garry Cummerata",
+  "name": "umqUaM crEo coTIdIe vACUus sui EuM ADVocO HArUm TanTILLUS sUluM aDFeRo Vado",
   "questionMigrations": [
     {
-      "id": "expedita",
+      "id": "adMon",
       "kind": "delete",
-      "propertyType": "expedita",
-      "sourcePath": "expedita",
-      "targetPath": "expedita",
-    },
-    {
-      "id": "expedita",
-      "kind": "delete",
-      "propertyType": "expedita",
-      "sourcePath": "expedita",
-      "targetPath": "expedita",
-    },
-    {
-      "id": "expedita",
-      "kind": "delete",
-      "propertyType": "expedita",
-      "sourcePath": "expedita",
-      "targetPath": "expedita",
-    },
-    {
-      "id": "expedita",
-      "kind": "delete",
-      "propertyType": "expedita",
-      "sourcePath": "expedita",
-      "targetPath": "expedita",
+      "propertyType": "cOmPlECtus tENer spiRiTUS aLVEUS AufeRo beaTUs uNUS VaRIETaS bEstIA coRrEpt",
+      "sourcePath": "cuPio",
+      "targetPath": "pATRUus CeNa AtRoCitas CarCEr UtpotE AUreUs tARduS MagNam ViGIlO ViX Vis aV",
     },
   ],
-  "sourceSchema": "expedita",
-  "targetSchema": "expedita",
+  "sourceSchema": "ANImUS vulGus AstrUm COnvoCO MODI tEMpErantia AspErnatUr vERsUs DePROmo auX",
+  "targetSchema": "CONiu",
 }
 `;
 
 exports[`routes > schema > postSchemaMigration > successfully stores the schema migration 1`] = `
 {
   "schemaMigration": {
-    "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+    "description": "crEPtIO QuiSqUam anTE vORAgO DecipiO TesTImOniUm ThAlAsSINUs coNtra CuprEss",
     "draft": false,
-    "name": "Dr. Garry Cummerata",
+    "name": "ARTiC",
     "questionMigrations": [
       {
-        "id": "expedita",
-        "kind": "delete",
-        "propertyType": "expedita",
-        "sourcePath": "expedita",
-        "targetPath": "expedita",
-      },
-      {
-        "id": "expedita",
-        "kind": "delete",
-        "propertyType": "expedita",
-        "sourcePath": "expedita",
-        "targetPath": "expedita",
-      },
-      {
-        "id": "expedita",
-        "kind": "delete",
-        "propertyType": "expedita",
-        "sourcePath": "expedita",
-        "targetPath": "expedita",
-      },
-      {
-        "id": "expedita",
-        "kind": "delete",
-        "propertyType": "expedita",
-        "sourcePath": "expedita",
-        "targetPath": "expedita",
+        "id": "eIUS AuDio Tot TUtAMEn vIlLA UrbaNUS cuMQUe COGitO DeMiTTo vOlUPTAtIbUs trIpUdiO ANtIqUUS TubiNeUs cRUR VOlUptAtiBUS xipHIAS sUuS TUMuLTUs benigne CoNStaNs tuTIS CoMEtes depUtO teNeO DEcImuS MOLLiTIa MAgnaM UtrOQuE textiLIS TeMPOra COmPlEctuS DelUdO viRtUS APUD Strenuus aurUM CEleBRER cuRO CaStE dEorsUM sUmMISSe CrIBRo AnGulUS PeRSpICiAtiS vIctUS susTINeO sODAlITas amOr NisI ceDo CRuEnTUs dEpuLso Cogo VolUPtAtiBus antepOnO QUIDem voluPTAtuM CurIOsiTAS eAruM aRCuS vOrax tExTOR quia StATua addUCo SAEpE spoLiatiO uNDE seQui deSpaRaTUS valeo TeNEO CATERvA TaMetSi Tam MOlliTIA nAM cuPidiTatE veNtOsUS USUs SPOnte VICtUS trIcEsIMuS hIC cAsUS MAIOreS SInt tolLO ExpeditA vOLuPTATe belLICUs cAnDiDUS recUsaNDAE PaulatIM cOLo rePELLENDuS voLuP VERgo tHesAuRUS bAsIum uSTUlo nISI TantUM dOlORIBUS aGNOSCo aMaRItUDo suMMISSe rePelLenDus CARieS aEStaS aNTiqUUS teRGEo Adeo siMiLiqUe VEsica amITTO viLItAs spoLiAtio cOntEgO aURuM pLaceat dIGNiSSImOs CrEDo dolORe dEREliNqUo vICtoRIa ChariSMa tuRbo VidEo TE",
+        "kind": "move",
+        "propertyType": "opTIO",
+        "sourcePath": "eNiM VIniTOr ADVoCO aCiEs cREBER aVEHO SED cAlCO QuaM uSTUlo amOR dOlOrEm a",
+        "targetPath": "DEgUs",
       },
     ],
-    "sourceSchema": "expedita",
-    "targetSchema": "expedita",
+    "sourceSchema": "cuRTuS CRUentUS DOlOreM ANTeA sTaTuA AcSi caNIs Tabgo ViCTUS PLACeaT cUmQue",
+    "targetSchema": "quO AdMonEO adipIsci EvENIET terRa SuCCEdo aUXILiUM CErnuus bibO CUMQUE sOLlErs CERno CicUTa tERminaTiO ULterius iNcIdunt SuRCUlUS dAMnAtiO traCTo TrEDeciM AcCEPtUs TAbElLa SUnT supeR teRroR VIDuO SOlUS AudeO STO vulariTEr VeRgo UREDo aDIPiSCOR AbSEns TaMquam TaBElLA SUGgeRO ARO angUSTuS aRTo traNS CuLPo aTROX Quos adfIcIo alIuS AmOVeo sTRENuUS proViDeNt natUS TrEPidE tAMdIU CAlAMItaS alIas DeSinO comBIBo CENo dOlOr SUbStaNTia venusTaS dEFetIscOR eXpedIta TolERo creta TaLuS voRAX BEnE nEscIUNT SUPpELleX aPPELlo tORQuEo TabuLa TAM tURpis TANDem TAlio sAPiEntE RERUm trIbuO truCido brEViS SOMnICUlOSUS AtTERO trAdo aDDo adeo aCCusaNTIUM sImilIQuE ExErciTAtiONeM acSI AcqUiRO TAMetsI tamiSIUM cAmPana tErREO tuTAMEn tRiDUAna itaque stUlTus ter taCtUs CUM SpeCIosuS sUbIUnGo TOt CoNScenDO ErrOr AUreus CAsUS HiC COgiTO sImiLiqUE aDMiNisTRaTIo AmO teMplum decIPIo VolUbiLiS ANNus coNtaBEscO vESiCA tubInEUs voLUTabRum aUTuS cONTEGO SImiliQUe chARISma adIpisCOR NobIs audeO TestimoNIum CRaSTinUs cOMP",
   },
 }
 `;

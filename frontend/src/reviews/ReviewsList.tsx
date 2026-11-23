@@ -4,15 +4,15 @@ import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { ReviewKind, type ReviewListStatusKeys } from 'types/types'
+import { ReviewKind, type ReviewKindKeys, type ReviewListStatusKeys } from 'types/types'
 
 type ReviewsListProps = {
-  kind: 'release' | 'access' | 'lifecycle'
+  kind: ReviewKindKeys
   status: ReviewListStatusKeys
 }
 
 export default function ReviewsList({ kind, status }: ReviewsListProps) {
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser(status === 'open')
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser(status === 'open', kind)
 
   const ReviewListItem = memoize(({ data }) => <ReviewItem review={data} key={`${data._id}`} status={status} />)
 
@@ -24,6 +24,8 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
         return 'accessRequestId'
       case ReviewKind.LIFECYCLE:
         return 'dueDate'
+      default:
+        return 'createdAt'
     }
   }
 

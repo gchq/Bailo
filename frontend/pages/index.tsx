@@ -20,7 +20,6 @@ import {
   Stack,
   Tab,
   Tabs,
-  TextField,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -46,6 +45,7 @@ import React, {
 } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
@@ -56,6 +56,7 @@ import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { type EntityObject, EntryKind, type EntryKindKeys } from 'types/types'
 import { fromEntity, toEntity } from 'utils/entityUtils'
+import { TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 import { isEnabled, isReachable } from 'utils/peerUtils'
 import { toKebabCase, toTitleCase } from 'utils/stringUtils'
 
@@ -414,7 +415,7 @@ export default function Marketplace() {
                         id='entry-filter-input'
                         value={filter}
                         disableUnderline
-                        inputProps={{ spellCheck: 'false' }}
+                        inputProps={{ spellCheck: 'false', maxLength: TEXT_INPUT_MAX_LENGTH }}
                         onChange={handleFilterChange}
                         endAdornment={
                           <Tooltip title={titleOnly ? 'Name' : 'Full Text'}>
@@ -540,7 +541,7 @@ export default function Marketplace() {
                             }
                             loading={isUsersLoading && userListQuery.length >= 3}
                             renderInput={(params) => (
-                              <TextField
+                              <LimitedTextField
                                 {...params}
                                 autoFocus
                                 label={'Search for user or group'}

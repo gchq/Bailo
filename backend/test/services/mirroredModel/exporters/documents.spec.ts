@@ -10,8 +10,6 @@ import config from '../../../../src/utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 import { setTestConfig } from '../../../testUtils/setupTestConfig.js'
 
-vi.mock('bytes')
-
 const tarballMocks = vi.hoisted(() => ({
   initialiseTarGzUpload: vi.fn(),
   addEntryToTarGzUpload: vi.fn(),
@@ -232,6 +230,15 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
       mirroredModelId: mockModel.settings.mirror.destinationModelId,
       importKind: mirroredModelMocks.MirrorKind.Documents,
     })
+  })
+
+  test('getInitialiseTarGzUploadParams includes semvers', () => {
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], { ...mockLogData, semvers: ['1.0.0', '1.0.1'] })
+
+    // @ts-expect-error calling protected method
+    const params = exporter.getInitialiseTarGzUploadParams()
+
+    expect(params[1]).toMatchObject({ exportId: mockLogData.exportId, semvers: ['1.0.0', '1.0.1'] })
   })
 
   test('getInitialiseTarGzUploadParams throws if model missing', () => {

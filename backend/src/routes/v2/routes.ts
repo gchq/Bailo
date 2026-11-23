@@ -19,6 +19,7 @@ import { postAccessRequest } from './model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './model/accessRequest/postAccessRequestComment.js'
 import { deleteModel } from './model/deleteModel.js'
 import { deleteFile } from './model/file/deleteFile.js'
+import { deleteFiles } from './model/file/deleteFiles.js'
 import { getDownloadFile } from './model/file/getDownloadFile.js'
 import { getFiles } from './model/file/getFiles.js'
 import { patchFile } from './model/file/patchFile.js'
@@ -120,9 +121,9 @@ router.post('/model/:modelId/import-model-card-text', ...postImportModelCardText
 router.post('/model/:modelId/releases', ...postRelease)
 router.get('/model/:modelId/releases', ...getReleases)
 router.get('/model/:modelId/release/:semver', ...getRelease)
-router.get('/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+router.get('/model/:modelId/release/:semver/file/*fileName/download', ...getDownloadFile)
 // This is a temporary workaround to split out the URL to disable authorisation.
-router.get('/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
+router.get('/token/model/:modelId/release/:semver/file/*fileName/download', ...getDownloadFile)
 router.put('/model/:modelId/release/:semver', ...putRelease)
 router.post('/model/:modelId/release/:semver/comment', ...postReleaseComment)
 router.delete('/model/:modelId/release/:semver', ...deleteRelease)
@@ -150,6 +151,7 @@ router.post('/model/:modelId/files/upload/multipart/start', ...postStartMultipar
 router.post('/model/:modelId/files/upload/multipart/part', ...postMultipartUploadPart)
 router.post('/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 router.delete('/model/:modelId/file/:fileId', ...deleteFile)
+router.delete('/model/:modelId/files', ...deleteFiles)
 router.patch('/model/:modelId/file/:fileId', ...patchFile)
 
 router.post('/model/:modelId/webhooks', ...postWebhook)

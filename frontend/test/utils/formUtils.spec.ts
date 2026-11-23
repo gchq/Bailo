@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { type StepNoRender } from 'types/types'
 import {
   deepMergePreferFirst,

@@ -29,6 +29,7 @@ describe('Create and review a model release', () => {
   })
 
   it('creates a new release for a model', () => {
+    cy.intercept({ method: 'POST', pathname: '/api/v2/model/*/files/upload/simple' }).as('uploadFile')
     cy.visit(`/model/${modelUuidForRelease}`)
     cy.contains(modelNameForRelease)
 
@@ -41,7 +42,11 @@ describe('Create and review a model release', () => {
     cy.log('Filling out release form and submitting')
     cy.get('[data-test=releaseSemanticVersionTextField]').type(releaseVersion, { force: true })
     cy.get('.w-md-editor-text-input').type('These are some release notes', { force: true })
+    cy.get('[data-test=openFileUploadDialogButton]').click()
     cy.get('[data-test=uploadFileButton]').selectFile('cypress/fixtures/test.txt', { force: true })
+    cy.get('[data-test=confirmFileUploadButton]').click()
+    cy.wait('@uploadFile')
+    cy.contains('Files (1)')
     cy.get('[data-test=createReleaseButton]', { timeout: 15000 }).click({ force: true })
     cy.url().should('contain', `release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
@@ -53,18 +58,21 @@ describe('Create and review a model release', () => {
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.log('Clicking the review button')
-    cy.get('[data-test=reviewButton]').click({ force: true })
-    cy.contains(`Reviewing release ${releaseVersion} for model ${modelNameForRelease}`)
+    cy.get('[data-test=openReviewPopperBtn]').click({ force: true })
+    cy.contains(`Request changes`)
     cy.log('Creating a "requesting changes" review')
+    cy.get('[data-test=openReviewPopperBtn]').click({ force: true })
     cy.get('[data-test=reviewWithCommentContent]').should('be.visible')
     cy.get('[data-test=reviewWithCommentTextField]').type('This is a comment')
-    cy.get('[data-test=requestChangesReviewButton]').click()
+    cy.get('[data-test=requestChangesReviewButton]').click({ force: true })
+    cy.get('[data-test=submitReviewButton]').click({ force: true })
     cy.log('Approving a release')
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
-    cy.get('[data-test=reviewButton]').click({ force: true })
-    cy.contains(`Reviewing release ${releaseVersion} for model ${modelNameForRelease}`)
+    cy.get('[data-test=openReviewPopperBtn]').click({ force: true })
+    cy.contains(`Approve`)
     cy.get('[data-test=reviewWithCommentContent]').should('be.visible')
-    cy.get('[data-test=approveReviewButton]').click()
+    cy.get('[data-test=approveReviewButton]').click({ force: true })
+    cy.get('[data-test=submitReviewButton]').click({ force: true })
 
     cy.log('Checking that we can see both review states')
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
@@ -88,6 +96,25 @@ describe('Create and review a model release', () => {
     cy.get('[data-test=saveEditFormButton]').click({ force: true })
     cy.log('Checking our submitting edit has persisted')
     cy.contains('This is an edit')
+  })
+
+  it('does not show the review button for a draft release', () => {
+    const draftVersion = '2.0.0'
+    cy.request('POST', `/api/v2/model/${modelUuidForRelease}/releases`, {
+      modelId: modelUuidForRelease,
+      semver: draftVersion,
+      draft: true,
+      notes: 'This is a draft release',
+      fileIds: [],
+      minor: false,
+      images: [],
+      modelCardVersion: 1,
+    }).then((response) => {
+      expect(response.status).to.eq(200)
+    })
+    cy.visit(`/model/${modelUuidForRelease}/release/${draftVersion}`)
+    cy.contains('This is a draft release')
+    cy.get('[data-test=openReviewPopperBtn]').should('not.exist')
   })
 
   it('can download a release artefact', () => {

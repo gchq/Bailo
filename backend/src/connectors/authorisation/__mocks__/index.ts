@@ -16,6 +16,9 @@ const auth = {
   accessRequest: vi.fn(() => ({ success: true })),
   accessRequests: vi.fn(() => [{ success: true }]),
 
+  deploymentAssessment: vi.fn(() => ({ success: true })),
+  deploymentAssessments: vi.fn(() => [{ success: true }]),
+
   release: vi.fn(() => ({ success: true })),
   releases: vi.fn(() => [{ success: true }]),
 

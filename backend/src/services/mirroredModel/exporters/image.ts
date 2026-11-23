@@ -109,6 +109,7 @@ export class ImageExporter extends BaseExporter {
         distributionPackageName: this.distributionPackageName!,
         importKind: MirrorKind.Image,
         exportId: this.logData.exportId,
+        semvers: this.logData.semvers,
       },
       this.logData,
     ]

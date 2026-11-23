@@ -45,12 +45,7 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
             <ReleaseAssetsMainText model={model} release={release} latestRelease={latestRelease} />
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
-              <ReleaseAssetsAccordion
-                model={model}
-                release={release}
-                mode='interactive'
-                hideFileDownloads={hideFileDownloads}
-              />
+              <ReleaseAssetsAccordion model={model} release={release} hideFileDownloads={hideFileDownloads} />
               <ReleaseAccessRequestReviewSummary release={release} />
             </Stack>
           </Stack>

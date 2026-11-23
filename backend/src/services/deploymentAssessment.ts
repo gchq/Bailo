@@ -1,0 +1,415 @@
+import { type ClientSession } from 'mongoose'
+
+import authentication from '../connectors/authentication/index.js'
+import { DeploymentAssessmentAction, ModelAction } from '../connectors/authorisation/actions.js'
+import authorisation from '../connectors/authorisation/index.js'
+import { type z } from '../lib/zod.js'
+import DeploymentAssessmentModel, {
+  type DeploymentAssessmentDoc,
+  type DeploymentAssessmentInterface,
+} from '../models/DeploymentAssessment.js'
+import ModelModel, { EntryKind, EntryVisibility, SystemRoles } from '../models/Model.js'
+import ResponseModel, { type ResponseInterface, ResponseKind } from '../models/Response.js'
+import { type UserInterface } from '../models/User.js'
+import {
+  findDeploymentAssessments,
+  type SearchDeploymentAssessmentsParams,
+} from '../repositories/deploymentAssessment.js'
+import { SchemaKind } from '../types/enums.js'
+import { type DeploymentAssessmentUserPermissions } from '../types/types.js'
+import config from '../utils/config.js'
+import { fromEntity, toEntity } from '../utils/entity.js'
+import { BadReq, Conflict, Forbidden, NotFound } from '../utils/error.js'
+import { convertStringToId } from '../utils/id.js'
+import { isMongoServerError } from '../utils/mongo.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
+import log from './log.js'
+import { removeResponsesByParentIds } from './response.js'
+import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { notifyModelOwnersOfDeploymentAssessment, notifyRiskOwnerOfDeploymentAssessment } from './smtp/smtp.js'
+import { type deploymentAssessmentSchema, type deploymentAssessmentSummarySchema } from './specification.js'
+
+export type { SearchDeploymentAssessmentsParams }
+
+export interface DeploymentAssessmentDetails {
+  deploymentAssessment: DeploymentAssessmentDoc
+  responses: ResponseInterface[]
+}
+
+// Allow partial metadata when updating to support draft updates where sections may be missing
+export type UpdateDeploymentAssessmentParams = {
+  metadata?: Partial<DeploymentAssessmentInterface['metadata']>
+  draft?: DeploymentAssessmentInterface['draft']
+  name?: DeploymentAssessmentInterface['name']
+}
+export type CreateDeploymentAssessmentParams = z.infer<typeof deploymentAssessmentSchema>
+export type DeploymentAssessmentSummary = z.infer<typeof deploymentAssessmentSummarySchema>
+
+async function validateRiskOwner(riskOwners: string[]) {
+  for (const riskOwner of riskOwners) {
+    const { kind, value } = fromEntity(riskOwner)
+    if (kind !== 'user' || !value) {
+      throw BadReq('The Deployment Risk Owner must be a valid user entity.', { riskOwner })
+    }
+
+    try {
+      await authentication.getUserInformation(riskOwner)
+    } catch (error) {
+      throw BadReq('The Deployment Risk Owner could not be found.', { riskOwner, internal: error })
+    }
+  }
+}
+
+async function validateModels(user: UserInterface, modelIds: string[]) {
+  const models = await ModelModel.find({ id: { $in: modelIds } })
+  const modelKinds = new Set([EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] as string[])
+  const modelsById = new Set(models.map((model) => model.id))
+
+  const missingModelIds = modelIds.filter((modelId) => !modelsById.has(modelId))
+  const nonModelIds = models.filter((model) => !modelKinds.has(model.kind)).map((model) => model.id)
+  if (missingModelIds.length > 0 || nonModelIds.length > 0) {
+    throw BadReq('One or more models could not be found.', { modelIds: missingModelIds })
+  }
+
+  const auths = await authorisation.models(user, models, ModelAction.View)
+  const unauthorisedModelIds = auths.filter((auth) => !auth.success).map((auth) => auth.id)
+  if (unauthorisedModelIds.length > 0) {
+    throw BadReq('You do not have permission to use one or more of the specified models.', {
+      modelIds: unauthorisedModelIds,
+    })
+  }
+
+  const privateModelIds = models.filter((model) => model.visibility !== EntryVisibility.Public).map((model) => model.id)
+  if (privateModelIds.length > 0) {
+    throw BadReq('Deployment assessments can only use public models.', { modelIds: privateModelIds })
+  }
+
+  const deployableModelState = config.ui.deploymentAssessments.deployableModelState
+  if (deployableModelState !== null) {
+    const nonDeployableStateModelIds = models
+      .filter((model) => model.state !== deployableModelState)
+      .map((model) => model.id)
+    if (nonDeployableStateModelIds.length > 0) {
+      throw BadReq(`Deployment assessments can only use models with a ${deployableModelState} state.`, {
+        modelIds: nonDeployableStateModelIds,
+        deployableModelState,
+      })
+    }
+  }
+}
+
+async function validateDeploymentAssessment(
+  user: UserInterface,
+  schemaId: DeploymentAssessmentInterface['schemaId'],
+  metadata: Partial<DeploymentAssessmentInterface['metadata']>,
+  draft: DeploymentAssessmentInterface['draft'],
+) {
+  const { valid, errors } = await validateContentAgainstSchema(schemaId, metadata, { draft })
+  if (!valid) {
+    throw BadReq('Deployment assessment metadata could not be validated against the schema.', { errors })
+  }
+
+  const { riskOwners } = metadata.signOff ?? {}
+  const { modelIds } = metadata.modelOverview ?? {}
+
+  if (!draft && (!riskOwners || riskOwners.length === 0)) {
+    throw BadReq('Deployment Risk Owner is required')
+  }
+
+  if (riskOwners && riskOwners.length > 0) {
+    await validateRiskOwner(riskOwners)
+  }
+  if (modelIds?.length) {
+    await validateModels(user, modelIds)
+  }
+}
+
+async function notifyDeploymentStakeholders(
+  riskOwners: string[] = [],
+  modelIds: string[] = [],
+  deploymentAssessment: DeploymentAssessmentInterface,
+): Promise<void> {
+  if (riskOwners.length === 0 && modelIds.length === 0) {
+    return
+  }
+
+  try {
+    const models = await ModelModel.find({
+      id: { $in: modelIds },
+    }).lean()
+
+    const creator = await authentication.getUserInformation(toEntity('user', deploymentAssessment.createdBy))
+    const creatorName = creator.name || deploymentAssessment.createdBy
+    const notifications = [
+      ...riskOwners
+        .filter((riskOwner) => riskOwner !== toEntity('user', deploymentAssessment.createdBy))
+        .map((additionalRiskOwner) =>
+          notifyRiskOwnerOfDeploymentAssessment(additionalRiskOwner, deploymentAssessment, creatorName),
+        ),
+      ...models.flatMap((model) => {
+        const owners = [
+          ...new Set(
+            model.collaborators
+              .filter((collaborator) => collaborator.roles.includes(SystemRoles.Owner))
+              .map((collaborator) => collaborator.entity),
+          ),
+        ]
+
+        return owners.length
+          ? [notifyModelOwnersOfDeploymentAssessment(owners, deploymentAssessment, model, creatorName)]
+          : []
+      }),
+    ]
+
+    const results = await Promise.allSettled(notifications)
+
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        log.warn(
+          {
+            error: result.reason,
+            deploymentAssessmentId: deploymentAssessment.id,
+          },
+          'Failed to send Deployment Assessment notification',
+        )
+      }
+    }
+  } catch (error) {
+    log.warn(
+      {
+        error,
+        deploymentAssessmentId: deploymentAssessment.id,
+      },
+      'Failed to prepare Deployment Assessment notifications',
+    )
+  }
+}
+
+export async function getDeploymentAssessmentById(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  session?: ClientSession,
+) {
+  const deploymentAssessment = await DeploymentAssessmentModel.findOne({ id: deploymentAssessmentId }, undefined, {
+    session,
+  })
+  if (!deploymentAssessment) {
+    throw NotFound('The requested Deployment Assessment was not found.', { deploymentAssessmentId })
+  }
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+  return deploymentAssessment
+}
+
+export async function getDeploymentAssessmentDetails(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+): Promise<DeploymentAssessmentDetails> {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const responses = await ResponseModel.find({ parentId: deploymentAssessment._id }).sort({
+    createdAt: -1,
+  })
+
+  return {
+    deploymentAssessment,
+    responses,
+  }
+}
+
+export async function commentOnDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  comment: string,
+) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+  const response = new ResponseModel({
+    entity: toEntity('user', user.dn),
+    kind: ResponseKind.Comment,
+    parentId: deploymentAssessment._id,
+    comment,
+  })
+  await response.save()
+  return response
+}
+
+export async function createDeploymentAssessment(
+  user: UserInterface,
+  { name, schemaId, draft, metadata }: CreateDeploymentAssessmentParams,
+) {
+  const schema = await getSchemaById(schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create a Deployment Assessment using a hidden schema.', { schemaId })
+  }
+  if (schema.kind !== SchemaKind.DeploymentAssessment) {
+    throw BadReq('Deployment assessments must use a Deployment Assessment schema.', { schemaId })
+  }
+
+  if (metadata) {
+    await validateDeploymentAssessment(user, schemaId, metadata, draft)
+  }
+
+  const deploymentAssessmentId = convertStringToId(name)
+  const deploymentAssessment = new DeploymentAssessmentModel({
+    id: deploymentAssessmentId,
+    name,
+    schemaId,
+    metadata: metadata ?? {},
+    draft,
+    createdBy: user.dn,
+  })
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  try {
+    await deploymentAssessment.save()
+  } catch (error) {
+    if (isMongoServerError(error) && error.code === 11000) {
+      throw Conflict('A Deployment Assessment with this ID already exists.', {
+        deploymentAssessmentId: deploymentAssessment.id,
+      })
+    }
+    throw error
+  }
+
+  if (!draft) {
+    notifyDeploymentStakeholders(
+      metadata.signOff.riskOwners,
+      metadata.modelOverview.modelIds ?? [],
+      deploymentAssessment,
+    ).catch((error) =>
+      log.warn(
+        { error, deploymentAssessmentId: deploymentAssessment.id },
+        'Error when notifying deployment stakeholders.',
+      ),
+    )
+  }
+
+  return deploymentAssessment
+}
+
+export async function removeDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  session?: ClientSession,
+) {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId, session)
+
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  // Delete children before DA so that a failure part way through leaves DA so deletion safe to retry
+  await removeResponsesByParentIds([deploymentAssessment._id.toString()], session)
+  await deploymentAssessment.delete(session)
+
+  return deploymentAssessment
+}
+
+export async function getCurrentUserPermissionsByDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+): Promise<DeploymentAssessmentUserPermissions> {
+  const deploymentAssessment = await getDeploymentAssessmentById(user, deploymentAssessmentId)
+
+  const [editAuth, deleteAuth] = await Promise.all([
+    authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update),
+    authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Delete),
+  ])
+
+  return {
+    editDeploymentAssessment: authResponseToUserPermission(editAuth),
+    deleteDeploymentAssessment: authResponseToUserPermission(deleteAuth),
+  }
+}
+
+export async function updateDeploymentAssessment(
+  user: UserInterface,
+  deploymentAssessmentId: string,
+  diff: Partial<UpdateDeploymentAssessmentParams>,
+) {
+  const { deploymentAssessment } = await getDeploymentAssessmentDetails(user, deploymentAssessmentId)
+  const auth = await authorisation.deploymentAssessment(user, deploymentAssessment, DeploymentAssessmentAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, deploymentAssessmentId })
+  }
+
+  await validateDeploymentAssessment(
+    user,
+    deploymentAssessment.schemaId,
+    diff.metadata ?? deploymentAssessment.metadata,
+    diff.draft ?? deploymentAssessment.draft,
+  )
+
+  if (diff.name !== undefined) {
+    deploymentAssessment.name = diff.name
+    deploymentAssessment.markModified('name')
+  }
+  if (diff.metadata !== undefined) {
+    deploymentAssessment.metadata = { ...diff.metadata, modelOverview: diff.metadata.modelOverview ?? {} }
+    deploymentAssessment.markModified('metadata')
+  }
+
+  const isBeingPublished = deploymentAssessment.draft && diff.draft === false
+
+  if (diff.draft !== undefined) {
+    if (!deploymentAssessment.draft && diff.draft) {
+      throw BadReq('Cannot convert a published Deployment Assessment back to a draft.')
+    }
+    deploymentAssessment.draft = diff.draft
+    deploymentAssessment.markModified('draft')
+  }
+
+  await deploymentAssessment.save()
+
+  if (isBeingPublished) {
+    notifyDeploymentStakeholders(
+      deploymentAssessment.metadata?.signOff?.riskOwners ?? [],
+      deploymentAssessment.metadata?.modelOverview?.modelIds ?? [],
+      deploymentAssessment,
+    ).catch((error) =>
+      log.warn(
+        { error, deploymentAssessmentId: deploymentAssessment.id },
+        'Error when notifying deployment stakeholders.',
+      ),
+    )
+  }
+
+  return deploymentAssessment
+}
+
+export async function searchDeploymentAssessments(user: UserInterface, params: SearchDeploymentAssessmentsParams) {
+  const deploymentAssessments = await findDeploymentAssessments(params)
+
+  const auths = await authorisation.deploymentAssessments(user, deploymentAssessments, DeploymentAssessmentAction.View)
+
+  const authorisedAssessments = deploymentAssessments.filter((_, index) => auths[index].success)
+
+  const summaries: DeploymentAssessmentSummary[] = authorisedAssessments.reduce<DeploymentAssessmentSummary[]>(
+    (acc, assessment) => {
+      const { riskOwners } = assessment.metadata?.signOff ?? {}
+      const { modelIds } = assessment.metadata?.modelOverview ?? {}
+      acc.push({
+        id: assessment.id,
+        schemaId: assessment.schemaId,
+        name: assessment.name,
+        ...(riskOwners && riskOwners.length > 0 && { owner: riskOwners }),
+        ...(modelIds && { models: modelIds }),
+        draft: assessment.draft,
+        createdBy: assessment.createdBy,
+        createdAt: assessment.createdAt instanceof Date ? assessment.createdAt.toISOString() : assessment.createdAt,
+      })
+
+      return acc
+    },
+    [],
+  )
+
+  return summaries
+}

@@ -67,6 +67,7 @@ describe('Create new model', () => {
   })
 
   it('can create release on an existing model', () => {
+    cy.intercept({ method: 'POST', pathname: '/api/v2/model/*/files/upload/simple' }).as('uploadFile')
     cy.intercept('POST', `/api/v2/model/${modelUuid}/releases`).as('postRelease')
     cy.visit(`/model/${modelUuid}`)
     cy.contains(modelUuid)
@@ -80,7 +81,11 @@ describe('Create new model', () => {
     cy.log('Filling out release form and submitting')
     cy.get('[data-test=releaseSemanticVersionTextField]').type(version, { force: true })
     cy.get('.w-md-editor-text-input').type('These are some release notes', { force: true })
+    cy.get('[data-test=openFileUploadDialogButton]').click()
     cy.get('[data-test=uploadFileButton]').selectFile('cypress/fixtures/test.txt', { force: true })
+    cy.get('[data-test=confirmFileUploadButton]').click()
+    cy.wait('@uploadFile')
+    cy.contains('Files (1)')
     cy.get('[data-test=createReleaseButton]').click({ force: true })
     cy.wait('@postRelease')
     cy.url().should('contain', `release/${version}`)

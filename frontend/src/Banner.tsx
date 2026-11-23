@@ -20,7 +20,7 @@ export default function Banner() {
 
   return (
     <Card sx={style} aria-hidden='true'>
-      <Typography sx={{ color: 'black' }}>{uiConfig.banner.text}</Typography>
+      <Typography sx={{ color: 'inherit' }}>{uiConfig.banner.text}</Typography>
     </Card>
   )
 }

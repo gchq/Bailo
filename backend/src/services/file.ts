@@ -1,6 +1,5 @@
 import { type Readable } from 'node:stream'
 
-import bytes from 'bytes'
 import { type ClientSession, Types } from 'mongoose'
 
 import {
@@ -24,9 +23,10 @@ import { EntryKind, type ModelDoc } from '../models/Model.js'
 import ScanModel from '../models/Scan.js'
 import { type UserInterface } from '../models/User.js'
 import { type ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
+import { formatBytes } from '../utils/bytes.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
-import { createFilePath } from '../utils/fileUtils.js'
+import { createFilePath, validateFileName } from '../utils/fileUtils.js'
 import { longId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -41,6 +41,8 @@ export async function uploadFile(
   stream: Readable,
   tags?: string[],
 ): Promise<FileWithScanResultsInterface> {
+  const validatedName = validateFileName(name)
+
   const model = await getModelById(user, modelId)
   if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
@@ -50,7 +52,7 @@ export async function uploadFile(
 
   const path = createFilePath(modelId, fileId)
 
-  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: true })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name: validatedName, mime, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
@@ -89,6 +91,8 @@ export async function startUploadMultipartFile(
   size: number,
   tags?: string[],
 ) {
+  const validatedName = validateFileName(name)
+
   const model = await getModelById(user, modelId)
   if (EntryKind.MirroredModel === model.kind) {
     throw BadReq('Cannot upload files to a mirrored model.')
@@ -97,7 +101,7 @@ export async function startUploadMultipartFile(
   const fileId = longId()
   const path = createFilePath(modelId, fileId)
 
-  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: false })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name: validatedName, mime, path, complete: false })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
@@ -202,7 +206,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   const stream = await getObjectStream(file.path, undefined, range)
 
   const totalBytes = file.size
-  const totalPretty = bytes.format(totalBytes)
+  const totalPretty = formatBytes(totalBytes)
   let progress = 0
   let lastLoggedAt = 0
   stream.on('data', function (chunk) {
@@ -218,7 +222,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     lastLoggedAt = now
     log.debug(
       {
-        loaded: bytes.format(progress),
+        loaded: formatBytes(progress),
         loadedBytes: progress,
         total: totalPretty,
         totalBytes,
@@ -232,9 +236,9 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   stream.on('close', () => {
     log.debug(
       {
-        loaded: bytes.format(progress),
+        loaded: formatBytes(progress),
         loadedBytes: progress,
-        total: bytes.format(file.size),
+        total: formatBytes(file.size),
         totalBytes: file.size,
         fileId,
         modelId: model.id,
@@ -433,6 +437,10 @@ export async function updateFile(
   const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
   if (!patchFileAuth.success) {
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
+  }
+
+  if (patchFileParams.name !== undefined) {
+    patchFileParams.name = validateFileName(patchFileParams.name)
   }
 
   const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, patchFileParams, { new: true })

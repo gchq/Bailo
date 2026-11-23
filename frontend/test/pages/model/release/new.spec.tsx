@@ -97,7 +97,7 @@ describe('NewRelease', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Draft release' }))
     await waitFor(() => expect(postRelease).toHaveBeenCalledTimes(1))
 
-    fireEvent.click(screen.getByRole('button', { name: 'Publish release' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Submit for review' }))
 
     await waitFor(() => {
       expect(postRelease).toHaveBeenCalledTimes(2)
