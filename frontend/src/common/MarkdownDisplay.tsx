@@ -4,8 +4,46 @@ import { grey } from '@mui/material/colors'
 import Link from '@mui/material/Link'
 import { type Theme, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-import ReactMarkdown from 'markdown-to-jsx'
+import ReactMarkdown, { type MarkdownToJSX, RuleType } from 'markdown-to-jsx'
+import { compiler } from 'markdown-to-jsx/react'
 import { createElement, type ReactNode, useMemo } from 'react'
+
+// Styles and classes on user-written HTML could position content outside the markdown container (e.g. a fixed
+// full-screen overlay), so they are removed. Styles generated from markdown syntax, such as table alignment, are kept.
+const blockedHtmlAttributes = new Set(['style', 'class', 'classname'])
+
+/** Removes attributes from raw HTML nodes that would let user content restyle or escape its container. */
+export const removeUnsafeHtmlAttributes: NonNullable<MarkdownToJSX.Options['renderRule']> = (next, node) => {
+  if ((node.type === RuleType.htmlBlock || node.type === RuleType.htmlSelfClosing) && node.attrs) {
+    // `next` renders from the node itself, so the attributes are filtered in place
+    node.attrs = Object.fromEntries(
+      Object.entries(node.attrs).filter(([name]) => !blockedHtmlAttributes.has(name.toLowerCase())),
+    )
+  }
+
+  return next()
+}
+
+/**
+ * markdown-to-jsx injects the body of some HTML blocks (e.g. a `<pre>` containing tags) as unparsed HTML, which would
+ * skip `removeUnsafeHtmlAttributes`. That HTML is instead compiled with the same options so the filter still applies.
+ */
+function createElementWithoutRawHtml(
+  options: Partial<MarkdownToJSX.Options>,
+): NonNullable<MarkdownToJSX.Options['createElement']> {
+  return function createSafeElement(type, props, ...children) {
+    const { dangerouslySetInnerHTML, ...safeProps } = props as Record<string, unknown> & {
+      dangerouslySetInnerHTML?: { __html?: unknown }
+    }
+    const rawHtml = dangerouslySetInnerHTML?.__html
+
+    if (typeof rawHtml !== 'string') {
+      return createElement(type, props, ...children)
+    }
+
+    return createElement(type, safeProps, compiler(rawHtml, { ...options, wrapper: null }))
+  }
+}
 
 export type MarkdownDisplayProps = {
   children: string
@@ -97,8 +135,9 @@ export function MarkdownBlockquote({ children, ...props }: BoxProps) {
 }
 
 export function createMarkdownOptions(theme: Theme, inline = false) {
-  return {
+  const options = {
     forceInline: inline,
+    renderRule: removeUnsafeHtmlAttributes,
     overrides: {
       h1: {
         component: ({ children, id, className }: TypographyProps) => (
@@ -170,6 +209,8 @@ export function createMarkdownOptions(theme: Theme, inline = false) {
       },
     },
   }
+
+  return { ...options, createElement: createElementWithoutRawHtml(options) }
 }
 
 export default function MarkdownDisplay({ children, id, inline = false }: MarkdownDisplayProps) {

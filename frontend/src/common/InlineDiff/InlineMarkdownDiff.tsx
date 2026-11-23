@@ -6,7 +6,7 @@ import { cloneElement, Fragment, isValidElement, type ReactNode, useId, useMemo 
 import { diffText } from 'src/common/InlineDiff/diffEngine'
 import DiffMark, { DiffChunks, stackedDiffLayout, WholeValueDiff } from 'src/common/InlineDiff/DiffMark'
 import { diffMarkdown, type RichDiff } from 'src/common/InlineDiff/markdownDiff'
-import MarkdownDisplay, { createMarkdownOptions } from 'src/common/MarkdownDisplay'
+import MarkdownDisplay, { createMarkdownOptions, removeUnsafeHtmlAttributes } from 'src/common/MarkdownDisplay'
 import { type ASTNode, getMediaKind, type MarkdownAST, parseMarkdown } from 'utils/markdownUtils'
 
 type RenderContext = {
@@ -211,9 +211,9 @@ function diffFootnotes(from: MarkdownAST, to: MarkdownAST): RenderContext['footn
 }
 
 function createFootnoteReferenceRule(footnoteId: RenderContext['footnoteId']): MarkdownToJSX.Options['renderRule'] {
-  return function renderFootnoteReference(next, node, _renderChildren, state) {
+  return function renderFootnoteReference(next, node, renderChildren, state) {
     if (node.type !== RuleType.footnoteReference) {
-      return next()
+      return removeUnsafeHtmlAttributes(next, node, renderChildren, state)
     }
 
     // Point references at the diffed footnote list, using IDs that are unique to this field
