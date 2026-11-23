@@ -1,12 +1,13 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { postWebhookSchema } from '../../../../src/routes/v2/model/webhook/postWebhook.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/audit/index.js')
 
 vi.mock('../../../../src/services/webhook.js', () => ({
-  createWebhook: vi.fn(),
+  createWebhook: vi.fn(() => ({ id: 'test-webhook', modelId: 'test-model', name: 'test webhook' })),
 }))
 
 describe('routes > webhook > postWebhook', () => {
@@ -16,5 +17,14 @@ describe('routes > webhook > postWebhook', () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
+  })
+
+  test('audit > expected call', async () => {
+    const fixture = createFixture(postWebhookSchema)
+    const res = await testPost(`/api/v2/model/${fixture.params.modelId}/webhooks`, fixture)
+
+    expect(res.statusCode).toBe(200)
+    expect(audit.onCreateWebhook).toHaveBeenCalled()
+    expect(audit.onCreateWebhook.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

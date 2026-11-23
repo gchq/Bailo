@@ -14,6 +14,7 @@ import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type StroomEventObject } from '../../models/StroomEvent.js'
 import { type TokenDoc } from '../../models/Token.js'
+import { type WebhookDoc } from '../../models/Webhook.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import log from '../../services/log.js'
@@ -548,6 +549,26 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
     this.auditGenericEvent(req, registryImage)
+  }
+
+  async onCreateWebhook(req: Request, webhook: WebhookDoc): Promise<void> {
+    this.auditGenericEvent(req, webhook.id)
+  }
+
+  async onViewWebhooks(req: Request, webhooks: WebhookDoc[]): Promise<void> {
+    this.auditMultipleViewEvent(
+      req,
+      webhooks.map((webhook) => ({ Id: webhook.id })),
+      'webhook',
+    )
+  }
+
+  async onUpdateWebhook(req: Request, webhook: WebhookDoc): Promise<void> {
+    this.auditGenericEvent(req, webhook.id)
+  }
+
+  async onDeleteWebhook(req: Request, webhook: WebhookDoc): Promise<void> {
+    this.auditGenericEvent(req, webhook.id)
   }
 
   async onError(req: Request, error: BailoError): Promise<void> {
