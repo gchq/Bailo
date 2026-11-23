@@ -62,8 +62,12 @@ describe('services > webhook', () => {
   })
 
   test('removeWebhook > simple', async () => {
-    await removeWebhook(user, 'model', 'webhook')
+    const deletedWebhook = { id: 'webhook', modelId: 'model' }
+    vi.mocked(WebhookModelMock.findOneAndDelete).mockResolvedValueOnce(deletedWebhook)
 
+    const result = await removeWebhook(user, 'model', 'webhook')
+
+    expect(result).toBe(deletedWebhook)
     expect(WebhookModelMock.findOneAndDelete).toHaveBeenCalled()
     expect(modelServiceMock.getModelById).toHaveBeenCalled()
     expect(authorisation.model).toHaveBeenCalled()

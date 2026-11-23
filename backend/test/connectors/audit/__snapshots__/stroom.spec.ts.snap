@@ -595,6 +595,39 @@ exports[`connectors > audit > stroom > onCreateUserToken > save expected event 1
 ]
 `;
 
+exports[`connectors > audit > stroom > onCreateWebhook > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Create": {
+        "Object": {
+          "Description": "test description",
+          "Id": "test-webhook",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
 exports[`connectors > audit > stroom > onDeleteAccessRequest > save expected event 1`] = `
 [
   {
@@ -871,6 +904,39 @@ exports[`connectors > audit > stroom > onDeleteUserToken > save expected event 1
         "Object": {
           "Description": "test description",
           "Id": "access",
+          "Name": "testKind",
+        },
+      },
+      "TypeId": "TestType",
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onDeleteWebhook > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "Delete": {
+        "Object": {
+          "Description": "test description",
+          "Id": "test-webhook",
           "Name": "testKind",
         },
       },
@@ -1515,6 +1581,41 @@ exports[`connectors > audit > stroom > onUpdateSchemaMigration > save expected e
 ]
 `;
 
+exports[`connectors > audit > stroom > onUpdateWebhook > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "Update": {
+        "After": {
+          "Object": {
+            "Description": "test description",
+            "Id": "test-webhook",
+            "Name": "testKind",
+          },
+        },
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
 exports[`connectors > audit > stroom > onViewAccessRequest > save expected event 1`] = `
 [
   {
@@ -2080,6 +2181,41 @@ exports[`connectors > audit > stroom > onViewUserToken > save expected event 1`]
             "Description": "test description",
             "Id": "access",
             "Name": "token",
+          },
+        ],
+      },
+    },
+    "EventSource": {
+      "Device": {
+        "IPAddress": "127.0.0.1",
+      },
+      "Generator": "Generator",
+      "System": {
+        "Environment": "local",
+        "Name": "bailo",
+      },
+      "User": {
+        "Id": "test-dn",
+      },
+    },
+    "EventTime": {
+      "TimeCreated": "1970-01-01T00:00:00.000Z",
+    },
+  },
+]
+`;
+
+exports[`connectors > audit > stroom > onViewWebhooks > save expected event 1`] = `
+[
+  {
+    "EventDetail": {
+      "TypeId": "TestType",
+      "View": {
+        "Object": [
+          {
+            "Description": "test description",
+            "Id": "test-webhook",
+            "Name": "webhook",
           },
         ],
       },

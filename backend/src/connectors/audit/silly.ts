@@ -12,6 +12,7 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
+import { type WebhookDoc } from '../../models/Webhook.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
@@ -99,5 +100,9 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onRegistryImagePulled(_req: Request, _registryImage: string): Promise<void> {}
   async onRegistryImagePushed(_req: Request, _registryImage: string): Promise<void> {}
   async onRegistryImageDeleted(_req: Request, _registryImage: string): Promise<void> {}
+  async onCreateWebhook(_req: Request, _webhook: WebhookDoc): Promise<void> {}
+  async onViewWebhooks(_req: Request, _webhooks: WebhookDoc[]): Promise<void> {}
+  async onUpdateWebhook(_req: Request, _webhook: WebhookDoc): Promise<void> {}
+  async onDeleteWebhook(_req: Request, _webhook: WebhookDoc): Promise<void> {}
   async onError(_req: Request, _error: BailoError): Promise<void> {}
 }

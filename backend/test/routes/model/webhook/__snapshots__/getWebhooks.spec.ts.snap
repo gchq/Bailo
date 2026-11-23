@@ -8,3 +8,10 @@ exports[`routes > webhook > deleteWebhook > 200 > ok 1`] = `
   ],
 }
 `;
+
+exports[`routes > webhook > deleteWebhook > audit > expected call 1`] = `
+[
+  "webhook 1",
+  "webhook 2",
+]
+`;

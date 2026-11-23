@@ -1,5 +1,7 @@
 import { type Request, type Response } from 'express'
 
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { WebhookEvent, type WebhookInterface } from '../../../../models/Webhook.js'
 import { registerPath, webhookInterfaceSchema } from '../../../../services/specification.js'
@@ -47,12 +49,15 @@ interface PutWebhookResponse {
 
 export const putWebhook = [
   async (req: Request, res: Response<PutWebhookResponse>): Promise<void> => {
+    req.audit = AuditInfo.UpdateWebhook
     const {
       params: { modelId, webhookId },
       body,
     } = parse(req, putWebhookSchema)
 
     const webhook = await updateWebhook(req.user, webhookId, { modelId, ...body })
+
+    await audit.onUpdateWebhook(req, webhook)
 
     res.json({
       webhook,
