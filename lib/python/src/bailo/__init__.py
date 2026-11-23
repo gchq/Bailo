@@ -11,7 +11,11 @@ import importlib.metadata
 import logging
 
 # Package Version
-__version__ = importlib.metadata.version("bailo")
+try:
+    __version__ = importlib.metadata.version("bailo")
+except importlib.metadata.PackageNotFoundError:
+    # Imported from source without being installed
+    __version__ = "0.0.0+unknown"
 
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent

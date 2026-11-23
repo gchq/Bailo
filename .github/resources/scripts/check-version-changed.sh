@@ -14,9 +14,25 @@ read_version() {
 
 echo "Base commit: $BASE_COMMIT"
 
-# Empty when the file or a static version does not exist at the base commit
-OLD_VERSION=$(git show "$BASE_COMMIT:$PYPROJECT" 2>/dev/null | read_version 2>/dev/null || echo "")
+# A missing base commit must fail rather than look like a new version and trigger a publish
+if ! git cat-file -e "$BASE_COMMIT^{commit}" 2>/dev/null; then
+  echo "Base commit '$BASE_COMMIT' is not available in this checkout" >&2
+  exit 1
+fi
+
+# Empty when the file or a static version does not exist at the base commit. Parse errors still fail.
+if git cat-file -e "$BASE_COMMIT:$PYPROJECT" 2>/dev/null; then
+  OLD_VERSION=$(git show "$BASE_COMMIT:$PYPROJECT" | read_version)
+else
+  OLD_VERSION=""
+fi
+
 NEW_VERSION=$(read_version < "$PYPROJECT")
+if [ -z "$NEW_VERSION" ]; then
+  echo "No static [project].version in $PYPROJECT" >&2
+  exit 1
+fi
+
 echo "OLD_VERSION=$OLD_VERSION"
 echo "NEW_VERSION=$NEW_VERSION"
 

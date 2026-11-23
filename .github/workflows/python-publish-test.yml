@@ -80,3 +80,5 @@ jobs:
         with:
           packages-dir: lib/python/dist/
           repository-url: https://test.pypi.org/legacy/
+          # Allow re-running from the same branch once its version has already been uploaded
+          skip-existing: true

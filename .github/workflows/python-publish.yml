@@ -26,11 +26,10 @@ jobs:
       # Only publish when the version in pyproject.toml changes, as PyPI rejects re-uploads of an existing version
       - name: Check if bailo version changed
         id: version-changed
-        run: |
-          git fetch origin main
-          # Previous commit on main
-          BASE_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
-          .github/resources/scripts/check-version-changed.sh lib/python/pyproject.toml "$BASE_COMMIT"
+        # Compare against the commit before this push so every commit in it is covered
+        env:
+          BASE_COMMIT: ${{ github.event.before }}
+        run: .github/resources/scripts/check-version-changed.sh lib/python/pyproject.toml "$BASE_COMMIT"
 
       - name: Set up uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3

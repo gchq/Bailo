@@ -88,8 +88,12 @@ jobs:
 
       # artefactscan version check (separate to release versions)
       - name: Check if artefactscan_api version changed
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan'
+        # Push only, as `github.event.before` is unset for manual runs (use the `artefactscan_tag` input instead)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan'
         id: artefactscan_version_changed
+        # Compare against the commit before this push so every commit in it is covered
+        env:
+          BASE_COMMIT: ${{ github.event.before }}
         run: |
           set -euo pipefail
 
@@ -97,12 +101,10 @@ jobs:
           echo "Git context HEAD commit:"
           git --no-pager log -1 --oneline
 
-          git fetch origin main
+          # Checkout is shallow, so fetch the base commit explicitly
+          git fetch --depth=1 origin "$BASE_COMMIT"
 
-          PREV_MAIN_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
-          echo "Previous main commit: $PREV_MAIN_COMMIT"
-
-          .github/resources/scripts/check-version-changed.sh lib/artefactscan_api/pyproject.toml "$PREV_MAIN_COMMIT"
+          .github/resources/scripts/check-version-changed.sh lib/artefactscan_api/pyproject.toml "$BASE_COMMIT"
 
       - name: Determine push targets
         id: push_targets
