@@ -2,7 +2,13 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.13.0 - dd/mm/yyyy
+## 3.13.1 - dd/mm/yyyy
+
+### Changes
+
+- Switch build backend from `flit_core` to `uv_build`
+
+## 3.13.0 - 13/11/2026
 
 ### Changes
 

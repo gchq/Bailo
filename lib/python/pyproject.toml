@@ -1,9 +1,10 @@
 [build-system]
-requires = ["flit_core >=4.0,<5"]
-build-backend = "flit_core.buildapi"
+requires = ["uv_build>=0.13.4"]
+build-backend = "uv_build"
 
 [project]
 name = "bailo"
+version = "3.13.1"
 authors = []
 description = "Simplifies interacting with Bailo programmatically"
 readme = "README.md"
@@ -20,7 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.15",
 ]
 requires-python = ">=3.11"
-dynamic = ["version"]
 dependencies = [
     "requests>=2.26",
     "semantic-version>=2.4",
@@ -47,9 +47,6 @@ test = [
     "pytest-mock>=3",
     "requests-mock>=1.5",
 ]
-
-[tool.flit.module]
-name = "bailo"
 
 [tool.coverage.run]
 branch = true
