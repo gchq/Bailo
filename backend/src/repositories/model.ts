@@ -5,8 +5,9 @@ import ModelModel, {
   type EntryVisibilityKeys,
   type ModelDoc,
   type ModelInterface,
+  ModelSearchFields,
 } from '../models/Model.js'
-import { FUZZY_MATCH_THRESHOLD, gramSimilarity, toSearchGrams } from '../utils/search.js'
+import { FUZZY_MATCH_THRESHOLD, gramSimilarity, toEntrySearchGrams, toSearchGrams } from '../utils/search.js'
 
 export interface SearchModelsParams {
   kind?: EntryKindKeys[]
@@ -22,6 +23,8 @@ export interface SearchModelsParams {
   /** At least one of the entities must be a collaborator, optionally holding one of the roles. */
   collaboratorMatch?: { entities: string[]; roles?: string[] }
   search?: string
+  /** Skips the full text pass, so a search term only matches on name, description and tags. */
+  titleOnly?: boolean
 }
 
 const searchProjection: ProjectionType<ModelDoc> = {
@@ -87,31 +90,35 @@ function buildModelsQuery(params: SearchModelsParams): QueryFilter<ModelInterfac
 /**
  * Finds entries matching the filters. A search term is matched in two ways:
  *  - fuzzy: trigram similarity over name, description and tags, so typos and part-words match, ranked best first
- *  - stemmed: the full text index, which also covers card contents, appended after the fuzzy matches
+ *  - stemmed: the full text index, which also covers card contents, appended after the fuzzy matches (unless titleOnly)
  * Without a search term, results are ordered by most recently updated.
  */
 export async function findModels(params: SearchModelsParams): Promise<ModelDoc[]> {
   const query = buildModelsQuery(params)
   const queryGrams = params.search ? toSearchGrams(params.search) : []
 
-  let results = await ModelModel.find<ModelDoc>(
-    queryGrams.length ? { ...query, searchGrams: { $in: queryGrams } } : query,
-    searchProjection,
-  ).sort({ updatedAt: -1 })
+  // A term with no letters or digits has no grams, so it must not fall back to matching every entry
+  let results: ModelDoc[] =
+    params.search && !queryGrams.length
+      ? []
+      : await ModelModel.find<ModelDoc>(
+          queryGrams.length ? { ...query, searchGrams: { $in: queryGrams } } : query,
+          searchProjection,
+        ).sort({ updatedAt: -1 })
 
   if (queryGrams.length) {
     // The sort is stable, so equally similar entries stay in updatedAt order
     results = results
       .map((model) => ({
         model,
-        score: gramSimilarity(queryGrams, toSearchGrams(model.name, model.description, ...(model.tags ?? []))),
+        score: gramSimilarity(queryGrams, toEntrySearchGrams(model, ModelSearchFields)),
       }))
       .filter(({ score }) => score >= FUZZY_MATCH_THRESHOLD)
       .sort((a, b) => b.score - a.score)
       .map(({ model }) => model)
   }
 
-  if (params.search) {
+  if (params.search && !params.titleOnly) {
     const fullTextResults = await ModelModel.find<ModelDoc>(
       { ...query, $text: { $search: params.search } },
       searchProjection,

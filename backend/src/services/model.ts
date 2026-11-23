@@ -404,6 +404,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     collaboratorEntities,
     collaboratorMatch,
     search: opts.search,
+    titleOnly: opts.titleOnly,
   })
 
   //Auth already checked, so just need to check if they require admin access

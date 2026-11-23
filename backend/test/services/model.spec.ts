@@ -411,6 +411,12 @@ describe('services > model', () => {
       })
     })
 
+    test('passes titleOnly to the repository', async () => {
+      await searchModels({ dn: 'test' } as any, { search: 'search', titleOnly: true })
+
+      expect(repositoryMocks.findModels).toHaveBeenCalledWith(expect.objectContaining({ titleOnly: true }))
+    })
+
     test('maps results to entry summaries', async () => {
       const user: any = { dn: 'test' }
       repositoryMocks.findModels.mockResolvedValueOnce([

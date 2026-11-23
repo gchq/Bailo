@@ -133,12 +133,20 @@ describe('repositories > model', () => {
       expect(ModelModelMock.find).toHaveBeenCalledWith({}, projection)
     })
 
-    test('skips the trigram query when the term has no searchable characters', async () => {
+    test('only runs the full text query when the term has no searchable characters', async () => {
       await findModels({ search: '--' })
 
-      expect(ModelModelMock.find).toHaveBeenCalledTimes(2)
-      expect(ModelModelMock.find.mock.calls[0][0]).toStrictEqual({})
-      expect(ModelModelMock.find.mock.calls[1][0]).toStrictEqual({ $text: { $search: '--' } })
+      expect(ModelModelMock.find).toHaveBeenCalledTimes(1)
+      expect(ModelModelMock.find.mock.calls[0][0]).toStrictEqual({ $text: { $search: '--' } })
+    })
+
+    test('does not return every entry for a term with no searchable characters', async () => {
+      mockFindResults([entry('a', 'A')])
+
+      const result = await findModels({ search: '--', titleOnly: true })
+
+      expect(ModelModelMock.find).not.toHaveBeenCalled()
+      expect(result).toStrictEqual([])
     })
 
     test('searches by trigrams then full text, keeping the other filters on both queries', async () => {
@@ -153,6 +161,13 @@ describe('repositories > model', () => {
         { kind: { $in: ['model'] }, $text: { $search: 'clasifier' } },
         projection,
       ])
+    })
+
+    test('skips the full text query when titleOnly is set', async () => {
+      await findModels({ search: 'clasifier', titleOnly: true })
+
+      expect(ModelModelMock.find).toHaveBeenCalledTimes(1)
+      expect(ModelModelMock.find.mock.calls[0][0]).toHaveProperty('searchGrams')
     })
 
     test('sorts full text matches by text score', async () => {

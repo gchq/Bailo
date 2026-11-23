@@ -19,6 +19,35 @@ export function toSearchGrams(...texts: Array<string | undefined>): string[] {
   return [...grams]
 }
 
+/** Builds grams from the named fields of an entry, where array fields such as tags contribute each value. */
+export function toEntrySearchGrams(entry: object, fields: readonly string[]): string[] {
+  const texts = fields.flatMap((field) => (entry as Record<string, unknown>)[field] ?? []) as Array<string | undefined>
+  return toSearchGrams(...texts)
+}
+
+/** Whether a Mongo update document or pipeline could change any of the fields that searchGrams is built from. */
+export function touchesSearchFields(update: unknown, fields: readonly string[]): boolean {
+  const isSearchPath = (path: string) => fields.includes(path.split('.')[0])
+  if (Array.isArray(update)) {
+    return true
+  }
+  if (!update || typeof update !== 'object') {
+    return false
+  }
+  return Object.entries(update).some(([key, value]) => {
+    if (!key.startsWith('$')) {
+      return isSearchPath(key)
+    }
+    if (!value || typeof value !== 'object') {
+      return false
+    }
+    return Object.entries(value).some(
+      ([path, target]) =>
+        isSearchPath(path) || (key === '$rename' && typeof target === 'string' && isSearchPath(target)),
+    )
+  })
+}
+
 /** Share of the query's trigrams that also appear in the entry, from 0 to 1. */
 export function gramSimilarity(queryGrams: string[], entryGrams: string[] = []): number {
   if (queryGrams.length === 0) {

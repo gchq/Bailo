@@ -1,7 +1,10 @@
 import { type HydratedDocument, model, Schema } from 'mongoose'
 
-import { toSearchGrams } from '../utils/search.js'
+import { searchGramsPlugin } from './plugins/searchGramsPlugin.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+
+// Fields whose text is turned into searchGrams for fuzzy search
+export const ModelSearchFields = ['name', 'description', 'tags'] as const
 
 export const EntryVisibility = {
   Private: 'private',
@@ -152,11 +155,7 @@ const ModelSchema = new Schema<ModelDoc>(
   },
 )
 
-// searchGrams is not selected by default, so always rebuild it rather than relying on isModified
-ModelSchema.pre('save', function modelPreSave() {
-  this.searchGrams = toSearchGrams(this.name, this.description, ...(this.tags ?? []))
-})
-
+ModelSchema.plugin(searchGramsPlugin, { fields: ModelSearchFields })
 ModelSchema.plugin(softDeletionPlugin)
 ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
 ModelSchema.index({ createdAt: 1 })
