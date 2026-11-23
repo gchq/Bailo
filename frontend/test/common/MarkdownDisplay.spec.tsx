@@ -70,9 +70,28 @@ describe('MarkdownDisplay', () => {
       <MarkdownDisplay>{`<pre data-test-raw style="${fixedStyle}">\nverbatim\n</pre>`}</MarkdownDisplay>,
     )
 
-    const element = container.querySelector('[data-test-raw]')
+    const element = container.querySelector<HTMLElement>('[data-test-raw]')
     expect(element?.textContent).toContain('verbatim')
-    expect(element?.hasAttribute('style')).toBe(false)
+    // The pre override applies its own styles, so check that the injected ones are absent
+    expect(element?.style.position).toBe('')
+    expect(element?.style.zIndex).toBe('')
+  })
+
+  it('removes style attributes from HTML nested inside verbatim HTML blocks', () => {
+    const { container } = render(
+      <MarkdownDisplay>
+        {[
+          `<pre>\n<b data-test-raw style="${fixedStyle}">bold</b> text\n</pre>`,
+          `<div>\n<pre>x</pre>\n<span data-test-raw style="${fixedStyle}">y</span>\n</div>`,
+        ].join('\n\n')}
+      </MarkdownDisplay>,
+    )
+
+    const elements = getRawHtmlElements(container)
+    expect(elements).toHaveLength(2)
+    expect(elements[0].textContent).toBe('bold')
+    expect(elements[1].textContent).toBe('y')
+    elements.forEach((element) => expect(element.hasAttribute('style')).toBe(false))
   })
 
   it('removes style attributes regardless of attribute name casing', () => {
