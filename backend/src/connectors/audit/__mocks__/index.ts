@@ -86,6 +86,11 @@ const audit: Record<string, Mock> = {
 
   onNotifyReviewers: vi.fn(),
 
+  onCreateWebhook: vi.fn(),
+  onViewWebhooks: vi.fn(),
+  onUpdateWebhook: vi.fn(),
+  onDeleteWebhook: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit

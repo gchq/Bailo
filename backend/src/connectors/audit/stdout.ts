@@ -12,6 +12,7 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
+import { type WebhookDoc } from '../../models/Webhook.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
@@ -499,6 +500,32 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
     this.checkEventType(AuditInfo.RegistryImageDeleted, req)
     const event = this.generateEvent(req, { registryImage })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateWebhook(req: Request, webhook: WebhookDoc) {
+    this.checkEventType(AuditInfo.CreateWebhook, req)
+    const event = this.generateEvent(req, { modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewWebhooks(req: Request, webhooks: WebhookDoc[]) {
+    this.checkEventType(AuditInfo.ViewWebhooks, req)
+    const event = this.generateEvent(req, {
+      results: webhooks.map((webhook) => ({ modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateWebhook(req: Request, webhook: WebhookDoc) {
+    this.checkEventType(AuditInfo.UpdateWebhook, req)
+    const event = this.generateEvent(req, { modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteWebhook(req: Request, webhook: WebhookDoc) {
+    this.checkEventType(AuditInfo.DeleteWebhook, req)
+    const event = this.generateEvent(req, { modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })
     req.log.info(event, req.audit.description)
   }
 
