@@ -12,7 +12,6 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
-import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
@@ -476,12 +475,6 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
     this.checkEventType(AuditInfo.CommentOnDeploymentAssessment, req)
     const event = this.generateEvent(req, { deploymentAssessmentId: response.parentId })
-    req.log.info(event, req.audit.description)
-  }
-
-  async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
-    this.checkEventType(AuditInfo.ViewCurrentUserInformation, req)
-    const event = this.generateEvent(req, { userDn: userInformation.user.dn })
     req.log.info(event, req.audit.description)
   }
 

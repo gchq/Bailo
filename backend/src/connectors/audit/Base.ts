@@ -12,7 +12,6 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
-import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
@@ -46,7 +45,6 @@ export const ResourceKind = {
   Export: 'export',
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
-  User: 'user',
   Registry: 'registry',
   DeploymentAssessment: 'deployment assessment',
 }
@@ -472,12 +470,6 @@ export const AuditInfo = {
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Response,
   },
-  ViewCurrentUserInformation: {
-    typeId: 'ViewCurrentUserInformation',
-    description: 'Viewed information about the user making the request',
-    auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Metric,
-  },
   NotifyReviewers: {
     typeId: 'NotifyReviewers',
     description: 'Sent a request to email reviewers for an additional review',
@@ -598,8 +590,6 @@ export abstract class BaseAuditConnector {
   ): Promise<void>
   abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
-
-  abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
 

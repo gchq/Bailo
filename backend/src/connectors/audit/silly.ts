@@ -12,7 +12,6 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
-import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
@@ -94,7 +93,6 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onSearchDeploymentAssessments(_req: Request, _deploymentAssessments: DeploymentAssessmentSummary[]) {}
   async onViewDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
   async onCommentOnDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
-  async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
   async onNotifyReviewers(_req: Request, _reviewId: string): Promise<void> {}
   async onRegistryImagePulled(_req: Request, _registryImage: string): Promise<void> {}
   async onRegistryImagePushed(_req: Request, _registryImage: string): Promise<void> {}
