@@ -232,7 +232,7 @@ describe('services > deploymentAssessment', () => {
     schemaMocks.getSchemaById.mockResolvedValueOnce({ kind: SchemaKind.AccessRequest, hidden: false })
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
-      'Deployment assessments must use a Deployment Assessment schema.',
+      'The schema kind does not match the expected kind.',
     )
     expect(schemaMocks.validateContentAgainstSchema).not.toHaveBeenCalled()
   })
