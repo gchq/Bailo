@@ -58,6 +58,14 @@ export function testGet(path: string, fixture?: Fixture) {
   return request
 }
 
+export function testHead(path: string, fixture?: Fixture) {
+  let request = supertest(server).head(path)
+  if (fixture) {
+    request = applyHeaders(request, fixture)
+  }
+  return request
+}
+
 export function testPut(path: string, fixture: Fixture) {
   let request = supertest(server).put(path)
   request = applyHeaders(request, fixture)

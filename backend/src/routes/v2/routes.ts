@@ -162,15 +162,6 @@ router.delete('/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 router.get('/model/:modelId/images', ...getImages)
 router.get('/model/:modelId/image/:name/:tag', ...getImage)
 router.delete('/model/:modelId/image/:name/:tag', ...deleteImage)
-router.get('/model/:modelId/files', ...getFiles)
-router.get('/model/:modelId/file/:fileId/download', ...getDownloadFile)
-// This is a temporary workaround to split out the URL to disable authorisation.
-router.get('/token/model/:modelId/file/:fileId/download', ...getDownloadFile)
-router.post('/model/:modelId/files/upload/simple', ...postSimpleUpload)
-router.post('/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
-router.post('/model/:modelId/files/upload/multipart/part', ...postMultipartUploadPart)
-router.post('/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
-router.delete('/model/:modelId/file/:fileId', ...deleteFile)
 
 // Inferencing routes are conditional to Bailo specific configuration
 // NOTE: Enabled if config not loaded for testing purposes
@@ -195,8 +186,8 @@ router.get('/schema-migration/:schemaMigrationId', ...getSchemaMigration)
 router.post('/schema-migration', ...postSchemaMigration)
 router.put('/schema-migration/:schemaMigrationId', ...putSchemaMigration)
 
+// Express also routes HEAD requests to this GET handler (used by the UI to read the x-count header)
 router.get('/reviews', ...getReviews)
-router.head('/reviews', ...getReviews)
 router.get('/responses', ...getResponses)
 router.patch('/response/:responseId', ...patchResponse)
 router.patch('/response/:responseId/reaction/:kind', ...patchResponseReaction)

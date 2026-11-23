@@ -53,7 +53,10 @@ export const getReviews = [
     } = parse(req, getReviewsSchema)
 
     const reviews = await findReviews(req.user, mine, open, modelId, semver, reviewId, accessRequestId, kind)
-    await audit.onSearchReviews(req, reviews)
+    // HEAD requests only return the x-count header (no reviews), so only audit full searches
+    if (req.method !== 'HEAD') {
+      await audit.onSearchReviews(req, reviews)
+    }
 
     res.setHeader('x-count', reviews.length)
     res.json({ reviews })
