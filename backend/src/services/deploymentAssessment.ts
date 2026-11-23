@@ -25,7 +25,7 @@ import { isMongoServerError } from '../utils/mongo.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { removeResponsesByParentIds } from './response.js'
-import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { checkSchemaKind, getSchemaById, validateContentAgainstSchema } from './schema.js'
 import { notifyModelOwnersOfDeploymentAssessment, notifyRiskOwnerOfDeploymentAssessment } from './smtp/smtp.js'
 import { type deploymentAssessmentSchema, type deploymentAssessmentSummarySchema } from './specification.js'
 
@@ -243,9 +243,7 @@ export async function createDeploymentAssessment(
   if (schema.hidden) {
     throw BadReq('Cannot create a Deployment Assessment using a hidden schema.', { schemaId })
   }
-  if (schema.kind !== SchemaKind.DeploymentAssessment) {
-    throw BadReq('Deployment assessments must use a Deployment Assessment schema.', { schemaId })
-  }
+  checkSchemaKind(schema, SchemaKind.DeploymentAssessment)
 
   if (metadata) {
     await validateDeploymentAssessment(user, schemaId, metadata, draft)
