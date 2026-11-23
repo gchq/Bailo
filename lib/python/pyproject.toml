@@ -8,10 +8,10 @@ version = "3.13.1"
 authors = []
 description = "Simplifies interacting with Bailo programmatically"
 readme = "README.md"
+license = "Apache-2.0"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
