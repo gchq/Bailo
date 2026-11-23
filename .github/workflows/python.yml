@@ -57,6 +57,10 @@ jobs:
       - name: Check linting
         run: uv run --project lib/python --no-sync pre-commit run ruff-check --all-files --show-diff-on-failure
 
+      - name: Build distribution
+        working-directory: lib/python
+        run: uv build
+
 
   python_test:
     needs: [changes, python_static_checks]

@@ -2,7 +2,14 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.13.0 - dd/mm/yyyy
+## 3.13.1 - dd/mm/yyyy
+
+### Changes
+
+- Switch build backend from `flit_core` to `uv_build`
+- Correct package licence metadata to `Apache-2.0` (previously declared as MIT)
+
+## 3.13.0 - 13/11/2026
 
 ### Changes
 
