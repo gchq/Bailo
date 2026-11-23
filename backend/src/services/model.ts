@@ -406,27 +406,15 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
   }
 
   if (opts.users?.length) {
-    const collaborators = await opts.users.reduce(
-      async (accPromise, entity) => {
-        const acc = await accPromise
-        if (entity.startsWith('group:')) {
-          acc.groups.push({ entity, members: await authentication.getEntityMembers(entity) })
-        } else {
-          acc.users.push(entity)
-        }
-        return acc
-      },
-      Promise.resolve({ users: [], groups: [] } as {
-        users: string[]
-        groups: { entity: string; members: string[] }[]
-      }),
+    const groups = opts.users.filter((entity) => entity.startsWith('group:'))
+    const users = opts.users.filter((entity) => entity.startsWith('user:'))
+    const collaboratorConditions: object[] = await Promise.all(
+      groups.map(async (entity) => ({
+        'collaborators.entity': { $in: [entity, ...(await authentication.getEntityMembers(entity))] },
+      })),
     )
-
-    const collaboratorConditions: object[] = collaborators.groups.map((group) => ({
-      'collaborators.entity': { $in: [group.entity, ...group.members] },
-    }))
-    if (collaborators.users.length) {
-      collaboratorConditions.push({ 'collaborators.entity': { $all: collaborators.users } })
+    if (users.length) {
+      collaboratorConditions.push({ 'collaborators.entity': { $all: users } })
     }
 
     query.$and = collaboratorConditions
