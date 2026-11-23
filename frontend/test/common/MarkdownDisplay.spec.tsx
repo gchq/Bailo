@@ -72,7 +72,6 @@ describe('MarkdownDisplay', () => {
 
     const element = container.querySelector<HTMLElement>('[data-test-raw]')
     expect(element?.textContent).toContain('verbatim')
-    // The pre override applies its own styles, so check that the injected ones are absent
     expect(element?.style.position).toBe('')
     expect(element?.style.zIndex).toBe('')
   })
