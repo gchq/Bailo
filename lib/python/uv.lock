@@ -39,6 +39,7 @@ wheels = [
 
 [[package]]
 name = "bailo"
+version = "3.13.1"
 source = { editable = "." }
 dependencies = [
     { name = "requests" },
