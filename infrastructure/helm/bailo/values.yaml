@@ -265,8 +265,12 @@ config:
 
     announcement:
       enabled: false
+      title: ''
       text: ''
+      description: ''
       startTimestamp: ''
+      severity: 'info'
+      links: []
 
     helpPopoverText:
       manualEntryAccess: ''

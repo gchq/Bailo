@@ -412,8 +412,12 @@ The following tables describe selected configuration options available in `value
 | `config.ui.banner.colour` | Colour of top banner | `#047a06` |
 | `config.ui.banner.textColor` | Colour of top banner text | `black` |
 | `config.announcement.enabled` | Enables announcement banner at bottom of the page | `false` |
+| `config.announcement.title` | Heading of announcement banner, defaults to "Announcement" | `''` |
 | `config.announcement.text` | Content of announcement banner | `null` |
+| `config.announcement.description` | Markdown shown when the user selects "Show more" on the announcement banner | `''` |
 | `config.announcement.startTimestamp` | Start time of announcement banner | `null` |
+| `config.announcement.severity` | Colour scheme of announcement banner: `info`, `warning` or `error` | `info` |
+| `config.announcement.links` | Buttons on announcement banner, list of `{ label, href }` | `[]` |
 | `config.helpPopoverText.manualEntryAccess` | Help text for manually adding a user to a model | `null` |
 | `config.modelDetails.organisations` | Organisation options for models | `[]` |
 | `config.modelDetails.states` | States options for models | `[]` |
