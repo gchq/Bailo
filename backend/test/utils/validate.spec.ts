@@ -45,7 +45,9 @@ describe('utils > validate', () => {
       b: z.string(),
     })
 
-    expect(() => parse({} as any, schema)).toThrow('Path: a - Message: Required | Path: b - Message: Required')
+    expect(() => parse({} as any, schema)).toThrow(
+      'Path: a - Message: Invalid input: expected string, received undefined | Path: b - Message: Invalid input: expected string, received undefined',
+    )
   })
 
   test('formatZodIssues > array and nested paths', () => {
@@ -53,13 +55,25 @@ describe('utils > validate', () => {
     const result = schema.safeParse({ items: [{ value: 1 }, { value: 'x' }] })
 
     expect(formatZodIssues(result.error!.issues)).toEqual(
-      'Path: items[1].value - Message: Expected number, received string',
+      'Path: items[1].value - Message: Invalid input: expected number, received string',
     )
   })
 
   test('formatZodIssues > root level issue', () => {
     const result = z.string().safeParse(1)
 
-    expect(formatZodIssues(result.error!.issues)).toEqual('Path:  - Message: Expected string, received number')
+    expect(formatZodIssues(result.error!.issues)).toEqual(
+      'Path:  - Message: Invalid input: expected string, received number',
+    )
+  })
+
+  test('formatZodIssues > symbol path key', () => {
+    const key = Symbol('key')
+    const schema = z.object({ [key]: z.string() })
+    const result = schema.safeParse({ [key]: 1 })
+
+    expect(formatZodIssues(result.error!.issues)).toEqual(
+      'Path: Symbol(key) - Message: Invalid input: expected string, received number',
+    )
   })
 })
