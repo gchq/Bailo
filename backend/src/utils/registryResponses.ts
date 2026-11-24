@@ -1,4 +1,4 @@
-import type { ZodSchema } from 'zod'
+import type { ZodType } from 'zod'
 
 import { InternalError } from './error.js'
 import {
@@ -10,7 +10,7 @@ import {
 } from './registryResponseTypes.js'
 
 export function parseRegistryResponse<T>(
-  schema: ZodSchema<T>,
+  schema: ZodType<T>,
   body: unknown,
 ): { ok: true; data: T } | { ok: false; error: RegistryErrorResponseBody } {
   // expected successful response

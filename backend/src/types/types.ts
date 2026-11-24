@@ -1,4 +1,4 @@
-import type { ZodSchema, ZodTypeDef } from 'zod'
+import type { ZodType } from 'zod'
 
 import { type ArtefactScanStateKeys } from '../connectors/artefactScanning/Base.js'
 import { type PeerKindKeys } from '../connectors/peer/index.js'
@@ -314,8 +314,8 @@ export interface EntrySearchOptions {
 
 export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
 
-export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
-  kind: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
+export const EntrySearchOptionsSchema: ZodType<EntrySearchOptionsParams, unknown> = z.object({
+  kind: coerceArray(z.array(z.enum(EntryKind))).optional(),
   task: z.string().toLowerCase().optional(),
   libraries: coerceArray(z.array(z.string().toLowerCase())).optional(),
   organisations: coerceArray(z.array(z.string())).optional(),
@@ -328,7 +328,7 @@ export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTy
   adminAccess: strictCoerceBoolean(z.boolean()).optional(),
   peers: coerceArray(z.array(z.string())).optional(),
   titleOnly: strictCoerceBoolean(z.boolean()).optional(),
-  visibility: z.nativeEnum(EntryVisibility).optional(),
+  visibility: z.enum(EntryVisibility).optional(),
 })
 
 export const EntryFilter = {
@@ -349,23 +349,22 @@ export interface MetricsEntrySearchOptions {
 
 export type MetricsEntrySearchOptionsParams = Optional<MetricsEntrySearchOptions>
 
-export const MetricsEntrySearchOptionsSchema: ZodSchema<MetricsEntrySearchOptionsParams, ZodTypeDef, unknown> =
-  z.object({
-    organisation: z.string().optional(),
-    state: z.string().optional(),
-    schemaId: z.string().optional(),
-    kinds: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
-    release: z.enum(getEnumValues(EntryFilter)).optional(),
-    accessRequest: z.enum(getEnumValues(EntryFilter)).optional(),
-    startMonth: z
-      .string()
-      .regex(/^\d{4}-\d{2}$/)
-      .optional(),
-    endMonth: z
-      .string()
-      .regex(/^\d{4}-\d{2}$/)
-      .optional(),
-  })
+export const MetricsEntrySearchOptionsSchema: ZodType<MetricsEntrySearchOptionsParams, unknown> = z.object({
+  organisation: z.string().optional(),
+  state: z.string().optional(),
+  schemaId: z.string().optional(),
+  kinds: coerceArray(z.array(z.enum(EntryKind))).optional(),
+  release: z.enum(getEnumValues(EntryFilter)).optional(),
+  accessRequest: z.enum(getEnumValues(EntryFilter)).optional(),
+  startMonth: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/)
+    .optional(),
+  endMonth: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/)
+    .optional(),
+})
 
 export type ModelImages = ModelImageTags[]
 export type LayerScanSummary = Pick<

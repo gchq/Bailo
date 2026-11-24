@@ -19,7 +19,7 @@ const ArtefactScanInfoResponseSchema = z.object({
 })
 
 const ModelScanSeveritySchema = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
-const ModelScanSeverityCountMapSchema = z.record(ModelScanSeveritySchema, z.number().nonnegative())
+const ModelScanSeverityCountMapSchema = z.partialRecord(ModelScanSeveritySchema, z.number().nonnegative())
 export const ModelScanResponseSchema = z.object({
   summary: z.object({
     total_issues: z.number().nonnegative(),
@@ -73,7 +73,7 @@ const ImageHistorySchema = z
     comment: z.string().optional(),
     empty_layer: z.boolean().optional(),
   })
-  .passthrough()
+  .loose()
 
 const ImageConfigSchema = z
   .object({
@@ -86,7 +86,7 @@ const ImageConfigSchema = z
         type: z.string().optional(),
         diff_ids: z.array(z.string()).optional(),
       })
-      .passthrough()
+      .loose()
       .optional(),
     config: z
       .object({
@@ -95,10 +95,10 @@ const ImageConfigSchema = z
         WorkingDir: z.string().optional(),
         ArgsEscaped: z.boolean().optional(),
       })
-      .passthrough()
+      .loose()
       .optional(),
   })
-  .passthrough()
+  .loose()
 
 const VulnerabilitySchema = z
   .object({
@@ -110,7 +110,7 @@ const VulnerabilitySchema = z
         PURL: z.string(),
         UID: z.string(),
       })
-      .passthrough()
+      .loose()
       .optional(),
     InstalledVersion: z.string().optional(),
     FixedVersion: z.string().optional(),
@@ -119,38 +119,39 @@ const VulnerabilitySchema = z
       .object({
         DiffID: z.string().optional(),
       })
-      .passthrough()
+      .loose()
       .optional(),
-    PrimaryURL: z.string().url().optional(),
+    PrimaryURL: z.url().optional(),
     DataSource: z
       .object({
         ID: z.string().optional(),
         Name: z.string().optional(),
-        URL: z.string().url().optional(),
+        URL: z.url().optional(),
       })
-      .passthrough()
+      .loose()
       .optional(),
     Title: z.string().optional(),
     Description: z.string().optional(),
     Severity: z.string().optional(),
     CweIDs: z.array(z.string()).optional(),
-    VendorSeverity: z.record(z.number()).optional(),
+    VendorSeverity: z.record(z.string(), z.number()).optional(),
     CVSS: z
       .record(
+        z.string(),
         z
           .object({
             V3Vector: z.string().optional(),
             V3Score: z.number().optional(),
           })
-          .passthrough()
+          .loose()
           .optional(),
       )
       .optional(),
-    References: z.array(z.string().url()).optional(),
+    References: z.array(z.url()).optional(),
     PublishedDate: z.string().optional(),
     LastModifiedDate: z.string().optional(),
   })
-  .passthrough()
+  .loose()
 
 const ResultSchema = z
   .object({
@@ -162,7 +163,7 @@ const ResultSchema = z
     Secrets: z.array(z.unknown()).optional(),
     Licenses: z.array(z.unknown()).optional(),
   })
-  .passthrough()
+  .loose()
 
 export const TrivyScanResultResponseSchema = z
   .object({
@@ -177,7 +178,7 @@ export const TrivyScanResultResponseSchema = z
             Family: z.string().optional(),
             Name: z.string().optional(),
           })
-          .passthrough()
+          .loose()
           .optional(),
         ImageID: z.string().optional(),
         DiffIDs: z.array(z.string()).optional(),
@@ -185,11 +186,11 @@ export const TrivyScanResultResponseSchema = z
         RepoDigests: z.array(z.string()).optional(),
         ImageConfig: ImageConfigSchema.optional(),
       })
-      .passthrough()
+      .loose()
       .optional(),
     Results: z.array(ResultSchema).optional(),
   })
-  .passthrough()
+  .loose()
 export type TrivyScanResultResponse = z.infer<typeof TrivyScanResultResponseSchema>
 
 async function handleBadResponse(res: Response, context?: Record<string, unknown>) {
