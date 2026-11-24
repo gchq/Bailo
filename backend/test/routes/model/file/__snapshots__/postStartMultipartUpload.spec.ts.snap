@@ -21,16 +21,15 @@ exports[`routes > model > file > postStartMultipartUpload > 400 > no name 1`] = 
         {
           "code": "invalid_type",
           "expected": "string",
-          "message": "Required",
+          "message": "Invalid input: expected string, received undefined",
           "path": [
             "body",
             "name",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: body.name - Message: Required",
+    "message": "Path: body.name - Message: Invalid input: expected string, received undefined",
     "name": "Bailo Error",
   },
 }

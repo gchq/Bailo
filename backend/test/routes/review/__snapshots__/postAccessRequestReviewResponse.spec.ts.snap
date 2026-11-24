@@ -22,8 +22,11 @@ exports[`routes > review > postAccessRequestReviewResponse > missing review deci
     "context": {
       "errors": [
         {
-          "code": "invalid_union_discriminator",
+          "code": "invalid_union",
+          "discriminator": "decision",
+          "errors": [],
           "message": "Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
+          "note": "No matching discriminator",
           "options": [
             "approve",
             "undo",

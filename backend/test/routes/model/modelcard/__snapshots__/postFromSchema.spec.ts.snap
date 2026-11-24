@@ -21,7 +21,6 @@ exports[`routes > model > postModel > schema > 400 > no description 1`] = `
             "body",
             "schemaId",
           ],
-          "received": "undefined",
         },
       ],
     },

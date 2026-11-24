@@ -14,19 +14,18 @@ exports[`routes > model > file > postStartMultipartUpload > 400 > no fileId 1`] 
         {
           "code": "invalid_type",
           "expected": "string",
-          "message": "Required",
+          "message": "Invalid input: expected string, received undefined",
           "path": [
             "query",
             "fileId",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: query.fileId - Message: Required",
+    "message": "Path: query.fileId - Message: Invalid input: expected string, received undefined",
     "name": "Bailo Error",
   },
 }
 `;
 
-exports[`routes > model > file > postStartMultipartUpload > audit > expected call 1`] = `"vULnU"`;
+exports[`routes > model > file > postStartMultipartUpload > audit > expected call 1`] = `"Temporibus audeo civis spargo desidero atrox cupiditate."`;

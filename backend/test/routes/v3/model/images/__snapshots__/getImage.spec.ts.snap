@@ -10,6 +10,6 @@ exports[`routes > images > getImageByDigest > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > images > getImageByDigest > audit > expected call 1`] = `"eRror"`;
+exports[`routes > images > getImageByDigest > audit > expected call 1`] = `"Desidero atrox cupiditate avarus exercitationem tristis audax vita."`;
 
-exports[`routes > images > getImageByDigest > audit > expected call 2`] = `"DENego PRaEseNTIUm Bis apeRTE LibEro colO DeprecaTOr CLArO ceLo cURIs aBbas"`;
+exports[`routes > images > getImageByDigest > audit > expected call 2`] = `"Desparatus dolore accendo suus vulgo ascisco."`;

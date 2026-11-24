@@ -14,21 +14,20 @@ exports[`routes > model > patchModel > 400 > bad visibility 1`] = `
     "context": {
       "errors": [
         {
-          "code": "invalid_enum_value",
-          "message": "Invalid enum value. Expected 'private' | 'public', received 'not_valid'",
-          "options": [
-            "private",
-            "public",
-          ],
+          "code": "invalid_value",
+          "message": "Invalid option: expected one of "private"|"public"",
           "path": [
             "body",
             "visibility",
           ],
-          "received": "not_valid",
+          "values": [
+            "private",
+            "public",
+          ],
         },
       ],
     },
-    "message": "Path: body.visibility - Message: Invalid enum value. Expected 'private' | 'public', received 'not_valid'",
+    "message": "Path: body.visibility - Message: Invalid option: expected one of "private"|"public"",
     "name": "Bailo Error",
   },
 }
