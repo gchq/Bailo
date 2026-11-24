@@ -1,10 +1,10 @@
-import { Box, Chip, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import { type Registry, type RJSFSchema } from '@rjsf/utils'
 import { type EntrySearchResult, useListEntries } from 'actions/entry'
 import { debounce } from 'lodash-es'
-import { type KeyboardEvent, type SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { type KeyboardEvent, type SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react'
 import CompareField from 'src/common/CompareField'
 import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -66,20 +66,18 @@ export default function ModelSelector({
 
   const modelsById = useMemo(() => new Map(models.map((model) => [model.id, model])), [models])
 
-  const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
-
-  useEffect(() => {
-    if (!models || !currentValue) {
-      return
-    }
-
-    setSelectedModels(models.filter((card) => currentValue.includes(card.id)))
-  }, [models, currentValue])
+  // Keep IDs missing from the list (e.g. deleted models) so they stay visible and removable
+  const selectedModels = useMemo(
+    () =>
+      (currentValue || [])
+        .filter((modelId) => modelId !== null)
+        .map((modelId) => modelsById.get(modelId) ?? ({ id: modelId, name: modelId } as EntrySearchResult)),
+    [currentValue, modelsById],
+  )
 
   const handleSelectedModelsChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntrySearchResult[]) => {
       onChange(newValues.map((value) => value.id))
-      setSelectedModels(newValues)
     },
     [onChange],
   )
@@ -145,20 +143,24 @@ export default function ModelSelector({
           disableClearable
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.name}
-          value={selectedModels || []}
+          value={selectedModels}
           onChange={handleSelectedModelsChange}
           noOptionsText={modelListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
           options={models || []}
           renderValue={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Chip
-                sx={{ textOverflow: 'ellipsis', maxWidth: '200px' }}
-                {...getTagProps({ index })}
-                key={option.name}
-                label={option.name}
-              />
-            ))
+            value.map((option, index) => {
+              const { key, ...tagProps } = getTagProps({ index })
+              return (
+                <ModelSelectorChip
+                  sx={{ textOverflow: 'ellipsis', maxWidth: '200px' }}
+                  {...tagProps}
+                  key={key}
+                  label={option.name}
+                  modelId={option.id}
+                />
+              )
+            })
           }
           renderInput={(params) => (
             <LimitedTextField
