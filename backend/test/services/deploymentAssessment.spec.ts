@@ -202,11 +202,11 @@ describe('services > deploymentAssessment', () => {
     expect(ModelModelMock.find).not.toHaveBeenCalled()
   })
 
-  test('rejects a missing model', async () => {
+  test('rejects a missing model and tells the owner to remove it', async () => {
     ModelModelMock.find.mockResolvedValueOnce([])
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
-      'One or more models could not be found.',
+      'One or more models could not be found. They may have been deleted, so remove them from this Deployment Assessment. Missing models: model-one',
     )
   })
 
@@ -264,7 +264,7 @@ describe('services > deploymentAssessment', () => {
   })
 
   test.each([
-    [{ ...liveModel, kind: EntryKind.DataCard }, 'One or more models could not be found.'],
+    [{ ...liveModel, kind: EntryKind.DataCard }, 'Deployment assessments can only use models, not data cards.'],
     [{ ...liveModel, visibility: EntryVisibility.Private }, 'Deployment assessments can only use public models.'],
     [{ ...liveModel, state: 'Review' }, 'Deployment assessments can only use models with a Production state.'],
   ])('rejects an ineligible model', async (model, message) => {

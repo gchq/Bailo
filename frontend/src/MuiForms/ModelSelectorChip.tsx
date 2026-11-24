@@ -15,20 +15,26 @@ type ModelSelectorChipsProps = {
 export default function ModelSelectorChip({ label, modelId, sx, ...chipProps }: ModelSelectorChipsProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetModel(modelId)
-  // DAs keep references to deleted models, which the API reports as 404
   const isDeleted = isEntryError?.status === 404
   const name = entry?.name ?? label
 
   if (isDeleted) {
     return (
-      <Tooltip title='This model has been deleted'>
+      <Tooltip title={`This model (${modelId}) has been deleted.`}>
         <Chip
           {...chipProps}
-          aria-label={`Model ${modelId} has been deleted`}
+          aria-label={modelId}
           color='error'
           icon={<ErrorOutline />}
-          label={`Deleted model (${modelId})`}
-          sx={{ width: 'fit-content', ...sx }}
+          label={modelId}
+          sx={{
+            ...sx,
+            width: 'fit-content',
+            maxWidth: 'none',
+            height: 'auto',
+            py: 0.5,
+            '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere' },
+          }}
         />
       </Tooltip>
     )
