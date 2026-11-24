@@ -22,7 +22,7 @@ describe('routes > v3 > deploymentAssessment > patchDeploymentAssessment', () =>
   })
 
   test('audit > expected call', async () => {
-    const fixture = createFixture(patchDeploymentAssessmentSchema)
+    const fixture = createFixture(patchDeploymentAssessmentSchema, { body: { draft: true } })
     const res = await testPatch(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`, fixture)
 
     expect(res.statusCode).toBe(200)
