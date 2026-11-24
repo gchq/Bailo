@@ -32,7 +32,10 @@ export const postReviewResponseSchema = z.object({
         kind: z.literal(ReviewKind.Lifecycle),
         dueDate: z.coerce
           .date({
-            required_error: 'Please provide a next review due date when submitting this review.',
+            error: (issue) =>
+              issue.input === undefined
+                ? 'Please provide a next review due date when submitting this review.'
+                : undefined,
           })
           .refine((date) => date.getTime() > Date.now(), {
             message: 'Due date of next review cannot be in the past.',

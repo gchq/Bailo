@@ -8,10 +8,10 @@ import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const EntryVolumeDataPointSchema = z.object({
-  startDate: z.string().datetime().openapi({ example: '2026-01-01' }),
-  endDate: z.string().datetime().openapi({ example: '2026-01-31' }),
+  startDate: z.iso.datetime().openapi({ example: '2026-01-01' }),
+  endDate: z.iso.datetime().openapi({ example: '2026-01-31' }),
   count: z.number().int().nonnegative().openapi({ example: 7 }),
-  organisations: z.record(z.number().int().nonnegative()).openapi({
+  organisations: z.record(z.string(), z.number().int().nonnegative()).openapi({
     example: {
       unset: 1,
       'E corporation': 3,
@@ -29,9 +29,9 @@ export const getEntryVolumeSchema = z.object({
     .object({
       interval: EntryVolumeIntervalEnum.openapi({ example: 'month' }),
 
-      startDate: z.string().date().openapi({ example: '2026-01-01' }),
+      startDate: z.iso.date().openapi({ example: '2026-01-01' }),
 
-      endDate: z.string().date().openapi({ example: '2026-04-01' }),
+      endDate: z.iso.date().openapi({ example: '2026-04-01' }),
 
       timezone: z.string().optional().openapi({ example: 'UTC' }),
     })
@@ -44,8 +44,8 @@ export const getEntryVolumeSchema = z.object({
 const GetEntryVolumeResponseSchema = z.object({
   lastUpdated: z.string(),
   interval: EntryVolumeIntervalEnum.openapi({ example: 'month' }),
-  startDate: z.string().date().openapi({ example: '2026-01-01' }),
-  endDate: z.string().date().openapi({ example: '2026-04-01' }),
+  startDate: z.iso.date().openapi({ example: '2026-01-01' }),
+  endDate: z.iso.date().openapi({ example: '2026-04-01' }),
   data: z.array(EntryVolumeDataPointSchema),
 })
 

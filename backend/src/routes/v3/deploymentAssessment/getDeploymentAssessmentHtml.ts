@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 export const getDeploymentAssessmentHtmlSchema = z.object({
   params: z.object({
     deploymentAssessmentId: z.string({
-      required_error: 'Must specify Deployment Assessment id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify Deployment Assessment id as param' : undefined),
     }),
   }),
 })
