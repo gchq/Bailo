@@ -62,8 +62,12 @@ async function doProcessBatch() {
     return
   }
 
+  const batchEvents = await removeInvalidEvents(candidateEvents, batchId)
+  if (batchEvents.length === 0) {
+    return
+  }
+
   try {
-    const batchEvents = candidateEvents.map((stroomEvent) => JSON.parse(stroomEvent.event))
     const xml = create({
       Events: {
         '@xmlns': config.stroom.xmlns,
@@ -73,7 +77,7 @@ async function doProcessBatch() {
         '@Version': config.stroom.version,
         Event: batchEvents,
       },
-    }).end()
+    }).end({ wellFormed: true })
     await sendEvents(xml)
   } catch (error) {
     // Return the batch back to the DB
@@ -91,4 +95,32 @@ async function doProcessBatch() {
   } else {
     log.info({ pendingEvents }, 'Events pending STROOM batch send.')
   }
+}
+
+async function removeInvalidEvents(
+  candidateEvents: Array<Pick<StroomEventLean, '_id' | 'event'>>,
+  batchId: string,
+): Promise<StroomEventObject[]> {
+  const validEvents: StroomEventObject[] = []
+  const invalidEventIds: StroomEventLean['_id'][] = []
+
+  for (const stroomEvent of candidateEvents) {
+    try {
+      const parsedEvent: StroomEventObject = JSON.parse(stroomEvent.event)
+      create({ Event: parsedEvent }).end({ wellFormed: true })
+      validEvents.push(parsedEvent)
+    } catch (error) {
+      log.error({ error, stroomEventId: stroomEvent._id }, 'Invalid STROOM audit event. Removing it from the batch.')
+      invalidEventIds.push(stroomEvent._id)
+    }
+  }
+
+  if (invalidEventIds.length > 0) {
+    await StroomEvent.updateMany(
+      { _id: { $in: invalidEventIds }, batchId },
+      { batchId: '', inFlight: false, attempts: MAX_ATTEMPTS + 1 },
+    )
+  }
+
+  return validEvents
 }
