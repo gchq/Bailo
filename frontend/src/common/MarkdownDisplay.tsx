@@ -8,14 +8,29 @@ import ReactMarkdown, { type MarkdownToJSX, RuleType } from 'markdown-to-jsx'
 import { compiler } from 'markdown-to-jsx/react'
 import { createElement, type HTMLAttributes, type ReactNode, useMemo } from 'react'
 
-// Lets user HTML escape its container, e.g. a fixed full-screen overlay
-const blockedHtmlAttributes = new Set(['style', 'class', 'classname'])
-
 type MarkdownRenderRule = Required<MarkdownToJSX.Options>['renderRule']
 type MarkdownCreateElement = Required<MarkdownToJSX.Options>['createElement']
 
-export const removeUnsafeHtmlAttributes: MarkdownRenderRule = (next, node) => {
-  if ((node.type === RuleType.htmlBlock || node.type === RuleType.htmlSelfClosing) && node.attrs) {
+// React renders these as the page's own document elements, replacing the app
+const documentHtmlTags = new Set(['html', 'head', 'body'])
+// Change the whole page, e.g. global stylesheets, the base URL for links, or redirects
+const removedHtmlTags = new Set(['meta', 'link', 'base'])
+// Lets user HTML escape its container, e.g. a fixed full-screen overlay
+const blockedHtmlAttributes = new Set(['style', 'class', 'classname'])
+
+export const removeUnsafeHtml: MarkdownRenderRule = (next, node) => {
+  if (node.type !== RuleType.htmlBlock && node.type !== RuleType.htmlSelfClosing) {
+    return next()
+  }
+
+  const tag = node.tag.toLowerCase()
+  if (removedHtmlTags.has(tag)) {
+    return null
+  }
+  if (documentHtmlTags.has(tag)) {
+    node.tag = 'div'
+  }
+  if (node.attrs) {
     node.attrs = Object.fromEntries(
       Object.entries(node.attrs).filter(([name]) => !blockedHtmlAttributes.has(name.toLowerCase())),
     )
@@ -131,7 +146,7 @@ export function MarkdownBlockquote({ children, ...props }: BoxProps) {
 export function createMarkdownOptions(theme: Theme, inline = false) {
   const options = {
     forceInline: inline,
-    renderRule: removeUnsafeHtmlAttributes,
+    renderRule: removeUnsafeHtml,
     overrides: {
       h1: {
         component: ({ children, id, className }: TypographyProps) => (

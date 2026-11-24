@@ -9,6 +9,21 @@ import { lightTheme } from '../../src/theme'
 
 const fixedStyle = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999'
 
+const fullHtmlDocument = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    Bailo4Ever!
+
+  </style>
+</head>
+<body>
+  <h1>Welcome!</h1>
+</body>
+</html>`
+
 function render(ui: ReactElement) {
   return renderWithoutTheme(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>)
 }
@@ -131,6 +146,30 @@ describe('MarkdownDisplay', () => {
     expect((cells[0] as HTMLElement).style.textAlign).toBe('left')
     expect((cells[1] as HTMLElement).style.textAlign).toBe('right')
   })
+
+  it('keeps a full HTML document inside its container', () => {
+    const { container } = render(<MarkdownDisplay>{fullHtmlDocument}</MarkdownDisplay>)
+
+    expect(document.body.contains(container)).toBe(true)
+    expect(container.querySelector('html, head, body, meta')).toBeNull()
+    expect(container.querySelector('h1')?.textContent).toBe('Welcome!')
+  })
+
+  it('removes tags that affect the whole document', () => {
+    const { container } = render(
+      <MarkdownDisplay>
+        {[
+          '<link rel="stylesheet" href="https://example.com/a.css">',
+          '<base href="https://example.com/">',
+          '<meta http-equiv="refresh" content="0;url=https://example.com">',
+          'Text',
+        ].join('\n\n')}
+      </MarkdownDisplay>,
+    )
+
+    expect(container.querySelector('link, base, meta')).toBeNull()
+    expect(container.textContent).toContain('Text')
+  })
 })
 
 describe('InlineMarkdownDiff', () => {
@@ -155,5 +194,12 @@ describe('InlineMarkdownDiff', () => {
     const elements = getRawHtmlElements(container)
     expect(elements.length).toBeGreaterThan(0)
     elements.forEach((element) => expect(element?.hasAttribute('style')).toBe(false))
+  })
+
+  it('keeps a full HTML document inside its container', () => {
+    const { container } = render(<InlineMarkdownDiff from='Old notes' to={fullHtmlDocument} />)
+
+    expect(document.body.contains(container)).toBe(true)
+    expect(container.querySelector('html, head, body, meta')).toBeNull()
   })
 })
