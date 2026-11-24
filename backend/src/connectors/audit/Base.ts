@@ -190,7 +190,8 @@ export const AuditInfo = {
     resourceKind: ResourceKind.Token,
   },
   ViewUserTokens: {
-    typeId: 'ViewUserToken',
+ViewUserTokens: {
+typeId: 'ViewUserTokens',
     description: 'Token Viewed',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Token,
