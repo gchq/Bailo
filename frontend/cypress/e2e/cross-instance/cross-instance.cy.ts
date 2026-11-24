@@ -24,7 +24,7 @@ describe('Mirrored Model tests', () => {
     instanceAUrl = Cypress.expose('instanceAUrl')
     instanceBUrl = Cypress.expose('instanceBUrl')
     containerCli = Cypress.expose('containerCli')
-    cy.exec(`${containerCli} version`, { failOnNonZeroExit: false }).then(({ stdout }) => {
+    cy.task<string>('runShellCommand', `${containerCli} version || true`).then((stdout) => {
       expect(stdout, `${containerCli} version produced no output`).to.have.length.greaterThan(0)
       tlsFlag = /podman/i.test(stdout) ? '--tls-verify=false' : ''
     })
@@ -90,18 +90,20 @@ describe('Mirrored Model tests', () => {
           const accessKey = response.body.token.accessKey
           const secretKey = response.body.token.secretKey
 
-          cy.exec(`${containerCli} login ${tlsFlag} ${instanceAUrl} -u ${accessKey} -p ${secretKey}`, {
-            timeout: 60000,
-          })
+          cy.task(
+            'runShellCommand',
+            `${containerCli} login ${tlsFlag} ${instanceAUrl} -u ${accessKey} -p ${secretKey}`,
+            { timeout: 60000 },
+          )
           const testDockerImageName = `${testDockerImage}:${testDockerImageTag}`
           const testDockerImageFull = `${instanceAUrl.replace('http://', '')}/${instanceASourceModelId}/${testDockerImageName}`
-          cy.exec(`${containerCli} build --tag ${testDockerImage} cypress/fixtures/docker-image`, { timeout: 60000 })
-          cy.exec(`${containerCli} tag ${testDockerImage} "${testDockerImageFull}"`, {
+          cy.task('runShellCommand', `${containerCli} build --tag ${testDockerImage} cypress/fixtures/docker-image`, {
             timeout: 60000,
           })
-          cy.exec(`${containerCli} push ${tlsFlag} "${testDockerImageFull}"`, {
+          cy.task('runShellCommand', `${containerCli} tag ${testDockerImage} "${testDockerImageFull}"`, {
             timeout: 60000,
           })
+          cy.task('runShellCommand', `${containerCli} push ${tlsFlag} "${testDockerImageFull}"`, { timeout: 60000 })
 
           cy.fixture(testFile).then((file) => {
             cy.request(

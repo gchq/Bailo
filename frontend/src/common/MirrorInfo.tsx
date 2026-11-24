@@ -29,6 +29,9 @@ export default function MirrorInfo() {
           <br />
           If a release is updated after export, it must be re-exported for those changes to appear on the mirrored
           model.
+          <br />
+          Draft releases cannot be exported and are not available for selection. Publish a draft release before
+          exporting it.
         </Typography>
         <Typography
           sx={{

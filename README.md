@@ -7,8 +7,7 @@
 <div align="center">
   <a href="https://github.com/gchq/Bailo">
     <h1>
-      <!-- TODO: Fix #gh-dark-mode-only -->
-      <img src="frontend/public/logo-vertical-dark-transparent.png" alt="Logo" width="170">
+      <img src="frontend/public/logo-vertical-filled-transparent.png" alt="Bailo logo" width="170">
     </h1>
   </a>
 
@@ -102,7 +101,7 @@ docker compose down
 
 #### Production Build
 
-The above `docker compose` commands can, alternatively, be run with `-f compose.prod.yml` to have a more static version
+The above `docker compose` commands can, alternatively, be run with `-f compose.prod.yaml` to have a more static version
 of the application running which mimics a production environment. Volumes are not dynamically mounted, the build time is
 slower as the frontend is pre-compiled, and environment variables & users are more production ready. This build is also
 more reliable for our cypress tests:
@@ -136,39 +135,45 @@ You can test out your new deployment using the example models which can be found
 [`minimal_binary.zip`](frontend/cypress/fixtures/minimal_binary.zip) and
 [`minimal_code.zip`](frontend/cypress/fixtures/minimal_code.zip). There are also example forms in the `scripts` folder
 [`minimal_model_schema.json`](backend/src/scripts/example_schemas/minimal_model_schema.json),
-[`minimal_data_card_schema.json`](backend/src/scripts/example_schemas/minimal_data_card_schema.json) and
-[`minimal_access_request_schema.json`](backend/src/scripts/example_schemas/minimal_access_request_schema.json).
+[`minimal_data_card_schema.json`](backend/src/scripts/example_schemas/minimal_data_card_schema.json),
+[`minimal_access_request_schema.json`](backend/src/scripts/example_schemas/minimal_access_request_schema.json) and
+[`minimal_deployment_assessment_schema.json`](backend/src/scripts/example_schemas/minimal_deployment_assessment_schema.json).
 
 <br />
 
 ## Logical Project Flow (Overview)
 
-![bailo diagram](frontend/public/mm-diagram.png)
+![Bailo architecture diagram](frontend/public/architecture-diagram.svg)
 
 ### Components
 
-|                 |                                                                                                                                                                                              |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NGINX           | [![nginx][NGINX]](https://nginx.org/)                                                                                                                                                        |
-| UI              | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![React][React]](https://react.dev/) [![Cypress][Cypress]](https://www.cypress.io/) |
-| API             | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![Express.js][Express]](https://expressjs.com/) [![Vitest][Vitest]](#)              |
-| Docker Registry | [![Docker][Docker]](https://www.docker.com/)                                                                                                                                                 |
-| Mongo           | [![MongoDB][Mongo]](https://www.mongodb.com/)                                                                                                                                                |
-| S3              | [![SeaweedFS][SeaweedFS]](https://github.com/seaweedfs/seaweedfs)                                                                                                                            |
+|                 |                                                                                                                                                                                                                              |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NGINX           | [![nginx][NGINX]](https://nginx.org/)                                                                                                                                                                                        |
+| UI              | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Next.js][Next.js]](https://nextjs.org/) [![React][React]](https://react.dev/) [![MUI][MUI]](https://mui.com/) [![Cypress][Cypress]](https://www.cypress.io/) |
+| API             | [![TypeScript][Typescript]](https://www.typescriptlang.org/) [![Express.js][Express]](https://expressjs.com/) [![Vitest][Vitest]](https://vitest.dev/)                                                                       |
+| Docker Registry | [![Docker][Docker]](https://distribution.github.io/distribution/)                                                                                                                                                            |
+| Mongo           | [![MongoDB][Mongo]](https://www.mongodb.com/)                                                                                                                                                                                |
+| S3              | [![SeaweedFS][SeaweedFS]](https://github.com/seaweedfs/seaweedfs)                                                                                                                                                            |
+| Scanning        | [![ClamAV][ClamAV]](https://www.clamav.net/) [![ModelScan][ModelScan]](https://github.com/protectai/modelscan) [![Trivy][Trivy]](https://trivy.dev/) [![FastAPI][FastAPI]](https://fastapi.tiangolo.com/)                    |
 
-1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
-   `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
+1. A user accesses a URL. NGINX sends `/api` requests to the backend, `/v2` requests to the Docker registry and
+   everything else to the frontend. We use [Next.js Pages Router](https://nextjs.org/docs/pages) routing to point it to
+   a file in `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
 2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `frontend/actions`. Each one exposes
    variables to specify if it is loading, errored, data, etc.
-3. Requests to the backend get routed through [express](https://expressjs.com/) within `backend/src/routes.ts`. Each
-   route is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
-4. Routes interact with the database via `mongoose`, which stores models in `backend/src/models`.
+3. Requests to the backend get routed through [Express](https://expressjs.com/) from `backend/src/routes.ts` to the
+   versioned routers in `backend/src/routes/` (e.g. `backend/src/routes/v2/routes.ts`). Each route is an array with all
+   items being middleware except the last, which is the handler (`[...middleware, handler]`).
+4. Routes call services in `backend/src/services`, which read and write MongoDB via repositories in
+   `backend/src/repositories` and `mongoose` models in `backend/src/models`. Pluggable connectors in
+   `backend/src/connectors` handle authentication, authorisation, auditing, artefact scanning and federation.
 
 <br />
 
 ## Stroom Integration
 
-Bailo integrated with [Stroom](https://github.com/gchq/stroom), a [GCHQ](https://github.com/gchq)-developed data
+Bailo integrates with [Stroom](https://github.com/gchq/stroom), a [GCHQ](https://github.com/gchq)-developed data
 storage, processing and analysis platform.
 
 This integration enables Bailo to create and send event logging to Stroom for ingestion and later analysis, creating an
@@ -179,7 +184,7 @@ audit trail and ensuring health within a given Bailo deployment. The integration
 - _Issue: Sometimes Docker struggles when you add a new dependency._ <br /> Fix: Run `docker compose down --rmi all`
   followed by `docker compose up --build`.
 
-- _Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
+- _Issue: Sometimes SWC fails to install its own binary and the project will refuse to start up (development only)_
   <br /> Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run:
   `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
 
@@ -250,4 +255,8 @@ more information.
 [Vitest]: https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=fff
 [Typescript]: https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff
 [Cypress]: https://img.shields.io/badge/Cypress-69D3A7?logo=cypress&logoColor=fff
-[MUI]: https://img.shields.io/badge/Material%20UI-007FFF?style=for-the-badge&logo=mui&logoColor=white
+[ClamAV]: https://img.shields.io/badge/ClamAV-CC0000
+[ModelScan]: https://img.shields.io/badge/ModelScan-5A2D82
+[Trivy]: https://img.shields.io/badge/Trivy-1904DA?logo=trivy&logoColor=fff
+[FastAPI]: https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=fff
+[MUI]: https://img.shields.io/badge/MUI-007FFF?logo=mui&logoColor=white

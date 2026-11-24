@@ -1,11 +1,9 @@
 import Delete from '@mui/icons-material/Delete'
 import Info from '@mui/icons-material/Info'
-import LocalOffer from '@mui/icons-material/LocalOffer'
 import MoreVert from '@mui/icons-material/MoreVert'
 import Refresh from '@mui/icons-material/Refresh'
 import {
   Box,
-  Button,
   Chip,
   Divider,
   IconButton,
@@ -36,12 +34,10 @@ import {
   useMemo,
   useState,
 } from 'react'
-import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import Restricted from 'src/common/Restricted'
+import TagSelector from 'src/common/TagSelector'
 import ArtefactScanningInfoContext from 'src/contexts/artefactScanningInfoContext'
+import DeleteConfirmationDialog from 'src/entry/model/files/DeleteConfirmationDialog'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
-import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
-import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { buildChipDetails, isAnyScanInProgress, isAnyScanResults } from 'src/entry/model/scanning/scanChipUtils'
 import ScanResultDetail from 'src/entry/model/scanning/ScanResultDetail'
 import useNotification from 'src/hooks/useNotification'
@@ -53,18 +49,6 @@ import { getErrorMessage } from 'utils/fetcher'
 
 export type MutateReleases = KeyedMutator<{ releases: ReleaseInterface[] }>
 export type MutateFiles = KeyedMutator<{ files: FileInterface[] }>
-
-type ClickableFileDownloadProps =
-  | {
-      isClickable: true
-      activeFileTag: string
-      activeFileTagOnChange: (newFileTag: string) => void
-    }
-  | {
-      isClickable?: false
-      activeFileTag?: string
-      activeFileTagOnChange?: (newFileTag: string) => void
-    }
 
 type FileDisplayProps = {
   modelId: string
@@ -79,7 +63,8 @@ type FileDisplayProps = {
   style?: CSSProperties
   key?: string
   releases: ReleaseInterface[]
-} & ClickableFileDownloadProps
+  displayName?: string
+}
 
 export default function FileDisplay({
   modelId,
@@ -87,16 +72,13 @@ export default function FileDisplay({
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
   mutator = undefined,
   hideTags = false,
-  isClickable = false,
-  activeFileTag = '',
-  activeFileTagOnChange,
   style = {},
   key = '',
   releases,
+  displayName,
 }: FileDisplayProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
-  const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const [deleteFileOpen, setDeleteFileOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -267,13 +249,6 @@ export default function FileDisplay({
     }
   }
 
-  const handleFileTagOnClick = (fileTag: string) => {
-    if (!activeFileTagOnChange) {
-      return
-    }
-    activeFileTagOnChange(fileTag === activeFileTag ? '' : fileTag)
-  }
-
   if (isFileInterface(file) && !file.complete) {
     return (
       <Typography>
@@ -318,7 +293,7 @@ export default function FileDisplay({
                       overflow: 'hidden',
                     }}
                   >
-                    {file.name}
+                    {displayName ?? file.name}
                   </Typography>
                 </Link>
               </Tooltip>
@@ -377,7 +352,7 @@ export default function FileDisplay({
                           }}
                         >
                           <ListItemIcon>
-                            <Delete color='primary' fontSize='small' />
+                            <Delete color='error' fontSize='small' />
                           </ListItemIcon>
                           <ListItemText>Delete file</ListItemText>
                         </MenuItem>
@@ -389,50 +364,16 @@ export default function FileDisplay({
               </Stack>
             </Stack>
           </Stack>
-          <Stack
-            spacing={2}
-            direction='row'
-            sx={{
-              alignItems: 'center',
-            }}
-          >
-            {!hideTags && (
-              <>
-                <Restricted action='editEntry' fallback={<></>}>
-                  <Button
-                    sx={{ width: 'fit-content' }}
-                    size='small'
-                    startIcon={<LocalOffer />}
-                    onClick={(event) => setAnchorElFileTag(event.currentTarget)}
-                  >
-                    Apply file tags
-                  </Button>
-                </Restricted>
-                <Box sx={{ whiteSpace: 'pre-wrap' }}>
-                  {file.tags.map((fileTag) =>
-                    isClickable ? (
-                      <Chip
-                        key={fileTag}
-                        label={fileTag}
-                        sx={{ width: 'fit-content', m: 0.5 }}
-                        onClick={() => handleFileTagOnClick(fileTag)}
-                        color={activeFileTag === fileTag ? 'secondary' : undefined}
-                      />
-                    ) : (
-                      <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content', m: 0.5 }} />
-                    ),
-                  )}
-                </Box>
-                <EntryTagSelector
-                  anchorEl={anchorElFileTag}
-                  setAnchorEl={setAnchorElFileTag}
-                  onChange={handleFileTagSelectorOnChange}
-                  tags={file.tags || []}
-                  errorText={fileTagErrorMessage}
-                />
-              </>
-            )}
-          </Stack>
+          {!hideTags && (
+            <>
+              <TagSelector
+                restrictedToAction={'editEntry'}
+                onChange={handleFileTagSelectorOnChange}
+                tags={file.tags || []}
+                errorText={fileTagErrorMessage}
+              />
+            </>
+          )}
         </Stack>
       )}
       <AssociatedReleasesDialog
@@ -442,9 +383,8 @@ export default function FileDisplay({
         latestRelease={latestRelease}
         sortedAssociatedReleases={sortedAssociatedReleases}
       />
-      <ConfirmationDialogue
+      <DeleteConfirmationDialog
         open={deleteFileOpen}
-        title='Delete File'
         onConfirm={handleDeleteConfirm}
         onCancel={() => {
           if (!isDeleting) {
@@ -452,22 +392,13 @@ export default function FileDisplay({
           }
         }}
         errorMessage={deleteErrorMessage}
-        confirmDisabled={isDeleting}
         confirmLoading={isDeleting}
-        dialogMessage={
-          sortedAssociatedReleases.length > 0
-            ? 'Deleting this file will affect the following releases:'
-            : 'Deleting this file will not affect any existing releases'
-        }
-      >
-        <Box sx={{ pt: 2 }}>
-          <AssociatedReleasesList
-            modelId={modelId}
-            latestRelease={releases.length > 0 ? releases[0].semver : ''}
-            releases={sortedAssociatedReleases}
-          />
-        </Box>
-      </ConfirmationDialogue>
+        itemName={displayName ?? file.name}
+        itemType='file'
+        associatedReleases={sortedAssociatedReleases}
+        allReleases={releases}
+        modelId={modelId}
+      />
     </Box>
   )
 }

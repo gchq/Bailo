@@ -2,6 +2,7 @@ import { type Request } from 'express'
 import os from 'os'
 
 import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { type FileInterface, type FileInterfaceDoc, type FileWithScanResultsAggregate } from '../../models/File.js'
 import { type InferenceDoc } from '../../models/Inference.js'
 import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
@@ -13,7 +14,9 @@ import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type StroomEventObject } from '../../models/StroomEvent.js'
 import { type TokenDoc } from '../../models/Token.js'
+import { type WebhookDoc } from '../../models/Webhook.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import log from '../../services/log.js'
 import { type MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
 import { type FileMirrorInformation } from '../../services/mirroredModel/importers/file.js'
@@ -22,6 +25,7 @@ import { processBatch, saveEvent } from '../../services/stroom.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, isFileMirrorInformation, isMongoDocumentMirrorInformation } from '../../types/types.js'
 import config from '../../utils/config.js'
+import { ConfigurationError } from '../../utils/error.js'
 import { AuditKind, BaseAuditConnector } from './Base.js'
 
 export type EventDetail = {
@@ -184,6 +188,11 @@ export class StroomAuditConnector extends BaseAuditConnector {
   constructor() {
     super()
     this.hostIP = this.getHostDeviceIP()[0] ?? '0.0.0.0'
+    if (!Number.isInteger(config.stroom.interval)) {
+      throw ConfigurationError('Unable to initialise Stroom Audit Connector as the interval is not a number.', {
+        interval: config.stroom.interval,
+      })
+    }
     setInterval(() => {
       processBatch().catch((err) => {
         log.error({ err }, 'Failed to process batch of STROOM events.')
@@ -492,6 +501,36 @@ export class StroomAuditConnector extends BaseAuditConnector {
     this.auditGenericEvent(req, `Review created for ${modelId}`)
   }
 
+  async onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onUpdateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onSearchDeploymentAssessments(
+    req: Request,
+    deploymentAssessments: DeploymentAssessmentSummary[],
+  ): Promise<void> {
+    this.auditSearchEvent(
+      req,
+      deploymentAssessments.map((deploymentAssessment) => ({ Id: deploymentAssessment.id })),
+    )
+  }
+
+  async onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.auditGenericEvent(req, deploymentAssessment.id)
+  }
+
+  async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.auditGenericEvent(req, `${response._id}`)
+  }
+
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
     this.auditGenericEvent(req, userInformation.user.dn)
   }
@@ -510,6 +549,26 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
     this.auditGenericEvent(req, registryImage)
+  }
+
+  async onCreateWebhook(req: Request, webhook: WebhookDoc): Promise<void> {
+    this.auditGenericEvent(req, webhook.id)
+  }
+
+  async onViewWebhooks(req: Request, webhooks: WebhookDoc[]): Promise<void> {
+    this.auditMultipleViewEvent(
+      req,
+      webhooks.map((webhook) => ({ Id: webhook.id })),
+      'webhook',
+    )
+  }
+
+  async onUpdateWebhook(req: Request, webhook: WebhookDoc): Promise<void> {
+    this.auditGenericEvent(req, webhook.id)
+  }
+
+  async onDeleteWebhook(req: Request, webhook: WebhookDoc): Promise<void> {
+    this.auditGenericEvent(req, webhook.id)
   }
 
   async onError(req: Request, error: BailoError): Promise<void> {

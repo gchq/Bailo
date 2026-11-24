@@ -1,3 +1,4 @@
+import { Agent as HttpsAgent } from 'node:https'
 import { type PassThrough, type Readable } from 'node:stream'
 
 import {
@@ -18,11 +19,10 @@ import {
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
-import bytes from 'bytes'
 
-import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isBailoError } from '../types/error.js'
+import { formatBytes } from '../utils/bytes.js'
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
 
@@ -34,7 +34,13 @@ function getS3Client() {
     region: config.s3.region,
     forcePathStyle: config.s3.forcePathStyle,
     requestHandler: new NodeHttpHandler({
-      httpsAgent: getHttpsAgent({ rejectUnauthorized: config.s3.rejectUnauthorized }),
+      // The AWS SDK needs a Node HTTPS agent rather than an undici dispatcher
+      httpsAgent: new HttpsAgent({
+        ...config.httpClient.defaultOpts,
+        rejectUnauthorized: config.s3.rejectUnauthorized,
+        // Use HTTP_PROXY, HTTPS_PROXY and NO_PROXY from the environment
+        proxyEnv: process.env,
+      }),
     }),
     ...(config.s3.responseChecksumValidation && { responseChecksumValidation: config.s3.responseChecksumValidation }),
   })
@@ -61,8 +67,8 @@ export async function putObjectStream(
       log.debug(
         {
           ...progress,
-          ...(progress.loaded && { loaded: bytes.format(progress.loaded), loadedBytes: progress.loaded }),
-          ...(progress.total && { total: bytes.format(progress.total), totalBytes: progress.total }),
+          ...(progress.loaded && { loaded: formatBytes(progress.loaded), loadedBytes: progress.loaded }),
+          ...(progress.total && { total: formatBytes(progress.total), totalBytes: progress.total }),
         },
         'Object upload is in progress',
       )

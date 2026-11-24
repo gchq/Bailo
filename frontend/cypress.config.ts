@@ -1,9 +1,10 @@
+import { execSync } from 'node:child_process'
+
 import { CreateBucketCommand, GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  allowCypressEnv: false,
   e2e: {
     baseUrl: process.env.CYPRESS_BASE_URL ?? 'http://localhost:8080',
 
@@ -17,8 +18,12 @@ export default defineConfig({
 
     defaultCommandTimeout: 10000,
     video: false,
-    setupNodeEvents(on) {
+    setupNodeEvents(on, config) {
       on('task', {
+        // Replacement for `cy.exec()`, removed in Cypress 16
+        runShellCommand(command: string) {
+          return execSync(command, { cwd: config.projectRoot, encoding: 'utf8' })
+        },
         log(message) {
           // eslint-disable-next-line no-console
           console.log(message)

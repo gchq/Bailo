@@ -23,7 +23,7 @@ const mockStroomClient = vi.hoisted(() => ({
 vi.mock('../../src/clients/stroom.js', () => mockStroomClient)
 
 const xmlMock = vi.hoisted(() => ({
-  create: vi.fn(() => ({ end: vi.fn(() => '<Events />') })),
+  create: vi.fn((_xmlObject?: unknown) => ({ end: vi.fn(() => '<Events />') })),
 }))
 vi.mock('xmlbuilder2', () => xmlMock)
 
@@ -171,6 +171,84 @@ describe('services > stroom', () => {
       { batchId: '', inFlight: false, $inc: { attempts: 1 } },
     )
     expect(StroomEventModelMock.deleteMany).not.toHaveBeenCalled()
+  })
+
+  test('processBatch > sends the rest of the batch when an event cannot be parsed', async () => {
+    StroomEventModelMock.countDocuments.mockReturnValueOnce(0)
+    StroomEventModelMock.lean.mockReturnValueOnce([...candidateEvents, { _id: 'event-2', event: '{not json' }])
+    StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 2 })
+
+    await processBatch()
+
+    expect(StroomEventModelMock.updateMany).toHaveBeenCalledWith(
+      { _id: { $in: ['event-2'] }, batchId: 'mock-batch-id' },
+      { batchId: '', inFlight: false, attempts: 4 },
+    )
+    expect(xmlMock.create).toHaveBeenLastCalledWith({ Events: expect.objectContaining({ Event: [event] }) })
+    expect(mockStroomClient.sendEvents).toHaveBeenCalledOnce()
+    expect(StroomEventModelMock.deleteMany).toHaveBeenCalledWith({ batchId: 'mock-batch-id' })
+    expect(logMock.error).toHaveBeenCalledWith(
+      { error: expect.any(SyntaxError), stroomEventId: 'event-2' },
+      'Invalid STROOM audit event. Removing it from the batch.',
+    )
+    expect(logMock.warn).not.toHaveBeenCalled()
+  })
+
+  test('processBatch > sends the rest of the batch when an event is not well-formed XML', async () => {
+    const invalidEvent = { EventDetail: { TypeId: 'invalid\u0001' } } as StroomEventObject
+    xmlMock.create.mockImplementation((xmlObject?: unknown) => ({
+      end: vi.fn(() => {
+        if (JSON.stringify(xmlObject).includes('\\u0001')) {
+          throw new Error('Text data contains invalid characters (well-formed required).')
+        }
+        return '<Events />'
+      }),
+    }))
+    StroomEventModelMock.countDocuments.mockReturnValueOnce(0)
+    StroomEventModelMock.lean.mockReturnValueOnce([
+      { _id: 'event-0', event: JSON.stringify(invalidEvent) },
+      ...candidateEvents,
+    ])
+    StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 2 })
+
+    await processBatch()
+
+    expect(StroomEventModelMock.updateMany).toHaveBeenCalledWith(
+      { _id: { $in: ['event-0'] }, batchId: 'mock-batch-id' },
+      { batchId: '', inFlight: false, attempts: 4 },
+    )
+    expect(xmlMock.create).toHaveBeenLastCalledWith({ Events: expect.objectContaining({ Event: [event] }) })
+    expect(mockStroomClient.sendEvents).toHaveBeenCalledWith('<Events />')
+    expect(StroomEventModelMock.deleteMany).toHaveBeenCalledWith({ batchId: 'mock-batch-id' })
+    expect(logMock.warn).not.toHaveBeenCalled()
+  })
+
+  test('processBatch > does not send when every event in the batch is invalid', async () => {
+    StroomEventModelMock.countDocuments.mockReturnValueOnce(0)
+    StroomEventModelMock.lean.mockReturnValueOnce([{ _id: 'event-1', event: '{not json' }])
+    StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 1 })
+
+    await processBatch()
+
+    expect(StroomEventModelMock.updateMany).toHaveBeenLastCalledWith(
+      { _id: { $in: ['event-1'] }, batchId: 'mock-batch-id' },
+      { batchId: '', inFlight: false, attempts: 4 },
+    )
+    expect(mockStroomClient.sendEvents).not.toHaveBeenCalled()
+    expect(StroomEventModelMock.deleteMany).not.toHaveBeenCalled()
+  })
+
+  test('processBatch > requires the batch XML to be well-formed', async () => {
+    const end = vi.fn(() => '<Events />')
+    xmlMock.create.mockReturnValue({ end })
+    StroomEventModelMock.countDocuments.mockReturnValueOnce(0)
+    StroomEventModelMock.lean.mockReturnValueOnce(candidateEvents)
+    StroomEventModelMock.updateMany.mockReturnValueOnce({ matchedCount: 1 })
+
+    await processBatch()
+
+    expect(end).toHaveBeenCalledWith({ wellFormed: true })
+    expect(end).not.toHaveBeenCalledWith()
   })
 
   test('processBatch > skips overlapping runs within the same process', async () => {

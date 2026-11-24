@@ -118,11 +118,11 @@ resolve against. `uv.lock` pins the exact versions used in development and CI. D
 advisories. Routine upgrades are manual with `uv lock --upgrade-package <name>`, and the ruff version comes from
 `.pre-commit-config.yaml`.
 
-The `python_test_lowest` CI job runs the tests against those minimum versions on Python 3.10. If it fails, reproduce it
+The `python_test_lowest` CI job runs the tests against those minimum versions on Python 3.11. If it fails, reproduce it
 locally without touching `uv.lock` or `.venv`:
 
 ```bash
-uv run --python 3.10 --resolution lowest-direct --isolated --extra mlflow --group test pytest
+uv run --python 3.11 --resolution lowest-direct --isolated --extra mlflow --group test pytest
 ```
 
 Then raise the failing floor in `pyproject.toml` to the oldest version that passes, re-run the command above, and

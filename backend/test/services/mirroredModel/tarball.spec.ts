@@ -209,6 +209,7 @@ describe('service > mirroredModel > tarball', () => {
       await extractTarGzStream(passThrough, { dn: 'user' }, {} as any)
 
       expect(authMocks.default.model).toHaveBeenCalled()
+      expect(modelTransferMocks.handleStartEmail).toHaveBeenCalledWith(dummyMetadata)
       expect(mirroredModelMocks.processEntrySpy).toHaveBeenCalled()
       expect(mirroredModelMocks.handleStreamCompletionSpy).toHaveBeenCalled()
     })

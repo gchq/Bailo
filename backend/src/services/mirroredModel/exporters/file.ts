@@ -78,6 +78,7 @@ export class FileExporter extends BaseExporter {
         filePath: this.file.id,
         importKind: MirrorKind.File,
         exportId: this.logData.exportId,
+        semvers: this.logData.semvers,
       },
       this.logData,
     ]

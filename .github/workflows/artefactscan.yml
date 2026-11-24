@@ -51,6 +51,10 @@ jobs:
         working-directory: lib/artefactscan_api
         run: uv sync --group dev --locked
 
+      - name: Build distribution
+        working-directory: lib/artefactscan_api
+        run: uv build
+
       - name: Run basic tests
         working-directory: lib/artefactscan_api
         run: uv run pytest

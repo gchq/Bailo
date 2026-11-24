@@ -16,20 +16,20 @@ jobs:
     name: Build distribution
     runs-on: ubuntu-latest
     outputs:
-      files-changed-output: ${{ steps.files-changed.outputs.any_changed }}
+      version-changed: ${{ steps.version-changed.outputs.changed }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      # Check for changed init file (for new version)
-      - name: Get changed init files
-        id: files-changed
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        with:
-          files: |
-            lib/python/src/bailo/__init__.py
+      # Only publish when the version in pyproject.toml changes, as PyPI rejects re-uploads of an existing version
+      - name: Check if bailo version changed
+        id: version-changed
+        # Compare against the commit before this push so every commit in it is covered
+        env:
+          BASE_COMMIT: ${{ github.event.before }}
+        run: .github/resources/scripts/check-version-changed.sh lib/python/pyproject.toml "$BASE_COMMIT"
 
       - name: Set up uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
@@ -66,7 +66,7 @@ jobs:
     steps:
       # Retrieve Bailo artifact
       - name: Download all the dists
-        if: needs.build.outputs.files-changed-output == 'true'
+        if: needs.build.outputs.version-changed == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: python-package-distributions
@@ -74,7 +74,7 @@ jobs:
 
       # Publish artifact to PyPI
       - name: Publish distribution to PyPI
-        if: needs.build.outputs.files-changed-output == 'true'
+        if: needs.build.outputs.version-changed == 'true'
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           packages-dir: lib/python/dist/

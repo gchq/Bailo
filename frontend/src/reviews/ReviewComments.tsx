@@ -27,6 +27,7 @@ interface ReviewCommentsProps {
   kind: ReviewKindKeys
   mutator: () => void
   showComments?: boolean
+  responseList?: ResponseInterface[]
 }
 
 export default function ReviewComments({
@@ -37,6 +38,7 @@ export default function ReviewComments({
   kind,
   parentId,
   showComments = true,
+  responseList,
 }: ReviewCommentsProps) {
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
@@ -74,6 +76,16 @@ export default function ReviewComments({
     ...reviews.map((review) => review._id),
   ])
 
+  const triggerResponsesRefresh = useMemo(() => {
+    return () => {
+      if (responseList) {
+        mutator()
+      } else {
+        mutateResponses()
+      }
+    }
+  }, [mutator, mutateResponses, responseList])
+
   useEffect(() => {
     if (!isResponsesLoading && ref && asPath.split('#')[1] === 'responses') {
       ref.current?.scrollIntoView()
@@ -106,7 +118,7 @@ export default function ReviewComments({
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
           showReplyButton={showComments}
           currentUser={currentUser}
-          mutateResponses={mutateResponses}
+          mutateResponses={triggerResponsesRefresh}
         />
       )
     } else {
@@ -117,7 +129,7 @@ export default function ReviewComments({
           onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
           showReplyButton={showComments}
           currentUser={currentUser}
-          mutateResponses={mutateResponses}
+          mutateResponses={triggerResponsesRefresh}
         />
       )
     }
@@ -163,21 +175,8 @@ export default function ReviewComments({
   return (
     <Stack spacing={2} ref={ref}>
       {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
-      <Paginate
-        list={reviewDetails}
-        emptyListText='No responses found'
-        sortingProperties={[
-          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-        ]}
-        defaultSortProperty='createdAt'
-        hideSearchInput
-        searchFilterProperty='createdAt'
-      >
-        {ResponseListItem}
-      </Paginate>
       {!isEdit && showComments && (
-        <Stack spacing={1} sx={{ justifyContent: 'center', alignItems: 'flex-end' }}>
+        <Stack spacing={1} sx={{ justifyContent: 'center', alignItems: 'flex-end', px: 2 }}>
           <Box sx={{ width: '100%' }}>
             <RichTextEditor
               value={newReviewComment}
@@ -197,6 +196,19 @@ export default function ReviewComments({
           <MessageAlert severity='error' message={commentSubmissionError} />
         </Stack>
       )}
+      <Paginate
+        list={responseList ? responseList : reviewDetails}
+        emptyListText='No responses found'
+        sortingProperties={[
+          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+        ]}
+        defaultSortProperty='createdAt'
+        hideSearchInput
+        searchFilterProperty='createdAt'
+      >
+        {ResponseListItem}
+      </Paginate>
     </Stack>
   )
 }

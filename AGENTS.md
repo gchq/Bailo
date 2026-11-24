@@ -11,10 +11,11 @@ Core principles for changes:
 - Always use British English for spellings and terms (e.g. "colour", "organisation", "authorise", "centre", "licence").
 - Prefer clear, readable code over clever or compact solutions. Keep functions focused on a single responsibility.
 - Avoid new external dependencies unless absolutely necessary. Reuse existing project utilities first.
-- Backend follows a layered architecture: routes -> services -> models -> connectors. Respect this separation.
-  Connectors use a strategy pattern: a base class in `Base.ts`, concrete implementations (e.g. `clamAv.ts`, `oauth.ts`),
-  and an `index.ts` that selects the implementation via `config.connectors.<name>.kind`. Categories: authentication,
-  authorisation, audit, artefactScanning, metrics, peer.
+- Backend follows a layered architecture: routes -> services -> repositories -> models -> connectors. Respect this
+  separation. The repositories layer encapsulates all Mongoose query construction (`find`, `aggregate`, etc.), keeping
+  services free of raw query logic. Connectors use a strategy pattern: a base class in `Base.ts`, concrete
+  implementations (e.g. `clamAv.ts`, `oauth.ts`), and an `index.ts` that selects the implementation via
+  `config.connectors.<name>.kind`. Categories: authentication, authorisation, audit, artefactScanning, metrics, peer.
 
 ## Structure
 
@@ -70,7 +71,7 @@ Bailo expects Node.js 26 (see `.nvmrc`).
 
 Each Python project is an independent [uv](https://docs.astral.sh/uv/) project with its own `uv.lock`. They are
 deliberately not a uv workspace: a workspace forces a single `requires-python` across all members (the intersection here
-is Python 3.12 only), which would break the `bailo` 3.10-3.15 test matrix.
+is Python 3.12 only), which would break the `bailo` 3.11-3.15 test matrix.
 
 Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
 
@@ -78,8 +79,13 @@ Run `uv lock` after changing dependencies, and commit the updated `uv.lock`.
   failing `python_test_lowest` CI job. Use a `; python_version >= "3.x"` marker when only newer Pythons need a newer
   version.
 - Dependabot keeps the direct dependencies of `lib/artefactscan_api` (shipped as a Docker image) at their latest
-  versions. `lib/python` and `backend/docs` only get security updates; routine upgrades there are manual
+  minor/major versions. `lib/python` and `backend/docs` only get security updates; routine upgrades there are manual
   (`uv lock --upgrade-package <name>`).
+- Dependabot skips patch-only version bumps in every ecosystem. Security updates of any size are still raised for npm,
+  uv and GitHub Actions, but Dependabot has no security updates for docker, docker-compose, helm or pre-commit, so patch
+  fixes there must be applied manually.
+- npm dependencies must use a `^` or `~` range, never an exact pin. `npm ci` installs exactly what `package-lock.json`
+  records, so new patches only arrive when the lockfile is regenerated (a Dependabot PR or a manual `npm update`).
 - The ruff version comes from the hook `rev` in `.pre-commit-config.yaml`, not from any `uv.lock`.
 
 ### Python client (`lib/python/`)
@@ -158,6 +164,10 @@ Coverage is only needed for the full CI run.
   `backend/test/testUtils/setupMongooseModelMocks.ts` for Mongoose model mocks.
 - Snapshot testing with `expect(res.body).matchSnapshot()`.
 - Verify audit connector calls in route tests (e.g. `expect(audit.onDeleteModel).toHaveBeenCalled()`).
+- Repository tests live in `backend/test/repositories/**/*.spec.ts`, mirroring `src/repositories/`. Use
+  `getTypedModelMock()` to mock Mongoose models and assert the exact query arguments passed (e.g. the filter object
+  given to `find` or the pipeline given to `aggregate`). This is what distinguishes them from service tests, which mock
+  at the repository function boundary rather than the model boundary.
 - `config` is mocked globally for every spec from `backend/test/testUtils/setupTestConfig.ts`, which loads
   `backend/config/default.cjs` and applies a short block of test-only overrides. Add to that block only when a test
   genuinely needs a value the deployed defaults do not provide - everything else should track `default.cjs`.
@@ -169,6 +179,9 @@ Coverage is only needed for the full CI run.
 ### Frontend (Vitest + Cypress)
 
 - Unit tests: `frontend/test/**/*.spec.tsx` using `@testing-library/react`.
+- The default test environment is `jsdom`, which is slow to create. Specs that never render or touch browser globals
+  (e.g. pure utility tests) must start with `// @vitest-environment node` to skip it. Vitest's end-of-run "jsdom was
+  created N times" line counts every file regardless of environment, so check the time figure instead.
 - E2E tests: `frontend/cypress/e2e/bailo/` using Cypress with `cypress-axe` for accessibility.
 
 ### Python (pytest)
@@ -193,7 +206,7 @@ Path-filtered (only run when relevant files change):
 
 9. **Python static checks** - ruff format + check via pre-commit (when `lib/python/`, `.pre-commit-config.yaml` or
    `ruff.toml` changes)
-10. **Python unit tests** - pytest across Python 3.10-3.15 (when `lib/python/` changes)
+10. **Python unit tests** - pytest across Python 3.11-3.15 (when `lib/python/` changes)
 11. **ArtefactScan tests** - pytest (when `lib/artefactscan_api/` changes)
 12. **Docs style** - `frontend/scripts/check-docs-style.sh` (when `frontend/pages/docs/**/*.mdx` changes)
 

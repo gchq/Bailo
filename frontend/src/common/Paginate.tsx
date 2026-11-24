@@ -16,13 +16,13 @@ import {
   MenuItem,
   Pagination,
   Stack,
-  TextField,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
-import { type MouseEvent, type ReactElement, useCallback, useMemo, useState } from 'react'
+import { type MouseEvent, type ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
+import LimitedTextField from 'src/common/LimitedTextField'
 
 interface PaginateProps<T> {
   list: Array<T>
@@ -37,6 +37,8 @@ interface PaginateProps<T> {
   prioritiseItems?: (a: T, b: T) => number
   hideBorders?: boolean
   hideDividers?: boolean
+  groupByProperty?: keyof T
+  onSearchChange?: (query: string) => void
   children: ({ data }: { data: T }) => ReactElement
 }
 
@@ -66,6 +68,8 @@ export default function Paginate<T>({
   prioritiseItems,
   hideBorders = false,
   hideDividers = false,
+  groupByProperty,
+  onSearchChange,
   children,
 }: PaginateProps<T>) {
   const [page, setPage] = useState(1)
@@ -75,6 +79,14 @@ export default function Paginate<T>({
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(defaultSortDirection)
   const [searchFilter, setSearchFilter] = useState('')
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchFilter(value)
+      onSearchChange?.(value)
+    },
+    [onSearchChange],
+  )
 
   const filteredList = list.filter((item: T) => {
     if (!searchFilterProperty) {
@@ -95,6 +107,11 @@ export default function Paginate<T>({
     () => (isArray(filteredList) ? Math.ceil(filteredList.length / pageSize) : 10),
     [filteredList, pageSize],
   )
+  const currentPage = Math.min(page, Math.max(pageCount, 1))
+
+  useEffect(() => {
+    setPage((currentPage) => Math.min(currentPage, Math.max(pageCount, 1)))
+  }, [pageCount])
 
   const handlePageOnChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
@@ -102,12 +119,23 @@ export default function Paginate<T>({
 
   const sortByValue = useMemo(
     () => (a: T, b: T) => {
+      // Group items by a primary key before applying the user-selected sort. Grouping is
+      // deliberately independent of the sort direction: lower group values always come first
+      // (e.g. folders before files, matching Windows Explorer), so reversing the sort reorders
+      // items within each group rather than flipping the groups themselves.
+      if (groupByProperty) {
+        const groupA = a[groupByProperty]
+        const groupB = b[groupByProperty]
+        if (groupA !== groupB) {
+          return groupA < groupB ? -1 : 1
+        }
+      }
       if (ascOrDesc === SortingDirection.ASC) {
         return a[orderByValue] < b[orderByValue] ? -1 : 1
       }
       return a[orderByValue] > b[orderByValue] ? -1 : 1
     },
-    [ascOrDesc, orderByValue],
+    [ascOrDesc, orderByValue, groupByProperty],
   )
 
   const checkMenuOption = useCallback(
@@ -234,10 +262,10 @@ export default function Paginate<T>({
     let sortedList
     if (orderByValue === 'semver') {
       sortedList = filteredList.sort(compareSemanticVersions)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     } else {
       sortedList = filteredList.sort(sortByValue)
-      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+      sortedList = sortedList.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     }
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
@@ -246,7 +274,7 @@ export default function Paginate<T>({
         </div>
       ))
     }
-  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, page, pageSize, children])
+  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, currentPage, pageSize, children])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />
@@ -269,11 +297,13 @@ export default function Paginate<T>({
         {hideSearchInput ? (
           <div style={{ maxWidth: '200px', width: '100%' }}></div>
         ) : (
-          <TextField
+          <LimitedTextField
             size='small'
             value={searchFilter}
             label={searchPlaceholderText}
-            onChange={(e) => setSearchFilter(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            // Filtering happens as you type and Enter must not submit an enclosing form
+            onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
             sx={{ maxWidth: '200px' }}
           />
         )}
@@ -332,7 +362,7 @@ export default function Paginate<T>({
         <Pagination
           count={pageCount}
           color='secondary'
-          page={page}
+          page={currentPage}
           onChange={handlePageOnChange}
           aria-label='bottom page pagination navigation'
         />

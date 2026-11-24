@@ -10,7 +10,7 @@ import { getModelById } from './model.js'
 import { getSchemaById } from './schema.js'
 
 // Widgets that represent entity/data relationships rather than user-editable content, excluded from LLM extraction
-const EXCLUDED_WIDGETS = new Set(['dataCardSelector', 'entitySelector'])
+const EXCLUDED_WIDGETS = new Set(['dataCardSelector', 'entitySelector', 'modelSelector'])
 
 const SCHEMA_DESCRIPTION_CACHE_TTL = 3600
 const schemaDescriptionCache = new NodeCache({

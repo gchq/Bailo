@@ -1,5 +1,3 @@
-import fetch, { type Response } from 'node-fetch'
-
 import log from '../services/log.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'

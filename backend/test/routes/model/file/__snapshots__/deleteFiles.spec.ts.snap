@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > file > deleteFiles > 200 > ok 1`] = `
+{
+  "message": "Successfully removed 2 file(s).",
+}
+`;
+
+exports[`routes > file > deleteFiles > audit > expected calls 1`] = `
+{
+  "_id": "file1",
+  "id": "file1",
+  "modelId": "testModel",
+}
+`;
+
+exports[`routes > file > deleteFiles > audit > expected calls 2`] = `
+{
+  "_id": "file2",
+  "id": "file2",
+  "modelId": "testModel",
+}
+`;

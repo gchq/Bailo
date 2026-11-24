@@ -16,9 +16,16 @@ vi.mock('../../../src/services/schema.js', () => mockSchemaService)
 describe('routes > schema > patchSchema', async () => {
   test('successfully updates the schema', async () => {
     const fixture = createFixture(patchSchemaSchema)
+    fixture.body = {
+      active: false,
+      hidden: false,
+      name: 'Test Schema',
+      description: 'Test schema description',
+      reviewRoles: ['reviewer'],
+    }
     mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
     const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, {
-      body: { active: false, hidden: false, name: fixture.body.name, description: fixture.body.description },
+      body: fixture.body,
     })
 
     expect(res.statusCode).toBe(200)
@@ -42,6 +49,13 @@ describe('routes > schema > patchSchema', async () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(patchSchemaSchema)
+    fixture.body = {
+      active: false,
+      hidden: false,
+      name: 'Test Schema',
+      description: 'Test schema description',
+      reviewRoles: ['reviewer'],
+    }
     mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
     const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, fixture)
 

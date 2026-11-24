@@ -1,5 +1,3 @@
-import fetch, { type Response } from 'node-fetch'
-
 import { type UserInterface } from '../../models/User.js'
 import { BAILO_ID_HEADER, USER_HEADER } from '../../routes/middleware/userEscalation.js'
 import {
@@ -80,7 +78,7 @@ export class BailoPeerConnector extends BasePeerConnector {
 
     try {
       res = await fetch(requestUrl, {
-        agent: this.getHttpsAgent(),
+        dispatcher: this.getHttpsDispatcher(),
         headers,
       })
     } catch (err) {

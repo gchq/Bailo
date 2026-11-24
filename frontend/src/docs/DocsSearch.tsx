@@ -1,9 +1,9 @@
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, ButtonBase, IconButton, InputBase, Tooltip, useMediaQuery } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
-import { KeyboardEvent, ReactElement, useCallback, useEffect, useState } from 'react'
+import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useState } from 'react'
 import useIsMac from 'src/hooks/useIsMac'
-import { DocsSearchDialogProps } from 'types/docs'
+import { type DocsSearchDialogProps } from 'types/docs'
 
 import DocsSearchDialog from './DocsSearchDialog'
 

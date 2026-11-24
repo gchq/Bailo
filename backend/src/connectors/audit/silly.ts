@@ -1,6 +1,7 @@
 import { type Request } from 'express'
 
 import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { type FileInterface, type FileInterfaceDoc, type FileWithScanResultsAggregate } from '../../models/File.js'
 import { type InferenceDoc } from '../../models/Inference.js'
 import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
@@ -11,7 +12,9 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
+import { type WebhookDoc } from '../../models/Webhook.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
@@ -86,10 +89,20 @@ export class SillyAuditConnector extends BaseAuditConnector {
   async onDeleteReviewRole(_req: Request, _reviewRole: ReviewRoleDoc) {}
   async onViewMetric(_req: Request): Promise<void> {}
   async onCreateReview(_req: Request, _modelId: string) {}
+  async onCreateDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc) {}
+  async onUpdateDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc) {}
+  async onDeleteDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
+  async onSearchDeploymentAssessments(_req: Request, _deploymentAssessments: DeploymentAssessmentSummary[]) {}
+  async onViewDeploymentAssessment(_req: Request, _deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {}
+  async onCommentOnDeploymentAssessment(_req: Request, _response: ResponseInterface): Promise<void> {}
   async onViewCurrentUserInformation(_req: Request, _userInformation: GetCurrentUserResponse): Promise<void> {}
   async onNotifyReviewers(_req: Request, _reviewId: string): Promise<void> {}
   async onRegistryImagePulled(_req: Request, _registryImage: string): Promise<void> {}
   async onRegistryImagePushed(_req: Request, _registryImage: string): Promise<void> {}
   async onRegistryImageDeleted(_req: Request, _registryImage: string): Promise<void> {}
+  async onCreateWebhook(_req: Request, _webhook: WebhookDoc): Promise<void> {}
+  async onViewWebhooks(_req: Request, _webhooks: WebhookDoc[]): Promise<void> {}
+  async onUpdateWebhook(_req: Request, _webhook: WebhookDoc): Promise<void> {}
+  async onDeleteWebhook(_req: Request, _webhook: WebhookDoc): Promise<void> {}
   async onError(_req: Request, _error: BailoError): Promise<void> {}
 }

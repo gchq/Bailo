@@ -22,7 +22,6 @@ import MessageAlert from 'src/MessageAlert'
 import AdditionalInformation from 'src/MuiForms/AdditionalInformation'
 import MetricItem from 'src/MuiForms/MetricItem'
 import { isValidNumber } from 'utils/stringUtils'
-import { v4 as uuidv4 } from 'uuid'
 
 export interface MetricValue {
   name: string
@@ -89,7 +88,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
     setMetricsWithIds((current) =>
       value.map((metric, index) => ({
         ...metric,
-        id: current[index]?.id ?? uuidv4(),
+        id: current[index]?.id ?? crypto.randomUUID(),
       })),
     )
   }, [value])
@@ -98,7 +97,7 @@ export default function Metrics({ onChange, value, label, id, registry, required
 
   const handleAddItem = useCallback(() => {
     const newMetric: MetricValueWithId = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       name: '',
       value: 0,
     }

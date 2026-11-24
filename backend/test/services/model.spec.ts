@@ -13,6 +13,8 @@ import {
   getModelById,
   getModelByIdNoAuth,
   getModelCardRevision,
+  getModelsByIds,
+  getModelsByIdsNoAuth,
   getModelSystemRoles,
   getRoleEntities,
   isModelCardRevisionDoc,
@@ -24,6 +26,8 @@ import {
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
+import type * as SchemaService from '../../src/services/schema.js'
+import { SchemaKind } from '../../src/types/enums.js'
 import { type EntrySearchOptionsParams, type EntryUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -32,6 +36,7 @@ vi.mock('../../src/connectors/authorisation/index.js')
 const ModelModelMock = getTypedModelMock('ModelModel')
 const ModelCardRevisionModelMock = getTypedModelMock('ModelCardRevisionModel')
 const ReviewModelMock = getTypedModelMock('ReviewModel')
+const ReviewRoleModelMock = getTypedModelMock('ReviewRoleModel')
 
 const accessRequestMock = vi.hoisted(() => ({
   getAccessRequestsByModel: vi.fn(() => [] as any[]),
@@ -69,10 +74,13 @@ const reviewMock = vi.hoisted(() => ({
 vi.mock('../../src/services/review.js', async () => reviewMock)
 
 const schemaMock = vi.hoisted(() => ({
-  getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[] })),
+  getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[], kind: 'model' })),
   validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] as string[] })),
 }))
-vi.mock('../../src/services/schema.js', async () => schemaMock)
+vi.mock('../../src/services/schema.js', async (importOriginal) => {
+  const { checkSchemaKind, getSchemaKindForEntryKind } = await importOriginal<typeof SchemaService>()
+  return { ...schemaMock, checkSchemaKind, getSchemaKindForEntryKind }
+})
 
 const tokenMock = vi.hoisted(() => ({
   dropModelIdFromTokens: vi.fn(),
@@ -101,6 +109,7 @@ vi.mock('../../src/utils/database.js', async () => ({
 
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
+  getEntityMembers: vi.fn((entity: string) => Promise.resolve([entity])),
   getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
   hasRole: vi.fn(function () {
     return {}
@@ -181,6 +190,37 @@ describe('services > model', () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(() => getModelById({} as any, {} as any)).rejects.toThrow(/^You do not have permission/)
+  })
+
+  test('getModelsByIdsNoAuth > good', async () => {
+    ModelModelMock.find.mockResolvedValueOnce([{ id: 'model-1' }])
+
+    const models = await getModelsByIdsNoAuth(['model-1'])
+
+    expect(ModelModelMock.find).toHaveBeenCalled()
+    expect(models).toEqual([{ id: 'model-1' }])
+  })
+
+  test('getModelsByIdsNoAuth > no model', async () => {
+    ModelModelMock.find.mockResolvedValueOnce([])
+
+    await expect(getModelsByIdsNoAuth(['model-1'])).rejects.toThrow('Some requested entries were not found.')
+  })
+
+  test('getModelsByIds > filters out unauthorised models', async () => {
+    ModelModelMock.find.mockResolvedValueOnce([{ id: 'model-1' }])
+
+    vi.mocked(authorisation.models).mockResolvedValueOnce([
+      {
+        id: 'model-1',
+        success: false,
+        info: 'You do not have permission',
+      },
+    ])
+
+    const models = await getModelsByIds({} as any, ['model-1'])
+
+    expect(models).toEqual([])
   })
 
   describe('removeModel', () => {
@@ -397,6 +437,80 @@ describe('services > model', () => {
     }
 
     await searchModels(user, searchParams)
+  })
+
+  test('searchModels > users filter with users only', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['user:alice', 'user:bob'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:bob')
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({ 'collaborators.entity': { $all: ['user:alice', 'user:bob'] } }),
+      expect.anything(),
+    )
+  })
+
+  test('searchModels > users filter with user and group', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+    authenticationMocks.getEntityMembers.mockImplementation((entity: string) =>
+      Promise.resolve(entity === 'group:devs' ? ['user:bob', 'user:carol'] : [entity]),
+    )
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['user:alice', 'group:devs'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('group:devs')
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'collaborators.entity': { $all: ['user:alice', 'group:devs', 'user:bob', 'user:carol'] },
+      }),
+      expect.anything(),
+    )
+  })
+
+  test('searchModels > users filter throws when group members cannot be retrieved', async () => {
+    const user: any = { dn: 'test' }
+    authenticationMocks.getEntityMembers.mockRejectedValueOnce(new Error('Unable to get members'))
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['group:devs'],
+    }
+
+    await expect(searchModels(user, searchParams)).rejects.toThrow('Unable to get members')
+    expect(ModelModelMock.find).not.toHaveBeenCalled()
   })
 
   test('searchModels > admin access without auth', async () => {
@@ -737,7 +851,7 @@ describe('services > model', () => {
     expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
       'test-schema',
       { overview: { name: 'Local Name', description: 'Mirrored Description' } },
-      'Production',
+      { modelState: 'Production' },
     )
     expect(saveMock).toHaveBeenCalled()
   })
@@ -792,7 +906,7 @@ describe('services > model', () => {
     expect(schemaMock.validateContentAgainstSchema).toHaveBeenCalledWith(
       'test-schema',
       { overview: { name: 'Local' } },
-      'Production',
+      { modelState: 'Production' },
     )
   })
 
@@ -807,6 +921,54 @@ describe('services > model', () => {
       /^Cannot alter a mirrored model./,
     )
     expect(ModelModelMock.save).not.toHaveBeenCalled()
+  })
+
+  test('createModelCardFromSchema > can create a model card from a model schema', async () => {
+    ReviewRoleModelMock.find.mockResolvedValueOnce([])
+    ModelModelMock.findOne.mockResolvedValue({
+      kind: EntryKind.Model,
+      collaborators: [],
+      settings: { mirror: {} },
+      save: vi.fn(),
+    })
+
+    await createModelCardFromSchema({} as any, 'test-model', 'model-schema')
+
+    expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
+  })
+
+  test('createModelCardFromSchema > can create a data card from a data card schema', async () => {
+    ReviewRoleModelMock.find.mockResolvedValueOnce([])
+    ModelModelMock.findOne.mockResolvedValue({
+      kind: EntryKind.DataCard,
+      collaborators: [],
+      settings: { mirror: {} },
+      save: vi.fn(),
+    })
+    schemaMock.getSchemaById.mockReturnValueOnce({ jsonschema: {}, reviewRoles: [], kind: SchemaKind.DataCard })
+
+    await createModelCardFromSchema({} as any, 'test-data-card', 'data-card-schema')
+
+    expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
+  })
+
+  test('createModelCardFromSchema > throws when using an access request schema for a model', async () => {
+    ModelModelMock.findOne.mockResolvedValue({ kind: EntryKind.Model, collaborators: [], settings: { mirror: {} } })
+    schemaMock.getSchemaById.mockReturnValueOnce({ jsonschema: {}, reviewRoles: [], kind: SchemaKind.AccessRequest })
+
+    await expect(() => createModelCardFromSchema({} as any, 'test-model', 'access-schema')).rejects.toThrow(
+      /^The schema kind does not match the expected kind./,
+    )
+    expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
+  })
+
+  test('createModelCardFromSchema > throws when using a model schema for a data card', async () => {
+    ModelModelMock.findOne.mockResolvedValue({ kind: EntryKind.DataCard, collaborators: [], settings: { mirror: {} } })
+
+    await expect(() => createModelCardFromSchema({} as any, 'test-data-card', 'model-schema')).rejects.toThrow(
+      /^The schema kind does not match the expected kind./,
+    )
+    expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
   })
 
   describe('saveImportedModelCard', () => {
@@ -943,6 +1105,7 @@ describe('services > model', () => {
   test('createModelCardFromTemplate > can create a model using a template', async () => {
     const testModel = {
       name: 'test model',
+      kind: EntryKind.Model,
       settings: {
         mirror: {},
       },
@@ -967,6 +1130,23 @@ describe('services > model', () => {
     await createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')
     expect(ModelCardRevisionModelMock.save).toHaveBeenCalled()
     expect(ModelModelMock.updateOne).toHaveBeenCalled()
+  })
+
+  test('createModelCardFromTemplate > throws when the template uses a schema of a different kind', async () => {
+    const testModel = { name: 'test model', kind: EntryKind.Model, settings: { mirror: {} } }
+    const testTemplate = {
+      name: 'test template',
+      kind: EntryKind.DataCard,
+      settings: { mirror: {} },
+      card: { schemaId: 'data-card-schema', version: '1', createdBy: 'User', metadata: {} },
+    }
+    ModelModelMock.findOne.mockResolvedValueOnce(testModel).mockResolvedValue(testTemplate)
+    schemaMock.getSchemaById.mockReturnValueOnce({ jsonschema: {}, reviewRoles: [], kind: SchemaKind.DataCard })
+
+    await expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplate')).rejects.toThrow(
+      /^The schema kind does not match the expected kind./,
+    )
+    expect(ModelCardRevisionModelMock.save).not.toHaveBeenCalled()
   })
 
   test('createModelCardFromTemplate > requesting to use a template without a model card will throw an error', async () => {
@@ -1071,8 +1251,9 @@ describe('services > model', () => {
 
   test('popularTagsForEntries > returns a list of tags', async () => {
     ModelModelMock.aggregate.mockResolvedValueOnce([{ _id: 'test-tag' }])
-    const tags = await popularTagsForEntries()
+    const tags = await popularTagsForEntries(10)
     expect(tags).toEqual(['test-tag'])
+    expect(ModelModelMock.aggregate).toHaveBeenCalledWith(expect.arrayContaining([{ $limit: 10 }]))
   })
 
   test('getModelSystemRoles > should handle case-insensitive entity matching', async () => {

@@ -88,8 +88,12 @@ jobs:
 
       # artefactscan version check (separate to release versions)
       - name: Check if artefactscan_api version changed
-        if: github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan'
+        # Push only, as `github.event.before` is unset for manual runs (use the `artefactscan_tag` input instead)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.component.name == 'artefactscan'
         id: artefactscan_version_changed
+        # Compare against the commit before this push so every commit in it is covered
+        env:
+          BASE_COMMIT: ${{ github.event.before }}
         run: |
           set -euo pipefail
 
@@ -97,24 +101,10 @@ jobs:
           echo "Git context HEAD commit:"
           git --no-pager log -1 --oneline
 
-          git fetch origin main
+          # Checkout is shallow, so fetch the base commit explicitly
+          git fetch --depth=1 origin "$BASE_COMMIT"
 
-          PREV_MAIN_COMMIT=$(git rev-list --first-parent origin/main -n 2 | tail -n 1)
-          echo "Previous main commit: $PREV_MAIN_COMMIT"
-
-          OLD_VERSION=$(git show "$PREV_MAIN_COMMIT:lib/artefactscan_api/pyproject.toml" 2>/dev/null | grep '^version' | head -n1 | cut -d'"' -f2 || echo "")
-          NEW_VERSION=$(grep '^version' lib/artefactscan_api/pyproject.toml | head -n1 | cut -d'"' -f2)
-          echo "OLD_VERSION=$OLD_VERSION"
-          echo "NEW_VERSION=$NEW_VERSION"
-
-          if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
-            echo "Result: version has changed"
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          else
-            echo "Result: version has NOT changed"
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
+          .github/resources/scripts/check-version-changed.sh lib/artefactscan_api/pyproject.toml "$BASE_COMMIT"
 
       - name: Determine push targets
         id: push_targets
@@ -148,7 +138,7 @@ jobs:
 
       - name: Log in to GHCR
         if: steps.push_targets.outputs.push_release == 'true' || steps.push_targets.outputs.push_artefactscan == 'true'
-        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

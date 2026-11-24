@@ -13,11 +13,13 @@ import { type ReviewRoleDoc } from '../../../src/models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../../src/models/Schema.js'
 import { type SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
 import { type TokenDoc } from '../../../src/models/Token.js'
+import { type WebhookDoc } from '../../../src/models/Webhook.js'
 import { type MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
 import { type FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
 import { type ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
 import config from '../../../src/utils/config.js'
 import { InternalError } from '../../../src/utils/error.js'
+import { setTestConfig } from '../../testUtils/setupTestConfig.js'
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -109,6 +111,32 @@ describe('connectors > audit > stroom', () => {
   test('create connector > host IP is populated', async () => {
     const auditConnector = new StroomAuditConnector()
     expect(auditConnector.hostIP)
+  })
+
+  test('create connector > throws when interval is not a number', async () => {
+    setTestConfig({ stroom: { interval: 'not-a-number' as unknown as number } })
+
+    expect(() => new StroomAuditConnector()).toThrow(
+      expect.objectContaining({
+        message:
+          'BAILO configuration error: Unable to initialise Stroom Audit Connector as the interval is not a number.',
+        context: { interval: 'not-a-number' },
+      }),
+    )
+  })
+
+  test('create connector > throws when interval is not an integer', async () => {
+    setTestConfig({ stroom: { interval: 1.5 } })
+
+    expect(() => new StroomAuditConnector()).toThrow(
+      'BAILO configuration error: Unable to initialise Stroom Audit Connector as the interval is not a number.',
+    )
+  })
+
+  test('create connector > does not throw when interval is an integer', async () => {
+    setTestConfig({ stroom: { interval: 1000 } })
+
+    expect(() => new StroomAuditConnector()).not.toThrow()
   })
 
   test('onCreateModel > save expected event', async () => {
@@ -358,6 +386,26 @@ describe('connectors > audit > stroom', () => {
 
   test('onDeleteInference > save expected event', async () => {
     await connector.onDeleteInference(deleteEventRequest, { id: 'id' } as InferenceDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onCreateWebhook > save expected event', async () => {
+    await connector.onCreateWebhook(createEventRequest, { id: 'test-webhook', modelId: 'test-model' } as WebhookDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewWebhooks > save expected event', async () => {
+    await connector.onViewWebhooks(viewEventRequest, [{ id: 'test-webhook', modelId: 'test-model' } as WebhookDoc])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onUpdateWebhook > save expected event', async () => {
+    await connector.onUpdateWebhook(updateEventRequest, { id: 'test-webhook', modelId: 'test-model' } as WebhookDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onDeleteWebhook > save expected event', async () => {
+    await connector.onDeleteWebhook(deleteEventRequest, { id: 'test-webhook', modelId: 'test-model' } as WebhookDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 

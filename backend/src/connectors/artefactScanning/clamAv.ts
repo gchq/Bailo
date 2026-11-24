@@ -1,4 +1,3 @@
-import bytes from 'bytes'
 import NodeClam from 'clamscan'
 import PQueue from 'p-queue'
 
@@ -7,6 +6,7 @@ import { type FileInterfaceDoc } from '../../models/File.js'
 import { ArtefactKind, type ArtefactKindKeys, type ClamAVSummary } from '../../models/Scan.js'
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
+import { parseBytes } from '../../utils/bytes.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import { type ArtefactScanResult, ArtefactScanState, BaseArtefactScanningConnector } from './Base.js'
@@ -34,14 +34,18 @@ export class ClamAvFileScanningConnector extends BaseArtefactScanningConnector {
     this.av = await new NodeClam().init({ clamdscan: config.artefactScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
-    const sizeString = config.artefactScanning.clamdscan.streamMaxLength.endsWith('B')
-      ? config.artefactScanning.clamdscan.streamMaxLength
-      : `${config.artefactScanning.clamdscan.streamMaxLength}B`
-    const streamMaxLength = bytes.parse(sizeString)
-    if (streamMaxLength === null) {
+    const configuredSize = config.artefactScanning.clamdscan.streamMaxLength
+    // clamd treats K/M/G suffixes as binary multiples, so '2G' means 2GiB.
+    const sizeString = /[kmgtp]$/i.test(configuredSize)
+      ? `${configuredSize}iB`
+      : configuredSize.endsWith('B')
+        ? configuredSize
+        : `${configuredSize}B`
+    const streamMaxLength = parseBytes(sizeString)
+    if (streamMaxLength === null || streamMaxLength > Number.MAX_SAFE_INTEGER) {
       throw InternalError('Invalid ClamAV size value.', { sizeString })
     }
-    this.maxSize = streamMaxLength
+    this.maxSize = Number(streamMaxLength)
     log.debug({ ...this.getConnectorInfo() }, 'Initialised Clam AV scanner')
   }
 

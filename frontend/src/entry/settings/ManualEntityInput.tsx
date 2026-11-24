@@ -1,7 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, TextField, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from '@mui/material'
 import { useContext, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
+import LimitedTextField from 'src/common/LimitedTextField'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import MessageAlert from 'src/MessageAlert'
 
@@ -42,7 +43,7 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
             alignItems: 'center',
           }}
         >
-          <TextField
+          <LimitedTextField
             size='small'
             fullWidth
             label='User'

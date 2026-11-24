@@ -2,20 +2,17 @@ import { Readable } from 'node:stream'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(),
-}))
-vi.mock('node-fetch', async () => fetchMock)
+const fetchMock = vi.hoisted(() => vi.fn())
+vi.stubGlobal('fetch', fetchMock)
 
-const formDataMock = vi.hoisted(() => ({
-  default: vi.fn(function () {
-    return {
-      append: vi.fn(),
-      getHeaders: vi.fn(function () {}),
-    }
-  }),
-}))
-vi.mock('form-data', async () => formDataMock)
+// Read a request body built from an async iterable back into a string
+async function readBody(body: AsyncIterable<Buffer>) {
+  const chunks: Buffer[] = []
+  for await (const chunk of body) {
+    chunks.push(chunk)
+  }
+  return Buffer.concat(chunks).toString()
+}
 
 const expectedInfoResponse = {
   apiName: 'Bailo ArtefactScan API',
@@ -38,7 +35,7 @@ describe('clients > artefactScan', () => {
 
   test('getCachedArtefactScanInfo > success', async () => {
     const { getCachedArtefactScanInfo } = await loadClient()
-    fetchMock.default.mockReturnValueOnce({
+    fetchMock.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
       json: vi.fn(function () {
@@ -47,15 +44,15 @@ describe('clients > artefactScan', () => {
     })
     const response = await getCachedArtefactScanInfo()
 
-    expect(fetchMock.default).toHaveBeenCalled()
-    expect(fetchMock.default.mock.calls).toMatchSnapshot()
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(expectedInfoResponse)
   })
 
   test('getCachedArtefactScanInfo > uses cached value within TTL', async () => {
     const { getCachedArtefactScanInfo } = await loadClient()
 
-    fetchMock.default.mockReturnValueOnce({
+    fetchMock.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => expectedInfoResponse),
@@ -66,7 +63,7 @@ describe('clients > artefactScan', () => {
 
     expect(first).toStrictEqual(expectedInfoResponse)
     expect(second).toStrictEqual(expectedInfoResponse)
-    expect(fetchMock.default).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
   test('getCachedArtefactScanInfo > inFlight prevents duplicate fetches', async () => {
@@ -74,7 +71,7 @@ describe('clients > artefactScan', () => {
     const jsonPromise = new Promise((resolve) => {
       resolveJson = resolve
     })
-    fetchMock.default.mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => jsonPromise),
@@ -85,7 +82,7 @@ describe('clients > artefactScan', () => {
     const p1 = getCachedArtefactScanInfo()
     const p2 = getCachedArtefactScanInfo()
 
-    expect(fetchMock.default).toHaveBeenCalledOnce()
+    expect(fetchMock).toHaveBeenCalledOnce()
 
     resolveJson!(expectedInfoResponse)
 
@@ -115,7 +112,7 @@ describe('clients > artefactScan', () => {
       trivyVersion: '2',
     }
 
-    fetchMock.default
+    fetchMock
       .mockReturnValueOnce({
         ok: true,
         text: vi.fn(),
@@ -136,12 +133,12 @@ describe('clients > artefactScan', () => {
 
     expect(first).toStrictEqual(response1)
     expect(second).toStrictEqual(response2)
-    expect(fetchMock.default).toHaveBeenCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
   test('getCachedArtefactScanInfo > bad response', async () => {
     const { getCachedArtefactScanInfo } = await loadClient()
-    fetchMock.default.mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: false,
       text: vi.fn(function () {
         return 'Unrecognised response'
@@ -157,7 +154,7 @@ describe('clients > artefactScan', () => {
 
   test('getCachedArtefactScanInfo > rejected', async () => {
     const { getCachedArtefactScanInfo } = await loadClient()
-    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
+    fetchMock.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
     await expect(() => getCachedArtefactScanInfo()).rejects.toThrow(
       /^Unable to communicate with the ArtefactScan service./,
@@ -191,7 +188,7 @@ describe('clients > artefactScan', () => {
       issues: [],
       errors: [],
     }
-    fetchMock.default.mockReturnValueOnce({
+    fetchMock.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
       json: vi.fn(function () {
@@ -202,19 +199,29 @@ describe('clients > artefactScan', () => {
     const date = new Date(1970, 0, 1, 0)
     vi.setSystemTime(date)
 
-    const response = await scanFileStream({} as Readable, 'safe_model.h5')
+    const response = await scanFileStream(Readable.from([Buffer.from('model bytes')]), 'safe_model.h5')
 
-    expect(fetchMock.default).toHaveBeenCalled()
-    expect(fetchMock.default.mock.calls).toMatchSnapshot()
-    expect(formDataMock.default).toHaveBeenCalled()
-    expect(formDataMock.default.mock.calls).toMatchSnapshot()
+    expect(fetchMock).toHaveBeenCalledOnce()
+    const [url, init] = fetchMock.mock.calls[0]
+    const boundary = init.headers['content-type'].match(/^multipart\/form-data; boundary=(\S+)$/)?.[1]
+    expect(url).toBe('http://127.0.0.1:3311/scan/file')
+    expect(init).toMatchObject({ method: 'POST', duplex: 'half', headers: { accept: 'application/json' } })
+    expect(boundary).toBeDefined()
+    expect(await readBody(init.body)).toBe(
+      `--${boundary}\r\n` +
+        'Content-Disposition: form-data; name="in_file"; filename="safe_model.h5"\r\n' +
+        'Content-Type: application/octet-stream\r\n' +
+        '\r\n' +
+        'model bytes' +
+        `\r\n--${boundary}--\r\n`,
+    )
     expect(response).toStrictEqual(expectedResponse)
   })
 
   test('scanFileStream > invalid response fails schema validation', async () => {
     const { scanFileStream } = await loadClient()
 
-    fetchMock.default.mockReturnValueOnce({
+    fetchMock.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => ({ invalid: 'payload' })),
@@ -225,7 +232,7 @@ describe('clients > artefactScan', () => {
 
   test('scanFileStream > bad response', async () => {
     const { scanFileStream } = await loadClient()
-    fetchMock.default.mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: false,
       text: vi.fn(function () {
         return 'Unrecognised response'
@@ -241,7 +248,7 @@ describe('clients > artefactScan', () => {
 
   test('scanFileStream > rejected', async () => {
     const { scanFileStream } = await loadClient()
-    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ArtefactScan service.')
+    fetchMock.mockRejectedValueOnce('Unable to communicate with the ArtefactScan service.')
 
     // use a real Readable to make sure `.destroy()` is also called
     await expect(() => scanFileStream(Readable.from(''), 'safe_model.h5')).rejects.toThrow(
@@ -263,7 +270,7 @@ describe('clients > artefactScan', () => {
       Results: [],
     }
 
-    fetchMock.default.mockReturnValueOnce({
+    fetchMock.mockReturnValueOnce({
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => expectedResponse),
@@ -271,15 +278,15 @@ describe('clients > artefactScan', () => {
 
     const response = await scanImageBlobStream({} as Readable, 'sha256:abc')
 
-    expect(fetchMock.default).toHaveBeenCalled()
-    expect(formDataMock.default).toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledOnce()
+    expect(fetchMock.mock.calls[0][0]).toBe('http://127.0.0.1:3311/scan/image')
     expect(response).toStrictEqual(expectedResponse)
   })
 
   test('scanImageBlobStream > bad response', async () => {
     const { scanImageBlobStream } = await loadClient()
 
-    fetchMock.default.mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: false,
       text: vi.fn(() => 'Bad response'),
       json: vi.fn(),
@@ -294,7 +301,7 @@ describe('clients > artefactScan', () => {
   test('scanImageBlobStream > rejected fetch destroys stream', async () => {
     const { scanImageBlobStream } = await loadClient()
 
-    fetchMock.default.mockRejectedValueOnce(new Error('network error'))
+    fetchMock.mockRejectedValueOnce(new Error('network error'))
 
     const stream = Readable.from('data')
     const destroySpy = vi.spyOn(stream, 'destroy')

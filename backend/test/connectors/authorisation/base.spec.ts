@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { Roles } from '../../../src/connectors/authentication/constants.js'
 import {
   AccessRequestAction,
+  DeploymentAssessmentAction,
   FileAction,
   ModelAction,
   ReleaseAction,
@@ -96,6 +97,36 @@ describe('connectors > authorisation > base', () => {
       success: false,
       info: 'You cannot change an access request you do not own.',
     })
+  })
+
+  test('files > rejects a file belonging to a different model', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getEntities.mockResolvedValue(['entity1'])
+    mockModelService.getModelSystemRoles.mockReturnValue(['owner'])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+    const foreignFile = { _id: 'file1', modelId: 'otherModel' } as any
+
+    const result = await connector.file(user, model, foreignFile, FileAction.Delete)
+
+    expect(result).toStrictEqual({
+      id: 'file1',
+      success: false,
+      info: 'The requested file does not belong to this model.',
+    })
+  })
+
+  test('files > allows a file belonging to the supplied model', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getEntities.mockResolvedValue(['entity1'])
+    mockModelService.getModelSystemRoles.mockReturnValue(['owner'])
+    mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
+    ReviewRoleModelMock.find.mockResolvedValue([])
+    const ownFile = { _id: 'file1', modelId: 'testModel' } as any
+
+    const result = await connector.file(user, model, ownFile, FileAction.Delete)
+
+    expect(result).toStrictEqual({ id: 'file1', success: true })
   })
 
   test('hasModelVisibilityAccess > public model', async () => {
@@ -856,7 +887,7 @@ describe('connectors > authorisation > base', () => {
     mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
     mockModelService.getModelSystemRoles.mockResolvedValue([])
     ReviewRoleModelMock.find.mockResolvedValue([])
-    const file = { _id: { toString: () => 'file1' } }
+    const file = { _id: { toString: () => 'file1' }, modelId: 'testModel' }
 
     const result = await connector.file(user as any, model as any, file as any, FileAction.Upload)
 
@@ -873,7 +904,7 @@ describe('connectors > authorisation > base', () => {
     mockResponseService.checkAccessRequestsApproved.mockResolvedValue(false)
     mockModelService.getModelSystemRoles.mockResolvedValue([])
     ReviewRoleModelMock.find.mockResolvedValue([])
-    const file = { _id: { toString: () => 'file1' } }
+    const file = { _id: { toString: () => 'file1' }, modelId: 'testModel' }
     const mockModel = { ...model, settings: { ungovernedAccess: false } }
 
     const result = await connector.file(user as any, mockModel as any, file as any, FileAction.Download)
@@ -890,7 +921,7 @@ describe('connectors > authorisation > base', () => {
     mockAccessRequestService.getModelAccessRequestsForUser.mockResolvedValue([])
     mockModelService.getModelSystemRoles.mockResolvedValue([])
     ReviewRoleModelMock.find.mockResolvedValue([])
-    const file = { _id: { toString: () => 'file1' } }
+    const file = { _id: { toString: () => 'file1' }, modelId: 'testModel' }
 
     const result = await connector.file(user as any, model as any, file as any, FileAction.Update)
 
@@ -1139,6 +1170,119 @@ describe('connectors > authorisation > base', () => {
       })
     },
   )
+
+  describe('Deployment assessments', () => {
+    const connector = new BasicAuthorisationConnector()
+
+    const deploymentAssessment = {
+      id: 'da-1',
+      createdBy: 'creator',
+      draft: false,
+      metadata: { signOff: { riskOwners: ['user:riskOwner'] } },
+    } as any
+
+    test('view non-draft DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('view draft DA as creator', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'creator' } as UserInterface,
+        { ...deploymentAssessment, draft: true },
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('view draft DA as risk owner', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'riskOwner' } as UserInterface,
+        { ...deploymentAssessment, draft: true },
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('view draft DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        { ...deploymentAssessment, draft: true },
+        DeploymentAssessmentAction.View,
+      )
+
+      expect(result).toStrictEqual({
+        id: 'da-1',
+        success: false,
+        info: 'You are not the creator or the Deployment Risk Owner of this draft Deployment Assessment, so you do not have permission to view it.',
+      })
+    })
+
+    test('delete DA as creator', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'creator' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Delete,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('delete DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Delete,
+      )
+
+      expect(result).toStrictEqual({
+        id: 'da-1',
+        success: false,
+        info: 'You do not have permission to delete this Deployment Assessment.',
+      })
+    })
+
+    test('update DA as risk owner', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'riskOwner' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Update,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+
+    test('update DA as non-named user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'otherUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Update,
+      )
+
+      expect(result).toStrictEqual({
+        id: 'da-1',
+        success: false,
+        info: 'You do not have permission to update this Deployment Assessment.',
+      })
+    })
+
+    test('create DA as any user', async () => {
+      const result = await connector.deploymentAssessment(
+        { dn: 'anyUser' } as UserInterface,
+        deploymentAssessment,
+        DeploymentAssessmentAction.Create,
+      )
+
+      expect(result).toStrictEqual({ id: 'da-1', success: true })
+    })
+  })
 
   test('partials > merges new responses into successes', async () => {
     const data = ['a', 'b', 'c']
