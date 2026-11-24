@@ -5,10 +5,8 @@
 # for models in another instance.
 
 # Usage
-# Run your 1st instance of Bailo the usual way
-#       docker compose build --parallel
-#       docker compose up
-#       Access UI at localhost:8080
+# Run your 1st instance of Bailo as per "Development Build" in README.md
+#       Access UI at http://localhost:8080/
 # Then run your 2nd instance using this file with
 #       docker build . -t second-bailo -f Dockerfile.standalone --build-context python=./lib/python
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
