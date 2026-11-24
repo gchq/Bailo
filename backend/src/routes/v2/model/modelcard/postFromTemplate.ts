@@ -11,12 +11,12 @@ import { parse } from '../../../../utils/validate.js'
 export const postFromTemplateSchema = z.object({
   params: z.object({
     modelId: z.string({
-      required_error: 'Must specify model id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
     }),
   }),
   body: z.object({
     templateId: z.string({
-      required_error: 'Must specify template id within the body',
+      error: (issue) => (issue.input === undefined ? 'Must specify template id within the body' : undefined),
     }),
   }),
 })

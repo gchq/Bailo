@@ -13,7 +13,7 @@ export const getModelSchema = z.object({
     modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   }),
   query: z.object({
-    kind: coerceArray(z.array(z.nativeEnum(EntryKind))).optional(),
+    kind: coerceArray(z.array(z.enum(EntryKind))).optional(),
   }),
 })
 

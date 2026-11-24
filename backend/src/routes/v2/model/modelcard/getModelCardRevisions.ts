@@ -11,7 +11,7 @@ import { parse } from '../../../../utils/validate.js'
 export const getModelCardRevisionsSchema = z.object({
   params: z.object({
     modelId: z.string({
-      required_error: 'Must specify model id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
     }),
   }),
 })

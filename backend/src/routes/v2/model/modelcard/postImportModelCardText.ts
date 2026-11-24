@@ -9,12 +9,12 @@ import { parse } from '../../../../utils/validate.js'
 export const postImportModelCardTextSchema = z.object({
   params: z.object({
     modelId: z.string({
-      required_error: 'Must specify model id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
     }),
   }),
   body: z.object({
     text: z.string({
-      required_error: 'Must provide model card text to import',
+      error: (issue) => (issue.input === undefined ? 'Must provide model card text to import' : undefined),
     }),
   }),
 })

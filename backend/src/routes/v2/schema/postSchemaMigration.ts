@@ -13,7 +13,7 @@ import { parse } from '../../../utils/validate.js'
 export const postSchemaMigrationSchema = z.object({
   body: z.object({
     name: z.string({
-      required_error: 'Must specify schema migration plan name',
+      error: (issue) => (issue.input === undefined ? 'Must specify schema migration plan name' : undefined),
     }),
     description: z.string().optional().openapi({ example: 'This is an example migration plan' }),
     sourceSchema: z.string().openapi({ example: 'v1' }),

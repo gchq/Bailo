@@ -11,12 +11,12 @@ import { parse } from '../../../../utils/validate.js'
 export const postFromSchemaSchema = z.object({
   params: z.object({
     modelId: z.string({
-      required_error: 'Must specify model id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
     }),
   }),
   body: z.object({
     schemaId: z.string({
-      required_error: 'Must specify schema id within the body',
+      error: (issue) => (issue.input === undefined ? 'Must specify schema id within the body' : undefined),
     }),
   }),
 })

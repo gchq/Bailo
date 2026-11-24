@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 export const deleteSchemaSchema = z.object({
   params: z.object({
     schemaId: z.string({
-      required_error: 'Must specify schema id as URL parameter',
+      error: (issue) => (issue.input === undefined ? 'Must specify schema id as URL parameter' : undefined),
     }),
   }),
 })

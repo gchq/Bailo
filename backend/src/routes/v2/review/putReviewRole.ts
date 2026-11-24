@@ -12,7 +12,8 @@ import { parse } from '../../../utils/validate.js'
 export const putReviewRoleSchema = z.object({
   params: z.object({
     shortName: z.string({
-      required_error: 'Must specify review role short name as URL parameter',
+      error: (issue) =>
+        issue.input === undefined ? 'Must specify review role short name as URL parameter' : undefined,
     }),
   }),
   body: z
@@ -23,7 +24,7 @@ export const putReviewRoleSchema = z.object({
         .array(z.string())
         .openapi({ example: ['user:user'] })
         .optional(),
-      systemRole: z.nativeEnum(SystemRoles).optional().openapi({ example: SystemRoles.Owner }),
+      systemRole: z.enum(SystemRoles).optional().openapi({ example: SystemRoles.Owner }),
     })
     .strict(),
 })
