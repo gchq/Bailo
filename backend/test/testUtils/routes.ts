@@ -37,6 +37,7 @@ function omitEmptyQueryValues(fixture: unknown) {
   return { ...fixture, query: Object.fromEntries(presentEntries) }
 }
 
+/** Validates via `safeParse`, so refinements run: set `mock*Once` values used by refinements afterwards. */
 export function createFixture<T extends z.ZodType>(schema: T, overrides: FixtureOverrides = {}): z.infer<T> {
   const fixture = omitEmptyQueryValues(applyOverrides(fake(schema), overrides))
   const result = schema.safeParse(fixture)

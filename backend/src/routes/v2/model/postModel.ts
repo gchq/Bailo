@@ -59,7 +59,7 @@ export const postModelSchema = z.object({
           .optional()
           .default({}),
       })
-      .prefault({ ungovernedAccess: false, allowTemplating: false }),
+      .prefault({}),
   }),
 })
 
