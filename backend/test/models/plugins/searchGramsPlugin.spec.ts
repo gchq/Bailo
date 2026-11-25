@@ -36,16 +36,39 @@ let schema: mongoose.Schema
 
 describe('models > plugins > searchGramsPlugin', () => {
   beforeEach(() => {
-    schema = new mongoose.Schema({ name: String, description: String, tags: [String] })
+    schema = new mongoose.Schema({ name: String, description: String, tags: [String], searchGrams: [String] })
     schema.plugin(searchGramsPlugin, { fields })
   })
 
-  test('save > rebuilds searchGrams from the configured fields', () => {
-    const doc: Record<string, unknown> = { name: 'Yolo', description: 'detects', tags: ['cat'], other: 'ignored' }
+  describe('save', () => {
+    let Test: mongoose.Model<any>
 
-    getHooks(schema, '_pres', 'save')[0].call(doc)
+    const saveHook = () => getHooks(schema, '_pres', 'save').find((hook) => hook.name === 'searchGramsPreSave')!
 
-    expect(doc.searchGrams).toEqual(toSearchGrams('Yolo', 'detects', 'cat'))
+    beforeEach(() => {
+      Test = new mongoose.Mongoose().model('SearchGramsTest', schema)
+    })
+
+    test('rebuilds searchGrams from the configured fields', async () => {
+      const doc = new Test({ name: 'Yolo', description: 'detects', tags: ['cat'] })
+
+      await saveHook().call(doc)
+
+      expect(doc.searchGrams).toEqual(toSearchGrams('Yolo', 'detects', 'cat'))
+    })
+
+    test('reads fields excluded by a projection from the stored document', async () => {
+      const doc = Test.hydrate({ _id: new mongoose.Types.ObjectId(), name: 'Yolo' }, { name: 1 })
+      const findOne = vi.spyOn(doc.collection, 'findOne').mockResolvedValue({ description: 'detects', tags: ['cat'] })
+
+      await saveHook().call(doc)
+
+      expect(findOne).toHaveBeenCalledWith(
+        { _id: doc._id },
+        expect.objectContaining({ projection: { description: 1, tags: 1 } }),
+      )
+      expect(doc.searchGrams).toEqual(toSearchGrams('Yolo', 'detects', 'cat'))
+    })
   })
 
   test('insertMany > sets searchGrams on every document', () => {
