@@ -30,7 +30,7 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
       case ReviewKind.ACCESS:
         return `access-request/${review.accessRequestId}`
       case ReviewKind.LIFECYCLE:
-        return `lifecycle/${review._id}/review`
+        return ''
     }
   }
 

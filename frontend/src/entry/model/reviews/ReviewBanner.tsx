@@ -37,7 +37,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   )
 
   const handleReviewOnClick = () => {
-    router.push(`/model/${modelId}/${urlParam}/${semverOrAccessRequestId}${accessRequest ? '/review' : ''}`)
+    router.push(`/model/${modelId}/${urlParam}/${semverOrAccessRequestId}`)
   }
 
   const queryState = renderQueryState([isReviewsError], isReviewsLoading)

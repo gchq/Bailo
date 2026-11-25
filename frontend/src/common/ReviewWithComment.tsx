@@ -97,6 +97,8 @@ export default function ReviewWithComment({
       setErrorText('You must submit a comment when requesting changes.')
     } else if (!reviewRequest?.role) {
       setErrorText('Please select a role before submitting your review.')
+    } else if (!dueDate && includeDueDate) {
+      setErrorText('Please select a next review due date before submitting your review.')
     } else {
       onReviewCommentChange('')
       onSubmit(selectedDecision, reviewComment, reviewRequest.role, dueDate)
@@ -167,9 +169,6 @@ export default function ReviewWithComment({
               onChange={(newValue) => onReviewCommentChange(newValue)}
               alwaysShowToolbar
             />
-            <Typography variant='caption' color='error'>
-              {errorText}
-            </Typography>
             {includeDueDate && (
               <Stack spacing={0.5}>
                 <Typography sx={{ fontWeight: 'bold' }}>Next review date</Typography>
@@ -184,9 +183,18 @@ export default function ReviewWithComment({
                       ? undefined
                       : increaseCurrentDateByHumanInterval(uiConfig.lifecycle.maxReviewInterval)
                   }
+                  slotProps={{
+                    field: { clearable: true },
+                    popper: {
+                      disablePortal: true,
+                    },
+                  }}
                 />
               </Stack>
             )}
+            <Typography variant='caption' color='error'>
+              {errorText}
+            </Typography>
             <RadioGroup sx={{ mt: 0 }} defaultValue={undefined} value={decision} onChange={handleRadioChange}>
               {!hideRequestChangesButton && (
                 <>
