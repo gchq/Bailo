@@ -5,25 +5,16 @@ export type ASTNode = MarkdownToJSX.ASTNode
 
 export type MarkdownAST = ASTNode[]
 
+export const markdownParserOptions = { disableParsingRawHTML: true } as const
+
 export function parseMarkdown(markdown: string): MarkdownAST {
-  return parser(markdown)
+  return parser(markdown, markdownParserOptions)
 }
 
-export type MediaKind = 'image' | 'video' | 'audio'
+export type MediaKind = 'image'
 
-const mediaTags: Record<string, MediaKind> = { img: 'image', video: 'video', audio: 'audio' }
-
-/** Identifies images from Markdown syntax, and images, videos and audio from raw HTML tags. */
 export function getMediaKind(node: ASTNode): MediaKind | undefined {
-  if (node.type === RuleType.image) {
-    return 'image'
-  }
-
-  if (node.type === RuleType.htmlBlock || node.type === RuleType.htmlSelfClosing) {
-    return mediaTags[node.tag.toLowerCase()]
-  }
-
-  return undefined
+  return node.type === RuleType.image ? 'image' : undefined
 }
 
 function getVisibleLength(nodes: ASTNode[]): number {
@@ -40,11 +31,6 @@ function getVisibleLength(nodes: ASTNode[]): number {
       case RuleType.paragraph:
       case RuleType.textFormatted:
         return length + getVisibleLength(node.children)
-      case RuleType.htmlBlock:
-        if (node.tag === 'script' || node.tag === 'style') {
-          return length
-        }
-        return length + getVisibleLength(node.children || [])
       case RuleType.orderedList:
       case RuleType.unorderedList:
         return length + node.items.reduce((itemLength, item) => itemLength + getVisibleLength(item), 0)
@@ -126,14 +112,6 @@ function truncateNodes(nodes: ASTNode[], maxLength: number): ASTNode[] {
         const children = truncateChildren(node.children)
         return children.length > 0 ? { ...node, children } : null
       }
-      case RuleType.htmlBlock: {
-        if (node.tag === 'script' || node.tag === 'style') {
-          return null
-        }
-
-        const children = truncateChildren(node.children || [])
-        return children.length > 0 ? { ...node, children } : null
-      }
       case RuleType.orderedList:
       case RuleType.unorderedList: {
         const items = truncateItems(node.items)
@@ -166,7 +144,7 @@ export type MarkdownPreview = {
 }
 
 export function getMarkdownPreview(markdown: string, maxLength: number): MarkdownPreview {
-  const ast = parser(markdown)
+  const ast = parseMarkdown(markdown)
   const normalisedMaxLength = Math.max(0, maxLength)
   const truncated = getVisibleLength(ast) > normalisedMaxLength
 
