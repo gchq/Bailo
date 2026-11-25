@@ -101,8 +101,19 @@ export default function ReviewPopper({
           open={Boolean(anchorEl)}
           anchorEl={anchorEl}
           placement={popperPlacement}
-          popperOptions={{ strategy: 'fixed' }}
-          modifiers={[{ name: 'eventListeners', enabled: false }]}
+          modifiers={[
+            {
+              name: 'preventOverflow',
+              enabled: true,
+              options: {
+                altAxis: true,
+                altBoundary: true,
+                tether: false,
+                rootBoundary: 'viewport',
+                padding: 8,
+              },
+            },
+          ]}
           sx={{
             minWidth: '450px',
             boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
