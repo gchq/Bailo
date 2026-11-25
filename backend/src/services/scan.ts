@@ -1,5 +1,3 @@
-import { type ClientSession } from 'mongoose'
-
 import {
   type ArtefactScanResult,
   ArtefactScanState,
@@ -17,7 +15,6 @@ import { dedupeByKey } from '../utils/array.js'
 import config from '../utils/config.js'
 import { BadReq, Conflict, Forbidden, UnprocessableContent } from '../utils/error.js'
 import { plural } from '../utils/string.js'
-import { useTransaction } from '../utils/transactions.js'
 import { getFileById } from './file.js'
 import { getImageLayers } from './images/getImageLayers.js'
 import log from './log.js'
@@ -36,7 +33,6 @@ type ArtefactScanIdentifier =
 export async function updateArtefactScanWithResults(
   scanIdentifier: ArtefactScanIdentifier,
   results: ArtefactScanResult[],
-  session?: ClientSession,
 ) {
   const bulkOps = results.map((result) => {
     // Only insert new (in progress) scans, otherwise only allow updating results
@@ -63,7 +59,7 @@ export async function updateArtefactScanWithResults(
   })
 
   try {
-    await ScanModel.bulkWrite(bulkOps, { session, ordered: true })
+    await ScanModel.bulkWrite(bulkOps, { ordered: true })
   } catch (err: any) {
     if (err.code === 11000) {
       throw Conflict('Scan already in progress', { scanIdentifier })
@@ -93,32 +89,28 @@ export async function runScans({ file, layerRef }: RunScansParams) {
     }
   }
 
-  await useTransaction([
-    async (session) => {
-      try {
-        const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
-          ...scannerInfo,
-          state: ArtefactScanState.InProgress,
-          lastRunAt: new Date(),
-        }))
+  try {
+    const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
+      ...scannerInfo,
+      state: ArtefactScanState.InProgress,
+      lastRunAt: new Date(),
+    }))
 
-        await updateArtefactScanWithResults(scanIdentifier, resultsInprogress, session)
+    await updateArtefactScanWithResults(scanIdentifier, resultsInprogress)
 
-        const resultsArray = await scanners.startScans({ ...(file ? { file } : { layerRef }) })
-        await updateArtefactScanWithResults(scanIdentifier, resultsArray, session)
-      } catch (error) {
-        log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
-        const failedResults = activeScanners.map((scannerInfo) => ({
-          ...scannerInfo,
-          state: ArtefactScanState.Error,
-          lastRunAt: new Date(),
-        }))
+    const resultsArray = await scanners.startScans({ ...(file ? { file } : { layerRef }) })
+    await updateArtefactScanWithResults(scanIdentifier, resultsArray)
+  } catch (error) {
+    log.warn({ scannersInfo, scanIdentifier, error }, 'Unable to run scans. Attempting to set failure state.')
+    const failedResults = activeScanners.map((scannerInfo) => ({
+      ...scannerInfo,
+      state: ArtefactScanState.Error,
+      lastRunAt: new Date(),
+    }))
 
-        // This will always release the lock by setting results to no longer be in progress
-        await updateArtefactScanWithResults(scanIdentifier, failedResults, session)
-      }
-    },
-  ])
+    // This will always release the lock by setting results to no longer be in progress
+    await updateArtefactScanWithResults(scanIdentifier, failedResults)
+  }
 }
 
 async function artefactScanDelay(scanIdentifier: ArtefactScanIdentifier): Promise<number> {

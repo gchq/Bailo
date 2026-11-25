@@ -13,7 +13,6 @@ import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
-vi.mock('../../src/utils/transactions.js')
 
 const ScanModelMock = getTypedModelMock('ScanModel')
 
