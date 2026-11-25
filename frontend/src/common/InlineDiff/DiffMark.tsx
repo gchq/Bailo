@@ -41,8 +41,6 @@ function highlight(theme: Theme, inserted: boolean) {
 }
 
 function MediaFrame({ media, children }: { media: MediaKind; inserted: boolean; children: ReactNode }) {
-  const audio = media === 'audio'
-
   return (
     <Box
       component='span'
@@ -51,16 +49,13 @@ function MediaFrame({ media, children }: { media: MediaKind; inserted: boolean; 
         display: 'flex',
         width: '100%',
         minWidth: 0,
-        // Audio players have a fixed height, so only images and video are given a 16:9 frame
-        aspectRatio: audio ? undefined : '16 / 9',
-        padding: audio ? 1 : 0,
+        aspectRatio: '16 / 9',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
         margin: '2px',
         backgroundColor: 'background.paper',
-        '& img, & video': { width: '100%', height: '100%', objectFit: 'contain' },
-        '& audio': { width: '100%' },
+        '& img': { width: '100%', height: '100%', objectFit: 'contain' },
         boxSizing: 'border-box',
         maxWidth: '100%',
         ...forcedColours,
