@@ -1,6 +1,5 @@
 import CorporateFare from '@mui/icons-material/CorporateFare'
-import { Box, Card, CardActionArea, CardContent, Chip, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Box, Card, CardActionArea, CardContent, Chip, Divider, Stack, Typography } from '@mui/material'
 import { type EntrySearchResult } from 'actions/entry'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -35,8 +34,6 @@ export default function EntryCardList({
   selectedChips,
   onSelectedChipsChange,
 }: EntryCardListProps) {
-  const theme = useTheme()
-
   if (entriesErrorMessage) {
     return <MessageAlert message={entriesErrorMessage} severity='error' />
   }
@@ -62,15 +59,15 @@ export default function EntryCardList({
 
         return (
           <Card key={entry.id} sx={{ minWidth: 0, height: '100%' }}>
-            <Box sx={{ backgroundColor: theme.palette.secondary.main, p: 1, height: '40px' }}>
+            <Box sx={{ p: 1, height: '40px' }}>
               <Stack direction='row' spacing={1} sx={{ overflow: 'hidden' }}>
                 {displayOrganisation && entry.organisation && (
                   <Chip
                     icon={<CorporateFare />}
                     size='small'
+                    color='primary'
                     label={entry.organisation}
                     sx={{
-                      color: 'white',
                       p: 0.5,
                       maxWidth: '100%',
                       '& .MuiChip-icon': { color: 'white' },
@@ -78,18 +75,11 @@ export default function EntryCardList({
                     }}
                   />
                 )}
-                {displayState && entry.state && (
-                  <Chip
-                    label={entry.state}
-                    size='small'
-                    sx={{
-                      color: 'white',
-                    }}
-                  />
-                )}
+                {displayState && entry.state && <Chip color='secondary' label={entry.state} size='small' />}
               </Stack>
             </Box>
-            <CardContent sx={{ flex: 1, overflow: 'hidden' }}>
+            <Divider />
+            <CardContent sx={{ flex: 1, overflow: 'hidden', pt: 0 }}>
               <CardActionArea
                 href={href}
                 target={isExternal ? '_blank' : undefined}
@@ -150,6 +140,7 @@ export default function EntryCardList({
                   onChange={onSelectedChipsChange}
                   size='small'
                   ariaLabel='add tag to search filter'
+                  variant='outlined'
                   style={{ maxWidth: '400px' }}
                 />
               )}

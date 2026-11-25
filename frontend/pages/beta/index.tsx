@@ -12,15 +12,14 @@ import {
   InputLabel,
   MenuItem,
   Paper,
+  Popover,
   Select,
   type SelectChangeEvent,
   Stack,
-  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
   Typography,
-  useMediaQuery,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags, useListEntries } from 'actions/entry'
@@ -32,6 +31,7 @@ import { debounce } from 'lodash-es'
 import Image from 'next/image'
 import { useRouter } from 'node_modules/next/router'
 import { type ChangeEvent, type SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -54,7 +54,6 @@ const ALL_KINDS = 'All'
 export default function Marketplace() {
   const router = useRouter()
   const theme = useTheme()
-  const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   function parseQueryArray(value?: string | string[]): string[] {
     if (!value) {
@@ -83,12 +82,11 @@ export default function Marketplace() {
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [titleOnly, setTitleOnly] = useState(false)
-  const [isFiltersHidden, setIsFiltersHidden] = useState(!isSmOrLarger)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-  useEffect(() => {
-    setIsFiltersHidden(!isSmOrLarger)
-  }, [isSmOrLarger])
+  const open = Boolean(anchorEl)
+  const id = open ? 'simple-popover' : undefined
 
   useEffect(() => {
     if (!router.isReady) {
@@ -384,6 +382,7 @@ export default function Marketplace() {
               id='entry-filter-input'
               value={filter}
               disableUnderline
+              title='lol'
               inputProps={{ spellCheck: 'false' }}
               onChange={handleFilterChange}
               endAdornment={
@@ -400,213 +399,225 @@ export default function Marketplace() {
               </Typography>
             )}
           </FormControl>
-          {!isFiltersHidden && (
-            <>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                sx={{ margin: 'auto', alignItems: { sm: 'center' }, flexWrap: { sm: 'wrap' } }}
-                useFlexGap
-              >
-                {organisationList.length > 0 && (
-                  <FormControl size='small' sx={{ minWidth: 160, flex: '1 1 160px' }}>
-                    <InputLabel id='organisation-filter-label'>Organisation</InputLabel>
-                    <Select
-                      labelId='organisation-filter-label'
-                      multiple
-                      value={selectedOrganisations}
-                      label='Organisation'
-                      onChange={(event) => handleMultiSelectChange(event, handleOrganisationsOnChange)}
-                      renderValue={(selected) => selected.join(', ')}
-                    >
-                      {organisationList.map((organisation) => (
-                        <MenuItem key={organisation} value={organisation}>
-                          {organisation}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-                <FormControl size='small' sx={{ minWidth: 160, flex: '1 1 160px' }}>
-                  <InputLabel id='state-filter-label'>States</InputLabel>
-                  <Select
-                    labelId='state-filter-label'
-                    multiple
-                    value={selectedStates}
-                    label='States'
-                    onChange={(event) => handleMultiSelectChange(event, handleStatesOnChange)}
-                    renderValue={(selected) => selected.join(', ')}
-                  >
-                    {stateList.map((state) => (
-                      <MenuItem key={state} value={state}>
-                        {state}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
-                  <FormControl size='small' sx={{ minWidth: 160, flex: '1 1 160px' }}>
-                    <InputLabel id='kind-filter-label'>Kinds</InputLabel>
-                    <Select
-                      labelId='kind-filter-label'
-                      multiple
-                      value={selectedKinds.map(toTitleCase)}
-                      label='Kinds'
-                      onChange={(event) => handleMultiSelectChange(event, handleModelKindsOnChange)}
-                      renderValue={(selected) => selected.join(', ')}
-                    >
-                      {modelKindOptions.map((kind) => (
-                        <MenuItem key={kind} value={kind}>
-                          {kind}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-                {federationEnabled && peers && peers.size > 0 && (
-                  <FormControl size='small' sx={{ minWidth: 200, flex: '1 1 200px' }}>
-                    <InputLabel id='peer-filter-label'>External repositories</InputLabel>
-                    <Select
-                      labelId='peer-filter-label'
-                      multiple
-                      value={selectedPeers}
-                      label='External repositories'
-                      onChange={(event) => handleMultiSelectChange(event, handlePeersOnChange)}
-                      renderValue={(selected) => selected.join(', ')}
-                    >
-                      {Array.from(peers.keys()).map((peer) => (
-                        <MenuItem key={peer} value={peer} disabled={unreachablePeerList.includes(peer)}>
-                          {peer}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-                <FormControl size='small' sx={{ minWidth: 160, flex: '1 1 160px' }}>
-                  <InputLabel id='tag-filter-label'>Popular tags</InputLabel>
-                  <Select
-                    labelId='tag-filter-label'
-                    multiple
-                    value={selectedTags}
-                    label='Popular tags'
-                    onChange={(event) => handleMultiSelectChange(event, handlePopularTagsOnChange)}
-                    renderValue={(selected) => selected.join(', ')}
-                  >
-                    {tags.map((tag) => (
-                      <MenuItem key={tag} value={tag}>
-                        {tag}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl size='small' sx={{ minWidth: 160, flex: '1 1 160px' }}>
-                  <InputLabel id='role-filter-label'>My roles</InputLabel>
-                  <Select
-                    labelId='role-filter-label'
-                    multiple
-                    value={roleOptions.filter((role) => selectedRoles.includes(role.key)).map((role) => role.label)}
-                    label='My roles'
-                    onChange={(event) => handleSelectedRolesOnChange(event.target.value as string[])}
-                    renderValue={(selected) => selected.join(', ')}
-                  >
-                    {roleOptions.map((role) => (
-                      <MenuItem key={role.key} value={role.label}>
-                        {role.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Autocomplete
-                  multiple
-                  size='small'
-                  noOptionsText='No entries found'
-                  onInputChange={debounceOnInputChange}
-                  value={updatedUsers}
-                  groupBy={(option) => option.kind.toUpperCase()}
-                  getOptionLabel={(option) => option.id}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  onChange={(_event, newValue) => {
-                    setUpdatedUsers(newValue)
-                  }}
-                  options={users}
-                  filterOptions={(options) =>
-                    options.filter((option) => !updatedUsers.find((user) => _.isEqual(user, option)))
-                  }
-                  loading={isUsersLoading && userListQuery.length >= 3}
-                  sx={{ minWidth: '300px' }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      autoFocus
-                      label={'Search for user or group'}
-                      slotProps={{ ...params.slotProps }}
-                    />
-                  )}
-                />
-              </Stack>
-              <Button size='small' sx={{ width: 'max-content' }} onClick={handleResetFilters}>
-                Reset filters
-              </Button>
-            </>
-          )}
+          <Stack direction='row'>
+            <Button onClick={(event) => setAnchorEl(event.currentTarget)}>Filters (0)</Button>
+            <Button size='small' sx={{ width: 'max-content' }} onClick={handleResetFilters}>
+              Reset filters
+            </Button>
+          </Stack>
           <Divider />
-          <ToggleButtonGroup
-            value={selectedTab}
-            color='primary'
-            size='small'
-            onChange={(_event, value) => {
-              if (value) {
-                setSelectedTab(value)
-              }
-            }}
-            aria-label='text formatting'
-            exclusive
-          >
-            <ToggleButton value={EntryKind.MODEL} aria-label='bold' sx={{ px: 2 }}>
-              Models
-            </ToggleButton>
-            <ToggleButton value={EntryKind.DATA_CARD} aria-label='italic' sx={{ px: 2 }}>
-              Data cards
-            </ToggleButton>
-          </ToggleButtonGroup>
-          <div data-test='modelListBox'>
-            {!isEntriesLoading && selectedTab === EntryKind.MODEL && (
-              <EntryCardList
-                entries={filteredModels}
-                entriesErrorMessage={combinedModelErrorMessage || ''}
-                selectedChips={selectedTags}
-                onSelectedChipsChange={handlePopularTagsOnChange}
-                selectedOrganisations={selectedOrganisations}
-                onSelectedOrganisationsChange={handleOrganisationsOnChange}
-                selectedStates={selectedStates}
-                onSelectedStatesChange={handleStatesOnChange}
-                selectedPeers={selectedPeers}
-                onSelectedPeersChange={handlePeersOnChange}
-                displayOrganisation={uiConfig.modelDetails.organisations.length > 0}
-                displayState={uiConfig.modelDetails.states.length > 0}
-                displayPeers={federationEnabled}
-                peers={peers}
-              />
-            )}
-            {!isEntriesLoading && selectedTab === EntryKind.DATA_CARD && (
-              <EntryCardList
-                entries={dataCards}
-                entriesErrorMessage={entryErrors ? entryErrors.info.message : ''}
-                selectedChips={selectedTags}
-                onSelectedChipsChange={handlePopularTagsOnChange}
-                selectedOrganisations={selectedOrganisations}
-                onSelectedOrganisationsChange={handleOrganisationsOnChange}
-                selectedStates={selectedStates}
-                onSelectedStatesChange={handleStatesOnChange}
-                selectedPeers={selectedPeers}
-                onSelectedPeersChange={handlePeersOnChange}
-                displayPeers={federationEnabled}
-                peers={peers}
-              />
-            )}
-          </div>
+          <Stack spacing={2}>
+            <ToggleButtonGroup
+              value={selectedTab}
+              color='primary'
+              size='small'
+              onChange={(_event, value) => {
+                if (value) {
+                  setSelectedTab(value)
+                }
+              }}
+              aria-label='text formatting'
+              exclusive
+            >
+              <ToggleButton value={EntryKind.MODEL} aria-label='bold' sx={{ px: 2 }}>
+                Models
+              </ToggleButton>
+              <ToggleButton value={EntryKind.DATA_CARD} aria-label='italic' sx={{ px: 2 }}>
+                Data cards
+              </ToggleButton>
+            </ToggleButtonGroup>
+            <div data-test='modelListBox'>
+              {!isEntriesLoading && selectedTab === EntryKind.MODEL && (
+                <EntryCardList
+                  entries={filteredModels}
+                  entriesErrorMessage={combinedModelErrorMessage || ''}
+                  selectedChips={selectedTags}
+                  onSelectedChipsChange={handlePopularTagsOnChange}
+                  selectedOrganisations={selectedOrganisations}
+                  onSelectedOrganisationsChange={handleOrganisationsOnChange}
+                  selectedStates={selectedStates}
+                  onSelectedStatesChange={handleStatesOnChange}
+                  selectedPeers={selectedPeers}
+                  onSelectedPeersChange={handlePeersOnChange}
+                  displayOrganisation={uiConfig.modelDetails.organisations.length > 0}
+                  displayState={uiConfig.modelDetails.states.length > 0}
+                  displayPeers={federationEnabled}
+                  peers={peers}
+                />
+              )}
+              {!isEntriesLoading && selectedTab === EntryKind.DATA_CARD && (
+                <EntryCardList
+                  entries={dataCards}
+                  entriesErrorMessage={entryErrors ? entryErrors.info.message : ''}
+                  selectedChips={selectedTags}
+                  onSelectedChipsChange={handlePopularTagsOnChange}
+                  selectedOrganisations={selectedOrganisations}
+                  onSelectedOrganisationsChange={handleOrganisationsOnChange}
+                  selectedStates={selectedStates}
+                  onSelectedStatesChange={handleStatesOnChange}
+                  selectedPeers={selectedPeers}
+                  onSelectedPeersChange={handlePeersOnChange}
+                  displayPeers={federationEnabled}
+                  peers={peers}
+                />
+              )}
+            </div>
+          </Stack>
         </Stack>
       </Paper>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Stack spacing={1}>
+            {organisationList.length > 0 && (
+              <FormControl size='small' sx={{ minWidth: 160 }}>
+                <InputLabel id='organisation-filter-label'>Organisation</InputLabel>
+                <Select
+                  labelId='organisation-filter-label'
+                  multiple
+                  value={selectedOrganisations}
+                  label='Organisation'
+                  onChange={(event) => handleMultiSelectChange(event, handleOrganisationsOnChange)}
+                  renderValue={(selected) => selected.join(', ')}
+                >
+                  {organisationList.map((organisation) => (
+                    <MenuItem key={organisation} value={organisation}>
+                      {organisation}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            <FormControl size='small' sx={{ minWidth: 160 }}>
+              <InputLabel id='state-filter-label'>States</InputLabel>
+              <Select
+                labelId='state-filter-label'
+                multiple
+                value={selectedStates}
+                label='States'
+                onChange={(event) => handleMultiSelectChange(event, handleStatesOnChange)}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {stateList.map((state) => (
+                  <MenuItem key={state} value={state}>
+                    {state}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {selectedTab !== EntryKind.DATA_CARD && availableModelKinds.length > 1 && (
+              <FormControl size='small' sx={{ minWidth: 160 }}>
+                <InputLabel id='kind-filter-label'>Kinds</InputLabel>
+                <Select
+                  labelId='kind-filter-label'
+                  multiple
+                  value={selectedKinds.map(toTitleCase)}
+                  label='Kinds'
+                  onChange={(event) => handleMultiSelectChange(event, handleModelKindsOnChange)}
+                  renderValue={(selected) => selected.join(', ')}
+                >
+                  {modelKindOptions.map((kind) => (
+                    <MenuItem key={kind} value={kind}>
+                      {kind}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            {federationEnabled && peers && peers.size > 0 && (
+              <FormControl size='small' sx={{ minWidth: 200 }}>
+                <InputLabel id='peer-filter-label'>External repositories</InputLabel>
+                <Select
+                  labelId='peer-filter-label'
+                  multiple
+                  value={selectedPeers}
+                  label='External repositories'
+                  onChange={(event) => handleMultiSelectChange(event, handlePeersOnChange)}
+                  renderValue={(selected) => selected.join(', ')}
+                >
+                  {Array.from(peers.keys()).map((peer) => (
+                    <MenuItem key={peer} value={peer} disabled={unreachablePeerList.includes(peer)}>
+                      {peer}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            <FormControl size='small' sx={{ minWidth: 160 }}>
+              <InputLabel id='tag-filter-label'>Popular tags</InputLabel>
+              <Select
+                labelId='tag-filter-label'
+                multiple
+                value={selectedTags}
+                label='Popular tags'
+                onChange={(event) => handleMultiSelectChange(event, handlePopularTagsOnChange)}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {tags.map((tag) => (
+                  <MenuItem key={tag} value={tag}>
+                    {tag}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size='small' sx={{ minWidth: 160 }}>
+              <InputLabel id='role-filter-label'>My roles</InputLabel>
+              <Select
+                labelId='role-filter-label'
+                multiple
+                value={roleOptions.filter((role) => selectedRoles.includes(role.key)).map((role) => role.label)}
+                label='My roles'
+                onChange={(event) => handleSelectedRolesOnChange(event.target.value as string[])}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {roleOptions.map((role) => (
+                  <MenuItem key={role.key} value={role.label}>
+                    {role.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Autocomplete
+              multiple
+              size='small'
+              noOptionsText='No entries found'
+              onInputChange={debounceOnInputChange}
+              value={updatedUsers}
+              groupBy={(option) => option.kind.toUpperCase()}
+              getOptionLabel={(option) => option.id}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              onChange={(_event, newValue) => {
+                setUpdatedUsers(newValue)
+              }}
+              options={users}
+              filterOptions={(options) =>
+                options.filter((option) => !updatedUsers.find((user) => _.isEqual(user, option)))
+              }
+              loading={isUsersLoading && userListQuery.length >= 3}
+              sx={{ minWidth: '300px' }}
+              renderInput={(params) => (
+                <LimitedTextField
+                  {...params}
+                  autoFocus
+                  label={'Search for user or group'}
+                  slotProps={{ ...params.slotProps }}
+                />
+              )}
+            />
+            <Button size='small' sx={{ width: 'max-content' }} onClick={handleResetFilters}>
+              Reset filters
+            </Button>
+          </Stack>
+        </Box>
+      </Popover>
     </Container>
   )
 }
