@@ -44,9 +44,7 @@ results are shared: name, description, tags, organisation, state and similar sum
 releases are not transferred by federation.
 
 Federated requests are subject to the remote instance's normal authentication and authorisation. The remote instance
-only returns models that the requesting identity is allowed to see. That identity is either the calling instance's
-service identity, or the original user if user escalation is turned on (see
-[Setting Up Federation](setting-up-federation)).
+only returns models that the requesting identity is allowed to see.
 
 ## Federation states
 
@@ -63,12 +61,9 @@ Each instance has an overall federation state, set in `federation.state`:
 `GET /api/v2/system/status` so that peers can see how an instance is configured.
 
 The federation state controls outgoing connections only. It does not stop other instances from querying your instance.
-Incoming requests are controlled by your authentication and authorisation connectors, in the same way as any other API
-request. See [Setting Up Federation](setting-up-federation) for configuration details.
 
 Each peer also has its own `state`, using the same three values. Setting a peer to `disabled` stops this instance from
-checking whether that peer is reachable, without removing its configuration. A disabled peer still appears in the
-**External repositories** filter, so remove it from `federation.peers` if users should not see it.
+checking whether that peer is reachable, without removing its configuration.
 
 ## Peer types
 
@@ -76,7 +71,7 @@ checking whether that peer is reachable, without removing its configuration. A d
 - **Hugging Face Hub** (`huggingfacehub`) - The public [Hugging Face Hub](https://huggingface.co) model repository
 
 Hugging Face Hub peers only support plain text searches of at least five characters, and only return models, not data
-cards. Searches that use other filters, such as organisation or state, return an error for that peer.
+cards.
 
 ## How federation appears to users
 
@@ -86,10 +81,7 @@ When federation is turned on and at least one peer is configured:
   `federation.peers`)
 - Peers that the local backend cannot currently reach are marked as unreachable in the filter
 - Selecting one or more peers includes their models in the search results alongside local models
-- Each external model shows which peer it came from
 - Selecting an external model opens it on the peer's own website
-- If a peer returns an error for a search, such as an unsupported filter on Hugging Face Hub, the Marketplace shows the
-  error above the results
 
 If a selected Bailo peer cannot be reached at all, the whole search fails, including local results. Deselect the
 unreachable peer to search again.
