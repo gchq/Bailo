@@ -12,6 +12,29 @@ type ModelSelectorChipsProps = {
   modelId: string
 } & Omit<ChipProps, 'label'>
 
+export function DeletedModelChip({ modelId, size, sx, ...chipProps }: Omit<ChipProps, 'label'> & { modelId: string }) {
+  return (
+    <Tooltip title={`This model (${modelId}) has been deleted.`}>
+      <Chip
+        {...chipProps}
+        size={size}
+        aria-label={modelId}
+        color='error'
+        icon={<ErrorOutline />}
+        label={modelId}
+        sx={{
+          ...sx,
+          width: 'fit-content',
+          maxWidth: 'none',
+          height: 'auto',
+          minHeight: size === 'small' ? 24 : 32,
+          '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
+        }}
+      />
+    </Tooltip>
+  )
+}
+
 export default function ModelSelectorChip({ label, modelId, sx, ...chipProps }: ModelSelectorChipsProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { entry, isEntryLoading, isEntryError, mutateEntry } = useGetModel(modelId)
@@ -19,25 +42,7 @@ export default function ModelSelectorChip({ label, modelId, sx, ...chipProps }: 
   const name = entry?.name ?? label
 
   if (isDeleted) {
-    return (
-      <Tooltip title={`This model (${modelId}) has been deleted.`}>
-        <Chip
-          {...chipProps}
-          aria-label={modelId}
-          color='error'
-          icon={<ErrorOutline />}
-          label={modelId}
-          sx={{
-            ...sx,
-            width: 'fit-content',
-            maxWidth: 'none',
-            height: 'auto',
-            py: 0.5,
-            '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere' },
-          }}
-        />
-      </Tooltip>
-    )
+    return <DeletedModelChip {...chipProps} sx={sx} modelId={modelId} />
   }
 
   return (
