@@ -1,3 +1,5 @@
+import { type MongoBulkWriteError } from 'mongodb'
+
 import {
   type ArtefactScanResult,
   ArtefactScanState,
@@ -62,10 +64,40 @@ export async function updateArtefactScanWithResults(
     await ScanModel.bulkWrite(bulkOps, { ordered: true })
   } catch (err: any) {
     if (err.code === 11000) {
+      const failedOpIndex = getFailedOpIndex(err)
+      if (failedOpIndex !== undefined) {
+        await releaseAcquiredLocks(scanIdentifier, results, failedOpIndex)
+      }
       throw Conflict('Scan already in progress', { scanIdentifier })
     }
     throw err
   }
+}
+
+function getFailedOpIndex(err: Pick<MongoBulkWriteError, 'writeErrors'>): number | undefined {
+  const writeErrors = Array.isArray(err.writeErrors) ? err.writeErrors : [err.writeErrors]
+  return writeErrors[0]?.index
+}
+
+/** Set locks taken before the failed op of an ordered bulk write to Error to not block new scans */
+async function releaseAcquiredLocks(
+  scanIdentifier: ArtefactScanIdentifier,
+  attemptedResults: ArtefactScanResult[],
+  failedOpIndex: number,
+) {
+  const appliedResults = attemptedResults.slice(0, failedOpIndex)
+  const acquiredLocks = appliedResults.filter((result) => result.state === ArtefactScanState.InProgress)
+  if (acquiredLocks.length === 0) {
+    return
+  }
+
+  const releaseOps = acquiredLocks.map((lock) => ({
+    updateOne: {
+      filter: { ...scanIdentifier, toolName: lock.toolName },
+      update: { $set: { state: ArtefactScanState.Error, lastRunAt: new Date() } },
+    },
+  }))
+  await ScanModel.bulkWrite(releaseOps, { ordered: false })
 }
 
 type RunScansParams = { file: FileInterface; layerRef?: never } | { file?: never; layerRef: LayerRefInterface }
@@ -94,7 +126,7 @@ export async function runScans({ file, layerRef }: RunScansParams) {
     state: ArtefactScanState.InProgress,
     lastRunAt: new Date(),
   }))
-  // Acquire the lock outside the try so that a Conflict never overwrites another run's InProgress state
+  // Outside the try so a Conflict never overwrites another run's lock
   await updateArtefactScanWithResults(scanIdentifier, resultsInprogress)
 
   try {
