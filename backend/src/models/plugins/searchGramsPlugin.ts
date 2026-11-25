@@ -69,12 +69,21 @@ export function searchGramsPlugin(schema: Schema, { fields }: SearchGramsOptions
     }
     const ids = pendingIds.get(this) ?? []
     pendingIds.delete(this)
-    // Upserts create documents the pre hook could not see: updateOne returns upsertedId, findOneAndUpdate returns the doc
+    // Upserts create documents the pre hook could not see: updateOne returns upsertedId, findOneAndUpdate may return null
     const result = res as { upsertedId?: Types.ObjectId; _id?: Types.ObjectId } | null
     if (result?.upsertedId) {
       ids.push(result.upsertedId)
     } else if (result?._id) {
       ids.push(result._id)
+    }
+    if (ids.length === 0 && (this as unknown as { op: string }).op === 'findOneAndUpdate' && this.getOptions().upsert) {
+      const doc = await this.model.collection.findOne(this.cast(this.model, { ...this.getFilter() }), {
+        projection: { _id: 1 },
+        session: this.getOptions().session ?? undefined,
+      })
+      if (doc) {
+        ids.push(doc._id)
+      }
     }
     if (ids.length === 0) {
       return

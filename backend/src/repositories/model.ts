@@ -90,18 +90,22 @@ function buildModelsQuery(params: SearchModelsParams): QueryFilter<ModelInterfac
 /**
  * Finds entries matching the filters. A search term is matched in two ways:
  *  - fuzzy: trigram similarity over name, description and tags, so typos and part-words match, ranked best first
- *  - stemmed: the full text index, which also covers card contents, appended after the fuzzy matches (unless titleOnly)
+ *  - stemmed: the full text index, appended after the fuzzy matches (unless titleOnly)
  * Without a search term, results are ordered by most recently updated.
  */
 export async function findModels(params: SearchModelsParams): Promise<ModelInterface[]> {
   const query = buildModelsQuery(params)
   const queryGrams = params.search ? toSearchGrams(params.search) : []
+  const shortSearch =
+    params.search && params.search.length < 3 ? params.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
 
   let results: ModelInterface[] =
     params.search && !queryGrams.length
       ? []
       : await ModelModel.find(
-          queryGrams.length ? { ...query, searchGrams: { $in: queryGrams } } : query,
+          queryGrams.length
+            ? { ...query, searchGrams: shortSearch ? { $regex: shortSearch, $options: 'i' } : { $in: queryGrams } }
+            : query,
           searchProjection,
         )
           .sort({ updatedAt: -1 })
@@ -113,7 +117,10 @@ export async function findModels(params: SearchModelsParams): Promise<ModelInter
         model,
         score: gramSimilarity(queryGrams, toEntrySearchGrams(model, ModelSearchFields)),
       }))
-      .filter(({ score }) => score >= FUZZY_MATCH_THRESHOLD)
+      .filter(
+        ({ model, score }) =>
+          score >= FUZZY_MATCH_THRESHOLD || model.name.toLowerCase().includes(params.search!.toLowerCase()),
+      )
       .sort((a, b) => b.score - a.score)
       .map(({ model }) => model)
   }

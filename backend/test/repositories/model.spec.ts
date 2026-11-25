@@ -197,6 +197,25 @@ describe('repositories > model', () => {
       expect(result.map((model) => model.id)).toStrictEqual(['exact', 'partial'])
     })
 
+    test('retains an exact name substring even when its trigram score is below the threshold', async () => {
+      mockFindResults([entry('substring', 'Image classifier'), entry('unrelated', 'Assessment')])
+
+      const result = await findModels({ search: 'ass', titleOnly: true })
+
+      expect(result.map((model) => model.id)).toContain('substring')
+    })
+
+    test('finds short substrings in the middle of a name', async () => {
+      mockFindResults([entry('substring', 'Image classifier')])
+
+      const result = await findModels({ search: 'ss', titleOnly: true })
+
+      expect(ModelModelMock.find.mock.calls[0][0]).toStrictEqual({
+        searchGrams: { $regex: 'ss', $options: 'i' },
+      })
+      expect(result.map((model) => model.id)).toContain('substring')
+    })
+
     test('keeps updatedAt order between equally similar matches', async () => {
       mockFindResults([entry('newer', 'Image classifier'), entry('older', 'Image classifier')], [])
 

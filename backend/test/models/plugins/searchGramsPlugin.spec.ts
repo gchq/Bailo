@@ -12,19 +12,20 @@ function getHooks(schema: mongoose.Schema, kind: '_pres' | '_posts', hookName: s
   return found ? found.map((h: any) => h.fn) : []
 }
 
-function createQuery(op: string, update: unknown) {
+function createQuery(op: string, update: unknown, options = {}) {
   const toArray = vi.fn()
   const find = vi.fn(() => ({ toArray }))
+  const findOne = vi.fn()
   const bulkWrite = vi.fn()
   const query = {
     op,
     getUpdate: () => update,
     getFilter: () => ({ id: 'a' }),
-    getOptions: () => ({}),
+    getOptions: () => options,
     cast: (_model: unknown, filter: unknown) => filter,
-    model: { collection: { find, bulkWrite } },
+    model: { collection: { find, findOne, bulkWrite } },
   }
-  return { query, toArray, find, bulkWrite }
+  return { query, toArray, find, findOne, bulkWrite }
 }
 
 async function runUpdate(query: any, res?: unknown) {
@@ -138,6 +139,24 @@ describe('models > plugins > searchGramsPlugin', () => {
       await runUpdate(query, { _id: 3 })
 
       expect(find).toHaveBeenNthCalledWith(2, { _id: { $in: [3] } }, expect.anything())
+    })
+
+    test('findOneAndUpdate > rebuilds grams for an upsert that returns null', async () => {
+      const { query, toArray, findOne, bulkWrite } = createQuery(
+        'findOneAndUpdate',
+        { $set: { name: 'New' } },
+        { upsert: true },
+      )
+      toArray.mockResolvedValueOnce([]).mockResolvedValueOnce([{ _id: 4, name: 'New' }])
+      findOne.mockResolvedValueOnce({ _id: 4 })
+
+      await runUpdate(query, null)
+
+      expect(findOne).toHaveBeenCalledWith({ id: 'a' }, expect.objectContaining({ projection: { _id: 1 } }))
+      expect(bulkWrite).toHaveBeenCalledWith(
+        [{ updateOne: { filter: { _id: 4 }, update: { $set: { searchGrams: toSearchGrams('New') } } } }],
+        expect.anything(),
+      )
     })
 
     test('replaceOne > always rebuilds, even if the replacement omits the search fields', async () => {
