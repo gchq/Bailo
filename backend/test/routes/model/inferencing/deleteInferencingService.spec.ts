@@ -19,7 +19,8 @@ describe('routes > inferencing > deleteInference', () => {
   })
 
   test('404 > bad', async () => {
-    const fixtureBad = createFixture(deleteInferenceSchema, { stringMap: { modelId: () => '' } })
+    const fixtureBad = createFixture(deleteInferenceSchema)
+    fixtureBad.params.modelId = ''
     const res = await testDelete(
       `/api/v2/model/${fixtureBad.params.modelId}/inference/example/${fixtureBad.params.tag}`,
     )

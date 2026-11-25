@@ -55,6 +55,7 @@ interface UseListEntriesProps {
   schemaId?: string
   titleOnly?: boolean
   adminAccess?: boolean
+  visibility?: EntryVisibilityKeys
   enabled?: boolean
 }
 
@@ -71,6 +72,7 @@ export function useListEntries({
   allowTemplating,
   schemaId,
   titleOnly,
+  visibility,
   adminAccess,
   enabled = true,
 }: UseListEntriesProps) {
@@ -88,6 +90,7 @@ export function useListEntries({
     ...(schemaId && { schemaId }),
     ...(titleOnly && { titleOnly }),
     ...(adminAccess && { adminAccess }),
+    ...(visibility && { visibility }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -109,7 +112,7 @@ export function useListEntries({
   }
 }
 
-export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys[] | EntryKindKeys) {
+export function useGetEntry(entryId: string | undefined | null, kind?: EntryKindKeys[] | EntryKindKeys) {
   const queryParams = {
     ...(kind && { kind }),
   }
@@ -128,7 +131,7 @@ export function useGetEntry(entryId: string | undefined, kind?: EntryKindKeys[] 
     isEntryError: error,
   }
 }
-export function useGetModel(entryId: string | undefined) {
+export function useGetModel(entryId: string | undefined | null) {
   return useGetEntry(entryId, MODEL_ENTRY_KINDS)
 }
 
@@ -204,6 +207,14 @@ export function deleteEntryFile(modelId: string, fileId: string) {
   return fetch(`/api/v2/model/${modelId}/file/${fileId}`, {
     method: `delete`,
     headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+export function deleteEntryFiles(modelId: string, fileIds: string[]) {
+  return fetch(`/api/v2/model/${modelId}/files`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fileIds }),
   })
 }
 

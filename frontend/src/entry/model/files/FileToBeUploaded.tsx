@@ -1,16 +1,17 @@
 import Delete from '@mui/icons-material/Delete'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
-import { Box, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { type ChangeEvent, useCallback } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import TagSelector from 'src/common/TagSelector'
 import { type FileUploadMetadata, type FileUploadWithMetadata } from 'types/types'
 
 interface FileToBeUploadedProps {
   fileWithMetadata: FileUploadWithMetadata
   showMetaDataInput?: boolean
-  onFileMetadataChange: (metadata: FileUploadMetadata, fileName: string) => void
-  onDelete: (fileName: string) => void
+  onFileMetadataChange: (metadata: FileUploadMetadata, relativePath: string) => void
+  onDelete: (relativePath: string) => void
 }
 
 export default function FileToBeUploaded({
@@ -19,6 +20,8 @@ export default function FileToBeUploaded({
   onFileMetadataChange,
   onDelete,
 }: FileToBeUploadedProps) {
+  const displayName = fileWithMetadata.uploadPath || fileWithMetadata.file.name
+
   const handleMetadataTextOnChange = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
       onFileMetadataChange(
@@ -26,10 +29,10 @@ export default function FileToBeUploaded({
           text: event.target.value,
           tags: fileWithMetadata.metadata ? fileWithMetadata.metadata.tags.filter((newTag) => newTag !== '') : [],
         },
-        fileWithMetadata.file.name,
+        fileWithMetadata.relativePath,
       )
     },
-    [onFileMetadataChange, fileWithMetadata.file.name, fileWithMetadata.metadata],
+    [onFileMetadataChange, fileWithMetadata.relativePath, fileWithMetadata.metadata],
   )
 
   const handleFileTagSelectorOnChange = useCallback(
@@ -39,10 +42,10 @@ export default function FileToBeUploaded({
           text: fileWithMetadata.metadata ? fileWithMetadata.metadata.text : '',
           tags: newTags.filter((newTag) => newTag !== ''),
         },
-        fileWithMetadata.file.name,
+        fileWithMetadata.relativePath,
       )
     },
-    [fileWithMetadata.file.name, fileWithMetadata.metadata, onFileMetadataChange],
+    [fileWithMetadata.relativePath, fileWithMetadata.metadata, onFileMetadataChange],
   )
 
   return (
@@ -73,14 +76,14 @@ export default function FileToBeUploaded({
             }}
           >
             <InsertDriveFileOutlined color='primary' fontSize='small' />
-            <Tooltip title={fileWithMetadata.file.name}>
+            <Tooltip title={displayName}>
               <Typography
                 noWrap
                 sx={{
                   fontWeight: 'bold',
                 }}
               >
-                {fileWithMetadata.file.name}
+                {displayName}
               </Typography>
             </Tooltip>
             <Typography variant='caption' color='text.secondary' sx={{ whiteSpace: 'nowrap' }}>
@@ -89,20 +92,20 @@ export default function FileToBeUploaded({
           </Stack>
           <IconButton
             size='small'
-            aria-label={`remove ${fileWithMetadata.file.name} from files to upload`}
-            onClick={() => onDelete(fileWithMetadata.file.name)}
+            aria-label={`remove ${displayName} from files to upload`}
+            onClick={() => onDelete(fileWithMetadata.relativePath)}
           >
             <Delete fontSize='small' />
           </IconButton>
         </Stack>
         {showMetaDataInput && (
-          <TextField
+          <LimitedTextField
             size='small'
+            value={fileWithMetadata.metadata?.text}
+            onChange={handleMetadataTextOnChange}
             label='Metadata'
             placeholder='Enter metadata details...'
             fullWidth
-            value={fileWithMetadata.metadata?.text}
-            onChange={handleMetadataTextOnChange}
           />
         )}
         <TagSelector

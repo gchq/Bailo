@@ -1,0 +1,177 @@
+import { postDeploymentAssessment } from 'actions/deploymentAssessment'
+import { useGetSchema } from 'actions/schema'
+import { useGetCurrentUser } from 'actions/user'
+import { useRouter } from 'next/router'
+import { type ChangeEvent, useContext, useEffect, useMemo, useState } from 'react'
+import LabelledInput from 'src/common/LabelledInput'
+import LimitedTextField from 'src/common/LimitedTextField'
+import Title from 'src/common/Title'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import SchemaFormPage from 'src/schemas/SchemaFormPage'
+import SchemaSelect from 'src/schemas/SchemaSelect'
+import { SchemaKind, type SplitSchemaNoRender } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
+import { getStepsData, getStepsFromSchema, removeEmptyValues, setStepValidate, validateForm } from 'utils/formUtils'
+
+export default function NewDeploymentAssessment() {
+  const router = useRouter()
+  const { schemaId }: { schemaId?: string } = router.query
+
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(schemaId || '')
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [name, setName] = useState('')
+  const [errorText, setErrorText] = useState('')
+  const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+  const [draftButtonLoading, setDraftButtonLoading] = useState(false)
+  const [formValidationErrorState, setFormValidationErrorState] = useState(false)
+
+  const isFormLoading = useMemo(() => isSchemaLoading || isCurrentUserLoading, [isSchemaLoading, isCurrentUserLoading])
+
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
+  useEffect(() => {
+    if (!schema || !currentUser) {
+      return
+    }
+
+    const defaultState = {
+      signOff: {
+        riskOwners: [`user:${currentUser.dn}`],
+      },
+    }
+
+    const steps = getStepsFromSchema(schema, {}, [], defaultState)
+    for (const step of steps) {
+      step.steps = steps
+    }
+
+    setSplitSchema({ reference: schema.id, steps })
+  }, [schema, currentUser])
+
+  // Picking a different schema starts a new form, so stop highlighting errors until it is submitted
+  useEffect(() => {
+    setFormValidationErrorState(false)
+  }, [schemaId])
+
+  async function onSaveDraft() {
+    setErrorText('')
+    setDraftButtonLoading(true)
+    setUnsavedChanges(false)
+
+    if (!schemaId) {
+      setErrorText('Please wait until the page has finished loading before attempting to save.')
+      setDraftButtonLoading(false)
+      return
+    }
+
+    const data = getStepsData(splitSchema, true)
+    const res = await postDeploymentAssessment(name, schemaId, removeEmptyValues(data), true)
+
+    if (!res.ok) {
+      setErrorText(await getErrorMessage(res))
+      setDraftButtonLoading(false)
+      return
+    }
+
+    setDraftButtonLoading(false)
+
+    const body = await res.json()
+    router.push(`/deployment-assessments/${body.deploymentAssessment.id}`)
+  }
+
+  async function onSubmit() {
+    setErrorText('')
+    setSubmitButtonLoading(true)
+    setUnsavedChanges(false)
+    setFormValidationErrorState(false)
+
+    if (!schemaId) {
+      setErrorText('Please wait until the page has finished loading before attempting to publish.')
+      setSubmitButtonLoading(false)
+      return
+    }
+
+    for (const step of splitSchema.steps) {
+      setStepValidate(splitSchema, setSplitSchema, step, true)
+    }
+
+    for (const step of splitSchema.steps) {
+      const isValid = validateForm(step)
+
+      if (!isValid) {
+        setErrorText('Please make sure that all sections have been completed.')
+        setSubmitButtonLoading(false)
+        setFormValidationErrorState(true)
+        return
+      }
+    }
+
+    const data = getStepsData(splitSchema, true)
+    const res = await postDeploymentAssessment(name, schemaId, data, false)
+
+    if (!res.ok) {
+      setErrorText(await getErrorMessage(res))
+      setSubmitButtonLoading(false)
+      return
+    }
+
+    const body = await res.json()
+    router.push(`/deployment-assessments/${body.deploymentAssessment.id}`)
+  }
+
+  useEffect(() => {
+    if (schemaId) {
+      setUnsavedChanges(true)
+    }
+  }, [schemaId, setUnsavedChanges])
+
+  const error = MultipleErrorWrapper('Unable to load Deployment Assessment page', {
+    isSchemaError,
+    isCurrentUserError,
+  })
+  if (error) {
+    return error
+  }
+
+  if (!schemaId) {
+    return (
+      <>
+        <Title text='Select a schema' />
+        <SchemaSelect schemaKind={SchemaKind.DEPLOYMENT_ASSESSMENT} />
+      </>
+    )
+  }
+
+  return (
+    <SchemaFormPage
+      title='New Deployment Assessment'
+      isLoading={isFormLoading}
+      splitSchema={splitSchema}
+      setSplitSchema={setSplitSchema}
+      backHref='/deployment-assessments/new'
+      backLabel='Select a different schema'
+      onSubmit={onSubmit}
+      submitButtonText='Publish'
+      submitButtonLoading={submitButtonLoading}
+      formValidationErrorState={formValidationErrorState}
+      errorText={errorText}
+      onSaveDraft={onSaveDraft}
+      draftButtonLoading={draftButtonLoading}
+      disableActions={!name ? 'Please enter a Deployment Assessment name' : undefined}
+      // Drafts can be saved with unanswered questions, so only validate when submitted for review
+      liveValidation={false}
+    >
+      <LabelledInput fullWidth label='Deployment Assessment Name' htmlFor='deployment-assessment-name'>
+        <LimitedTextField
+          fullWidth
+          size='small'
+          id='deployment-assessment-name'
+          value={name}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+        />
+      </LabelledInput>
+    </SchemaFormPage>
+  )
+}

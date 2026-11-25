@@ -40,7 +40,7 @@ export default function SchemaTab() {
         </Link>
       </Box>
       <Stack sx={{ m: 2 }} spacing={2}>
-        <Select sx={{ width: '200px', height: 'fit-content' }} onChange={handleSchemaOnChange} value={selectedCategory}>
+        <Select sx={{ width: '230px', height: 'fit-content' }} onChange={handleSchemaOnChange} value={selectedCategory}>
           {listButtons}
         </Select>
         {schemaLists}

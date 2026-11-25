@@ -5,6 +5,7 @@ import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
 import Person from '@mui/icons-material/Person'
 import Settings from '@mui/icons-material/Settings'
+import SettingsSuggestTwoToneIcon from '@mui/icons-material/SettingsSuggestTwoTone'
 import {
   Box,
   Button,
@@ -23,8 +24,9 @@ import { alpha, styled, useTheme } from '@mui/material/styles'
 import { visuallyHidden } from '@mui/utils'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { type CSSProperties, type MouseEvent, useMemo, useState } from 'react'
+import { type CSSProperties, type MouseEvent, useContext, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
+import UiConfigContext from 'src/contexts/uiConfigContext'
 import DocsSearch from 'src/docs/DocsSearch'
 import DocsSearchDialog from 'src/docs/DocsSearchDialog'
 
@@ -72,6 +74,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
 
   const router = useRouter()
   const theme = useTheme()
+  const uiConfig = useContext(UiConfigContext)
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
@@ -194,6 +197,14 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
                       </MenuItem>
+                      {uiConfig.syOps.enabled && (
+                        <MenuItem component='a' href={uiConfig.syOps.href} data-test='syOpsLink' role='menuitem'>
+                          <ListItemIcon>
+                            <SettingsSuggestTwoToneIcon fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>SyOps</ListItemText>
+                        </MenuItem>
+                      )}
                       <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
                         <ListItemIcon>
                           <LogoutIcon fontSize='small' />
@@ -283,6 +294,14 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
                       </MenuItem>
+                      {uiConfig.syOps.enabled && (
+                        <MenuItem component='a' href={uiConfig.syOps.href} data-test='syOpsLink' role='menuitem'>
+                          <ListItemIcon>
+                            <SettingsSuggestTwoToneIcon fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>SyOps</ListItemText>
+                        </MenuItem>
+                      )}
                       <MenuItem component='a' href='/api/logout' data-test='logoutLink' role='menuitem'>
                         <ListItemIcon>
                           <LogoutIcon fontSize='small' />

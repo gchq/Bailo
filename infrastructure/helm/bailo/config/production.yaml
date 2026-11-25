@@ -61,9 +61,11 @@ smtp:
     host: {{ include "bailo.mail.host" . }}
     port: {{ .Values.config.smtp.port }}
     secure: {{ .Values.config.smtp.secure }}
+    {{- if .Values.config.smtp.user }}
     auth:
-      user: {{ .Values.config.smtp.user }}
-      pass: {{ .Values.config.smtp.pass }}
+      user: {{ .Values.config.smtp.user | quote }}
+      pass: {{ .Values.config.smtp.pass | quote }}
+    {{- end }}
     tls:
       rejectUnauthorized: {{ .Values.config.smtp.rejectUnauthorized }}
   lifecycle:
@@ -74,6 +76,8 @@ log:
   level: {{ .Values.config.log.level }}
 session:
   secret: {{ .Values.cookie.secret }}
+personalAccessToken:
+  lifetime: {{ .Values.config.personalAccessToken.lifetime | quote }}
 oauth:
   provider: cognito
   grant:
@@ -100,13 +104,17 @@ oauth:
 ui:
   banner:
     enabled: {{ .Values.config.ui.banner.enabled }}
-    text: {{ .Values.config.ui.banner.text }}
-    colour: {{ .Values.config.ui.banner.colour }}
-    textColor: {{ .Values.config.ui.banner.textColor}}
+    text: {{ .Values.config.ui.banner.text | quote }}
+    colour: {{ .Values.config.ui.banner.colour | quote }}
+    textColor: {{ .Values.config.ui.banner.textColor | quote}}
   announcement:
     enabled: {{ .Values.config.ui.announcement.enabled }}
+    title: {{ toJson .Values.config.ui.announcement.title }}
     text: {{ .Values.config.ui.announcement.text }}
+    description: {{ toJson .Values.config.ui.announcement.description }}
     startTimestamp: {{ .Values.config.ui.announcement.startTimestamp }}
+    severity: {{ .Values.config.ui.announcement.severity }}
+    links: {{ toJson .Values.config.ui.announcement.links }}
   issues:
     label: Bailo Support Team
     supportHref: {{ .Values.config.issueLinks.support }}
@@ -141,6 +149,8 @@ ui:
     untrustedModelLongDescription: {{ .Values.config.ui.untrustedModel.untrustedModelLongDescription }}
     untrustedModelShortDescription: {{ .Values.config.ui.untrustedModel.untrustedModelShortDescription }}
     fileUploadGuidance: {{ .Values.config.ui.untrustedModel.fileUploadGuidance }}
+  deploymentAssessments:
+    deployableModelState: {{ toJson .Values.config.ui.deploymentAssessments.deployableModelState }}
   lifecycle:
     maxReviewInterval: {{ .Values.config.ui.lifecycle.maxReviewInterval }}
 connectors:

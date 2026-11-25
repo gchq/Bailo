@@ -1,0 +1,58 @@
+import { type Request, type Response } from 'express'
+
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { z } from '../../../lib/zod.js'
+import { getDeploymentAssessmentDetails } from '../../../services/deploymentAssessment.js'
+import {
+  deploymentAssessmentInterfaceSchema,
+  deploymentAssessmentResponseSchema,
+  registerPath,
+} from '../../../services/specification.js'
+import { parse } from '../../../utils/validate.js'
+
+export const getDeploymentAssessmentSchema = z.object({
+  params: z.object({
+    deploymentAssessmentId: z.string(),
+  }),
+})
+
+registerPath(
+  {
+    method: 'get',
+    path: '/api/v3/deployment-assessments/{deploymentAssessmentId}',
+    tags: ['deployment assessments'],
+    description: 'Get a Deployment Assessment.',
+    schema: getDeploymentAssessmentSchema,
+    responses: {
+      200: {
+        description: 'A Deployment Assessment.',
+        content: {
+          'application/json': {
+            schema: z.object({
+              deploymentAssessment: deploymentAssessmentInterfaceSchema,
+              responses: z.array(deploymentAssessmentResponseSchema),
+            }),
+          },
+        },
+      },
+    },
+  },
+  'v3',
+)
+
+export const getDeploymentAssessment = [
+  async (req: Request, res: Response): Promise<void> => {
+    req.audit = AuditInfo.ViewDeploymentAssessment
+    const { params } = parse(req, getDeploymentAssessmentSchema)
+
+    const { deploymentAssessment, responses } = await getDeploymentAssessmentDetails(
+      req.user,
+      params.deploymentAssessmentId,
+    )
+
+    await audit.onViewDeploymentAssessment(req, deploymentAssessment)
+
+    res.json({ deploymentAssessment, responses })
+  },
+]

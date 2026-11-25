@@ -1,6 +1,7 @@
 import { type Request } from 'express'
 
 import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type DeploymentAssessmentDoc } from '../../models/DeploymentAssessment.js'
 import { type FileInterface, type FileInterfaceDoc, type FileWithScanResultsAggregate } from '../../models/File.js'
 import { type InferenceDoc } from '../../models/Inference.js'
 import { type ModelCardInterface, type ModelDoc, type ModelInterface } from '../../models/Model.js'
@@ -11,7 +12,9 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
+import { type WebhookDoc } from '../../models/Webhook.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
+import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
@@ -438,6 +441,45 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  async onCreateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.checkEventType(AuditInfo.CreateDeploymentAssessment, req)
+    const event = this.generateEvent(req, { id: deploymentAssessment.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.checkEventType(AuditInfo.UpdateDeploymentAssessment, req)
+    const event = this.generateEvent(req, { id: deploymentAssessment.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.checkEventType(AuditInfo.DeleteDeploymentAssessment, req)
+    const event = this.generateEvent(req, { id: deploymentAssessment.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onSearchDeploymentAssessments(req: Request, deploymentAssessments: DeploymentAssessmentSummary[]) {
+    this.checkEventType(AuditInfo.SearchDeploymentAssessments, req)
+    const event = this.generateEvent(req, {
+      url: req.originalUrl,
+      results: deploymentAssessments.map((deploymentAssessment) => deploymentAssessment.id),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void> {
+    this.checkEventType(AuditInfo.ViewDeploymentAssessment, req)
+    const event = this.generateEvent(req, { id: deploymentAssessment.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
+    this.checkEventType(AuditInfo.CommentOnDeploymentAssessment, req)
+    const event = this.generateEvent(req, { deploymentAssessmentId: response.parentId })
+    req.log.info(event, req.audit.description)
+  }
+
   async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
     this.checkEventType(AuditInfo.ViewCurrentUserInformation, req)
     const event = this.generateEvent(req, { userDn: userInformation.user.dn })
@@ -465,6 +507,32 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   async onRegistryImageDeleted(req: Request, registryImage: string): Promise<void> {
     this.checkEventType(AuditInfo.RegistryImageDeleted, req)
     const event = this.generateEvent(req, { registryImage })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onCreateWebhook(req: Request, webhook: WebhookDoc) {
+    this.checkEventType(AuditInfo.CreateWebhook, req)
+    const event = this.generateEvent(req, { modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onViewWebhooks(req: Request, webhooks: WebhookDoc[]) {
+    this.checkEventType(AuditInfo.ViewWebhooks, req)
+    const event = this.generateEvent(req, {
+      results: webhooks.map((webhook) => ({ modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onUpdateWebhook(req: Request, webhook: WebhookDoc) {
+    this.checkEventType(AuditInfo.UpdateWebhook, req)
+    const event = this.generateEvent(req, { modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })
+    req.log.info(event, req.audit.description)
+  }
+
+  async onDeleteWebhook(req: Request, webhook: WebhookDoc) {
+    this.checkEventType(AuditInfo.DeleteWebhook, req)
+    const event = this.generateEvent(req, { modelId: webhook.modelId, webhookId: webhook.id, name: webhook.name })
     req.log.info(event, req.audit.description)
   }
 

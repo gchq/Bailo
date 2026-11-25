@@ -43,7 +43,7 @@ import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
 import { cancelLifecycleJobsForModel } from './schedule/scheduler.js'
-import { getSchemaById, validateContentAgainstSchema } from './schema.js'
+import { checkSchemaKind, getSchemaById, getSchemaKindForEntryKind, validateContentAgainstSchema } from './schema.js'
 import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
@@ -179,6 +179,8 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
+
+  // TODO: future work to handle how DAs that reference this model are cleaned up
 
   const [
     allModelReviews,
@@ -405,8 +407,22 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     query['settings.allowTemplating'] = true
   }
 
+  if (opts.visibility) {
+    query.visibility = opts.visibility
+  }
+
   if (opts.users?.length) {
-    query['collaborators.entity'] = { $all: opts.users }
+    const usersAndGroupMembers = (
+      await Promise.all(
+        opts.users.map(async (entity) =>
+          entity.startsWith('group:')
+            ? [entity, ...(await authentication.getEntityMembers(entity))]
+            : authentication.getEntityMembers(entity),
+        ),
+      )
+    ).flat()
+
+    query['collaborators.entity'] = { $all: usersAndGroupMembers }
   }
 
   if (opts.filters && opts.filters.length > 0) {
@@ -580,7 +596,9 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, model.state)
+  const { valid, errors } = await validateContentAgainstSchema(model.card.schemaId, metadata, {
+    modelState: model.state,
+  })
   if (!valid) {
     throw BadReq(
       `Model metadata could not be validated against the schema${model.state && `, for ${model.state} state`}.`,
@@ -638,7 +656,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
       model.kind === EntryKind.MirroredModel && model.mirroredCard?.metadata
         ? deepMergePreferFirst(model.card.metadata, model.mirroredCard?.metadata)
         : model.card.metadata
-    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, modelDiff.state)
+    const { valid } = await validateContentAgainstSchema(model.card.schemaId, card, { modelState: modelDiff.state })
 
     if (!valid) {
       throw BadReq(`Model metadata could not be validated against the schema, for ${modelDiff.state} state.`)
@@ -724,6 +742,7 @@ export async function createModelCardFromSchema(
   if (schema.hidden) {
     throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
   }
+  checkSchemaKind(schema, getSchemaKindForEntryKind(model.kind))
 
   // Check schema review roles for any default entities
   const reviewRolesForSchema = await ReviewRoleModel.find({ shortName: schema.reviewRoles })
@@ -772,6 +791,8 @@ export async function createModelCardFromTemplate(
   if (!template.card?.schemaId) {
     throw BadReq('The template model is missing a model card', { modelId, templateId })
   }
+  const templateSchema = await getSchemaById(template.card.schemaId)
+  checkSchemaKind(templateSchema, getSchemaKindForEntryKind(model.kind))
   const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
   return revision
 }
@@ -963,4 +984,38 @@ export function getRoleEntities<T extends string>(
     },
     {} as Record<T, string[]>,
   )
+}
+
+export async function getModelsByIds(
+  user: UserInterface,
+  modelIds: string[],
+  kinds?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc[]> {
+  const models = await getModelsByIdsNoAuth(modelIds, kinds)
+
+  const auths = await authorisation.models(user, models, ModelAction.View)
+  return models.filter((_, i) => auths[i].success)
+}
+
+export async function getModelsByIdsNoAuth(
+  modelIds: string[],
+  kinds?: EntryKindKeys[] | EntryKindKeys,
+): Promise<ModelDoc[]> {
+  const kindArray = kinds ? (Array.isArray(kinds) ? kinds : [kinds]) : undefined
+
+  const models = await ModelModel.find({
+    id: { $in: modelIds },
+    ...(kindArray && { kind: { $in: kindArray } }),
+  })
+
+  const foundModelIds = new Set(models.map((model) => model.id))
+  const missingModelIds = modelIds.filter((modelId) => !foundModelIds.has(modelId))
+
+  if (missingModelIds.length > 0) {
+    throw NotFound('Some requested entries were not found.', {
+      missingModelIds,
+    })
+  }
+
+  return models
 }

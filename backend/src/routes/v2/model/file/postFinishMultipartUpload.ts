@@ -20,7 +20,7 @@ export const postFinishMultipartUploadSchema = z.object({
         .array(
           z.object({
             ETag: z.string(),
-            PartNumber: z.number(),
+            PartNumber: z.number().finite(),
           }),
         )
         .min(1),

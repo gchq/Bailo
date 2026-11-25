@@ -1,5 +1,7 @@
 import { type Request, type Response } from 'express'
 
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { registerPath } from '../../../../services/specification.js'
 import { removeWebhook } from '../../../../services/webhook.js'
@@ -38,11 +40,14 @@ interface DeleteWebhookResponse {
 
 export const deleteWebhook = [
   async (req: Request, res: Response<DeleteWebhookResponse>): Promise<void> => {
+    req.audit = AuditInfo.DeleteWebhook
     const {
       params: { modelId, webhookId },
     } = parse(req, deleteWebhookSchema)
 
-    await removeWebhook(req.user, modelId, webhookId)
+    const webhook = await removeWebhook(req.user, modelId, webhookId)
+
+    await audit.onDeleteWebhook(req, webhook)
 
     res.json({
       message: 'Successfully removed file.',

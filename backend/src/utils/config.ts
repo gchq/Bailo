@@ -328,6 +328,12 @@ export interface Config {
     secret: string
   }
 
+  /** ### Personal access tokens */
+  personalAccessToken: {
+    /** How long a token stays valid after it was last renewed, as a human-interval string (e.g. '90 days'). An empty string disables expiry */
+    lifetime: string
+  }
+
   /** ### OAuth/OpenID Connect
    *
    * Defines behaviour for user authorisation if the connector is enabled
@@ -377,6 +383,8 @@ export interface Config {
     accessRequests: DefaultSchema[]
     /** Data card schemas that define the data card forms*/
     dataCards: DefaultSchema[]
+    /** Deployment Assessment schemas that define the Deployment Assessment forms */
+    deploymentAssessments: DefaultSchema[]
   }
 
   /** Roles that can be used after startup */

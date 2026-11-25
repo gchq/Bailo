@@ -1,4 +1,5 @@
 import { type AccessRequestDoc } from '../../models/AccessRequest.js'
+import { type DeploymentAssessmentDoc, type DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
 import { type FileInterface } from '../../models/File.js'
 import { EntryKind, EntryVisibility, type ModelDoc } from '../../models/Model.js'
 import { type ReleaseDoc, type ReleaseInterface } from '../../models/Release.js'
@@ -21,6 +22,8 @@ import {
   AccessRequestAction,
   type AccessRequestActionKeys,
   ActionLookup,
+  DeploymentAssessmentAction,
+  type DeploymentAssessmentActionKeys,
   FileAction,
   type FileActionKeys,
   ImageAction,
@@ -98,6 +101,14 @@ export class BasicAuthorisationConnector {
     action: AccessRequestActionKeys,
   ) {
     return (await this.accessRequests(user, model, [accessRequest], action))[0]
+  }
+
+  async deploymentAssessment(
+    user: UserInterface,
+    deploymentAssessment: DeploymentAssessmentDoc,
+    action: DeploymentAssessmentActionKeys,
+  ) {
+    return (await this.deploymentAssessments(user, [deploymentAssessment], action))[0]
   }
 
   async response(user: UserInterface, response: ResponseDoc, action: ResponseActionKeys) {
@@ -335,6 +346,54 @@ export class BasicAuthorisationConnector {
     )
   }
 
+  async deploymentAssessments(
+    user: UserInterface,
+    deploymentAssessments: Array<DeploymentAssessmentInterface>,
+    action: DeploymentAssessmentActionKeys,
+  ): Promise<Array<Response>> {
+    return Promise.all(
+      deploymentAssessments.map(async (deploymentAssessment) => {
+        const isNamedUser =
+          deploymentAssessment.createdBy === user.dn ||
+          (deploymentAssessment.metadata.signOff?.riskOwners ?? []).includes(`user:${user.dn}`)
+
+        let errorInfo: string | undefined
+        switch (action) {
+          case DeploymentAssessmentAction.View: {
+            // Only allow GET requests if the DA is not a draft, otherwise restrict to creator or risk owner
+            if (deploymentAssessment.draft && !isNamedUser) {
+              errorInfo =
+                'You are not the creator or the Deployment Risk Owner of this draft Deployment Assessment, so you do not have permission to view it.'
+            }
+            break
+          }
+          case DeploymentAssessmentAction.Delete: {
+            if (!isNamedUser) {
+              errorInfo = 'You do not have permission to delete this Deployment Assessment.'
+            }
+            break
+          }
+          case DeploymentAssessmentAction.Update: {
+            if (!isNamedUser) {
+              errorInfo = 'You do not have permission to update this Deployment Assessment.'
+            }
+            break
+          }
+        }
+
+        if (errorInfo !== undefined) {
+          return {
+            success: false,
+            info: errorInfo,
+            id: deploymentAssessment.id,
+          }
+        }
+
+        return { success: true, id: deploymentAssessment.id }
+      }),
+    )
+  }
+
   async files(
     user: UserInterface,
     model: ModelDoc,
@@ -345,6 +404,17 @@ export class BasicAuthorisationConnector {
     const hasApprovedAccessRequest = await this.hasApprovedAccessRequest(user, model)
     return Promise.all(
       files.map(async (file) => {
+        // Bind the file to the model it was requested against. Without this a caller can pair a
+        // model they have roles on with a file belonging to another model, and have the action
+        // authorised by the wrong model's roles.
+        if (file.modelId !== model.id) {
+          return {
+            success: false,
+            info: 'The requested file does not belong to this model.',
+            id: file._id.toString(),
+          }
+        }
+
         // Is this a constrained user token.
         const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
         if (!tokenAuth.success) {

@@ -14,6 +14,8 @@ import {
   removeAccessRequests,
   updateAccessRequest,
 } from '../../src/services/accessRequest.js'
+import type * as SchemaService from '../../src/services/schema.js'
+import { SchemaKind } from '../../src/types/enums.js'
 import { type AccessRequestUserPermissions } from '../../src/types/types.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
@@ -32,7 +34,10 @@ const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
   validateContentAgainstSchema: vi.fn(() => ({ valid: true, errors: [] })),
 }))
-vi.mock('../../src/services/schema.js', () => schemaMocks)
+vi.mock('../../src/services/schema.js', async (importOriginal) => {
+  const { checkSchemaKind } = await importOriginal<typeof SchemaService>()
+  return { ...schemaMocks, checkSchemaKind }
+})
 
 const mockAuthentication = vi.hoisted(() => ({
   hasRole: vi.fn(),
@@ -67,7 +72,7 @@ const accessRequest = {
 describe('services > accessRequest', () => {
   test('createAccessRequest > simple', async () => {
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {}, kind: SchemaKind.AccessRequest })
 
     await createAccessRequest({} as any, 'example-model', accessRequest)
 
@@ -85,7 +90,7 @@ describe('services > accessRequest', () => {
     })
 
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {}, kind: SchemaKind.AccessRequest })
 
     await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
       /^You do not have permission/,
@@ -100,7 +105,7 @@ describe('services > accessRequest', () => {
     })
 
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.UntrustedModel } as any)
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {}, kind: SchemaKind.AccessRequest })
 
     await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
       'Cannot create an access request for an untrusted model.',
@@ -116,8 +121,18 @@ describe('services > accessRequest', () => {
     )
   })
 
+  test('createAccessRequest > schema of the wrong kind', async () => {
+    schemaMocks.getSchemaById.mockResolvedValue({ id: 'model-schema', jsonSchema: {}, kind: SchemaKind.Model })
+    modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
+
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrow(
+      /^The schema kind does not match the expected kind./,
+    )
+    expect(AccessRequestModelMock.save).not.toHaveBeenCalled()
+  })
+
   test('createAccessRequest > validation error', async () => {
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {}, kind: SchemaKind.AccessRequest })
     modelMocks.getModelById.mockResolvedValue({ kind: EntryKind.Model } as any)
     schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
 
@@ -315,7 +330,7 @@ describe('services > accessRequest', () => {
   test('updateAccessRequest > success', async () => {
     const user = { dn: 'testUser' } as any
 
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {}, kind: SchemaKind.AccessRequest })
 
     await updateAccessRequest(user, 'test', {})
 
@@ -325,7 +340,7 @@ describe('services > accessRequest', () => {
   test('updateAccessRequest > with metadata', async () => {
     const user = { dn: 'testUser' } as any
 
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {}, kind: SchemaKind.AccessRequest })
     await updateAccessRequest(user, 'test', { metadata: { overview: { name: 'test', entities: user } } })
 
     expect(AccessRequestModelMock.markModified).toHaveBeenCalledOnce()
@@ -340,12 +355,13 @@ describe('services > accessRequest', () => {
       id: '',
     })
 
-    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {}, kind: SchemaKind.AccessRequest })
     await expect(() => updateAccessRequest({} as any, 'test', {} as any)).rejects.toThrow(errorMessage)
   })
 
   test('updateAccessRequest > validation error', async () => {
     schemaMocks.validateContentAgainstSchema.mockResolvedValueOnce({ valid: false, errors: [] })
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'mockedId' })
 
     await expect(() =>
       updateAccessRequest({} as any, 'test', { metadata: { overview: { name: 'test', entities: [] } } } as any),
@@ -359,6 +375,7 @@ describe('services > accessRequest', () => {
       markModified: vi.fn(),
       save: vi.fn(),
     }
+    ReviewModelMock.sort.mockResolvedValue({ _id: 'mockedId' })
     AccessRequestModelMock.findOne.mockResolvedValue(stored as any)
     const diff = { metadata: { overview: { name: 'updated', entities: ['user:testUser'] } } }
 

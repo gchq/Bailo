@@ -8,7 +8,7 @@ import EditableText from 'src/common/EditableText'
 import LabelledValue from 'src/common/LabelledValue'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import UsageListDialog from 'src/schemas/UsageListDialog'
-import { type SchemaInterface } from 'types/types'
+import { type SchemaInterface, SchemaKind } from 'types/types'
 
 interface SchemaListItemProps {
   schema: SchemaInterface
@@ -128,8 +128,18 @@ export default function SchemaListItem({
             <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
               {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
             </MenuItem>
-            <MenuItem onClick={() => setEntriesListOpen(true)}>View schema usage</MenuItem>
-            <MenuItem onClick={() => setReviewRoleSelectorIsOpen(true)}>Update review roles</MenuItem>
+            <MenuItem
+              disabled={schema.kind === SchemaKind.DEPLOYMENT_ASSESSMENT}
+              onClick={() => setEntriesListOpen(true)}
+            >
+              View schema usage
+            </MenuItem>
+            <MenuItem
+              disabled={schema.kind === SchemaKind.DEPLOYMENT_ASSESSMENT}
+              onClick={() => setReviewRoleSelectorIsOpen(true)}
+            >
+              Update review roles
+            </MenuItem>
             <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
           </Menu>
         </Stack>
@@ -139,7 +149,9 @@ export default function SchemaListItem({
         onClose={handleReviewRolesDialogClose}
         schema={schema}
       />
-      <UsageListDialog open={entriesListOpen} schema={schema} onClose={handleEntriesListDialogClose} />
+      {schema.kind !== SchemaKind.DEPLOYMENT_ASSESSMENT && (
+        <UsageListDialog open={entriesListOpen} schema={schema} onClose={handleEntriesListDialogClose} />
+      )}
     </ListItem>
   )
 }

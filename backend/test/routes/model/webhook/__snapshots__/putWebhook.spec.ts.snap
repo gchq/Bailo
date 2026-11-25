@@ -1,3 +1,19 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > webhook > postWebhook > 200 > ok 1`] = `{}`;
+exports[`routes > webhook > postWebhook > 200 > ok 1`] = `
+{
+  "webhook": {
+    "id": "test-webhook",
+    "modelId": "test-model",
+    "name": "test webhook",
+  },
+}
+`;
+
+exports[`routes > webhook > postWebhook > audit > expected call 1`] = `
+{
+  "id": "test-webhook",
+  "modelId": "test-model",
+  "name": "test webhook",
+}
+`;

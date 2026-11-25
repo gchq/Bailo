@@ -17,13 +17,13 @@ import {
   Select,
   type SelectChangeEvent,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
 import React, { type Dispatch, type SetStateAction, useCallback, useMemo, useState } from 'react'
+import LimitedTextField from 'src/common/LimitedTextField'
 import JsonSchemaViewer, { type QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { type CombinedSchema, type QuestionMigration } from 'types/types'
 import { truncateText } from 'utils/stringUtils'
@@ -350,7 +350,7 @@ export default function SchemaMigrator({
                   >
                     Migration name
                   </Typography>
-                  <TextField
+                  <LimitedTextField
                     size='small'
                     value={migrationName}
                     onChange={(e) => setMigrationName(e.target.value)}
@@ -365,7 +365,7 @@ export default function SchemaMigrator({
                   >
                     Migration description (optional)
                   </Typography>
-                  <TextField
+                  <LimitedTextField
                     size='small'
                     multiline
                     label='migration plan description input'

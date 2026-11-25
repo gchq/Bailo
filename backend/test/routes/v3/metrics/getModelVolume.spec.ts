@@ -24,6 +24,8 @@ vi.mock('../../../../src/connectors/metrics/index.js', () => ({
 describe('routes > metrics > getEntryVolume', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getEntryVolumeSchema)
+    fixture.query.startDate = '2026-01-01'
+    fixture.query.endDate = '2026-04-01'
 
     const res = await testGet(`/api/v3/metrics/entryVolume?${querystring.stringify(fixture.query)}`)
 
@@ -33,6 +35,8 @@ describe('routes > metrics > getEntryVolume', () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(getEntryVolumeSchema)
+    fixture.query.startDate = '2026-01-01'
+    fixture.query.endDate = '2026-04-01'
 
     const res = await testGet(`/api/v3/metrics/entryVolume?${querystring.stringify(fixture.query)}`)
 

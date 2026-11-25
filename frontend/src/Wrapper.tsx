@@ -111,7 +111,22 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
               <>
                 {isCurrentUserLoading && <Loading />}
                 {announcementBannerOpen && (
-                  <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
+                  <Box
+                    sx={(theme) => ({
+                      width: `min(1000px, calc(100% - ${theme.spacing(4)}))`,
+                      mx: 'auto',
+                      mt: 2,
+                    })}
+                  >
+                    <Announcement
+                      title={uiConfig.announcement.title}
+                      message={uiConfig.announcement.text}
+                      description={uiConfig.announcement.description}
+                      severity={uiConfig.announcement.severity}
+                      links={uiConfig.announcement.links}
+                      onClose={handleAnnouncementOnClose}
+                    />
+                  </Box>
                 )}
                 <Box
                   sx={{
