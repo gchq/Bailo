@@ -82,22 +82,22 @@ export async function runScans({ file, layerRef }: RunScansParams) {
       artefactKind: ArtefactKind.FILE,
       fileId: file._id.toString(),
     }
-  } else if (layerRef) {
+  } else {
     scanIdentifier = {
       artefactKind: ArtefactKind.IMAGE,
       layerDigest: layerRef.layerDigest,
     }
   }
 
+  const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
+    ...scannerInfo,
+    state: ArtefactScanState.InProgress,
+    lastRunAt: new Date(),
+  }))
+  // Acquire the lock outside the try so that a Conflict never overwrites another run's InProgress state
+  await updateArtefactScanWithResults(scanIdentifier, resultsInprogress)
+
   try {
-    const resultsInprogress: ArtefactScanResult[] = activeScanners.map((scannerInfo) => ({
-      ...scannerInfo,
-      state: ArtefactScanState.InProgress,
-      lastRunAt: new Date(),
-    }))
-
-    await updateArtefactScanWithResults(scanIdentifier, resultsInprogress)
-
     const resultsArray = await scanners.startScans({ ...(file ? { file } : { layerRef }) })
     await updateArtefactScanWithResults(scanIdentifier, resultsArray)
   } catch (error) {
