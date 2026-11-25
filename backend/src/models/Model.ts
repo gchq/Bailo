@@ -157,7 +157,7 @@ const ModelSchema = new Schema<ModelDoc>(
 
 ModelSchema.plugin(searchGramsPlugin, { fields: ModelSearchFields })
 ModelSchema.plugin(softDeletionPlugin)
-ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
+ModelSchema.index({ name: 'text', description: 'text', tags: 'text' }, { weights: { name: 10, description: 5 } })
 ModelSchema.index({ createdAt: 1 })
 ModelSchema.index({ searchGrams: 1 })
 

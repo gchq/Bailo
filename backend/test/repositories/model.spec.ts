@@ -19,8 +19,12 @@ function entry(id: string, name: string, description = 'cats', tags: string[] = 
   return { id, name, description, tags }
 }
 
+function mockSort(results: unknown[]) {
+  return vi.fn().mockReturnValue({ lean: vi.fn().mockResolvedValue(results) })
+}
+
 function mockFindResults(...resultSets: unknown[][]) {
-  const sorts = resultSets.map((results) => vi.fn().mockResolvedValue(results))
+  const sorts = resultSets.map((results) => mockSort(results))
   for (const sort of sorts) {
     ModelModelMock.find.mockReturnValueOnce({ sort })
   }
@@ -30,7 +34,7 @@ function mockFindResults(...resultSets: unknown[][]) {
 describe('repositories > model', () => {
   describe('findModels', () => {
     beforeEach(() => {
-      ModelModelMock.find.mockReturnValue({ sort: vi.fn().mockResolvedValue([]) })
+      ModelModelMock.find.mockReturnValue({ sort: mockSort([]) })
     })
 
     test('applies no filters and sorts by most recently updated when no params are given', async () => {

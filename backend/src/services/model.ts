@@ -328,7 +328,7 @@ export async function searchModels(
         collaborators: model.collaborators,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
-        sourceModelId: model.settings.mirror.sourceModelId,
+        sourceModelId: model.settings?.mirror?.sourceModelId,
         visibility: model.visibility,
       })),
     )
@@ -881,11 +881,11 @@ export async function getCurrentUserPermissionsByModel(
   }
 }
 
-export async function getModelSystemRoles(user: UserInterface, model: ModelDoc): Promise<string[]> {
+export async function getModelSystemRoles(user: UserInterface, model: ModelInterface): Promise<string[]> {
   const entities = await authentication.getEntities(user)
   const normalisedEntities = entities.map((entity) => entity.toLowerCase())
 
-  return model.collaborators
+  return (model.collaborators ?? [])
     .filter((collaborator) => normalisedEntities.includes(collaborator.entity.toLowerCase()))
     .map((collaborator) => collaborator.roles)
     .flat()

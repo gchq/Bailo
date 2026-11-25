@@ -1,11 +1,6 @@
 import { registerPath } from '../../../services/specification.js'
 import { getModelsSearch, getModelsSearchPathSpec, getModelsSearchSchema } from '../../v3/model/getModelsSearch.js'
 
-registerPath({
-  ...getModelsSearchPathSpec,
-  deprecated: true,
-  description: 'Deprecated: use /api/v3/models/search.',
-  path: '/api/v2/models/search',
-})
+registerPath({ ...getModelsSearchPathSpec, path: '/api/v2/models/search' })
 
 export { getModelsSearch, getModelsSearchSchema }

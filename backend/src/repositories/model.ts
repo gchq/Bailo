@@ -93,21 +93,21 @@ function buildModelsQuery(params: SearchModelsParams): QueryFilter<ModelInterfac
  *  - stemmed: the full text index, which also covers card contents, appended after the fuzzy matches (unless titleOnly)
  * Without a search term, results are ordered by most recently updated.
  */
-export async function findModels(params: SearchModelsParams): Promise<ModelDoc[]> {
+export async function findModels(params: SearchModelsParams): Promise<ModelInterface[]> {
   const query = buildModelsQuery(params)
   const queryGrams = params.search ? toSearchGrams(params.search) : []
 
-  // A term with no letters or digits has no grams, so it must not fall back to matching every entry
-  let results: ModelDoc[] =
+  let results: ModelInterface[] =
     params.search && !queryGrams.length
       ? []
-      : await ModelModel.find<ModelDoc>(
+      : await ModelModel.find(
           queryGrams.length ? { ...query, searchGrams: { $in: queryGrams } } : query,
           searchProjection,
-        ).sort({ updatedAt: -1 })
+        )
+          .sort({ updatedAt: -1 })
+          .lean<ModelInterface[]>()
 
   if (queryGrams.length) {
-    // The sort is stable, so equally similar entries stay in updatedAt order
     results = results
       .map((model) => ({
         model,
@@ -119,10 +119,9 @@ export async function findModels(params: SearchModelsParams): Promise<ModelDoc[]
   }
 
   if (params.search && !params.titleOnly) {
-    const fullTextResults = await ModelModel.find<ModelDoc>(
-      { ...query, $text: { $search: params.search } },
-      searchProjection,
-    ).sort({ score: { $meta: 'textScore' } })
+    const fullTextResults = await ModelModel.find({ ...query, $text: { $search: params.search } }, searchProjection)
+      .sort({ score: { $meta: 'textScore' } })
+      .lean<ModelInterface[]>()
 
     const alreadyFound = new Set(results.map((model) => model.id))
     results = results.concat(fullTextResults.filter((model) => !alreadyFound.has(model.id)))

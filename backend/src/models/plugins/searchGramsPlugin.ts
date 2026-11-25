@@ -1,4 +1,4 @@
-import { type MongooseDefaultQueryMiddleware, type Query, type Schema, type Types } from 'mongoose'
+import { type Document, type MongooseDefaultQueryMiddleware, type Query, type Schema, type Types } from 'mongoose'
 
 import { toEntrySearchGrams, touchesSearchFields } from '../../utils/search.js'
 
@@ -26,9 +26,23 @@ const pendingIds = new WeakMap<object, Types.ObjectId[]>()
 export function searchGramsPlugin(schema: Schema, { fields }: SearchGramsOptions) {
   const projection = Object.fromEntries([...fields, '_id'].map((field) => [field, 1]))
 
-  // searchGrams is not selected by default, so always rebuild it rather than relying on isModified
-  schema.pre('save', function searchGramsPreSave(this: Record<string, unknown>) {
-    this.searchGrams = toEntrySearchGrams(this, fields)
+  // A document loaded with a projection is missing some fields, so read those from the stored copy rather
+  // than letting them drop out of the grams. An unselected field cannot have been modified, so this is current.
+  schema.pre('save', async function searchGramsPreSave(this: Document & Record<string, unknown>) {
+    const unselected = fields.filter((field) => !this.isSelected(field))
+    const stored = unselected.length
+      ? await this.collection.findOne(
+          { _id: this._id },
+          {
+            projection: Object.fromEntries(unselected.map((field) => [field, 1])),
+            session: this.$session() ?? undefined,
+          },
+        )
+      : null
+    const entry = Object.fromEntries(
+      fields.map((field) => [field, unselected.includes(field) ? stored?.[field] : this.get(field)]),
+    )
+    this.searchGrams = toEntrySearchGrams(entry, fields)
   })
 
   schema.pre<UpdateQuery>(queryUpdateMethods, async function searchGramsPreUpdate() {
