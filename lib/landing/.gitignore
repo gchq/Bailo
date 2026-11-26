@@ -42,6 +42,7 @@ src/Link.tsx
 src/docs
 src/common/Title.tsx
 src/common/MarkdownDisplay.tsx
+utils
 
 pages/docs
 pages/accessibility

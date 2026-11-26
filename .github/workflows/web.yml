@@ -38,8 +38,15 @@ jobs:
           filters: |
             relevant:
               - 'backend/**'
+              - 'frontend/actions/**'
               - 'frontend/pages/docs/**'
+              - 'frontend/pages/accessibility/**'
+              - 'frontend/public/**'
+              - 'frontend/src/**'
+              - 'frontend/types/**'
+              - 'frontend/utils/**'
               - 'lib/landing/**'
+              - 'lib/python/**'
               - '.github/workflows/web.yml'
 
   sphinx:
