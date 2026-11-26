@@ -80,7 +80,10 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
   const router = useRouter()
   const theme = useTheme()
   const uiConfig = useContext(UiConfigContext)
-  const showChristmas = uiConfig.christmas.enabled && new Date().getMonth() === 11
+  const today = new Date()
+  const month = today.getMonth()
+  const showChristmas =
+    uiConfig.christmas.enabled && ((month === 11 && today.getDate() >= 1) || (month === 0 && today.getDate() <= 5))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
