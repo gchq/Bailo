@@ -13,7 +13,6 @@ import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
 
 vi.mock('../../src/connectors/artefactScanning/index.js')
-vi.mock('../../src/utils/transactions.js')
 
 const ScanModelMock = getTypedModelMock('ScanModel')
 
@@ -409,6 +408,50 @@ describe('services > scan', () => {
       const bulkOps: any = ScanModelMock.bulkWrite.mock.calls.flatMap((c) => c[0])
       const update = bulkOps[0].updateOne.update
       expect(update.$set).toMatchObject(result)
+    })
+
+    test('sets locks acquired before a conflict to Error', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const results: ArtefactScanResult[] = ['Trivy', 'ModelScan'].map((toolName) => ({
+        toolName,
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }))
+      ScanModelMock.bulkWrite.mockRejectedValueOnce({ code: 11000, writeErrors: [{ index: 1 }] })
+
+      await expect(updateArtefactScanWithResults(scanIdentifier, results)).rejects.toThrow('Scan already in progress')
+
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalledTimes(2)
+      expect(ScanModelMock.bulkWrite.mock.calls[1][0]).toEqual([
+        {
+          updateOne: {
+            filter: { ...scanIdentifier, toolName: 'Trivy' },
+            update: { $set: { state: ArtefactScanState.Error, lastRunAt: expect.any(Date) } },
+          },
+        },
+      ])
+    })
+
+    test('does not release any locks when the first lock conflicts', async () => {
+      const scanIdentifier = {
+        artefactKind: ArtefactKind.IMAGE,
+        layerDigest: 'sha256:test-layer',
+      }
+      const result: ArtefactScanResult = {
+        toolName: 'Trivy',
+        artefactKind: ArtefactKind.IMAGE,
+        state: ArtefactScanState.InProgress,
+        lastRunAt: new Date(),
+      }
+      ScanModelMock.bulkWrite.mockRejectedValueOnce({ code: 11000, writeErrors: { index: 0 } })
+
+      await expect(updateArtefactScanWithResults(scanIdentifier, [result])).rejects.toThrow('Scan already in progress')
+
+      expect(ScanModelMock.bulkWrite).toHaveBeenCalledOnce()
     })
   })
 })
