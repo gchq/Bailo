@@ -456,10 +456,9 @@ describe('services > model', () => {
 
     await searchModels(user, searchParams)
 
-    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
-    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:bob')
+    expect(authenticationMocks.getEntityMembers).not.toHaveBeenCalled()
     expect(ModelModelMock.find).toHaveBeenCalledWith(
-      expect.objectContaining({ 'collaborators.entity': { $all: ['user:alice', 'user:bob'] } }),
+      expect.objectContaining({ $and: [{ 'collaborators.entity': { $all: ['user:alice', 'user:bob'] } }] }),
       expect.anything(),
     )
   })
@@ -484,11 +483,128 @@ describe('services > model', () => {
 
     await searchModels(user, searchParams)
 
-    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('user:alice')
+    expect(authenticationMocks.getEntityMembers).toHaveBeenCalledTimes(1)
     expect(authenticationMocks.getEntityMembers).toHaveBeenCalledWith('group:devs')
     expect(ModelModelMock.find).toHaveBeenCalledWith(
       expect.objectContaining({
-        'collaborators.entity': { $all: ['user:alice', 'group:devs', 'user:bob', 'user:carol'] },
+        $and: [
+          { 'collaborators.entity': { $in: ['group:devs', 'user:bob', 'user:carol'] } },
+          { 'collaborators.entity': { $all: ['user:alice'] } },
+        ],
+      }),
+      expect.anything(),
+    )
+    expect(ModelModelMock.find.mock.calls[0][0]).not.toHaveProperty(['collaborators.entity'])
+  })
+
+  test('searchModels > users filter keeps each group separate so every group must be matched', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+    authenticationMocks.getEntityMembers.mockImplementation((entity: string) =>
+      Promise.resolve(entity === 'group:a' ? ['user:x'] : ['user:y']),
+    )
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['user:alice', 'group:a', 'group:b'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        $and: [
+          { 'collaborators.entity': { $in: ['group:a', 'user:x'] } },
+          { 'collaborators.entity': { $in: ['group:b', 'user:y'] } },
+          { 'collaborators.entity': { $all: ['user:alice'] } },
+        ],
+      }),
+      expect.anything(),
+    )
+  })
+
+  test('searchModels > users filter with group only', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+    authenticationMocks.getEntityMembers.mockResolvedValueOnce(['user:bob', 'user:carol'])
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['group:devs'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        $and: [{ 'collaborators.entity': { $in: ['group:devs', 'user:bob', 'user:carol'] } }],
+      }),
+      expect.anything(),
+    )
+  })
+
+  test('searchModels > users filter with group that has no members matches the group only', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+    authenticationMocks.getEntityMembers.mockResolvedValueOnce([])
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['group:empty'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({ $and: [{ 'collaborators.entity': { $in: ['group:empty'] } }] }),
+      expect.anything(),
+    )
+  })
+
+  test('searchModels > users filter combined with mine filter keeps both conditions', async () => {
+    const user: any = { dn: 'test' }
+    ModelModelMock.sort.mockResolvedValueOnce([])
+    authenticationMocks.getEntityMembers.mockResolvedValueOnce(['user:bob'])
+    authenticationMocks.getEntities.mockReturnValue(['user'])
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: ['model'],
+      libraries: [],
+      filters: ['mine'],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+      users: ['user:alice', 'group:devs'],
+    }
+
+    await searchModels(user, searchParams)
+
+    expect(ModelModelMock.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        $and: [
+          { 'collaborators.entity': { $in: ['group:devs', 'user:bob'] } },
+          { 'collaborators.entity': { $all: ['user:alice'] } },
+        ],
+        collaborators: { $elemMatch: { entity: { $in: ['user'] } } },
       }),
       expect.anything(),
     )
