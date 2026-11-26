@@ -39,7 +39,10 @@ export default function AccessRequest() {
     modelId,
     accessRequestId,
   })
-  const { mutateResponses } = useGetResponses([...reviews.map((review) => review._id)])
+  const { mutateResponses } = useGetResponses([
+    accessRequest ? accessRequest._id : '',
+    ...reviews.map((review) => review._id),
+  ])
   const { reviewCountHeader, isReviewsLoading: isReviewCountLoading } = useHeadReviewRequestsForModel({
     modelId: modelId as string,
     accessRequestId: accessRequestId as string,
