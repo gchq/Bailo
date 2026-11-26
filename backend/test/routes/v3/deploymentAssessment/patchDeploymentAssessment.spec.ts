@@ -34,6 +34,7 @@ describe('routes > v3 > deploymentAssessment > patchDeploymentAssessment', () =>
     const fixture = createFixture(patchDeploymentAssessmentSchema) as any
 
     delete fixture.body.draft
+    fixture.body.name = 'test'
     const res = await testPatch(`/api/v3/deployment-assessments/${fixture.params.deploymentAssessmentId}`, fixture)
 
     expect(res.statusCode).toEqual(200)
