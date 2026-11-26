@@ -310,6 +310,7 @@ export default function Marketplace() {
     setSelectedStates([])
     setSelectedRoles([])
     setSelectedPeers([])
+    setUpdatedUsers([])
     setFilter('')
     setTitleOnly(false)
     setSelectedKinds(availableModelKinds)
