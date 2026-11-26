@@ -251,6 +251,7 @@ export default function ReviewWithComment({
                 <Button
                   disabled={decision === undefined}
                   onClick={handleSubmitOnClick}
+                  loading={loading}
                   variant='contained'
                   data-test='submitReviewButton'
                 >

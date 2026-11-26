@@ -23,6 +23,10 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
     return queryState
   }
 
+  if (!release) {
+    return <></>
+  }
+
   return (
     <>
       <Stack
@@ -35,7 +39,7 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
       >
         <Box sx={{ width: '100%' }}>
           <DraftBanner text='This is a draft release' draft={release.draft} showButton={false} />
-          <ReviewBanner release={release} />
+          {!release.draft && <ReviewBanner release={release} />}
           <Stack
             spacing={1}
             sx={{

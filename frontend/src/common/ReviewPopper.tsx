@@ -46,7 +46,7 @@ export default function ReviewPopper({
   onReviewCommentChange,
   buttonSize = 'medium',
   buttonVariant = 'contained',
-  buttonText = 'Submit reivew',
+  buttonText = 'Submit review',
   hideButtonIcon = false,
   hideRequestChangesButton = false,
   popperPlacement = 'bottom-start',

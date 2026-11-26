@@ -39,9 +39,7 @@ export default function AccessRequest() {
     modelId,
     accessRequestId,
   })
-  const { responses, isResponsesLoading, isResponsesError, mutateResponses } = useGetResponses([
-    ...reviews.map((review) => review._id),
-  ])
+  const { mutateResponses } = useGetResponses([...reviews.map((review) => review._id)])
   const { reviewCountHeader, isReviewsLoading: isReviewCountLoading } = useHeadReviewRequestsForModel({
     modelId: modelId as string,
     accessRequestId: accessRequestId as string,
@@ -80,13 +78,12 @@ export default function AccessRequest() {
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
     isReviewsError,
-    isResponsesError,
   })
   if (error) {
     return error
   }
 
-  if (isReviewsLoading || isResponsesLoading || isReviewCountLoading) {
+  if (isReviewsLoading || isReviewCountLoading) {
     return <Loading />
   }
   return (
@@ -159,7 +156,6 @@ export default function AccessRequest() {
                   kind={ReviewKind.ACCESS}
                   isEdit={isEdit}
                   mutator={mutateAccessRequest}
-                  responseList={responses}
                 />
               </Stack>
             </>

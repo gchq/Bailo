@@ -1,11 +1,8 @@
 import ReviewIcon from '@mui/icons-material/Comment'
 import { Stack, Typography } from '@mui/material'
-import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
 import { useHeadReviewRequestsForModel } from 'actions/review'
-import { useRouter } from 'next/router'
-import { useMemo } from 'react'
 import renderQueryState from 'src/common/renderQueryState'
 import { type AccessRequestInterface, type ReleaseInterface } from 'types/types'
 
@@ -21,32 +18,16 @@ export type ReviewBannerProps =
 
 export default function ReviewBanner({ release, accessRequest }: ReviewBannerProps) {
   const theme = useTheme()
-  const router = useRouter()
 
-  const [modelId, urlParam, semverOrAccessRequestId] = useMemo(
-    () =>
-      release
-        ? [release.modelId, 'release', release.semver, { release }]
-        : [accessRequest.modelId, 'access-request', accessRequest.id, { accessRequest }],
-    [release, accessRequest],
-  )
   const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForModel(
     release
       ? { modelId: release.modelId, semver: release.semver }
       : { modelId: accessRequest.modelId, accessRequestId: accessRequest.id },
   )
 
-  const handleReviewOnClick = () => {
-    router.push(`/model/${modelId}/${urlParam}/${semverOrAccessRequestId}`)
-  }
-
   const queryState = renderQueryState([isReviewsError], isReviewsLoading)
   if (queryState) {
     return queryState
-  }
-
-  if (release && release.draft) {
-    return <></>
   }
 
   return (
@@ -79,15 +60,6 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
             <ReviewIcon />
             <Typography>Ready for review</Typography>
           </Stack>
-          <Button
-            variant='outlined'
-            color='inherit'
-            size='small'
-            onClick={handleReviewOnClick}
-            data-test='reviewButton'
-          >
-            Review
-          </Button>
         </Stack>
       </Paper>
     )

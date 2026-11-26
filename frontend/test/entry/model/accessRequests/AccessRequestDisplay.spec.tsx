@@ -1,16 +1,15 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
-import { UserDisplayProps } from 'src/common/UserDisplay'
+import { type UserDisplayProps } from 'src/common/UserDisplay'
 import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDisplay'
-import { ReleaseAccessRequestReviewSummaryProps } from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
-import { ReviewBannerProps } from 'src/entry/model/reviews/ReviewBanner'
-import { ReviewStatusProps } from 'src/entry/model/reviews/ReviewStatus'
+import { type ReleaseAccessRequestReviewSummaryProps } from 'src/entry/model/reviews/ReleaseAccessRequestReviewSummary'
+import { type ReviewStatusProps } from 'src/entry/model/reviews/ReviewStatus'
 import { lightTheme } from 'src/theme'
 import { formatDateString } from 'utils/dateUtils'
 import { testAccessRequest } from 'utils/test/testModels'
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('src/entry/model/reviews/ReviewBanner.tsx', () => ({ default: (_props: ReviewBannerProps) => <></> }))
+vi.mock('src/entry/model/reviews/ReviewBanner.tsx', () => ({ default: () => <></> }))
 vi.mock('src/common/UserDisplay.tsx', () => ({ default: (_props: UserDisplayProps) => <></> }))
 vi.mock('src/entry/model/reviews/ReviewStatus.tsx', () => ({
   default: (_props: ReviewStatusProps) => <></>,
