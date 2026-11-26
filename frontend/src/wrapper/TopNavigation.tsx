@@ -3,6 +3,7 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
+import ParkIcon from '@mui/icons-material/Park'
 import Person from '@mui/icons-material/Person'
 import Settings from '@mui/icons-material/Settings'
 import SettingsSuggestTwoToneIcon from '@mui/icons-material/SettingsSuggestTwoTone'
@@ -29,6 +30,9 @@ import UserDisplay from 'src/common/UserDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import DocsSearch from 'src/docs/DocsSearch'
 import DocsSearchDialog from 'src/docs/DocsSearchDialog'
+import { getSnowEnabled, saveSnowEnabled } from 'src/storage/userPreferences'
+import ChristmasLights from 'src/wrapper/ChristmasLights'
+import Snowfall from 'src/wrapper/Snowfall'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { type User } from '../../types/types'
@@ -69,12 +73,14 @@ const AppBar = styled(MuiAppBar, {
 export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, currentUser }: TopNavigationProps) {
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [docsSearchOpen, setDocsSearchOpen] = useState(false)
+  const [snowEnabled, setSnowEnabled] = useState(() => typeof window !== 'undefined' && getSnowEnabled())
 
   const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
 
   const router = useRouter()
   const theme = useTheme()
   const uiConfig = useContext(UiConfigContext)
+  const showChristmas = uiConfig.christmas.enabled && new Date().getMonth() === 11
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
@@ -87,6 +93,43 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
   const handleMenuClose = () => {
     setUserMenuAnchorEl(null)
   }
+
+  const handleSnowToggle = () => {
+    saveSnowEnabled(!snowEnabled)
+    setSnowEnabled(!snowEnabled)
+  }
+
+  const snowToggleButton = (
+    <Tooltip title={snowEnabled ? 'Turn off snow' : 'Turn on snow'}>
+      <IconButton
+        onClick={handleSnowToggle}
+        aria-label={snowEnabled ? 'Turn off snow' : 'Turn on snow'}
+        aria-pressed={snowEnabled}
+        data-test='snowToggleButton'
+        sx={{
+          color: 'white',
+          backgroundColor: alpha(theme.palette.common.white, 0.15),
+          '&:hover, &:focus': {
+            backgroundColor: alpha(theme.palette.common.white, 0.25),
+          },
+          height: 'max-content',
+          // Diagonal strike-through over the tree when snow is off
+          ...(!snowEnabled && {
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              width: '60%',
+              height: '2px',
+              backgroundColor: 'currentColor',
+              transform: 'rotate(-45deg)',
+            },
+          }),
+        }}
+      >
+        <ParkIcon />
+      </IconButton>
+    </Tooltip>
+  )
 
   return (
     <AppBar
@@ -164,6 +207,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                     <Add />
                   </IconButton>
                 </Tooltip>
+                {showChristmas && snowToggleButton}
                 {currentUser ? (
                   <>
                     <Tooltip title='User settings'>
@@ -258,6 +302,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                   ariaLabel='Create a new data card or model'
                   height='40px'
                 />
+                {showChristmas && snowToggleButton}
                 <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
                 {currentUser ? (
                   <>
@@ -319,6 +364,8 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
         </Stack>
       </Toolbar>
       <DocsSearchDialog open={docsSearchOpen} onClose={() => setDocsSearchOpen(false)} />
+      {showChristmas && <ChristmasLights twinkle={snowEnabled} />}
+      {showChristmas && snowEnabled && <Snowfall />}
     </AppBar>
   )
 }
