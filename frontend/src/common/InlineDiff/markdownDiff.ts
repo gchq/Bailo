@@ -20,8 +20,7 @@ function isNonVisualNode(node: ASTNode): boolean {
     node.type === RuleType.ref ||
     node.type === RuleType.refCollection ||
     node.type === RuleType.footnote ||
-    node.type === RuleType.frontmatter ||
-    node.type === RuleType.htmlComment
+    node.type === RuleType.frontmatter
   )
 }
 
@@ -29,14 +28,13 @@ function isLayoutOnlyNode(node: ASTNode): boolean {
   return node.type === RuleType.breakLine || node.type === RuleType.breakThematic
 }
 
-// Compare the parsed nodes directly - converting back to Markdown drops raw HTML, so changed HTML would look equal
 function identical(from: ASTNode | ASTNode[], to: ASTNode | ASTNode[]): boolean {
   return JSON.stringify(from) === JSON.stringify(to)
 }
 
 /** Nodes of the same kind are aligned with each other, then diffed or replaced. */
 function nodeKind(node: ASTNode): string {
-  // Media of the same kind pair up regardless of source, so a changed file is shown as a replacement
+  // Images pair up regardless of source, so a changed image is shown as a replacement
   const mediaKind = getMediaKind(node)
   if (mediaKind) {
     return `media:${mediaKind}`
@@ -55,10 +53,6 @@ function nodeKind(node: ASTNode): string {
       return `ordered-list:${node.start ?? 1}`
     case RuleType.table:
       return 'table'
-    case RuleType.htmlBlock:
-      return `html:${node.tag}:${JSON.stringify(node.attrs ?? {})}:${node._verbatim ? 'verbatim' : ''}`
-    case RuleType.htmlSelfClosing:
-      return `html-self-closing:${node.tag}:${JSON.stringify(node.attrs ?? {})}`
     case RuleType.gfmTask:
       return `task:${node.completed}`
     case RuleType.footnoteReference:
@@ -168,11 +162,6 @@ function diffTable(from: TableNode, to: TableNode): RichDiff | undefined {
 
 /** Returns the children of containers whose content can be diffed in place, keeping the container itself. */
 function diffableChildren(node: ASTNode): ASTNode[] | undefined {
-  // Media is replaced as a whole - diffing inside a <video> would only compare its <source> tags
-  if (getMediaKind(node)) {
-    return undefined
-  }
-
   switch (node.type) {
     case RuleType.paragraph:
     case RuleType.heading:
@@ -180,8 +169,6 @@ function diffableChildren(node: ASTNode): ASTNode[] | undefined {
     case RuleType.textFormatted:
     case RuleType.link:
       return node.children
-    case RuleType.htmlBlock:
-      return node._verbatim ? undefined : node.children
     default:
       return undefined
   }

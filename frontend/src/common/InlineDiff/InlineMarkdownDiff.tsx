@@ -37,15 +37,6 @@ function renderContainer(node: ASTNode, children: ReactNode, context: RenderCont
     return children
   }
 
-  if (node.type === RuleType.htmlBlock) {
-    const override = context.markdownOptions.overrides?.[node.tag]
-    const expectedType = override && typeof override === 'object' ? override.component : (override ?? node.tag)
-
-    if (element.type !== expectedType) {
-      return renderNode(node, context)
-    }
-  }
-
   // Media comparisons are rendered as grids, which are not valid inside a <p>
   if (node.type === RuleType.paragraph && containsMediaChange(entries)) {
     return cloneElement(element, { component: 'div' }, children)
@@ -122,11 +113,11 @@ function renderReplacement(from: ASTNode, to: ASTNode, context: RenderContext, i
 
   // nodeKind only pairs media of the same kind, so `from` is the same kind of media as `to`
   if (media) {
-    // Audio players are wide and short, so old and new are stacked rather than placed side by side
-    const columns = media === 'audio' ? 'minmax(0, 1fr)' : { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' }
-
     return (
-      <Box data-diff-media-comparison={media} sx={{ display: 'grid', gridTemplateColumns: columns, gap: 1 }}>
+      <Box
+        data-diff-media-comparison={media}
+        sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 1 }}
+      >
         <DiffMark operation='delete' media={media}>
           {renderNode(from, context)}
         </DiffMark>

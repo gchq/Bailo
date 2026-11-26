@@ -13,6 +13,19 @@ The landing page is a static NextJS application used for our GitHub Pages webpag
 
 - Node v26
 
+### Prerequisites
+
+`npm run generate` copies files produced elsewhere in the repository. Generate them first:
+
+- Python Sphinx documentation: follow [backend/docs/README.md](../../backend/docs/README.md).
+- Backend config documentation and OpenAPI specs, from within the `backend` directory:
+
+```bash
+npm i
+npm run generate-config-docs
+npx tsx src/scripts/generateOpenApiSpecs.ts
+```
+
 ### Development Build
 
 In order to start the application locally for development/testing, you will need to run the following commands:
