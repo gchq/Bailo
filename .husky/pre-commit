@@ -8,12 +8,10 @@ echo "Running TypeScript/JavaScript lint-staged checks..."
 npx lint-staged || exit 1
 
 # Try to find and activate a Python virtual environment
-VENV_ACTIVATED=false
 for venv_dir in $(find . -maxdepth 3 -type d \( -name 'venv' -o -name '.venv' -o -name '*env' \) -not -path '*/node_modules/*' | sort); do
     if [ -f "$venv_dir/bin/activate" ]; then
         echo "Activating Python virtual environment at $venv_dir"
         . "$venv_dir/bin/activate"
-        VENV_ACTIVATED=true
         break
     fi
 done
@@ -32,11 +30,7 @@ if [ -n "$PYTHON_CMD" ]; then
     $PYTHON_CMD -m pre_commit run --files $(git diff --cached --name-only)
   else
     echo "'pre-commit' not installed. Skipping Python linting."
-    if [ "$VENV_ACTIVATED" = true ]; then
-      echo "To enable, run: pip install pre-commit (inside the virtual environment)"
-    else
-      echo "To enable, run: pip install pre-commit"
-    fi
+    echo "To enable, follow \"Python Setup\" in lib/python/README.md"
   fi
 else
   echo "Python not found. Skipping Python linting."
