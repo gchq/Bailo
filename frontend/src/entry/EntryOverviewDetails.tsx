@@ -1,14 +1,15 @@
-import dayjs from '@dayjs'
+import dayjs, { type Dayjs } from '@dayjs'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import { type PickerValue } from '@mui/x-date-pickers/internals'
 import { patchEntry } from 'actions/entry'
-import { postReview, useGetReviewRequestsForModel } from 'actions/review'
+import { postGenericReviewResponse, postReview, useGetReviewRequestsForModel } from 'actions/review'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EntrySelect from 'src/common/EntrySelect'
 import Loading from 'src/common/Loading'
+import ReviewPopper from 'src/common/ReviewPopper'
 import TagSelector from 'src/common/TagSelector'
 import UserDisplay from 'src/common/UserDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
@@ -19,7 +20,7 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ReviewHistoryDialog from 'src/entry/overview/ReviewHistoryDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
-import { type EntryInterface, EntryKind, ReviewKind } from 'types/types'
+import { Decision, type DecisionKeys, type EntryInterface, EntryKind, ReviewKind } from 'types/types'
 import {
   formatDateStringAsDayMonthAndYear,
   increaseCurrentDateByHumanInterval,
@@ -44,6 +45,9 @@ export default function EntryOverviewDetails({
   const [reviewHistoryOpen, setReviewHistoryOpen] = useState(false)
   const [reviewDate, setReviewDate] = useState<PickerValue>()
   const [reviewConfirmationOpen, setReviewConfirmationOpen] = useState(false)
+  const [reviewErrorMessage, setReviewErrorMessage] = useState('')
+  const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
+  const [reviewComment, setReviewComment] = useState('')
 
   const sendNotification = useNotification()
 
@@ -116,6 +120,40 @@ export default function EntryOverviewDetails({
       await handleConfirmReviewDate()
     }
   }, [handleConfirmReviewDate, reviewDate])
+
+  async function handleSubmitReview(
+    decision: DecisionKeys,
+    comment: string,
+    _role: string,
+    dueDate: Dayjs | null | undefined,
+  ) {
+    setReviewErrorMessage('')
+    if (!entry.id) {
+      return setReviewErrorMessage('Could not find model ID')
+    }
+    if (!reviews[0]._id) {
+      return setReviewErrorMessage('Could not find review ID')
+    }
+    if (decision === Decision.Approve && !dueDate) {
+      return setReviewErrorMessage('Please provide a valid due date.')
+    }
+
+    setIsReviewButtonLoading(true)
+    const res = await postGenericReviewResponse({
+      kind: ReviewKind.LIFECYCLE,
+      comment,
+      decision,
+      reviewId: reviews[0]._id,
+      dueDate,
+    })
+
+    if (!res.ok) {
+      setIsReviewButtonLoading(false)
+      setReviewErrorMessage(await getErrorMessage(res))
+    } else {
+      mutateReviews()
+    }
+  }
 
   if (isReviewsLoading || isArchivedReviewsLoading) {
     return <Loading />
@@ -212,14 +250,23 @@ export default function EntryOverviewDetails({
                   </Typography>
                 )}
                 {isEditable && reviews[0] && (
-                  <Button
-                    size='small'
-                    sx={{ width: 'fit-content' }}
-                    href={`/model/${entry.id}/lifecycle/${reviews[0]._id}/review?role=owner`}
-                    variant='outlined'
-                  >
-                    Review
-                  </Button>
+                  <>
+                    <ReviewPopper
+                      reviews={reviews}
+                      onSubmit={handleSubmitReview}
+                      isLoading={isReviewButtonLoading}
+                      errorMessage={reviewErrorMessage}
+                      reviewComment={reviewComment}
+                      onReviewCommentChange={(comment) => setReviewComment(comment)}
+                      buttonSize='small'
+                      buttonVariant='outlined'
+                      includeDueDate
+                      buttonText='Review'
+                      hideButtonIcon
+                      hideRequestChangesButton
+                      popperPlacement='right-end'
+                    />
+                  </>
                 )}
                 {!dialogView && archivedReviews.length > 0 && (
                   <Button

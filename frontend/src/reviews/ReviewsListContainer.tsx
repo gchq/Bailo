@@ -13,20 +13,20 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
   const router = useRouter()
   const { category } = router.query
 
-  const cateogories = [
+  const categories = [
     { category: ReviewKind.ACCESS, title: 'Access requests' },
     { category: ReviewKind.RELEASE, title: 'Releases' },
     { category: ReviewKind.LIFECYCLE, title: 'Model card lifecycle' },
   ]
 
   const categoryList = () =>
-    cateogories.map((listbutton) => (
+    categories.map((listButton) => (
       <SimpleListItemButton
-        key={listbutton.category}
-        selected={selectedCategory === listbutton.category}
-        onClick={() => handleListItemClick(listbutton.category)}
+        key={listButton.category}
+        selected={selectedCategory === listButton.category}
+        onClick={() => handleListItemClick(listButton.category)}
       >
-        {listbutton.title}
+        {listButton.title}
       </SimpleListItemButton>
     ))
 
