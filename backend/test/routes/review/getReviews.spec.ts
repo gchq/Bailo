@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../src/connectors/audit/__mocks__/index.js'
-import { testGet } from '../../testUtils/routes.js'
+import { testGet, testHead } from '../../testUtils/routes.js'
 import { testReleaseReview } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
@@ -32,6 +32,14 @@ describe('routes > review > getReviews', () => {
     expect(res.statusCode).toBe(200)
     expect(res.header['x-count']).toBe('1')
     expect(res.body).matchSnapshot()
+  })
+
+  test('HEAD > returns count header without auditing', async () => {
+    const res = await testHead(endpoint)
+
+    expect(res.statusCode).toBe(200)
+    expect(res.header['x-count']).toBe('1')
+    expect(audit.onSearchReviews).not.toHaveBeenCalled()
   })
 
   test('returns only reviews for the specified model', async () => {

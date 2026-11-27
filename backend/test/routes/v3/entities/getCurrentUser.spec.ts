@@ -1,9 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { testGet } from '../../../testUtils/routes.js'
-
-vi.mock('../../../../src/connectors/audit/index.js')
 
 const mockAuth = vi.hoisted(() => ({
   authenticationMiddleware: vi.fn(() => [
@@ -76,13 +73,5 @@ describe('routes > v3 > entities > getCurrentUser', () => {
     expect(res.body).toEqual({
       user: { dn: 'test-user', systemRoles: ['admin', 'compliance', 'untrusted-model'] },
     })
-  })
-
-  test('audit > expected call', async () => {
-    const res = await testGet('/api/v3/entities/me')
-
-    expect(res.statusCode).toBe(200)
-    expect(audit.onViewCurrentUserInformation).toHaveBeenCalled()
-    expect(audit.onViewCurrentUserInformation.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

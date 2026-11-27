@@ -13,7 +13,6 @@ import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
 import { type WebhookDoc } from '../../models/Webhook.js'
-import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
 import { type EntrySearchResult, type MirrorInformation, type ModelImages } from '../../types/types.js'
@@ -39,6 +38,7 @@ export const ResourceKind = {
   Review: 'review',
   Response: 'response',
   ReviewResponse: 'review response',
+  ReviewRole: 'review role',
   Schema: 'schema',
   SchemaMigration: 'schemaMigration',
   Image: 'image',
@@ -46,7 +46,6 @@ export const ResourceKind = {
   Export: 'export',
   ArtefactScanning: 'artefact scanning',
   Metric: 'metric',
-  User: 'user',
   Registry: 'registry',
   DeploymentAssessment: 'deployment assessment',
   Webhook: 'webhook',
@@ -191,7 +190,7 @@ export const AuditInfo = {
     resourceKind: ResourceKind.Token,
   },
   ViewUserTokens: {
-    typeId: 'ViewUserToken',
+    typeId: 'ViewUserTokens',
     description: 'Token Viewed',
     auditKind: AuditKind.View,
     resourceKind: ResourceKind.Token,
@@ -216,13 +215,13 @@ export const AuditInfo = {
     resourceKind: ResourceKind.AccessRequest,
   },
   UpdateAccessRequest: {
-    typeId: 'UpdateAccess Request',
+    typeId: 'UpdateAccessRequest',
     description: 'Access Request Updated',
     auditKind: AuditKind.Update,
     resourceKind: ResourceKind.AccessRequest,
   },
   DeleteAccessRequest: {
-    typeId: 'UpdateAccessRequest',
+    typeId: 'DeleteAccessRequest',
     description: 'Access Request Deleted',
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.AccessRequest,
@@ -260,7 +259,7 @@ export const AuditInfo = {
     resourceKind: ResourceKind.Schema,
   },
   SearchSchemas: {
-    typeId: 'SearchedSchemas',
+    typeId: 'SearchSchemas',
     description: 'Schemas Searched',
     auditKind: AuditKind.Search,
     resourceKind: ResourceKind.Schema,
@@ -358,7 +357,7 @@ export const AuditInfo = {
     resourceKind: ResourceKind.Inference,
   },
   DeleteInference: {
-    typeId: 'DeleteInferences',
+    typeId: 'DeleteInference',
     description: 'Inferences Deleted',
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.Inference,
@@ -399,25 +398,25 @@ export const AuditInfo = {
     typeId: 'CreateReviewRole',
     description: 'Created a new review role',
     auditKind: AuditKind.Create,
-    resourceKind: ResourceKind.Response,
+    resourceKind: ResourceKind.ReviewRole,
   },
   UpdateReviewRole: {
     typeId: 'UpdateReviewRole',
     description: 'Updated an existing review role',
     auditKind: AuditKind.Update,
-    resourceKind: ResourceKind.Response,
+    resourceKind: ResourceKind.ReviewRole,
   },
   ViewReviewRoles: {
-    typeId: 'ViewReviewRole',
+    typeId: 'ViewReviewRoles',
     description: 'Viewed a list of review roles',
     auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Response,
+    resourceKind: ResourceKind.ReviewRole,
   },
   DeleteReviewRole: {
     typeId: 'DeleteReviewRole',
-    description: 'Delete a list of review roles',
+    description: 'Deleted a review role',
     auditKind: AuditKind.Delete,
-    resourceKind: ResourceKind.Response,
+    resourceKind: ResourceKind.ReviewRole,
   },
   ViewScanners: {
     typeId: 'ViewScanners',
@@ -472,12 +471,6 @@ export const AuditInfo = {
     description: 'Deployment assessment comment created',
     auditKind: AuditKind.Create,
     resourceKind: ResourceKind.Response,
-  },
-  ViewCurrentUserInformation: {
-    typeId: 'ViewCurrentUserInformation',
-    description: 'Viewed information about the user making the request',
-    auditKind: AuditKind.View,
-    resourceKind: ResourceKind.Metric,
   },
   NotifyReviewers: {
     typeId: 'NotifyReviewers',
@@ -624,8 +617,6 @@ export abstract class BaseAuditConnector {
   ): Promise<void>
   abstract onViewDeploymentAssessment(req: Request, deploymentAssessment: DeploymentAssessmentDoc): Promise<void>
   abstract onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void>
-
-  abstract onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void>
 
   abstract onNotifyReviewers(req: Request, reviewId: string): Promise<void>
 

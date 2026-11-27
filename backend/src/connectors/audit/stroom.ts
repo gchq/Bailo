@@ -15,7 +15,6 @@ import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type StroomEventObject } from '../../models/StroomEvent.js'
 import { type TokenDoc } from '../../models/Token.js'
 import { type WebhookDoc } from '../../models/Webhook.js'
-import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import log from '../../services/log.js'
 import { type MongoDocumentMirrorInformation } from '../../services/mirroredModel/importers/documents.js'
@@ -529,10 +528,6 @@ export class StroomAuditConnector extends BaseAuditConnector {
 
   async onCommentOnDeploymentAssessment(req: Request, response: ResponseInterface): Promise<void> {
     this.auditGenericEvent(req, `${response._id}`)
-  }
-
-  async onViewCurrentUserInformation(req: Request, userInformation: GetCurrentUserResponse): Promise<void> {
-    this.auditGenericEvent(req, userInformation.user.dn)
   }
 
   async onNotifyReviewers(req: Request, reviewId: string): Promise<void> {

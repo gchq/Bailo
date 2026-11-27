@@ -1,7 +1,5 @@
 import { type Request, type Response } from 'express'
 
-import { AuditInfo } from '../../../connectors/audit/Base.js'
-import audit from '../../../connectors/audit/index.js'
 import { Roles } from '../../../connectors/authentication/constants.js'
 import authentication from '../../../connectors/authentication/index.js'
 import { z } from '../../../lib/zod.js'
@@ -33,13 +31,11 @@ registerPath(
 
 export const getCurrentUser = [
   async (req: Request, res: Response<GetCurrentUserResponse>): Promise<void> => {
-    req.audit = AuditInfo.ViewCurrentUserInformation
     const roleChecks = await Promise.all(
       Object.values(Roles).map(async (role) => ((await authentication.hasRole(req.user, role)) ? role : undefined)),
     )
     const systemRoles = roleChecks.filter((role) => role !== undefined)
     const response = { user: { ...req.user, systemRoles } }
-    await audit.onViewCurrentUserInformation(req, response)
 
     res.json(response)
   },
