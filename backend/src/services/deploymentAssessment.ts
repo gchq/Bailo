@@ -65,10 +65,18 @@ async function validateModels(user: UserInterface, modelIds: string[]) {
   const modelKinds = new Set([EntryKind.Model, EntryKind.MirroredModel, EntryKind.UntrustedModel] as string[])
   const modelsById = new Set(models.map((model) => model.id))
 
+  // Models are soft-deleted, so a missing ID usually means the model was deleted after the DA was saved
   const missingModelIds = modelIds.filter((modelId) => !modelsById.has(modelId))
+  if (missingModelIds.length > 0) {
+    throw BadReq(
+      `One or more models could not be found. They may have been deleted, so remove them from this Deployment Assessment. Missing models: ${missingModelIds.join(', ')}`,
+      { modelIds: missingModelIds },
+    )
+  }
+
   const nonModelIds = models.filter((model) => !modelKinds.has(model.kind)).map((model) => model.id)
-  if (missingModelIds.length > 0 || nonModelIds.length > 0) {
-    throw BadReq('One or more models could not be found.', { modelIds: missingModelIds })
+  if (nonModelIds.length > 0) {
+    throw BadReq('Deployment assessments can only use models, not data cards.', { modelIds: nonModelIds })
   }
 
   const auths = await authorisation.models(user, models, ModelAction.View)

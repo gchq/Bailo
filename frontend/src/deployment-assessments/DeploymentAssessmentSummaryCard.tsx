@@ -1,10 +1,12 @@
 import { Box, Card, Divider, Stack, Typography } from '@mui/material'
+import { useGetModel } from 'actions/entry'
 import ChipSelector from 'src/common/ChipSelector'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
 import AssessmentStateChip from 'src/deployment-assessments/AssessmentStateChip'
 import { type DeploymentAssessmentStatusKeys } from 'src/hooks/useDeploymentAssessmentFilters'
 import Link from 'src/Link'
+import { DeletedModelChip } from 'src/MuiForms/ModelSelectorChip'
 import { type DeploymentAssessmentSummary } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
@@ -19,6 +21,42 @@ interface DeploymentAssessmentSummaryCardProps {
   onSelectedStateChange?: (state?: DeploymentAssessmentStatusKeys) => void
 }
 
+type ModelChipProps = Pick<DeploymentAssessmentSummaryCardProps, 'selectedModelIds' | 'onSelectedModelIdsChange'> & {
+  modelId: string
+}
+
+// Models can be deleted after a DA references them, so each one is looked up individually
+function ModelChip({ modelId, selectedModelIds, onSelectedModelIdsChange }: ModelChipProps) {
+  const { isEntryError } = useGetModel(modelId)
+
+  // Same size and margins as the ChipSelector chips below
+  if (isEntryError?.status === 404) {
+    return <DeletedModelChip modelId={modelId} size='small' sx={{ mx: 0.5, my: 0.5 }} />
+  }
+
+  if (!selectedModelIds || !onSelectedModelIdsChange) {
+    return (
+      <Typography component='span' variant='body2'>
+        {modelId}
+      </Typography>
+    )
+  }
+
+  return (
+    <ChipSelector
+      chipTooltipTitle='Filter by model'
+      options={[modelId]}
+      multiple
+      selectedChips={selectedModelIds}
+      onChange={onSelectedModelIdsChange}
+      size='small'
+      variant='outlined'
+      ariaLabel='add model to Deployment Assessment filters'
+      style={{ maxWidth: '400px' }}
+    />
+  )
+}
+
 export default function DeploymentAssessmentSummaryCard({
   assessment,
   returnTo,
@@ -27,8 +65,6 @@ export default function DeploymentAssessmentSummaryCard({
   selectedState,
   onSelectedStateChange,
 }: DeploymentAssessmentSummaryCardProps) {
-  const canSelectModels = selectedModelIds !== undefined && onSelectedModelIdsChange !== undefined
-
   const owners = assessment.owner ? (Array.isArray(assessment.owner) ? assessment.owner : [assessment.owner]) : []
 
   return (
@@ -89,23 +125,16 @@ export default function DeploymentAssessmentSummaryCard({
                 Models:
               </Box>
               {assessment.models?.length ? (
-                canSelectModels ? (
-                  <ChipSelector
-                    chipTooltipTitle='Filter by model'
-                    options={assessment.models}
-                    multiple
-                    selectedChips={selectedModelIds}
-                    onChange={onSelectedModelIdsChange}
-                    size='small'
-                    variant='outlined'
-                    ariaLabel='add model to Deployment Assessment filters'
-                    style={{ maxWidth: '400px' }}
-                  />
-                ) : (
-                  <Typography component='span' variant='body2'>
-                    {assessment.models.join(', ')}
-                  </Typography>
-                )
+                <Stack direction='row' sx={{ alignItems: 'center', flexWrap: 'wrap', columnGap: 1 }}>
+                  {assessment.models.map((modelId) => (
+                    <ModelChip
+                      key={modelId}
+                      modelId={modelId}
+                      selectedModelIds={selectedModelIds}
+                      onSelectedModelIdsChange={onSelectedModelIdsChange}
+                    />
+                  ))}
+                </Stack>
               ) : (
                 <Typography variant='body2' component='em'>
                   No models specified
