@@ -411,6 +411,7 @@ The following tables describe selected configuration options available in `value
 | `config.ui.banner.text` | Content of top banner | `BAILO` |
 | `config.ui.banner.colour` | Colour of top banner | `#047a06` |
 | `config.ui.banner.textColor` | Colour of top banner text | `black` |
+| `config.ui.christmas.enabled` | Enables Christmas decorations during December | `true` |
 | `config.announcement.enabled` | Enables announcement banner at bottom of the page | `false` |
 | `config.announcement.title` | Heading of announcement banner, defaults to "Announcement" | `''` |
 | `config.announcement.text` | Content of announcement banner | `null` |

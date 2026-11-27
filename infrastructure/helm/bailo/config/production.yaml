@@ -107,6 +107,8 @@ ui:
     text: {{ .Values.config.ui.banner.text | quote }}
     colour: {{ .Values.config.ui.banner.colour | quote }}
     textColor: {{ .Values.config.ui.banner.textColor | quote}}
+  christmas:
+    enabled: {{ .Values.config.ui.christmas.enabled }}
   announcement:
     enabled: {{ .Values.config.ui.announcement.enabled }}
     title: {{ toJson .Values.config.ui.announcement.title }}

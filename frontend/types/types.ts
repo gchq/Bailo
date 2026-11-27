@@ -39,6 +39,10 @@ export interface UiConfig {
     href: string
   }
 
+  christmas: {
+    enabled: boolean
+  }
+
   development: {
     logUrl: string
   }

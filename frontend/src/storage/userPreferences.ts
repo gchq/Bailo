@@ -4,10 +4,12 @@
 
 export interface UserPreferences {
   displayFormStats: boolean
+  snowEnabled?: boolean
 }
 
 const defaultPreferences: UserPreferences = {
   displayFormStats: false,
+  snowEnabled: false,
 }
 
 const USER_PREFERENCES_KEY = 'user-preferences'
@@ -30,4 +32,13 @@ export const saveDisplayFormStats = (newValue: boolean) => {
   const preferences: UserPreferences = getUserPreferences() ?? defaultPreferences
   preferences.displayFormStats = newValue
   saveUserPreferences(preferences)
+}
+
+// Without a saved choice, respect the operating system's reduced motion setting
+export const getSnowEnabled = (): boolean => {
+  return getUserPreferences().snowEnabled ?? !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+}
+
+export const saveSnowEnabled = (newValue: boolean) => {
+  saveUserPreferences({ ...getUserPreferences(), snowEnabled: newValue })
 }

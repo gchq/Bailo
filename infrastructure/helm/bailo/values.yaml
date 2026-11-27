@@ -263,6 +263,9 @@ config:
       colour: "#047a06"
       textColor: "black"
 
+    christmas:
+      enabled: true
+
     announcement:
       enabled: false
       title: ''

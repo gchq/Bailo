@@ -245,6 +245,10 @@ export const testUiConfig: UiConfig = {
     href: 'https://syops.example.com',
   },
 
+  christmas: {
+    enabled: true,
+  },
+
   inference: {
     enabled: false,
     connection: {

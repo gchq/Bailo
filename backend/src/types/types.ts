@@ -247,6 +247,11 @@ export interface UiConfig {
     href: string
   }
 
+  christmas: {
+    /** Enable Christmas decorations during December */
+    enabled: boolean
+  }
+
   modelMirror: {
     import: {
       /** Available to import models */
