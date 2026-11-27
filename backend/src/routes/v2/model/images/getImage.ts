@@ -10,13 +10,13 @@ import { parse } from '../../../../utils/validate.js'
 
 const getImageParams = z.object({
   modelId: z.string({
-    required_error: 'Must specify model id as param',
+    error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
   }),
   name: z.string({
-    required_error: 'Must specify image name as param',
+    error: (issue) => (issue.input === undefined ? 'Must specify image name as param' : undefined),
   }),
   tag: z.string({
-    required_error: 'Must specify image tag as param',
+    error: (issue) => (issue.input === undefined ? 'Must specify image tag as param' : undefined),
   }),
 })
 

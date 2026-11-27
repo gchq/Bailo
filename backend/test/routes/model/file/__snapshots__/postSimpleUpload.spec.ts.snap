@@ -16,16 +16,15 @@ exports[`routes > model > file > postSimpleUpload > 400 > no name 1`] = `
         {
           "code": "invalid_type",
           "expected": "string",
-          "message": "Required",
+          "message": "Invalid input: expected string, received undefined",
           "path": [
             "query",
             "name",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: query.name - Message: Required",
+    "message": "Path: query.name - Message: Invalid input: expected string, received undefined",
     "name": "Bailo Error",
   },
 }

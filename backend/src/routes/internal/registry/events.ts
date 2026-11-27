@@ -17,7 +17,7 @@ export const registryEventsSchema = z.object({
     events: z.array(
       z.object({
         id: z.string(),
-        timestamp: z.string().datetime(),
+        timestamp: z.iso.datetime(),
         action: z.string(),
         target: z
           .object({

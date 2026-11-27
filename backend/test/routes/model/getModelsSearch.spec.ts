@@ -16,9 +16,7 @@ vi.mock('../../../src/services/model.js', () => ({
 
 describe('routes > model > getModelsSearch', () => {
   test('200 > ok', async () => {
-    const fixture = createFixture(getModelsSearchSchema)
-    // Empty generated arrays are serialised as empty strings, which the route rejects.
-    fixture.query = { search: fixture.query.search }
+    const fixture = createFixture(getModelsSearchSchema, { query: { allowTemplating: 'true', titleOnly: 'false' } })
     const res = await testGet(`/api/v2/models/search?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)
@@ -27,8 +25,6 @@ describe('routes > model > getModelsSearch', () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(getModelsSearchSchema)
-    // Empty generated arrays are serialised as empty strings, which the route rejects.
-    fixture.query = { search: fixture.query.search }
     const res = await testGet(`/api/v2/models/search?${querystring.stringify(fixture.query)}`)
 
     expect(res.statusCode).toBe(200)

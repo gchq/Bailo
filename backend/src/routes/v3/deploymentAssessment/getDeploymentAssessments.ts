@@ -17,8 +17,8 @@ export const getDeploymentAssessmentsSchema = z.object({
       modelIds: coerceArray(z.array(z.string().min(1))).optional(),
       riskOwner: z.string().min(1).optional(),
       createdBy: z.string().min(1).optional(),
-      createdAfter: z.string().date().optional(),
-      createdBefore: z.string().date().optional(),
+      createdAfter: z.iso.date().optional(),
+      createdBefore: z.iso.date().optional(),
       draft: strictCoerceBoolean(z.boolean()).optional(),
       search: z.string().min(1).optional(),
     })

@@ -12,18 +12,18 @@ import { parse } from '../../../utils/validate.js'
 export const postSchemaSchema = z.object({
   body: z.object({
     id: z.string({
-      required_error: 'Must specify schema ID',
+      error: (issue) => (issue.input === undefined ? 'Must specify schema ID' : undefined),
     }),
     name: z.string({
-      required_error: 'Must specify schema name',
+      error: (issue) => (issue.input === undefined ? 'Must specify schema name' : undefined),
     }),
     description: z.string({
-      required_error: 'Must specify schema description',
+      error: (issue) => (issue.input === undefined ? 'Must specify schema description' : undefined),
     }),
-    kind: z.nativeEnum(SchemaKind, {
-      required_error: 'Must specify schema kind',
+    kind: z.enum(SchemaKind, {
+      error: (issue) => (issue.input === undefined ? 'Must specify schema kind' : undefined),
     }),
-    jsonSchema: z.object({}).passthrough(),
+    jsonSchema: z.object({}).loose(),
     reviewRoles: z.array(z.string()).openapi({
       example: ['reviewer'],
       description: 'This is an array made up of the "shortName" property from a Review Role object.',

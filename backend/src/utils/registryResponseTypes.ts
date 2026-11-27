@@ -14,7 +14,7 @@ export const CommonRegistryHeadersSchema = z
     'content-length': HeaderValueSchema.optional(),
     date: HeaderValueSchema.optional(),
   })
-  .passthrough()
+  .loose()
 export type CommonRegistryHeaders = z.infer<typeof CommonRegistryHeadersSchema>
 
 // Error response
@@ -35,7 +35,7 @@ export const BaseApiCheckResponseHeadersSchema = CommonRegistryHeadersSchema.ext
     .regex(/^registry\/2\.0$/)
     .optional(),
 })
-export const BaseApiCheckResponseBodySchema = z.record(z.never())
+export const BaseApiCheckResponseBodySchema = z.record(z.string(), z.never())
 
 // GET /v2/<name>/tags/list
 export const TagsListResponseBodySchema = z.object({

@@ -53,7 +53,7 @@ const rangeRequestHeader = z.object({
   Range: z.string().optional().describe('Range of bytes to request from the content. Formatted like: bytes=0-10'),
 })
 
-const rangedResponseHeaders = responseHeaders.merge(contentRangeResponseHeader)
+const rangedResponseHeaders = responseHeaders.extend(contentRangeResponseHeader.shape)
 
 // Binary response schema
 const binaryContent = {
@@ -74,8 +74,8 @@ const fileNameParam = z.object({
     .transform((v) => validateFileName(v)),
 })
 
-const modelIdWithSemverAndFileName = modelIdParam.merge(semverParam).merge(fileNameParam)
-const modelIdWithFileId = modelIdParam.merge(fileIdParam)
+const modelIdWithSemverAndFileName = modelIdParam.extend(semverParam.shape).extend(fileNameParam.shape)
+const modelIdWithFileId = modelIdParam.extend(fileIdParam.shape)
 
 const apiInfo: Omit<PathConfig, 'path' | 'schema'> = {
   method: 'get',

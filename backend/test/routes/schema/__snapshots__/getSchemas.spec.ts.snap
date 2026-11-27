@@ -57,24 +57,23 @@ exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
     "context": {
       "errors": [
         {
-          "code": "invalid_enum_value",
-          "message": "Invalid enum value. Expected '' | 'model' | 'accessRequest' | 'dataCard' | 'deploymentAssessment', received 'notValid'",
-          "options": [
+          "code": "invalid_value",
+          "message": "Invalid option: expected one of ""|"model"|"accessRequest"|"dataCard"|"deploymentAssessment"",
+          "path": [
+            "query",
+            "kind",
+          ],
+          "values": [
             "",
             "model",
             "accessRequest",
             "dataCard",
             "deploymentAssessment",
           ],
-          "path": [
-            "query",
-            "kind",
-          ],
-          "received": "notValid",
         },
       ],
     },
-    "message": "Path: query.kind - Message: Invalid enum value. Expected '' | 'model' | 'accessRequest' | 'dataCard' | 'deploymentAssessment', received 'notValid'",
+    "message": "Path: query.kind - Message: Invalid option: expected one of ""|"model"|"accessRequest"|"dataCard"|"deploymentAssessment"",
     "name": "Bailo Error",
   },
 }

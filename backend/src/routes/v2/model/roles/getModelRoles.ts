@@ -19,10 +19,10 @@ const GetModelRolesResponseSchema = z.object({
   roles: z.array(
     z.object({
       name: z.string().min(1),
-      kind: z.nativeEnum(RoleKind),
+      kind: z.enum(RoleKind),
       shortName: z.string(),
       description: z.string().optional(),
-      systemRole: z.nativeEnum(SystemRoles).optional(),
+      systemRole: z.enum(SystemRoles).optional(),
     }) satisfies z.ZodType<Role>,
   ),
 })

@@ -45,8 +45,8 @@ describe('routes > review > postReview', () => {
   })
 
   test('rejects date when isLifecycleReviewDateValid returns false', async () => {
-    mockReviewService.isLifecycleReviewDateValid.mockReturnValueOnce(false)
     const fixture = createFixture(postReviewSchema)
+    mockReviewService.isLifecycleReviewDateValid.mockReturnValueOnce(false)
     fixture.body = { kind: ReviewKind.Lifecycle, dueDate: new Date('2027-01-01T12:00:00.000Z') }
     const res = await testPost(`/api/v3/review/${fixture.params.modelId}`, fixture)
 
@@ -55,7 +55,9 @@ describe('routes > review > postReview', () => {
   })
 
   test('rejects date before year 2000', async () => {
-    const fixture = createFixture(postReviewSchema)
+    const fixture = createFixture(postReviewSchema, {
+      body: { kind: ReviewKind.Lifecycle, dueDate: new Date('2027-01-01T12:00:00.000Z') },
+    })
     fixture.body = { kind: ReviewKind.Lifecycle, dueDate: new Date('1999-12-31T00:00:00.000Z') }
     const res = await testPost(`/api/v3/review/${fixture.params.modelId}`, fixture)
 

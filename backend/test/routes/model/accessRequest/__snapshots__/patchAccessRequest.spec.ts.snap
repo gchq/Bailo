@@ -16,18 +16,17 @@ exports[`routes > accessRequest > patchAccessRequest > 400 > no name 1`] = `
         {
           "code": "invalid_type",
           "expected": "string",
-          "message": "Required",
+          "message": "Invalid input: expected string, received undefined",
           "path": [
             "body",
             "metadata",
             "overview",
             "name",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: body.metadata.overview.name - Message: Required",
+    "message": "Path: body.metadata.overview.name - Message: Invalid input: expected string, received undefined",
     "name": "Bailo Error",
   },
 }

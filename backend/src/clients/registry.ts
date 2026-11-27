@@ -1,8 +1,8 @@
 import { Readable } from 'node:stream'
 
 import { type BodyInit, type HeadersInit, type RequestInit } from 'undici-types'
-import type { ZodType, ZodTypeDef } from 'zod'
 
+import { z, type ZodType } from '../lib/zod.js'
 import { type ImageDigestRef, type ImageNameRef, type ImageRef } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -51,8 +51,8 @@ interface PaginationOptions<TBody> {
 }
 
 interface RegistryRequestOptions<TBody, THeaders> {
-  bodySchema?: ZodType<TBody, ZodTypeDef, any>
-  headersSchema?: ZodType<THeaders, ZodTypeDef, any>
+  bodySchema?: ZodType<TBody, any>
+  headersSchema?: ZodType<THeaders, any>
   expectStream?: boolean
   forceText?: boolean
   extraFetchOptions?: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>>
@@ -116,7 +116,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
   endpoint: string,
   {
     bodySchema,
-    headersSchema = CommonRegistryHeadersSchema as unknown as ZodType<THeaders, ZodTypeDef, any>,
+    headersSchema = CommonRegistryHeadersSchema as unknown as ZodType<THeaders, any>,
     expectStream = false,
     forceText = false,
     extraFetchOptions = {},
@@ -189,7 +189,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
     if (!parsedHeaders.success) {
       controller.abort()
       throw InternalError('Registry returned invalid headers.', {
-        issues: parsedHeaders.error.format(),
+        issues: z.treeifyError(parsedHeaders.error),
       })
     }
     headers = parsedHeaders.data
@@ -212,7 +212,7 @@ async function registryRequest<TBody = unknown, THeaders = CommonRegistryHeaders
       if (!parsed.success) {
         controller.abort()
         throw InternalError('Registry response body validation failed.', {
-          issues: parsed.error.format(),
+          issues: z.treeifyError(parsed.error),
         })
       }
 

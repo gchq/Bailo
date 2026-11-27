@@ -30,8 +30,8 @@ export const postAccessRequestReviewResponseSchema = z.object({
     accessRequestId: z.string(),
   }),
   body: z.discriminatedUnion('decision', [
-    staticProperties.merge(optionalComment),
-    staticProperties.merge(mandatoryComment),
+    staticProperties.extend(optionalComment.shape),
+    staticProperties.extend(mandatoryComment.shape),
   ]),
 })
 

@@ -21,7 +21,6 @@ exports[`routes > model > postModel > template > 400 > no model template ID prov
             "body",
             "templateId",
           ],
-          "received": "undefined",
         },
       ],
     },
