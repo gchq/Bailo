@@ -6,16 +6,11 @@ const BULB_COLOURS = ['#e53935', '#43a047', '#fdd835', '#1e88e5']
 // shortcut: fixed count covers screens up to 2400px wide, raise it if wider displays need it
 const BULB_COUNT = 60
 
-export type ChristmasLightsProps = {
-  twinkle: boolean
-}
-
-export default function ChristmasLights({ twinkle }: ChristmasLightsProps) {
+export default function ChristmasLights() {
   return (
     <Box
       aria-hidden
       data-test='christmasLights'
-      data-twinkle={twinkle}
       sx={{
         position: 'absolute',
         left: 0,
@@ -41,7 +36,7 @@ export default function ChristmasLights({ twinkle }: ChristmasLightsProps) {
               flex: '0 0 40px',
               height: 24,
               '& .bulb': {
-                animation: twinkle ? `twinkle 1.5s ease-in-out ${(index % 4) * 0.375}s infinite` : 'none',
+                animation:`twinkle 1.5s ease-in-out ${(index % 4) * 0.375}s infinite`,
               },
               '@media (prefers-reduced-motion: reduce)': {
                 '& .bulb': { animation: 'none' },
