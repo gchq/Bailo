@@ -124,7 +124,6 @@ export const flatDirectory: DocumentationNavigationEntry[] = [
   { title: 'Reference', slug: 'reference', header: true },
   { title: 'Glossary', slug: 'reference/glossary' },
   { title: 'Roles & Permissions', slug: 'reference/roles-and-permissions' },
-  { title: 'Troubleshooting & FAQ', slug: 'reference/troubleshooting' },
 ]
 
 function slugsToTree(paths: DocumentationNavigationEntry[]) {
