@@ -25,7 +25,7 @@ vi.mock('actions/modelCard', () => ({
 vi.mock('src/common/RichTextEditor.tsx', () => ({ default: () => <></> }))
 vi.mock('src/entry/model/ModelImageList.tsx', () => ({ default: () => <></> }))
 
-const uploadedFile = { _id: 'new-file-id', name: 'weights/model.bin' } as FileInterface
+const uploadedFile = { _id: 'new-file-id', name: 'weights/model.bin', size: 1024 } as FileInterface
 
 // Stands in for a completed upload, so the test drives only what the form does with the result.
 vi.mock('src/entry/model/files/FileUploadDialog.tsx', () => ({
@@ -118,8 +118,8 @@ describe('ReleaseForm', () => {
   })
 
   it('replaces a file of the same name on the release with a newly uploaded file', async () => {
-    const existingFile = { _id: 'existing-file-id', name: 'weights/model.bin' } as FileInterface
-    const otherFile = { _id: 'other-file-id', name: 'config.json' } as FileInterface
+    const existingFile = { _id: 'existing-file-id', name: 'weights/model.bin', size: 1024 } as FileInterface
+    const otherFile = { _id: 'other-file-id', name: 'config.json', size: 1024 } as FileInterface
     const onFilesChange = vi.fn()
 
     renderReleaseForm({ ...emptyFormData, files: [existingFile, otherFile] }, onFilesChange)
@@ -129,7 +129,7 @@ describe('ReleaseForm', () => {
   })
 
   it('adds a newly uploaded file to the release when no file of that name is on it', async () => {
-    const otherFile = { _id: 'other-file-id', name: 'config.json' } as FileInterface
+    const otherFile = { _id: 'other-file-id', name: 'config.json', size: 1024 } as FileInterface
     const onFilesChange = vi.fn()
 
     renderReleaseForm({ ...emptyFormData, files: [otherFile] }, onFilesChange)
