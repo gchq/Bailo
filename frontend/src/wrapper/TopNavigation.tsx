@@ -3,7 +3,7 @@ import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
-import ParkIcon from '@mui/icons-material/Park'
+import AcUnitIcon from '@mui/icons-material/AcUnit';
 import Person from '@mui/icons-material/Person'
 import Settings from '@mui/icons-material/Settings'
 import SettingsSuggestTwoToneIcon from '@mui/icons-material/SettingsSuggestTwoTone'
@@ -129,7 +129,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
           }),
         }}
       >
-        <ParkIcon />
+        <AcUnitIcon />
       </IconButton>
     </Tooltip>
   )
@@ -367,7 +367,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
         </Stack>
       </Toolbar>
       <DocsSearchDialog open={docsSearchOpen} onClose={() => setDocsSearchOpen(false)} />
-      {showChristmas && <ChristmasLights twinkle={snowEnabled} />}
+      {showChristmas && snowEnabled && <ChristmasLights />}
       {showChristmas && snowEnabled && <Snowfall />}
     </AppBar>
   )
