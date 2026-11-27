@@ -5,20 +5,18 @@
 # for models in another instance.
 
 # Usage
-# Run your 1st instance of Bailo the usual way
-#       docker compose build --parallel
-#       docker compose up
-#       Access UI at localhost:8080
+# Run your 1st instance of Bailo as per "Development Build" in README.md
+#       Access UI at http://localhost:8080/
 # Then run your 2nd instance using this file with
 #       docker build . -t second-bailo -f Dockerfile.standalone --build-context python=./lib/python
 #       docker run --rm -p 4318:8080 --network dev_internal --name second-bailo second-bailo:latest
 #       Access UI at http://localhost:4318/
 
-FROM chrislusf/seaweedfs:4.53@sha256:ccad23e18639c8b98cee17e7100b95830a06077b56d8e5b006d6dcf8ec5e94a0 AS seaweedfs-bin
+FROM chrislusf/seaweedfs:4.55@sha256:7ca46aeae2f223b37e5d91593c17ab37738eec6df6ab69b48a0487f7643342b9 AS seaweedfs-bin
 FROM registry:3.1.2@sha256:82f6ff4a7f982960c8aa51617fea3aabc485df6e55cce80d22deb1de36f1bc3c AS registry-bin
 FROM marlonb/mailcrab:v1.10.0@sha256:dd0e3933e35200ed9956aeb76bb27fc700dd452bd6586448107ccf8fe411c0a1 AS mailcrab-bin
 
-FROM ghcr.io/astral-sh/uv:python3.15-alpine@sha256:61d5053f323bbdb706e3f02398aa7931d514ba1ef9bcf87c512d4549e98d8c1b AS sphinx-docs
+FROM ghcr.io/astral-sh/uv:python3.15-alpine@sha256:6de501ac125aa750217800807c65e68debd84eb14e421661b8972b119ec144bf AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_PROJECT_ENVIRONMENT=/venv \
@@ -56,7 +54,7 @@ RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY frontend .
 RUN npm run build
 
-FROM ubuntu:noble@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+FROM ubuntu:noble@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8
 ENV DEBIAN_FRONTEND=noninteractive
 # Cache packages with run cache, update system packages, install packages
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \

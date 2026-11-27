@@ -5,3 +5,11 @@ exports[`routes > webhook > deleteWebhook > 200 > ok 1`] = `
   "message": "Successfully removed file.",
 }
 `;
+
+exports[`routes > webhook > deleteWebhook > audit > expected call 1`] = `
+{
+  "id": "new-webhook",
+  "modelId": "test-model",
+  "name": "new webhook",
+}
+`;

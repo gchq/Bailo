@@ -6,12 +6,12 @@ exports[`routes > images > getImages > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > images > getImages > audit > expected call 1`] = `"aEGrOTaTIo VulNus sPectACUlUM aDfeCtUs DEcuMbo imPEdiT cURiOSItas qUIbUsdAM"`;
+exports[`routes > images > getImages > audit > expected call 1`] = `"Cupressus nulla temporibus audeo civis."`;
 
 exports[`routes > images > getImages > audit > expected call 2`] = `
 {
-  "name": "eRror",
-  "repository": "aEGrOTaTIo VulNus sPectACUlUM aDfeCtUs DEcuMbo imPEdiT cURiOSItas qUIbUsdAM",
-  "tag": "DENego PRaEseNTIUm Bis apeRTE LibEro colO DeprecaTOr CLArO ceLo cURIs aBbas",
+  "name": "Desidero atrox cupiditate avarus exercitationem tristis audax vita.",
+  "repository": "Cupressus nulla temporibus audeo civis.",
+  "tag": "Desparatus dolore accendo suus vulgo ascisco.",
 }
 `;

@@ -11,7 +11,7 @@ import { parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getSchemasSchema = z.object({
   query: z.object({
-    kind: z.nativeEnum(SchemaKind).optional(),
+    kind: z.enum(SchemaKind).optional(),
     hidden: strictCoerceBoolean(z.boolean()).optional(),
   }),
 })

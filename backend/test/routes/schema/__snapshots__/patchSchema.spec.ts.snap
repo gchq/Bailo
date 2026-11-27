@@ -36,14 +36,14 @@ exports[`routes > schema > patchSchema > throws 400 when trying to update id pro
           "keys": [
             "id",
           ],
-          "message": "Unrecognized key(s) in object: 'id'",
+          "message": "Unrecognized key: "id"",
           "path": [
             "body",
           ],
         },
       ],
     },
-    "message": "Path: body - Message: Unrecognized key(s) in object: 'id'",
+    "message": "Path: body - Message: Unrecognized key: "id"",
     "name": "Bailo Error",
   },
 }

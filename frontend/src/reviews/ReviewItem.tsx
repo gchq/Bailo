@@ -28,9 +28,9 @@ export default function ReviewItem({ review, status }: ReviewItemProps) {
       case ReviewKind.RELEASE:
         return `release/${review.semver}`
       case ReviewKind.ACCESS:
-        return `access-request/${review.accessRequestId}/review`
+        return `access-request/${review.accessRequestId}`
       case ReviewKind.LIFECYCLE:
-        return `lifecycle/${review._id}/review`
+        return ''
     }
   }
 

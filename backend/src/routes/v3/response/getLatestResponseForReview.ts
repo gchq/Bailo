@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const getLatestResponseSchema = z.object({
   params: z.object({
-    reviewId: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid review id'),
+    reviewId: z.string().regex(/^[a-fA-F\d]{24}$/, 'Invalid review id'),
   }),
 })
 

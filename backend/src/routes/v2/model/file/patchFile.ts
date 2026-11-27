@@ -11,10 +11,10 @@ import { parse } from '../../../../utils/validate.js'
 export const patchFileSchema = z.object({
   params: z.object({
     modelId: z.string({
-      required_error: 'Must specify model id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
     }),
     fileId: z.string({
-      required_error: 'Must specify file id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify file id as param' : undefined),
     }),
   }),
   body: z.object({

@@ -15,7 +15,7 @@ export const getReviewsSchema = z.object({
     semver: z.string().optional(),
     accessRequestId: z.string().optional(),
     reviewId: z.string().optional(),
-    kind: z.nativeEnum(ReviewKind).optional(),
+    kind: z.enum(ReviewKind).optional(),
     mine: strictCoerceBoolean(z.boolean()).optional().default(true),
     open: strictCoerceBoolean(z.boolean()).optional(),
   }),

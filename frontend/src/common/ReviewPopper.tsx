@@ -2,12 +2,14 @@ import { type Dayjs } from '@dayjs'
 import Close from '@mui/icons-material/Close'
 import {
   Button,
+  type ButtonOwnProps,
   Dialog,
   DialogContent,
   DialogTitle,
   IconButton,
   Paper,
   Popper,
+  type PopperPlacementType,
   Stack,
   useMediaQuery,
 } from '@mui/material'
@@ -26,6 +28,12 @@ interface ReviewPopperProps {
   includeDueDate?: boolean
   reviewComment: string
   onReviewCommentChange: (value: string) => void
+  buttonSize?: ButtonOwnProps['size']
+  buttonVariant?: ButtonOwnProps['variant']
+  buttonText?: string
+  hideButtonIcon?: boolean
+  hideRequestChangesButton?: boolean
+  popperPlacement?: PopperPlacementType
 }
 
 export default function ReviewPopper({
@@ -36,6 +44,12 @@ export default function ReviewPopper({
   onSubmit,
   reviewComment,
   onReviewCommentChange,
+  buttonSize = 'medium',
+  buttonVariant = 'contained',
+  buttonText = 'Submit review',
+  hideButtonIcon = false,
+  hideRequestChangesButton = false,
+  popperPlacement = 'bottom-start',
 }: ReviewPopperProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const theme = useTheme()
@@ -56,6 +70,7 @@ export default function ReviewPopper({
         onCancel={() => setAnchorEl(null)}
         reviewComment={reviewComment}
         onReviewCommentChange={onReviewCommentChange}
+        hideRequestChangesButton={hideRequestChangesButton}
       />
       <MessageAlert message={errorMessage} severity='error' />
     </Stack>
@@ -63,13 +78,14 @@ export default function ReviewPopper({
   return (
     <>
       <Button
-        variant='contained'
+        variant={buttonVariant}
         onClick={(e) => setAnchorEl(e.currentTarget)}
         data-test='openReviewPopperBtn'
         sx={{ height: 'max-content' }}
-        endIcon={<ArrowDropDownIcon />}
+        endIcon={hideButtonIcon ? null : <ArrowDropDownIcon />}
+        size={buttonSize}
       >
-        Submit review
+        {buttonText}
       </Button>
       {isSmallScreen ? (
         <Dialog open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} fullScreen>
@@ -84,9 +100,20 @@ export default function ReviewPopper({
         <Popper
           open={Boolean(anchorEl)}
           anchorEl={anchorEl}
-          placement='bottom-start'
-          popperOptions={{ strategy: 'fixed' }}
-          modifiers={[{ name: 'eventListeners', enabled: false }]}
+          placement={popperPlacement}
+          modifiers={[
+            {
+              name: 'preventOverflow',
+              enabled: true,
+              options: {
+                altAxis: true,
+                altBoundary: true,
+                tether: false,
+                rootBoundary: 'viewport',
+                padding: 8,
+              },
+            },
+          ]}
           sx={{
             minWidth: '450px',
             boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',

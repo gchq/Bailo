@@ -127,20 +127,57 @@ export interface Config {
 
   /** ### Federation
    *
-   * Enables searching and discovery across Bailo peers.
+   * Enables searching and discovery of models across other Bailo instances and external model repositories
+   * (e.g. Hugging Face Hub). Each connected instance or repository is called a **peer**.
+   *
+   * - Configured in the backend only. Peers are loaded at start-up, so restart the backend after any change
+   * - One-directional: listing a peer lets your users discover its models, not the other way round
+   * - Only search results are shared. Files, images and releases are never transferred
+   * - Controls outgoing connections only. Incoming requests are handled by your authentication and authorisation
+   *   connectors like any other API request
+   *
+   * @example
+   * ```js
+   * federation: {
+   *   state: 'enabled',
+   *   id: 'organisation-a',
+   *   peers: {
+   *     'organisation-b': {
+   *       state: 'enabled',
+   *       kind: 'bailo',
+   *       baseUrl: 'https://bailo.organisation-b.example',
+   *       label: 'Organisation B',
+   *     },
+   *   },
+   * }
+   * ```
    */
   federation: {
-    /** Status of federation search
-     * - 'enabled' - Creates peer connections
-     * - 'readOnly' - Used for creating a peer itself without any peers
-     * - 'disabled' - Doesn't create peer connections
+    /** Federation state for this instance. Also reported to other instances by `GET /api/v2/system/status`
+     * - 'disabled' - Federation is off and no peer connections are created (default)
+     * - 'readOnly' - Peer connections are created. Intended for an instance that acts as a source for other
+     *   instances. Currently behaves the same as 'enabled'
+     * - 'enabled' - Peer connections are created. Intended for an instance whose users search other instances
      */
     state: FederationStateKeys
-    /** Unique peer identifier */
+    /** Unique identifier for this instance
+     *
+     * Sent to peers in the `x-bailo-id` header of every federated request. Required when `state` is not 'disabled'.
+     * Remote instances must use this value as the key for this instance in their own `peers` for escalation to work.
+     */
     id: string
-    /** Allow escalation across federated peers */
+    /** Allow user escalation across federated peers (default: off)
+     *
+     * By default peers handle federated searches as this instance's service identity. When enabled, outgoing searches
+     * also send the searching user, and incoming requests from peers listed with `allowedSystemUserIds` are run as
+     * that user. Both instances must enable it, and should only do so for instances they trust.
+     */
     isEscalationEnabled?: boolean
-    /** Known federation peers */
+    /** Known federation peers
+     *
+     * A map of peer ID to peer settings. The ID is shown to users in the Marketplace **External repositories** filter.
+     * Required when `state` is not 'disabled' (use `{}` if there are none), otherwise the backend fails to start.
+     */
     peers: Record<string, RemoteFederationConfig>
   }
 
@@ -289,6 +326,12 @@ export interface Config {
   session: {
     /** Express session signing secret */
     secret: string
+  }
+
+  /** ### Personal access tokens */
+  personalAccessToken: {
+    /** How long a token stays valid after it was last renewed, as a human-interval string (e.g. '90 days'). An empty string disables expiry */
+    lifetime: string
   }
 
   /** ### OAuth/OpenID Connect

@@ -27,7 +27,7 @@ describe('routes > model > getModel', () => {
   test('audit > expected call', async () => {
     modelMock.getModelCard.mockResolvedValueOnce({ example: 'test' })
 
-    const fixture = createFixture(getModelCardSchema)
+    const fixture = createFixture(getModelCardSchema, { query: { mirrored: 'false' } })
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card/latest`)
 
     expect(res.statusCode).toBe(200)

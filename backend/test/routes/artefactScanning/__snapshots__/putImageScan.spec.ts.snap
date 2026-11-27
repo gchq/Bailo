@@ -2,13 +2,13 @@
 
 exports[`routes > artefactscanning > putImageScan > 200 > ok 1`] = `{}`;
 
-exports[`routes > artefactscanning > putImageScan > audit > expected call 1`] = `"aeGRo"`;
+exports[`routes > artefactscanning > putImageScan > audit > expected call 1`] = `"Nulla temporibus audeo civis spargo desidero."`;
 
 exports[`routes > artefactscanning > putImageScan > audit > expected call 2`] = `
 {
-  "name": "qUIbU",
-  "repository": "aeGRo",
-  "tag": "SOlUT",
+  "name": "Cupiditate avarus exercitationem tristis.",
+  "repository": "Nulla temporibus audeo civis spargo desidero.",
+  "tag": "Vita currus desparatus dolore.",
 }
 `;
 

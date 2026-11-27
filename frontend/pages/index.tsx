@@ -284,6 +284,17 @@ export default function Marketplace() {
     [updateQueryParams],
   )
 
+  const handleUserChange = useCallback(
+    (newValue: Array<EntityObject>) => {
+      setUpdatedUsers(newValue)
+      updateQueryParams(
+        'users',
+        newValue.map((user) => toEntity(user.kind, user.id)),
+      )
+    },
+    [updateQueryParams],
+  )
+
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
   }
@@ -299,6 +310,7 @@ export default function Marketplace() {
     setSelectedStates([])
     setSelectedRoles([])
     setSelectedPeers([])
+    setUpdatedUsers([])
     setFilter('')
     setTitleOnly(false)
     setSelectedKinds(availableModelKinds)
@@ -533,7 +545,7 @@ export default function Marketplace() {
                             getOptionLabel={(option) => option.id}
                             isOptionEqualToValue={(option, value) => option.id === value.id}
                             onChange={(_event, newValue) => {
-                              setUpdatedUsers(newValue)
+                              handleUserChange(newValue)
                             }}
                             options={users}
                             filterOptions={(options) =>

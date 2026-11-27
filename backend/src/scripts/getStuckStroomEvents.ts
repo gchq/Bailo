@@ -2,8 +2,8 @@ import StroomEvent from '../models/StroomEvent.js'
 import log from '../services/log.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
-// npm run script -- getStroomStuckEvents
-// npm run script -- getStroomStuckEvents reset
+// npm run script -- getStuckStroomEvents
+// npm run script -- getStuckStroomEvents reset
 async function script() {
   const shouldReset = process.argv.includes('reset')
 

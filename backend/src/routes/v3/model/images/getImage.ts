@@ -10,16 +10,16 @@ import { parse } from '../../../../utils/validate.js'
 
 const getImageByDigestParams = z.object({
   modelId: z.string({
-    required_error: 'Must specify model id as param',
+    error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
   }),
   name: z.string({
-    required_error: 'Must specify image name as param',
+    error: (issue) => (issue.input === undefined ? 'Must specify image name as param' : undefined),
   }),
   tag: z.string({
-    required_error: 'Must specify image tag as param',
+    error: (issue) => (issue.input === undefined ? 'Must specify image tag as param' : undefined),
   }),
   digest: z.string({
-    required_error: 'Must specify image digest as param',
+    error: (issue) => (issue.input === undefined ? 'Must specify image digest as param' : undefined),
   }),
 })
 

@@ -22,7 +22,7 @@ export const postReviewRoleSchema = z.object({
       .optional()
       .openapi({ example: ['user:user'] }),
     lockEntities: z.boolean().optional().openapi({ example: false }),
-    systemRole: z.nativeEnum(SystemRoles).optional().openapi({ example: SystemRoles.Owner }),
+    systemRole: z.enum(SystemRoles).optional().openapi({ example: SystemRoles.Owner }),
   }),
 })
 

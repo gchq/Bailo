@@ -6,6 +6,7 @@ import { type Theme, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import ReactMarkdown from 'markdown-to-jsx'
 import { createElement, type ReactNode, useMemo } from 'react'
+import { markdownParserOptions } from 'utils/markdownUtils'
 
 export type MarkdownDisplayProps = {
   children: string
@@ -98,6 +99,7 @@ export function MarkdownBlockquote({ children, ...props }: BoxProps) {
 
 export function createMarkdownOptions(theme: Theme, inline = false) {
   return {
+    ...markdownParserOptions,
     forceInline: inline,
     overrides: {
       h1: {

@@ -387,6 +387,7 @@ The following tables describe selected configuration options available in `value
 | Name | Description | Value |
 | ---- | ----------- | ----- |
 | `cookie.secret` | A randomly generated secret key used to encrypt and sign session cookies, ensuring data security and integrity | `somerandomstring12341234567890AB` |
+| `config.personalAccessToken.lifetime` | How long a personal access token stays valid after it was last renewed, as a human-interval string (e.g. `90 days`). Applies to existing tokens too. An empty string disables expiry | `90 days` |
 | `oauth.enabled` | Currently setup to use Cognito <https://aws.amazon.com/blogs/security/how-to-use-oauth-2-0-in-amazon-cognito-learn-about-the-different-oauth-2-0-grants/> | `false` |
 
 ### Bailo Supporting Service Configurations
@@ -410,9 +411,14 @@ The following tables describe selected configuration options available in `value
 | `config.ui.banner.text` | Content of top banner | `BAILO` |
 | `config.ui.banner.colour` | Colour of top banner | `#047a06` |
 | `config.ui.banner.textColor` | Colour of top banner text | `black` |
+| `config.ui.christmas.enabled` | Enables Christmas decorations during December | `true` |
 | `config.announcement.enabled` | Enables announcement banner at bottom of the page | `false` |
+| `config.announcement.title` | Heading of announcement banner, defaults to "Announcement" | `''` |
 | `config.announcement.text` | Content of announcement banner | `null` |
+| `config.announcement.description` | Markdown shown when the user selects "Show more" on the announcement banner | `''` |
 | `config.announcement.startTimestamp` | Start time of announcement banner | `null` |
+| `config.announcement.severity` | Colour scheme of announcement banner: `info`, `warning` or `error` | `info` |
+| `config.announcement.links` | Buttons on announcement banner, list of `{ label, href }` | `[]` |
 | `config.helpPopoverText.manualEntryAccess` | Help text for manually adding a user to a model | `null` |
 | `config.modelDetails.organisations` | Organisation options for models | `[]` |
 | `config.modelDetails.states` | States options for models | `[]` |

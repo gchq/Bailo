@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@agendajs/mongo-backend": "^4.0.3",
-    "@asteasolutions/zod-to-openapi": "^7.3.4",
+    "@asteasolutions/zod-to-openapi": "^9.1.0",
     "@aws-sdk/client-cognito-identity-provider": "~3.1169.0",
     "@aws-sdk/client-kms": "~3.1169.0",
     "@aws-sdk/client-s3": "~3.1169.0",
@@ -65,7 +65,7 @@
     "mongodb": "^7.9.0",
     "mongoose": "^9.12.1",
     "node-cache": "^5.1.2",
-    "nodemailer": "^10.5.0",
+    "nodemailer": "^10.6.0",
     "p-queue": "^10.0.0",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
@@ -78,10 +78,11 @@
     "undici": "^8.12.2",
     "xmlbuilder2": "^4.0.3",
     "yargs": "^18.2.0",
-    "zod": "^3.25.67"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@faker-js/faker": "^10.6.0",
     "@types/clamscan": "^2.4.0",
     "@types/config": "^4.4.0",
     "@types/express": "~5.0.6",

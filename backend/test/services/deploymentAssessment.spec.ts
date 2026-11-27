@@ -15,6 +15,7 @@ import {
   searchDeploymentAssessments,
   updateDeploymentAssessment,
 } from '../../src/services/deploymentAssessment.js'
+import type * as SchemaService from '../../src/services/schema.js'
 import { SchemaKind } from '../../src/types/enums.js'
 import config from '../../src/utils/config.js'
 import { getTypedModelMock } from '../testUtils/setupMongooseModelMocks.js'
@@ -37,7 +38,10 @@ const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
   validateContentAgainstSchema: vi.fn(),
 }))
-vi.mock('../../src/services/schema.js', () => schemaMocks)
+vi.mock('../../src/services/schema.js', async (importOriginal) => {
+  const { checkSchemaKind } = await importOriginal<typeof SchemaService>()
+  return { ...schemaMocks, checkSchemaKind }
+})
 
 const smtpMocks = vi.hoisted(() => ({
   notifyRiskOwnerOfDeploymentAssessment: vi.fn(),
@@ -228,7 +232,7 @@ describe('services > deploymentAssessment', () => {
     schemaMocks.getSchemaById.mockResolvedValueOnce({ kind: SchemaKind.AccessRequest, hidden: false })
 
     await expect(createDeploymentAssessment({ dn: 'creator' }, params)).rejects.toThrow(
-      'Deployment assessments must use a Deployment Assessment schema.',
+      'The schema kind does not match the expected kind.',
     )
     expect(schemaMocks.validateContentAgainstSchema).not.toHaveBeenCalled()
   })

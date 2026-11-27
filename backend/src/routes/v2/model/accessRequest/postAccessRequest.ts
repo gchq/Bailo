@@ -8,19 +8,15 @@ import { createAccessRequest } from '../../../../services/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
-const knownOverview = z.object({
+const overview = z.looseObject({
   name: z.string().nonempty(),
   endDate: z.string().optional(),
   entities: z.array(z.string().nonempty()).nonempty(),
 })
 
-const overview = z.intersection(knownOverview, z.record(z.unknown()))
-
-const KnownMetadata = z.object({
+export const accessRequestMetadata = z.looseObject({
   overview,
 })
-
-export const accessRequestMetadata = z.intersection(KnownMetadata, z.record(z.unknown()))
 
 export const postAccessRequestSchema = z.object({
   params: z.object({

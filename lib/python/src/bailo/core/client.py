@@ -525,19 +525,22 @@ class Client:
 
         :param model_id: Unique model ID
         :param semver: Semver of the release
-        :param filename: The filename trying to download from
+        :param filename: The filename trying to download from (may contain slashes for path-like names)
         :return: Response object
         """
-        filename = quote(filename, safe="")
+        # URL-encode each path segment so slashes in path-like filenames are preserved as separators
+        # in the URL. Every other character is escaped, so a name without slashes still occupies a
+        # single path segment, as it did before hierarchical file names were introduced.
+        encoded_filename = "/".join(quote(segment, safe="") for segment in filename.split("/"))
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
-                f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{filename}/download",
+                f"{self.url}/v2/token/model/{model_id}/release/{semver}/file/{encoded_filename}/download",
                 stream=True,
                 timeout=10_000,
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download",
+                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{encoded_filename}/download",
                 stream=True,
                 timeout=10_000,
             )

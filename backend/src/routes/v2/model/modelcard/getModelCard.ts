@@ -12,9 +12,9 @@ import { parse, strictCoerceBoolean } from '../../../../utils/validate.js'
 export const getModelCardSchema = z.object({
   params: z.object({
     modelId: z.string({
-      required_error: 'Must specify model id as param',
+      error: (issue) => (issue.input === undefined ? 'Must specify model id as param' : undefined),
     }),
-    version: z.nativeEnum(GetModelCardVersionOptions).or(z.coerce.number()),
+    version: z.enum(GetModelCardVersionOptions).or(z.coerce.number()),
   }),
   query: z.object({ mirrored: strictCoerceBoolean(z.boolean()).optional().openapi({ example: false }) }),
 })

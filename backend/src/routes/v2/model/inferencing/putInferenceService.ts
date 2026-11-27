@@ -19,8 +19,8 @@ export const putInferenceSchema = z.object({
     description: z.string(),
     settings: z.object({
       processorType: z.string(),
-      memory: z.number().finite().optional(),
-      port: z.number().finite(),
+      memory: z.number().optional(),
+      port: z.number(),
     }),
   }),
 })

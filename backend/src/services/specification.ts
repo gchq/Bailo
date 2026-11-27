@@ -1,5 +1,5 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry, type RouteConfig } from '@asteasolutions/zod-to-openapi'
-import type { AnyZodObject } from 'zod'
+import type { ZodObject } from 'zod'
 
 import { ModelScanResponseSchema, TrivyScanResultResponseSchema } from '../clients/artefactScan.js'
 import { ArtefactScanState } from '../connectors/artefactScanning/Base.js'
@@ -16,7 +16,7 @@ import config from '../utils/config.js'
 export const registryv2 = new OpenAPIRegistry()
 export const registryv3 = new OpenAPIRegistry()
 
-export type PathConfig = RouteConfig & { schema: AnyZodObject }
+export type PathConfig = RouteConfig & { schema: ZodObject }
 export function registerPath(config: PathConfig, version?: string) {
   const routeConfig: RouteConfig = {
     ...config,
@@ -81,11 +81,11 @@ export const deploymentAssessmentMetadataSchema = z
       .object({
         riskOwners: deploymentAssessmentRiskOwnerSchema.optional(),
       })
-      .passthrough()
+      .loose()
       .optional(),
-    modelOverview: z.object({ modelIds: deploymentAssessmentModelIdsSchema.optional() }).passthrough().optional(),
+    modelOverview: z.object({ modelIds: deploymentAssessmentModelIdsSchema.optional() }).loose().optional(),
   })
-  .passthrough()
+  .loose()
 
 export const deploymentAssessmentMetadataRequiredSchema = z
   .object({
@@ -93,10 +93,10 @@ export const deploymentAssessmentMetadataRequiredSchema = z
       .object({
         modelIds: deploymentAssessmentModelIdsSchema,
       })
-      .passthrough(),
-    signOff: z.object({ riskOwners: deploymentAssessmentRiskOwnerSchema }).passthrough(),
+      .loose(),
+    signOff: z.object({ riskOwners: deploymentAssessmentRiskOwnerSchema }).loose(),
   })
-  .passthrough()
+  .loose()
 
 export const deploymentAssessmentSummarySchema = z.object({
   id: deploymentAssessmentIdSchema,
@@ -106,7 +106,7 @@ export const deploymentAssessmentSummarySchema = z.object({
   models: deploymentAssessmentModelIdsSchema.optional(),
   draft: deploymentAssessmentDraftSchema,
   createdBy: z.string().openapi({ example: 'tony' }),
-  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+  createdAt: z.iso.datetime().openapi({ example: new Date().toISOString() }),
 })
 
 const baseDeploymentAssessmentSchema = z.object({
@@ -134,7 +134,7 @@ export const systemStatusSchema = z.object({
   ping: z.string().openapi({ example: 'pong' }),
   federation: z.object({
     id: z.string().openapi({ example: 'my-bailo' }),
-    state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
+    state: z.enum(FederationState).openapi({ example: 'readOnly' }),
   }),
 })
 
@@ -149,18 +149,18 @@ export const modelTransferSchema = z.object({
   artefactStatus: z.array(
     z.object({
       key: z.string().openapi({ example: '69fa066b3f64c06f027b4921' }),
-      status: z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.Completed }),
-      kind: z.nativeEnum(MirrorKind).openapi({ example: MirrorKind.File }),
+      status: z.enum(TransferStatus).openapi({ example: TransferStatus.Completed }),
+      kind: z.enum(MirrorKind).openapi({ example: MirrorKind.File }),
     }),
   ),
-  status: z.nativeEnum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
+  status: z.enum(TransferStatus).openapi({ example: TransferStatus.InProgress }),
   createdBy: z.string().openapi({ example: 'bob' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
 export const remoteFederationConfigSchema = z.object({
-  state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
+  state: z.enum(FederationState).openapi({ example: 'readOnly' }),
   baseUrl: z.string().openapi({ example: 'https://example.com' }),
   label: z.string().openapi({ example: 'My Bailo' }),
 })
@@ -226,12 +226,12 @@ export const artefactScanningConnectorInfo = z.array(
   z.object({
     toolName: z.string().openapi({ example: 'Clam AV' }),
     scannerVersion: z.string().optional().openapi({ example: '2.4.0' }),
-    artefactKind: z.nativeEnum(ArtefactKind).openapi({ example: 'file' }),
+    artefactKind: z.enum(ArtefactKind).openapi({ example: 'file' }),
   }),
 )
 
 export const scanInterfaceSchema = z.object({
-  artefactKind: z.nativeEnum(ArtefactKind).openapi({ example: 'file' }),
+  artefactKind: z.enum(ArtefactKind).openapi({ example: 'file' }),
   fileId: z.string().optional().openapi({ example: '507f1f77bcf86cd799439011' }),
   layerDigest: z
     .string()
@@ -239,7 +239,7 @@ export const scanInterfaceSchema = z.object({
     .openapi({ example: 'sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf' }),
   toolName: z.string().openapi({ example: 'Clam AV' }),
   scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
-  state: z.nativeEnum(ArtefactScanState).openapi({ example: 'complete' }),
+  state: z.enum(ArtefactScanState).openapi({ example: 'complete' }),
   summary: z
     .array(
       z.object({
@@ -290,7 +290,7 @@ export const fileWithScanInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
-export const SeverityCountsSchema = z.record(
+export const SeverityCountsSchema = z.partialRecord(
   z
     .enum(Object.values(SeverityLevel) as [SeverityLevelKeys, ...SeverityLevelKeys[]])
     .openapi({ example: SeverityLevel.HIGH }),
@@ -317,7 +317,7 @@ export const imageWithScanResultsSchema = z.object({
   tags: z.array(z.string()).openapi({ example: ['v1-cpu', 'v2-gpu'] }),
   scanSummaries: z.array(
     z.object({
-      state: z.nativeEnum(ArtefactScanState),
+      state: z.enum(ArtefactScanState),
       severityCounts: z.object({
         tag: z.string().openapi({ example: 'v1-cpu' }),
         severity: SeverityCountsSchema,
@@ -328,7 +328,7 @@ export const imageWithScanResultsSchema = z.object({
 })
 
 export const imageTagWithScanResultsSchema = z.object({
-  state: z.nativeEnum(ArtefactScanState),
+  state: z.enum(ArtefactScanState),
   tag: z.string().openapi({ example: 'v1-cpu' }),
   scanResults: z
     .array(
@@ -391,7 +391,7 @@ export const reviewInterfaceSchema = z.object({
 
   responses: z.array(z.string().optional()),
 
-  status: z.nativeEnum(Decision).nullable(),
+  status: z.enum(Decision).nullable(),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -399,9 +399,9 @@ export const reviewInterfaceSchema = z.object({
 
 export const responseInterfaceSchema = z.object({
   user: z.string().optional().openapi({ example: 'Joe Bloggs' }),
-  kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
+  kind: z.enum(ResponseKind).openapi({ example: ResponseKind.Comment }),
   role: z.string().optional().openapi({ example: 'mtr' }),
-  decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
+  decision: z.enum(Decision).optional().openapi({ example: Decision.Approve }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
   commentEditedAt: z.string().optional().openapi({ example: new Date().toISOString() }),
 
@@ -412,7 +412,7 @@ export const responseInterfaceSchema = z.object({
 export const deploymentAssessmentResponseSchema = z.object({
   _id: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   entity: z.string().openapi({ example: 'user:joe.bloggs' }),
-  kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
+  kind: z.enum(ResponseKind).openapi({ example: ResponseKind.Comment }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
   parentId: z.string().openapi({ example: '65df1a0e8c2b7c0012f0abcd' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -457,7 +457,7 @@ const deploymentAssessmentModelOverview = z
       .openapi({ example: ['ironman-a1b2c3', 'hulkbuster-a1b2c3'] })
       .optional(),
   })
-  .passthrough()
+  .loose()
 
 const deploymentAssessmentSignOff = z
   .object({
@@ -468,7 +468,7 @@ const deploymentAssessmentSignOff = z
       .openapi({ example: ['user:tony'] })
       .optional(),
   })
-  .passthrough()
+  .loose()
 
 export const deploymentAssessmentInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'just-a-rather-very-intelligent-system-a1b2c3' }),
@@ -482,11 +482,11 @@ export const deploymentAssessmentInterfaceSchema = z.object({
       modelOverview: deploymentAssessmentModelOverview,
       signOff: deploymentAssessmentSignOff,
     })
-    .passthrough(),
+    .loose(),
   draft: draft.optional().default(true).openapi({ example: true }),
   createdBy: z.string().openapi({ example: 'tony' }),
-  createdAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
-  updatedAt: z.string().datetime().openapi({ example: new Date().toISOString() }),
+  createdAt: z.iso.datetime().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.iso.datetime().openapi({ example: new Date().toISOString() }),
 })
 
 export const schemaInterfaceSchema = z.object({
@@ -497,7 +497,7 @@ export const schemaInterfaceSchema = z.object({
   active: z.boolean().openapi({ example: true }),
   hidden: z.boolean().openapi({ example: false }),
 
-  kind: z.nativeEnum(SchemaKind).openapi({ example: 'model' }),
+  kind: z.enum(SchemaKind).openapi({ example: 'model' }),
   jsonSchema: z.object({}).openapi({ example: {} }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -596,7 +596,7 @@ export const deploymentAssessmentPermissionsSchema = z.object({
 export const userTokenSchema = z.object({
   description: z.string().openapi({ example: 'user token' }),
 
-  scope: z.nativeEnum(TokenScope).openapi({ example: 'models' }),
+  scope: z.enum(TokenScope).openapi({ example: 'models' }),
   modelIds: z.array(z.string()).openapi({ example: ['yozlo-v4-abcdef'] }),
   actions: z.array(z.string()).openapi({ example: ['image:read', 'file:read'] }),
 

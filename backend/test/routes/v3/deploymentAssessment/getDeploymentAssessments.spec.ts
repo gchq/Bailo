@@ -37,7 +37,7 @@ describe('routes > deploymentAssessment > getDeploymentAssessments', () => {
 
   test('audit > expected call', async () => {
     serviceMock.searchDeploymentAssessments.mockResolvedValueOnce([deploymentAssessmentSummary])
-    const fixture = createFixture(getDeploymentAssessmentsSchema)
+    const fixture = createFixture(getDeploymentAssessmentsSchema, { query: { draft: 'true' } })
     const res = await testGet(
       `/api/v3/deployment-assessments?${qs.stringify(fixture.query, { arrayFormat: 'repeat' })}`,
     )

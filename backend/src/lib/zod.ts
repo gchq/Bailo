@@ -8,4 +8,4 @@ import { z } from 'zod'
 extendZodWithOpenApi(z)
 
 export { z }
-export type { ZodTypeAny } from 'zod'
+export type { ZodType } from 'zod'

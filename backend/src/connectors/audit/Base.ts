@@ -12,6 +12,7 @@ import { type ReviewRoleDoc } from '../../models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../models/Schema.js'
 import { type SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { type TokenDoc } from '../../models/Token.js'
+import { type WebhookDoc } from '../../models/Webhook.js'
 import { type GetCurrentUserResponse } from '../../routes/v3/entities/getCurrentUser.js'
 import { type DeploymentAssessmentSummary } from '../../services/deploymentAssessment.js'
 import { type BailoError } from '../../types/error.js'
@@ -48,6 +49,7 @@ export const ResourceKind = {
   User: 'user',
   Registry: 'registry',
   DeploymentAssessment: 'deployment assessment',
+  Webhook: 'webhook',
 }
 export type ResourceKindKeys = (typeof ResourceKind)[keyof typeof ResourceKind]
 
@@ -501,6 +503,31 @@ export const AuditInfo = {
     auditKind: AuditKind.Delete,
     resourceKind: ResourceKind.Registry,
   },
+
+  CreateWebhook: {
+    typeId: 'CreateWebhook',
+    description: 'Webhook Created',
+    auditKind: AuditKind.Create,
+    resourceKind: ResourceKind.Webhook,
+  },
+  ViewWebhooks: {
+    typeId: 'ViewWebhooks',
+    description: 'Webhooks Viewed',
+    auditKind: AuditKind.View,
+    resourceKind: ResourceKind.Webhook,
+  },
+  UpdateWebhook: {
+    typeId: 'UpdateWebhook',
+    description: 'Webhook Updated',
+    auditKind: AuditKind.Update,
+    resourceKind: ResourceKind.Webhook,
+  },
+  DeleteWebhook: {
+    typeId: 'DeleteWebhook',
+    description: 'Webhook Deleted',
+    auditKind: AuditKind.Delete,
+    resourceKind: ResourceKind.Webhook,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -605,6 +632,11 @@ export abstract class BaseAuditConnector {
   abstract onRegistryImagePulled(req: Request, registryImage: string): Promise<void>
   abstract onRegistryImagePushed(req: Request, registryImage: string): Promise<void>
   abstract onRegistryImageDeleted(req: Request, registryImage: string): Promise<void>
+
+  abstract onCreateWebhook(req: Request, webhook: WebhookDoc): Promise<void>
+  abstract onViewWebhooks(req: Request, webhooks: WebhookDoc[]): Promise<void>
+  abstract onUpdateWebhook(req: Request, webhook: WebhookDoc): Promise<void>
+  abstract onDeleteWebhook(req: Request, webhook: WebhookDoc): Promise<void>
 
   abstract onError(req: Request, error: BailoError): Promise<void>
 

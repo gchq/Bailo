@@ -30,8 +30,8 @@ export const postReleaseReviewResponseSchema = z.object({
     semver: z.string(),
   }),
   body: z.discriminatedUnion('decision', [
-    staticProperties.merge(optionalComment),
-    staticProperties.merge(mandatoryComment),
+    staticProperties.extend(optionalComment.shape),
+    staticProperties.extend(mandatoryComment.shape),
   ]),
 })
 

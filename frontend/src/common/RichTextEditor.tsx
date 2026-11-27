@@ -7,6 +7,7 @@ import { useTheme } from '@mui/material/styles'
 import { type MDEditorProps } from '@uiw/react-md-editor'
 import dynamic from 'next/dynamic'
 import { type ReactNode, useState } from 'react'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import { limitText, TEXT_INPUT_MAX_LENGTH } from 'utils/inputLimits'
 
 // The MD Editor library uses custom CSS property names which do not correspond to standard CSS naming
@@ -82,6 +83,7 @@ export default function RichTextEditor({
         height={150}
         textareaProps={{ ...richTextareaProps, 'aria-label': 'rich-text-input' }}
         onChange={handleChange}
+        components={{ preview: (source) => <MarkdownDisplay>{source}</MarkdownDisplay> }}
       />
     </>
   )

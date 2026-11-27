@@ -1,5 +1,7 @@
 import { type Request, type Response } from 'express'
 
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
 import { z } from '../../../../lib/zod.js'
 import { WebhookEvent, type WebhookInterface } from '../../../../models/Webhook.js'
 import { registerPath, webhookInterfaceSchema } from '../../../../services/specification.js'
@@ -17,7 +19,7 @@ export const postWebhookSchema = z.object({
     token: z.string().optional(),
     insecureSSL: z.boolean().optional().default(false),
 
-    events: z.array(z.nativeEnum(WebhookEvent)).optional(),
+    events: z.array(z.enum(WebhookEvent)).optional(),
     active: z.boolean().optional(),
   }),
 })
@@ -46,12 +48,15 @@ interface PostWebhookResponse {
 
 export const postWebhook = [
   async (req: Request, res: Response<PostWebhookResponse>): Promise<void> => {
+    req.audit = AuditInfo.CreateWebhook
     const {
       params: { modelId },
       body,
     } = parse(req, postWebhookSchema)
 
     const webhook = await createWebhook(req.user, { modelId, ...body })
+
+    await audit.onCreateWebhook(req, webhook)
 
     res.json({
       webhook,

@@ -9,7 +9,7 @@ import { parse } from '../../../utils/validate.js'
 export const patchResponseReactionSchema = z.object({
   params: z.object({
     responseId: z.string(),
-    kind: z.nativeEnum(ReactionKind),
+    kind: z.enum(ReactionKind),
   }),
 })
 

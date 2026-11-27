@@ -10,6 +10,6 @@ exports[`routes > images > getImage > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > images > getImage > audit > expected call 1`] = `"aEGrOTaTIo VulNus sPectACUlUM aDfeCtUs DEcuMbo imPEdiT cURiOSItas qUIbUsdAM"`;
+exports[`routes > images > getImage > audit > expected call 1`] = `"Cupressus nulla temporibus audeo civis."`;
 
-exports[`routes > images > getImage > audit > expected call 2`] = `"eRror"`;
+exports[`routes > images > getImage > audit > expected call 2`] = `"Desidero atrox cupiditate avarus exercitationem tristis audax vita."`;

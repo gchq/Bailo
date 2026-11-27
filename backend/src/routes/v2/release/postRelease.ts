@@ -11,7 +11,7 @@ import { parse } from '../../../utils/validate.js'
 export const postReleaseSchema = z.object({
   params: z.object({
     modelId: z.string({
-      required_error: 'Must specify model id as URL parameter',
+      error: (issue) => (issue.input === undefined ? 'Must specify model id as URL parameter' : undefined),
     }),
   }),
   body: z.object({

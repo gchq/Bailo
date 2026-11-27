@@ -143,6 +143,10 @@ module.exports = {
     secret: '',
   },
 
+  personalAccessToken: {
+    lifetime: '90 days',
+  },
+
   oauth: {
     provider: 'cognito',
 
@@ -215,6 +219,10 @@ module.exports = {
     syOps: {
       enabled: false,
       href: 'https://syops.example.com',
+    },
+
+    christmas: {
+      enabled: true,
     },
 
     inference: {

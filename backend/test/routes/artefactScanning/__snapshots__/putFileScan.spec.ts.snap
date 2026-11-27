@@ -2,6 +2,6 @@
 
 exports[`routes > artefactscanning > putFileScan > 200 > ok 1`] = `{}`;
 
-exports[`routes > artefactscanning > putFileScan > audit > expected call 1`] = `"SUpEllEX PAuLAtIM aMbituS paUCI TEnuIs AdUlATIo AegRotATio VuLNuS SpecTaCUl"`;
+exports[`routes > artefactscanning > putFileScan > audit > expected call 1`] = `"Decipio testimonium thalassinus contra cupressus nulla temporibus audeo civis spargo."`;
 
-exports[`routes > artefactscanning > putFileScan > audit > expected call 2`] = `"vICTu"`;
+exports[`routes > artefactscanning > putFileScan > audit > expected call 2`] = `"Atrox cupiditate avarus exercitationem tristis audax."`;

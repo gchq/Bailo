@@ -16,16 +16,15 @@ exports[`routes > release > postRelease > 400 > no semver 1`] = `
         {
           "code": "invalid_type",
           "expected": "string",
-          "message": "Required",
+          "message": "Invalid input: expected string, received undefined",
           "path": [
             "body",
             "semver",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: body.semver - Message: Required",
+    "message": "Path: body.semver - Message: Invalid input: expected string, received undefined",
     "name": "Bailo Error",
   },
 }

@@ -1,3 +1,4 @@
+import AcUnitIcon from '@mui/icons-material/AcUnit'
 import Add from '@mui/icons-material/Add'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
@@ -29,6 +30,9 @@ import UserDisplay from 'src/common/UserDisplay'
 import UiConfigContext from 'src/contexts/uiConfigContext'
 import DocsSearch from 'src/docs/DocsSearch'
 import DocsSearchDialog from 'src/docs/DocsSearchDialog'
+import { getSnowEnabled, saveSnowEnabled } from 'src/storage/userPreferences'
+import ChristmasLights from 'src/wrapper/ChristmasLights'
+import Snowfall from 'src/wrapper/Snowfall'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { type User } from '../../types/types'
@@ -69,12 +73,17 @@ const AppBar = styled(MuiAppBar, {
 export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, currentUser }: TopNavigationProps) {
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [docsSearchOpen, setDocsSearchOpen] = useState(false)
+  const [snowEnabled, setSnowEnabled] = useState(() => typeof window !== 'undefined' && getSnowEnabled())
 
   const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
 
   const router = useRouter()
   const theme = useTheme()
   const uiConfig = useContext(UiConfigContext)
+  const today = new Date()
+  const month = today.getMonth()
+  const showChristmas =
+    uiConfig.christmas.enabled && ((month === 11 && today.getDate() >= 1) || (month === 0 && today.getDate() <= 5))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
     setUserMenuAnchorEl(event.currentTarget)
@@ -87,6 +96,32 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
   const handleMenuClose = () => {
     setUserMenuAnchorEl(null)
   }
+
+  const handleSnowToggle = () => {
+    saveSnowEnabled(!snowEnabled)
+    setSnowEnabled(!snowEnabled)
+  }
+
+  const snowToggleButton = (
+    <Tooltip title={snowEnabled ? 'Turn off snow' : 'Turn on snow'}>
+      <IconButton
+        onClick={handleSnowToggle}
+        aria-label={snowEnabled ? 'Turn off snow' : 'Turn on snow'}
+        aria-pressed={snowEnabled}
+        data-test='snowToggleButton'
+        sx={{
+          color: snowEnabled ? 'white' : alpha(theme.palette.common.white, 0.55),
+          backgroundColor: alpha(theme.palette.common.white, snowEnabled ? 0.3 : 0.08),
+          '&:hover, &:focus': {
+            backgroundColor: alpha(theme.palette.common.white, 0.25),
+          },
+          height: 'max-content',
+        }}
+      >
+        <AcUnitIcon />
+      </IconButton>
+    </Tooltip>
+  )
 
   return (
     <AppBar
@@ -164,6 +199,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                     <Add />
                   </IconButton>
                 </Tooltip>
+                {showChristmas && snowToggleButton}
                 {currentUser ? (
                   <>
                     <Tooltip title='User settings'>
@@ -258,6 +294,7 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
                   ariaLabel='Create a new data card or model'
                   height='40px'
                 />
+                {showChristmas && snowToggleButton}
                 <DocsSearch renderDialog={false} onOpen={() => setDocsSearchOpen(true)} />
                 {currentUser ? (
                   <>
@@ -319,6 +356,8 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
         </Stack>
       </Toolbar>
       <DocsSearchDialog open={docsSearchOpen} onClose={() => setDocsSearchOpen(false)} />
+      {showChristmas && snowEnabled && <ChristmasLights />}
+      {showChristmas && snowEnabled && <Snowfall />}
     </AppBar>
   )
 }

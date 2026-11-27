@@ -13,6 +13,7 @@ import { type ReviewRoleDoc } from '../../../src/models/ReviewRole.js'
 import { type SchemaDoc, type SchemaInterface } from '../../../src/models/Schema.js'
 import { type SchemaMigrationInterface } from '../../../src/models/SchemaMigration.js'
 import { type TokenDoc } from '../../../src/models/Token.js'
+import { type WebhookDoc } from '../../../src/models/Webhook.js'
 import { type MongoDocumentMirrorInformation } from '../../../src/services/mirroredModel/importers/documents.js'
 import { type FileMirrorInformation } from '../../../src/services/mirroredModel/importers/file.js'
 import { type ImageMirrorInformation } from '../../../src/services/mirroredModel/importers/image.js'
@@ -385,6 +386,26 @@ describe('connectors > audit > stroom', () => {
 
   test('onDeleteInference > save expected event', async () => {
     await connector.onDeleteInference(deleteEventRequest, { id: 'id' } as InferenceDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onCreateWebhook > save expected event', async () => {
+    await connector.onCreateWebhook(createEventRequest, { id: 'test-webhook', modelId: 'test-model' } as WebhookDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onViewWebhooks > save expected event', async () => {
+    await connector.onViewWebhooks(viewEventRequest, [{ id: 'test-webhook', modelId: 'test-model' } as WebhookDoc])
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onUpdateWebhook > save expected event', async () => {
+    await connector.onUpdateWebhook(updateEventRequest, { id: 'test-webhook', modelId: 'test-model' } as WebhookDoc)
+    expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('onDeleteWebhook > save expected event', async () => {
+    await connector.onDeleteWebhook(deleteEventRequest, { id: 'test-webhook', modelId: 'test-model' } as WebhookDoc)
     expect(mockStroomService.saveEvent.mock.calls.at(0)).toMatchSnapshot()
   })
 

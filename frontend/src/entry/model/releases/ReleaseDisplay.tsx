@@ -23,6 +23,10 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
     return queryState
   }
 
+  if (!release) {
+    return <></>
+  }
+
   return (
     <>
       <Stack
@@ -35,7 +39,7 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
       >
         <Box sx={{ width: '100%' }}>
           <DraftBanner text='This is a draft release' draft={release.draft} showButton={false} />
-          <ReviewBanner release={release} />
+          {!release.draft && <ReviewBanner release={release} />}
           <Stack
             spacing={1}
             sx={{
@@ -45,12 +49,7 @@ export default function ReleaseDisplay({ model, release, latestRelease, hideFile
             <ReleaseAssetsMainText model={model} release={release} latestRelease={latestRelease} />
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
-              <ReleaseAssetsAccordion
-                model={model}
-                release={release}
-                mode='interactive'
-                hideFileDownloads={hideFileDownloads}
-              />
+              <ReleaseAssetsAccordion model={model} release={release} hideFileDownloads={hideFileDownloads} />
               <ReleaseAccessRequestReviewSummary release={release} />
             </Stack>
           </Stack>

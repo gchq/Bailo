@@ -69,6 +69,8 @@ export async function removeWebhook(user: UserInterface, modelId: string, webhoo
   if (!webhook) {
     throw NotFound(`The requested webhook was not found.`, { webhookId })
   }
+
+  return webhook
 }
 
 type WebhookContent =

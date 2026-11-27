@@ -15,11 +15,11 @@ const statesList = [...config.ui.modelDetails.states, '']
 export const postModelSchema = z.object({
   body: z.object({
     name: z.string().min(1, 'You must provide a model name').openapi({ example: 'Yolo v4' }),
-    kind: z.nativeEnum(EntryKind).openapi({ example: 'model' }),
+    kind: z.enum(EntryKind).openapi({ example: 'model' }),
     organisation: z.enum(organisationsList as [string, ...string[]]).optional(),
     state: z.enum(statesList as [string, ...string[], '']).optional(),
     description: z.string().min(1, 'You must provide a model description').openapi({ example: 'You only look once' }),
-    visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
+    visibility: z.enum(EntryVisibility).optional().default(EntryVisibility.Public),
     tags: z
       .array(z.string().toLowerCase())
       .optional()
@@ -59,8 +59,7 @@ export const postModelSchema = z.object({
           .optional()
           .default({}),
       })
-      .optional()
-      .default({ ungovernedAccess: false, allowTemplating: false }),
+      .prefault({}),
   }),
 })
 

@@ -16,16 +16,15 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
         {
           "code": "invalid_type",
           "expected": "string",
-          "message": "Required",
+          "message": "Invalid input: expected string, received undefined",
           "path": [
             "body",
             "description",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: body.description - Message: Required",
+    "message": "Path: body.description - Message: Invalid input: expected string, received undefined",
     "name": "Bailo Error",
   },
 }

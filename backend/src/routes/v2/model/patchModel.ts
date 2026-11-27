@@ -15,9 +15,9 @@ const statesList = [...config.ui.modelDetails.states, '']
 export const patchModelSchema = z.object({
   body: z.object({
     name: z.string().optional().openapi({ example: 'Yolo v4' }),
-    kind: z.nativeEnum(EntryKind).optional().openapi({ example: EntryKind.Model }),
+    kind: z.enum(EntryKind).optional().openapi({ example: EntryKind.Model }),
     description: z.string().optional().openapi({ example: 'You only look once' }),
-    visibility: z.nativeEnum(EntryVisibility).optional().openapi({ example: 'private' }),
+    visibility: z.enum(EntryVisibility).optional().openapi({ example: 'private' }),
     organisation: z.enum(organisationsList as [string, ...string[]]).optional(),
     state: z.enum(statesList as [string, ...string[]]).optional(),
     tags: z
