@@ -1,4 +1,9 @@
 module.exports = {
+  api: {
+    host: '',
+    port: 3001,
+    rateLimit: false,
+  },
   mongo: {
     uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
   },

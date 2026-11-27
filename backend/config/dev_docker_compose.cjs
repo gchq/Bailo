@@ -1,5 +1,10 @@
 /** @type {import('../src/utils/config.js').Config} */
 module.exports = {
+  api: {
+    // A single NGINX hop sits in front of the backend
+    trustProxy: 1,
+  },
+
   build: {
     environment: 'img',
   },
