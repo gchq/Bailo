@@ -36,7 +36,7 @@ export default function ChristmasLights() {
               flex: '0 0 40px',
               height: 24,
               '& .bulb': {
-                animation:`twinkle 1.5s ease-in-out ${(index % 4) * 0.375}s infinite`,
+                animation: `twinkle 1.5s ease-in-out ${(index % 4) * 0.375}s infinite`,
               },
               '@media (prefers-reduced-motion: reduce)': {
                 '& .bulb': { animation: 'none' },

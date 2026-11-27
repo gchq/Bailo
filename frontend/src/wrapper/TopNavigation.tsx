@@ -1,9 +1,9 @@
+import AcUnitIcon from '@mui/icons-material/AcUnit'
 import Add from '@mui/icons-material/Add'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
-import AcUnitIcon from '@mui/icons-material/AcUnit';
 import Person from '@mui/icons-material/Person'
 import Settings from '@mui/icons-material/Settings'
 import SettingsSuggestTwoToneIcon from '@mui/icons-material/SettingsSuggestTwoTone'
@@ -110,23 +110,12 @@ export default function TopNavigation({ toggleDrawer, pageTopStyling = {}, curre
         aria-pressed={snowEnabled}
         data-test='snowToggleButton'
         sx={{
-          color: 'white',
-          backgroundColor: alpha(theme.palette.common.white, 0.15),
+          color: snowEnabled ? 'white' : alpha(theme.palette.common.white, 0.55),
+          backgroundColor: alpha(theme.palette.common.white, snowEnabled ? 0.3 : 0.08),
           '&:hover, &:focus': {
             backgroundColor: alpha(theme.palette.common.white, 0.25),
           },
           height: 'max-content',
-          // Diagonal strike-through over the tree when snow is off
-          ...(!snowEnabled && {
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              width: '60%',
-              height: '2px',
-              backgroundColor: 'currentColor',
-              transform: 'rotate(-45deg)',
-            },
-          }),
         }}
       >
         <AcUnitIcon />
