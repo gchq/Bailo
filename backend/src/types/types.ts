@@ -88,52 +88,124 @@ export interface DeploymentAssessmentUserPermissions {
   deleteDeploymentAssessment: PermissionDetail
 }
 
+/**
+ * The possible federation states, used for both the instance (`federation.state`) and each peer
+ * (`federation.peers.<id>.state`).
+ *
+ * - `DISABLED` - Federation is off and no peer connections are created
+ * - `READ_ONLY` - Peer connections are created. Currently behaves the same as `ENABLED`
+ * - `ENABLED` - Peer connections are created
+ *
+ * This only controls outgoing connections. It does not stop other instances from querying this instance.
+ */
 export const FederationState = {
   DISABLED: 'disabled',
   READ_ONLY: 'readOnly',
   ENABLED: 'enabled',
 } as const
 
+/** The string values of FederationState: `'disabled' | 'readOnly' | 'enabled'` */
 export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
 
+/**
+ * Configuration for a single federation peer, i.e. a value in `federation.peers`. Its key in `federation.peers` is the
+ * peer's ID, which is shown to users in the Marketplace **External repositories** filter.
+ *
+ * @example
+ * ```js
+ * // Another Bailo instance
+ * {
+ *   state: 'enabled',
+ *   kind: 'bailo',
+ *   baseUrl: 'https://bailo.organisation-b.example',
+ *   label: 'Organisation B',
+ * }
+ *
+ * // Hugging Face Hub
+ * {
+ *   state: 'enabled',
+ *   kind: 'huggingfacehub',
+ *   baseUrl: 'https://huggingface.co',
+ *   label: 'Hugging Face',
+ *   cache: { query: 60 },
+ *   extra: { statusModelName: 'openai/whisper-large-v3', statusModelId: '654a84cadff2f49007ce6c37' },
+ * }
+ * ```
+ */
 export interface RemoteFederationConfig {
-  /** Whether a peer is enabled */
+  /** State of this peer (required).
+   *
+   * A 'disabled' Bailo peer is not checked for reachability, but is still listed to users. Remove it from
+   * `federation.peers` to hide it.
+   */
   state: FederationStateKeys
-  /** The url of the peer to communicate to */
+  /** Public URL of the peer (required), without a trailing slash or `/api`
+   *
+   * Used for backend requests to the peer and for the links users follow to view remote models.
+   */
   baseUrl: string
-  /** Does nothing */
+  /** Human-readable name for the peer (required). Not currently shown in the UI, which displays the peer's ID */
   label: string
-  /** Either another Bailo instance or hugging face */
+  /** The type of peer (required)
+   * - 'bailo' - Another Bailo instance
+   * - 'huggingfacehub' - The public Hugging Face Hub. Only supports plain text searches of at least five characters
+   *   for models, and requires `extra`
+   */
   kind: PeerKindKeys
-  /** `http(s)://` proxy URL for requests to this peer. PAC files are not supported. */
+  /** `http(s)://` proxy URL for requests to this peer. PAC files are not supported.
+   *
+   * When omitted, the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables are used instead.
+   */
   proxy?: string
-  /** TLS options for requests to this peer */
+  /** TLS options for requests to this peer, e.g. `ca` to trust a private certificate authority, or `cert` and `key`
+   * for a client certificate. Merged over `httpClient.defaultOpts`
+   */
   httpConfig?: HttpsDispatcherOptions
-  /** Defines how long search requests should exist for */
+  /** Caching of search results from this peer. Only used by Hugging Face Hub peers */
   cache?: {
-    /** Time to live in seconds */
+    /** Time to live in seconds. Caching is off when unset */
     query?: number
   }
+  /** Additional settings specific to the peer `kind`
+   *
+   * Required for 'huggingfacehub' peers, where reachability is checked by looking up a known model:
+   * - `statusModelName` - Name of the model to look up, e.g. `'openai/whisper-large-v3'`
+   * - `statusModelId` - The expected ID of that model
+   */
   extra?: {
     [key: string]: any
   }
-  // the list of system users allowed to perform escalation
+  /** Service identities this peer is allowed to escalate from
+   *
+   * Only used when `federation.isEscalationEnabled` is set. Requests from this peer authenticated as one of these
+   * identities are run as the user the peer sends. The peer's key in `federation.peers` must match its `federation.id`.
+   */
   allowedSystemUserIds?: string[]
 }
 
+/** Federation details of an instance, as reported by `GET /api/v2/system/status` */
 export type FederationStatus = {
+  /** The instance's configured `federation.state` */
   state: FederationStateKeys
+  /** The instance's configured `federation.id` */
   id?: string
 }
 
+/** Status of an instance or peer, as returned by the system status endpoints */
 export type SystemStatus = {
+  /** 'pong' if the instance or peer was reachable, otherwise an empty string */
   ping: 'pong' | ''
+  /** Federation details. Only reported by Bailo instances */
   federation?: FederationStatus
+  /** Set if the status check failed or returned something unexpected */
   error?: BailoError
 }
 
+/** A configured peer and its current status, as returned by `GET /api/v2/system/peers` */
 export type PeerConfigStatus = {
+  /** The peer's configuration */
   config: RemoteFederationConfig
+  /** The result of the latest status check against the peer */
   status: SystemStatus
 }
 
