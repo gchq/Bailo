@@ -20,6 +20,8 @@ export interface SearchModelsParams {
   visibility?: EntryVisibilityKeys
   /** Entities that must all be collaborators on the entry. */
   collaboratorEntities?: string[]
+  /** For each group, at least one of its entities (the group and its members) must be a collaborator. */
+  collaboratorGroups?: string[][]
   /** At least one of the entities must be a collaborator, optionally holding one of the roles. */
   collaboratorMatch?: { entities: string[]; roles?: string[] }
   search?: string
@@ -73,6 +75,10 @@ function buildModelsQuery(params: SearchModelsParams): QueryFilter<ModelInterfac
     query['collaborators.entity'] = { $all: params.collaboratorEntities }
   }
 
+  if (params.collaboratorGroups?.length) {
+    query.$and = params.collaboratorGroups.map((entities) => ({ 'collaborators.entity': { $in: entities } }))
+  }
+
   if (params.collaboratorMatch) {
     query.collaborators = {
       $elemMatch: {
@@ -97,7 +103,7 @@ export async function findModels(params: SearchModelsParams): Promise<ModelInter
   const query = buildModelsQuery(params)
   const queryGrams = params.search ? toSearchGrams(params.search) : []
   const shortSearch =
-    params.search && params.search.length < 3 ? params.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
+    params.search && params.search.trim().length < 3 ? params.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
 
   let results: ModelInterface[] =
     params.search && !queryGrams.length

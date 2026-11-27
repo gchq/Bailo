@@ -373,56 +373,14 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind?.length) {
-    query['kind'] = { $in: opts.kind }
-  }
-
-  if (opts.organisations?.length) {
-    query.organisation = { $in: opts.organisations }
-  }
-
-  if (opts.states?.length) {
-    query.state = { $in: opts.states }
-  }
-
-  if (opts.libraries?.length) {
-    query.tags = { $all: opts.libraries }
-  }
-
-  if (opts.task) {
-    if (query.tags) {
-      query.tags.$all.push(opts.task)
-    } else {
-      query.tags = { $all: [opts.task] }
-    }
-  }
-
-  if (opts.schemaId) {
-    query['card.schemaId'] = { $all: opts.schemaId }
-  }
-
-  if (opts.allowTemplating) {
-    query['settings.allowTemplating'] = true
-  }
-
-  if (opts.visibility) {
-    query.visibility = opts.visibility
-  }
-
-  if (opts.users?.length) {
-    const groups = opts.users.filter((entity) => entity.startsWith('group:'))
-    const users = opts.users.filter((entity) => entity.startsWith('user:'))
-    const collaboratorConditions: object[] = await Promise.all(
-      groups.map(async (entity) => ({
-        'collaborators.entity': { $in: [entity, ...(await authentication.getEntityMembers(entity))] },
-      })),
-    )
-    if (users.length) {
-      collaboratorConditions.push({ 'collaborators.entity': { $all: users } })
-    }
-
-    query.$and = collaboratorConditions
-  }
+  const collaboratorEntities = opts.users?.filter((entity) => entity.startsWith('user:'))
+  const collaboratorGroups = opts.users
+    ? await Promise.all(
+        opts.users
+          .filter((entity) => entity.startsWith('group:'))
+          .map(async (entity) => [entity, ...(await authentication.getEntityMembers(entity))]),
+      )
+    : undefined
 
   const collaboratorMatch = opts.filters?.length
     ? {
@@ -441,6 +399,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     allowTemplating: opts.allowTemplating,
     visibility: opts.visibility,
     collaboratorEntities,
+    collaboratorGroups,
     collaboratorMatch,
     search: opts.search,
     titleOnly: opts.titleOnly,

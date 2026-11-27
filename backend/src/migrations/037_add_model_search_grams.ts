@@ -26,4 +26,14 @@ export async function up() {
 
 export async function down() {
   await ModelModel.updateMany({}, { $unset: { searchGrams: '' } }, { timestamps: false })
+
+  const indexNames = (await ModelModel.collection.indexes()).map((index) => index.name)
+  for (const name of ['searchGrams_1', 'name_text_description_text_tags_text']) {
+    if (indexNames.includes(name)) {
+      await ModelModel.collection.dropIndex(name)
+    }
+  }
+  if (!indexNames.includes('$**_text')) {
+    await ModelModel.collection.createIndex({ '$**': 'text' }, { weights: { name: 10, description: 5 } }, undefined)
+  }
 }
