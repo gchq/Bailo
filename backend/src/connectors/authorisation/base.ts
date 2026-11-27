@@ -1,7 +1,7 @@
 import { type AccessRequestDoc } from '../../models/AccessRequest.js'
 import { type DeploymentAssessmentDoc, type DeploymentAssessmentInterface } from '../../models/DeploymentAssessment.js'
 import { type FileInterface } from '../../models/File.js'
-import { EntryKind, EntryVisibility, type ModelDoc } from '../../models/Model.js'
+import { EntryKind, EntryVisibility, type ModelDoc, type ModelInterface } from '../../models/Model.js'
 import { type ReleaseDoc, type ReleaseInterface } from '../../models/Release.js'
 import { type ResponseDoc } from '../../models/Response.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
@@ -49,7 +49,7 @@ const NON_ADMIN_SCHEMA_MIGRATION_ACTIONS: SchemaMigrationActionKeys[] = [SchemaM
 const NON_ADMIN_REVIEW_ROLE_ACTIONS: ReviewRoleActionKeys[] = [ReviewRoleAction.View]
 
 export class BasicAuthorisationConnector {
-  async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
+  async hasModelVisibilityAccess(user: UserInterface, model: ModelInterface) {
     if (model.visibility === EntryVisibility.Public) {
       return true
     }
@@ -123,7 +123,7 @@ export class BasicAuthorisationConnector {
     return (await this.images(user, model, [access], admin))[0]
   }
 
-  async models(user: UserInterface, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
+  async models(user: UserInterface, models: Array<ModelInterface>, action: ModelActionKeys): Promise<Array<Response>> {
     return Promise.all(
       models.map(async (model) => {
         // Is this a constrained user token.
@@ -603,7 +603,7 @@ export class BasicAuthorisationConnector {
   }
 }
 
-async function missingRequiredRole(user: UserInterface, model: ModelDoc, roles: Array<string>) {
+async function missingRequiredRole(user: UserInterface, model: ModelInterface, roles: Array<string>) {
   const modelRoles = await getModelSystemRoles(user, model)
   const reviewRoles = await ReviewRoleModel.find({ shortName: modelRoles })
   const collaboratorRoles = reviewRoles.map((role) => role.systemRole)

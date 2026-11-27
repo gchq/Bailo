@@ -1,6 +1,10 @@
 import { type HydratedDocument, model, Schema } from 'mongoose'
 
+import { searchGramsPlugin } from './plugins/searchGramsPlugin.js'
 import { type SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
+
+// Fields whose text is turned into searchGrams for fuzzy search
+export const ModelSearchFields = ['name', 'description', 'tags'] as const
 
 export const EntryVisibility = {
   Private: 'private',
@@ -78,6 +82,9 @@ export interface ModelInterface {
   visibility: EntryVisibilityKeys
   deleted: boolean
 
+  // Trigrams of name, description and tags used for fuzzy search
+  searchGrams?: string[]
+
   createdAt: Date
   updatedAt: Date
 }
@@ -139,6 +146,8 @@ const ModelSchema = new Schema<ModelDoc>(
     },
 
     visibility: { type: String, enum: Object.values(EntryVisibility), default: EntryVisibility.Public },
+
+    searchGrams: { type: [String], select: false },
   },
   {
     timestamps: true,
@@ -146,9 +155,11 @@ const ModelSchema = new Schema<ModelDoc>(
   },
 )
 
+ModelSchema.plugin(searchGramsPlugin, { fields: ModelSearchFields })
 ModelSchema.plugin(softDeletionPlugin)
-ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
+ModelSchema.index({ name: 'text', description: 'text', tags: 'text' }, { weights: { name: 10, description: 5 } })
 ModelSchema.index({ createdAt: 1 })
+ModelSchema.index({ searchGrams: 1 })
 
 const ModelModel = model<ModelDoc>('v2_Model', ModelSchema)
 

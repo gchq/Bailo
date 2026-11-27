@@ -1,0 +1,144 @@
+import { type ProjectionType, type QueryFilter } from 'mongoose'
+
+import ModelModel, {
+  type EntryKindKeys,
+  type EntryVisibilityKeys,
+  type ModelDoc,
+  type ModelInterface,
+  ModelSearchFields,
+} from '../models/Model.js'
+import { FUZZY_MATCH_THRESHOLD, gramSimilarity, toEntrySearchGrams, toSearchGrams } from '../utils/search.js'
+
+export interface SearchModelsParams {
+  kind?: EntryKindKeys[]
+  organisations?: string[]
+  states?: string[]
+  libraries?: string[]
+  task?: string
+  schemaId?: string
+  allowTemplating?: boolean
+  visibility?: EntryVisibilityKeys
+  /** Entities that must all be collaborators on the entry. */
+  collaboratorEntities?: string[]
+  /** For each group, at least one of its entities (the group and its members) must be a collaborator. */
+  collaboratorGroups?: string[][]
+  /** At least one of the entities must be a collaborator, optionally holding one of the roles. */
+  collaboratorMatch?: { entities: string[]; roles?: string[] }
+  search?: string
+  /** Skips the full text pass, so a search term only matches on name, description and tags. */
+  titleOnly?: boolean
+}
+
+const searchProjection: ProjectionType<ModelDoc> = {
+  settings: false,
+  card: false,
+  deleted: false,
+  _id: false,
+  __v: false,
+  deletedBy: false,
+  deletedAt: false,
+}
+
+function buildModelsQuery(params: SearchModelsParams): QueryFilter<ModelInterface> {
+  const query: QueryFilter<ModelInterface> = {}
+
+  if (params.kind?.length) {
+    query.kind = { $in: params.kind }
+  }
+
+  if (params.organisations?.length) {
+    query.organisation = { $in: params.organisations }
+  }
+
+  if (params.states?.length) {
+    query.state = { $in: params.states }
+  }
+
+  const tags = [...(params.libraries ?? []), ...(params.task ? [params.task] : [])]
+  if (tags.length) {
+    query.tags = { $all: tags }
+  }
+
+  if (params.schemaId) {
+    query['card.schemaId'] = { $all: [params.schemaId] }
+  }
+
+  if (params.allowTemplating) {
+    query['settings.allowTemplating'] = true
+  }
+
+  if (params.visibility) {
+    query.visibility = params.visibility
+  }
+
+  if (params.collaboratorEntities?.length) {
+    query['collaborators.entity'] = { $all: params.collaboratorEntities }
+  }
+
+  if (params.collaboratorGroups?.length) {
+    query.$and = params.collaboratorGroups.map((entities) => ({ 'collaborators.entity': { $in: entities } }))
+  }
+
+  if (params.collaboratorMatch) {
+    query.collaborators = {
+      $elemMatch: {
+        ...(params.collaboratorMatch.roles?.length && {
+          roles: { $elemMatch: { $in: params.collaboratorMatch.roles } },
+        }),
+        entity: { $in: params.collaboratorMatch.entities },
+      },
+    }
+  }
+
+  return query
+}
+
+/**
+ * Finds entries matching the filters. A search term is matched in two ways:
+ *  - fuzzy: trigram similarity over name, description and tags, so typos and part-words match, ranked best first
+ *  - stemmed: the full text index, appended after the fuzzy matches (unless titleOnly)
+ * Without a search term, results are ordered by most recently updated.
+ */
+export async function findModels(params: SearchModelsParams): Promise<ModelInterface[]> {
+  const query = buildModelsQuery(params)
+  const queryGrams = params.search ? toSearchGrams(params.search) : []
+  const shortSearch =
+    params.search && params.search.trim().length < 3 ? params.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
+
+  let results: ModelInterface[] =
+    params.search && !queryGrams.length
+      ? []
+      : await ModelModel.find(
+          queryGrams.length
+            ? { ...query, searchGrams: shortSearch ? { $regex: shortSearch, $options: 'i' } : { $in: queryGrams } }
+            : query,
+          searchProjection,
+        )
+          .sort({ updatedAt: -1 })
+          .lean<ModelInterface[]>()
+
+  if (queryGrams.length) {
+    results = results
+      .map((model) => ({
+        model,
+        score: gramSimilarity(queryGrams, toEntrySearchGrams(model, ModelSearchFields)),
+      }))
+      .filter(
+        ({ model, score }) =>
+          score >= FUZZY_MATCH_THRESHOLD || model.name.toLowerCase().includes(params.search!.toLowerCase()),
+      )
+      .sort((a, b) => b.score - a.score)
+      .map(({ model }) => model)
+  }
+
+  if (params.search && !params.titleOnly) {
+    const fullTextResults = await ModelModel.find({ ...query, $text: { $search: params.search } }, searchProjection)
+      .sort({ score: { $meta: 'textScore' } })
+      .lean<ModelInterface[]>()
+
+    const alreadyFound = new Set(results.map((model) => model.id))
+    results = results.concat(fullTextResults.filter((model) => !alreadyFound.has(model.id)))
+  }
+
+  return results
+}

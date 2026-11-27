@@ -1,5 +1,4 @@
 import mergeWith from 'lodash-es/mergeWith.js'
-import { type ProjectionType } from 'mongoose'
 
 import { Roles } from '../connectors/authentication/constants.js'
 import authentication from '../connectors/authentication/index.js'
@@ -19,6 +18,7 @@ import ModelCardRevisionModel, { type ModelCardRevisionDoc } from '../models/Mod
 import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { type UserInterface } from '../models/User.js'
+import { findModels } from '../repositories/model.js'
 import { GetModelCardVersionOptions, type GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { isBailoError } from '../types/error.js'
 import {
@@ -328,7 +328,7 @@ export async function searchModels(
         collaborators: model.collaborators,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
-        sourceModelId: model.settings.mirror.sourceModelId,
+        sourceModelId: model.settings?.mirror?.sourceModelId,
         visibility: model.visibility,
       })),
     )
@@ -364,8 +364,6 @@ export async function searchModels(
 }
 
 async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsParams): Promise<Array<ModelInterface>> {
-  const query: any = {}
-
   if (opts.adminAccess) {
     if (!(await authentication.hasRole(user, Roles.Admin))) {
       throw Forbidden('You do not have the required role.', {
@@ -375,107 +373,37 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  if (opts.kind?.length) {
-    query['kind'] = { $in: opts.kind }
-  }
+  const collaboratorEntities = opts.users?.filter((entity) => entity.startsWith('user:'))
+  const collaboratorGroups = opts.users
+    ? await Promise.all(
+        opts.users
+          .filter((entity) => entity.startsWith('group:'))
+          .map(async (entity) => [entity, ...(await authentication.getEntityMembers(entity))]),
+      )
+    : undefined
 
-  if (opts.organisations?.length) {
-    query.organisation = { $in: opts.organisations }
-  }
-
-  if (opts.states?.length) {
-    query.state = { $in: opts.states }
-  }
-
-  if (opts.libraries?.length) {
-    query.tags = { $all: opts.libraries }
-  }
-
-  if (opts.task) {
-    if (query.tags) {
-      query.tags.$all.push(opts.task)
-    } else {
-      query.tags = { $all: [opts.task] }
-    }
-  }
-
-  if (opts.schemaId) {
-    query['card.schemaId'] = { $all: opts.schemaId }
-  }
-
-  if (opts.allowTemplating) {
-    query['settings.allowTemplating'] = true
-  }
-
-  if (opts.visibility) {
-    query.visibility = opts.visibility
-  }
-
-  if (opts.users?.length) {
-    const groups = opts.users.filter((entity) => entity.startsWith('group:'))
-    const users = opts.users.filter((entity) => entity.startsWith('user:'))
-    const collaboratorConditions: object[] = await Promise.all(
-      groups.map(async (entity) => ({
-        'collaborators.entity': { $in: [entity, ...(await authentication.getEntityMembers(entity))] },
-      })),
-    )
-    if (users.length) {
-      collaboratorConditions.push({ 'collaborators.entity': { $all: users } })
-    }
-
-    query.$and = collaboratorConditions
-  }
-
-  if (opts.filters && opts.filters.length > 0) {
-    if (opts.filters?.includes('mine')) {
-      query.collaborators = {
-        $elemMatch: {
-          entity: { $in: await authentication.getEntities(user) },
-        },
+  const collaboratorMatch = opts.filters?.length
+    ? {
+        entities: await authentication.getEntities(user),
+        roles: opts.filters.includes('mine') ? undefined : opts.filters,
       }
-    } else {
-      query.collaborators = {
-        $elemMatch: {
-          roles: { $elemMatch: { $in: opts.filters } },
-          entity: { $in: await authentication.getEntities(user) },
-        },
-      }
-    }
-  }
+    : undefined
 
-  const projection: ProjectionType<ModelDoc> = {
-    settings: false,
-    card: false,
-    deleted: false,
-    _id: false,
-    __v: false,
-    deletedBy: false,
-    deletedAt: false,
-  }
-
-  // Always do a partial match on the model name
-  const escapedSearch = opts.search ? opts.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : undefined
-  let results = await ModelModel.find<ModelDoc>(
-    escapedSearch ? { ...query, name: { $regex: escapedSearch, $options: 'i' } } : query,
-    projection,
-  ).sort({
-    updatedAt: -1,
+  const results = await findModels({
+    kind: opts.kind,
+    organisations: opts.organisations,
+    states: opts.states,
+    libraries: opts.libraries,
+    task: opts.task,
+    schemaId: opts.schemaId,
+    allowTemplating: opts.allowTemplating,
+    visibility: opts.visibility,
+    collaboratorEntities,
+    collaboratorGroups,
+    collaboratorMatch,
+    search: opts.search,
+    titleOnly: opts.titleOnly,
   })
-
-  //Include all full text matches
-  if (opts.search && !opts.titleOnly) {
-    let fullTextOnlyResults = await ModelModel.find<ModelDoc>(
-      { ...query, $text: { $search: opts.search } },
-      projection,
-    ).sort({
-      score: { $meta: 'textScore' },
-    })
-    // Remove duplicate items
-    const mask = new Set(results.map((model) => model.id))
-
-    fullTextOnlyResults = fullTextOnlyResults.filter((model) => !mask.has(model.id))
-    results = results.concat(fullTextOnlyResults)
-  }
 
   //Auth already checked, so just need to check if they require admin access
   if (opts.adminAccess) {
@@ -951,11 +879,11 @@ export async function getCurrentUserPermissionsByModel(
   }
 }
 
-export async function getModelSystemRoles(user: UserInterface, model: ModelDoc): Promise<string[]> {
+export async function getModelSystemRoles(user: UserInterface, model: ModelInterface): Promise<string[]> {
   const entities = await authentication.getEntities(user)
   const normalisedEntities = entities.map((entity) => entity.toLowerCase())
 
-  return model.collaborators
+  return (model.collaborators ?? [])
     .filter((collaborator) => normalisedEntities.includes(collaborator.entity.toLowerCase()))
     .map((collaborator) => collaborator.roles)
     .flat()

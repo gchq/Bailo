@@ -1,0 +1,38 @@
+import querystring from 'node:querystring'
+
+import { describe, expect, test, vi } from 'vitest'
+
+import audit from '../../../../src/connectors/audit/__mocks__/index.js'
+import { getModelsSearchSchema } from '../../../../src/routes/v3/model/getModelsSearch.js'
+import { createFixture, testGet } from '../../../testUtils/routes.js'
+
+vi.mock('../../../../src/connectors/audit/index.js')
+
+vi.mock('../../../../src/services/model.js', () => ({
+  searchModels: vi.fn(() => {
+    return { models: [{ id: 'test', name: 'name', description: 'description', tags: ['tag'] }] }
+  }),
+}))
+
+describe('routes > v3 > model > getModelsSearch', () => {
+  test('200 > ok', async () => {
+    const fixture = createFixture(getModelsSearchSchema, { query: { allowTemplating: 'true', titleOnly: 'false' } })
+    // Empty generated arrays are serialised as empty strings, which the route rejects.
+    fixture.query = { search: fixture.query.search }
+    const res = await testGet(`/api/v3/models/search?${querystring.stringify(fixture.query)}`)
+
+    expect(res.statusCode).toBe(200)
+    expect(res.body).matchSnapshot()
+  })
+
+  test('audit > expected call', async () => {
+    const fixture = createFixture(getModelsSearchSchema, { query: { allowTemplating: 'true', titleOnly: 'false' } })
+    // Empty generated arrays are serialised as empty strings, which the route rejects.
+    fixture.query = { search: fixture.query.search }
+    const res = await testGet(`/api/v3/models/search?${querystring.stringify(fixture.query)}`)
+
+    expect(res.statusCode).toBe(200)
+    expect(audit.onSearchModel).toHaveBeenCalled()
+    expect(audit.onSearchModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
+  })
+})
