@@ -1,12 +1,16 @@
 import BugReportIcon from '@mui/icons-material/BugReport'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
-import { Container, Divider, Paper, Stack } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Accordion, AccordionDetails, AccordionSummary, Container, Divider, Paper, Stack } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { useContext } from 'react'
+import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import Title from 'src/common/Title'
 import UiConfigContext from 'src/contexts/uiConfigContext'
+import { faqItems, relatedDocs } from 'src/help/troubleshootingFaq'
+import Link from 'src/Link'
 
 export default function Help() {
   const uiConfig = useContext(UiConfigContext)
@@ -40,6 +44,42 @@ export default function Help() {
               Get support
             </Button>
           </Box>
+        </Stack>
+      </Paper>
+      <Paper sx={{ mt: 2, py: 5, px: 5 }}>
+        <Typography variant='h4' component='h2' color='primary'>
+          Troubleshooting and FAQ
+        </Typography>
+        <Typography sx={{ pt: 1, pb: 3 }} color='text.secondary'>
+          Common issues and answers for Bailo users and administrators.
+        </Typography>
+        <Box>
+          {faqItems.map((item) => (
+            <Accordion
+              key={item.question}
+              disableGutters
+              variant='outlined'
+              slotProps={{ heading: { component: 'h3' } }}
+            >
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography sx={{ fontWeight: 'bold' }}>{item.question}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <MarkdownDisplay>{item.answer}</MarkdownDisplay>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </Box>
+        <Divider sx={{ my: 4 }} />
+        <Typography variant='h6' component='h3' gutterBottom>
+          Related documentation
+        </Typography>
+        <Stack direction='row' spacing={3} useFlexGap sx={{ flexWrap: 'wrap' }}>
+          {relatedDocs.map((doc) => (
+            <Link key={doc.href} href={doc.href}>
+              {doc.title}
+            </Link>
+          ))}
         </Stack>
       </Paper>
     </Container>

@@ -84,17 +84,6 @@ const HELP_PAGES: DocsSearchResult[] = [
     snippetHtml: 'Definitions of terminology used throughout Bailo.',
     title: 'Glossary',
   },
-  {
-    breadcrumb: 'Reference',
-    category: 'docs',
-    href: '/docs/reference/troubleshooting',
-    key: 'docs:reference/troubleshooting',
-    kind: 'page',
-    score: 0,
-    slug: 'reference/troubleshooting',
-    snippetHtml: 'Frequently asked questions and solutions to common issues.',
-    title: 'Troubleshooting & FAQ',
-  },
 ]
 
 function buildBreadcrumb(slug: string): string {
