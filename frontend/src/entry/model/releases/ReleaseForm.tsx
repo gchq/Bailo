@@ -28,6 +28,8 @@ import { useTheme } from '@mui/material/styles'
 import { useGetFilesForModel } from 'actions/file'
 import { useGetEntryCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
+import { sumBy } from 'lodash-es'
+import prettyBytes from 'pretty-bytes'
 import { type ChangeEvent, useCallback, useContext, useMemo, useState } from 'react'
 import FolderNavigableList from 'src/common/FolderNavigableList'
 import HelpPopover from 'src/common/HelpPopover'
@@ -104,6 +106,7 @@ export default function ReleaseForm({
   const theme = useTheme()
 
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
+  const totalFileSize = useMemo(() => sumBy(formData.files, 'size'), [formData.files])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
   const { files: modelFiles, isFilesLoading, isFilesError, mutateFiles } = useGetFilesForModel(model.id)
@@ -338,11 +341,18 @@ export default function ReleaseForm({
       <Stack>
         <Accordion defaultExpanded sx={{ p: 0 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
-            <Typography
-              sx={{
-                fontWeight: 'bold',
-              }}
-            >{`Files (${formData.files.length})`}</Typography>
+            <Stack direction='row' spacing={1} sx={{ alignItems: 'baseline' }}>
+              <Typography
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >{`Files (${formData.files.length})`}</Typography>
+              {formData.files.length > 0 && (
+                <Typography variant='caption' data-test='release-files-total-size'>
+                  {`(${prettyBytes(totalFileSize)} total)`}
+                </Typography>
+              )}
+            </Stack>
           </AccordionSummary>
           <AccordionDetails>
             {!isReadOnly && model.kind === EntryKind.UNTRUSTED_MODEL && (
