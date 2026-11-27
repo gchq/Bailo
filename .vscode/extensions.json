@@ -1,23 +1,21 @@
 {
   "recommendations": [
     "charliermarsh.ruff",
-    "timonwong.shellcheck",
     "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
-    "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
     "mongodb.mongodb-vscode",
-    "ms-azuretools.vscode-docker",
+    "ms-azuretools.vscode-containers",
     "ms-python.debugpy",
     "ms-python.python",
     "ms-python.vscode-python-envs",
     "ms-toolsai.jupyter",
-    "ms-toolsai.jupyter-keymap",
-    "ms-toolsai.jupyter-renderers",
     "njpwerner.autodocstring",
     "ryanluker.vscode-coverage-gutters",
-    "shardulm94.trailing-spaces",
     "streetsidesoftware.code-spell-checker",
+    "streetsidesoftware.code-spell-checker-british-english",
     "tamasfe.even-better-toml",
+    "timonwong.shellcheck",
+    "vitest.explorer"
   ]
 }

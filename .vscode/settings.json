@@ -6,13 +6,19 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnPaste": true,
   "files.trimTrailingWhitespace": true,
-  "git.autofetch": true,
   "javascript.preferences.importModuleSpecifier": "non-relative",
   "typescript.preferences.importModuleSpecifier": "non-relative",
-  "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff"
+  "cSpell.language": "en-GB",
+  "markdownlint.config": {
+    "MD013": false
   },
-  "python.defaultInterpreterPath": "/usr/local/bin/python",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "autoDocstring.docstringFormat": "sphinx-notypes",
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true,
+  "python.testing.pytestEnabled": true
 }

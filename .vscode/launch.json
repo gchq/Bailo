@@ -2,14 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Docker: Attach to Node",
+      "name": "Backend: Attach (Docker)",
       "type": "node",
       "request": "attach",
       "port": 9229,
       "address": "localhost",
-      "localRoot": "${workspaceRoot}/backend",
+      "localRoot": "${workspaceFolder}/backend",
       "remoteRoot": "/app",
-      "restart": true
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
